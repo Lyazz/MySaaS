@@ -1,0 +1,45 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+npm-cache
+
+# Local npm cache (Codex / custom installs)
+.npm-custom-cache
+
+# Test artifacts
+playwright-report
+test-results
+
+# Logs
+logs
+*.log
+.eslintcache
+
+# Test coverage
+coverage
+.nyc_output
+
+# Misc
+.DS_Store
+.fleet
+.idea
+.vscode
+
+# Task runners / build tools
+.turbo
+
+# Runtime artifacts
+*.pid
+*.pid.lock
+
+# Local env files
+.env
+.env.*
+!.env.example
