@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import ClassicCategory from '~/components/storefront/templates/ClassicCategory.vue'
+import ModernCategory from '~/components/storefront/templates/ModernCategory.vue'
+
 const route = useRoute()
 const slug = route.params.slug as string
+const storeSettings = useState<any>('storeSettings')
+const templateKey = computed(() => storeSettings.value?.templateKey || 'modern')
 
 type Category = { id: string; title: string; slug: string }
 type Product = {
@@ -37,38 +42,21 @@ try {
   throw createError({ statusCode: 500, statusMessage: 'Failed to load products' })
 }
 
-const categoryProducts = computed(() => {
-  const id = category.id
-  return (products.value ?? []).filter((p) => p.isActive && p.stock > 0 && p.categoryId === id)
-})
-
 useTenantSeo({
   title: `${category.title}`,
   description: `Browse products in ${category.title}.`
 })
 
 definePageMeta({
-  middleware: 'tenant-only'
+  middleware: 'tenant-only',
+  layout: 'store'
+})
+
+const ActiveTemplate = computed(() => {
+    return templateKey.value === 'modern' ? ModernCategory : ClassicCategory
 })
 </script>
 
 <template>
-  <div class="py-10">
-    <div class="max-w-7xl mx-auto px-4">
-      <NuxtLink to="/products" class="text-brand hover:underline mb-6 inline-flex items-center gap-2">
-        <span aria-hidden="true">&larr;</span> Back to Products
-      </NuxtLink>
-
-      <h1 class="text-3xl font-bold text-slate-900 mb-2">{{ category.title }}</h1>
-      <p class="text-slate-600 mb-8">Browse products in this category.</p>
-
-      <div v-if="categoryProducts.length === 0" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-10 text-center">
-        <p class="text-slate-600">No products available in this category yet.</p>
-      </div>
-
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <ProductCard v-for="product in categoryProducts" :key="product.id" :product="product" />
-      </div>
-    </div>
-  </div>
+  <component :is="ActiveTemplate" :category="category" :products="products" />
 </template>

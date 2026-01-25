@@ -2,7 +2,7 @@ import prisma from '../../lib/prisma'
 
 export type StoreTemplateKey = 'classic' | 'modern'
 export type StoreLanguage = 'ar' | 'fr' | 'en'
-export type StoreFontFamily = 'Inter' | 'Cairo' | 'Poppins' | 'Tajawal'
+
 
 export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; description: string }[] = [
     { key: 'classic', label: 'Classic', description: 'Clean layout, ideal for most stores.' },
@@ -15,12 +15,7 @@ export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [
     { key: 'en', label: 'English (EN)' }
 ]
 
-export const STORE_FONTS: { key: StoreFontFamily; label: string }[] = [
-    { key: 'Inter', label: 'Inter' },
-    { key: 'Cairo', label: 'Cairo' },
-    { key: 'Poppins', label: 'Poppins' },
-    { key: 'Tajawal', label: 'Tajawal' }
-]
+
 
 export class StoreSettingsValidationError extends Error {
     statusCode = 400
@@ -39,12 +34,11 @@ const isTemplateKey = (value: string): value is StoreTemplateKey =>
 
 const isLanguage = (value: string): value is StoreLanguage => STORE_LANGUAGES.some((l) => l.key === value)
 
-const isFontFamily = (value: string): value is StoreFontFamily => STORE_FONTS.some((f) => f.key === value)
 
 export type StoreSettingsPatchInput = Partial<{
     primaryColor: string
     templateKey: string
-    fontFamily: string
+
     language: string
     isCompleted: boolean
 }>
@@ -77,14 +71,7 @@ export class StoreSettingsService {
             update.templateKey = input.templateKey
         }
 
-        if (input.fontFamily !== undefined) {
-            if (typeof input.fontFamily !== 'string' || !isFontFamily(input.fontFamily)) {
-                throw new StoreSettingsValidationError(
-                    `fontFamily must be one of: ${STORE_FONTS.map((f) => f.key).join(', ')}`
-                )
-            }
-            update.fontFamily = input.fontFamily
-        }
+
 
         if (input.language !== undefined) {
             if (typeof input.language !== 'string' || !isLanguage(input.language)) {
@@ -111,7 +98,7 @@ export class StoreSettingsService {
 
     buildFrontendAgentSummary(args: {
         tenant: { id: string; slug: string; name: string }
-        settings: { primaryColor: string; templateKey: string; fontFamily: string; language: string }
+        settings: { primaryColor: string; templateKey: string; language: string }
         apiBasePath?: string
     }): { markdown: string; data: any } {
         const apiBasePath = args.apiBasePath ?? '/api'
@@ -121,7 +108,7 @@ export class StoreSettingsService {
             tenant: args.tenant,
             storeSettings: args.settings,
             templates: STORE_TEMPLATES,
-            fonts: STORE_FONTS,
+
             languages: STORE_LANGUAGES,
             api: {
                 basePath: apiBasePath,
@@ -149,13 +136,13 @@ export class StoreSettingsService {
             `## Store Settings (Chosen)`,
             `- Template: ${args.settings.templateKey}`,
             `- Primary color: ${args.settings.primaryColor}`,
-            `- Font: ${args.settings.fontFamily}`,
+
             `- Language: ${args.settings.language}`,
             ``,
             `## What to Implement`,
             `1) Render storefront using the selected template.`,
             `2) Apply primary color as a CSS variable (e.g. --brand) for buttons/links/accents.`,
-            `3) Apply fontFamily globally (store layout + template).`,
+
             `4) If language is "ar", consider RTL layout and Arabic-friendly typography.`,
             ``,
             `## Backend API (Tenant-scoped)`,

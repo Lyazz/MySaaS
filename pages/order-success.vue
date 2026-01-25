@@ -97,6 +97,7 @@ onMounted(() => {
 
 definePageMeta({
   title: 'Order Success',
-  middleware: 'tenant-only'
+  middleware: 'tenant-only',
+  layout: 'store'
 })
 </script>

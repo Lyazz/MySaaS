@@ -40,8 +40,8 @@ model StoreSettings {
   tenantId     String   @unique
   tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  primaryColor String   @default("#4F46E5") // indigo-600
-  templateKey  String   @default("classic") // e.g. classic | modern
+  primaryColor String   @default("#0d9488") // teal-600
+  templateKey  String   @default("modern") // e.g. classic | modern
   fontFamily   String   @default("Inter")
   language     String   @default("fr") // ar | fr | en
 

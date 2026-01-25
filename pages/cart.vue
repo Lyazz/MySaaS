@@ -136,6 +136,7 @@ onMounted(() => {
 
 definePageMeta({
   title: 'Shopping Cart',
-  middleware: 'tenant-only'
+  middleware: 'tenant-only',
+  layout: 'store'
 })
 </script>

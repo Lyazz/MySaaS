@@ -1,10 +1,84 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 useSeoMeta({
   title: 'MySaaS - The all-in-one platform to build, sell, and scale',
   description: 'Create your online store, manage orders, and scale your business with MySaaS. The best platform for your online business.',
 })
+
+const stats = ref([
+  { label: 'Active Businesses', value: 0, target: 500, suffix: '+' },
+  { label: 'Total Orders', value: 0, target: 10000, suffix: '+' },
+  { label: 'Products Created', value: 0, target: 50000, suffix: '+' }
+])
+
+const statsSection = ref<HTMLElement | null>(null)
+let hasAnimated = false
+
+const startCounter = () => {
+  if (hasAnimated) return
+  hasAnimated = true
+  
+  stats.value.forEach(stat => {
+    const duration = 2000 // 2 seconds
+    const start = 0
+    const end = stat.target
+    const startTime = performance.now()
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // Ease out quart
+      const ease = 1 - Math.pow(1 - progress, 4)
+      
+      stat.value = Math.floor(start + (end - start) * ease)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        stat.value = end
+      }
+    }
+    
+    requestAnimationFrame(animate)
+  })
+}
+
+onMounted(() => {
+  // Stats Counter Observer
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        startCounter()
+        statsObserver.disconnect()
+      }
+    })
+  }, { threshold: 0.5 })
+  
+  if (statsSection.value) {
+    statsObserver.observe(statsSection.value)
+  }
+
+  // General Scroll Reveal Observer
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible')
+        revealObserver.unobserve(entry.target)
+      }
+    })
+  }, { 
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  })
+
+  document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
+    revealObserver.observe(el)
+  })
+})
+
+
 
 const features = [
   {
@@ -168,6 +242,31 @@ const setPlaybackSpeed = (speed: number) => {
     })
   }
 }
+
+const activeFaq = ref<number | null>(null)
+
+const faqs = [
+  {
+    question: 'Is there a free trial?',
+    answer: 'Yes! You can start with our Basic plan for free to explore the platform features. No credit card required.'
+  },
+  {
+    question: 'Can I use my own domain name?',
+    answer: 'Absolutely. You can connect your existing domain or buy a new one directly through our dashboard on the Beginner plan and above.'
+  },
+  {
+    question: 'How does the delivery integration work?',
+    answer: 'We connect directly with major Algerian delivery services like Yalidine and Eckoz. Orders are automatically synced, and tracking numbers are generated instantly.'
+  },
+  {
+    question: 'Do I need technical skills to use MySaaS?',
+    answer: 'Not at all. Our platform is designed to be user-friendly. You can build your store using our drag-and-drop tools without writing a single line of code.'
+  },
+  {
+    question: 'Can I cancel my subscription anytime?',
+    answer: 'Yes, there are no long-term contracts. You can upgrade, downgrade, or cancel your plan at any time from your dashboard.'
+  }
+]
 </script>
 
 <template>
@@ -262,6 +361,21 @@ const setPlaybackSpeed = (speed: number) => {
       </div>
     </section>
 
+
+    <!-- Stats Section -->
+    <section ref="statsSection" class="py-12 bg-white border-b border-slate-100 relative overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
+          <div v-for="(stat, index) in stats" :key="index" class="py-4 md:py-0">
+            <div class="text-4xl md:text-5xl font-bold text-indigo-600 mb-2 font-display tabular-nums tracking-tight">
+              {{ stat.value.toLocaleString() }}{{ stat.suffix }}
+            </div>
+            <div class="text-slate-500 font-medium text-lg">{{ stat.label }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Features Section -->
     <section class="py-24 bg-white relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -273,7 +387,9 @@ const setPlaybackSpeed = (speed: number) => {
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div v-for="(feature, index) in features" :key="index" class="group p-8 rounded-2xl bg-white border border-slate-100 shadow-soft hover:shadow-xl hover:border-indigo-100 transition-all duration-300 hover:-translate-y-1">
+          <div v-for="(feature, index) in features" :key="index" 
+            class="reveal-on-scroll group p-8 rounded-2xl bg-white border border-slate-100 shadow-soft hover:shadow-xl hover:border-indigo-100 transition-all duration-300 hover:-translate-y-1"
+            :style="{ transitionDelay: `${index * 100}ms` }">
             <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon"></path>
@@ -297,7 +413,9 @@ const setPlaybackSpeed = (speed: number) => {
         </div>
 
         <div class="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          <div v-for="(plan, index) in pricingPlans" :key="index" class="relative bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+          <div v-for="(plan, index) in pricingPlans" :key="index" 
+            class="reveal-on-scroll relative bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+            :style="{ transitionDelay: `${index * 100}ms` }">
             <div v-if="plan.popular" class="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
               Most Popular
             </div>
@@ -365,6 +483,39 @@ const setPlaybackSpeed = (speed: number) => {
         </div>
       </div>
     </section>
+
+    <!-- FAQ Section -->
+    <section class="py-24 bg-slate-50">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
+          <p class="text-slate-500">
+            Have questions? We're here to help.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <div v-for="(faq, index) in faqs" :key="index" 
+            class="reveal-on-scroll bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300" 
+            :class="{'shadow-lg ring-1 ring-indigo-50 border-indigo-100': activeFaq === index}"
+            :style="{ transitionDelay: `${index * 50}ms` }">
+            <button @click="activeFaq = activeFaq === index ? null : index" class="w-full flex items-center justify-between p-6 text-left">
+              <span class="font-bold text-slate-900 text-lg">{{ faq.question }}</span>
+              <span class="ml-6 flex-shrink-0 text-indigo-500 transition-transform duration-300" :class="{'rotate-180': activeFaq === index}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </span>
+            </button>
+            <div v-show="activeFaq === index" class="px-6 pb-6 animate-fadeIn">
+              <p class="text-slate-600 leading-relaxed">{{ faq.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
 
     <!-- Social Proof / Final CTA -->
     <section class="py-24 bg-slate-900 text-white relative overflow-hidden">
@@ -456,5 +607,17 @@ const setPlaybackSpeed = (speed: number) => {
   to {
     opacity: 1;
   }
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>

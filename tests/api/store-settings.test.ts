@@ -62,7 +62,7 @@ describe('Store Settings (Tenant Admin)', async () => {
                 primaryColor: '#112233',
                 templateKey: 'modern',
                 language: 'ar',
-                fontFamily: 'Cairo',
+
                 isCompleted: true
             })
         })
@@ -71,7 +71,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(patchBody.primaryColor).toBe('#112233'.toUpperCase())
         expect(patchBody.templateKey).toBe('modern')
         expect(patchBody.language).toBe('ar')
-        expect(patchBody.fontFamily).toBe('Cairo')
+
         expect(patchBody.isCompleted).toBe(true)
     })
 

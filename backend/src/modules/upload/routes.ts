@@ -2,14 +2,27 @@ import { Router } from 'express'
 import multer from 'multer'
 import { Upload } from '@aws-sdk/lib-storage'
 import type { PutObjectCommandInput } from '@aws-sdk/client-s3'
-import { s3Client, BUCKET_NAME } from '../../lib/s3'
+import crypto from 'crypto'
+import { s3Client, BUCKET_NAME, ensureBucketExists, ensureBucketPublicRead, buildPublicUrl } from '../../lib/s3'
 import { requireTenantAdmin } from '../../middleware/rbac.middleware'
 
 const router = Router()
 
-// Configure multer to store file in memory
+// Configure multer to store file in memory and validate uploads early
 const storage = multer.memoryStorage()
-const upload = multer({ storage })
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB per file is enough for product imagery
+        files: 5
+    },
+    fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Only image uploads are allowed'))
+        }
+        cb(null, true)
+    }
+})
 
 router.post('/', requireTenantAdmin, upload.single('file'), async (req, res) => {
     try {
@@ -17,9 +30,18 @@ router.post('/', requireTenantAdmin, upload.single('file'), async (req, res) => 
             return res.status(400).json({ error: 'No file uploaded' })
         }
 
+        const tenant = req.tenant
+        if (!tenant) {
+            return res.status(400).json({ error: 'Tenant context missing' })
+        }
+
+        await ensureBucketExists()
+        await ensureBucketPublicRead()
+
         const file = req.file
-        // Create a unique file name
-        const fileName = `${Date.now()}-${file.originalname}`
+        // Create a unique file name under tenant scope to avoid collisions and leaks
+        const safeOriginal = file.originalname.replace(/[^a-zA-Z0-9_.-]/g, '_')
+        const fileName = `${tenant.id}/${Date.now()}-${crypto.randomBytes(6).toString('hex')}-${safeOriginal}`
 
         const uploadParams: PutObjectCommandInput = {
             Bucket: BUCKET_NAME,
@@ -39,12 +61,33 @@ router.post('/', requireTenantAdmin, upload.single('file'), async (req, res) => 
 
         // Construct public URL
         // For local MinIO: http://localhost:9000/products/filename
-        const fileUrl = `${process.env.S3_PUBLIC_URL || 'http://localhost:9000'}/${BUCKET_NAME}/${fileName}`
+        const fileUrl = buildPublicUrl(fileName)
 
-        res.json({ url: fileUrl })
+        res.json({ url: fileUrl, storage: 's3' })
     } catch (error) {
         console.error('Upload error:', error)
-        res.status(500).json({ error: 'Upload failed' })
+
+        if (error instanceof multer.MulterError) {
+            return res.status(400).json({ error: error.message })
+        }
+        if (error instanceof Error && error.message === 'Only image uploads are allowed') {
+            return res.status(400).json({ error: error.message })
+        }
+
+        const storageUnavailable =
+            (error as any)?.code &&
+            ['ECONNREFUSED', 'ECONNRESET', 'ENETUNREACH', 'EAI_AGAIN', 'ENOTFOUND'].includes(
+                (error as any).code
+            )
+
+        if (storageUnavailable || (error as any)?.$metadata?.httpStatusCode === 503) {
+            return res.status(503).json({
+                error: 'Storage unavailable. Please ensure MinIO/S3 is running at S3_ENDPOINT.'
+            })
+        }
+
+        const message = error instanceof Error ? error.message : 'Upload failed'
+        res.status(500).json({ error: message })
     }
 })
 

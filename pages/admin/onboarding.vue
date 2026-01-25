@@ -89,8 +89,7 @@
 
         <!-- Language + Font -->
         <div v-else-if="step === 2" class="space-y-4">
-          <h3 class="text-lg font-semibold text-slate-900">Language and font</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 class="text-lg font-semibold text-slate-900">Language</h3>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1">Language</label>
               <select
@@ -101,17 +100,7 @@
               </select>
               <p class="mt-1 text-xs text-slate-500">If Arabic, consider RTL layout.</p>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Font</label>
-              <select
-                v-model="form.fontFamily"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option v-for="f in fonts" :key="f.key" :value="f.key">{{ f.label }}</option>
-              </select>
-            </div>
           </div>
-        </div>
 
         <!-- Summary -->
         <div v-else class="space-y-4">
@@ -133,10 +122,7 @@
               <p class="text-sm text-slate-500">Language</p>
               <p class="font-semibold text-slate-900">{{ form.language }}</p>
             </div>
-            <div class="rounded-xl border border-slate-200 p-4">
-              <p class="text-sm text-slate-500">Font</p>
-              <p class="font-semibold text-slate-900">{{ form.fontFamily }}</p>
-            </div>
+
           </div>
 
           <div class="rounded-xl border border-slate-200 p-4">
@@ -228,7 +214,7 @@ const saving = ref(false)
 const error = ref('')
 
 const step = ref(0)
-const steps = ['Brand', 'Template', 'Language & Font', 'Summary']
+const steps = ['Brand', 'Template', 'Language', 'Summary']
 const progressPercent = computed(() => Math.round(((step.value + 1) / steps.length) * 100))
 
 const templates = [
@@ -240,18 +226,12 @@ const languages = [
   { key: 'fr', label: 'French (FR)' },
   { key: 'en', label: 'English (EN)' }
 ]
-const fonts = [
-  { key: 'Inter', label: 'Inter' },
-  { key: 'Cairo', label: 'Cairo' },
-  { key: 'Poppins', label: 'Poppins' },
-  { key: 'Tajawal', label: 'Tajawal' }
-]
+
 
 const form = reactive({
-  primaryColor: '#4F46E5',
+  primaryColor: '#0d9488',
   templateKey: 'classic',
-  language: 'fr',
-  fontFamily: 'Inter'
+  language: 'fr'
 })
 
 const summaryLoading = ref(false)
@@ -268,7 +248,6 @@ async function loadSettings() {
     form.primaryColor = data.primaryColor || form.primaryColor
     form.templateKey = data.templateKey || form.templateKey
     form.language = data.language || form.language
-    form.fontFamily = data.fontFamily || form.fontFamily
   } catch (e: any) {
     error.value = e.data?.statusMessage || 'Failed to load store settings.'
   } finally {
@@ -284,7 +263,6 @@ async function save(partial?: { isCompleted?: boolean }) {
       primaryColor: form.primaryColor,
       templateKey: form.templateKey,
       language: form.language,
-      fontFamily: form.fontFamily,
       ...partial
     }
 

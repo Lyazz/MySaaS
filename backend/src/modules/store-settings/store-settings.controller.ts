@@ -45,7 +45,7 @@ export class StoreSettingsController {
                 settings: {
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
-                    fontFamily: settings.fontFamily,
+
                     language: settings.language
                 }
             })
@@ -70,7 +70,7 @@ export class StoreSettingsController {
                 storeSettings: {
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
-                    fontFamily: settings.fontFamily,
+
                     language: settings.language
                 }
             })
