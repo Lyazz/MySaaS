@@ -1,0 +1,280 @@
+import { Router } from 'express'
+import prisma from '../../lib/prisma'
+import { requireSuperAdmin } from '../../middleware/superadmin.middleware'
+import { logAction } from '../../lib/audit'
+import bcrypt from 'bcryptjs'
+
+const router = Router()
+
+router.use(requireSuperAdmin)
+
+// GET / - List tenants
+router.get('/', async (req, res) => {
+    try {
+        const tenants = await prisma.tenant.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: {
+                _count: {
+                    select: {
+                        users: true,
+                        products: true,
+                        orders: true
+                    }
+                }
+            }
+        })
+        res.json(tenants)
+    } catch (error) {
+        console.error('List tenants error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// POST / - Create tenant
+router.post('/', async (req, res) => {
+    const { name, slug, ownerEmail, ownerPassword } = req.body
+    const user = req.user!
+
+    if (!name || !slug || !ownerEmail || !ownerPassword) {
+        return res.status(400).json({
+            statusCode: 400,
+            statusMessage: 'Missing required fields: name, slug, ownerEmail, ownerPassword'
+        })
+    }
+
+    try {
+        // Check if slug already exists
+        const existingTenant = await prisma.tenant.findUnique({ where: { slug } })
+        if (existingTenant) {
+            return res.status(409).json({
+                statusCode: 409,
+                statusMessage: 'Tenant with this slug already exists'
+            })
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(ownerPassword, 10)
+
+        // Create tenant and owner user in a transaction
+        const tenant = await prisma.$transaction(async (tx) => {
+            const newTenant = await tx.tenant.create({
+                data: { name, slug }
+            })
+
+            await tx.user.create({
+                data: {
+                    email: ownerEmail,
+                    passwordHash,
+                    role: 'owner',
+                    tenantId: newTenant.id
+                }
+            })
+
+            await tx.storeSettings.create({
+                data: {
+                    tenantId: newTenant.id
+                }
+            })
+
+            return newTenant
+        })
+
+        await logAction({
+            action: 'CREATE_TENANT',
+            details: `Tenant ${tenant.slug} created`,
+            userId: user.id,
+            targetId: tenant.id
+        })
+
+        res.status(201).json(tenant)
+    } catch (error) {
+        console.error('Create tenant error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// PATCH /:id - Update tenant
+router.patch('/:id', async (req, res) => {
+    const { id } = req.params
+    const { name, slug } = req.body
+    const user = req.user!
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+    if (!name && !slug) {
+        return res.status(400).json({ statusCode: 400, statusMessage: 'No fields to update' })
+    }
+
+    try {
+        const updateData: any = {}
+        if (name) updateData.name = name
+        if (slug) updateData.slug = slug
+
+        const tenant = await prisma.tenant.update({
+            where: { id },
+            data: updateData
+        })
+
+        await logAction({
+            action: 'UPDATE_TENANT',
+            details: `Tenant ${tenant.slug} updated`,
+            userId: user.id,
+            targetId: tenant.id
+        })
+
+        res.json(tenant)
+    } catch (error) {
+        console.error('Update tenant error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// GET /:id/stats - Get tenant stats
+router.get('/:id/stats', async (req, res) => {
+    const { id } = req.params
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+
+    try {
+        const [userCount, productCount, orderCount, revenue] = await Promise.all([
+            prisma.user.count({ where: { tenantId: id } }),
+            prisma.product.count({ where: { tenantId: id } }),
+            prisma.order.count({ where: { tenantId: id } }),
+            prisma.order.aggregate({
+                where: {
+                    tenantId: id,
+                    status: { in: ['CONFIRMED', 'SHIPPED', 'DELIVERED'] }
+                },
+                _sum: { totalAmount: true }
+            })
+        ])
+
+        res.json({
+            users: userCount,
+            products: productCount,
+            orders: orderCount,
+            revenue: revenue._sum.totalAmount || 0
+        })
+    } catch (error) {
+        console.error('Get tenant stats error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// DELETE /:id
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params
+    const user = req.user!
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+
+    try {
+        const tenant = await prisma.tenant.delete({
+            where: { id }
+        })
+
+        await logAction({
+            action: 'DELETE_TENANT',
+            details: `Tenant ${tenant.slug} deleted`,
+            userId: user.id,
+            targetId: tenant.id
+        })
+
+        res.json({ success: true })
+    } catch (error) {
+        console.error('Delete tenant error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// POST /:id/suspend
+router.post('/:id/suspend', async (req, res) => {
+    const { id } = req.params
+    const user = req.user!
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+
+    try {
+        const tenant = await prisma.tenant.update({
+            where: { id },
+            data: { isSuspended: true }
+        })
+
+        await logAction({
+            action: 'SUSPEND_TENANT',
+            details: `Tenant ${tenant.slug} suspended`,
+            userId: user.id,
+            targetId: tenant.id
+        })
+
+        res.json({ success: true })
+    } catch (error) {
+        console.error('Suspend tenant error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// POST /:id/unsuspend
+router.post('/:id/unsuspend', async (req, res) => {
+    const { id } = req.params
+    const user = req.user!
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+
+    try {
+        const tenant = await prisma.tenant.update({
+            where: { id },
+            data: { isSuspended: false }
+        })
+
+        await logAction({
+            action: 'UNSUSPEND_TENANT',
+            details: `Tenant ${tenant.slug} unsuspended`,
+            userId: user.id,
+            targetId: tenant.id
+        })
+
+        res.json({ success: true })
+    } catch (error) {
+        console.error('Unsuspend tenant error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// POST /:id/impersonate
+router.post('/:id/impersonate', async (req, res) => {
+    const { id } = req.params
+    const adminUser = req.user!
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing Tenant ID' })
+
+    try {
+        const targetUser = await prisma.user.findFirst({
+            where: {
+                tenantId: id,
+                role: 'owner'
+            }
+        })
+
+        if (!targetUser) {
+            return res.status(404).json({ statusCode: 404, statusMessage: 'Tenant owner not found' })
+        }
+
+        await logAction({
+            action: 'IMPERSONATE_USER',
+            details: `Impersonated user ${targetUser.email} of tenant ${id}`,
+            userId: adminUser.id,
+            targetId: targetUser.id,
+            tenantId: id
+        })
+
+        res.json({
+            success: true,
+            impersonatedUser: targetUser
+        })
+    } catch (error) {
+        console.error('Impersonate error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+export default router

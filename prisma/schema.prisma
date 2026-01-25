@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  isSuspended Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  products   Product[]
+  categories Category[]
+  orders     Order[]
+  storeSettings StoreSettings?
+  domains    TenantDomain[]
+}
+
+model TenantDomain {
+  id        String   @id @default(uuid())
+  domain    String   @unique
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model StoreSettings {
+  id           String   @id @default(uuid())
+  tenantId     String   @unique
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  primaryColor String   @default("#4F46E5") // indigo-600
+  templateKey  String   @default("classic") // e.g. classic | modern
+  fontFamily   String   @default("Inter")
+  language     String   @default("fr") // ar | fr | en
+
+  isCompleted  Boolean  @default(false)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String
+  passwordHash String?
+  role         String   @default("staff") // owner, admin, staff
+  isSuperAdmin Boolean  @default(false)
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  title     String
+  slug      String
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  
+  products  Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String
+  description String?
+  price       Decimal  @default(0)
+  stock       Int      @default(0)
+
+  isActive    Boolean  @default(true)
+  images      String[] @default([])
+  
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  variants    Variant[]
+  orderItems  OrderItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model Variant {
+  id          String   @id @default(uuid())
+  sku         String?
+  optionName  String
+  optionValue String
+  priceDelta  Decimal  @default(0)
+  stock       Int      @default(0)
+
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id])
+  status          String      @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  totalAmount     Float
+  
+  customerName    String
+  customerPhone   String
+  customerAddress String?
+
+  items           OrderItem[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([tenantId])
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  
+  quantity  Int
+  price     Float // Price at the time of order
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String?
+  userId    String?  // ID of the user who performed the action (optional if system action)
+  targetId  String?  // ID of the target entity (e.g. tenantId)
+  tenantId  String?  // Tenant context usually null for super admin actions but good to have
+  createdAt DateTime @default(now())
+}
