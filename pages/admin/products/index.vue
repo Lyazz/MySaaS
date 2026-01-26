@@ -83,7 +83,8 @@
 
       <!-- Products Table -->
       <div v-else class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -158,6 +159,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
 
         <!-- Pagination -->
         <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">

@@ -34,9 +34,11 @@ const handleAddToCart = () => {
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <h1 class="text-3xl font-bold text-slate-900">{{ product?.title }}</h1>
-          <p v-if="product?.description" class="mt-3 text-slate-600 leading-relaxed">
-            {{ product.description }}
-          </p>
+          <div 
+            v-if="product?.description" 
+            class="mt-3 prose prose-slate text-slate-600 leading-relaxed"
+            v-html="product.description"
+          ></div>
 
           <div class="mt-6 flex items-center justify-between">
             <div class="text-3xl font-bold text-indigo-600">{{ Number(product?.price ?? 0).toFixed(2) }} DA</div>

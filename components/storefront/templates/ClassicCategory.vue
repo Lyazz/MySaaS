@@ -23,8 +23,19 @@ const categoryProducts = computed(() => {
         <span aria-hidden="true">&larr;</span> Back to Products
       </NuxtLink>
 
-      <h1 class="text-3xl font-bold text-slate-900 mb-2">{{ category.title }}</h1>
-      <p class="text-slate-600 mb-8">Browse products in this category.</p>
+      <div v-if="category.imageUrl" class="relative overflow-hidden rounded-xl border border-slate-200 mb-6 bg-slate-50">
+        <img :src="category.imageUrl" :alt="category.title" class="w-full h-52 sm:h-64 object-contain" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 p-6 text-white">
+          <p class="text-xs uppercase tracking-wide text-white/70 mb-1">Category</p>
+          <h1 class="text-3xl font-bold">{{ category.title }}</h1>
+        </div>
+      </div>
+
+      <template v-if="!category.imageUrl">
+        <h1 class="text-3xl font-bold text-slate-900 mb-2">{{ category.title }}</h1>
+        <p class="text-slate-600 mb-8">Browse products in this category.</p>
+      </template>
 
       <div v-if="categoryProducts.length === 0" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-10 text-center">
         <p class="text-slate-600">No products available in this category yet.</p>

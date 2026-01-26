@@ -10,7 +10,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <NuxtLink to="/" class="text-2xl font-display font-bold text-slate-900 tracking-tight hover:text-indigo-600 transition-colors">
+            <NuxtLink to="/" class="text-2xl font-sans font-bold text-slate-900 tracking-tight hover:text-indigo-600 transition-colors">
               MySaaS
             </NuxtLink>
           </div>
@@ -50,7 +50,7 @@
               <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white">
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
               </div>
-              <span class="text-xl font-display font-bold text-slate-900">MySaaS</span>
+              <span class="text-xl font-sans font-bold text-slate-900">MySaaS</span>
             </div>
             <p class="text-slate-500 text-sm leading-relaxed max-w-xs">
               Empowering businesses with cutting-edge tools and a premium experience. Built for scale, designed for you.

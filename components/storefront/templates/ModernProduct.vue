@@ -102,12 +102,12 @@ const formatPrice = (val: number | string) => {
                 
                 <!-- Header -->
                 <div>
-                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-slate-900 tracking-tight leading-tight mb-4">
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-900 tracking-tight leading-tight mb-4">
                         {{ product?.title }}
                     </h1>
 
                     <div class="flex items-baseline gap-4">
-                        <div class="text-4xl font-display font-bold text-brand-600 tracking-tight">
+                        <div class="text-4xl font-sans font-bold text-brand-600 tracking-tight">
                             {{ formatPrice(Number(product?.price || 0)) }}
                         </div>
                         <div v-if="(Number(product?.price) * 1.2) > 0" class="text-lg text-slate-400 line-through decoration-2 decoration-slate-200">
@@ -117,8 +117,13 @@ const formatPrice = (val: number | string) => {
                 </div>
 
                 <!-- Description -->
-                <div class="prose prose-slate text-slate-600 max-w-none leading-relaxed">
-                    <p>{{ product?.description || 'Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.' }}</p>
+                <div 
+                    v-if="product?.description" 
+                    class="prose prose-slate text-slate-600 max-w-none leading-relaxed"
+                    v-html="product.description"
+                ></div>
+                <div v-else class="prose prose-slate text-slate-600 max-w-none leading-relaxed">
+                    <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
                 </div>
 
                 <!-- Features / Trust -->
@@ -148,7 +153,7 @@ const formatPrice = (val: number | string) => {
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                         </div>
                         <div>
-                            <h3 class="font-display font-bold text-slate-900 text-xl leading-none">Order Now</h3>
+                            <h3 class="font-sans font-bold text-slate-900 text-xl leading-none">Order Now</h3>
                             <span class="text-xs text-slate-500 font-medium">Cash on Delivery (COD)</span>
                         </div>
                     </div>

@@ -13,6 +13,7 @@ describe('Express Admin API', async () => {
     let userId: string
     let token: string // Valid JWT token
     let productId: string
+    let categoryId: string
 
     it('registers a tenant successfully', async () => {
         const res = await fetch('/api/register', {
@@ -67,6 +68,57 @@ describe('Express Admin API', async () => {
         expect(body.title).toBe('Test Product')
         expect(body.images).toEqual(images)
         productId = body.id
+    })
+
+    it('Create Category with image (Admin)', async () => {
+        const imageUrl = 'http://example.com/category-a.png'
+        const res = await fetch('/api/admin/categories', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Forwarded-Host': `${slug}.localhost:3000`,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: 'Phones',
+                slug: 'phones',
+                imageUrl
+            })
+        })
+        const body = await res.json()
+        expect(res.status).toBe(200)
+        expect(body.imageUrl).toBe(imageUrl)
+        categoryId = body.id
+    })
+
+    it('Update Category image (Admin)', async () => {
+        const newImage = 'http://example.com/category-b.png'
+        const res = await fetch(`/api/admin/categories/${categoryId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Forwarded-Host': `${slug}.localhost:3000`,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: 'Phones',
+                slug: 'phones',
+                imageUrl: newImage
+            })
+        })
+        const body = await res.json()
+        expect(res.status).toBe(200)
+        expect(body.imageUrl).toBe(newImage)
+
+        const listRes = await fetch('/api/categories', {
+            headers: {
+                'X-Forwarded-Host': `${slug}.localhost:3000`
+            }
+        })
+        const listBody = await listRes.json()
+        expect(listRes.status).toBe(200)
+        const found = listBody.find((c: any) => c.slug === 'phones')
+        expect(found.imageUrl).toBe(newImage)
     })
 
     it('Update Product Images (Admin)', async () => {
@@ -143,6 +195,7 @@ describe('Express Admin API', async () => {
         // Delete tenant-owned data first (FKs do not cascade on Tenant delete)
         await prisma.variant.deleteMany({ where: { productId } })
         await prisma.product.deleteMany({ where: { id: productId } })
+        await prisma.category.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { email } })
         await prisma.tenant.delete({ where: { slug } })
     })

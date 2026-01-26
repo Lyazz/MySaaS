@@ -40,7 +40,7 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+    fontFamily: "'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
   } as Record<string, string>
 
   console.log('StoreStyle Computed:', result)
@@ -57,4 +57,3 @@ onMounted(() => {
     <slot />
   </div>
 </template>
-

@@ -66,12 +66,10 @@
           <!-- Description -->
           <AdminFormField label="Description" :error="errors.description">
             <template #default="{ inputId }">
-              <textarea
+              <RichTextEditor
                 :id="inputId"
                 v-model="form.description"
-                rows="4"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="Enter product description"
+                placeholder="Enter product description with rich formatting..."
               />
             </template>
           </AdminFormField>
@@ -171,6 +169,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import ImageUploader from '~/components/admin/ImageUploader.vue'
+import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 
 definePageMeta({
   middleware: 'auth',

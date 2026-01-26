@@ -7,7 +7,7 @@ const slug = route.params.slug as string
 const storeSettings = useState<any>('storeSettings')
 const templateKey = computed(() => storeSettings.value?.templateKey || 'modern')
 
-type Category = { id: string; title: string; slug: string }
+type Category = { id: string; title: string; slug: string; imageUrl?: string | null }
 type Product = {
   id: string
   title: string

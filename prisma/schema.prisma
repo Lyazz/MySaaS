@@ -42,7 +42,7 @@ model StoreSettings {
 
   primaryColor String   @default("#0d9488") // teal-600
   templateKey  String   @default("modern") // e.g. classic | modern
-  fontFamily   String   @default("Inter")
+  fontFamily   String   @default("Outfit")
   language     String   @default("fr") // ar | fr | en
 
   isCompleted  Boolean  @default(false)
@@ -70,6 +70,7 @@ model Category {
   id        String   @id @default(uuid())
   title     String
   slug      String
+  imageUrl  String?
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   

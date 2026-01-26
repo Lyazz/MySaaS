@@ -6,13 +6,30 @@ const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 
-// Mock categories for the menu
-const categories = [
-  { name: 'Home', href: '/' },
-  { name: 'Shop', href: '/products' },
-  { name: 'Categories', href: '/categories' },
-  { name: 'Contact', href: '/contact' },
-]
+const categoriesUrl = useTenantApiUrl('/api/categories')
+const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
+    headers: useTenantApiHeaders(),
+   // lazy: true
+})
+
+// Build dynamic menu
+const categories = computed(() => {
+    const base = [
+        { name: 'Home', href: '/' },
+        { name: 'Shop', href: '/products' },
+    ]
+    
+    // Add top 3 categories
+    if (tenantCategories.value) {
+        tenantCategories.value.slice(0, 3).forEach(cat => {
+            base.push({ name: cat.title, href: `/c/${cat.slug}` })
+        })
+    }
+    
+    // Add Contact at the end
+    base.push({ name: 'Contact', href: '/contact' }) // contact is usually static or handled elsewhere
+    return base
+})
 </script>
 
 <template>
@@ -40,7 +57,7 @@ const categories = [
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
               </div>
-              <span class="text-xl font-bold text-slate-900 group-hover:text-brand-600 transition-colors uppercase tracking-tight">{{ tenantName }}</span>
+              <span class="text-xl font-bold text-slate-900 group-hover:text-brand-600 transition-colors tracking-tight">{{ tenantName }}</span>
             </NuxtLink>
 
             <!-- Search Bar (Centered & Rounded) -->

@@ -19,7 +19,7 @@ const tenantName = computed(() => tenant.value?.name || 'Store')
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <NuxtLink to="/" class="text-2xl font-display font-bold text-slate-900 tracking-tight hover-text-brand transition-colors">
+              <NuxtLink to="/" class="text-2xl font-sans font-bold text-slate-900 tracking-tight hover-text-brand transition-colors">
                 {{ tenantName }}
               </NuxtLink>
             </div>
@@ -64,7 +64,7 @@ const tenantName = computed(() => tenant.value?.name || 'Store')
                 <div class="w-6 h-6 rounded bg-brand flex items-center justify-center text-white">
                   <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 </div>
-                <span class="text-xl font-display font-bold text-slate-900">{{ tenantName }}</span>
+                <span class="text-xl font-sans font-bold text-slate-900">{{ tenantName }}</span>
               </div>
               <p class="text-slate-500 text-sm leading-relaxed max-w-xs">Powered by MySaaS.</p>
             </div>

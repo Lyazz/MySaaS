@@ -6,19 +6,32 @@ const props = defineProps<{
     products: any[] // All products passed, we filter here
 }>()
 
+// Fetch dynamic categories for sidebar
+const categoriesUrl = useTenantApiUrl('/api/categories')
+const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
+    headers: useTenantApiHeaders(),
+    lazy: true
+})
+
 // Filter products for this category
 const categoryProducts = computed(() => {
     const id = props.category.id
     return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && p.categoryId === id)
 })
 
-// Mock sidebar filters
-const filters = {
-    categories: ['Bags', 'Books', 'English Books', 'Fantasy', 'Horror', 'Mystery', 'Self-Development', 'كتب دينية', 'Packs', 'Series', 'Stationery', 'Notebooks', 'Tech'],
-    brands: ['Nike', 'Adidas', 'Puma', 'Reebok'],
-    colors: ['Green', 'Blue', 'Brown', 'Gray', 'Pink', 'Beige'],
-    sizes: ['Small', 'Medium', 'Large']
-}
+const sortOption = ref('Most Popular')
+
+const sortedProducts = computed(() => {
+    let result = [...categoryProducts.value]
+    if (sortOption.value === 'Price: Low to High') {
+        result.sort((a, b) => Number(a.price) - Number(b.price))
+    } else if (sortOption.value === 'Price: High to Low') {
+        result.sort((a, b) => Number(b.price) - Number(a.price))
+    }
+    return result
+})
+
+// Mock filters removed. We only show Categories logic for navigation.
 </script>
 
 <template>
@@ -29,8 +42,33 @@ const filters = {
           <nav class="flex mb-8 text-sm text-slate-500">
              <NuxtLink to="/" class="hover:text-brand-600">Home</NuxtLink>
              <span class="mx-2">/</span>
+             <NuxtLink to="/products" class="hover:text-brand-600">Shop</NuxtLink>
+             <span class="mx-2">/</span>
              <span class="font-medium text-slate-900">{{ category.title }}</span>
           </nav>
+
+          <div class="relative overflow-hidden rounded-2xl bg-slate-900 text-white mb-8 shadow-sm border border-slate-200">
+            <img
+              v-if="category.imageUrl"
+              :src="category.imageUrl"
+              :alt="category.title"
+              class="absolute inset-0 w-full h-full object-contain opacity-90 bg-slate-900"
+            />
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/60 to-black/30"></div>
+            <div class="relative p-8 sm:p-10 lg:p-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.2em] text-brand-200 mb-2">Category</p>
+                <h1 class="text-3xl sm:text-4xl font-bold font-sans">{{ category.title }}</h1>
+                <p class="mt-3 text-slate-200 text-sm">Curated products ready to ship.</p>
+              </div>
+              <div class="flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-2 text-sm border border-white/20">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white font-semibold">
+                  {{ categoryProducts.length }}
+                </span>
+                <span class="text-slate-100">products available</span>
+              </div>
+            </div>
+          </div>
 
           <div class="flex flex-col lg:flex-row gap-8">
               
@@ -40,27 +78,24 @@ const filters = {
                   <div>
                       <div class="flex items-center justify-between mb-4">
                           <h3 class="font-bold text-slate-900">Categories</h3>
-                          <button class="text-xs text-brand-600 hover:underline">Reset</button>
                       </div>
                       <div class="space-y-2">
-                          <label v-for="cat in filters.categories" :key="cat" class="flex items-center gap-3 cursor-pointer group">
-                               <div class="relative flex items-center">
-                                  <input type="checkbox" class="peer h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 transition-all checked:bg-brand-600 checked:border-transparent" />
-                                </div>
-                              <span class="text-sm text-slate-600 group-hover:text-brand-600 transition-colors">{{ cat }}</span>
-                          </label>
+                          <!-- Iterate over fetched categories -->
+                          <NuxtLink 
+                            v-for="cat in allCategories" 
+                            :key="cat.id" 
+                            :to="`/c/${cat.slug}`"
+                            class="flex items-center gap-3 cursor-pointer group p-1 rounded-lg hover:bg-slate-50 transition-colors"
+                            :class="cat.id === category.id ? 'bg-brand-50 text-brand-700 font-medium' : 'text-slate-600'"
+                          >
+                               <!-- Mock Icon or simple bullet -->
+                              <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 transition-colors" :class="cat.id === category.id ? 'bg-brand-600' : ''"></span>
+                              <span class="text-sm transition-colors">{{ cat.title }}</span>
+                          </NuxtLink>
                       </div>
                   </div>
 
-                   <!-- Price Range (Mock) -->
-                   <div>
-                       <h3 class="font-bold text-slate-900 mb-4">Price</h3>
-                       <div class="flex items-center gap-3">
-                           <input type="number" placeholder="Min" class="w-full rounded-lg border-slate-200 text-sm focus:border-brand-500 focus:ring-brand-500" />
-                           <span class="text-slate-400">-</span>
-                           <input type="number" placeholder="Max" class="w-full rounded-lg border-slate-200 text-sm focus:border-brand-500 focus:ring-brand-500" />
-                       </div>
-                   </div>
+                   <!-- Removed Price (Mock) -->
 
               </aside>
 

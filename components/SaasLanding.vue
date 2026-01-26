@@ -287,7 +287,7 @@ const faqs = [
             <span class="text-sm font-medium text-slate-600">New features available</span>
           </div>
           
-          <h1 class="text-5xl md:text-7xl font-display font-bold text-slate-900 tracking-tight mb-8 animate-slideUp">
+          <h1 class="text-5xl md:text-7xl font-sans font-bold text-slate-900 tracking-tight mb-8 animate-slideUp">
             The all-in-one platform to
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 animate-gradient-x">build, sell, and scale.</span>
           </h1>
@@ -367,7 +367,7 @@ const faqs = [
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
           <div v-for="(stat, index) in stats" :key="index" class="py-4 md:py-0">
-            <div class="text-4xl md:text-5xl font-bold text-indigo-600 mb-2 font-display tabular-nums tracking-tight">
+            <div class="text-4xl md:text-5xl font-bold text-indigo-600 mb-2 font-sans tabular-nums tracking-tight">
               {{ stat.value.toLocaleString() }}{{ stat.suffix }}
             </div>
             <div class="text-slate-500 font-medium text-lg">{{ stat.label }}</div>
@@ -380,7 +380,7 @@ const faqs = [
     <section class="py-24 bg-white relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-4">Why MySaaS is the best platform for you</h2>
+          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Why MySaaS is the best platform for you</h2>
           <p class="text-slate-500 max-w-2xl mx-auto">
             Customers choose MySaaS for its smart, easy-to-use, and feature-rich experience.
           </p>
@@ -406,7 +406,7 @@ const faqs = [
     <section class="py-24 bg-slate-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-4">Fair pricing, built for everyone</h2>
+          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Fair pricing, built for everyone</h2>
           <p class="text-slate-500 max-w-2xl mx-auto">
             Whether you are just starting out or ready to scale, we've got a plan for you. Pay only for what you need.
           </p>
@@ -450,7 +450,7 @@ const faqs = [
     <section class="py-24 bg-white overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-4">Loved by Algerian Merchants</h2>
+          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Loved by Algerian Merchants</h2>
           <!-- <p class="text-slate-500 max-w-2xl mx-auto"></p> -->
         </div>
 
@@ -488,7 +488,7 @@ const faqs = [
     <section class="py-24 bg-slate-50">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-display font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
+          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
           <p class="text-slate-500">
             Have questions? We're here to help.
           </p>
@@ -524,7 +524,7 @@ const faqs = [
       <div class="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-violet-500/30 blur-3xl"></div>
       
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
-        <h2 class="text-3xl md:text-5xl font-display font-bold mb-6">Ready to find your forever customers?</h2>
+        <h2 class="text-3xl md:text-5xl font-sans font-bold mb-6">Ready to find your forever customers?</h2>
         <p class="text-indigo-200 text-xl max-w-2xl mx-auto mb-10">
           Join thousands of merchants who trust MySaaS to power their online business.
         </p>

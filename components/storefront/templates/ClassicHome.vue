@@ -18,7 +18,7 @@ defineProps<{
           Welcome
         </span>
 
-        <h1 class="text-5xl md:text-7xl font-display font-bold text-slate-900 tracking-tight mb-6 animate-slideUp">
+        <h1 class="text-5xl md:text-7xl font-sans font-bold text-slate-900 tracking-tight mb-6 animate-slideUp">
           <span class="text-brand">{{ tenantName }}</span>
         </h1>
 
