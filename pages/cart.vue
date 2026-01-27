@@ -30,8 +30,8 @@
             <TransitionGroup name="list">
               <li v-for="item in cartStore.items" :key="item.productId" class="flex py-6 sm:py-8 px-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                 <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
-                   <!-- Placeholder for product image, in real app bind src to item.image -->
-                   <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+                   <img v-if="item.image" :src="item.image" :alt="item.title" class="h-full w-full object-cover object-center" />
+                   <div v-else class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
                       <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
@@ -99,14 +99,8 @@
             <div class="flex items-center justify-between border-b border-gray-100 pb-4">
                <dt class="flex text-base text-gray-600 items-center">
                   <span>Shipping estimate</span>
-                  <a href="#" class="ml-2 flex-shrink-0 text-gray-400 hover:text-gray-500">
-                     <span class="sr-only">Learn more about how shipping is calculated</span>
-                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                     </svg>
-                  </a>
                </dt>
-               <dd class="text-base font-medium text-green-600">Free</dd>
+               <dd class="text-sm font-medium text-gray-500">Calculated at checkout</dd>
             </div>
              <div class="flex items-center justify-between border-b border-gray-100 pb-4">
               <dt class="text-base text-gray-600">Tax estimate</dt>
@@ -134,14 +128,7 @@
              </NuxtLink>
           </div>
           
-          <div class="mt-6 flex justify-center text-center text-xs text-gray-500">
-             <p>
-                or
-                <button type="button" class="font-medium text-brand hover:text-brand-dark">
-                   continue shopping<span aria-hidden="true"> &rarr;</span>
-                </button>
-             </p>
-          </div>
+
         </section>
       </div>
     </div>

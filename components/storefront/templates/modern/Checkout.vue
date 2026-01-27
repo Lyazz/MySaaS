@@ -162,7 +162,12 @@ async function handleSubmit() {
                      <!-- Cart Items -->
                      <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pr-2">
                          <div v-for="item in cartStore.items" :key="item.productId" class="flex items-center gap-4 py-2 border-b border-slate-50 last:border-0">
-                             <div class="h-16 w-16 bg-slate-100 rounded-lg flex-shrink-0 bg-cover bg-center" style="background-image: url('https://placehold.co/100')"></div>
+                             <div class="h-16 w-16 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden relative border border-slate-200">
+                                 <img v-if="item.image" :src="item.image" :alt="item.title" class="h-full w-full object-cover object-center" />
+                                 <div v-else class="h-full w-full flex items-center justify-center bg-slate-100 text-slate-300">
+                                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                 </div>
+                             </div>
                              <div class="flex-1 min-w-0">
                                  <h4 class="font-bold text-slate-900 text-sm truncate">{{ item.title }}</h4>
                                  <p class="text-xs text-slate-500 mt-1">x{{ item.quantity }}</p>

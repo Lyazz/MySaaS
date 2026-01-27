@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ClassicHome from '~/components/storefront/templates/ClassicHome.vue'
-import ModernHome from '~/components/storefront/templates/ModernHome.vue'
+import { homeTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
+import type { TemplateKey } from '~/components/storefront/templates/registry'
 
 type Tenant = { id: string; slug: string; name: string }
 type Product = {
@@ -33,8 +33,8 @@ const featuredProducts = computed(() => {
   return products.value.slice(0, 6) // Show top 6
 })
 
-const templateKey = computed(() => storeSettings.value?.templateKey || 'modern')
-const activeTemplate = computed(() => (templateKey.value === 'modern' ? ModernHome : ClassicHome))
+const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
+const activeTemplate = computed(() => homeTemplates[templateKey.value])
 </script>
 
 <template>

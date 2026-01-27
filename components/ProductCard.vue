@@ -1,8 +1,10 @@
 <template>
   <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
     <!-- Product Image Placeholder -->
-    <div class="h-48 bg-gray-200 flex items-center justify-center">
-      <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Product Image -->
+    <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden">
+      <img v-if="mainImage" :src="mainImage" :alt="product.title" class="w-full h-full object-cover" />
+      <svg v-else class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
       </svg>
     </div>
@@ -58,6 +60,7 @@ interface Product {
   price: number | string
   stock: number
   isActive: boolean
+  images?: string[]
 }
 
 const props = defineProps<{
@@ -66,13 +69,21 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 
+const mainImage = computed(() => {
+  if (props.product.images && props.product.images.length > 0) {
+    return props.product.images[0]
+  }
+  return null
+})
+
 function handleAddToCart() {
   cartStore.addItem({
     productId: props.product.id,
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
-    stock: props.product.stock
+    stock: props.product.stock,
+    image: mainImage.value ?? undefined
   })
   
   // Optional: Show toast notification

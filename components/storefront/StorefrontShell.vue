@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import ClassicStoreShell from '~/components/storefront/templates/ClassicStoreShell.vue'
-import ModernStoreShell from '~/components/storefront/templates/ModernStoreShell.vue'
+import { resolveTemplateKey, storeShellTemplates } from '~/components/storefront/templates/registry'
+import type { TemplateKey } from '~/components/storefront/templates/registry'
 
 const storeSettings = useState<any>('storeSettings')
-const templateKey = computed(() => storeSettings.value?.templateKey || 'classic')
+const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
 
-const ActiveShell = computed(() => {
-  return templateKey.value === 'modern' ? ModernStoreShell : ClassicStoreShell
-})
+const ActiveShell = computed(() => storeShellTemplates[templateKey.value])
 </script>
 
 <template>
@@ -15,4 +13,3 @@ const ActiveShell = computed(() => {
     <slot />
   </component>
 </template>
-

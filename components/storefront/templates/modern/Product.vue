@@ -24,6 +24,7 @@ const setActiveImage = (index: number) => {
 // Add to Cart Logic (Simulated for form submit)
 const isAdding = ref(false)
 const showSuccess = ref(false)
+const fullName = ref('')
 
 const handleOrderSubmit = async () => {
   if (!props.product) return
@@ -37,7 +38,8 @@ const handleOrderSubmit = async () => {
       title: props.product.title,
       slug: props.product.slug,
       price: Number(props.product.price),
-      stock: props.product.stock
+      stock: props.product.stock,
+      image: images.value[0]
   })
   
   isAdding.value = false
@@ -117,32 +119,13 @@ const formatPrice = (val: number | string) => {
                 </div>
 
                 <!-- Description -->
-                <div 
-                    v-if="product?.description" 
-                    class="prose prose-slate text-slate-600 max-w-none leading-relaxed"
-                    v-html="product.description"
-                ></div>
-                <div v-else class="prose prose-slate text-slate-600 max-w-none leading-relaxed">
-                    <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
-                </div>
+                <!-- Mini Description -->
+                <p v-if="product?.miniDescription" class="text-slate-600 mb-6 text-lg leading-relaxed">
+                    {{ product.miniDescription }}
+                </p>
 
                 <!-- Features / Trust -->
-                <div class="grid grid-cols-2 gap-3">
-                     <div class="flex flex-col items-center text-center p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-brand-100 transition-all duration-300 group">
-                         <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 mb-3 group-hover:scale-110 transition-transform duration-300">
-                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                         </div>
-                         <div class="font-bold text-xs text-slate-900 uppercase tracking-wide">Fast Delivery</div>
-                         <div class="text-[10px] text-slate-500 mt-1">58 Wilayas</div>
-                     </div>
-                     <div class="flex flex-col items-center text-center p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-brand-100 transition-all duration-300 group">
-                         <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 mb-3 group-hover:scale-110 transition-transform duration-300">
-                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                         </div>
-                         <div class="font-bold text-xs text-slate-900 uppercase tracking-wide">Secure Payment</div>
-                         <div class="text-[10px] text-slate-500 mt-1">Cash on Delivery</div>
-                     </div>
-                </div>
+
 
                 <!-- Quick COD Order Form -->
                 <div class="bg-white rounded-3xl p-6 md:p-8 shadow-soft border border-slate-100 relative overflow-hidden">
@@ -161,7 +144,13 @@ const formatPrice = (val: number | string) => {
                     <form @submit.prevent="handleOrderSubmit" class="space-y-5">
                         <div class="space-y-2">
                             <label class="block text-sm font-semibold text-slate-700 ml-1">Full Name</label>
-                            <input type="text" placeholder="e.g. John Doe" class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm" />
+                            <input 
+                                v-model="fullName"
+                                type="text" 
+                                placeholder="e.g. John Doe" 
+                                class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                                :class="{ 'animate-attention': !fullName }"
+                            />
                         </div>
                         
                         <div class="space-y-2">
@@ -169,7 +158,7 @@ const formatPrice = (val: number | string) => {
                             <input type="tel" placeholder="e.g. 0550 12 34 56" class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm" />
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-2">
                                 <label class="block text-sm font-semibold text-slate-700 ml-1">Wilaya</label>
                                 <div class="relative">
@@ -208,6 +197,19 @@ const formatPrice = (val: number | string) => {
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+
+        <!-- Full Description (Rich Text) -->
+        <div class="mt-12 max-w-4xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Product Details</h2>
+            <div 
+                v-if="product?.description" 
+                class="prose prose-slate prose-lg text-slate-600 max-w-none leading-relaxed bg-white rounded-3xl p-8 shadow-sm border border-slate-100"
+                v-html="product.description"
+            ></div>
+            <div v-else class="prose prose-slate prose-lg text-slate-600 max-w-none leading-relaxed bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                 <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
             </div>
         </div>
      </div>
@@ -260,5 +262,14 @@ const formatPrice = (val: number | string) => {
 @keyframes fadeInRight {
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-attention {
+    animation: attentionCaptivate 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes attentionCaptivate {
+    0%, 100% { border-color: #e2e8f0; box-shadow: 0 0 0 0 rgba(0,0,0,0); transform: scale(1); background-color: white; }
+    50% { border-color: var(--brand); box-shadow: 0 0 20px -5px color-mix(in srgb, var(--brand), transparent 50%); transform: scale(1.02); background-color: color-mix(in srgb, var(--brand), white 98%); }
 }
 </style>

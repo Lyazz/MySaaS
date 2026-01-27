@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import ModernShop from '~/components/storefront/templates/ModernShop.vue'
-// Import ClassicShop if exists
+import { resolveTemplateKey, shopTemplates } from '~/components/storefront/templates/registry'
+import type { TemplateKey } from '~/components/storefront/templates/registry'
 
 const storeSettings = useState<any>('storeSettings')
-const templateKey = computed(() => storeSettings.value?.templateKey || 'modern')
+const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
 
 type Product = {
   id: string
@@ -35,10 +35,7 @@ definePageMeta({
   layout: 'store'
 })
 
-const ActiveTemplate = computed(() => {
-    // Logic for other templates can go here
-    return ModernShop
-})
+const ActiveTemplate = computed(() => shopTemplates[templateKey.value])
 </script>
 
 <template>

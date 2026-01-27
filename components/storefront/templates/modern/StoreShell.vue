@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
-import StoreThemeProvider from '../StoreThemeProvider.vue'
+import StoreThemeProvider from '../../StoreThemeProvider.vue'
 
 const cartStore = useCartStore()
 const tenant = useState<any>('tenant')

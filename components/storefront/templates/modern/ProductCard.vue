@@ -45,7 +45,8 @@ function handleAddToCart() {
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
-    stock: props.product.stock
+    stock: props.product.stock,
+    image: mainImage.value
   })
 }
 </script>

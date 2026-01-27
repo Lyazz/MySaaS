@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ProductCard from '~/components/storefront/templates/ModernProductCard.vue'
+import ProductCard from '~/components/storefront/templates/modern/ProductCard.vue'
 
 const props = defineProps<{
     products: any[]

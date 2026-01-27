@@ -63,6 +63,19 @@
             </template>
           </AdminFormField>
 
+          <!-- Mini Description -->
+          <AdminFormField label="Mini Description" :error="errors.miniDescription" hint="Short description for landing page header (optional)">
+            <template #default="{ inputId }">
+              <textarea
+                :id="inputId"
+                v-model="form.miniDescription"
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter a short summary..."
+              ></textarea>
+            </template>
+          </AdminFormField>
+
           <!-- Description -->
           <AdminFormField label="Description" :error="errors.description">
             <template #default="{ inputId }">
@@ -191,6 +204,7 @@ interface Category {
 const form = ref({
   title: '',
   slug: '',
+  miniDescription: '',
   description: '',
   price: 0,
   stock: 0,
@@ -217,6 +231,7 @@ async function fetchProduct() {
     form.value = {
       title: data.title,
       slug: data.slug,
+      miniDescription: data.miniDescription || '',
       description: data.description || '',
       price: Number(data.price),
       stock: data.stock,
@@ -254,6 +269,7 @@ async function handleSubmit() {
     const payload: any = {
       title: form.value.title,
       slug: form.value.slug,
+      miniDescription: form.value.miniDescription || null,
       description: form.value.description || null,
       price: form.value.price,
       stock: form.value.stock,

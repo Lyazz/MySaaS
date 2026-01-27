@@ -83,6 +83,7 @@ async function main() {
                 title: 'iPhone 15',
                 slug: iPhoneSlug,
                 description: 'The latest iPhone',
+                miniDescription: 'A brief overview of the iPhone 15.',
                 price: 999,
                 stock: 100,
                 tenantId: appleTenant.id

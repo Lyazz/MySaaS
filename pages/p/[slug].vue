@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import ClassicProduct from '~/components/storefront/templates/ClassicProduct.vue'
-import ModernProduct from '~/components/storefront/templates/ModernProduct.vue'
+import { productTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
+import type { TemplateKey } from '~/components/storefront/templates/registry'
 
 const route = useRoute()
 const slug = route.params.slug as string
 const storeSettings = useState<any>('storeSettings')
-const templateKey = computed(() => storeSettings.value?.templateKey || 'modern')
+const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
 
 type Product = {
   id: string
@@ -65,7 +65,10 @@ definePageMeta({
 })
 
 const ActiveTemplate = computed(() => {
-    return templateKey.value === 'modern' ? ModernProduct : ClassicProduct
+  if (route.query.mode === 'landing' || route.query.layout === 'landing') {
+    return defineAsyncComponent(() => import('~/components/storefront/templates/modern/ProductLandingPage.vue')) 
+  }
+  return productTemplates[templateKey.value]
 })
 </script>
 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import ClassicCategory from '~/components/storefront/templates/ClassicCategory.vue'
-import ModernCategory from '~/components/storefront/templates/ModernCategory.vue'
+import { categoryTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
+import type { TemplateKey } from '~/components/storefront/templates/registry'
 
 const route = useRoute()
 const slug = route.params.slug as string
 const storeSettings = useState<any>('storeSettings')
-const templateKey = computed(() => storeSettings.value?.templateKey || 'modern')
+const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
 
 type Category = { id: string; title: string; slug: string; imageUrl?: string | null }
 type Product = {
@@ -52,9 +52,7 @@ definePageMeta({
   layout: 'store'
 })
 
-const ActiveTemplate = computed(() => {
-    return templateKey.value === 'modern' ? ModernCategory : ClassicCategory
-})
+const ActiveTemplate = computed(() => categoryTemplates[templateKey.value])
 </script>
 
 <template>

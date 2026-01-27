@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
-import ProductCard from '~/components/storefront/templates/ModernProductCard.vue'
+import ProductCard from '~/components/storefront/templates/modern/ProductCard.vue'
 
 const props = defineProps<{
   tenantName: string

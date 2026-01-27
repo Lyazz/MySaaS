@@ -88,6 +88,7 @@ model Product {
   title       String
   slug        String
   description String?
+  miniDescription String?
   price       Decimal  @default(0)
   stock       Int      @default(0)
 

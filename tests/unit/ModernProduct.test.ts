@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import ModernProduct from '../../components/storefront/templates/ModernProduct.vue'
+import ModernProduct from '../../components/storefront/templates/modern/Product.vue'
 import { createTestingPinia } from '@pinia/testing'
 
 describe('ModernProduct', () => {
