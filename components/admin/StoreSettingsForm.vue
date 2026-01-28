@@ -1,16 +1,25 @@
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-slate-200">
     <div class="p-6 border-b border-slate-200">
-      <h2 class="text-xl font-bold text-slate-800">Store Appearance & Settings</h2>
-      <p class="text-slate-600 mt-1">Customize how your store looks and feels to your customers.</p>
+      <h2 class="text-xl font-bold text-slate-800">
+        Store Appearance & Settings
+      </h2>
+      <p class="text-slate-600 mt-1">
+        Customize how your store looks and manages core commerce features.
+      </p>
     </div>
 
-    <form @submit.prevent="save" class="p-6 space-y-8">
+    <form
+      class="p-6 space-y-8"
+      @submit.prevent="save"
+    >
       <!-- Logo Section -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">Brand Logo</h3>
+            <h3 class="text-lg font-medium leading-6 text-slate-900">
+              Brand Logo
+            </h3>
             <p class="mt-1 text-sm text-slate-500">
               This logo will appear on your storefront header and invoices.
             </p>
@@ -25,13 +34,15 @@
         </div>
       </section>
 
-      <div class="border-t border-slate-200"></div>
+      <div class="border-t border-slate-200" />
 
       <!-- Brand Colors -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">Brand Colors</h3>
+            <h3 class="text-lg font-medium leading-6 text-slate-900">
+              Brand Colors
+            </h3>
             <p class="mt-1 text-sm text-slate-500">
               Choose a primary color for buttons, links, and highlights.
             </p>
@@ -45,14 +56,14 @@
                     v-model="form.primaryColor"
                     type="color"
                     class="h-10 w-14 rounded border border-slate-300 bg-white p-1 cursor-pointer"
-                  />
+                  >
                   <input
                     v-model="form.primaryColor"
                     type="text"
                     pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
                     class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     placeholder="#4F46E5"
-                  />
+                  >
                 </div>
               </div>
             </div>
@@ -81,13 +92,152 @@
         </div>
       </section>
 
-      <div class="border-t border-slate-200"></div>
+      <div class="border-t border-slate-200" />
+
+      <!-- Store Features -->
+      <section>
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+          <div class="md:col-span-1">
+            <h3 class="text-lg font-medium leading-6 text-slate-900">
+              Store Features
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+              Toggle core commerce flows for your storefront.
+            </p>
+          </div>
+          <div class="mt-5 md:mt-0 md:col-span-2 space-y-3">
+            <div
+              class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-sm"
+            >
+              <div class="h-10 w-10 flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l1.8-8H6.2M7 13L5.4 5M7 13l-2 7h14l-2-7M9 21a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="font-semibold text-slate-900">
+                  Cart & Checkout
+                </p>
+                <p class="text-sm text-slate-500">
+                  Allow customers to add items to cart and complete checkout.
+                </p>
+              </div>
+              <button
+                type="button"
+                :class="form.cartEnabled ? 'bg-indigo-600' : 'bg-slate-200'"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                @click="form.cartEnabled = !form.cartEnabled"
+              >
+                <span
+                  aria-hidden="true"
+                  :class="form.cartEnabled ? 'translate-x-5' : 'translate-x-0'"
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition"
+                />
+              </button>
+            </div>
+
+            <div
+              class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-sm"
+            >
+              <div class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8c-1.657 0-3 1.343-3 3v3H7l5 5 5-5h-2v-3c0-1.657-1.343-3-3-3z"
+                  />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="font-semibold text-slate-900">
+                  COD on Product Page
+                </p>
+                <p class="text-sm text-slate-500">
+                  Show the one-click cash-on-delivery form directly on product landing pages.
+                </p>
+              </div>
+              <button
+                type="button"
+                :class="form.codEnabled ? 'bg-emerald-600' : 'bg-slate-200'"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                @click="form.codEnabled = !form.codEnabled"
+              >
+                <span
+                  aria-hidden="true"
+                  :class="form.codEnabled ? 'translate-x-5' : 'translate-x-0'"
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="border-t border-slate-200" />
+
+      <!-- Currency -->
+      <section>
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+          <div class="md:col-span-1">
+            <h3 class="text-lg font-medium leading-6 text-slate-900">
+              Store Currency
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+              Choose the currency shown on product prices. Symbols and formatting will follow this choice.
+            </p>
+          </div>
+          <div class="mt-5 md:mt-0 md:col-span-2 space-y-3">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Currency</label>
+            <div class="relative">
+              <select
+                v-model="form.currencyCode"
+                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm pl-11"
+                @change="onCurrencyChange"
+              >
+                <option
+                  v-for="c in currencies"
+                  :key="c.code"
+                  :value="c.code"
+                >
+                  {{ c.label }}
+                </option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                <span class="text-xl">{{ selectedCurrency?.flag || '🌍' }}</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500">
+              Currency code: {{ form.currencyCode }} · Country: {{ form.currencyCountry }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="border-t border-slate-200" />
 
       <!-- Template Selection -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">Store Template</h3>
+            <h3 class="text-lg font-medium leading-6 text-slate-900">
+              Store Template
+            </h3>
             <p class="mt-1 text-sm text-slate-500">
               Select the layout structure for your storefront.
             </p>
@@ -97,16 +247,24 @@
               <div
                 v-for="t in templates"
                 :key="t.key"
-                @click="form.templateKey = t.key"
                 class="cursor-pointer relative rounded-xl border p-4 shadow-sm flex flex-col transition-all hover:border-indigo-300"
                 :class="form.templateKey === t.key ? 'border-indigo-500 ring-2 ring-indigo-500 ring-opacity-50 bg-indigo-50' : 'border-slate-200 bg-white'"
+                @click="form.templateKey = t.key"
               >
                 <div class="flex items-center justify-between mb-2">
                   <span class="font-semibold text-slate-900">{{ t.label }}</span>
-                  <span v-if="form.templateKey === t.key" class="h-2 w-2 rounded-full bg-indigo-600"></span>
+                  <span
+                    v-if="form.templateKey === t.key"
+                    class="h-2 w-2 rounded-full bg-indigo-600"
+                  />
                 </div>
-                <p class="text-sm text-slate-500 mb-3">{{ t.description }}</p>
-                <div class="mt-auto pt-2 flex items-center text-xs font-medium" :class="form.templateKey === t.key ? 'text-indigo-700' : 'text-slate-500'">
+                <p class="text-sm text-slate-500 mb-3">
+                  {{ t.description }}
+                </p>
+                <div
+                  class="mt-auto pt-2 flex items-center text-xs font-medium"
+                  :class="form.templateKey === t.key ? 'text-indigo-700' : 'text-slate-500'"
+                >
                   {{ form.templateKey === t.key ? 'Selected' : 'Select' }}
                 </div>
               </div>
@@ -115,29 +273,38 @@
         </div>
       </section>
 
-      <div class="border-t border-slate-200"></div>
+      <div class="border-t border-slate-200" />
 
       <!-- Localization -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">Localization</h3>
+            <h3 class="text-lg font-medium leading-6 text-slate-900">
+              Localization
+            </h3>
             <p class="mt-1 text-sm text-slate-500">
-              Set the default language for your store.
+              Set the default language for your store. Translations will be added later.
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2">
-             <div class="max-w-xs">
+            <div class="max-w-xs">
               <label class="block text-sm font-medium text-slate-700 mb-1">Default Language</label>
               <select
                 v-model="form.language"
                 class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               >
-                <option v-for="l in languages" :key="l.key" :value="l.key">
+                <option
+                  v-for="l in languages"
+                  :key="l.key"
+                  :value="l.key"
+                >
                   {{ l.label }}
                 </option>
               </select>
-               <p v-if="form.language === 'ar'" class="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+              <p
+                v-if="form.language === 'ar'"
+                class="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200"
+              >
                 Note: Selecting Arabic will enable Right-to-Left (RTL) layout automatically.
               </p>
             </div>
@@ -147,18 +314,24 @@
 
       <!-- Actions -->
       <div class="pt-6 border-t border-slate-200 flex items-center justify-end gap-3">
-        <div v-if="successMessage" class="text-sm text-emerald-600 font-medium mr-auto animate-fadeIn">
+        <div
+          v-if="successMessage"
+          class="text-sm text-emerald-600 font-medium mr-auto animate-fadeIn"
+        >
           {{ successMessage }}
         </div>
-        <div v-if="errorMessage" class="text-sm text-red-600 font-medium mr-auto animate-fadeIn">
+        <div
+          v-if="errorMessage"
+          class="text-sm text-red-600 font-medium mr-auto animate-fadeIn"
+        >
           {{ errorMessage }}
         </div>
 
         <button
           type="button"
-          @click="reset"
           class="px-4 py-2 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           :disabled="loading || saving"
+          @click="reset"
         >
           Reset
         </button>
@@ -167,9 +340,25 @@
           class="inline-flex justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="loading || saving"
         >
-          <svg v-if="saving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            v-if="saving"
+            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           {{ saving ? 'Saving Changes...' : 'Save Changes' }}
         </button>
@@ -196,7 +385,11 @@ const form = reactive({
   logoUrl: null as string | null,
   primaryColor: '#4F46E5',
   templateKey: 'classic',
-  language: 'en'
+  language: 'en',
+  cartEnabled: true,
+  codEnabled: true,
+  currencyCode: 'DZD',
+  currencyCountry: 'DZ'
 })
 
 const templates = [
@@ -209,6 +402,14 @@ const languages = [
   { key: 'fr', label: 'Français (FR)' },
   { key: 'ar', label: 'العربية (AR)' }
 ]
+
+const currencies = [
+  { code: 'DZD', country: 'DZ', flag: '🇩🇿', label: '🇩🇿 Algeria — DZD' },
+  { code: 'EUR', country: 'FR', flag: '🇫🇷', label: '🇫🇷 France — EUR' },
+  { code: 'USD', country: 'US', flag: '🇺🇸', label: '🇺🇸 United States — USD' }
+]
+
+const selectedCurrency = computed(() => currencies.find((c) => c.code === form.currencyCode))
 
 // Initialize form from props if available, or fetch
 const init = async () => {
@@ -225,6 +426,10 @@ const updateForm = (data: any) => {
   form.primaryColor = data.primaryColor || '#4F46E5'
   form.templateKey = data.templateKey || 'classic'
   form.language = data.language || 'en'
+  form.cartEnabled = data.cartEnabled ?? true
+  form.codEnabled = data.codEnabled ?? true
+  form.currencyCode = data.currencyCode || 'DZD'
+  form.currencyCountry = data.currencyCountry || 'DZ'
 }
 
 const fetchSettings = async () => {
@@ -273,6 +478,13 @@ const save = async () => {
 const reset = () => {
   if (confirm('Are you sure you want to discard your changes and reload saved settings?')) {
     fetchSettings()
+  }
+}
+
+const onCurrencyChange = () => {
+  const cur = currencies.find((c) => c.code === form.currencyCode)
+  if (cur) {
+    form.currencyCountry = cur.country
   }
 }
 

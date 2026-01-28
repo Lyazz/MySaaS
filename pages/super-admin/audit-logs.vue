@@ -2,10 +2,24 @@
   <NuxtLayout name="super-admin">
     <div class="space-y-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-white">Audit Logs</h1>
-        <button @click="loadLogs" class="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-purple-300 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+        <h1 class="text-3xl font-bold text-white">
+          Audit Logs
+        </h1>
+        <button
+          class="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-purple-300 transition-colors"
+          @click="loadLogs"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 inline-block mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+              clip-rule="evenodd"
+            />
           </svg>
           Refresh
         </button>
@@ -20,7 +34,7 @@
             type="text"
             placeholder="Search logs..."
             class="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+          >
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">Action Type</label>
@@ -28,13 +42,27 @@
             v-model="filterAction"
             class="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value="">All Actions</option>
-            <option value="CREATE_TENANT">Create Tenant</option>
-            <option value="UPDATE_TENANT">Update Tenant</option>
-            <option value="DELETE_TENANT">Delete Tenant</option>
-            <option value="SUSPEND_TENANT">Suspend Tenant</option>
-            <option value="UNSUSPEND_TENANT">Unsuspend Tenant</option>
-            <option value="IMPERSONATE_USER">Impersonate User</option>
+            <option value="">
+              All Actions
+            </option>
+            <option value="CREATE_TENANT">
+              Create Tenant
+            </option>
+            <option value="UPDATE_TENANT">
+              Update Tenant
+            </option>
+            <option value="DELETE_TENANT">
+              Delete Tenant
+            </option>
+            <option value="SUSPEND_TENANT">
+              Suspend Tenant
+            </option>
+            <option value="UNSUSPEND_TENANT">
+              Unsuspend Tenant
+            </option>
+            <option value="IMPERSONATE_USER">
+              Impersonate User
+            </option>
           </select>
         </div>
         <div>
@@ -43,38 +71,74 @@
             v-model="sortOrder"
             class="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value="desc">Newest First</option>
-            <option value="asc">Oldest First</option>
+            <option value="desc">
+              Newest First
+            </option>
+            <option value="asc">
+              Oldest First
+            </option>
           </select>
         </div>
       </div>
 
       <!-- Logs Table -->
       <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden">
-        <div v-if="loading" class="p-8 text-center text-gray-400">Loading logs...</div>
-        <div v-else-if="filteredLogs.length === 0" class="p-8 text-center text-gray-400">No logs found</div>
-        <div v-else class="overflow-x-auto">
+        <div
+          v-if="loading"
+          class="p-8 text-center text-gray-400"
+        >
+          Loading logs...
+        </div>
+        <div
+          v-else-if="filteredLogs.length === 0"
+          class="p-8 text-center text-gray-400"
+        >
+          No logs found
+        </div>
+        <div
+          v-else
+          class="overflow-x-auto"
+        >
           <table class="w-full">
             <thead class="bg-slate-900/50 border-b border-slate-700">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Timestamp</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Action</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Details</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">User ID</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">Target</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                  Timestamp
+                </th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                  Action
+                </th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                  Details
+                </th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                  User ID
+                </th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                  Target
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-700">
-              <tr v-for="log in paginatedLogs" :key="log.id" class="hover:bg-slate-900/30 transition-colors">
+              <tr
+                v-for="log in paginatedLogs"
+                :key="log.id"
+                class="hover:bg-slate-900/30 transition-colors"
+              >
                 <td class="px-6 py-4 text-gray-300 text-sm whitespace-nowrap">
                   {{ formatDateTime(log.createdAt) }}
                 </td>
                 <td class="px-6 py-4">
-                  <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getActionBadgeClass(log.action)">
+                  <span
+                    class="px-2 py-1 rounded-full text-xs font-medium"
+                    :class="getActionBadgeClass(log.action)"
+                  >
                     {{ getActionIcon(log.action) }} {{ log.action.replace(/_/g, ' ') }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-gray-300">{{ log.details || '-' }}</td>
+                <td class="px-6 py-4 text-gray-300">
+                  {{ log.details || '-' }}
+                </td>
                 <td class="px-6 py-4 text-gray-300 font-mono text-xs">
                   {{ log.userId ? log.userId.substring(0, 8) + '...' : '-' }}
                 </td>
@@ -87,22 +151,25 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="filteredLogs.length > 0" class="flex items-center justify-between px-6 py-4 border-t border-slate-700">
+        <div
+          v-if="filteredLogs.length > 0"
+          class="flex items-center justify-between px-6 py-4 border-t border-slate-700"
+        >
           <p class="text-sm text-gray-400">
             Showing {{ (currentPage - 1) * perPage + 1 }} to {{ Math.min(currentPage * perPage, filteredLogs.length) }} of {{ filteredLogs.length }} logs
           </p>
           <div class="flex space-x-2">
             <button
-              @click="currentPage--"
               :disabled="currentPage === 1"
               class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="currentPage--"
             >
               Previous
             </button>
             <button
-              @click="currentPage++"
               :disabled="currentPage >= totalPages"
               class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="currentPage++"
             >
               Next
             </button>

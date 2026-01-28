@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 definePageMeta({
   middleware: 'saas-only',
   layout: 'marketing',
-  title: 'Register'
+  title: 'Register - MySaaS'
 })
 
 const form = ref({
@@ -48,116 +48,206 @@ async function register() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded shadow">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Start your SaaS Journey
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Create your own tenant workspace in seconds.
-        </p>
+  <div class="min-h-screen flex bg-white font-sans">
+    
+    <!-- LEFT SIDE: Marketing / Visual (Hidden on mobile) -->
+    <div class="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12 text-white">
+      <!-- Animated Background -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-[10%] left-[10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[100px] animate-blob" />
+        <div class="absolute bottom-[10%] right-[10%] w-[50%] h-[50%] bg-violet-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000" />
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
       </div>
-      
-      <div v-if="successData" class="rounded-md bg-green-50 p-4">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <!-- Icon -->
-            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
+
+
+
+      <div class="relative z-10 max-w-lg">
+        <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
+          Launch your <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Empire</span> today.
+        </h2>
+        <p class="text-lg text-slate-400 mb-8 leading-relaxed">
+          Join thousands of merchants building the next generation of commerce. 
+          Scalable, secure, and ready for growth.
+        </p>
+
+        <!-- Mini Testimonial -->
+        <div class="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+          <div class="flex gap-1 text-amber-400 mb-3">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
           </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-green-800">
-              Registration Successful!
-            </h3>
-            <div class="mt-2 text-sm text-green-700">
-              <p>Your tenant <strong>{{ successData.tenant.name }}</strong> is ready.</p>
-              <p class="mt-2">
-                <a :href="successData.tenant.url" class="font-bold underline hover:text-green-600">
-                  Go to {{ successData.tenant.url }}
-                </a>
-              </p>
-            </div>
+          <p class="text-slate-300 italic mb-4">"Moving to MySaaS was the best decision we made. Our revenue doubled in 3 months."</p>
+          <div class="flex items-center gap-3">
+             <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">JD</div>
+             <div class="text-sm">
+               <div class="font-bold text-white">John Doe</div>
+               <div class="text-slate-500">CEO, FashionNova</div>
+             </div>
           </div>
         </div>
       </div>
 
-      <form v-else class="mt-8 space-y-6" @submit.prevent="register">
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div class="mb-4">
-            <label for="company-name" class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-            <input 
+      <div class="relative z-10 text-xs text-slate-500">
+        © 2026 MySaaS Inc.
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: Form -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 relative">
+      <div class="max-w-md w-full space-y-8">
+        
+        <div class="text-center lg:text-left">
+
+          <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Create your account</h2>
+          <p class="mt-2 text-slate-500">Start your 14-day free trial. No credit card required.</p>
+        </div>
+
+        <div v-if="successData" class="rounded-2xl bg-green-50 p-6 border border-green-100 animate-fadeIn">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="ml-4">
+              <h3 class="text-lg font-bold text-green-800">You're in!</h3>
+              <div class="mt-2 text-green-700">
+                <p>Your workspace <strong>{{ successData.tenant.name }}</strong> has been created.</p>
+                <div class="mt-4">
+                  <a :href="successData.tenant.url" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 shadow-sm transition-colors">
+                    Go to Dashboard &rarr;
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form v-else class="mt-8 space-y-6" @submit.prevent="register">
+          <div class="space-y-5">
+            
+            <!-- Company Name -->
+            <div>
+              <label for="company-name" class="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+              <input 
                 id="company-name" 
                 v-model="form.name" 
                 name="name" 
                 type="text" 
                 required 
-                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
-                placeholder="Acme Corp"
-            >
-          </div>
-          <div class="mb-4">
-            <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">Subdomain (URL)</label>
-            <div class="flex rounded-md shadow-sm">
-                 <input 
-                    id="slug" 
-                    v-model="form.slug" 
-                    name="slug" 
-                    type="text" 
-                    required 
-                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300"
-                    placeholder="acme"
-                >
-                <span class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                  .localhost
-                </span>
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                placeholder="Ex. Acme Corp"
+              >
             </div>
-             <p class="mt-1 text-xs text-gray-500">Only lowercase letters, numbers, and hyphens.</p>
-          </div>
-          <div class="mb-4">
-            <label for="email-address" class="block text-sm font-medium text-gray-700 mb-1">Admin Email</label>
-            <input 
+
+            <!-- Slug -->
+            <div>
+              <label for="slug" class="block text-sm font-medium text-slate-700 mb-1">Store URL</label>
+              <div class="flex rounded-xl shadow-sm">
+                <input 
+                  id="slug" 
+                  v-model="form.slug" 
+                  name="slug" 
+                  type="text" 
+                  required 
+                  class="flex-1 min-w-0 block w-full px-4 py-3 rounded-none rounded-l-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                  placeholder="acme"
+                >
+                <span class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-sm font-medium">
+                  .mysaas.com
+                </span>
+              </div>
+              <p v-if="form.slug" class="mt-1 text-xs text-indigo-500 font-medium">
+                Your store will be at: {{ form.slug }}.mysaas.com
+              </p>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email-address" class="block text-sm font-medium text-slate-700 mb-1">Work Email</label>
+              <input 
                 id="email-address" 
                 v-model="form.email" 
                 name="email" 
                 type="email" 
                 autocomplete="email" 
                 required 
-                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
-                placeholder="admin@example.com"
-            >
-          </div>
-          <div class="mb-4">
-             <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                placeholder="name@company.com"
+              >
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <input 
                 id="password" 
                 v-model="form.password" 
                 name="password" 
                 type="password" 
                 autocomplete="current-password" 
                 required 
-                class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
-                placeholder="**********"
-            >
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                placeholder="••••••••"
+              >
+            </div>
           </div>
-        </div>
 
-        <div v-if="error" class="text-red-500 text-sm text-center">
-            {{ error }}
-        </div>
+          <div v-if="error" class="rounded-lg bg-red-50 p-4 border border-red-100 flex items-center gap-3">
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-sm text-red-700 font-medium">{{ error }}</span>
+          </div>
 
-        <div>
-          <button 
-            type="submit" 
-            :disabled="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            <span v-if="loading">Creating Account...</span>
-            <span v-else>Register & Create Tenant</span>
-          </button>
-        </div>
-      </form>
+          <div>
+            <button 
+              type="submit" 
+              :disabled="loading"
+              class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5"
+            >
+              <span v-if="loading" class="flex items-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Creating Account...
+              </span>
+              <span v-else>Register & Create Tenant</span>
+            </button>
+          </div>
+          
+          <div class="text-center text-sm text-slate-500">
+            Already have an account? <NuxtLink to="/login" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">Log in</NuxtLink>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.animate-blob {
+  animation: blob 10s infinite alternate;
+}
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+@keyframes blob {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, -20px) scale(1.1); }
+  100% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+</style>

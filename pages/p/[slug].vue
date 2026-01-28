@@ -20,6 +20,7 @@ type Product = {
 
 const productUrl = useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`)
 const product = ref<Product | null>(null)
+const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
 try {
   product.value = await $fetch<Product>(productUrl, { headers: useTenantApiHeaders() })
 } catch (e: any) {
@@ -52,7 +53,7 @@ useHead({
         offers: {
             '@type': 'Offer',
             price: product.value?.price,
-            priceCurrency: 'DZD'
+            priceCurrency: currencyCode.value
         }
       })
     } as any
@@ -73,5 +74,8 @@ const ActiveTemplate = computed(() => {
 </script>
 
 <template>
-  <component :is="ActiveTemplate" :product="product" />
+  <component
+    :is="ActiveTemplate"
+    :product="product"
+  />
 </template>

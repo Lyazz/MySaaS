@@ -3,7 +3,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const TENANT_ID = 'f74cf864-f4cc-41af-8988-c536466e5d95';
+const getTenantId = async () => {
+    const tenant = await prisma.tenant.findUnique({ where: { slug: 'apple' } });
+    if (!tenant) throw new Error('Apple tenant not found. Please run seed_debug.js first.');
+    return tenant.id;
+};
+
 const categoryImages: Record<string, string> = {
     iPhone: 'https://dummyimage.com/960x640/111827/ffffff.png&text=iPhone',
     MacBook: 'https://dummyimage.com/960x640/0f172a/ffffff.png&text=MacBook',
@@ -142,7 +147,8 @@ const getImagesForProduct = (categorySlug: string, index: number) => {
 };
 
 async function main() {
-    console.log('Seeding products for Apple Store...');
+    const TENANT_ID = await getTenantId();
+    console.log(`Seeding products for Apple Store (${TENANT_ID})...`);
 
     for (const item of data) {
         const categorySlug = item.category.toLowerCase().replace(/ /g, '-');

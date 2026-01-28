@@ -56,5 +56,9 @@ const ActiveTemplate = computed(() => categoryTemplates[templateKey.value])
 </script>
 
 <template>
-  <component :is="ActiveTemplate" :category="category" :products="products" />
+  <component
+    :is="ActiveTemplate"
+    :category="category"
+    :products="products"
+  />
 </template>

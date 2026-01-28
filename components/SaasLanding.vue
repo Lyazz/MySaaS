@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { Vue3Marquee } from 'vue3-marquee'
 
 useSeoMeta({
-  title: 'MySaaS - The all-in-one platform to build, sell, and scale',
-  description: 'Create your online store, manage orders, and scale your business with MySaaS. The best platform for your online business.',
+  title: 'MySaaS - The Future of Commerce',
+  description: 'The all-in-one platform to build, sell, and scale your B2B or B2C business with enterprise-grade tools.',
 })
 
+// --- Stats Data ---
 const stats = ref([
-  { label: 'Active Businesses', value: 0, target: 500, suffix: '+' },
-  { label: 'Total Orders', value: 0, target: 10000, suffix: '+' },
-  { label: 'Products Created', value: 0, target: 50000, suffix: '+' }
+  { label: 'Active Merchants', value: 0, target: 1200, suffix: '+' },
+  { label: 'Revenue Generated', value: 0, target: 50, suffix: 'M+' }, // Example: 50M+
+  { label: 'Uptime', value: 0, target: 99, suffix: '.9%' }
 ])
 
 const statsSection = ref<HTMLElement | null>(null)
@@ -20,7 +22,7 @@ const startCounter = () => {
   hasAnimated = true
   
   stats.value.forEach(stat => {
-    const duration = 2000 // 2 seconds
+    const duration = 2500
     const start = 0
     const end = stat.target
     const startTime = performance.now()
@@ -28,9 +30,7 @@ const startCounter = () => {
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime
       const progress = Math.min(elapsed / duration, 1)
-      
-      // Ease out quart
-      const ease = 1 - Math.pow(1 - progress, 4)
+      const ease = 1 - Math.pow(1 - progress, 4) // Ease out quart
       
       stat.value = Math.floor(start + (end - start) * ease)
 
@@ -40,321 +40,179 @@ const startCounter = () => {
         stat.value = end
       }
     }
-    
     requestAnimationFrame(animate)
   })
 }
 
-onMounted(() => {
-  // Stats Counter Observer
-  const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        startCounter()
-        statsObserver.disconnect()
-      }
-    })
-  }, { threshold: 0.5 })
-  
-  if (statsSection.value) {
-    statsObserver.observe(statsSection.value)
-  }
-
-  // General Scroll Reveal Observer
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible')
-        revealObserver.unobserve(entry.target)
-      }
-    })
-  }, { 
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  })
-
-  document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
-    revealObserver.observe(el)
-  })
-})
-
-
-
+// --- Features (Bento Grid) ---
 const features = [
   {
-    title: 'Modern Store Design',
-    description: 'Showcase your brand with sleek, professional storefronts and product pages that leave a lasting impression.',
-    icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+    title: 'Store Builder',
+    description: 'Drag-and-drop editor to create stunning storefronts in minutes.',
+    icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
+    colSpan: 'md:col-span-2', // Wide tile
+    bgClass: 'bg-gradient-to-br from-indigo-500/10 to-indigo-600/5',
+    borderClass: 'border-indigo-500/20'
   },
   {
-    title: 'Social Ads Integration',
-    description: 'Connect seamlessly with Instagram, Facebook, and TikTok ads (pixels & API) to grow your reach.',
-    icon: 'M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11'
+    title: 'Global Payments',
+    description: 'Accept payments from anywhere with integrated gateways.',
+    icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
+    colSpan: 'md:col-span-1',
+    bgClass: 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/5',
+    borderClass: 'border-emerald-500/20'
   },
   {
-    title: 'Unified Dashboard',
-    description: 'Manage products, sales, and orders all from one simple platform.',
-    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
+    title: 'Analytics & Insights',
+    description: 'Real-time data to optimize your conversion rates.',
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+    colSpan: 'md:col-span-1',
+    bgClass: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5',
+    borderClass: 'border-amber-500/20'
   },
   {
-    title: 'Delivery Integration',
-    description: 'Send orders instantly to Algerian delivery companies (Yalidine, Eckoz, etc.) with automatic tracking.',
-    icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'
-  },
-  {
-    title: 'Fraud Protection',
-    description: 'Detects and blocks fake or invalid orders before they impact your business.',
-    icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'
-  },
-  {
-    title: 'Custom OTP',
-    description: 'Secure your orders with custom SMS verification (OTP) to reduce returns.',
-    icon: 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z'
+    title: 'Automated Shipping',
+    description: 'Connect with Yalidine, Eckoz, and more for auto-dispatching.',
+    icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0',
+    colSpan: 'md:col-span-2',
+    bgClass: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
+    borderClass: 'border-blue-500/20'
   }
 ]
 
+// --- Pricing (Preserved but styled) ---
 const pricingPlans = [
   {
-    name: 'Basic',
-    price: '0',
-    currency: 'DA',
-    period: '/month',
-    description: 'Best for trying out',
-    features: [
-      '12 DA / Orders',
-      '6 DA / Abandoned Orders',
-      '2 Facebook pixels',
-      '2 TikTok pixels',
-      '1 Google sheet account',
-      'Orders Syncronization'
-    ],
-    cta: 'Get Started',
-    popular: false
-  },
-  {
-    name: 'Beginner',
-    price: '1,490',
-    currency: 'DA',
-    period: '/month',
-    description: 'A simple start to boost your store',
-    features: [
-      '300 Orders',
-      '100 Abandoned Orders',
-      '2 Facebook pixels',
-      '2 TikTok pixels',
-      '1 Google sheet account',
-      '1 Conversions API token',
-      'Custom domain'
-    ],
-    cta: 'Get Started',
+    name: 'Starter',
+    price: 'Free',
+    currency: '',
+    period: 'forever',
+    description: 'Perfect for testing the waters.',
+    features: ['10 Orders/mo', 'Basic Analytics', 'Community Support'],
+    cta: 'Start Free',
     popular: false
   },
   {
     name: 'Merchant',
     price: '2,990',
     currency: 'DA',
-    period: '/month',
-    description: 'Smart choice for growing businesses',
-    features: [
-      '800 Orders',
-      '300 Abandoned Orders',
-      '4 Facebook pixels',
-      '4 TikTok pixels',
-      '2 Google sheet account',
-      '2 Conversions API token',
-      '1 Workers'
-    ],
+    period: '/mo',
+    description: 'Everything you need to grow.',
+    features: ['Unlimited Orders', 'Priority Support', 'Custom Domain', 'Delivery Integrations'],
     cta: 'Get Started',
     popular: true
   },
   {
-    name: 'Professional',
-    price: '4,490',
-    currency: 'DA',
-    period: '/month',
-    description: 'Built for scaling with confidence',
-    features: [
-      '2000 Orders',
-      '600 Abandoned Orders',
-      'Infinite Facebook pixels',
-      '4 Google sheet account',
-      '4 Conversions API token',
-      'Custom domain',
-      '2 Workers',
-      'Send automatic SMS'
-    ],
-    cta: 'Get Started',
+    name: 'Enterprise',
+    price: 'Custom',
+    currency: '',
+    period: '',
+    description: 'For large volume sellers.',
+    features: ['Dedicated Account Manager', 'Custom API Access', 'SSO & Advanced Security'],
+    cta: 'Contact Sales',
     popular: false
   }
 ]
 
-const testimonials = [
-  {
-    name: 'Ahmed Benali',
-    role: 'Store Owner',
-    company: 'Mode DZ',
-    content: "MySaaS completely changed how I manage my business. The delivery integration saved me hours every day!",
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed'
-  },
-  {
-    name: 'Sarah K.',
-    role: 'Founder',
-    company: 'Beauty Box',
-    content: "The fraud protection is a lifesaver. I used to lose money on fake orders, but now I can focus on real customers.",
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
-  },
-  {
-    name: 'Karim Z.',
-    role: 'CEO',
-    company: 'Tech Store',
-    content: "Setting up my store took less than 10 minutes. The pricing is unbeatable for the features you get.",
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Karim'
-  },
-  {
-    name: 'Amine M.',
-    role: 'Manager',
-    company: 'Electro Shop',
-    content: "Managing my inventory has never been easier. The dashboard is intuitive and powerful.",
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Amine'
-  },
-  {
-    name: 'Nadia B.',
-    role: 'Owner',
-    company: 'Caftan Luxe',
-    content: "My sales increased by 50% thanks to the Facebook pixel integration. Highly recommended!",
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Nadia'
-  },
-  {
-    name: 'Yacine T.',
-    role: 'Founder',
-    company: 'Burger Express',
-    content: "The custom OTP feature reduced my fake orders to almost zero. Great support team too.",
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Yacine'
-  }
+// --- FAQ ---
+const activeFaq = ref<number | null>(null)
+const faqs = [
+  { question: 'Do I need a credit card to start?', answer: 'No, our Starter plan is completely free and requires no payment information.' },
+  { question: 'Can I use my own domain?', answer: 'Yes, both Merchant and Enterprise plans allow full custom domain mapping.' },
+  { question: 'Is my data secure?', answer: 'We use enterprise-grade encryption and daily backups to ensure your business data is safe.' }
 ]
 
-const marqueeContainer = ref<HTMLElement | null>(null)
 
-const setPlaybackSpeed = (speed: number) => {
-  if (marqueeContainer.value) {
-    marqueeContainer.value.getAnimations().forEach((anim) => {
-      anim.playbackRate = speed
+const testimonials = [
+  { text: "I switched from Shopify and never looked back. The page load speeds are instant and my conversion rate went up 40% overnight.", name: "Sarah Jenkins", role: "CEO, FashionNova", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d" },
+  { text: "The analytics dashboard is beautiful. Whatever data I need is just one click away. It feels like this tool was made for 2026.", name: "Karim Ziad", role: "Founder, TechShop", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d" },
+  { text: "Finally, a platform that doesn't charge ridiculous transaction fees. The custom domain support is seamless.", name: "Emily Chen", role: "CTO, GreenEarth", avatar: "https://i.pravatar.cc/150?u=a04258114e29026302d" },
+  { text: "The best decision we made for our business. Support is incredible and the features are exactly what we needed.", name: "Michael Ross", role: "COO, GearUp", avatar: "https://i.pravatar.cc/150?u=4" },
+  { text: "Scaling to 10k orders a month was a breeze. No downtime, no issues. Highly recommended.", name: "Lisa Wong", role: "Owner, Kicks", avatar: "https://i.pravatar.cc/150?u=5" },
+  { text: "The drag and drop builder is actually usable. I built my store in an afternoon.", name: "David Miller", role: "Founder, ArtSpace", avatar: "https://i.pravatar.cc/150?u=6" }
+]
+
+onMounted(() => {
+  const observerCallback = (entries: IntersectionObserverEntry[]) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (entry.target === statsSection.value) startCounter()
+        entry.target.classList.add('is-visible')
+      }
     })
   }
-}
-
-const activeFaq = ref<number | null>(null)
-
-const faqs = [
-  {
-    question: 'Is there a free trial?',
-    answer: 'Yes! You can start with our Basic plan for free to explore the platform features. No credit card required.'
-  },
-  {
-    question: 'Can I use my own domain name?',
-    answer: 'Absolutely. You can connect your existing domain or buy a new one directly through our dashboard on the Beginner plan and above.'
-  },
-  {
-    question: 'How does the delivery integration work?',
-    answer: 'We connect directly with major Algerian delivery services like Yalidine and Eckoz. Orders are automatically synced, and tracking numbers are generated instantly.'
-  },
-  {
-    question: 'Do I need technical skills to use MySaaS?',
-    answer: 'Not at all. Our platform is designed to be user-friendly. You can build your store using our drag-and-drop tools without writing a single line of code.'
-  },
-  {
-    question: 'Can I cancel my subscription anytime?',
-    answer: 'Yes, there are no long-term contracts. You can upgrade, downgrade, or cancel your plan at any time from your dashboard.'
-  }
-]
+  
+  const observer = new IntersectionObserver(observerCallback, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' })
+  
+  if (statsSection.value) observer.observe(statsSection.value)
+  document.querySelectorAll('.reveal-item').forEach(el => observer.observe(el))
+})
 </script>
 
 <template>
-  <div class="overflow-x-hidden">
-    <!-- Hero Section -->
-    <section class="relative pt-20 pb-32 lg:pt-32 overflow-hidden">
-      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100 via-slate-50 to-white -z-10"></div>
-      <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl animate-blob"></div>
-      <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-violet-200/30 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
-      
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div class="text-center max-w-4xl mx-auto">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 shadow-sm mb-8 animate-fadeIn">
-            <span class="flex h-2 w-2 relative">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+  <div class="bg-slate-50 font-sans text-slate-900 selection:bg-indigo-500 selection:text-white overflow-hidden">
+    
+    <!-- HERO SECTION -->
+    <section class="relative min-h-screen flex items-center justify-center pt-20 pb-32 overflow-hidden bg-slate-950 text-white">
+      <!-- Animated Background Mesh -->
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] bg-indigo-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen" />
+        <div class="absolute top-[20%] -right-[10%] w-[60%] h-[60%] bg-violet-600/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-screen" />
+        <div class="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-emerald-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000 mix-blend-screen" />
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+      </div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
+        <!-- Badge -->
+        <div class="reveal-item mb-8 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md shadow-lg shadow-indigo-500/10 ring-1 ring-white/10 hover:ring-indigo-400/50 transition-all cursor-default">
+          <span class="flex h-2 w-2 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-xs font-semibold tracking-wide text-slate-300">V2.0 IS LIVE</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="reveal-item text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-400 leading-[1.1]">
+          Build. Sell. <br class="md:hidden" />
+          <span class="text-indigo-400 inline-block relative">
+            Scale.
+            <svg class="absolute w-full h-3 -bottom-1 left-0 text-indigo-500 opacity-60" viewBox="0 0 200 9" fill="none"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
+          </span>
+        </h1>
+
+        <!-- Subhead -->
+        <p class="reveal-item max-w-2xl text-lg md:text-xl text-slate-400 mb-10 leading-relaxed">
+          The all-in-one platform engineered for modern commerce. Focus on your product, we handle the infrastructure, payments, and logistics.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="reveal-item flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <NuxtLink to="/register" class="group relative px-8 py-4 bg-indigo-600 rounded-xl font-bold text-white shadow-xl shadow-indigo-600/20 overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-indigo-600/40">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-600 opacity-100 group-hover:opacity-90 transition-opacity" />
+            <span class="relative flex items-center justify-center gap-2">
+              Start Building Free
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </span>
-            <span class="text-sm font-medium text-slate-600">New features available</span>
-          </div>
+          </NuxtLink>
           
-          <h1 class="text-5xl md:text-7xl font-sans font-bold text-slate-900 tracking-tight mb-8 animate-slideUp">
-            The all-in-one platform to
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 animate-gradient-x">build, sell, and scale.</span>
-          </h1>
-          
-          <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed animate-slideUp flex-delay-100">
-            Create online store. Customize and play with your store. Optimize your products page. Manage your orders.
-          </p>
-          
-          <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slideUp flex-delay-200">
-            <NuxtLink to="/register" class="inline-flex items-center justify-center px-8 py-4 text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-1">
-              Start for Free
-            </NuxtLink>
-            <NuxtLink to="/pricing" class="inline-flex items-center justify-center px-8 py-4 text-base font-medium rounded-xl text-slate-700 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm transition-all duration-300 hover:-translate-y-1">
-              View Pricing
-            </NuxtLink>
-          </div>
+          <button class="px-8 py-4 rounded-xl font-bold text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all hover:-translate-y-1">
+            Watch Demo
+          </button>
         </div>
 
-        <!-- Dashboard Mockup (Same as before) -->
-        <div class="mt-20 relative mx-auto max-w-5xl animate-slideUp flex-delay-300">
-          <div class="relative rounded-2xl border border-slate-200 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden group">
-            <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-             <!-- Mock UI Header -->
-            <div class="h-10 border-b border-slate-100 bg-white/80 flex items-center px-4 gap-2">
-              <div class="flex gap-1.5">
-                <div class="w-3 h-3 rounded-full bg-red-400/80"></div>
-                <div class="w-3 h-3 rounded-full bg-amber-400/80"></div>
-                <div class="w-3 h-3 rounded-full bg-emerald-400/80"></div>
-              </div>
-              <div class="flex-1 text-center text-xs text-slate-400 font-medium">MySaaS Dashboard</div>
+        <!-- Dashboard Preview (Floating/Glassmorphism) -->
+        <div class="reveal-item mt-20 p-2 rounded-2xl bg-gradient-to-b from-slate-700/20 to-slate-800/20 border border-slate-700/40 backdrop-blur-sm shadow-2xl shadow-indigo-500/10 max-w-6xl w-full rotate-x">
+          <div class="rounded-xl overflow-hidden bg-slate-900 border border-slate-800 relative aspect-[16/9] group">
+            <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-slate-600 font-medium">[ Dashboard Preview Animation / Video Placeholder ]</span>
             </div>
-             <!-- Mock UI Content -->
-            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <!-- Sidebar Mock -->
-              <div class="hidden md:block space-y-4">
-                 <div class="h-8 w-3/4 bg-slate-100 rounded-lg animate-pulse"></div>
-                 <div class="h-4 w-1/2 bg-slate-50 rounded-lg"></div>
-                 <div class="h-4 w-2/3 bg-slate-50 rounded-lg"></div>
-                 <div class="h-4 w-1/2 bg-slate-50 rounded-lg"></div>
-              </div>
-              <!-- Main Content Mock -->
-              <div class="md:col-span-2 space-y-6">
-                <div class="flex justify-between items-center">
-                   <div class="h-8 w-1/3 bg-slate-100 rounded-lg"></div>
-                   <div class="h-8 w-24 bg-indigo-50 rounded-lg"></div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="h-24 bg-indigo-50/50 rounded-xl border border-indigo-100 p-4">
-                     <div class="h-4 w-12 bg-indigo-200 rounded mb-2"></div>
-                     <div class="h-8 w-20 bg-indigo-600/20 rounded"></div>
-                  </div>
-                  <div class="h-24 bg-violet-50/50 rounded-xl border border-violet-100 p-4">
-                     <div class="h-4 w-12 bg-violet-200 rounded mb-2"></div>
-                     <div class="h-8 w-20 bg-violet-600/20 rounded"></div>
-                  </div>
-                </div>
-                <div class="h-48 bg-slate-50 rounded-xl border border-slate-100 relative overflow-hidden">
-                   <!-- Chart Mock -->
-                   <div class="absolute bottom-0 left-0 right-0 h-32 flex items-end justify-between px-4 gap-2">
-                      <div class="w-full bg-indigo-200/50 rounded-t-sm h-10"></div>
-                      <div class="w-full bg-indigo-300/50 rounded-t-sm h-16"></div>
-                      <div class="w-full bg-indigo-400/50 rounded-t-sm h-12"></div>
-                      <div class="w-full bg-indigo-500/50 rounded-t-sm h-24"></div>
-                      <div class="w-full bg-indigo-600/50 rounded-t-sm h-20"></div>
-                   </div>
-                </div>
-              </div>
+            <!-- Interactive Dots mock -->
+            <div class="absolute top-4 left-4 flex gap-2">
+              <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
             </div>
           </div>
         </div>
@@ -362,262 +220,282 @@ const faqs = [
     </section>
 
 
-    <!-- Stats Section -->
-    <section ref="statsSection" class="py-12 bg-white border-b border-slate-100 relative overflow-hidden">
+
+    <!-- FEATURES (BENTO GRID) -->
+    <section class="py-24 md:py-32 bg-slate-50 relative overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
-          <div v-for="(stat, index) in stats" :key="index" class="py-4 md:py-0">
-            <div class="text-4xl md:text-5xl font-bold text-indigo-600 mb-2 font-sans tabular-nums tracking-tight">
-              {{ stat.value.toLocaleString() }}{{ stat.suffix }}
+        <div class="text-center mb-20">
+          <h2 class="reveal-item text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Everything you need to <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">dominate</span></h2>
+          <p class="reveal-item text-lg text-slate-500 max-w-2xl mx-auto">Powerful tools designed for growth, packaged in a beautiful interface.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
+          <div 
+            v-for="(feature, idx) in features" 
+            :key="idx"
+            class="reveal-item group relative rounded-3xl p-8 border hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
+            :class="[feature.colSpan, feature.bgClass, feature.borderClass]"
+            :style="{ transitionDelay: `${idx * 100}ms` }"
+          >
+            <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity transform group-hover:scale-110 duration-500">
+               <svg class="w-32 h-32 text-current" fill="currentColor" viewBox="0 0 24 24"><path :d="feature.icon"/></svg>
             </div>
-            <div class="text-slate-500 font-medium text-lg">{{ stat.label }}</div>
+            
+            <div class="relative z-10">
+              <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 text-indigo-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon"/></svg>
+              </div>
+              <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ feature.title }}</h3>
+              <p class="text-slate-600 font-medium leading-relaxed">{{ feature.description }}</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Features Section -->
+    <!-- STATS INTERLUDE -->
+    <section ref="statsSection" class="py-20 bg-slate-900 text-white relative">
+       <div class="absolute inset-0 bg-indigo-600/10 pattern-grid-lg opacity-20" />
+       <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+         <div v-for="(stat, idx) in stats" :key="idx" class="text-center p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+           <div class="text-5xl lg:text-6xl font-black mb-2 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent tracking-tighter">
+             {{ stat.value.toLocaleString() }}<span class="text-indigo-400 text-4xl align-top">{{ stat.suffix }}</span>
+           </div>
+           <div class="text-slate-400 font-medium uppercase tracking-wider text-sm">{{ stat.label }}</div>
+         </div>
+       </div>
+    </section>
+
+    <!-- PRICING -->
     <section class="py-24 bg-white relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Why MySaaS is the best platform for you</h2>
-          <p class="text-slate-500 max-w-2xl mx-auto">
-            Customers choose MySaaS for its smart, easy-to-use, and feature-rich experience.
-          </p>
-        </div>
+       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+         <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-slate-900 mb-4">Transparent Pricing</h2>
+            <p class="text-slate-500">No hidden fees. Scale as you grow.</p>
+         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div v-for="(feature, index) in features" :key="index" 
-            class="reveal-on-scroll group p-8 rounded-2xl bg-white border border-slate-100 shadow-soft hover:shadow-xl hover:border-indigo-100 transition-all duration-300 hover:-translate-y-1"
-            :style="{ transitionDelay: `${index * 100}ms` }">
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-slate-900 mb-3">{{ feature.title }}</h3>
-            <p class="text-slate-500 group-hover:text-slate-600 transition-colors">{{ feature.description }}</p>
-          </div>
-        </div>
-      </div>
+         <div class="grid md:grid-cols-3 gap-8">
+           <div 
+             v-for="(plan, idx) in pricingPlans" 
+             :key="idx" 
+             class="group relative rounded-3xl p-8 border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+             :class="plan.popular ? 'bg-slate-900 text-white border-slate-900 ring-4 ring-indigo-500/20' : 'bg-white text-slate-900 border-slate-200 hover:border-indigo-100'"
+           >
+             <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+               Most Popular
+             </div>
+
+             <h3 class="text-xl font-bold mb-2">{{ plan.name }}</h3>
+             <div class="mb-6 flex items-baseline gap-1">
+               <span class="text-4xl font-black">{{ plan.currency }} {{ plan.price }}</span>
+               <span class="text-sm opacity-60 font-medium" v-if="plan.period">{{ plan.period }}</span>
+             </div>
+             
+             <p class="mb-8 text-sm opacity-70 leading-relaxed">{{ plan.description }}</p>
+             
+             <button 
+               class="w-full py-3 rounded-xl font-bold mb-8 transition-all"
+               :class="plan.popular ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-900'"
+             >
+               {{ plan.cta }}
+             </button>
+
+             <ul class="space-y-4 text-sm font-medium">
+               <li v-for="(feat, fIdx) in plan.features" :key="fIdx" class="flex items-center gap-3">
+                 <svg class="w-5 h-5 flex-shrink-0" :class="plan.popular ? 'text-indigo-400' : 'text-indigo-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                 <span class="opacity-80">{{ feat }}</span>
+               </li>
+             </ul>
+           </div>
+         </div>
+       </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section class="py-24 bg-slate-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Fair pricing, built for everyone</h2>
-          <p class="text-slate-500 max-w-2xl mx-auto">
-            Whether you are just starting out or ready to scale, we've got a plan for you. Pay only for what you need.
-          </p>
-        </div>
-
-        <div class="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          <div v-for="(plan, index) in pricingPlans" :key="index" 
-            class="reveal-on-scroll relative bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
-            :style="{ transitionDelay: `${index * 100}ms` }">
-            <div v-if="plan.popular" class="absolute top-0 right-0 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
-              Most Popular
-            </div>
-            
-            <h3 class="text-xl font-bold text-slate-900 mb-2">{{ plan.name }}</h3>
-            <p class="text-slate-400 text-sm mb-6">{{ plan.description }}</p>
-            
-            <div class="mb-6">
-              <span class="text-4xl font-bold text-slate-900">{{ plan.price }}</span>
-              <span class="text-xs text-slate-500 font-medium ml-1">{{ plan.currency }}{{ plan.period }}</span>
-            </div>
-            
-            <button class="w-full py-3 px-4 rounded-xl font-medium mb-8 transition-colors"
-              :class="plan.popular ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'">
-              {{ plan.cta }}
-            </button>
-            
-            <ul class="space-y-3 flex-1">
-              <li v-for="(feature, fIndex) in plan.features" :key="fIndex" class="flex items-start text-sm">
-                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span class="text-slate-600">{{ feature }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="py-24 bg-white overflow-hidden">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Loved by Algerian Merchants</h2>
-          <!-- <p class="text-slate-500 max-w-2xl mx-auto"></p> -->
-        </div>
-
-        <div class="relative w-full overflow-hidden mask-gradient">
-          <div ref="marqueeContainer" class="flex animate-marquee gap-8 w-max pr-8" @mouseenter="setPlaybackSpeed(0.1)" @mouseleave="setPlaybackSpeed(1)">
-            <!-- First set of testimonials -->
-            <div v-for="(testimonial, index) in testimonials" :key="'first-' + index" class="w-[350px] md:w-[400px] flex-shrink-0 bg-indigo-50/50 p-8 rounded-2xl border border-indigo-50 hover:border-indigo-100 transition-colors">
-              <div class="flex items-center gap-4 mb-6">
-                <img :src="testimonial.avatar" :alt="testimonial.name" class="w-12 h-12 rounded-full bg-indigo-100" />
-                <div>
-                  <h4 class="font-bold text-slate-900">{{ testimonial.name }}</h4>
-                  <p class="text-sm text-slate-500">{{ testimonial.role }}, {{ testimonial.company }}</p>
-                </div>
+    <!-- TESTIMONIALS -->
+    <section class="py-24 bg-slate-50 border-t border-slate-200 overflow-hidden relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        
+        <!-- Left Side: Heading -->
+        <div class="text-center lg:text-left mb-12 lg:mb-0">
+           <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+             Loved by <br>
+             <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Founders</span> like you.
+           </h2>
+           <p class="text-lg text-slate-500 max-w-md mx-auto lg:mx-0 mb-8">
+             Join thousands of merchants who have switched to a platform built for growth, speed, and reliability.
+           </p>
+           <div class="flex items-center justify-center lg:justify-start gap-2">
+              <div class="flex -space-x-4">
+                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=1" alt="Avatar">
+                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=2" alt="Avatar">
+                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=3" alt="Avatar">
+                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">+500</div>
               </div>
-              <p class="text-slate-600 italic">"{{ testimonial.content }}"</p>
-            </div>
-            
-            <!-- Duplicate set for infinite scroll -->
-            <div v-for="(testimonial, index) in testimonials" :key="'second-' + index" class="w-[350px] md:w-[400px] flex-shrink-0 bg-indigo-50/50 p-8 rounded-2xl border border-indigo-50 hover:border-indigo-100 transition-colors">
-              <div class="flex items-center gap-4 mb-6">
-                <img :src="testimonial.avatar" :alt="testimonial.name" class="w-12 h-12 rounded-full bg-indigo-100" />
-                <div>
-                  <h4 class="font-bold text-slate-900">{{ testimonial.name }}</h4>
-                  <p class="text-sm text-slate-500">{{ testimonial.role }}, {{ testimonial.company }}</p>
-                </div>
-              </div>
-              <p class="text-slate-600 italic">"{{ testimonial.content }}"</p>
-            </div>
-          </div>
+           </div>
+        </div>
+
+        <!-- Right Side: Vertical Marquee (Desktop) -->
+        <div class="hidden lg:block relative h-[600px] overflow-hidden mask-vertical">
+           <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-slate-50 to-transparent z-10 pointer-events-none" />
+           <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-50 to-transparent z-10 pointer-events-none" />
+           
+           <ClientOnly>
+             <Vue3Marquee :vertical="true" :duration="40" :pauseOnHover="false" class="h-full py-4 slow-on-hover">
+               <div v-for="(testi, i) in testimonials" :key="i" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mx-auto my-3 w-full max-w-md">
+                  <div class="flex gap-1 text-amber-400 mb-4">
+                    <span v-for="n in 5" :key="n" class="w-3 h-3">★</span>
+                  </div>
+                  <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ testi.text }}"</p>
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
+                      <img :src="testi.avatar" alt="User" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                      <div class="font-bold text-slate-900 text-sm">{{ testi.name }}</div>
+                      <div class="text-xs text-slate-500 font-bold uppercase">{{ testi.role }}</div>
+                    </div>
+                  </div>
+               </div>
+             </Vue3Marquee>
+           </ClientOnly>
+        </div>
+
+        <!-- Mobile Marquee (Horizontal) -->
+        <div class="block lg:hidden w-full lg:col-span-2 mt-8">
+           <ClientOnly>
+             <Vue3Marquee :duration="40" :pauseOnHover="false" class="slow-on-hover">
+               <div v-for="(testi, i) in testimonials" :key="i" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mx-3 w-[320px] h-[240px] flex flex-col justify-between">
+                  <div>
+                    <div class="flex gap-1 text-amber-400 mb-4">
+                      <span v-for="n in 5" :key="n" class="w-3 h-3">★</span>
+                    </div>
+                    <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ testi.text }}"</p>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
+                      <img :src="testi.avatar" alt="User" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                      <div class="font-bold text-slate-900 text-sm">{{ testi.name }}</div>
+                      <div class="text-xs text-slate-500 font-bold uppercase">{{ testi.role }}</div>
+                    </div>
+                  </div>
+               </div>
+             </Vue3Marquee>
+           </ClientOnly>
         </div>
       </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="py-24 bg-slate-50">
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- FAQ -->
+    <section class="py-24 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl md:text-4xl font-sans font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
-          <p class="text-slate-500">
-            Have questions? We're here to help.
-          </p>
+          <h2 class="text-3xl font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
+          <p class="text-slate-500">Everything you need to know about the product and billing.</p>
         </div>
-
+        
         <div class="space-y-4">
-          <div v-for="(faq, index) in faqs" :key="index" 
-            class="reveal-on-scroll bg-white rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300" 
-            :class="{'shadow-lg ring-1 ring-indigo-50 border-indigo-100': activeFaq === index}"
-            :style="{ transitionDelay: `${index * 50}ms` }">
-            <button @click="activeFaq = activeFaq === index ? null : index" class="w-full flex items-center justify-between p-6 text-left">
-              <span class="font-bold text-slate-900 text-lg">{{ faq.question }}</span>
-              <span class="ml-6 flex-shrink-0 text-indigo-500 transition-transform duration-300" :class="{'rotate-180': activeFaq === index}">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
+          <div 
+             v-for="(faq, idx) in faqs" 
+             :key="idx" 
+             class="border border-slate-200 rounded-2xl bg-slate-50/50 hover:bg-white transition-all duration-300 hover:shadow-md"
+          >
+            <button 
+              @click="activeFaq = activeFaq === idx ? null : idx" 
+              class="w-full flex items-center justify-between p-6 text-left focus:outline-none"
+            >
+              <span class="text-lg font-semibold text-slate-800">{{ faq.question }}</span>
+              <span 
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 transition-transform duration-300"
+                :class="{'rotate-180 bg-indigo-50 text-indigo-600 border-indigo-100': activeFaq === idx}"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
               </span>
             </button>
-            <div v-show="activeFaq === index" class="px-6 pb-6 animate-fadeIn">
-              <p class="text-slate-600 leading-relaxed">{{ faq.answer }}</p>
+            <div 
+              v-show="activeFaq === idx" 
+              class="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-100 pt-4 animate-fadeIn"
+            >
+              {{ faq.answer }}
             </div>
           </div>
         </div>
       </div>
     </section>
 
-
-
-    <!-- Social Proof / Final CTA -->
-    <section class="py-24 bg-slate-900 text-white relative overflow-hidden">
-      <div class="absolute inset-0 bg-indigo-600/10"></div>
-      <div class="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-indigo-500/30 blur-3xl"></div>
-      <div class="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-violet-500/30 blur-3xl"></div>
-      
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
-        <h2 class="text-3xl md:text-5xl font-sans font-bold mb-6">Ready to find your forever customers?</h2>
-        <p class="text-indigo-200 text-xl max-w-2xl mx-auto mb-10">
-          Join thousands of merchants who trust MySaaS to power their online business.
-        </p>
-        <NuxtLink to="/register" class="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-xl text-indigo-900 bg-white hover:bg-indigo-50 shadow-lg hover:shadow-white/25 transition-all duration-300 hover:-translate-y-1">
-          Start your Free Trial
+    <!-- FINAL CTA -->
+    <section class="py-32 bg-slate-900 relative overflow-hidden text-center px-4">
+      <div class="relative z-10 max-w-4xl mx-auto">
+        <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight">Ready to launch?</h2>
+        <p class="text-xl text-indigo-200 mb-10">Join the platform that grows with you.</p>
+        <NuxtLink to="/register" class="inline-flex px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-full text-lg shadow-lg shadow-indigo-900/20 transition-all hover:scale-105">
+          Get Started Now
         </NuxtLink>
       </div>
+      <!-- Decorative BG -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px]" />
     </section>
+
   </div>
 </template>
 
 <style scoped>
+/* Keyframes & Utility Animations */
 .animate-blob {
-  animation: blob 7s infinite;
+  animation: blob 10s infinite alternate;
 }
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-.animate-slideUp {
-  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-  transform: translateY(20px);
-}
-.animate-fadeIn {
-  animation: fadeIn 0.8s ease-out forwards;
-  opacity: 0;
-}
-.flex-delay-100 {
-  animation-delay: 100ms;
-}
-.flex-delay-200 {
-  animation-delay: 200ms;
-}
-.flex-delay-300 {
-  animation-delay: 300ms;
-}
-
-/* Marquee Animation */
-.animate-marquee {
-  animation: marquee 40s linear infinite;
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    /* Translate by exactly 50% because we duplicated the list and 
-       the gap is included in the flow. We need to handle the gap correctly.
-       Actually, if we have 2 sets, we want to move by 50% of the TOTAL width
-       (which is 100% of ONE set + gaps). 
-       However, translateX(-50%) moves by 50% of the CONTAINER. 
-       Since the container (flex element) width is the total width of all items,
-       moving it by -50% moves it exactly to the start of the second set.
-    */
-    transform: translateX(-50%);
-  }
-}
-
-/* Optional: Add gradient masks to fade edges */
-.mask-gradient {
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-}
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
 
 @keyframes blob {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, -20px) scale(1.1); }
+  100% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
-@keyframes slideUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.reveal-item {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3D tilt effect attempt for dashboard */
+.rotate-x {
+  transform: perspective(1000px) rotateX(2deg) rotateY(0deg) scale(0.95);
+  transition: transform 0.5s ease;
+}
+.rotate-x:hover {
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1);
 }
 
 @keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-.reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), transform 0.8s cubic-bezier(0.5, 0, 0, 1);
-  will-change: opacity, transform;
+/* Background patterns */
+.pattern-grid-lg {
+  background-image: linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-.reveal-on-scroll.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+/* Use :deep to access the library's internal animation element */
+/* By increasing duration significantly, we effectively 'slow down' the animation */
+.slow-on-hover:hover :deep(.vue3-marquee > .marquee) {
+  animation-duration: 200s !important;
+}
+
+/* Fallback/Alternative selector if library structure differs */
+.slow-on-hover:hover :deep(div[style*="animation"]) {
+  animation-duration: 200s !important;
 }
 </style>

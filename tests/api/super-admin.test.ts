@@ -76,7 +76,7 @@ describe('Super Admin API Tests', () => {
             const orderIds = orders.map((o) => o.id)
 
             if (productIds.length) {
-                await prisma.variant.deleteMany({ where: { productId: { in: productIds } } })
+                await prisma.productVariant.deleteMany({ where: { productId: { in: productIds } } })
             }
 
             if (orderIds.length) {

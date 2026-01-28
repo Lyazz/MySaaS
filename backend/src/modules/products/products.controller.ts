@@ -8,7 +8,9 @@ export class ProductsController {
         try {
             const tenant = req.tenant!
             const categoryId = req.query.categoryId as string | undefined
-            const products = await productsService.listProducts(tenant.id, categoryId)
+            const sortBy = req.query.sortBy as string | undefined
+            const sortOrder = req.query.sortOrder as 'asc' | 'desc' | undefined
+            const products = await productsService.listProducts(tenant.id, categoryId, sortBy, sortOrder)
             res.json(products)
         } catch (error) {
             console.error('List products error:', error)
@@ -124,23 +126,70 @@ export class ProductsController {
     }
 
     async createVariant(req: Request, res: Response) {
+        // Legacy or update to use generateVariants or single creation?
+        // We probably want "generateVariants" mainly.
+        res.status(501).json({ message: 'Use generate endpoints' })
+    }
+
+    async createOption(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
             const productId = req.params.productId as string
             const body = req.body
+            const option = await productsService.createOption(tenant.id, productId, body)
+            res.json(option)
+        } catch (error: any) {
+            console.error('Create option error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message || 'Error' })
+        }
+    }
 
-            try {
-                const variant = await productsService.createVariant(tenant.id, productId, body)
-                res.json(variant)
-            } catch (e: any) {
-                if (e.message === 'Product not found') {
-                    return res.status(404).json({ statusCode: 404, statusMessage: e.message })
-                }
-                throw e
-            }
-        } catch (error) {
-            console.error('Create variant error:', error)
-            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    async addOptionValue(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const optionId = req.params.optionId as string
+            const body = req.body
+            const value = await productsService.addOptionValue(tenant.id, optionId, body)
+            res.json(value)
+        } catch (error: any) {
+            console.error('Add option value error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message || 'Error' })
+        }
+    }
+
+    async deleteOptionValue(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const valueId = req.params.valueId as string
+            await productsService.deleteOptionValue(tenant.id, valueId)
+            res.json({ success: true })
+        } catch (error: any) {
+            console.error('Delete option value error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message })
+        }
+    }
+
+    async deleteOption(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const optionId = req.params.optionId as string
+            await productsService.deleteOption(tenant.id, optionId)
+            res.json({ success: true })
+        } catch (error: any) {
+            console.error('Delete option error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message })
+        }
+    }
+
+    async generateVariants(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const productId = req.params.productId as string
+            const variants = await productsService.generateVariants(tenant.id, productId)
+            res.json(variants)
+        } catch (error: any) {
+            console.error('Generate variants error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message })
         }
     }
 }

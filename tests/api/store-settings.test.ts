@@ -51,6 +51,10 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(getRes.status).toBe(200)
         expect(getBody).toHaveProperty('tenantId')
         expect(getBody.isCompleted).toBe(false)
+        expect(getBody).toHaveProperty('cartEnabled')
+        expect(getBody).toHaveProperty('codEnabled')
+        expect(getBody).toHaveProperty('currencyCode')
+        expect(getBody).toHaveProperty('currencyCountry')
 
         const patchRes = await fetch('/api/admin/store-settings', {
             method: 'PATCH',
@@ -62,7 +66,10 @@ describe('Store Settings (Tenant Admin)', async () => {
                 primaryColor: '#112233',
                 templateKey: 'modern',
                 language: 'ar',
-
+                cartEnabled: false,
+                codEnabled: false,
+                currencyCode: 'EUR',
+                currencyCountry: 'FR',
                 isCompleted: true
             })
         })
@@ -71,6 +78,10 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(patchBody.primaryColor).toBe('#112233'.toUpperCase())
         expect(patchBody.templateKey).toBe('modern')
         expect(patchBody.language).toBe('ar')
+        expect(patchBody.cartEnabled).toBe(false)
+        expect(patchBody.codEnabled).toBe(false)
+        expect(patchBody.currencyCode).toBe('EUR')
+        expect(patchBody.currencyCountry).toBe('FR')
 
         expect(patchBody.isCompleted).toBe(true)
     })

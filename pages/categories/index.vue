@@ -36,12 +36,15 @@ definePageMeta({
           Collections
         </h1>
         <p class="mt-4 text-lg text-gray-500 font-sans">
-            Browse our curated categories to find exactly what you need.
+          Browse our curated categories to find exactly what you need.
         </p>
       </div>
 
       <!-- Categories Grid -->
-      <div v-if="categories && categories.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div
+        v-if="categories && categories.length > 0"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      >
         <NuxtLink
           v-for="category in categories"
           :key="category.id"
@@ -54,12 +57,12 @@ definePageMeta({
               :src="category.imageUrl"
               :alt="category.title"
               class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 bg-white"
-            />
+            >
             <div
               v-else
               class="w-full h-full bg-gradient-to-br from-slate-100 via-white to-slate-50"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
             <div class="absolute inset-0 flex items-end p-6">
               <div class="text-left">
                 <h3 class="text-xl font-bold text-white drop-shadow font-sans">
@@ -76,9 +79,16 @@ definePageMeta({
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-24 bg-white rounded-xl border border-dashed border-gray-300">
-         <h3 class="mt-2 text-sm font-medium text-gray-900 font-sans">No categories found</h3>
-         <p class="mt-1 text-sm text-gray-500 font-sans">Please check back later.</p>
+      <div
+        v-else
+        class="text-center py-24 bg-white rounded-xl border border-dashed border-gray-300"
+      >
+        <h3 class="mt-2 text-sm font-medium text-gray-900 font-sans">
+          No categories found
+        </h3>
+        <p class="mt-1 text-sm text-gray-500 font-sans">
+          Please check back later.
+        </p>
       </div>
     </div>
   </div>

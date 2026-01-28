@@ -10,7 +10,9 @@ useTenantSeo({
 
 <template>
   <div class="max-w-5xl mx-auto px-4 py-12">
-    <h1 class="text-4xl font-sans font-bold text-slate-900 mb-4">Contact {{ tenantName }}</h1>
+    <h1 class="text-4xl font-sans font-bold text-slate-900 mb-4">
+      Contact {{ tenantName }}
+    </h1>
     <p class="text-slate-600 leading-relaxed">
       This is the store contact page. Add your phone/email/address from the store settings wizard to replace this
       placeholder content.

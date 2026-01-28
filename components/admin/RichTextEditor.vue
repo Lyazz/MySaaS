@@ -1,149 +1,252 @@
 <template>
   <div class="rich-text-editor-wrapper">
-    <div v-if="editor" class="editor-toolbar">
+    <div
+      v-if="editor"
+      class="editor-toolbar"
+    >
       <!-- Row 1: Text Formatting -->
       <div class="toolbar-row">
         <div class="button-group">
           <button 
-            @click="editor.chain().focus().undo().run()" 
-            :disabled="!editor.can().undo()"
+            :disabled="!editor.can().undo()" 
             class="toolbar-btn"
             title="Undo"
             type="button"
+            @click="editor.chain().focus().undo().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().redo().run()" 
-            :disabled="!editor.can().redo()"
+            :disabled="!editor.can().redo()" 
             class="toolbar-btn"
             title="Redo"
             type="button"
+            @click="editor.chain().focus().redo().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6"
+            /></svg>
           </button>
         </div>
 
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <div class="button-group">
           <button 
-            @click="editor.chain().focus().toggleBold().run()" 
-            :class="{ 'is-active': editor.isActive('bold') }"
+            :class="{ 'is-active': editor.isActive('bold') }" 
             class="toolbar-btn"
             title="Bold (Ctrl+B)"
             type="button"
+            @click="editor.chain().focus().toggleBold().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().toggleItalic().run()" 
-            :class="{ 'is-active': editor.isActive('italic') }"
+            :class="{ 'is-active': editor.isActive('italic') }" 
             class="toolbar-btn"
             title="Italic (Ctrl+I)"
             type="button"
+            @click="editor.chain().focus().toggleItalic().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 4h-9m4 16H5m11-14L10 20"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 4h-9m4 16H5m11-14L10 20"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().toggleUnderline().run()" 
-            :class="{ 'is-active': editor.isActive('underline') }"
+            :class="{ 'is-active': editor.isActive('underline') }" 
             class="toolbar-btn"
             title="Underline (Ctrl+U)"
             type="button"
+            @click="editor.chain().focus().toggleUnderline().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4v7a7 7 0 0014 0V4M4 21h16"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 4v7a7 7 0 0014 0V4M4 21h16"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().toggleStrike().run()" 
-            :class="{ 'is-active': editor.isActive('strike') }"
+            :class="{ 'is-active': editor.isActive('strike') }" 
             class="toolbar-btn"
             title="Strikethrough"
             type="button"
+            @click="editor.chain().focus().toggleStrike().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18M8 5h8M9 19h6"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12h18M8 5h8M9 19h6"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().toggleCode().run()" 
-            :class="{ 'is-active': editor.isActive('code') }"
+            :class="{ 'is-active': editor.isActive('code') }" 
             class="toolbar-btn"
             title="Inline Code"
             type="button"
+            @click="editor.chain().focus().toggleCode().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+            /></svg>
           </button>
         </div>
 
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <div class="button-group">
           <button 
-            @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" 
-            :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
+            :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }" 
             class="toolbar-btn"
             title="Heading 1"
             type="button"
+            @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
           >
             <span class="font-bold text-base">H1</span>
           </button>
           <button 
-            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()" 
-            :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+            :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }" 
             class="toolbar-btn"
             title="Heading 2"
             type="button"
+            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
           >
             <span class="font-bold text-sm">H2</span>
           </button>
           <button 
-            @click="editor.chain().focus().toggleHeading({ level: 3 }).run()" 
-            :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
+            :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }" 
             class="toolbar-btn"
             title="Heading 3"
             type="button"
+            @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
           >
             <span class="font-bold text-xs">H3</span>
           </button>
           <button 
-            @click="editor.chain().focus().setParagraph().run()" 
-            :class="{ 'is-active': editor.isActive('paragraph') }"
+            :class="{ 'is-active': editor.isActive('paragraph') }" 
             class="toolbar-btn"
             title="Paragraph"
             type="button"
+            @click="editor.chain().focus().setParagraph().run()"
           >
             <span class="text-xs">¶</span>
           </button>
         </div>
 
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <div class="button-group">
           <button 
-            @click="editor.chain().focus().setTextAlign('left').run()" 
-            :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }"
+            :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }" 
             class="toolbar-btn"
             title="Align Left"
             type="button"
+            @click="editor.chain().focus().setTextAlign('left').run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h10M4 18h16"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().setTextAlign('center').run()" 
-            :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }"
+            :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }" 
             class="toolbar-btn"
             title="Align Center"
             type="button"
+            @click="editor.chain().focus().setTextAlign('center').run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M7 12h10M4 18h16"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().setTextAlign('right').run()" 
-            :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }"
+            :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }" 
             class="toolbar-btn"
             title="Align Right"
             type="button"
+            @click="editor.chain().focus().setTextAlign('right').run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M10 12h10M4 18h16"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M10 12h10M4 18h16"
+            /></svg>
           </button>
         </div>
       </div>
@@ -152,112 +255,221 @@
       <div class="toolbar-row">
         <div class="button-group">
           <button 
-            @click="editor.chain().focus().toggleBulletList().run()" 
-            :class="{ 'is-active': editor.isActive('bulletList') }"
+            :class="{ 'is-active': editor.isActive('bulletList') }" 
             class="toolbar-btn"
             title="Bullet List"
             type="button"
+            @click="editor.chain().focus().toggleBulletList().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().toggleOrderedList().run()" 
-            :class="{ 'is-active': editor.isActive('orderedList') }"
+            :class="{ 'is-active': editor.isActive('orderedList') }" 
             class="toolbar-btn"
             title="Numbered List"
             type="button"
+            @click="editor.chain().focus().toggleOrderedList().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h12M9 12h12M9 19h12M5 5L3 7m2 5v4m0-4l-2 2"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5h12M9 12h12M9 19h12M5 5L3 7m2 5v4m0-4l-2 2"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().toggleBlockquote().run()" 
-            :class="{ 'is-active': editor.isActive('blockquote') }"
+            :class="{ 'is-active': editor.isActive('blockquote') }" 
             class="toolbar-btn"
             title="Quote"
             type="button"
+            @click="editor.chain().focus().toggleBlockquote().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().toggleCodeBlock().run()" 
-            :class="{ 'is-active': editor.isActive('codeBlock') }"
+            :class="{ 'is-active': editor.isActive('codeBlock') }" 
             class="toolbar-btn"
             title="Code Block"
             type="button"
+            @click="editor.chain().focus().toggleCodeBlock().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            /></svg>
           </button>
         </div>
 
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <div class="button-group">
           <button 
-            @click="setLink" 
-            :class="{ 'is-active': editor.isActive('link') }"
+            :class="{ 'is-active': editor.isActive('link') }" 
             class="toolbar-btn"
             title="Insert Link"
             type="button"
+            @click="setLink"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+            /></svg>
           </button>
           <button 
-            @click="addImage" 
-            class="toolbar-btn"
+            class="toolbar-btn" 
             title="Insert Image"
             type="button"
+            @click="addImage"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            /></svg>
           </button>
           <button 
-            @click="editor.chain().focus().setHorizontalRule().run()" 
-            class="toolbar-btn"
+            class="toolbar-btn" 
             title="Horizontal Line"
             type="button"
+            @click="editor.chain().focus().setHorizontalRule().run()"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20 12H4"
+            /></svg>
           </button>
         </div>
 
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <div class="button-group">
           <div class="color-picker-group">
-            <label class="color-picker-label" title="Text Color">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+            <label
+              class="color-picker-label"
+              title="Text Color"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+              /></svg>
               <input 
                 type="color" 
-                @input="(e) => editor.chain().focus().setColor((e.target as HTMLInputElement).value).run()"
                 :value="editor.getAttributes('textStyle').color || '#000000'"
                 class="color-input"
-              />
+                @input="(e) => editor.chain().focus().setColor((e.target as HTMLInputElement).value).run()"
+              >
             </label>
-            <label class="color-picker-label" title="Highlight Color">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            <label
+              class="color-picker-label"
+              title="Highlight Color"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              ><path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              /></svg>
               <input 
                 type="color" 
-                @input="(e) => editor.chain().focus().toggleHighlight({ color: (e.target as HTMLInputElement).value }).run()"
                 value="#ffff00"
                 class="color-input"
-              />
+                @input="(e) => editor.chain().focus().toggleHighlight({ color: (e.target as HTMLInputElement).value }).run()"
+              >
             </label>
           </div>
         </div>
 
-        <div class="toolbar-divider"></div>
+        <div class="toolbar-divider" />
 
         <button 
-          @click="editor.chain().focus().clearNodes().unsetAllMarks().run()" 
-          class="toolbar-btn"
+          class="toolbar-btn" 
           title="Clear Formatting"
           type="button"
+          @click="editor.chain().focus().clearNodes().unsetAllMarks().run()"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          /></svg>
         </button>
       </div>
     </div>
 
-    <editor-content :editor="editor" class="editor-content" />
+    <editor-content
+      :editor="editor"
+      class="editor-content"
+    />
   </div>
 </template>
 

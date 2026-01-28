@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ProductLandingPage from '../../components/storefront/templates/modern/ProductLandingPage.vue'
 import { createTestingPinia } from '@pinia/testing'
+import { useState } from '#imports'
 
 describe('ProductLandingPage', () => {
     const mockProduct = {
@@ -16,6 +17,11 @@ describe('ProductLandingPage', () => {
         images: ['img1.jpg']
     }
 
+    beforeEach(() => {
+        const storeSettings = useState<any>('storeSettings')
+        storeSettings.value = undefined
+    })
+
     it('renders landing page structure correctly', () => {
         const wrapper = mount(ProductLandingPage, {
             props: {
@@ -29,8 +35,7 @@ describe('ProductLandingPage', () => {
             }
         })
 
-        // Check for Title and Price
-        expect(wrapper.text()).toContain('Test Product')
+        // Check for Price (Title is hidden in this design)
         expect(wrapper.text()).toContain('1,500.00 DZD')
 
         // Check for Description
@@ -58,5 +63,23 @@ describe('ProductLandingPage', () => {
         expect(descriptionIndex).not.toBe(-1)
         expect(formIndex).not.toBe(-1)
         expect(descriptionIndex).toBeLessThan(formIndex)
+    })
+
+    it('shows COD disabled message when setting is false', () => {
+        const storeSettings = useState<any>('storeSettings')
+        storeSettings.value = { codEnabled: false, currencyCode: 'DZD' }
+
+        const wrapper = mount(ProductLandingPage, {
+            props: { product: mockProduct },
+            global: {
+                plugins: [createTestingPinia({ createSpy: vi.fn })],
+                stubs: { NuxtLink: true }
+            }
+        })
+
+        expect(wrapper.find('[data-test="cod-order-card"]').exists()).toBe(false)
+        const alert = wrapper.find('[data-test="cod-disabled-alert"]')
+        expect(alert.exists()).toBe(true)
+        expect(alert.text()).toContain('COD orders disabled')
     })
 })

@@ -30,19 +30,19 @@ describe('Express Admin API', async () => {
         expect(res.status).toBe(200)
         expect(body.success).toBe(true)
 
-      tenantId = body.tenant.id
-      // Find the user created
-      const user = await prisma.user.findFirst({ where: { email } })
-      expect(user).toBeTruthy()
-      userId = user!.id
+        tenantId = body.tenant.id
+        // Find the user created
+        const user = await prisma.user.findFirst({ where: { email } })
+        expect(user).toBeTruthy()
+        userId = user!.id
 
-      // Generate valid JWT using matching secret
-      const secret = process.env.JWT_SECRET || 'secret'
-      token = jwt.sign(
-        { userId: user!.id, email: user!.email, role: user!.role, tenantId: user!.tenantId },
-        secret,
-        { expiresIn: '1h' }
-      )
+        // Generate valid JWT using matching secret
+        const secret = process.env.JWT_SECRET || 'secret'
+        token = jwt.sign(
+            { userId: user!.id, email: user!.email, role: user!.role, tenantId: user!.tenantId },
+            secret,
+            { expiresIn: '1h' }
+        )
     })
 
     it('Create Product (Admin)', async () => {
@@ -169,8 +169,9 @@ describe('Express Admin API', async () => {
         expect(body[0].title).toBe('Test Product')
     })
 
-    it('Create Variant (Admin)', async () => {
-        const res = await fetch(`/api/admin/products/${productId}/variants`, {
+    it('Create Options and Generate Variants (Admin)', async () => {
+        // 1. Create Option
+        const optRes = await fetch(`/api/admin/products/${productId}/options`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -178,22 +179,43 @@ describe('Express Admin API', async () => {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                sku: 'VALID-SKU', // Correct field now
-                optionName: 'Size',
-                optionValue: 'L',
-                priceDelta: 10,
-                stock: 5
+                name: 'Size',
+                displayType: 'dropdown',
+                values: [{ label: 'Small' }, { label: 'Medium' }]
             })
         })
-        const body = await res.json()
-        expect(res.status).toBe(200)
-        expect(body.sku).toBe('VALID-SKU')
+        expect(optRes.status).toBe(200)
+
+        // 2. Generate Variants
+        const genRes = await fetch(`/api/admin/products/${productId}/variants/generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Forwarded-Host': `${slug}.localhost:3000`,
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        const genBody = await genRes.json()
+        expect(genRes.status).toBe(200)
+        expect(genBody.length).toBe(2)
+
+        // 3. Verify Variants created via Get Product
+        const productRes = await fetch(`/api/admin/products/${productId}`, {
+            headers: {
+                'X-Forwarded-Host': `${slug}.localhost:3000`,
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        const productBody = await productRes.json()
+        expect(productBody.variants.length).toBe(2)
+        expect(productBody.options.length).toBe(1)
+        expect(productBody.options[0].name).toBe('Size')
     })
 
     // Cleanup
     it('cleanups', async () => {
         // Delete tenant-owned data first (FKs do not cascade on Tenant delete)
-        await prisma.variant.deleteMany({ where: { productId } })
+        await prisma.productVariant.deleteMany({ where: { productId } })
         await prisma.product.deleteMany({ where: { id: productId } })
         await prisma.category.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { email } })

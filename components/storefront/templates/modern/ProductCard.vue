@@ -13,10 +13,15 @@ interface Product {
 }
 
 const props = defineProps<{
-  product: Product
+  product: Product,
+  viewMode?: 'grid' | 'list'
 }>()
 
+defineEmits(['quick-view'])
+
 const cartStore = useCartStore()
+const storeSettings = useState<any>('storeSettings')
+const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
 
 const mainImage = computed(() => {
     if (props.product.images && props.product.images.length > 0) {
@@ -52,53 +57,144 @@ function handleAddToCart() {
 </script>
 
 <template>
-  <div class="group relative flex flex-col items-center">
-    
+  <div 
+    class="group relative"
+    :class="[
+      viewMode === 'list' 
+        ? 'flex flex-row items-center gap-6 bg-white p-4 rounded-3xl border border-slate-100 hover:shadow-lg transition-all duration-300' 
+        : 'flex flex-col items-center'
+    ]"
+  >
     <!-- Image Card -->
-    <div class="relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gray-100">
-        <!-- Background Image -->
-        <NuxtLink :to="`/p/${product.slug}`" class="block w-full h-full">
-            <img :src="mainImage" :alt="product.title" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-        </NuxtLink>
+    <div 
+      class="relative overflow-hidden rounded-3xl bg-gray-100 shadow-sm"
+      :class="[
+        viewMode === 'list' 
+          ? 'w-48 h-48 aspect-square flex-shrink-0' 
+          : 'w-full aspect-[3/4] shadow-lg hover:shadow-xl transition-all duration-300'
+      ]"
+    >
+      <!-- Background Image -->
+      <NuxtLink
+        :to="`/p/${product.slug}`"
+        class="block w-full h-full"
+      >
+        <img
+          :src="mainImage"
+          :alt="product.title"
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        >
+      </NuxtLink>
         
-        <!-- Gradient Overlay -->
-        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+      <!-- Gradient Overlay (Grid Only) -->
+      <div v-if="viewMode !== 'list'" class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-        <!-- Badges (Top Left) -->
-        <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
-            <span v-if="isNew" class="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90">New</span>
-            <span v-if="discount > 0" class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90">-{{ discount }}%</span>
-        </div>
+      <!-- Badges (Top Left) -->
+      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
+        <span
+          v-if="isNew"
+          class="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90"
+        >New</span>
+        <span
+          v-if="discount > 0"
+          class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90"
+        >-{{ discount }}%</span>
+      </div>
 
-         <!-- Floating Actions (Right) -->
-        <div class="absolute top-3 right-3 flex flex-col gap-2 translate-x-0 opacity-100 lg:translate-x-10 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100 transition-all duration-300 z-10">
-            <!-- Quick View (Future Implementation) -->
-            <!--
-            <button class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-700 hover:bg-brand-50 hover:text-brand-600 shadow-md transition-colors" title="Quick View">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </button>
-            -->
-             <button @click.prevent="handleAddToCart" :disabled="product.stock === 0" class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-700 hover:bg-brand-600 hover:text-white shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" title="Add to Cart">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            </button>
-        </div>
+      <!-- Floating Actions (Right) -->
+      <!-- In List View, we might want these visible or positioned differently. For now, keep generic behavior or hide in list if preferred. 
+           Let's keep them absolute for consistency but adjust visibility. -->
+      <div 
+        class="absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 z-10"
+        :class="[
+           viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-10 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
+        ]"
+      >
+        <!-- Quick View -->
+        <button
+           class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-700 hover:bg-brand-50 hover:text-brand-600 shadow-md transition-colors" 
+           title="Quick View"
+           @click.prevent="$emit('quick-view', product)"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+        </button>
 
-         <!-- Static In Stock Badge (Bottom Right) -->
-         <div v-if="product.stock > 0" class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span class="px-2.5 py-1 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-bold rounded-full shadow-sm">In Stock</span>
-         </div>
+        <button
+          v-if="storeSettings?.cartEnabled !== false"
+          :disabled="product.stock === 0"
+          class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-700 hover:bg-brand-600 hover:text-white shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Add to Cart"
+          @click.prevent="handleAddToCart"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+          /></svg>
+        </button>
+      </div>
+
+      <!-- Static In Stock Badge (Grid Only) -->
+      <div
+        v-if="product.stock > 0 && viewMode !== 'list'"
+        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      >
+        <span class="px-2.5 py-1 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-bold rounded-full shadow-sm">In Stock</span>
+      </div>
     </div>
 
-    <!-- Details Below -->
-    <div class="mt-3 text-center w-full px-1">
-        <NuxtLink :to="`/p/${product.slug}`" class="block group-hover:text-brand-600 transition-colors duration-200">
-             <h3 class="text-base font-medium text-slate-900 leading-snug truncate">{{ product.title }}</h3>
-        </NuxtLink>
-        <div class="flex items-center justify-center gap-2 mt-1">
-            <span class="text-lg font-bold text-slate-900">{{ Number(product.price).toLocaleString() }} <span class="text-xs font-normal text-slate-500">DZD</span></span>
-             <span v-if="oldPrice" class="text-xs text-slate-400 line-through">{{ oldPrice }} DZD</span>
-        </div>
-    </div>
+    <!-- Details -->
+    <div 
+      :class="[
+        viewMode === 'list' 
+          ? 'flex-1 text-left' 
+          : 'mt-3 text-center w-full px-1'
+      ]"
+    >
+      <NuxtLink
+        :to="`/p/${product.slug}`"
+        class="block group-hover:text-brand-600 transition-colors duration-200"
+      >
+        <h3 
+          class="font-medium text-slate-900 leading-snug"
+          :class="[ viewMode === 'list' ? 'text-xl mb-2' : 'text-base truncate' ]"
+        >
+          {{ product.title }}
+        </h3>
+      </NuxtLink>
 
+      <p v-if="viewMode === 'list'" class="text-sm text-slate-500 mb-4 line-clamp-2">
+        {{ product.description || 'No description available for this product.' }}
+      </p>
+
+      <div 
+        class="flex items-center gap-2" 
+        :class="[ viewMode === 'list' ? '' : 'justify-center mt-1' ]"
+      >
+        <span class="text-lg font-bold text-slate-900">{{ Number(product.price).toLocaleString() }} <span class="text-xs font-normal text-slate-500">{{ currencyCode }}</span></span>
+        <span
+          v-if="oldPrice"
+          class="text-xs text-slate-400 line-through"
+        >{{ oldPrice }} {{ currencyCode }}</span>
+      </div>
+      
+      <!-- List View Extra Actions -->
+       <div v-if="viewMode === 'list'" class="mt-4 flex gap-3">
+          <button 
+             v-if="storeSettings?.cartEnabled !== false"
+             :disabled="product.stock === 0"
+             class="px-5 py-2 rounded-full bg-slate-900 text-white text-sm font-medium hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+             @click.prevent="handleAddToCart"
+          >
+             Add to Cart
+          </button>
+       </div>
+    </div>
   </div>
 </template>

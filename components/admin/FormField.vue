@@ -6,11 +6,24 @@
       class="block text-sm font-medium text-gray-700 mb-1"
     >
       {{ label }}
-      <span v-if="required" class="text-red-500">*</span>
+      <span
+        v-if="required"
+        class="text-red-500"
+      >*</span>
     </label>
-    <slot :inputId="inputId" />
-    <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>
-    <p v-if="hint && !error" class="mt-1 text-sm text-gray-500">{{ hint }}</p>
+    <slot :input-id="inputId" />
+    <p
+      v-if="error"
+      class="mt-1 text-sm text-red-600"
+    >
+      {{ error }}
+    </p>
+    <p
+      v-if="hint && !error"
+      class="mt-1 text-sm text-gray-500"
+    >
+      {{ hint }}
+    </p>
   </div>
 </template>
 

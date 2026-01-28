@@ -167,7 +167,8 @@ const storeSettings = useState<any>('storeSettings')
 const { data: settings } = await useAsyncData('storeSettings', () => 
   $fetch('/api/admin/store-settings', {
     headers: { Authorization: `Bearer ${authStore.token}` }
-  }).catch(() => null)
+  }).catch(() => null),
+  { lazy: true }
 )
 
 if (settings.value) {
@@ -178,12 +179,6 @@ onMounted(() => {
   if (window.innerWidth >= 1024) {
     sidebarOpen.value = true
   }
-})
-
-const adminStyle = computed(() => {
-  // Use a default color instead of transparent so active icons remain visible
-  const primaryColor = storeSettings.value?.primaryColor || '#4F46E5' 
-  return { '--brand': primaryColor } as Record<string, string>
 })
 
 // Compute tenant info
@@ -199,6 +194,27 @@ const storefrontUrl = computed(() => {
   const { protocol, host } = useRequestOrigin()
   const tenantHost = toTenantHost(host, slug)
   return `${protocol}://${tenantHost}/`
+})
+
+// Helper to convert hex to space-separated RGB for Tailwind
+function hexToRgb(hex: string) {
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i
+  hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b)
+
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return result
+    ? `${parseInt(result[1], 16)} ${parseInt(result[2], 16)} ${parseInt(result[3], 16)}`
+    : '79 70 229' // Default indigo-600
+}
+
+const adminStyle = computed(() => {
+  // Use a default color instead of transparent so active icons remain visible
+  const primaryColor = storeSettings.value?.primaryColor || '#4F46E5' 
+  return { 
+    '--brand': primaryColor,
+    '--brand-rgb': hexToRgb(primaryColor)
+  } as Record<string, string>
 })
 
 // Page title from route meta or default

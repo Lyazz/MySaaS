@@ -8,7 +8,8 @@ export class StoreSettingsController {
         try {
             const tenant = req.tenant!
             const settings = await service.getOrCreate(tenant.id)
-            res.json(settings)
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify(settings))
         } catch (error) {
             console.error('Get store settings error:', error)
             res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
@@ -45,8 +46,11 @@ export class StoreSettingsController {
                 settings: {
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
-
-                    language: settings.language
+                    language: settings.language,
+                    cartEnabled: settings.cartEnabled,
+                    codEnabled: settings.codEnabled,
+                    currencyCode: settings.currencyCode,
+                    currencyCountry: settings.currencyCountry
                 }
             })
 
@@ -70,8 +74,11 @@ export class StoreSettingsController {
                 storeSettings: {
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
-
-                    language: settings.language
+                    language: settings.language,
+                    cartEnabled: settings.cartEnabled,
+                    codEnabled: settings.codEnabled,
+                    currencyCode: settings.currencyCode,
+                    currencyCountry: settings.currencyCountry
                 }
             })
         } catch (error) {
@@ -80,4 +87,3 @@ export class StoreSettingsController {
         }
     }
 }
-

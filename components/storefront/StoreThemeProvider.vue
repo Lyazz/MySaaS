@@ -43,7 +43,6 @@ const storeStyle = computed(() => {
     fontFamily: "'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
   } as Record<string, string>
 
-  console.log('StoreStyle Computed:', result)
   return result
 })
 
@@ -53,7 +52,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 font-sans text-slate-600" :style="storeStyle">
+  <div
+    class="min-h-screen bg-slate-50 font-sans text-slate-600"
+    :style="storeStyle"
+  >
     <slot />
   </div>
 </template>

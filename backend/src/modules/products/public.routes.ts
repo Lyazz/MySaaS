@@ -51,7 +51,28 @@ router.get('/:slug', async (req, res) => {
             },
             include: {
                 category: true,
-                variants: true
+                options: {
+                    include: { values: { orderBy: { position: 'asc' } } },
+                    orderBy: { position: 'asc' }
+                },
+                variants: {
+                    where: { isActive: true },
+                    include: {
+                        optionValues: {
+                            include: { optionValue: true }
+                        },
+                        images: {
+                            include: { image: true },
+                            orderBy: { position: 'asc' }
+                        }
+                    },
+                    orderBy: {
+                        createdAt: 'asc'
+                    }
+                },
+                productImages: {
+                    orderBy: { position: 'asc' }
+                }
             }
         })
 

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 export interface CartItem {
     productId: string
+    variantId?: string
     title: string
     slug: string
     price: number
@@ -25,7 +26,12 @@ export const useCartStore = defineStore('cart', {
 
     actions: {
         addItem(product: Omit<CartItem, 'quantity'>) {
-            const existingItem = this.items.find(item => item.productId === product.productId)
+            const existingItem = this.items.find(item => {
+                if (product.variantId) {
+                    return item.variantId === product.variantId
+                }
+                return item.productId === product.productId && !item.variantId
+            })
 
             if (existingItem) {
                 // Increase quantity if item exists, but don't exceed stock
@@ -43,16 +49,22 @@ export const useCartStore = defineStore('cart', {
             }
         },
 
-        removeItem(productId: string) {
-            const index = this.items.findIndex(item => item.productId === productId)
+        removeItem(productId: string, variantId?: string) {
+            const index = this.items.findIndex(item => {
+                if (variantId) return item.variantId === variantId
+                return item.productId === productId && !item.variantId
+            })
             if (index > -1) {
                 this.items.splice(index, 1)
                 this.saveToLocalStorage()
             }
         },
 
-        updateQuantity(productId: string, quantity: number) {
-            const item = this.items.find(item => item.productId === productId)
+        updateQuantity(productId: string, quantity: number, variantId?: string) {
+            const item = this.items.find(item => {
+                if (variantId) return item.variantId === variantId
+                return item.productId === productId && !item.variantId
+            })
             if (item) {
                 // Ensure quantity is between 1 and stock
                 item.quantity = Math.max(1, Math.min(quantity, item.stock))

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { requireTenantAdmin } from '../../middleware/rbac.middleware'
 import { ProductsController } from './products.controller'
+import imagesRoutes from './images.routes'
 
 const router = Router()
 const controller = new ProductsController()
@@ -23,7 +24,22 @@ router.put('/:id', controller.updateProduct.bind(controller))
 // DELETE /products/:id - Delete product
 router.delete('/:id', controller.deleteProduct.bind(controller))
 
-// POST /products/:productId/variants - Create variant
-router.post('/:productId/variants', controller.createVariant.bind(controller))
+// POST /products/:productId/variants/generate - Generate variants from options
+router.post('/:productId/variants/generate', controller.generateVariants.bind(controller))
+
+// POST /products/:productId/options - Create option
+router.post('/:productId/options', controller.createOption.bind(controller))
+
+// DELETE /products/:productId/options/:optionId - Delete option
+router.delete('/:productId/options/:optionId', controller.deleteOption.bind(controller))
+
+// POST /products/:productId/options/:optionId/values - Add option value
+router.post('/:productId/options/:optionId/values', controller.addOptionValue.bind(controller))
+
+// DELETE /products/:productId/options/:optionId/values/:valueId - Delete option value
+router.delete('/:productId/options/:optionId/values/:valueId', controller.deleteOptionValue.bind(controller))
+
+// Mount image routes
+router.use('/', imagesRoutes)
 
 export default router

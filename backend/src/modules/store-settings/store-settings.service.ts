@@ -40,6 +40,10 @@ export type StoreSettingsPatchInput = Partial<{
     templateKey: string
 
     language: string
+    cartEnabled: boolean
+    codEnabled: boolean
+    currencyCode: string
+    currencyCountry: string
     isCompleted: boolean
 }>
 
@@ -82,6 +86,34 @@ export class StoreSettingsService {
             update.language = input.language
         }
 
+        if (input.cartEnabled !== undefined) {
+            if (typeof input.cartEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('cartEnabled must be a boolean')
+            }
+            update.cartEnabled = input.cartEnabled
+        }
+
+        if (input.codEnabled !== undefined) {
+            if (typeof input.codEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('codEnabled must be a boolean')
+            }
+            update.codEnabled = input.codEnabled
+        }
+
+        if (input.currencyCode !== undefined) {
+            if (typeof input.currencyCode !== 'string' || !/^[A-Z]{3}$/.test(input.currencyCode)) {
+                throw new StoreSettingsValidationError('currencyCode must be an ISO-4217 code (3 uppercase letters)')
+            }
+            update.currencyCode = input.currencyCode.toUpperCase()
+        }
+
+        if (input.currencyCountry !== undefined) {
+            if (typeof input.currencyCountry !== 'string' || !/^[A-Z]{2}$/.test(input.currencyCountry)) {
+                throw new StoreSettingsValidationError('currencyCountry must be an ISO-3166-1 alpha-2 code')
+            }
+            update.currencyCountry = input.currencyCountry.toUpperCase()
+        }
+
         if (input.isCompleted !== undefined) {
             if (typeof input.isCompleted !== 'boolean') {
                 throw new StoreSettingsValidationError('isCompleted must be a boolean')
@@ -98,7 +130,15 @@ export class StoreSettingsService {
 
     buildFrontendAgentSummary(args: {
         tenant: { id: string; slug: string; name: string }
-        settings: { primaryColor: string; templateKey: string; language: string }
+        settings: {
+            primaryColor: string
+            templateKey: string
+            language: string
+            cartEnabled: boolean
+            codEnabled: boolean
+            currencyCode: string
+            currencyCountry: string
+        }
         apiBasePath?: string
     }): { markdown: string; data: any } {
         const apiBasePath = args.apiBasePath ?? '/api'
@@ -136,14 +176,18 @@ export class StoreSettingsService {
             `## Store Settings (Chosen)`,
             `- Template: ${args.settings.templateKey}`,
             `- Primary color: ${args.settings.primaryColor}`,
-
             `- Language: ${args.settings.language}`,
+            `- Cart + checkout enabled: ${args.settings.cartEnabled ? 'yes' : 'no'}`,
+            `- Product page COD form: ${args.settings.codEnabled ? 'enabled' : 'disabled'}`,
+            `- Currency: ${args.settings.currencyCode} (${args.settings.currencyCountry})`,
             ``,
             `## What to Implement`,
             `1) Render storefront using the selected template.`,
             `2) Apply primary color as a CSS variable (e.g. --brand) for buttons/links/accents.`,
-
-            `4) If language is "ar", consider RTL layout and Arabic-friendly typography.`,
+            `3) Show prices with the configured currency code (${args.settings.currencyCode}).`,
+            `4) If cartEnabled is false, hide cart/checkout entry points.`,
+            `5) If codEnabled is true, surface a COD option at checkout.`,
+            `6) If language is "ar", consider RTL layout and Arabic-friendly typography.`,
             ``,
             `## Backend API (Tenant-scoped)`,
             `- Public store settings: GET ${data.api.public.storeSettings}`,
@@ -159,4 +203,3 @@ export class StoreSettingsService {
         return { markdown, data }
     }
 }
-

@@ -1,85 +1,6 @@
-<template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your account
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Or
-          <NuxtLink to="/register" class="font-medium text-indigo-600 hover:text-indigo-500">
-            start your 14-day free trial
-          </NuxtLink>
-        </p>
-      </div>
-      <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
-        <input type="hidden" name="remember" value="true" />
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div>
-            <label for="email-address" class="sr-only">Email address</label>
-            <input
-              id="email-address"
-              name="email"
-              type="email"
-              autocomplete="email"
-              required
-              v-model="email"
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
-            />
-          </div>
-          <div>
-            <label for="password" class="sr-only">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autocomplete="current-password"
-              required
-              v-model="password"
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
-            />
-          </div>
-        </div>
-
-        <div v-if="errorMessage" class="text-red-500 text-sm text-center">
-            {{ errorMessage }}
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            :disabled="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-              <!-- Heroicon name: solid/lock-closed -->
-              <svg
-                class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </span>
-            <span v-if="loading">Signing in...</span>
-            <span v-else>Sign in</span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { ref } from 'vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -92,7 +13,7 @@ const errorMessage = ref('')
 definePageMeta({
   middleware: 'saas-only',
   layout: 'marketing',
-  title: 'Login'
+  title: 'Login - MySaaS'
 })
 
 async function handleLogin() {
@@ -115,3 +36,164 @@ async function handleLogin() {
   }
 }
 </script>
+
+<template>
+  <div class="min-h-screen flex bg-white font-sans">
+    
+    <!-- LEFT SIDE: Marketing / Visual (Hidden on mobile) -->
+    <div class="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12 text-white">
+      <!-- Animated Background -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-[10%] left-[10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[100px] animate-blob" />
+        <div class="absolute bottom-[10%] right-[10%] w-[50%] h-[50%] bg-violet-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000" />
+        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+      </div>
+
+
+
+      <div class="relative z-10 max-w-lg">
+        <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
+          Welcome back, <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Builder</span>.
+        </h2>
+        <p class="text-lg text-slate-400 mb-8 leading-relaxed">
+          Your dashboard is ready. Continue managing your orders, products, and analytics from one central hub.
+        </p>
+
+    <!-- Mini Feature Highlight -->
+        <div class="flex items-start gap-4 p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
+          <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-white mb-1">Revenue Tracking</h4>
+            <p class="text-sm text-slate-400">Real-time insights into your store's performance at a glance.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative z-10 text-xs text-slate-500">
+        © 2026 MySaaS Inc.
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: Form -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 relative">
+      <div class="max-w-md w-full space-y-8">
+        
+        <div class="text-center lg:text-left">
+
+          <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Log in to your account</h2>
+          <p class="mt-2 text-slate-500">Access your tenant workspace.</p>
+        </div>
+
+        <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
+          
+          <!-- OAuth Buttons -->
+          <div class="grid grid-cols-3 gap-3">
+             <button type="button" class="flex items-center justify-center py-2.5 px-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google">
+             </button>
+             <button type="button" class="flex items-center justify-center py-2.5 px-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
+                <img src="https://www.svgrepo.com/show/448234/apple.svg" class="h-5 w-5" alt="Apple">
+             </button>
+             <button type="button" class="flex items-center justify-center py-2.5 px-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
+                <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook">
+             </button>
+          </div>
+
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+              <div class="w-full border-t border-slate-200"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white text-slate-500">Or continue with</span>
+            </div>
+          </div>
+
+          <div class="space-y-5">
+            <!-- Email -->
+            <div>
+              <label for="email-address" class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+              <input 
+                id="email-address" 
+                v-model="email" 
+                name="email" 
+                type="email" 
+                autocomplete="email" 
+                required 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                placeholder="name@company.com"
+              >
+            </div>
+
+            <!-- Password -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                 <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                 <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Forgot password?</a>
+              </div>
+              <input 
+                id="password" 
+                v-model="password" 
+                name="password" 
+                type="password" 
+                autocomplete="current-password" 
+                required 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                placeholder="••••••••"
+              >
+            </div>
+          </div>
+
+          <div v-if="errorMessage" class="rounded-lg bg-red-50 p-4 border border-red-100 flex items-center gap-3">
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-sm text-red-700 font-medium">{{ errorMessage }}</span>
+          </div>
+
+          <div>
+            <button 
+              type="submit" 
+              :disabled="loading"
+              class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5"
+            >
+              <span v-if="loading" class="flex items-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Signing in...
+              </span>
+              <span v-else>Sign in</span>
+            </button>
+          </div>
+          
+          <div class="text-center text-sm text-slate-500">
+            Don't have an account? <NuxtLink to="/register" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">Start for free</NuxtLink>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.animate-blob {
+  animation: blob 10s infinite alternate;
+}
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+@keyframes blob {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, -20px) scale(1.1); }
+  100% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

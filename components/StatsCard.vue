@@ -1,11 +1,20 @@
 <template>
-  <div class="stat-card" :class="`stat-card-${color}`">
+  <div
+    class="stat-card"
+    :class="`stat-card-${color}`"
+  >
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-sm font-medium opacity-80">{{ label }}</p>
-        <p class="text-3xl font-bold mt-1">{{ formattedValue }}</p>
+        <p class="text-sm font-medium opacity-80">
+          {{ label }}
+        </p>
+        <p class="text-3xl font-bold mt-1">
+          {{ formattedValue }}
+        </p>
       </div>
-      <div class="text-4xl opacity-70">{{ icon }}</div>
+      <div class="text-4xl opacity-70">
+        {{ icon }}
+      </div>
     </div>
   </div>
 </template>

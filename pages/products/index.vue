@@ -39,5 +39,8 @@ const ActiveTemplate = computed(() => shopTemplates[templateKey.value])
 </script>
 
 <template>
-  <component :is="ActiveTemplate" :products="products" />
+  <component
+    :is="ActiveTemplate"
+    :products="products"
+  />
 </template>

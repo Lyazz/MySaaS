@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModernProduct from '../../components/storefront/templates/modern/Product.vue'
 import { createTestingPinia } from '@pinia/testing'
+import { useState } from '#imports'
 
 describe('ModernProduct', () => {
     const mockProduct = {
@@ -14,6 +15,11 @@ describe('ModernProduct', () => {
         isActive: true,
         images: ['img1.jpg', 'img2.jpg']
     }
+
+    beforeEach(() => {
+        const storeSettings = useState<any>('storeSettings')
+        storeSettings.value = undefined
+    })
 
     it('renders product details correctly', () => {
         const wrapper = mount(ModernProduct, {
@@ -50,5 +56,21 @@ describe('ModernProduct', () => {
         const orderBtn = buttons.find(b => b.text().includes('Confirm Order'))
         expect(orderBtn).toBeDefined()
         expect(orderBtn?.exists()).toBe(true)
+    })
+
+    it('hides COD form when disabled in settings', () => {
+        const storeSettings = useState<any>('storeSettings')
+        storeSettings.value = { codEnabled: false, currencyCode: 'DZD' }
+
+        const wrapper = mount(ModernProduct, {
+            props: { product: mockProduct },
+            global: {
+                plugins: [createTestingPinia({ createSpy: vi.fn })],
+                stubs: { NuxtLink: true }
+            }
+        })
+
+        expect(wrapper.find('[data-test="cod-order-card"]').exists()).toBe(false)
+        expect(wrapper.find('[data-test="cod-disabled-alert"]').exists()).toBe(true)
     })
 })

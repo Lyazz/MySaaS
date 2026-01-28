@@ -38,5 +38,10 @@ const activeTemplate = computed(() => homeTemplates[templateKey.value])
 </script>
 
 <template>
-  <component :is="activeTemplate" :tenant-name="tenantName" :featured-products="featuredProducts" :pending="pending" />
+  <component
+    :is="activeTemplate"
+    :tenant-name="tenantName"
+    :featured-products="featuredProducts"
+    :pending="pending"
+  />
 </template>
