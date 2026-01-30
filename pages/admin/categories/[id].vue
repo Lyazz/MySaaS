@@ -85,41 +85,23 @@
         class="bg-white rounded-lg shadow p-6 space-y-6"
         @submit.prevent="handleSubmit"
       >
-        <AdminFormField
+        <BaseInput
+          v-model="form.title"
           label="Category Title"
           :error="errors.title"
+          placeholder="Enter category title"
           required
-        >
-          <template #default="{ inputId }">
-            <input
-              :id="inputId"
-              v-model="form.title"
-              type="text"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="Enter category title"
-            >
-          </template>
-        </AdminFormField>
+        />
 
-        <AdminFormField
+        <BaseInput
+          v-model="form.slug"
           label="Category Slug"
           :error="errors.slug"
+          placeholder="category-slug"
           hint="URL-friendly version of the title"
           required
-        >
-          <template #default="{ inputId }">
-            <input
-              :id="inputId"
-              v-model="form.slug"
-              type="text"
-              required
-              pattern="[a-z0-9-]+"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="category-slug"
-            >
-          </template>
-        </AdminFormField>
+          pattern="[a-z0-9-]+"
+        />
 
         <SingleImageUploader
           v-model="form.imageUrl"
@@ -178,6 +160,7 @@
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
 import SingleImageUploader from '~/components/admin/SingleImageUploader.vue'
+import BaseInput from '~/components/ui/BaseInput.vue'
 
 definePageMeta({
   middleware: 'auth',

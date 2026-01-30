@@ -4,7 +4,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret'
+const JWT_SECRET = process.env.JWT_SECRET!
 
 describe('Delivery API', () => {
     let tenantA: any
@@ -89,7 +89,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .post('/api/delivery/options')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('x-tenant-id', tenantA.id)
+            .set('Host', `${tenantA.slug}.platform.com`)
             .send({
                 provider: 'SELF',
                 destination: { wilayaCode: '16' }
@@ -99,6 +99,15 @@ describe('Delivery API', () => {
         expect(Array.isArray(res.body)).toBe(true)
         expect(res.body[0].price).toBe(500)
         expect(res.body[0].source).toBe('fallback-rate')
+    })
+
+    it('does not allow tenant resolution via x-tenant-id header', async () => {
+        const res = await request(app)
+            .get('/api/delivery/companies')
+            .set('x-tenant-id', tenantA.id)
+
+        expect(res.status).toBe(400)
+        expect(res.body.statusMessage).toContain('Tenant is required')
     })
 
     it('creates self shipment idempotently', async () => {
@@ -114,7 +123,7 @@ describe('Delivery API', () => {
         const first = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('x-tenant-id', tenantA.id)
+            .set('Host', `${tenantA.slug}.platform.com`)
             .send(payload)
 
         expect(first.status).toBe(201)
@@ -123,7 +132,7 @@ describe('Delivery API', () => {
         const second = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('x-tenant-id', tenantA.id)
+            .set('Host', `${tenantA.slug}.platform.com`)
             .send(payload)
 
         expect(second.status).toBe(201)
@@ -134,7 +143,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .get(`/api/shipments/${shipmentSelfId}`)
             .set('Authorization', `Bearer ${tokenB}`)
-            .set('x-tenant-id', tenantB.id)
+            .set('Host', `${tenantB.slug}.platform.com`)
 
         expect(res.status).toBe(404)
     })
@@ -143,7 +152,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .post(`/api/self/shipments/${shipmentSelfId}/status`)
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('x-tenant-id', tenantA.id)
+            .set('Host', `${tenantA.slug}.platform.com`)
             .send({ status: 'DELIVERED' })
 
         expect(res.status).toBe(200)

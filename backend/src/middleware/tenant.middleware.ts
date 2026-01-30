@@ -3,7 +3,8 @@ import prisma from '../lib/prisma'
 import { parseHost } from '../lib/tenant-host'
 
 export const expressTenantMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    const host = req.get('x-forwarded-host') || req.get('host') || ''
+    const trustProxy = process.env.TRUST_PROXY === 'true'
+    const host = (trustProxy ? req.get('x-forwarded-host') : null) || req.get('host') || ''
     const parsed = parseHost(host)
     if (parsed.kind === 'tenant-subdomain' || parsed.kind === 'custom-domain') {
         try {
@@ -28,19 +29,6 @@ export const expressTenantMiddleware = async (req: Request, res: Response, next:
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     } else {
-        // Fallback: allow explicit tenant header for internal/admin API calls
-        const tenantId = req.get('x-tenant-id')
-        if (tenantId) {
-            try {
-                const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } })
-                if (tenant) {
-                    req.tenant = tenant
-                }
-            } catch (error) {
-                console.error('Tenant header resolution error', error)
-                return res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
-            }
-        }
         // No tenant specific request, proceed (might be main site or super admin)
         next()
     }

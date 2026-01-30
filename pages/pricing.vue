@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 definePageMeta({
   layout: 'marketing',
-  title: 'Pricing - MySaaS'
+  title: 'Pricing - Swekly'
 })
 
 const isAnnual = ref(false)

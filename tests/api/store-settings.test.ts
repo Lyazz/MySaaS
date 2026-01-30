@@ -33,7 +33,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         const user = await prisma.user.findFirst({ where: { email: emailA } })
         expect(user).toBeTruthy()
 
-        const secret = process.env.JWT_SECRET || 'secret'
+        const secret = process.env.JWT_SECRET!
         tokenA = jwt.sign({ userId: user!.id }, secret, { expiresIn: '1h' })
 
         const settings = await prisma.storeSettings.findUnique({ where: { tenantId: user!.tenantId } })
@@ -102,7 +102,7 @@ describe('Store Settings (Tenant Admin)', async () => {
 
         const userB = await prisma.user.findFirst({ where: { email: emailB } })
         expect(userB).toBeTruthy()
-        const secret = process.env.JWT_SECRET || 'secret'
+        const secret = process.env.JWT_SECRET!
         tokenB = jwt.sign({ userId: userB!.id }, secret, { expiresIn: '1h' })
 
         // Token A trying to access tenant B via tenant host

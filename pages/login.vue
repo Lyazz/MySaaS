@@ -13,7 +13,7 @@ const errorMessage = ref('')
 definePageMeta({
   middleware: 'saas-only',
   layout: 'marketing',
-  title: 'Login - MySaaS'
+  title: 'Login - Swekly'
 })
 
 async function handleLogin() {
@@ -72,7 +72,7 @@ async function handleLogin() {
       </div>
 
       <div class="relative z-10 text-xs text-slate-500">
-        © 2026 MySaaS Inc.
+        © 2026 Swekly Inc.
       </div>
     </div>
 

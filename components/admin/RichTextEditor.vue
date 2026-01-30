@@ -20,7 +20,7 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { useToast } from '~/composables/useToast'
 
 const props = defineProps<{
-  modelValue: string
+  modelValue: string | null
   placeholder?: string
 }>()
 

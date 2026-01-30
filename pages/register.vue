@@ -4,7 +4,7 @@ import { ref, watch, onMounted } from 'vue'
 definePageMeta({
   middleware: 'saas-only',
   layout: 'marketing',
-  title: 'Register - MySaaS'
+  title: 'Register - Swekly'
 })
 
 const form = ref({
@@ -75,7 +75,7 @@ async function register() {
           <div class="flex gap-1 text-amber-400 mb-3">
             <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
           </div>
-          <p class="text-slate-300 italic mb-4">"Moving to MySaaS was the best decision we made. Our revenue doubled in 3 months."</p>
+          <p class="text-slate-300 italic mb-4">"Moving to Swekly was the best decision we made. Our revenue doubled in 3 months."</p>
           <div class="flex items-center gap-3">
              <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">JD</div>
              <div class="text-sm">
@@ -87,7 +87,7 @@ async function register() {
       </div>
 
       <div class="relative z-10 text-xs text-slate-500">
-        © 2026 MySaaS Inc.
+        © 2026 Swekly Inc.
       </div>
     </div>
 
@@ -151,11 +151,11 @@ async function register() {
                   placeholder="acme"
                 >
                 <span class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-sm font-medium">
-                  .mysaas.com
+                  .swekly.com
                 </span>
               </div>
               <p v-if="form.slug" class="mt-1 text-xs text-teal-500 font-medium">
-                Your store will be at: {{ form.slug }}.mysaas.com
+                Your store will be at: {{ form.slug }}.swekly.com
               </p>
             </div>
 

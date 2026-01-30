@@ -137,13 +137,13 @@
                   {{ item.product?.title || 'Product' }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900">
-                  ${{ Number(item.price).toFixed(2) }}
+                  {{ Number(item.price).toFixed(2) }} {{ currencyCode }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900">
                   {{ item.quantity }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900 text-right">
-                  ${{ (Number(item.price) * item.quantity).toFixed(2) }}
+                  {{ (Number(item.price) * item.quantity).toFixed(2) }} {{ currencyCode }}
                 </td>
               </tr>
             </tbody>
@@ -156,7 +156,7 @@
                   Total
                 </td>
                 <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
-                  ${{ Number(order.totalAmount).toFixed(2) }}
+                  {{ Number(order.totalAmount).toFixed(2) }} {{ currencyCode }}
                 </td>
               </tr>
             </tfoot>
@@ -180,10 +180,9 @@
             >
               Status
             </label>
-            <select
+            <BaseSelect
               id="status"
               v-model="newStatus"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="PENDING">
                 Pending
@@ -200,7 +199,7 @@
               <option value="CANCELLED">
                 Cancelled
               </option>
-            </select>
+            </BaseSelect>
           </div>
 
           <div
@@ -267,6 +266,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -275,6 +275,8 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const storeSettings = useState<any>('storeSettings')
+const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
 const route = useRoute()
 const orderId = route.params.id as string
 

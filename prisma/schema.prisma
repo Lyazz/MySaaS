@@ -236,15 +236,28 @@ model InventoryMovement {
 }
 
 model Order {
-  id          String @id @default(uuid())
-  tenantId    String
-  tenant      Tenant @relation(fields: [tenantId], references: [id])
-  status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
-  totalAmount Float
+  id           String @id @default(uuid())
+  tenantId     String
+  tenant       Tenant @relation(fields: [tenantId], references: [id])
+  status       String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  totalAmount  Float
 
   customerName    String
   customerPhone   String
   customerAddress String?
+
+  deliveryMode         String           @default("home") // home | pickup | store
+  shippingProvider     ShipmentProvider?
+  shippingServiceLevel String?
+  shippingAmount       Float?
+  shippingCurrency     String           @default("DZD")
+  shippingWilayaCode   String?
+  shippingCommuneCode  String?
+  shippingAddressLine1 String?
+  shippingAddressLine2 String?
+  shippingNotes        String?
+  shippingEtaMinDays   Int?
+  shippingEtaMaxDays   Int?
 
   items     OrderItem[]
   shipments Shipment[]
@@ -258,6 +271,8 @@ model Order {
 enum ShipmentProvider {
   MAYSTRO
   YALIDINE
+  ECOTRACK
+  ZR_EXPRESS
   SELF
 }
 
@@ -365,5 +380,4 @@ model AuditLog {
   tenantId  String? // Tenant context usually null for super admin actions but good to have
   createdAt DateTime @default(now())
 }
-
 

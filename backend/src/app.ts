@@ -6,7 +6,11 @@ import routes from './routes'
 
 const app = express()
 
-app.use(express.json())
+app.disable('x-powered-by')
+if (process.env.TRUST_PROXY === 'true') {
+    app.set('trust proxy', 1)
+}
+app.use(express.json({ limit: '1mb' }))
 app.use(expressTenantMiddleware)
 app.use(expressAuthMiddleware)
 

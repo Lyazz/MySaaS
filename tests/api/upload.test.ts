@@ -85,7 +85,7 @@ describe('Upload API (Tenant Admin)', async () => {
         expect(user).toBeTruthy()
         tenantId = user!.tenantId
 
-        const secret = process.env.JWT_SECRET || 'secret'
+        const secret = process.env.JWT_SECRET!
         token = jwt.sign({ userId: user!.id }, secret, { expiresIn: '1h' })
     })
 

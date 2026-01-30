@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import prisma from '../../lib/prisma'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import { signAccessToken } from '../../lib/jwt'
 
 const router = Router()
 
@@ -136,11 +136,12 @@ router.post('/login', async (req, res) => {
             })
         }
 
-        const token = jwt.sign(
-            { userId: user.id, email: user.email, role: user.role, tenantId: user.tenantId },
-            process.env.JWT_SECRET || 'secret',
-            { expiresIn: '24h' }
-        )
+        const token = signAccessToken({
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+            tenantId: user.tenantId
+        })
 
         // Return user info sans password
         const { passwordHash, ...userInfo } = user

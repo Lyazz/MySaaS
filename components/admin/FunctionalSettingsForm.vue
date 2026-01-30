@@ -31,7 +31,7 @@
             <div class="flex items-start md:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-sm transition-all duration-200">
               <div class="flex-1 pr-4">
                 <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                  <Icon name="lucide:shopping-cart" class="w-4 h-4 text-teal-600" />
+                  <Icon name="lucide:handbag" class="w-4 h-4 text-teal-600" />
                   Cart & Checkout
                 </h4>
                 <p class="text-sm text-slate-500 mt-1">
@@ -72,13 +72,11 @@
           
           <div class="mt-6 md:mt-0 md:col-span-2">
             <label class="block text-sm font-medium text-slate-700 mb-2">Select Currency</label>
-            <div class="relative">
-              <select
+            <BaseSelect
                 v-model="form.currencyCountry"
-                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 py-2.5 px-3 pr-10 text-slate-700 bg-white"
                 :disabled="loadingCurrencies"
                 @change="onCountryChange"
-              >
+            >
                 <option v-if="loadingCurrencies" value="" disabled>Loading currencies...</option>
                 <option
                   v-for="c in currencies"
@@ -87,11 +85,7 @@
                 >
                   {{ c.label }}
                 </option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                <Icon name="lucide:chevron-down" class="h-4 w-4" />
-              </div>
-            </div>
+            </BaseSelect>
             <p class="mt-2 text-xs text-slate-500">
               Note: Changing currency may not automatically convert existing product prices.
             </p>
@@ -197,6 +191,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import BaseToggle from '~/components/ui/BaseToggle.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 const authStore = useAuthStore()
 const loading = ref(false)

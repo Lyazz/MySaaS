@@ -7,6 +7,7 @@ const controller = new DeliveryController()
 
 // Public-ish: needs tenant context, no auth
 router.post('/delivery/options', controller.getOptions.bind(controller))
+router.get('/delivery/companies', controller.listCompanies.bind(controller))
 
 // Admin required
 router.post('/shipments', requireTenantAdmin, controller.createShipment.bind(controller))

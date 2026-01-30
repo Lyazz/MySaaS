@@ -21,7 +21,7 @@ const categoryProducts = computed(() => {
     <div class="max-w-7xl mx-auto px-4">
       <NuxtLink
         to="/products"
-        class="text-teal-600 hover:underline mb-6 inline-flex items-center gap-2"
+        class="text-brand-600 hover:underline mb-6 inline-flex items-center gap-2"
       >
         <span aria-hidden="true">&larr;</span> Back to Products
       </NuxtLink>

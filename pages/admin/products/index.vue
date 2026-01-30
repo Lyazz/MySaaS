@@ -24,18 +24,15 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input
+          <BaseInput
             v-model="searchQuery"
-            type="text"
             placeholder="Search products..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-          >
+          />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <select
+          <BaseSelect
             v-model="selectedCategory"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+            label="Category"
           >
             <option value="">
               All Categories
@@ -47,13 +44,12 @@
             >
               {{ cat.title }}
             </option>
-          </select>
+          </BaseSelect>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select
+          <BaseSelect
             v-model="selectedStatus"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+            label="Status"
           >
             <option value="">
               All Status
@@ -64,7 +60,7 @@
             <option value="inactive">
               Inactive
             </option>
-          </select>
+          </BaseSelect>
         </div>
       </div>
     </div>
@@ -363,6 +359,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
+
+import BaseSelect from '~/components/ui/BaseSelect.vue'
+import BaseInput from '~/components/ui/BaseInput.vue'
  
 definePageMeta({
   middleware: 'auth',

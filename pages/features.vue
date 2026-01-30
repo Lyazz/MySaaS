@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'marketing',
-  title: 'Features - MySaaS'
+  title: 'Features - Swekly'
 })
 
 const features = [
@@ -60,7 +60,7 @@ const features = [
        
        <div class="relative z-10 max-w-3xl mx-auto">
          <h1 class="text-4xl md:text-5xl font-black mb-6">Everything you need to <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Scale</span></h1>
-         <p class="text-slate-400 text-lg">MySaaS is more than just a store builder. It's an entire operating system for your commerce business.</p>
+         <p class="text-slate-400 text-lg">Swekly is more than just a store builder. It's an entire operating system for your commerce business.</p>
        </div>
     </div>
 

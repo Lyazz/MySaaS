@@ -38,7 +38,7 @@ describe('Express Admin API', async () => {
         userId = user!.id
 
         // Generate valid JWT using matching secret
-        const secret = process.env.JWT_SECRET || 'secret'
+        const secret = process.env.JWT_SECRET!
         token = jwt.sign(
             { userId: user!.id, email: user!.email, role: user!.role, tenantId: user!.tenantId },
             secret,

@@ -150,7 +150,7 @@ const isOptionValueAvailable = (optionId: string, valueId: string) => {
             </div>
 
 
-            <!-- Image Type -->
+             <!-- Image Type -->
              <div v-else-if="option.displayType === 'image'" class="flex flex-wrap gap-3">
                  <button 
                     v-for="value in option.values"
@@ -171,12 +171,6 @@ const isOptionValueAvailable = (optionId: string, valueId: string) => {
                  >
                      <img v-if="value.meta" :src="value.meta" class="w-full h-full object-cover" />
                      <span v-else class="text-xs text-slate-400">{{ value.label }}</span>
-                     
-                     <div v-if="selectedOptions[option.id] === value.id" class="absolute inset-0 bg-brand-600/10 flex items-center justify-center">
-                         <div class="bg-brand-600 text-white rounded-full p-0.5 shadow-sm">
-                             <Icon name="lucide:check" class="w-4 h-4" />
-                         </div>
-                     </div>
                  </button>
              </div>
 

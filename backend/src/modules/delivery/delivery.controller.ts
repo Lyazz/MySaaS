@@ -30,6 +30,19 @@ export class DeliveryController {
         }
     }
 
+    async listCompanies(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        try {
+            const companies = await service.listCompanies(tenant.id)
+            res.json(companies)
+        } catch (error) {
+            console.error('List delivery companies error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async createShipment(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })

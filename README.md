@@ -32,7 +32,7 @@ The platform is designed to start with **~100 tenants** and scale safely.
 
   - About / Contact
 - **Premium SaaS Landing Page**:
-  - Modern, responsive design ("MySaaS" styling)
+  - Modern, responsive design ("Swekly" styling)
   - Features showcase, Pricing, Social Proof
   - SEO optimized
 - SEO-friendly URLs and pages

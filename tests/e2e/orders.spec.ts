@@ -74,7 +74,7 @@ test.describe('Orders Dashboard - Tenant Isolation', () => {
         // Generate token for Tenant A
         tenantAToken = jwt.sign(
             { userId: userA.id, email: userA.email, role: userA.role, tenantId: userA.tenantId },
-            process.env.JWT_SECRET || 'secret',
+            process.env.JWT_SECRET!,
             { expiresIn: '24h' }
         )
 
@@ -93,7 +93,7 @@ test.describe('Orders Dashboard - Tenant Isolation', () => {
         // Generate token for Tenant B
         tenantBToken = jwt.sign(
             { userId: userB.id, email: userB.email, role: userB.role, tenantId: userB.tenantId },
-            process.env.JWT_SECRET || 'secret',
+            process.env.JWT_SECRET!,
             { expiresIn: '24h' }
         )
 

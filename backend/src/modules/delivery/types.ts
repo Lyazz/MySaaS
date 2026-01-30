@@ -7,6 +7,7 @@ export type QuoteRequest = {
         wilayaCode: string
         communeCode?: string
     }
+    originWilayaCode?: string
     weight?: number
     codAmount?: number
     serviceLevel?: string
@@ -64,4 +65,5 @@ export interface DeliveryProvider {
     track?(shipment: Shipment): Promise<TrackingEvent[]>
     getLabel?(shipment: Shipment): Promise<string | null>
     handleWebhook?(payload: any): Promise<{ shipmentId?: string; events?: TrackingEvent[]; status?: ShipmentStatus } | null>
+    listCompanies?(): Promise<{ code: string; name: string }[]>
 }

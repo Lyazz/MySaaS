@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { Vue3Marquee } from 'vue3-marquee'
 
 useSeoMeta({
-  title: 'MySaaS - The Future of Commerce',
+  title: 'Swekly - The Future of Commerce',
   description: 'The all-in-one platform to build, sell, and scale your B2B or B2C business with enterprise-grade tools.',
 })
 
@@ -43,6 +43,9 @@ const startCounter = () => {
     requestAnimationFrame(animate)
   })
 }
+
+// Remove manual observer setup
+
 
 // --- Features (Bento Grid) ---
 const features = [
@@ -135,17 +138,17 @@ const testimonials = [
 onMounted(() => {
   const observerCallback = (entries: IntersectionObserverEntry[]) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        if (entry.target === statsSection.value) startCounter()
-        entry.target.classList.add('is-visible')
+      if (entry.isIntersecting && entry.target === statsSection.value) {
+        startCounter()
+        // Disconnect after triggering once
+        if (observer) observer.disconnect()
       }
     })
   }
   
-  const observer = new IntersectionObserver(observerCallback, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' })
+  const observer = new IntersectionObserver(observerCallback, { threshold: 0.15 })
   
   if (statsSection.value) observer.observe(statsSection.value)
-  document.querySelectorAll('.reveal-item').forEach(el => observer.observe(el))
 })
 </script>
 
@@ -167,7 +170,10 @@ onMounted(() => {
 
 
         <!-- Headline -->
-        <h1 class="reveal-item mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-400 leading-[1.1]">
+        <h1 
+          v-motion-slide-visible-once-bottom
+          class="mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-400 leading-[1.1]"
+        >
           Build. Sell. <br class="md:hidden" />
           <span class="text-teal-400 inline-block relative">
             Scale.
@@ -176,12 +182,20 @@ onMounted(() => {
         </h1>
 
         <!-- Subhead -->
-        <p class="reveal-item max-w-2xl text-lg md:text-xl text-slate-400 mb-10 leading-relaxed">
+        <p 
+          v-motion-slide-visible-once-bottom
+          :delay="200"
+          class="max-w-2xl text-lg md:text-xl text-slate-400 mb-10 leading-relaxed"
+        >
           The all-in-one platform engineered for modern commerce. Focus on your product, we handle the infrastructure, payments, and logistics.
         </p>
 
         <!-- CTA Buttons -->
-        <div class="reveal-item flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <div 
+          v-motion-slide-visible-once-bottom
+          :delay="300"
+          class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+        >
           <NuxtLink to="/register" class="group relative px-8 py-4 bg-teal-600 rounded-xl font-bold text-white shadow-xl shadow-teal-600/20 overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-teal-600/40">
             <div class="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-100 group-hover:opacity-90 transition-opacity" />
             <span class="relative flex items-center justify-center gap-2">
@@ -196,12 +210,23 @@ onMounted(() => {
         </div>
 
         <!-- Dashboard Preview (Floating/Glassmorphism) -->
-        <div class="reveal-item mt-20 p-2 rounded-2xl bg-gradient-to-b from-slate-700/20 to-slate-800/20 border border-slate-700/40 backdrop-blur-sm shadow-2xl shadow-teal-500/10 max-w-6xl w-full rotate-x">
+        <div 
+          v-motion-slide-visible-once-bottom
+          :delay="400"
+          class="mt-20 p-2 rounded-2xl bg-gradient-to-b from-slate-700/20 to-slate-800/20 border border-slate-700/40 backdrop-blur-sm shadow-2xl shadow-teal-500/10 max-w-6xl w-full rotate-x"
+        >
           <div class="rounded-xl overflow-hidden bg-slate-900 border border-slate-800 relative aspect-[16/9] group">
-            <div class="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-slate-600 font-medium">[ Dashboard Preview Animation / Video Placeholder ]</span>
-            </div>
+            <video 
+              class="absolute inset-0 w-full h-full object-cover" 
+              autoplay 
+              muted 
+              loop 
+              playsinline 
+              poster="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop"
+            >
+              <source src="/placeholder-video.mp4" type="video/mp4" />
+            </video>
+            <div class="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10" />
             <!-- Interactive Dots mock -->
             <div class="absolute top-4 left-4 flex gap-2">
               <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
@@ -219,17 +244,29 @@ onMounted(() => {
     <section class="py-24 md:py-32 bg-slate-50 relative overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-20">
-          <h2 class="reveal-item text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Everything you need to <span class="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">dominate</span></h2>
-          <p class="reveal-item text-lg text-slate-500 max-w-2xl mx-auto">Powerful tools designed for growth, packaged in a beautiful interface.</p>
+          <h2 
+            v-motion-slide-visible-once-bottom
+            class="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight"
+          >
+            Everything you need to <span class="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">dominate</span>
+          </h2>
+          <p 
+            v-motion-slide-visible-once-bottom
+            :delay="100"
+            class="text-lg text-slate-500 max-w-2xl mx-auto"
+          >
+            Powerful tools designed for growth, packaged in a beautiful interface.
+          </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
           <div 
             v-for="(feature, idx) in features" 
             :key="idx"
-            class="reveal-item group relative rounded-3xl p-8 border hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
+            class="group relative rounded-3xl p-8 border hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
             :class="[feature.colSpan, feature.bgClass, feature.borderClass]"
-            :style="{ transitionDelay: `${idx * 100}ms` }"
+            v-motion-slide-visible-once-bottom
+            :delay="idx * 100"
           >
             <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity transform group-hover:scale-110 duration-500">
                <Icon :name="feature.icon" class="w-32 h-32 text-current" />
@@ -448,16 +485,7 @@ onMounted(() => {
   100% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
-.reveal-item {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
-.reveal-item.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
 
 /* 3D tilt effect attempt for dashboard */
 .rotate-x {

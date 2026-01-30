@@ -42,7 +42,7 @@ describe('Super Admin API Tests', () => {
 
         // Generate tokens (simplified - in real app would use JWT)
         const jwt = require('jsonwebtoken')
-        const secret = process.env.JWT_SECRET || 'secret'
+        const secret = process.env.JWT_SECRET!
         superAdminToken = jwt.sign({ userId: superAdmin.id }, secret)
         regularToken = jwt.sign({ userId: regularUser.id }, secret)
     })

@@ -12,6 +12,9 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true // Non-blocking
 })
 
+const storeSettings = useState<any>('storeSettings')
+const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
+
 // Dynamic Filters
 const filters = computed(() => ({
     categories: categoryData.value || [],
@@ -286,7 +289,7 @@ const closeQuickView = () => {
             </h4>
             <div class="flex items-center gap-4">
                <div class="relative w-full">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">{{ currencyCode }}</span>
                   <input 
                     v-model.number="minPriceInput"
                     type="number" 
@@ -296,7 +299,7 @@ const closeQuickView = () => {
                </div>
                <span class="text-slate-400">-</span>
                <div class="relative w-full">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">{{ currencyCode }}</span>
                   <input 
                     v-model.number="maxPriceInput"
                     type="number"
@@ -324,28 +327,28 @@ const closeQuickView = () => {
                      <div class="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
                          <img src="https://placehold.co/100x100" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                      </div>
-                     <div>
-                         <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">Premium Headphones</h5>
-                         <span class="text-xs font-semibold text-slate-500">$299.00</span>
-                     </div>
+                      <div>
+                          <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">Premium Headphones</h5>
+                          <span class="text-xs font-semibold text-slate-500">299.00 {{ currencyCode }}</span>
+                      </div>
                  </div>
                  <div class="flex gap-3 group cursor-pointer">
                      <div class="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
                          <img src="https://placehold.co/100x100" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                      </div>
-                     <div>
-                         <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">Ergonomic Chair</h5>
-                         <span class="text-xs font-semibold text-slate-500">$549.00</span>
-                     </div>
+                      <div>
+                          <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">Ergonomic Chair</h5>
+                          <span class="text-xs font-semibold text-slate-500">549.00 {{ currencyCode }}</span>
+                      </div>
                  </div>
                  <div class="flex gap-3 group cursor-pointer">
                      <div class="w-16 h-16 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
                          <img src="https://placehold.co/100x100" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                      </div>
-                     <div>
-                         <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">4K Monitor</h5>
-                         <span class="text-xs font-semibold text-slate-500">$399.00</span>
-                     </div>
+                      <div>
+                          <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">4K Monitor</h5>
+                          <span class="text-xs font-semibold text-slate-500">399.00 {{ currencyCode }}</span>
+                      </div>
                  </div>
              </div>
           </div>
@@ -536,7 +539,7 @@ const closeQuickView = () => {
                     <span class="inline-block px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-bold uppercase tracking-widest mb-4">In Stock</span>
                     <h2 class="text-3xl font-bold text-slate-900 mb-2">{{ quickViewProduct.title }}</h2>
                     <div class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                        {{ Number(quickViewProduct.price).toLocaleString() }} <span class="text-sm font-medium text-slate-500">DA</span>
+                        {{ Number(quickViewProduct.price).toLocaleString() }} <span class="text-sm font-medium text-slate-500">{{ currencyCode }}</span>
                     </div>
                     <p class="text-slate-600 leading-relaxed mb-8">
                         {{ quickViewProduct.description || 'Experience the perfect blend of style and functionality. Crafted with premium materials for lasting durability.' }}

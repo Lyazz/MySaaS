@@ -6,7 +6,7 @@
         class="text-center py-24"
       >
         <div class="mx-auto h-48 w-48 bg-gray-100 rounded-full flex items-center justify-center mb-8">
-          <Icon name="lucide:shopping-bag" class="h-24 w-24 text-gray-400" />
+          <Icon name="lucide:handbag" class="h-24 w-24 text-gray-400" />
         </div>
         <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
           Your cart is empty
@@ -87,7 +87,7 @@
 
                   <div class="flex flex-1 items-end justify-between pt-4">
                     <p class="text-xl font-bold text-gray-900">
-                      ${{ item.price.toFixed(2) }}
+                      {{ item.price.toFixed(2) }} {{ currencyCode }}
                     </p>
 
                     <div class="flex items-center space-x-3 bg-gray-50 rounded-full px-3 py-1 border border-gray-200">
@@ -132,7 +132,7 @@
                 Subtotal
               </dt>
               <dd class="text-base font-medium text-gray-900">
-                ${{ cartStore.total.toFixed(2) }}
+                {{ cartStore.total.toFixed(2) }} {{ currencyCode }}
               </dd>
             </div>
             <div class="flex items-center justify-between border-b border-gray-100 pb-4">
@@ -148,7 +148,7 @@
                 Tax estimate
               </dt>
               <dd class="text-base font-medium text-gray-900">
-                $0.00
+                0.00 {{ currencyCode }}
               </dd>
             </div>
             <div class="flex items-center justify-between pt-4">
@@ -156,7 +156,7 @@
                 Order total
               </dt>
               <dd class="text-2xl font-bold text-brand">
-                ${{ cartStore.total.toFixed(2) }}
+                {{ cartStore.total.toFixed(2) }} {{ currencyCode }}
               </dd>
             </div>
           </div>
@@ -186,6 +186,8 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const storeSettings = useState<any>('storeSettings')
+const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
 
 // Load cart from localStorage on mount
 onMounted(() => {

@@ -184,7 +184,7 @@ onMounted(() => {
 })
 
 // Compute tenant info
-const tenantName = computed(() => authStore.user?.tenant?.name || 'MySaaS')
+const tenantName = computed(() => authStore.user?.tenant?.name || 'Swekly')
 const tenantInitial = computed(() => tenantName.value.charAt(0).toUpperCase())
 const userInitial = computed(() => authStore.user?.email.charAt(0).toUpperCase() || 'U')
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
@@ -245,7 +245,7 @@ const navItems = [
   {
     path: '/admin/orders',
     label: 'Orders',
-    icon: 'lucide:shopping-bag' // or clipboard-list
+    icon: 'lucide:handbag' // or clipboard-list
   },
   {
     path: '/admin/settings/appearance',

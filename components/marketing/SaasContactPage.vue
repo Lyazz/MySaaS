@@ -1,7 +1,7 @@
 <script setup lang="ts">
 useSeoMeta({
   title: 'Contact Us',
-  description: 'Get in touch with the MySaaS team.'
+  description: 'Get in touch with the Swekly team.'
 })
 </script>
 
@@ -13,8 +13,8 @@ useSeoMeta({
     <p class="text-slate-600 leading-relaxed">
       Email us at <a
         class="text-teal-600 hover:underline"
-        href="mailto:support@mysaas.com"
-      >support@mysaas.com</a>.
+        href="mailto:support@swekly.com"
+      >support@swekly.com</a>.
     </p>
   </div>
 </template>

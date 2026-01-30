@@ -27,7 +27,7 @@ const handleAddToCart = () => {
     <div class="max-w-5xl mx-auto px-4">
       <NuxtLink
         to="/products"
-        class="text-teal-600 hover:underline mb-6 inline-flex items-center gap-2"
+        class="text-brand-600 hover:underline mb-6 inline-flex items-center gap-2"
       >
         <span aria-hidden="true">&larr;</span> Back to Products
       </NuxtLink>
@@ -52,7 +52,7 @@ const handleAddToCart = () => {
           />
 
           <div class="mt-6 flex items-center justify-between">
-            <div class="text-3xl font-bold text-teal-600">
+            <div class="text-3xl font-bold text-brand-600">
               {{ Number(product?.price ?? 0).toFixed(2) }} DA
             </div>
             <div
@@ -71,7 +71,7 @@ const handleAddToCart = () => {
 
           <button
             v-if="storeSettings?.cartEnabled !== false"
-            class="mt-6 w-full px-5 py-3 rounded-xl bg-teal-600 text-white font-medium hover:opacity-90 disabled:bg-slate-300 disabled:cursor-not-allowed transition-opacity"
+            class="mt-6 w-full px-5 py-3 rounded-xl bg-brand-600 text-white font-medium hover:opacity-90 disabled:bg-slate-300 disabled:cursor-not-allowed transition-opacity"
             :disabled="(product?.stock ?? 0) === 0 || product?.isActive === false"
             @click="handleAddToCart"
           >

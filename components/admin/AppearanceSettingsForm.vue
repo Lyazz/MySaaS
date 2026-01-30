@@ -284,7 +284,7 @@ onMounted(() => {
     if (host.includes('localhost')) {
       baseDomain.value = 'localhost:3000'
     } else {
-      // Assuming the platform domain is the last two parts for now, or use 'mysaas.com' as hinted
+      // Assuming the platform domain is the last two parts for now, or use 'swekly.com' as hinted
       // But for generic SaaS, usually it's the root domain.
       // Let's try to strip the current subdomain if it exists.
       const parts = host.split('.')

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
+import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 
 const props = defineProps<{
     product: any
@@ -9,14 +10,52 @@ const props = defineProps<{
     activeImage: string
 }>()
 
+const router = useRouter()
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 
-const isAdding = ref(false)
+const orderSubmitting = ref(false)
+const addToCartSubmitting = ref(false)
 const showSuccess = ref(false)
-const fullName = ref('')
+const successTitle = ref('')
+const successMessage = ref('')
+const orderError = ref('')
+const quantity = ref(1)
+
+const totalPrice = computed(() => {
+    return (props.currentPrice || 0) * quantity.value
+})
+
+
+const incrementQuantity = () => {
+    if (props.currentStock && quantity.value >= props.currentStock) return
+    quantity.value++
+}
+
+const decrementQuantity = () => {
+    if (quantity.value > 1) {
+        quantity.value--
+    }
+}
+
+
+const quickForm = reactive({
+    fullName: '',
+    phone: '',
+    wilaya: '',
+    commune: '',
+    address: ''
+})
+
+onMounted(() => {
+    cartStore.loadFromLocalStorage()
+})
+
+watch(() => props.currentVariant, () => {
+    quantity.value = 1
+})
 
 
 function getVariantTitle(variant: any) {
@@ -29,44 +68,86 @@ function getVariantTitle(variant: any) {
         values.sort((a: any, b: any) => {
             const posA = optionPos.get(a.optionValue?.optionId) ?? 999
             const posB = optionPos.get(b.optionValue?.optionId) ?? 999
-            return posA - posB
+            return (posA as number) - (posB as number)
         })
     }
     
     return values.map((ov: any) => ov.optionValue?.label).join(' / ')
 }
 
+const triggerSuccessToast = (title: string, message: string) => {
+    successTitle.value = title
+    successMessage.value = message
+    showSuccess.value = true
+    setTimeout(() => { showSuccess.value = false }, 3000)
+}
+
 const handleOrderSubmit = async () => {
-  if (!props.product) return
+    if (!props.product) return
+    orderError.value = ''
 
-  if (codEnabled.value && !fullName.value) {
-      alert('Please fill in your name')
-      return 
-  }
-  isAdding.value = true
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800))
+    if (codEnabled.value && !quickForm.fullName.trim()) {
+        orderError.value = 'Please fill in your full name.'
+        return
+    }
 
-  cartStore.addItem({
-      productId: props.product.id,
-      variantId: props.currentVariant?.id,
-      title: props.product.title + (props.currentVariant ? ` (${getVariantTitle(props.currentVariant)})` : ''),
-      slug: props.product.slug,
-      price: props.currentPrice,
-      stock: props.currentStock || 0,
-      image: props.activeImage,
-  })
-  
-  isAdding.value = false
-  showSuccess.value = true
-  setTimeout(() => showSuccess.value = false, 3000)
+    if (codEnabled.value && !quickForm.phone.trim()) {
+        orderError.value = 'Phone number is required.'
+        return
+    }
+
+    orderSubmitting.value = true
+
+    try {
+        const payload = {
+            customerName: quickForm.fullName.trim(),
+            customerPhone: quickForm.phone.trim(),
+            customerAddress: quickForm.address?.trim() || undefined,
+            shippingAddressLine1: quickForm.address?.trim() || undefined,
+            shippingWilayaCode: quickForm.wilaya || undefined,
+            shippingCommuneCode: quickForm.commune || undefined,
+            deliveryMode: 'home',
+            items: [
+                {
+                    productId: props.product.id,
+                    variantId: props.currentVariant?.id,
+                    quantity: quantity.value
+                }
+            ]
+        }
+
+        const response = await $fetch<{ orderId: string }>(useTenantApiUrl('/api/orders'), {
+            method: 'POST',
+            body: payload,
+            headers: {
+                ...(useTenantApiHeaders() || {})
+            }
+        })
+
+        triggerSuccessToast('Order received!', 'We will contact you shortly to confirm your order.')
+        cartStore.clearCart()
+        quickForm.fullName = ''
+        quickForm.phone = ''
+        quickForm.wilaya = ''
+        quickForm.commune = ''
+        quickForm.address = ''
+
+        router.push({
+            path: '/order-success',
+            query: { orderId: response.orderId }
+        })
+    } catch (error: any) {
+        console.error('Quick order failed:', error)
+        orderError.value = error?.data?.statusMessage || error?.data?.message || 'Failed to place order. Please try again.'
+    } finally {
+        orderSubmitting.value = false
+    }
 }
 
 const handleAddToCart = async () => {
     if (!props.product) return
-    isAdding.value = true
-    await new Promise(resolve => setTimeout(resolve, 500))
+    addToCartSubmitting.value = true
+
     cartStore.addItem({
         productId: props.product.id,
         variantId: props.currentVariant?.id,
@@ -75,15 +156,47 @@ const handleAddToCart = async () => {
         price: props.currentPrice,
         stock: props.currentStock || 0,
         image: props.activeImage,
+        quantity: quantity.value
     })
-    isAdding.value = false
-    showSuccess.value = true
-    setTimeout(() => showSuccess.value = false, 3000)
+
+    triggerSuccessToast('Added to cart', 'Review your cart to complete checkout.')
+    addToCartSubmitting.value = false
 }
 </script>
 
 <template>
     <div>
+        <!-- Quantity Selector (Global for both COD and Cart) -->
+        <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-6">
+            <span class="font-semibold text-slate-700">Quantity</span>
+            <div class="flex items-center bg-slate-50 rounded-xl shadow-inner border border-slate-200 p-1">
+                <button 
+                    type="button"
+                    class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    :disabled="quantity <= 1"
+                    @click="decrementQuantity"
+                >
+                    <Icon name="lucide:minus" class="w-4 h-4" />
+                </button>
+                <input 
+                    v-model.number="quantity" 
+                    type="number" 
+                    min="1" 
+                    :max="props.currentStock"
+                    class="w-12 text-center border-none bg-transparent font-bold text-slate-900 focus:ring-0 p-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    readonly
+                >
+                <button 
+                    type="button"
+                    class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    :disabled="quantity >= props.currentStock"
+                    @click="incrementQuantity"
+                >
+                    <Icon name="lucide:plus" class="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+
         <!-- Quick COD Order Form -->
         <div
             v-if="codEnabled"
@@ -106,17 +219,18 @@ const handleAddToCart = async () => {
                 <div class="space-y-2">
                 <label class="block text-sm font-semibold text-slate-700 ml-1">Full Name</label>
                 <input 
-                    v-model="fullName"
+                    v-model="quickForm.fullName"
                     type="text" 
                     placeholder="e.g. John Doe" 
                     class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                    :class="{ 'animate-attention': !fullName }"
+                    :class="{ 'animate-attention': !quickForm.fullName }"
                 >
                 </div>
                 
                 <div class="space-y-2">
                 <label class="block text-sm font-semibold text-slate-700 ml-1">Phone Number</label>
                 <input
+                    v-model="quickForm.phone"
                     type="tel"
                     placeholder="e.g. 0550 12 34 56"
                     class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
@@ -127,7 +241,10 @@ const handleAddToCart = async () => {
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 ml-1">Wilaya</label>
                     <div class="relative">
-                    <select class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm">
+                    <select
+                        v-model="quickForm.wilaya"
+                        class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
+                    >
                         <option value="">Select...</option>
                         <option value="16">Algiers</option>
                         <option value="31">Oran</option>
@@ -140,6 +257,7 @@ const handleAddToCart = async () => {
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 ml-1">Commune</label>
                     <input
+                    v-model="quickForm.commune"
                     type="text"
                     placeholder="e.g. Bab Ezzouar"
                     class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
@@ -147,17 +265,40 @@ const handleAddToCart = async () => {
                 </div>
                 </div>
 
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700 ml-1">Address (optional)</label>
+                    <input
+                        v-model="quickForm.address"
+                        type="text"
+                        placeholder="Street, building, apartment"
+                        class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                    >
+                </div>
+
+                <div
+                    v-if="orderError"
+                    class="p-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm"
+                >
+                    {{ orderError }}
+                </div>
+
+                <!-- Total Price Display -->
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <span class="text-slate-600 font-medium">Total Price:</span>
+                    <span class="text-xl font-bold text-brand-600">{{ totalPrice }} {{ storeSettings?.currencyCode || 'DZD' }}</span>
+                </div>
+
                 <button 
                 type="submit"
-                :disabled="isAdding"
+                :disabled="orderSubmitting"
                 class="w-full h-14 bg-slate-900 hover:bg-brand-600 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl shadow-lg shadow-slate-900/20 hover:shadow-brand-600/30 transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
                 >
-                <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': isAdding }">
-                    <span>Confirm Order</span>
+                <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
+                    <span>{{ orderSubmitting ? 'Submitting...' : 'Confirm Order' }}</span>
                     <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
                             
-                <div v-if="isAdding" class="absolute inset-0 flex items-center justify-center">
+                <div v-if="orderSubmitting" class="absolute inset-0 flex items-center justify-center">
                     <Icon name="lucide:loader-2" class="animate-spin h-6 w-6 text-white" />
                 </div>
                 </button>
@@ -168,12 +309,12 @@ const handleAddToCart = async () => {
         <div v-if="cartEnabled" class="mt-6">
             <button 
                 type="button"
-                :disabled="isAdding"
-                class="w-full h-14 bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-50 font-bold text-lg rounded-xl transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3"
+                :disabled="addToCartSubmitting"
+                class="w-full h-14 bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-50 font-bold text-lg rounded-xl transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
                 @click="handleAddToCart"
             >
-                    <Icon name="lucide:shopping-cart" class="w-5 h-5" />
-                <span>Add to Cart</span>
+                    <Icon name="lucide:handbag" class="w-5 h-5" />
+                <span>{{ addToCartSubmitting ? 'Adding...' : 'Add to Cart' }}</span>
             </button>
         </div>
         
@@ -194,8 +335,8 @@ const handleAddToCart = async () => {
             <Icon name="lucide:check" class="w-5 h-5" />
             </div>
             <div>
-            <div class="font-bold">Order Received!</div>
-            <div class="text-xs text-slate-300">We'll contact you shortly for confirmation.</div>
+            <div class="font-bold">{{ successTitle }}</div>
+            <div class="text-xs text-slate-300">{{ successMessage }}</div>
             </div>
         </div>
         </Transition>

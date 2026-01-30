@@ -28,9 +28,8 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Display Type</label>
-                        <select 
+                        <BaseSelect
                             v-model="option.displayType"
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border bg-white"
                             @change="updateOption(option)"
                         >
                             <option value="dropdown">Dropdown</option>
@@ -38,7 +37,7 @@
                             <option value="radio">Radio Buttons</option>
                             <option value="color">Color Swatch</option>
                             <option value="image">Image with Text</option>
-                        </select>
+                        </BaseSelect>
                         <p class="mt-2 text-xs font-medium text-gray-500">Preview:</p>
                         <div class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
                              <!-- Dropdown Preview -->
@@ -196,16 +195,15 @@
                         </div>
                          <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Display Type</label>
-                            <select 
+                            <BaseSelect
                                 v-model="newOptionType"
-                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border bg-white"
                             >
                                 <option value="dropdown">Dropdown</option>
                                 <option value="button">Buttons / Tags</option>
                                 <option value="radio">Radio Buttons</option>
                                 <option value="color">Color Swatch</option>
                                 <option value="image">Image with Text</option>
-                            </select>
+                            </BaseSelect>
                             <p class="mt-1 text-xs font-medium text-gray-500">Preview:</p>
                             <div class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
                                  <!-- Dropdown Preview -->
@@ -389,6 +387,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 import {
   TransitionRoot,
   TransitionChild,

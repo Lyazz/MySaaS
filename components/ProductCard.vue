@@ -56,7 +56,7 @@
         class="mt-4 w-full px-4 py-2 bg-brand text-white rounded-md hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
         @click="handleAddToCart"
       >
-        <Icon name="lucide:shopping-bag" class="w-5 h-5" />
+        <Icon name="lucide:handbag" class="w-5 h-5" />
         <span>{{ product.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}</span>
       </button>
     </div>

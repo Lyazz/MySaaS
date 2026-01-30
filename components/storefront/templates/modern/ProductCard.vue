@@ -126,7 +126,7 @@ function handleAddToCart() {
           title="Add to Cart"
           @click.prevent="handleAddToCart"
         >
-          <Icon name="lucide:shopping-bag" class="w-4 h-4" />
+          <Icon name="lucide:handbag" class="w-4 h-4" />
         </button>
       </div>
 

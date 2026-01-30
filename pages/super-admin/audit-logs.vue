@@ -18,18 +18,16 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-          <input
+          <BaseInput
             v-model="searchQuery"
             type="text"
             placeholder="Search logs..."
-            class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
-          >
+          />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Action Type</label>
-          <select
+          <BaseSelect
             v-model="filterAction"
-            class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
           >
             <option value="">
               All Actions
@@ -52,13 +50,12 @@
             <option value="IMPERSONATE_USER">
               Impersonate User
             </option>
-          </select>
+          </BaseSelect>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-          <select
+          <BaseSelect
             v-model="sortOrder"
-            class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
           >
             <option value="desc">
               Newest First
@@ -66,7 +63,7 @@
             <option value="asc">
               Oldest First
             </option>
-          </select>
+          </BaseSelect>
         </div>
       </div>
 
@@ -175,6 +172,8 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 const loading = ref(true)
 const logs = ref<any[]>([])
 const searchQuery = ref('')

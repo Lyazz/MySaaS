@@ -3,6 +3,7 @@ import prisma from '../../lib/prisma'
 import { MaystroProvider } from './providers/maystro.provider'
 import { YalidineProvider } from './providers/yalidine.provider'
 import { SelfDeliveryProvider } from './providers/self.provider'
+import { DolivrooProvider } from './providers/dolivroo.provider'
 import type {
     CreateShipmentInput,
     QuoteOption,
@@ -21,7 +22,9 @@ export class DeliveryService {
         this.prisma = client
         this.providers = {
             MAYSTRO: new MaystroProvider(),
-            YALIDINE: new YalidineProvider(),
+            YALIDINE: new DolivrooProvider('YALIDINE'),
+            ECOTRACK: new DolivrooProvider('ECOTRACK'),
+            ZR_EXPRESS: new DolivrooProvider('ZR_EXPRESS'),
             SELF: new SelfDeliveryProvider()
         }
     }
@@ -41,7 +44,11 @@ export class DeliveryService {
             where: { tenantId: input.tenantId }
         })
 
-        const allowedProviders = settings?.allowedDeliveryProviders || ['SELF'] // Default to SELF if no settings
+        const allowedProviders =
+            settings?.allowedDeliveryProviders && settings.allowedDeliveryProviders.length > 0
+                ? settings.allowedDeliveryProviders
+                : Object.keys(this.providers)
+
         if (!allowedProviders.includes(input.provider)) {
             return []
         }
@@ -79,6 +86,34 @@ export class DeliveryService {
                 source: 'fallback-rate'
             }
         ]
+    }
+
+    async listCompanies(tenantId: string) {
+        const settings = await this.prisma.storeSettings.findUnique({
+            where: { tenantId }
+        })
+        const allowed =
+            settings?.allowedDeliveryProviders && settings.allowedDeliveryProviders.length > 0
+                ? settings.allowedDeliveryProviders
+                : Object.keys(this.providers)
+
+        const results: { code: string; name: string; provider: ShipmentProvider }[] = []
+
+        for (const providerKey of allowed) {
+            const provider = this.providers[providerKey as ShipmentProvider]
+            if (!provider) continue
+
+            if (provider.listCompanies) {
+                const companies = await provider.listCompanies()
+                companies.forEach((c) => {
+                    results.push({ code: c.code, name: c.name, provider: provider.provider })
+                })
+            } else {
+                results.push({ code: providerKey, name: providerKey, provider: provider.provider })
+            }
+        }
+
+        return results
     }
 
     async listShipments(

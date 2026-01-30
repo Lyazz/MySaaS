@@ -22,7 +22,7 @@
               <div class="w-6 h-6 rounded bg-teal-600 flex items-center justify-center text-white">
                 <Icon name="lucide:store" class="w-3 h-3" />
               </div>
-              <span class="text-xl font-sans font-bold text-slate-900">MySaaS</span>
+              <span class="text-xl font-sans font-bold text-slate-900">Swekly</span>
             </div>
             <p class="text-slate-500 text-sm leading-relaxed max-w-xs">
               Empowering businesses with cutting-edge tools and a premium experience. Built for scale, designed for you.
@@ -81,7 +81,7 @@
         </div>
         <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <p class="text-center text-sm text-slate-400">
-            &copy; {{ new Date().getFullYear() }} MySaaS Platform. All rights reserved.
+            &copy; {{ new Date().getFullYear() }} Swekly Platform. All rights reserved.
           </p>
           <div class="flex space-x-6">
             <a

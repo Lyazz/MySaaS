@@ -60,7 +60,7 @@ const categories = computed(() => {
     
     return categoriesData.value.map((cat, index) => {
         // Simple visual pattern based on index
-        const colors = ['bg-orange-50', 'bg-blue-50', 'bg-green-50', 'bg-teal-50']
+        const colors = ['bg-orange-50', 'bg-blue-50', 'bg-green-50', 'bg-brand-50']
         const colorClass = colors[index % colors.length]
         
         return {
@@ -112,7 +112,7 @@ const displayedProducts = computed(() => {
               </p>
               <NuxtLink
                 to="/products"
-                class="group inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-teal-50 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] text-sm md:text-base"
+                class="group inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-brand-50 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] text-sm md:text-base"
               >
                 {{ slide.buttonText }}
                 <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -154,7 +154,7 @@ const displayedProducts = computed(() => {
     <section class="py-10 md:py-16 bg-slate-50">
       <div class="mb-8 md:mb-10 px-6 max-w-7xl mx-auto flex items-end justify-between">
         <div class="max-w-2xl">
-          <p class="text-sm font-bold text-teal-600 tracking-widest uppercase mb-2">
+          <p class="text-sm font-bold text-brand-600 tracking-widest uppercase mb-2">
             Collections
           </p>
           <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
@@ -165,13 +165,13 @@ const displayedProducts = computed(() => {
         <!-- Scroll Arrows -->
         <div class="hidden md:flex gap-3">
           <button
-            class="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:border-teal-600 hover:text-teal-600 transition-colors"
+            class="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:border-brand-600 hover:text-brand-600 transition-colors"
             onclick="document.getElementById('cat-scroll').scrollBy({left: -350, behavior: 'smooth'})"
           >
             <Icon name="lucide:chevron-left" class="w-5 h-5" />
           </button>
           <button
-            class="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:border-teal-600 hover:text-teal-600 transition-colors"
+            class="w-10 h-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-slate-600 hover:border-brand-600 hover:text-brand-600 transition-colors"
             onclick="document.getElementById('cat-scroll').scrollBy({left: 350, behavior: 'smooth'})"
           >
             <Icon name="lucide:chevron-right" class="w-5 h-5" />
@@ -210,12 +210,12 @@ const displayedProducts = computed(() => {
             <div class="absolute -top-10 -right-10 w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/30 blur-2xl group-hover:scale-150 transition-transform duration-700" />
 
             <div class="z-10 relative transform transition-transform duration-300 group-hover:-translate-y-2 bg-white/85 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-sm">
-              <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-1 group-hover:text-teal-700 transition-colors">
+              <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-1 group-hover:text-brand-700 transition-colors">
                 {{ cat.title }}
               </h3>
               <p class="text-slate-600 font-medium text-sm md:text-base flex items-center gap-2">
                 {{ cat.itemCount }} Products
-                <span class="w-8 h-px bg-slate-300 group-hover:w-16 group-hover:bg-teal-600 transition-all hidden md:block" />
+                <span class="w-8 h-px bg-slate-300 group-hover:w-16 group-hover:bg-brand-600 transition-all hidden md:block" />
               </p>
             </div>
                 
@@ -233,16 +233,16 @@ const displayedProducts = computed(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8 md:mb-10">
           <div>
-            <p class="text-sm font-bold text-teal-600 tracking-widest uppercase mb-1">
-              New Arrivals
-            </p>
+          <p class="text-sm font-bold text-brand-600 tracking-widest uppercase mb-1">
+            New Arrivals
+          </p>
             <h2 class="text-2xl md:text-3xl font-bold text-slate-900">
               Trending Now
             </h2>
           </div>
           <NuxtLink
             to="/products"
-            class="hidden sm:flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-700 font-medium hover:border-teal-600 hover:text-teal-600 transition-all items-center gap-2 group"
+            class="hidden sm:flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-700 font-medium hover:border-brand-600 hover:text-brand-600 transition-all items-center gap-2 group"
           >
             View all products
             <span class="inline-block transition-transform group-hover:translate-x-1">&rarr;</span>
@@ -279,7 +279,7 @@ const displayedProducts = computed(() => {
         <div class="mt-10 text-center sm:hidden">
           <NuxtLink
             to="/products"
-            class="inline-flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-700 font-medium hover:border-teal-600 hover:text-teal-600 transition-all items-center gap-2"
+            class="inline-flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-700 font-medium hover:border-brand-600 hover:text-brand-600 transition-all items-center gap-2"
           >
             View all products &rarr;
           </NuxtLink>

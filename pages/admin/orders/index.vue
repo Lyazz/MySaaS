@@ -17,18 +17,15 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-          <input
+          <BaseInput
             v-model="searchQuery"
-            type="text"
             placeholder="Search by customer name or phone..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-          >
+          />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status Filter</label>
-          <select
+          <BaseSelect
             v-model="selectedStatus"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+            label="Status Filter"
           >
             <option value="">
               All Orders
@@ -48,7 +45,7 @@
             <option value="CANCELLED">
               Cancelled
             </option>
-          </select>
+          </BaseSelect>
         </div>
       </div>
     </div>
@@ -133,7 +130,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">
-                  ${{ Number(order.totalAmount).toFixed(2) }}
+                  {{ Number(order.totalAmount).toFixed(2) }} {{ currencyCode }}
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -163,6 +160,8 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
+import BaseInput from '~/components/ui/BaseInput.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -171,6 +170,8 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const storeSettings = useState<any>('storeSettings')
+const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
 
 interface Order {
   id: string

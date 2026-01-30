@@ -10,8 +10,8 @@ test.describe('Landing Page Separation', () => {
 
     test('Root domain shows SaaS Landing Page', async ({ page }) => {
         await page.goto('/');
-        await expect(page).toHaveTitle(/MySaaS - The all-in-one platform/);
-        await expect(page.locator('text=Ready to find your forever customers?')).toBeVisible();
+        await expect(page).toHaveTitle(/Swekly - The Future of Commerce/);
+        await expect(page.locator('text=Ready to launch?')).toBeVisible();
         await expect(page.locator('nav >> text=Pricing')).toBeVisible();
     });
 });

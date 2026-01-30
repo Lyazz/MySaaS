@@ -71,7 +71,7 @@ const storeSettings = useState<any>('storeSettings')
                   to="/cart"
                   class="relative group p-2 rounded-full hover:bg-slate-100 transition-colors"
                 >
-                  <Icon name="lucide:shopping-bag" class="w-6 h-6 text-slate-600 group-hover:text-brand transition-colors" />
+                  <Icon name="lucide:handbag" class="w-6 h-6 text-slate-600 group-hover:text-brand transition-colors" />
                   <span
                     v-if="cartStore.itemCount > 0"
                     class="absolute -top-0.5 -right-0.5 bg-brand text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white shadow-sm"

@@ -57,13 +57,12 @@
                     type="color"
                     class="h-10 w-14 rounded border border-slate-300 bg-white p-1 cursor-pointer"
                   >
-                  <input
+                  <BaseInput
                     v-model="form.primaryColor"
                     type="text"
                     pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
-                    class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                     placeholder="#4F46E5"
-                  >
+                  />
                 </div>
               </div>
             </div>
@@ -110,7 +109,7 @@
               class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-sm"
             >
               <div class="h-10 w-10 flex items-center justify-center rounded-full bg-teal-50 text-teal-600">
-                <Icon name="lucide:shopping-cart" class="w-5 h-5" />
+                <Icon name="lucide:handbag" class="w-5 h-5" />
               </div>
               <div class="flex-1">
                 <p class="font-semibold text-slate-900">
@@ -179,25 +178,22 @@
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2 space-y-3">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Currency</label>
-            <div class="relative">
-              <select
-                v-model="form.currencyCode"
-                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm pl-11"
-                @change="onCurrencyChange"
-              >
-                <option
-                  v-for="c in currencies"
-                  :key="c.code"
-                  :value="c.code"
-                >
-                  {{ c.label }}
-                </option>
-              </select>
-              <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+            <BaseSelect
+              v-model="form.currencyCode"
+              label="Currency"
+              @change="onCurrencyChange"
+            >
+              <template #prefix>
                 <span class="text-xl">{{ selectedCurrency?.flag || '🌍' }}</span>
-              </div>
-            </div>
+              </template>
+              <option
+                v-for="c in currencies"
+                :key="c.code"
+                :value="c.code"
+              >
+                {{ c.label }}
+              </option>
+            </BaseSelect>
             <p class="text-xs text-slate-500">
               Currency code: {{ form.currencyCode }} · Country: {{ form.currencyCountry }}
             </p>
@@ -264,10 +260,9 @@
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2">
             <div class="max-w-xs">
-              <label class="block text-sm font-medium text-slate-700 mb-1">Default Language</label>
-              <select
+              <BaseSelect
                 v-model="form.language"
-                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                label="Default Language"
               >
                 <option
                   v-for="l in languages"
@@ -276,7 +271,7 @@
                 >
                   {{ l.label }}
                 </option>
-              </select>
+              </BaseSelect>
               <p
                 v-if="form.language === 'ar'"
                 class="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200"
@@ -330,6 +325,8 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
+import BaseInput from '~/components/ui/BaseInput.vue'
 import SingleImageUploader from './SingleImageUploader.vue'
 
 const props = defineProps<{

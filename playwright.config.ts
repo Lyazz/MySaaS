@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+process.env.JWT_SECRET ||= 'test-jwt-secret'
+process.env.TRUST_PROXY ||= 'true'
+
 export default defineConfig({
     testDir: './tests/e2e',
     fullyParallel: true,

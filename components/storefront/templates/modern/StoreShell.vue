@@ -60,7 +60,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['bg-white border-b border-slate-100 dark:border-slate-800 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="h-20 flex items-center justify-between gap-4">
+          <div class="h-16 md:h-20 flex items-center justify-between gap-4">
             <!-- Logo -->
             <NuxtLink
               to="/"
@@ -88,7 +88,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                 <input 
                   type="text" 
                   placeholder="Search products..." 
-                  class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-500 focus:border-transparent block w-full pl-5 p-2.5 transition-all shadow-sm group-hover:bg-white" 
+                  class="w-full h-10 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-500 focus:border-transparent block pl-5 pr-10 transition-all shadow-sm group-hover:bg-white" 
                 >
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <Icon name="lucide:search" class="w-5 h-5 text-slate-400 group-hover:text-brand-500 transition-colors" />
@@ -116,13 +116,13 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
               <!-- Icons -->
               <div class="flex items-center gap-3">
                 <button
-                  class="p-2 text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-colors"
+                  class="h-10 w-10 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-colors"
                   title="Wishlist"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
                 </button>
                 <button
-                  class="p-2 text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-colors"
+                  class="h-10 w-10 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-colors"
                   title="Account"
                 >
                   <Icon name="lucide:user" class="w-5 h-5" />
@@ -132,9 +132,9 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                 <NuxtLink
                   v-if="storeSettings?.cartEnabled !== false"
                   to="/cart"
-                  class="group relative flex items-center justify-center p-2 rounded-full bg-brand-600 text-white shadow-md hover:bg-brand-700 transition-all hover:shadow-lg"
+                  class="group relative h-10 flex items-center justify-center px-4 rounded-full bg-brand-600 text-white shadow-md hover:bg-brand-700 transition-all hover:shadow-lg"
                 >
-                  <Icon name="lucide:shopping-bag" class="w-5 h-5" />
+                  <Icon name="lucide:handbag" class="w-5 h-5" />
                   <span
                     v-if="cartStore.itemCount > 0"
                     class="ml-1 text-xs font-bold"

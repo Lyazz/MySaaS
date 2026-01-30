@@ -32,41 +32,23 @@
         v-show="currentTab === 'general'"
         class="space-y-6"
       >
-        <AdminFormField
-          label="Product Title"
-          :error="errors.title"
-          required
-        >
-          <template #default="{ inputId }">
-            <input
-              :id="inputId"
-              v-model="form.title"
-              type="text"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="Enter product title"
-            >
-          </template>
-        </AdminFormField>
+          <BaseInput
+            v-model="form.title"
+            label="Product Title"
+            :error="errors.title"
+            placeholder="Enter product title"
+            required
+          />
 
-        <AdminFormField
-          label="Product Slug"
-          :error="errors.slug"
-          hint="URL-friendly version of the title"
-          required
-        >
-          <template #default="{ inputId }">
-            <input
-              :id="inputId"
-              v-model="form.slug"
-              type="text"
-              required
-              pattern="[a-z0-9-]+"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="product-slug"
-            >
-          </template>
-        </AdminFormField>
+          <BaseInput
+            v-model="form.slug"
+            label="Product Slug"
+            :error="errors.slug"
+            placeholder="product-slug"
+            hint="URL-friendly version of the title"
+            required
+            pattern="[a-z0-9-]+"
+          />
 
         <AdminFormField
           label="Mini Description"
@@ -85,67 +67,44 @@
         </AdminFormField>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AdminFormField
-            label="Price ($)"
-            :error="errors.price"
-            required
-          >
-            <template #default="{ inputId }">
-              <input
-                :id="inputId"
-                v-model.number="form.price"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                placeholder="0.00"
-              >
-            </template>
-          </AdminFormField>
+            <BaseInput
+              v-model.number="form.price"
+              label="Price ($)"
+              :error="errors.price"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              placeholder="0.00"
+            />
 
-          <AdminFormField
-            label="Stock Quantity"
-            :error="errors.stock"
-            required
-          >
-            <template #default="{ inputId }">
-              <input
-                :id="inputId"
-                v-model.number="form.stock"
-                type="number"
-                min="0"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                placeholder="0"
-              >
-            </template>
-          </AdminFormField>
+            <BaseInput
+              v-model.number="form.stock"
+              label="Stock Quantity"
+              :error="errors.stock"
+              type="number"
+              min="0"
+              required
+              placeholder="0"
+            />
         </div>
 
-        <AdminFormField
+        <BaseSelect
+          v-model="form.categoryId"
           label="Category"
           :error="errors.categoryId"
         >
-          <template #default="{ inputId }">
-            <select
-              :id="inputId"
-              v-model="form.categoryId"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="">
-                Select a category (optional)
-              </option>
-              <option
-                v-for="cat in categories"
-                :key="cat.id"
-                :value="cat.id"
-              >
-                {{ cat.title }}
-              </option>
-            </select>
-          </template>
-        </AdminFormField>
+          <option value="">
+            Select a category (optional)
+          </option>
+          <option
+            v-for="cat in categories"
+            :key="cat.id"
+            :value="cat.id"
+          >
+            {{ cat.title }}
+          </option>
+        </BaseSelect>
 
         <ImageUploader v-model="images" />
 
@@ -229,6 +188,8 @@ import { computed, ref, watch } from 'vue'
 import AdminFormField from '~/components/admin/FormField.vue'
 import ImageUploader from '~/components/admin/ImageUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
+import BaseInput from '~/components/ui/BaseInput.vue'
 
 interface Category {
   id: string

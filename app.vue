@@ -2,7 +2,7 @@
 // Global head configuration if needed, but pages will override
 useHead({
   titleTemplate: (titleChunk) => {
-    return titleChunk ? `${titleChunk} - MySaaS Platform` : 'MySaaS Platform';
+    return titleChunk ? `${titleChunk} - Swekly Platform` : 'Swekly Platform';
   }
 })
 

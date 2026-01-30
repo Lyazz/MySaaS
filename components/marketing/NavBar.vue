@@ -27,7 +27,7 @@ function handleLogout() {
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform">
               <Icon name="lucide:zap" class="w-6 h-6" />
             </div>
-            <span class="text-xl font-bold text-white tracking-tight">MySaaS</span>
+            <span class="text-xl font-bold text-white tracking-tight">Swekly</span>
           </NuxtLink>
         </div>
 
