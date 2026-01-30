@@ -14,7 +14,7 @@
       class="bg-white rounded-xl shadow-sm border border-slate-200 p-8"
     >
       <div class="flex items-center gap-3 text-slate-600">
-        <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600" />
+        <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600" />
         <span>Loading your store settings…</span>
       </div>
     </div>
@@ -35,7 +35,7 @@
         </div>
         <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
           <div
-            class="h-2 bg-indigo-600 transition-all"
+            class="h-2 bg-teal-600 transition-all"
             :style="{ width: `${progressPercent}%` }"
           />
         </div>
@@ -66,7 +66,7 @@
                 v-model="form.primaryColor"
                 type="text"
                 placeholder="#4F46E5"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
               <p class="mt-1 text-xs text-slate-500">
                 Example: #4F46E5
@@ -101,7 +101,7 @@
               :key="t.key"
               type="button"
               class="text-left p-4 rounded-xl border transition-all"
-              :class="form.templateKey === t.key ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'"
+              :class="form.templateKey === t.key ? 'border-teal-500 ring-2 ring-teal-200 bg-teal-50' : 'border-slate-200 hover:border-slate-300'"
               @click="form.templateKey = t.key"
             >
               <div class="flex items-center justify-between">
@@ -110,7 +110,7 @@
                 </p>
                 <span
                   class="text-xs px-2 py-1 rounded-full"
-                  :class="form.templateKey === t.key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'"
+                  :class="form.templateKey === t.key ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'"
                 >
                   {{ t.key }}
                 </span>
@@ -134,7 +134,7 @@
             <label class="block text-sm font-medium text-slate-700 mb-1">Language</label>
             <select
               v-model="form.language"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option
                 v-for="l in languages"
@@ -209,13 +209,13 @@
             <textarea
               v-model="summaryMarkdown"
               rows="10"
-              class="w-full font-mono text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full font-mono text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="Click Generate to create a brief for your frontend agent."
             />
             <div class="mt-3 flex items-center justify-end gap-2">
               <button
                 type="button"
-                class="px-3 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+                class="px-3 py-2 rounded-lg text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
                 :disabled="!summaryMarkdown"
                 @click="copySummary"
               >
@@ -248,7 +248,7 @@
           <button
             v-if="step < steps.length - 1"
             type="button"
-            class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium disabled:opacity-50"
+            class="px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-medium disabled:opacity-50"
             :disabled="saving"
             @click="nextStep"
           >

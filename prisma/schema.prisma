@@ -8,26 +8,30 @@ datasource db {
 }
 
 model Tenant {
-  id        String   @id @default(uuid())
-  slug      String   @unique
-  name      String
-  isSuspended Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  isSuspended Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  users      User[]
-  products   Product[]
-  categories Category[]
-  orders     Order[]
-  storeSettings StoreSettings?
-  domains    TenantDomain[]
+  users          User[]
+  products       Product[]
+  categories     Category[]
+  orders         Order[]
+  shipments      Shipment[]
+  deliveryRates  DeliveryRate[]
+  storeSettings  StoreSettings?
+  domains        TenantDomain[]
+  shipmentEvents ShipmentEvent[] @relation("TenantShipmentEvents")
 }
 
+
 model TenantDomain {
-  id        String   @id @default(uuid())
-  domain    String   @unique
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  domain   String @unique
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,24 +40,26 @@ model TenantDomain {
 }
 
 model StoreSettings {
-  id           String   @id @default(uuid())
-  tenantId     String   @unique
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  primaryColor String   @default("#0d9488") // teal-600
-  templateKey  String   @default("modern") // e.g. classic | modern
-  fontFamily   String   @default("Outfit")
-  language     String   @default("fr") // ar | fr | en
+  logoUrl      String? // URL of the tenant's store logo
+  primaryColor String  @default("#0d9488") // teal-600
+  templateKey  String @default("modern") // e.g. classic | modern
+  fontFamily   String @default("Outfit")
+  language     String @default("fr") // ar | fr | en
 
-  cartEnabled   Boolean  @default(true)
-  codEnabled    Boolean  @default(true)
-  currencyCode  String   @default("DZD") // ISO currency code
-  currencyCountry String @default("DZ")  // ISO country for flag/locale
+  cartEnabled     Boolean @default(true)
+  codEnabled      Boolean @default(true)
+  currencyCode    String  @default("DZD") // ISO currency code
+  currencyCountry String  @default("DZ") // ISO country for flag/locale
 
-  isCompleted  Boolean  @default(false)
+  isCompleted Boolean @default(false)
+  allowedDeliveryProviders String[] @default(["SELF"])
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model User {
@@ -72,14 +78,14 @@ model User {
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  title     String
-  slug      String
-  imageUrl  String?
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  
-  products  Product[]
+  id       String  @id @default(uuid())
+  title    String
+  slug     String
+  imageUrl String?
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+
+  products Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -89,46 +95,46 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  title       String
-  slug        String
-  description String?
+  id              String  @id @default(uuid())
+  title           String
+  slug            String
+  description     String?
   miniDescription String?
-  price       Decimal  @default(0)
-  stock       Int      @default(0)
+  price           Decimal @default(0)
+  stock           Int     @default(0)
 
-  isActive    Boolean  @default(true)
-  images      String[] @default([]) // Deprecated: Use ProductImage model
+  isActive      Boolean        @default(true)
+  images        String[]       @default([]) // Deprecated: Use ProductImage model
   productImages ProductImage[]
 
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-  
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  options     ProductOption[]
-  variants    ProductVariant[]
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  orderItems  OrderItem[]
+  options  ProductOption[]
+  variants ProductVariant[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([tenantId, slug])
   @@index([tenantId])
 }
 
 model ProductImage {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
   alt       String?
-  position  Int      @default(0)
-  isMain    Boolean  @default(false)
+  position  Int     @default(0)
+  isMain    Boolean @default(false)
 
-  variants  ProductVariantImage[]
+  variants ProductVariantImage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -137,28 +143,28 @@ model ProductImage {
 }
 
 model ProductOption {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   productId   String
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  name        String   // e.g. "Color", "Size"
-  position    Int      @default(0)
-  displayType String   @default("dropdown") // dropdown, button, color, image
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String // e.g. "Color", "Size"
+  position    Int     @default(0)
+  displayType String  @default("dropdown") // dropdown, button, color, image
 
-  values      ProductOptionValue[]
+  values ProductOptionValue[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([productId])
 }
 
 model ProductOptionValue {
-  id        String        @id @default(uuid())
-  optionId  String
-  option    ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  label     String        // e.g. "Red", "XL"
-  position  Int           @default(0)
-  meta      String?       // JSON string for swatch colors, etc.
+  id       String        @id @default(uuid())
+  optionId String
+  option   ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  label    String // e.g. "Red", "XL"
+  position Int           @default(0)
+  meta     String? // JSON string for swatch colors, etc.
 
   variantValues ProductVariantOptionValue[]
 
@@ -169,28 +175,28 @@ model ProductOptionValue {
 }
 
 model ProductVariant {
-  id             String   @id @default(uuid())
-  productId      String
-  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   sku            String?
   price          Decimal  @default(0)
   compareAtPrice Decimal?
   isActive       Boolean  @default(true)
-  
+
   // Inventory
-  trackInventory Boolean  @default(true)
-  stock          Int      @default(0) // available
-  reserved       Int      @default(0)
-  safetyStock    Int      @default(0)
+  trackInventory Boolean @default(true)
+  stock          Int     @default(0) // available
+  reserved       Int     @default(0)
+  safetyStock    Int     @default(0)
 
-  optionValues   ProductVariantOptionValue[]
-  images         ProductVariantImage[]
-  movements      InventoryMovement[]
-  orderItems     OrderItem[]
+  optionValues ProductVariantOptionValue[]
+  images       ProductVariantImage[]
+  movements    InventoryMovement[]
+  orderItems   OrderItem[]
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([productId])
 }
@@ -221,31 +227,119 @@ model InventoryMovement {
   variantId String
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   delta     Int
-  reason    String         // e.g. "order", "restock", "correction"
+  reason    String // e.g. "order", "restock", "correction"
   orderId   String?
-  
-  createdAt DateTime       @default(now())
+
+  createdAt DateTime @default(now())
 
   @@index([variantId])
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  tenantId        String
-  tenant          Tenant      @relation(fields: [tenantId], references: [id])
-  status          String      @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
-  totalAmount     Float
-  
+  id          String @id @default(uuid())
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
+  status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  totalAmount Float
+
   customerName    String
   customerPhone   String
   customerAddress String?
 
-  items           OrderItem[]
+  items     OrderItem[]
+  shipments Shipment[]
 
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([tenantId])
+}
+
+enum ShipmentProvider {
+  MAYSTRO
+  YALIDINE
+  SELF
+}
+
+enum ShipmentStatus {
+  DRAFT
+  PENDING
+  REQUESTED
+  CONFIRMED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+model DeliveryRate {
+  id               String           @id @default(uuid())
+  tenantId         String
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider         ShipmentProvider
+  wilayaCode       String
+  communeCode      String?
+  serviceLevel     String?
+  price            Decimal          @default(0)
+  currency         String           @default("DZD")
+  isActive         Boolean          @default(true)
+  estimatedMinDays Int?
+  estimatedMaxDays Int?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([tenantId, provider, wilayaCode, communeCode, serviceLevel])
+  @@index([tenantId])
+}
+
+model Shipment {
+  id                 String           @id @default(uuid())
+  tenantId           String
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId            String
+  order              Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider           ShipmentProvider
+  providerShipmentId String?
+  status             ShipmentStatus   @default(PENDING)
+  serviceLevel       String?
+  price              Decimal?
+  currency           String           @default("DZD")
+  contactName        String
+  contactPhone       String
+  wilayaCode         String
+  communeCode        String?
+  addressLine1       String
+  addressLine2       String?
+  notes              String?
+  labelUrl           String?
+  trackingUrl        String?
+  metadata           Json?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  events ShipmentEvent[]
+
+  @@unique([tenantId, provider, orderId])
+  @@index([tenantId])
+  @@index([provider, tenantId])
+}
+
+model ShipmentEvent {
+  id          String          @id @default(uuid())
+  tenantId    String
+  tenant      Tenant          @relation("TenantShipmentEvents", fields: [tenantId], references: [id], onDelete: Cascade)
+  shipmentId  String
+  shipment    Shipment        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  status      ShipmentStatus?
+  code        String?
+  description String?
+  details     Json?
+  rawPayload  Json?
+  eventTime   DateTime        @default(now())
+  createdAt   DateTime        @default(now())
+
+  @@index([tenantId])
+  @@index([shipmentId])
 }
 
 model OrderItem {
@@ -254,10 +348,10 @@ model OrderItem {
   order     Order   @relation(fields: [orderId], references: [id])
   productId String
   product   Product @relation(fields: [productId], references: [id])
-  
-  quantity  Int
-  price     Float // Price at the time of order
-  
+
+  quantity Int
+  price    Float // Price at the time of order
+
   variantId String?
   variant   ProductVariant? @relation(fields: [variantId], references: [id])
 }
@@ -266,8 +360,10 @@ model AuditLog {
   id        String   @id @default(uuid())
   action    String
   details   String?
-  userId    String?  // ID of the user who performed the action (optional if system action)
-  targetId  String?  // ID of the target entity (e.g. tenantId)
-  tenantId  String?  // Tenant context usually null for super admin actions but good to have
+  userId    String? // ID of the user who performed the action (optional if system action)
+  targetId  String? // ID of the target entity (e.g. tenantId)
+  tenantId  String? // Tenant context usually null for super admin actions but good to have
   createdAt DateTime @default(now())
 }
+
+

@@ -1,94 +1,126 @@
 <template>
-  <NuxtLayout name="super-admin">
-    <div class="space-y-6">
-      <h1 class="text-3xl font-bold text-white">
-        Platform Dashboard
-      </h1>
+  <div>
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">
+        Platform Overview
+      </h2>
+      <p class="text-gray-600 mt-1">
+        Manage your multi-tenant SaaS platform
+      </p>
+    </div>
 
-      <!-- Platform Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          icon="🏢"
-          label="Total Tenants"
-          :value="platformStats?.tenants || 0"
-          color="purple"
-        />
-        <StatsCard
-          icon="👥"
-          label="Total Users"
-          :value="platformStats?.users || 0"
-          color="blue"
-        />
-        <StatsCard
-          icon="📦"
-          label="Total Products"
-          :value="platformStats?.products || 0"
-          color="green"
-        />
-        <StatsCard
-          icon="🛒"
-          label="Total Orders"
-          :value="platformStats?.orders || 0"
-          color="orange"
-        />
-      </div>
-
-      <!-- Revenue Card -->
-      <div class="bg-gradient-to-br from-purple-900/50 to-pink-900/50 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6">
-        <h2 class="text-xl font-semibold text-white mb-4">
-          Platform Revenue
-        </h2>
-        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-          ${{ revenueStats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00' }}
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-500">
+              Total Tenants
+            </p>
+            <p class="text-3xl font-bold text-gray-800 mt-1">
+              {{ platformStats?.tenants || 0 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center">
+            <Icon name="lucide:building" class="w-6 h-6 text-teal-600" />
+          </div>
         </div>
       </div>
 
+      <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-500">
+              Total Users
+            </p>
+            <p class="text-3xl font-bold text-gray-800 mt-1">
+              {{ platformStats?.users || 0 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+            <Icon name="lucide:users" class="w-6 h-6 text-blue-600" />
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-500">
+              Total Products
+            </p>
+            <p class="text-3xl font-bold text-gray-800 mt-1">
+              {{ platformStats?.products || 0 }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
+             <Icon name="lucide:package" class="w-6 h-6 text-indigo-600" />
+          </div>
+        </div>
+      </div>
+
+       <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-500">
+              Total Revenue
+            </p>
+             <p class="text-2xl font-bold text-gray-800 mt-1"> <!-- Smaller text for currency -->
+              ${{ revenueStats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0' }}
+            </p>
+          </div>
+          <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+            <Icon name="lucide:dollar-sign" class="w-6 h-6 text-green-600" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Recent Activity -->
-      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-white">
+      <div class="bg-white rounded-lg shadow border border-slate-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <h3 class="text-lg font-semibold text-gray-800">
             Recent Activity
-          </h2>
+          </h3>
           <NuxtLink
             to="/super-admin/audit-logs"
-            class="text-purple-400 hover:text-purple-300 transition-colors"
+            class="text-sm font-medium text-teal-600 hover:text-teal-700 hover:underline"
           >
-            View All →
+            View All
           </NuxtLink>
         </div>
         
-        <div
-          v-if="loading"
-          class="text-gray-400 text-center py-4"
-        >
-          Loading...
-        </div>
-        <div
-          v-else-if="recentLogs.length === 0"
-          class="text-gray-400 text-center py-4"
-        >
-          No recent activity
-        </div>
-        <div
-          v-else
-          class="space-y-3"
-        >
+        <div class="divide-y divide-slate-100">
           <div
+            v-if="loading"
+            class="p-8 text-center text-gray-400"
+          >
+            Loading...
+          </div>
+          <div
+            v-else-if="recentLogs.length === 0"
+            class="p-8 text-center text-gray-400"
+          >
+            No recent activity
+          </div>
+          <div
+            v-else
             v-for="log in recentLogs"
             :key="log.id"
-            class="flex items-start space-x-3 p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900/70 transition-colors"
+            class="p-4 hover:bg-slate-50 transition-colors flex items-start gap-4"
           >
-            <div class="flex-shrink-0 w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-              <span class="text-lg">{{ getActionIcon(log.action) }}</span>
+            <div class="flex-shrink-0 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-lg">
+              {{ getActionIcon(log.action) }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-white font-medium">
-                {{ log.action }}
+              <p class="text-sm font-medium text-gray-900">
+                {{ formatAction(log.action) }}
               </p>
-              <p class="text-gray-400 text-sm truncate">
+              <p class="text-sm text-gray-500 truncate">
                 {{ log.details }}
               </p>
-              <p class="text-gray-500 text-xs mt-1">
+              <p class="text-xs text-gray-400 mt-1">
                 {{ formatDate(log.createdAt) }}
               </p>
             </div>
@@ -97,106 +129,64 @@
       </div>
 
       <!-- Quick Actions -->
-      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-        <h2 class="text-xl font-semibold text-white mb-4">
-          Quick Actions
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-lg shadow border border-slate-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+          <h3 class="text-lg font-semibold text-gray-800">
+            Quick Actions
+          </h3>
+        </div>
+        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <NuxtLink
             to="/super-admin/tenants" 
-            class="p-4 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg transition-all duration-200 group"
+            class="flex items-center p-4 border rounded-lg hover:border-teal-500 hover:bg-teal-50 hover:shadow-sm transition-all group bg-white"
           >
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-purple-500/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6 text-purple-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-white font-medium">
-                  Create Tenant
-                </p>
-                <p class="text-gray-400 text-sm">
-                  Add a new tenant
-                </p>
-              </div>
+            <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center group-hover:bg-teal-200 text-teal-600 transition-colors">
+              <Icon name="lucide:plus" class="w-6 h-6" />
+            </div>
+            <div class="ml-4">
+              <p class="font-medium text-gray-900">Create Tenant</p>
+              <p class="text-xs text-gray-500 mt-0.5">Add a new store</p>
             </div>
           </NuxtLink>
 
           <NuxtLink
             to="/super-admin/tenants" 
-            class="p-4 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg transition-all duration-200 group"
+            class="flex items-center p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 hover:shadow-sm transition-all group bg-white"
           >
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-blue-500/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6 text-blue-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                  <path
-                    fill-rule="evenodd"
-                    d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p class="text-white font-medium">
-                  Manage Tenants
-                </p>
-                <p class="text-gray-400 text-sm">
-                  View all tenants
-                </p>
-              </div>
+             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 text-blue-600 transition-colors">
+              <Icon name="lucide:building" class="w-6 h-6" />
+            </div>
+            <div class="ml-4">
+              <p class="font-medium text-gray-900">Manage Tenants</p>
+              <p class="text-xs text-gray-500 mt-0.5">View all stores</p>
             </div>
           </NuxtLink>
 
           <NuxtLink
             to="/super-admin/analytics" 
-            class="p-4 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg transition-all duration-200 group"
+            class="flex items-center p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-sm transition-all group bg-white"
           >
-            <div class="flex items-center space-x-3">
-              <div class="w-12 h-12 bg-green-500/30 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-6 w-6 text-green-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-white font-medium">
-                  View Analytics
-                </p>
-                <p class="text-gray-400 text-sm">
-                  Platform insights
-                </p>
-              </div>
+             <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 text-indigo-600 transition-colors">
+              <Icon name="lucide:bar-chart-2" class="w-6 h-6" />
+            </div>
+            <div class="ml-4">
+              <p class="font-medium text-gray-900">View Analytics</p>
+              <p class="text-xs text-gray-500 mt-0.5">Platform insights</p>
             </div>
           </NuxtLink>
         </div>
       </div>
     </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+
 definePageMeta({
-  middleware: 'super-admin'
+  middleware: 'super-admin',
+  layout: 'super-admin', // Explicitly use super-admin layout
+  title: 'Platform Dashboard'
 })
 
 const loading = ref(true)
@@ -204,29 +194,25 @@ const platformStats = ref<any>(null)
 const revenueStats = ref<any>(null)
 const recentLogs = ref<any[]>([])
 
+const authStore = useAuthStore()
+
 onMounted(async () => {
   try {
     // Fetch platform stats
     const statsResponse = await $fetch('/api/super-admin/stats/platform', {
-      headers: {
-        Authorization: `Bearer ${useAuthStore().token}`
-      }
+      headers: { Authorization: `Bearer ${authStore.token}` }
     })
     platformStats.value = statsResponse
 
     // Fetch revenue stats
     const revenueResponse = await $fetch('/api/super-admin/stats/revenue', {
-      headers: {
-        Authorization: `Bearer ${useAuthStore().token}`
-      }
+      headers: { Authorization: `Bearer ${authStore.token}` }
     })
     revenueStats.value = revenueResponse
 
     // Fetch recent audit logs
     const logsResponse = await $fetch<any[]>('/api/super-admin/audit-logs', {
-      headers: {
-        Authorization: `Bearer ${useAuthStore().token}`
-      }
+      headers: { Authorization: `Bearer ${authStore.token}` }
     })
     recentLogs.value = logsResponse.slice(0, 5) // Show only 5 most recent
   } catch (error) {
@@ -246,6 +232,10 @@ const getActionIcon = (action: string) => {
     'IMPERSONATE_USER': '👤'
   }
   return icons[action] || '📝'
+}
+
+const formatAction = (action: string) => {
+  return action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 const formatDate = (date: string) => {

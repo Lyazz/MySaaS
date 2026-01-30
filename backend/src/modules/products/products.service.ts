@@ -207,7 +207,7 @@ export class ProductsService {
                     create: (data.values || []).map((v: any, idx: number) => ({
                         label: v.label,
                         position: v.position || idx,
-                        meta: v.meta ? JSON.stringify(v.meta) : null
+                        meta: v.meta ? (typeof v.meta === 'string' ? v.meta : JSON.stringify(v.meta)) : null
                     }))
                 }
             },
@@ -259,7 +259,7 @@ export class ProductsService {
                 optionId,
                 label: data.label,
                 position: data.position || 0,
-                meta: data.meta ? JSON.stringify(data.meta) : null
+                meta: data.meta ? (typeof data.meta === 'string' ? data.meta : JSON.stringify(data.meta)) : null
             }
         })
 
@@ -277,6 +277,35 @@ export class ProductsService {
         await prisma.productOptionValue.delete({ where: { id: valueId } })
         await this.syncVariants(tenantId, value.option.productId)
         return true
+    }
+
+    async updateOptionValue(tenantId: string, valueId: string, data: any) {
+        const value = await prisma.productOptionValue.findFirst({
+            where: { id: valueId, option: { product: { tenantId } } },
+            include: { option: true }
+        })
+        if (!value) throw new Error('Option Value not found')
+
+        const updated = await prisma.productOptionValue.update({
+            where: { id: valueId },
+            data: {
+                label: data.label,
+                position: data.position,
+                meta: data.meta ? (typeof data.meta === 'string' ? data.meta : JSON.stringify(data.meta)) : undefined
+            }
+        })
+
+        // If label changed, we might want to regenerate variant names if we store them explicitly,
+        // but currently we generate them dynamically or they are just relations. 
+        // Syncing variants might be needed if we tracked something specific, but for now 
+        // the relations stay the same, just the label on the value changed.
+        // However, if we cache variant titles, we'd need to update them. 
+        // Our getVariantTitle in frontend is dynamic. 
+        // Does backend store anything? 
+        // ProductVariant model has no title field. It relies on relations.
+        // So no need to syncVariants for a simple label change.
+
+        return updated
     }
 
     // --- Variant Generation / Sync ---

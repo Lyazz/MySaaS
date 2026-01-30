@@ -69,7 +69,7 @@
               <input 
                 v-model.number="variant.price" 
                 type="number"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border px-2 py-1" 
+                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
                 @change="updateVariant(variant)"
               >
             </td>
@@ -77,7 +77,7 @@
               <input 
                 v-model.number="variant.stock" 
                 type="number"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border px-2 py-1" 
+                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
                 @change="updateVariant(variant)"
               >
             </td>
@@ -85,7 +85,7 @@
               <input 
                 v-model="variant.sku" 
                 type="text"
-                class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border px-2 py-1" 
+                class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
                 @change="updateVariant(variant)"
               >
             </td>
@@ -93,14 +93,14 @@
               <input 
                 v-model="variant.isActive" 
                 type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" 
+                class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" 
                 @change="updateVariant(variant)"
               >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
               <button
                 type="button"
-                class="text-indigo-600 hover:text-indigo-900 font-medium"
+                class="text-teal-600 hover:text-teal-900 font-medium"
                 @click="openImageEditor(variant)"
               >
                 Manage ({{ variant.images?.length || 0 }})
@@ -152,7 +152,7 @@
           <label
             v-for="img in availableImages"
             :key="img.url"
-            class="border rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:border-indigo-400"
+            class="border rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:border-teal-400"
           >
             <div class="aspect-square overflow-hidden rounded-md bg-gray-50 border">
               <img
@@ -165,7 +165,7 @@
               <span class="truncate text-gray-700">{{ img.label || 'Image' }}</span>
               <input
                 type="checkbox"
-                class="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                class="h-4 w-4 text-teal-600 border-gray-300 rounded"
                 :checked="selectedImageUrls.has(img.url)"
                 @change="toggleImage(img.url)"
               >
@@ -184,7 +184,7 @@
           <button
             type="button"
             :disabled="savingImages"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50"
+            class="px-4 py-2 bg-teal-600 text-white rounded-md text-sm hover:bg-teal-700 disabled:opacity-50"
             @click="saveVariantImages"
           >
             {{ savingImages ? 'Saving...' : 'Save images' }}
@@ -201,6 +201,7 @@ import { useAuthStore } from '~/stores/auth'
 const props = defineProps<{
     productId: string
     variants: any[]
+    options?: any[] // Added options to help sort title
     productImages?: any[]
     legacyImages?: string[]
 }>()
@@ -210,7 +211,21 @@ const authStore = useAuthStore()
 
 function getVariantTitle(variant: any) {
     if (!variant.optionValues || variant.optionValues.length === 0) return 'Default'
-    return variant.optionValues.map((ov: any) => ov.optionValue?.label || '?').join(' / ')
+    
+    // If we have options metadata, sort values by option position
+    let values = [...variant.optionValues]
+    if (props.options && props.options.length > 0) {
+        // Map optionId -> Position
+        const optionPos = new Map(props.options.map((o: any) => [o.id, o.position]))
+        
+        values.sort((a: any, b: any) => {
+            const posA = optionPos.get(a.optionValue?.optionId) ?? 999
+            const posB = optionPos.get(b.optionValue?.optionId) ?? 999
+            return posA - posB
+        })
+    }
+
+    return values.map((ov: any) => ov.optionValue?.label || '?').join(' / ')
 }
 
 async function updateVariant(variant: any) {

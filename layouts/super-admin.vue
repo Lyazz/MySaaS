@@ -1,135 +1,187 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-    <!-- Top Navigation -->
-    <nav class="bg-black/30 backdrop-blur-sm border-b border-purple-500/30">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-8">
-            <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 text-white"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </div>
-              <span class="text-xl font-bold text-white">Super Admin</span>
-            </div>
-            
-            <div class="hidden md:flex space-x-4">
-              <NuxtLink
-                to="/super-admin"
-                class="nav-link"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                </svg>
-                Dashboard
-              </NuxtLink>
-              <NuxtLink
-                to="/super-admin/tenants"
-                class="nav-link"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                  <path
-                    fill-rule="evenodd"
-                    d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                Tenants
-              </NuxtLink>
-              <NuxtLink
-                to="/super-admin/analytics"
-                class="nav-link"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                </svg>
-                Analytics
-              </NuxtLink>
-              <NuxtLink
-                to="/super-admin/audit-logs"
-                class="nav-link"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                Audit Logs
-              </NuxtLink>
-            </div>
-          </div>
+  <div class="min-h-screen bg-slate-50 flex font-sans text-slate-600">
+    <!-- Mobile Backdrop -->
+    <div 
+      v-if="sidebarOpen" 
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 lg:hidden transition-opacity"
+      @click="sidebarOpen = false"
+    ></div>
 
-          <div class="flex items-center space-x-4">
-            <span class="px-3 py-1 bg-purple-500/20 border border-purple-500/50 rounded-full text-purple-300 text-sm font-medium">
-              Super Admin
-            </span>
-            <button
-              class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-300 transition-all duration-200"
-              @click="logout"
-            >
-              Logout
-            </button>
+    <!-- Sidebar -->
+    <aside :class="[
+      'bg-slate-950 text-white transition-all duration-300 flex flex-col shadow-2xl z-30',
+      'fixed inset-y-0 left-0 lg:static', // Mobile fixed, Desktop static
+      sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'
+    ]">
+      <!-- Logo/Brand -->
+      <div class="h-16 flex items-center justify-between px-6 bg-slate-950 border-b border-white/5">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div 
+            class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors bg-teal-600"
+          >
+            S
+          </div>
+          <span 
+            class="font-sans font-semibold text-lg tracking-wide truncate transition-all duration-300"
+            :class="sidebarOpen ? 'opacity-100' : 'opacity-0 lg:hidden'"
+          >
+            Super Admin
+          </span>
+        </div>
+        <button 
+          @click="toggleSidebar" 
+          class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors lg:hidden"
+          aria-label="Close sidebar"
+        >
+          <Icon name="lucide:x" class="w-5 h-5" />
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+        <NuxtLink
+          v-for="item in navItems"
+          :key="item.path"
+          :to="item.path"
+          class="group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 mb-1 relative overflow-hidden h-11"
+          active-class="text-white bg-white/10 shadow-sm ring-1 ring-white/20"
+          :class="['text-slate-400 hover:text-white hover:bg-white/5', sidebarOpen ? 'justify-start gap-3' : 'justify-center gap-0']"
+        >
+          <!-- Active Indicator Strip -->
+          <div 
+            v-if="route.path === item.path"
+            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-teal-500"
+          ></div>
+
+          <Icon 
+            :name="item.icon" 
+            class="w-5 h-5 transition-transform duration-300 group-hover:scale-110 shrink-0"
+            :class="route.path === item.path ? 'text-teal-400' : ''"
+          />
+          <span 
+            class="font-medium text-sm transition-all duration-300 whitespace-nowrap overflow-hidden"
+            :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
+          >
+            {{ item.label }}
+          </span>
+          
+          <!-- Tooltip for collapsed state -->
+          <div 
+            v-if="!sidebarOpen" 
+            class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
+          >
+            {{ item.label }}
+          </div>
+        </NuxtLink>
+      </nav>
+
+      <!-- User Section -->
+      <div class="p-4 border-t border-white/5 bg-black/20">
+        <div 
+          class="flex items-center rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
+          :class="sidebarOpen ? 'gap-3 p-2' : 'gap-0 justify-center p-2'"
+        >
+          <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-300 ring-2 ring-transparent group-hover:ring-white/20 transition-all shrink-0">
+            {{ userInitial }}
+          </div>
+          <div 
+            class="min-w-0 transition-all duration-300 overflow-hidden"
+            :class="sidebarOpen ? 'w-auto opacity-100 ml-3' : 'w-0 opacity-0 ml-0'"
+          >
+            <p class="text-sm font-medium text-slate-200 truncate">{{ authStore.user?.email }}</p>
+            <p class="text-xs text-slate-500 truncate mt-0.5">Super Admin</p>
           </div>
         </div>
       </div>
-    </nav>
+    </aside>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <slot />
-    </main>
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+      <!-- Top Bar -->
+      <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200/60 shadow-sm">
+        <div class="px-6 h-16 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <button 
+              @click="toggleSidebar" 
+              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <Icon name="lucide:menu" class="w-6 h-6" />
+            </button>
+            <h1 class="text-xl font-sans font-semibold text-slate-800 tracking-tight">{{ pageTitle }}</h1>
+          </div>
+          
+          <div class="flex items-center gap-4">
+            <button 
+              @click="handleLogout" 
+              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+            >
+              <Icon name="lucide:log-out" class="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50 custom-scrollbar">
+        <div class="max-w-7xl mx-auto animate-fadeIn">
+          <slot />
+        </div>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const authStore = useAuthStore()
-const router = useRouter()
+import { useAuthStore } from '~/stores/auth'
 
-const logout = async () => {
+const authStore = useAuthStore()
+const route = useRoute()
+const sidebarOpen = ref(false)
+
+onMounted(() => {
+  if (window.innerWidth >= 1024) {
+    sidebarOpen.value = true
+  }
+})
+
+const userInitial = computed(() => authStore.user?.email?.charAt(0).toUpperCase() || 'S')
+
+const pageTitle = computed(() => {
+  const meta = route.meta.title as string
+  return meta || 'Super Admin Dashboard'
+})
+
+const navItems = [
+  {
+    path: '/super-admin',
+    label: 'Dashboard',
+    icon: 'lucide:layout-dashboard'
+  },
+  {
+    path: '/super-admin/tenants',
+    label: 'Tenants',
+    icon: 'lucide:building'
+  },
+  {
+    path: '/super-admin/analytics',
+    label: 'Analytics',
+    icon: 'lucide:bar-chart-2'
+  },
+  {
+    path: '/super-admin/audit-logs',
+    label: 'Audit Logs',
+    icon: 'lucide:history'
+  }
+]
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
+function handleLogout() {
   authStore.logout()
-  await router.push('/super-admin/login')
+  navigateTo('/super-admin/login')
 }
 </script>
-
-<style scoped>
-.nav-link {
-  @apply flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200;
-}
-
-.router-link-active {
-  @apply text-white bg-white/10;
-}
-</style>

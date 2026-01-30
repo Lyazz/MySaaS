@@ -1,19 +1,19 @@
 <template>
   <NuxtLayout name="super-admin">
     <div class="space-y-6">
-      <h1 class="text-3xl font-bold text-white">
+      <h1 class="text-3xl font-bold text-gray-800">
         Platform Analytics
       </h1>
 
       <!-- Revenue Overview -->
-      <div class="bg-gradient-to-br from-purple-900/50 to-pink-900/50 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6">
-        <h2 class="text-xl font-semibold text-white mb-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
           Total Platform Revenue
         </h2>
-        <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+        <div class="text-5xl font-bold text-teal-600">
           ${{ revenueStats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00' }}
         </div>
-        <p class="text-purple-300 mt-2">
+        <p class="text-gray-500 mt-2">
           From confirmed, shipped, and delivered orders
         </p>
       </div>
@@ -24,43 +24,47 @@
           icon="🏢"
           label="Active Tenants"
           :value="platformStats?.tenants || 0"
-          color="purple"
+          color="teal"
+          class="bg-white border border-slate-200 shadow-sm"
         />
         <StatsCard
           icon="👥"
           label="Total Users"
           :value="platformStats?.users || 0"
           color="blue"
+          class="bg-white border border-slate-200 shadow-sm"
         />
         <StatsCard
           icon="📦"
           label="Total Products"
           :value="platformStats?.products || 0"
           color="green"
+          class="bg-white border border-slate-200 shadow-sm"
         />
         <StatsCard
           icon="🛒"
           label="Total Orders"
           :value="platformStats?.orders || 0"
           color="orange"
+          class="bg-white border border-slate-200 shadow-sm"
         />
       </div>
 
       <!-- Revenue by Tenant -->
-      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-        <h2 class="text-xl font-semibold text-white mb-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
           Revenue by Tenant
         </h2>
         
         <div
           v-if="loading"
-          class="text-center text-gray-400 py-8"
+          class="text-center text-gray-500 py-8"
         >
           Loading...
         </div>
         <div
           v-else-if="!revenueByTenant || revenueByTenant.length === 0" 
-          class="text-center text-gray-400 py-8"
+          class="text-center text-gray-500 py-8"
         >
           No revenue data available
         </div>
@@ -71,18 +75,18 @@
           <div
             v-for="item in sortedRevenueByTenant"
             :key="item.tenantId"
-            class="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg hover:bg-slate-900/70 transition-colors"
+            class="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors border border-slate-100"
           >
             <div class="flex-1">
-              <p class="text-white font-medium">
+              <p class="text-gray-800 font-medium">
                 {{ getTenantName(item.tenantId) }}
               </p>
-              <p class="text-gray-400 text-sm">
+              <p class="text-gray-500 text-sm">
                 {{ item.tenantSlug }}
               </p>
             </div>
             <div class="text-right">
-              <p class="text-2xl font-bold text-green-400">
+              <p class="text-2xl font-bold text-teal-600">
                 ${{ item.revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
               </p>
               <p class="text-gray-500 text-sm">
@@ -94,39 +98,39 @@
       </div>
 
       <!-- Top Performing Tenants -->
-      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-        <h2 class="text-xl font-semibold text-white mb-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
           Top Performing Tenants
         </h2>
         
         <div class="overflow-x-auto">
           <table class="w-full">
-            <thead class="bg-slate-900/50 border-b border-slate-700">
+            <thead class="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">
                   Rank
                 </th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">
                   Tenant
                 </th>
-                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-300">
+                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-600">
                   Revenue
                 </th>
-                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-300">
+                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-600">
                   Orders
                 </th>
-                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-300">
+                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-600">
                   Products
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-700">
+            <tbody class="divide-y divide-slate-100">
               <tr
                 v-for="(tenant, index) in topTenants"
                 :key="tenant.id"
-                class="hover:bg-slate-900/30 transition-colors"
+                class="hover:bg-slate-50 transition-colors"
               >
-                <td class="px-4 py-3">
+                <td class="px-4 py-3 text-gray-800">
                   <span
                     v-if="index === 0"
                     class="text-2xl"
@@ -141,24 +145,24 @@
                   >🥉</span>
                   <span
                     v-else
-                    class="text-gray-400"
+                    class="text-gray-500 ml-2"
                   >{{ index + 1 }}</span>
                 </td>
                 <td class="px-4 py-3">
-                  <p class="text-white font-medium">
+                  <p class="text-gray-800 font-medium">
                     {{ tenant.name }}
                   </p>
-                  <p class="text-gray-400 text-sm">
+                  <p class="text-gray-500 text-sm">
                     {{ tenant.slug }}
                   </p>
                 </td>
-                <td class="px-4 py-3 text-right text-green-400 font-semibold">
+                <td class="px-4 py-3 text-right text-teal-600 font-semibold">
                   ${{ tenant.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
                 </td>
-                <td class="px-4 py-3 text-right text-gray-300">
+                <td class="px-4 py-3 text-right text-gray-600">
                   {{ tenant._count?.orders || 0 }}
                 </td>
-                <td class="px-4 py-3 text-right text-gray-300">
+                <td class="px-4 py-3 text-right text-gray-600">
                   {{ tenant._count?.products || 0 }}
                 </td>
               </tr>

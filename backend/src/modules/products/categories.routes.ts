@@ -9,6 +9,7 @@ router.use(requireTenantAdmin)
 
 router.get('/', controller.listCategories)
 router.post('/', controller.createCategory)
+router.get('/:id', controller.getCategory)
 router.put('/:id', controller.updateCategory)
 router.delete('/:id', controller.deleteCategory)
 

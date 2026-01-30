@@ -1,78 +1,79 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+  <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl mb-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-8 w-8 text-white"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-              clip-rule="evenodd"
-            />
-          </svg>
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-teal-600 rounded-2xl mb-4 shadow-lg shadow-teal-600/20">
+          <Icon name="lucide:shield-check" class="h-8 w-8 text-white" />
         </div>
-        <h1 class="text-3xl font-bold text-white mb-2">
-          Super Admin Login
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">
+          Super Admin
         </h1>
-        <p class="text-gray-400">
+        <p class="text-slate-500">
           Sign in to access the platform dashboard
         </p>
       </div>
 
-      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-8">
+      <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-xl shadow-slate-200/50">
+        <!-- Error Alert -->
         <div
           v-if="error"
-          class="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm"
+          class="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg flex items-start space-x-3"
         >
-          {{ error }}
+          <Icon name="lucide:alert-circle" class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <p class="text-sm text-red-600">
+            {{ error }}
+          </p>
         </div>
 
         <form
-          class="space-y-4"
+          class="space-y-5"
           @submit.prevent="handleLogin"
         >
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-            <input
-              v-model="email"
-              type="email"
-              required
-              class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="superadmin@example.com"
-            >
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+            <div class="relative">
+              <input
+                v-model="email"
+                type="email"
+                required
+                class="w-full px-4 py-3 pl-10 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                placeholder="superadmin@example.com"
+              >
+              <Icon name="lucide:mail" class="h-5 w-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-            <input
-              v-model="password"
-              type="password"
-              required
-              class="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="••••••••"
-            >
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+            <div class="relative">
+              <input
+                v-model="password"
+                type="password"
+                required
+                class="w-full px-4 py-3 pl-10 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                placeholder="••••••••"
+              >
+              <Icon name="lucide:lock" class="h-5 w-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
           </div>
 
           <button
             type="submit"
             :disabled="loading"
-            class="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg text-white font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full px-4 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
           >
-            {{ loading ? 'Signing in...' : 'Sign In' }}
+            <Icon v-if="loading" name="lucide:loader-2" class="h-5 w-5 animate-spin" />
+            <span>{{ loading ? 'Signing in...' : 'Sign In' }}</span>
           </button>
         </form>
 
-        <div class="mt-6 pt-6 border-t border-slate-700 text-center">
+        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
           <NuxtLink
             to="/"
-            class="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            class="inline-flex items-center text-sm text-slate-500 hover:text-teal-600 font-medium transition-colors"
           >
-            ← Back to main site
+            <Icon name="lucide:arrow-left" class="h-4 w-4 mr-1.5" />
+            Back to main site
           </NuxtLink>
         </div>
       </div>
@@ -81,6 +82,8 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+
 definePageMeta({
   layout: false,
   middleware: 'saas-only'

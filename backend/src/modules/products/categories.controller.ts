@@ -7,7 +7,9 @@ export class CategoriesController {
     async listCategories(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const categories = await categoriesService.listAdmin(tenant.id)
+            const sortBy = req.query.sortBy as string | undefined
+            const sortOrder = req.query.sortOrder as 'asc' | 'desc' | undefined
+            const categories = await categoriesService.listAdmin(tenant.id, sortBy, sortOrder)
             res.json(categories)
         } catch (error) {
             console.error('List categories error:', error)
@@ -74,6 +76,27 @@ export class CategoriesController {
             }
         } catch (error) {
             console.error('Update category error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async getCategory(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const categoryId = req.params.id
+
+            if (!categoryId) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+            }
+
+            const category = await categoriesService.getCategory(tenant.id, categoryId)
+            if (!category) {
+                return res.status(404).json({ statusCode: 404, statusMessage: 'Category not found' })
+            }
+
+            res.json(category)
+        } catch (error) {
+            console.error('Get category error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

@@ -21,4 +21,9 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
         return navigateTo('/login')
     }
+
+    // Prevent Super Admin from accessing Tenant Admin area
+    if (authStore.isAuthenticated && to.path.startsWith('/admin') && authStore.user?.isSuperAdmin) {
+        return navigateTo('/super-admin')
+    }
 })

@@ -16,4 +16,5 @@ useState('storeSettings', () => event?.context.storeSettings)
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <Toast />
 </template>

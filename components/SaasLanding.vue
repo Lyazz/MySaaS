@@ -49,15 +49,15 @@ const features = [
   {
     title: 'Store Builder',
     description: 'Drag-and-drop editor to create stunning storefronts in minutes.',
-    icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z',
+    icon: 'lucide:layout-template',
     colSpan: 'md:col-span-2', // Wide tile
-    bgClass: 'bg-gradient-to-br from-indigo-500/10 to-indigo-600/5',
-    borderClass: 'border-indigo-500/20'
+    bgClass: 'bg-gradient-to-br from-teal-500/10 to-teal-600/5',
+    borderClass: 'border-teal-500/20'
   },
   {
     title: 'Global Payments',
     description: 'Accept payments from anywhere with integrated gateways.',
-    icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
+    icon: 'lucide:credit-card',
     colSpan: 'md:col-span-1',
     bgClass: 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/5',
     borderClass: 'border-emerald-500/20'
@@ -65,7 +65,7 @@ const features = [
   {
     title: 'Analytics & Insights',
     description: 'Real-time data to optimize your conversion rates.',
-    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+    icon: 'lucide:bar-chart-3',
     colSpan: 'md:col-span-1',
     bgClass: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5',
     borderClass: 'border-amber-500/20'
@@ -73,7 +73,7 @@ const features = [
   {
     title: 'Automated Shipping',
     description: 'Connect with Yalidine, Eckoz, and more for auto-dispatching.',
-    icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0',
+    icon: 'lucide:truck',
     colSpan: 'md:col-span-2',
     bgClass: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
     borderClass: 'border-blue-500/20'
@@ -150,34 +150,28 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-slate-50 font-sans text-slate-900 selection:bg-indigo-500 selection:text-white overflow-hidden">
+  <div class="bg-slate-50 font-sans text-slate-900 selection:bg-teal-500 selection:text-white overflow-hidden">
     
     <!-- HERO SECTION -->
     <section class="relative min-h-screen flex items-center justify-center pt-20 pb-32 overflow-hidden bg-slate-950 text-white">
       <!-- Animated Background Mesh -->
       <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] bg-indigo-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen" />
-        <div class="absolute top-[20%] -right-[10%] w-[60%] h-[60%] bg-violet-600/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-screen" />
-        <div class="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-emerald-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000 mix-blend-screen" />
+        <div class="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] bg-teal-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen" />
+        <div class="absolute top-[20%] -right-[10%] w-[60%] h-[60%] bg-emerald-600/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-screen" />
+        <div class="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-cyan-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000 mix-blend-screen" />
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
       </div>
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
         <!-- Badge -->
-        <div class="reveal-item mb-8 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md shadow-lg shadow-indigo-500/10 ring-1 ring-white/10 hover:ring-indigo-400/50 transition-all cursor-default">
-          <span class="flex h-2 w-2 relative">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span class="text-xs font-semibold tracking-wide text-slate-300">V2.0 IS LIVE</span>
-        </div>
+
 
         <!-- Headline -->
-        <h1 class="reveal-item text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-400 leading-[1.1]">
+        <h1 class="reveal-item mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-400 leading-[1.1]">
           Build. Sell. <br class="md:hidden" />
-          <span class="text-indigo-400 inline-block relative">
+          <span class="text-teal-400 inline-block relative">
             Scale.
-            <svg class="absolute w-full h-3 -bottom-1 left-0 text-indigo-500 opacity-60" viewBox="0 0 200 9" fill="none"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
+            <svg class="absolute w-full h-3 -bottom-1 left-0 text-teal-500 opacity-60" viewBox="0 0 200 9" fill="none"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
           </span>
         </h1>
 
@@ -188,11 +182,11 @@ onMounted(() => {
 
         <!-- CTA Buttons -->
         <div class="reveal-item flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <NuxtLink to="/register" class="group relative px-8 py-4 bg-indigo-600 rounded-xl font-bold text-white shadow-xl shadow-indigo-600/20 overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-indigo-600/40">
-            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-600 opacity-100 group-hover:opacity-90 transition-opacity" />
+          <NuxtLink to="/register" class="group relative px-8 py-4 bg-teal-600 rounded-xl font-bold text-white shadow-xl shadow-teal-600/20 overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-teal-600/40">
+            <div class="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-100 group-hover:opacity-90 transition-opacity" />
             <span class="relative flex items-center justify-center gap-2">
               Start Building Free
-              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+              <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </span>
           </NuxtLink>
           
@@ -202,9 +196,9 @@ onMounted(() => {
         </div>
 
         <!-- Dashboard Preview (Floating/Glassmorphism) -->
-        <div class="reveal-item mt-20 p-2 rounded-2xl bg-gradient-to-b from-slate-700/20 to-slate-800/20 border border-slate-700/40 backdrop-blur-sm shadow-2xl shadow-indigo-500/10 max-w-6xl w-full rotate-x">
+        <div class="reveal-item mt-20 p-2 rounded-2xl bg-gradient-to-b from-slate-700/20 to-slate-800/20 border border-slate-700/40 backdrop-blur-sm shadow-2xl shadow-teal-500/10 max-w-6xl w-full rotate-x">
           <div class="rounded-xl overflow-hidden bg-slate-900 border border-slate-800 relative aspect-[16/9] group">
-            <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div class="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
             <div class="absolute inset-0 flex items-center justify-center">
               <span class="text-slate-600 font-medium">[ Dashboard Preview Animation / Video Placeholder ]</span>
             </div>
@@ -225,7 +219,7 @@ onMounted(() => {
     <section class="py-24 md:py-32 bg-slate-50 relative overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-20">
-          <h2 class="reveal-item text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Everything you need to <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">dominate</span></h2>
+          <h2 class="reveal-item text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Everything you need to <span class="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">dominate</span></h2>
           <p class="reveal-item text-lg text-slate-500 max-w-2xl mx-auto">Powerful tools designed for growth, packaged in a beautiful interface.</p>
         </div>
 
@@ -238,12 +232,12 @@ onMounted(() => {
             :style="{ transitionDelay: `${idx * 100}ms` }"
           >
             <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity transform group-hover:scale-110 duration-500">
-               <svg class="w-32 h-32 text-current" fill="currentColor" viewBox="0 0 24 24"><path :d="feature.icon"/></svg>
+               <Icon :name="feature.icon" class="w-32 h-32 text-current" />
             </div>
             
             <div class="relative z-10">
-              <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 text-indigo-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="feature.icon"/></svg>
+              <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 text-teal-600">
+                <Icon :name="feature.icon" class="w-6 h-6" />
               </div>
               <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ feature.title }}</h3>
               <p class="text-slate-600 font-medium leading-relaxed">{{ feature.description }}</p>
@@ -255,11 +249,11 @@ onMounted(() => {
 
     <!-- STATS INTERLUDE -->
     <section ref="statsSection" class="py-20 bg-slate-900 text-white relative">
-       <div class="absolute inset-0 bg-indigo-600/10 pattern-grid-lg opacity-20" />
+       <div class="absolute inset-0 bg-teal-600/10 pattern-grid-lg opacity-20" />
        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
          <div v-for="(stat, idx) in stats" :key="idx" class="text-center p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
            <div class="text-5xl lg:text-6xl font-black mb-2 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent tracking-tighter">
-             {{ stat.value.toLocaleString() }}<span class="text-indigo-400 text-4xl align-top">{{ stat.suffix }}</span>
+             {{ stat.value.toLocaleString() }}<span class="text-teal-400 text-4xl align-top">{{ stat.suffix }}</span>
            </div>
            <div class="text-slate-400 font-medium uppercase tracking-wider text-sm">{{ stat.label }}</div>
          </div>
@@ -279,9 +273,9 @@ onMounted(() => {
              v-for="(plan, idx) in pricingPlans" 
              :key="idx" 
              class="group relative rounded-3xl p-8 border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-             :class="plan.popular ? 'bg-slate-900 text-white border-slate-900 ring-4 ring-indigo-500/20' : 'bg-white text-slate-900 border-slate-200 hover:border-indigo-100'"
+             :class="plan.popular ? 'bg-slate-900 text-white border-slate-900 ring-4 ring-teal-500/20' : 'bg-white text-slate-900 border-slate-200 hover:border-teal-100'"
            >
-             <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+             <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-teal-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
                Most Popular
              </div>
 
@@ -295,14 +289,14 @@ onMounted(() => {
              
              <button 
                class="w-full py-3 rounded-xl font-bold mb-8 transition-all"
-               :class="plan.popular ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-900'"
+               :class="plan.popular ? 'bg-teal-600 hover:bg-teal-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-900'"
              >
                {{ plan.cta }}
              </button>
 
              <ul class="space-y-4 text-sm font-medium">
                <li v-for="(feat, fIdx) in plan.features" :key="fIdx" class="flex items-center gap-3">
-                 <svg class="w-5 h-5 flex-shrink-0" :class="plan.popular ? 'text-indigo-400' : 'text-indigo-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  <Icon name="lucide:check" class="w-5 h-5 flex-shrink-0" :class="plan.popular ? 'text-teal-400' : 'text-teal-600'" />
                  <span class="opacity-80">{{ feat }}</span>
                </li>
              </ul>
@@ -319,7 +313,7 @@ onMounted(() => {
         <div class="text-center lg:text-left mb-12 lg:mb-0">
            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
              Loved by <br>
-             <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Founders</span> like you.
+             <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">Founders</span> like you.
            </h2>
            <p class="text-lg text-slate-500 max-w-md mx-auto lg:mx-0 mb-8">
              Join thousands of merchants who have switched to a platform built for growth, speed, and reliability.
@@ -408,9 +402,9 @@ onMounted(() => {
               <span class="text-lg font-semibold text-slate-800">{{ faq.question }}</span>
               <span 
                 class="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 transition-transform duration-300"
-                :class="{'rotate-180 bg-indigo-50 text-indigo-600 border-indigo-100': activeFaq === idx}"
+                :class="{'rotate-180 bg-teal-50 text-teal-600 border-teal-100': activeFaq === idx}"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <Icon name="lucide:chevron-down" class="w-4 h-4" />
               </span>
             </button>
             <div 
@@ -428,13 +422,13 @@ onMounted(() => {
     <section class="py-32 bg-slate-900 relative overflow-hidden text-center px-4">
       <div class="relative z-10 max-w-4xl mx-auto">
         <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight">Ready to launch?</h2>
-        <p class="text-xl text-indigo-200 mb-10">Join the platform that grows with you.</p>
-        <NuxtLink to="/register" class="inline-flex px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-full text-lg shadow-lg shadow-indigo-900/20 transition-all hover:scale-105">
+        <p class="text-xl text-teal-200 mb-10">Join the platform that grows with you.</p>
+        <NuxtLink to="/register" class="inline-flex px-10 py-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-full text-lg shadow-lg shadow-teal-900/20 transition-all hover:scale-105">
           Get Started Now
         </NuxtLink>
       </div>
       <!-- Decorative BG -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px]" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-teal-600/20 rounded-full blur-[120px]" />
     </section>
 
   </div>

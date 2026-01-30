@@ -12,7 +12,7 @@ useSeoMeta({
     </h1>
     <p class="text-slate-600 leading-relaxed">
       Email us at <a
-        class="text-indigo-600 hover:underline"
+        class="text-teal-600 hover:underline"
         href="mailto:support@mysaas.com"
       >support@mysaas.com</a>.
     </p>

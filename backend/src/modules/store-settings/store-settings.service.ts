@@ -36,6 +36,7 @@ const isLanguage = (value: string): value is StoreLanguage => STORE_LANGUAGES.so
 
 
 export type StoreSettingsPatchInput = Partial<{
+    logoUrl: string | null
     primaryColor: string
     templateKey: string
 
@@ -45,6 +46,7 @@ export type StoreSettingsPatchInput = Partial<{
     currencyCode: string
     currencyCountry: string
     isCompleted: boolean
+    allowedDeliveryProviders: string[]
 }>
 
 export class StoreSettingsService {
@@ -58,6 +60,13 @@ export class StoreSettingsService {
 
     async update(tenantId: string, input: StoreSettingsPatchInput) {
         const update: any = {}
+
+        if (input.logoUrl !== undefined) {
+            if (input.logoUrl !== null && typeof input.logoUrl !== 'string') {
+                throw new StoreSettingsValidationError('logoUrl must be a string URL or null')
+            }
+            update.logoUrl = input.logoUrl
+        }
 
         if (input.primaryColor !== undefined) {
             if (typeof input.primaryColor !== 'string' || !isHexColor(input.primaryColor)) {
@@ -121,6 +130,13 @@ export class StoreSettingsService {
             update.isCompleted = input.isCompleted
         }
 
+        if (input.allowedDeliveryProviders !== undefined) {
+            if (!Array.isArray(input.allowedDeliveryProviders) || !input.allowedDeliveryProviders.every(p => typeof p === 'string')) {
+                throw new StoreSettingsValidationError('allowedDeliveryProviders must be an array of strings')
+            }
+            update.allowedDeliveryProviders = input.allowedDeliveryProviders
+        }
+
         return await prisma.storeSettings.upsert({
             where: { tenantId },
             create: { tenantId, ...update },
@@ -131,6 +147,7 @@ export class StoreSettingsService {
     buildFrontendAgentSummary(args: {
         tenant: { id: string; slug: string; name: string }
         settings: {
+            logoUrl: string | null
             primaryColor: string
             templateKey: string
             language: string

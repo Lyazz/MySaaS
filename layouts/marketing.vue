@@ -12,18 +12,8 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div class="col-span-1 md:col-span-2">
             <div class="flex items-center gap-2 mb-4">
-              <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white">
-                <svg
-                  class="w-3 h-3"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                /></svg>
+              <div class="w-6 h-6 rounded bg-teal-600 flex items-center justify-center text-white">
+                <Icon name="lucide:store" class="w-3 h-3" />
               </div>
               <span class="text-xl font-sans font-bold text-slate-900">MySaaS</span>
             </div>
@@ -39,19 +29,19 @@
               <li>
                 <a
                   href="#"
-                  class="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+                  class="text-sm text-slate-500 hover:text-teal-600 transition-colors"
                 >Features</a>
               </li>
               <li>
                 <a
                   href="#"
-                  class="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+                  class="text-sm text-slate-500 hover:text-teal-600 transition-colors"
                 >Pricing</a>
               </li>
               <li>
                 <a
                   href="#"
-                  class="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+                  class="text-sm text-slate-500 hover:text-teal-600 transition-colors"
                 >Changelog</a>
               </li>
             </ul>
@@ -64,19 +54,19 @@
               <li>
                 <a
                   href="#"
-                  class="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+                  class="text-sm text-slate-500 hover:text-teal-600 transition-colors"
                 >Documentation</a>
               </li>
               <li>
                 <a
                   href="#"
-                  class="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+                  class="text-sm text-slate-500 hover:text-teal-600 transition-colors"
                 >API Status</a>
               </li>
               <li>
                 <a
                   href="#"
-                  class="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+                  class="text-sm text-slate-500 hover:text-teal-600 transition-colors"
                 >Contact</a>
               </li>
             </ul>

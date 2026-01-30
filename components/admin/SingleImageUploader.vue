@@ -14,7 +14,7 @@
       </div>
       <div
         v-if="uploading"
-        class="text-xs text-indigo-600 font-medium"
+        class="text-xs text-teal-600 font-medium"
       >
         Uploading...
       </div>
@@ -33,36 +33,12 @@
             class="absolute top-2 right-2 bg-white/90 border border-gray-200 rounded-full p-1.5 shadow-sm hover:bg-white"
             @click="removeImage"
           >
-            <svg
-              class="w-4 h-4 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <Icon name="lucide:x" class="w-4 h-4 text-gray-600" />
           </button>
         </template>
         <template v-else>
           <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
-            <svg
-              class="w-10 h-10 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 16l4-4a2 2 0 012.828 0L16 17m-2-2l1.586-1.586A2 2 0 0118 14.828L20 17M4 6h16M4 10h16"
-              />
-            </svg>
+            <Icon name="lucide:upload" class="w-10 h-10 text-gray-400" />
             <span class="mt-2 text-xs text-gray-500">Upload image</span>
             <input
               type="file"

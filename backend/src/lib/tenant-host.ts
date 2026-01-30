@@ -40,11 +40,29 @@ export const parseHost = (
     // SaaS roots (no tenant context)
     if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0') return { kind: 'saas' }
     if (host === platformBaseDomain || host === `www.${platformBaseDomain}`) return { kind: 'saas' }
+    // Plain IPv4 hosts (LAN dev): treat as SaaS so landing/login work via IP
+    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return { kind: 'saas' }
 
     // Local dev: {slug}.localhost
     if (host.endsWith('.localhost')) {
         const slug = host.slice(0, -'.localhost'.length).split('.')[0] ?? ''
         if (slug && slug !== 'www' && isValidSlug(slug)) return { kind: 'tenant-subdomain', slug }
+        return { kind: 'saas' }
+    }
+
+    // Dev on LAN: nip.io wildcard
+    // Tenant form: {slug}.{ip}.nip.io => slug derived from first label
+    // IP-only form: {ip}.nip.io => SaaS/root
+    if (host.endsWith('.nip.io')) {
+        const nipRegex = /^([a-z0-9-]+)\.(\d{1,3}(?:\.\d{1,3}){3})\.nip\.io$/
+        const ipOnlyRegex = /^(\d{1,3}(?:\.\d{1,3}){3})\.nip\.io$/
+        const nipTenantMatch = host.match(nipRegex)
+        if (nipTenantMatch) {
+            const slug = nipTenantMatch[1]
+            if (slug && slug !== 'www' && isValidSlug(slug)) return { kind: 'tenant-subdomain', slug }
+            return { kind: 'saas' }
+        }
+        if (ipOnlyRegex.test(host)) return { kind: 'saas' }
         return { kind: 'saas' }
     }
 

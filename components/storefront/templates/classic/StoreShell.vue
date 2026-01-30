@@ -15,21 +15,18 @@ const storeSettings = useState<any>('storeSettings')
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between h-20 items-center">
             <div class="flex-shrink-0 flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white shadow-md">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              <template v-if="storeSettings?.logoUrl">
+                <img 
+                  :src="storeSettings.logoUrl" 
+                  :alt="tenantName" 
+                  class="h-8 max-w-[120px] object-contain"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
+              </template>
+              <template v-else>
+                <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white shadow-md">
+                  <Icon name="lucide:store" class="w-5 h-5" />
+                </div>
+              </template>
               <NuxtLink
                 to="/"
                 class="text-2xl font-sans font-bold text-slate-900 tracking-tight hover-text-brand transition-colors"
@@ -74,19 +71,7 @@ const storeSettings = useState<any>('storeSettings')
                   to="/cart"
                   class="relative group p-2 rounded-full hover:bg-slate-100 transition-colors"
                 >
-                  <svg
-                    class="w-6 h-6 text-slate-600 group-hover:text-brand transition-colors"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                    />
-                  </svg>
+                  <Icon name="lucide:shopping-bag" class="w-6 h-6 text-slate-600 group-hover:text-brand transition-colors" />
                   <span
                     v-if="cartStore.itemCount > 0"
                     class="absolute -top-0.5 -right-0.5 bg-brand text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white shadow-sm"
@@ -110,17 +95,7 @@ const storeSettings = useState<any>('storeSettings')
             <div class="col-span-1 md:col-span-2">
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-6 h-6 rounded bg-brand flex items-center justify-center text-white">
-                  <svg
-                    class="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  /></svg>
+                    <Icon name="lucide:store" class="w-3 h-3" />
                 </div>
                 <span class="text-xl font-sans font-bold text-slate-900">{{ tenantName }}</span>
               </div>

@@ -33,11 +33,17 @@ router.post('/:productId/options', controller.createOption.bind(controller))
 // DELETE /products/:productId/options/:optionId - Delete option
 router.delete('/:productId/options/:optionId', controller.deleteOption.bind(controller))
 
+// PUT /products/:productId/options/:optionId - Update option
+router.put('/:productId/options/:optionId', controller.updateOption.bind(controller))
+
 // POST /products/:productId/options/:optionId/values - Add option value
 router.post('/:productId/options/:optionId/values', controller.addOptionValue.bind(controller))
 
 // DELETE /products/:productId/options/:optionId/values/:valueId - Delete option value
 router.delete('/:productId/options/:optionId/values/:valueId', controller.deleteOptionValue.bind(controller))
+
+// PUT /products/:productId/options/:optionId/values/:valueId - Update option value
+router.put('/:productId/options/:optionId/values/:valueId', controller.updateOptionValue.bind(controller))
 
 // Mount image routes
 router.use('/', imagesRoutes)

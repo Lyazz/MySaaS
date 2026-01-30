@@ -44,6 +44,7 @@ export class StoreSettingsController {
             const { markdown, data } = service.buildFrontendAgentSummary({
                 tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
                 settings: {
+                    logoUrl: settings.logoUrl,
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
                     language: settings.language,
@@ -72,6 +73,7 @@ export class StoreSettingsController {
             res.json({
                 tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
                 storeSettings: {
+                    logoUrl: settings.logoUrl,
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
                     language: settings.language,

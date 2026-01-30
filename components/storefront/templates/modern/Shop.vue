@@ -147,17 +147,7 @@ const closeQuickView = () => {
             class="p-2 -mr-2 text-slate-500 hover:text-slate-900"
             @click="isFilterDrawerOpen = false"
           >
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            /></svg>
+            <Icon name="lucide:x" class="w-6 h-6" />
           </button>
         </div>
             
@@ -209,15 +199,13 @@ const closeQuickView = () => {
              <span class="inline-block px-3 py-1 bg-brand-500/20 border border-brand-500/50 backdrop-blur-sm text-brand-300 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
                  New Collection
              </span>
-             <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-6 leading-tight">
-                 Elevate Your Lifestyle with Premium Gear.
-             </h1>
+
              <p class="text-lg text-slate-300 mb-8 max-w-xl leading-relaxed">
                  Discover our latest arrivals designed for performance and style. Limited edition items available now.
              </p>
              <button class="px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-brand-50 transition-all shadow-lg active:scale-95 flex items-center gap-2 group">
                  Shop Now
-                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                 <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
              </button>
          </div>
       </div>
@@ -374,7 +362,7 @@ const closeQuickView = () => {
               >
                   <span>{{ filters.categories.find(c => c.id === catId)?.title || 'Category' }}</span>
                   <button @click="removeCategory(catId)" class="hover:text-brand-900">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      <Icon name="lucide:x" class="w-4 h-4" />
                   </button>
               </div>
               <button @click="resetFilters" class="text-sm text-slate-500 hover:text-brand-600 underline underline-offset-2">
@@ -388,17 +376,7 @@ const closeQuickView = () => {
               class="w-full sm:hidden flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold shadow-sm active:scale-95 transition-all"
               @click="isFilterDrawerOpen = true"
             >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              ><path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-              /></svg>
+              <Icon name="lucide:sliders-horizontal" class="w-5 h-5" />
               Filters & Sort
             </button>
 
@@ -411,17 +389,7 @@ const closeQuickView = () => {
                 class="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-100 focus:border-brand-500 block pl-5 pr-10 py-3 shadow-sm transition-shadow hover:shadow-md" 
               >
               <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                <svg
-                  class="w-5 h-5 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                /></svg>
+                <Icon name="lucide:search" class="w-5 h-5 text-slate-400" />
               </div>
             </div>
 
@@ -439,21 +407,11 @@ const closeQuickView = () => {
                   <!-- <option>Newest Arrivals</option> -->
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg
-                    class="w-4 h-4 text-slate-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  /></svg>
+                  <Icon name="lucide:chevron-down" class="w-4 h-4 text-slate-500" />
                 </div>
               </div>
             </div>
-            </div>
+
 
              <!-- View Toggle -->
             <div class="hidden sm:flex items-center bg-white rounded-full border border-slate-200 p-1 shadow-sm">
@@ -463,7 +421,7 @@ const closeQuickView = () => {
                     @click="viewMode = 'grid'"
                     title="Grid View"
                 >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <Icon name="lucide:layout-grid" class="w-5 h-5" />
                 </button>
                 <button 
                     class="p-2 rounded-full transition-all"
@@ -471,7 +429,7 @@ const closeQuickView = () => {
                     @click="viewMode = 'list'"
                     title="List View"
                 >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <Icon name="lucide:list" class="w-5 h-5" />
                 </button>
             </div>
           </div>
@@ -481,19 +439,7 @@ const closeQuickView = () => {
             v-if="filteredProducts.length === 0"
             class="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center"
           >
-            <svg
-              class="w-16 h-16 text-slate-200 mx-auto mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
+            <Icon name="lucide:package-open" class="w-16 h-16 text-slate-200 mx-auto mb-4" />
             <h3 class="text-lg font-medium text-slate-900">
               No products found
             </h3>
@@ -533,17 +479,7 @@ const closeQuickView = () => {
                 class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-500 disabled:opacity-30 transition-colors"
                 disabled
               >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 19l-7-7 7-7"
-                /></svg>
+                <Icon name="lucide:chevron-left" class="w-5 h-5" />
               </button>
                           
               <div class="flex items-center px-2 gap-1">
@@ -563,24 +499,14 @@ const closeQuickView = () => {
               </div>
 
               <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-600 hover:text-brand-600 transition-colors">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5l7 7-7 7"
-                /></svg>
+                <Icon name="lucide:chevron-right" class="w-5 h-5" />
               </button>
             </nav>
           </div>
         </div>
       </div>
     </div>
-    </div>
+
   </div>
 
   <!-- Quick View Modal -->
@@ -596,7 +522,7 @@ const closeQuickView = () => {
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeQuickView"></div>
           <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden">
               <button @click="closeQuickView" class="absolute top-4 right-4 z-20 p-2 bg-white/50 rounded-full hover:bg-white transition-colors">
-                  <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  <Icon name="lucide:x" class="w-6 h-6 text-slate-600" />
               </button>
               
               <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-gray-100 relative">
@@ -619,7 +545,7 @@ const closeQuickView = () => {
 
                   <div class="mt-auto space-y-4">
                       <button class="w-full py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-brand-600 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <Icon name="lucide:banknote" class="w-5 h-5" />
                         Add to Cart
                       </button>
                       <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors text-center" @click="closeQuickView">

@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModernProduct from '../../components/storefront/templates/modern/Product.vue'
+import ProductOrderForm from '../../components/storefront/templates/modern/partials/ProductOrderForm.vue'
+import ProductDetails from '../../components/storefront/templates/modern/partials/ProductDetails.vue'
+import ProductGallery from '../../components/storefront/templates/modern/partials/ProductGallery.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { useState } from '#imports'
 
@@ -13,7 +16,8 @@ describe('ModernProduct', () => {
         price: 1500,
         stock: 10,
         isActive: true,
-        images: ['img1.jpg', 'img2.jpg']
+        images: ['img1.jpg', 'img2.jpg'],
+        options: []
     }
 
     beforeEach(() => {
@@ -21,7 +25,7 @@ describe('ModernProduct', () => {
         storeSettings.value = undefined
     })
 
-    it('renders product details correctly', () => {
+    it('renders product structure with correct child components', () => {
         const wrapper = mount(ModernProduct, {
             props: {
                 product: mockProduct
@@ -29,48 +33,59 @@ describe('ModernProduct', () => {
             global: {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
                 stubs: {
-                    NuxtLink: true
+                    NuxtLink: true,
+                    ProductGallery: true,
+                    ProductDetails: true,
+                    ProductOrderForm: true
                 }
             }
         })
 
-        expect(wrapper.text()).toContain('Test Product')
-        expect(wrapper.text()).toContain('1,500.00 DZD')
-        expect(wrapper.text()).toContain('This is a test product')
+        // Check if Child Components are rendered
+        expect(wrapper.findComponent(ProductGallery).exists()).toBe(true)
+        expect(wrapper.findComponent(ProductDetails).exists()).toBe(true)
+        expect(wrapper.findComponent(ProductOrderForm).exists()).toBe(true)
     })
 
-
-
-    it('renders COD form fields', () => {
+    it('passes correct props to child components', () => {
         const wrapper = mount(ModernProduct, {
             props: { product: mockProduct },
             global: {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
-                stubs: { NuxtLink: true }
+                stubs: {
+                    NuxtLink: true,
+                    ProductGallery: true,
+                    ProductDetails: true,
+                    ProductOrderForm: true
+                }
             }
         })
 
-        expect(wrapper.find('input[placeholder="e.g. John Doe"]').exists()).toBe(true)
-        expect(wrapper.find('input[placeholder="e.g. 0550 12 34 56"]').exists()).toBe(true)
-        const buttons = wrapper.findAll('button')
-        const orderBtn = buttons.find(b => b.text().includes('Confirm Order'))
-        expect(orderBtn).toBeDefined()
-        expect(orderBtn?.exists()).toBe(true)
+        // Check ProductGallery props
+        const gallery = wrapper.findComponent(ProductGallery)
+        expect(gallery.props('images')).toEqual(['img1.jpg', 'img2.jpg'])
+        expect(gallery.props('title')).toBe('Test Product')
+
+        // Check ProductDetails props
+        const details = wrapper.findComponent(ProductDetails)
+        expect(details.props('product')).toEqual(mockProduct)
+        expect(details.props('currentPrice')).toBe(1500)
+
+        // Check ProductOrderForm props
+        const orderForm = wrapper.findComponent(ProductOrderForm)
+        expect(orderForm.props('product')).toEqual(mockProduct)
+        expect(orderForm.props('currentPrice')).toBe(1500)
     })
 
-    it('hides COD form when disabled in settings', () => {
-        const storeSettings = useState<any>('storeSettings')
-        storeSettings.value = { codEnabled: false, currencyCode: 'DZD' }
-
+    it('renders description content', () => {
         const wrapper = mount(ModernProduct, {
             props: { product: mockProduct },
             global: {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
-                stubs: { NuxtLink: true }
+                stubs: { NuxtLink: true, ProductGallery: true, ProductDetails: true, ProductOrderForm: true }
             }
         })
 
-        expect(wrapper.find('[data-test="cod-order-card"]').exists()).toBe(false)
-        expect(wrapper.find('[data-test="cod-disabled-alert"]').exists()).toBe(true)
+        expect(wrapper.html()).toContain('This is a test product')
     })
 })

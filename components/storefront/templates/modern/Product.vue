@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
+import ProductGallery from './partials/ProductGallery.vue'
+import ProductDetails from './partials/ProductDetails.vue'
+import ProductOrderForm from './partials/ProductOrderForm.vue'
 
 const props = defineProps<{
     product: any
 }>()
 
 const cartStore = useCartStore()
-const storeSettings = useState<any>('storeSettings')
-const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
-const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
-const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
-
-
 
 // Option Selection Logic
 const selectedOptions = ref<Record<string, string>>({})
@@ -47,13 +44,12 @@ const currentStock = computed(() => {
 })
 
 // Image Gallery Logic (Updated for Variants)
-const activeImageIndex = ref(0)
 const images = computed(() => {
     // 1. Try variant images
     if (currentVariant.value && currentVariant.value.images && currentVariant.value.images.length > 0) {
         return currentVariant.value.images.map((vi: any) => vi.image.url)
     }
-    // 2. Fallback to product images (ProductImage model or legacy images array)
+    // 2. Fallback to product images
     if (props.product?.productImages && props.product.productImages.length > 0) {
         return props.product.productImages.map((pi: any) => pi.url)
     }
@@ -62,71 +58,10 @@ const images = computed(() => {
     }
     return ['https://placehold.co/600x400', 'https://placehold.co/600x400?text=View+2']
 })
-const currentImage = computed(() => images.value[activeImageIndex.value])
 
-const setActiveImage = (index: number) => {
-    activeImageIndex.value = index
-}
+// Main image for cart (first image)
+const cartImage = computed(() => images.value[0])
 
-// Reset image index when variant changes
-watch(currentVariant, () => {
-    activeImageIndex.value = 0
-})
-
-const setOption = (optionId: string, valueId: string) => {
-    selectedOptions.value = {
-        ...selectedOptions.value,
-        [optionId]: valueId
-    }
-}
-
-// Add to Cart Logic (Simulated for form submit)
-const isAdding = ref(false)
-const showSuccess = ref(false)
-const fullName = ref('')
-
-const handleOrderSubmit = async () => {
-  if (!props.product) return
-
-  if (codEnabled.value && !fullName.value) {
-      alert('Please fill in your name')
-      return 
-  }
-  isAdding.value = true
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800))
-
-  cartStore.addItem({
-      productId: props.product.id,
-      variantId: currentVariant.value?.id,
-      title: props.product.title + (currentVariant.value ? ` (${getVariantTitle(currentVariant.value)})` : ''),
-      slug: props.product.slug,
-      price: currentPrice.value,
-      stock: currentStock.value || 0,
-      image: images.value[0]
-  })
-  
-  isAdding.value = false
-  showSuccess.value = true
-  setTimeout(() => showSuccess.value = false, 3000)
-}
-
-function getVariantTitle(variant: any) {
-    if (!variant.optionValues) return ''
-    return variant.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ')
-}
-
-// Price Formatting
-const formatPrice = (val: number | string) => {
-    return (
-        Number(val)
-            .toLocaleString('en-US', { style: 'currency', currency: currencyCode.value })
-            .replace(currencyCode.value, '')
-            .trim() +
-        ` ${currencyCode.value}`
-    )
-}
 </script>
 
 <template>
@@ -140,376 +75,72 @@ const formatPrice = (val: number | string) => {
         >
           Home
         </NuxtLink>
-        <svg
-          class="w-4 h-4 mx-2 text-slate-300"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        ><path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 5l7 7-7 7"
-        /></svg>
+        <Icon name="lucide:chevron-right" class="w-4 h-4 mx-2 text-slate-300" />
         <NuxtLink
           to="/products"
           class="hover:text-brand-600 transition-colors font-medium"
         >
           Shop
         </NuxtLink>
-        <svg
-          class="w-4 h-4 mx-2 text-slate-300"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        ><path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 5l7 7-7 7"
-        /></svg>
+        <Icon name="lucide:chevron-right" class="w-4 h-4 mx-2 text-slate-300" />
         <span class="font-bold text-slate-900 truncate max-w-xs">{{ product?.title }}</span>
       </nav>
 
       <div class="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16 items-start">
         <!-- Gallery Section (Left - 7 cols) -->
-        <div class="lg:col-span-7 bg-white rounded-3xl p-6 shadow-soft border border-slate-100 mb-8 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-left">
-          <!-- Main Image -->
-          <div class="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50 relative group cursor-zoom-in mb-4 border border-slate-100">
-            <img 
-              :src="currentImage" 
-              :alt="product?.title" 
-              class="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-            >
-            <div class="absolute top-4 left-4">
-              <span class="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ring-1 ring-slate-900/5">
-                New Arrival
-              </span>
-            </div>
-          </div>
-
-          <!-- Thumbnails -->
-          <div class="grid grid-cols-5 gap-3">
-            <button 
-              v-for="(img, idx) in images" 
-              :key="idx"
-              class="aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 relative group"
-              :class="activeImageIndex === idx ? 'border-brand-500 ring-2 ring-brand-500/20 ring-offset-1' : 'border-transparent ring-1 ring-slate-200 hover:ring-brand-500/50'"
-              @click="setActiveImage(idx)"
-            >
-              <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/5 transition-colors duration-300" />
-              <img
-                :src="img"
-                class="w-full h-full object-cover"
-                alt="Thumbnail"
-              >
-            </button>
-          </div>
+        <div class="lg:col-span-7">
+             <ProductGallery :images="images" :title="product?.title" />
         </div>
 
         <!-- Product Info Section (Right - 5 cols) -->
-        <div class="lg:col-span-5 flex flex-col animate-fade-in-right space-y-8">
-          <!-- Header -->
-          <div>
-            <h1 class="text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-900 tracking-tight leading-tight mb-4">
-              {{ product?.title }}
-            </h1>
+        <div class="lg:col-span-5 flex flex-col gap-8">
+            <ProductDetails 
+                :product="product" 
+                :current-price="currentPrice" 
+                v-model:selected-options="selectedOptions" 
+            />
 
-            <div class="flex items-baseline gap-4">
-              <div class="text-4xl font-sans font-bold text-brand-600 tracking-tight">
-                {{ formatPrice(currentPrice) }}
-              </div>
-              <div
-                v-if="(Number(props.product?.price) * 1.2) > 0"
-                class="text-lg text-slate-400 line-through decoration-2 decoration-slate-200"
-              >
-                {{ formatPrice(currentPrice * 1.2) }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Option Selectors -->
-          <div
-            v-if="product?.options && product.options.length > 0"
-            class="space-y-4"
-          >
-            <div
-              v-for="option in product.options"
-              :key="option.id"
-            >
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ option.name }}</label>
-              <div class="flex flex-wrap gap-2">
-                <button 
-                  v-for="value in option.values" 
-                  :key="value.id"
-                  class="px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-200"
-                  :class="selectedOptions[option.id] === value.id 
-                    ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-600/20' 
-                    : 'bg-white text-slate-700 border-slate-200 hover:border-brand-300 hover:bg-slate-50'"
-                  @click="setOption(option.id, value.id)"
-                >
-                  {{ value.label }}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <!-- Mini Description -->
-          <p
-            v-if="product?.miniDescription"
-            class="text-slate-600 mb-6 text-lg leading-relaxed"
-          >
-            {{ product.miniDescription }}
-          </p>
-
-          <!-- Features / Trust -->
-
-
-                <!-- Quick COD Order Form -->
-                <div
-                  v-if="codEnabled"
-                  data-test="cod-order-card"
-                  class="bg-white rounded-3xl p-6 md:p-8 shadow-soft border border-slate-100 relative overflow-hidden"
-                >
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-brand-600" />
-                    
-            <div class="flex items-center gap-3 mb-6">
-              <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shadow-sm ring-1 ring-brand-100">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                /></svg>
-              </div>
-              <div>
-                <h3 class="font-sans font-bold text-slate-900 text-xl leading-none">
-                  Order Now
-                </h3>
-                <span class="text-xs text-slate-500 font-medium">Cash on Delivery (COD)</span>
-              </div>
-            </div>
-                    
-            <form
-              class="space-y-5"
-              @submit.prevent="handleOrderSubmit"
-            >
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1">Full Name</label>
-                <input 
-                  v-model="fullName"
-                  type="text" 
-                  placeholder="e.g. John Doe" 
-                  class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                  :class="{ 'animate-attention': !fullName }"
-                >
-              </div>
-                        
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1">Phone Number</label>
-                <input
-                  type="tel"
-                  placeholder="e.g. 0550 12 34 56"
-                  class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                >
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-slate-700 ml-1">Wilaya</label>
-                  <div class="relative">
-                    <select class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm">
-                      <option value="">
-                        Select...
-                      </option>
-                      <option value="16">
-                        Algiers
-                      </option>
-                      <option value="31">
-                        Oran
-                      </option>
-                    </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                      /></svg>
-                    </div>
-                  </div>
-                </div>
-                <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-slate-700 ml-1">Commune</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Bab Ezzouar"
-                    class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                  >
-                </div>
-              </div>
-
-              <button 
-                type="submit"
-                :disabled="isAdding"
-                class="w-full h-14 bg-slate-900 hover:bg-brand-600 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl shadow-lg shadow-slate-900/20 hover:shadow-brand-600/30 transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
-              >
-                <span
-                  class="relative z-10 flex items-center gap-2"
-                  :class="{ 'opacity-0': isAdding }"
-                >
-                  <span>Confirm Order</span>
-                  <svg
-                    class="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  /></svg>
-                </span>
-                            
-                <div
-                  v-if="isAdding"
-                  class="absolute inset-0 flex items-center justify-center"
-                >
-                  <svg
-                    class="animate-spin h-6 w-6 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    />
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                </div>
-              </button>
-                    </form>
-                </div>
-
-            </div>
+            <ProductOrderForm 
+                :product="product"
+                :current-variant="currentVariant"
+                :current-price="currentPrice"
+                :current-stock="currentStock"
+                :active-image="cartImage"
+            />
         </div>
 
-      <!-- Full Description (Rich Text) -->
-      <div
-        class="mt-12 max-w-4xl mx-auto animate-fade-in-up"
-        style="animation-delay: 0.2s"
-      >
-        <h2 class="text-2xl font-bold text-slate-900 mb-6">
-          Product Details
-        </h2>
-        <div 
-          v-if="product?.description" 
-          class="prose prose-slate prose-lg text-slate-600 max-w-none leading-relaxed bg-white rounded-3xl p-8 shadow-sm border border-slate-100"
-          v-html="product.description"
-        />
+        <!-- Full Description (Rich Text) -->
         <div
-          v-else
-          class="prose prose-slate prose-lg text-slate-600 max-w-none leading-relaxed bg-white rounded-3xl p-8 shadow-sm border border-slate-100"
+            class="mt-12 col-span-12 max-w-4xl mx-auto animate-fade-in-up"
+            style="animation-delay: 0.2s"
         >
-          <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">
+            Product Details
+            </h2>
+            <div 
+            v-if="product?.description" 
+            class="prose prose-slate prose-lg text-slate-600 max-w-none leading-relaxed bg-white rounded-3xl p-8 shadow-sm border border-slate-100"
+            v-html="product.description"
+            />
+            <div
+            v-else
+            class="prose prose-slate prose-lg text-slate-600 max-w-none leading-relaxed bg-white rounded-3xl p-8 shadow-sm border border-slate-100"
+            >
+            <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+            </div>
         </div>
-      </div>
+        </div>
     </div>
-
-    <!-- Success Toast -->
-    <Transition
-      enter-active-class="transform ease-out duration-300 transition"
-      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-      leave-active-class="transition ease-in duration-100"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 border border-slate-700/50 backdrop-blur-md bg-slate-900/95"
-      >
-        <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0">
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          ><path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M5 13l4 4L19 7"
-          /></svg>
-        </div>
-        <div>
-          <div class="font-bold">
-            Order Received!
-          </div>
-          <div class="text-xs text-slate-300">
-            We'll contact you shortly for confirmation.
-          </div>
-        </div>
-      </div>
-    </Transition>
   </div>
 </template>
 
 <style scoped>
-/* Scoped styles mainly for animations, global font classes assumed from Tailwind config */
-
 .animate-fade-in-up {
     animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-.animate-fade-in-left {
-    animation: fadeInLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-    opacity: 0;
-}
-.animate-fade-in-right {
-    animation: fadeInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
-    opacity: 0;
 }
 
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeInLeft {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-@keyframes fadeInRight {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-.animate-attention {
-    animation: attentionCaptivate 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes attentionCaptivate {
-    0%, 100% { border-color: #e2e8f0; box-shadow: 0 0 0 0 rgba(0,0,0,0); transform: scale(1); background-color: white; }
-    50% { border-color: var(--brand); box-shadow: 0 0 20px -5px color-mix(in srgb, var(--brand), transparent 50%); transform: scale(1.02); background-color: color-mix(in srgb, var(--brand), white 98%); }
 }
 </style>

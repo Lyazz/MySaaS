@@ -47,8 +47,10 @@ The platform is designed to start with **~100 tenants** and scale safely.
 ### 📦 Orders & Delivery
 - Order lifecycle:
   - NEW → CONFIRMED → SHIPPED → DELIVERED → CANCELLED
-- Manual delivery management (V1)
-- Algerian delivery companies integration (V2+)
+- Delivery integrations:
+  - Maystro (orders, webhooks)
+- Yalidine (parcels via https://api.yalidine.app/v1 with X-API-ID / X-API-TOKEN headers)
+  - Self delivery (internal courier)
 
 ### 🎨 Tenant Customization
 - Logo
@@ -131,6 +133,44 @@ The platform is designed to start with **~100 tenants** and scale safely.
   - Navigation: Collapsed menu on mobile, full nav on desktop
 - **Touch-friendly**: All interactive elements sized for touch targets (44px minimum)
 - **Performance**: Optimized for 3G networks common in Algeria
+
+---
+
+## 🚚 Delivery Module (Express + Prisma)
+
+- Adapter interface (`DeliveryProvider`) with providers: Maystro, Yalidine, Self.
+- Service/controller split; routes mounted under `/api`:
+  - `POST /api/delivery/options`
+  - `POST /api/shipments`
+  - `GET  /api/shipments/:id`
+  - `GET  /api/shipments/:id/tracking`
+  - `POST /api/webhooks/maystro`
+  - `POST /api/self/shipments/:id/status` (admin)
+- Persistence: `Shipments`, `ShipmentEvents`, `DeliveryRate` (wilaya/commune pricing). Idempotent on `(tenantId, provider, orderId)`.
+- Tenant context resolved from Host or `x-tenant-id` header; admin routes enforce RBAC.
+
+### Quick curl samples
+
+```bash
+# Delivery options (fallback to local rates when provider quote missing)
+curl -X POST http://localhost:3000/api/delivery/options \
+  -H "Authorization: Bearer <token>" \
+  -H "x-tenant-id: <tenant-id>" \
+  -H "Content-Type: application/json" \
+  -d '{ "provider":"SELF", "destination": { "wilayaCode":"16" } }'
+
+# Create a shipment (admin)
+curl -X POST http://localhost:3000/api/shipments \
+  -H "Authorization: Bearer <token>" \
+  -H "x-tenant-id: <tenant-id>" \
+  -H "Content-Type: application/json" \
+  -d '{ "provider":"SELF", "orderId":"<order-id>", "contactName":"Customer", "contactPhone":"0550...", "wilayaCode":"16", "addressLine1":"12 Rue"}'
+
+# Maystro webhook (double-base64 payload as per docs)
+curl -X POST http://localhost:3000/api/webhooks/maystro \
+  -H "Content-Type: application/json" \
+  -d '{ "payload": "<double-base64-string>" }'
+```
 
 ---
 

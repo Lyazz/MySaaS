@@ -9,24 +9,14 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/products"
-            class="text-gray-700 hover:text-indigo-600"
+            class="text-gray-700 hover:text-teal-600"
           >
             Products
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <svg
-              class="w-6 h-6 text-gray-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
             <span class="ml-1 text-gray-500">Edit {{ form.title || 'Product' }}</span>
           </div>
         </li>
@@ -38,7 +28,7 @@
       v-if="loading"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
         Loading product...
       </p>
@@ -67,37 +57,17 @@
               <a
                 :href="productUrl"
                 target="_blank"
-                class="p-1 text-indigo-600 hover:bg-indigo-50 rounded"
+                class="p-1 text-teal-600 hover:bg-teal-50 rounded"
                 title="Open Product Page"
               >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                /></svg>
+                <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
                 class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
                 title="Copy Product Link"
                 @click="copyUrl(productUrl)"
               >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                /></svg>
+                <Icon name="lucide:copy" class="w-4 h-4" />
               </button>
             </div>
 
@@ -107,37 +77,17 @@
               <a
                 :href="landingUrl"
                 target="_blank"
-                class="p-1 text-indigo-600 hover:bg-indigo-50 rounded"
+                class="p-1 text-teal-600 hover:bg-teal-50 rounded"
                 title="Open Landing Page"
               >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                /></svg>
+                <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
                 class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
                 title="Copy Landing Link"
                 @click="copyUrl(landingUrl)"
               >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                /></svg>
+                <Icon name="lucide:copy" class="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -150,7 +100,7 @@
           </NuxtLink>
           <button
             :disabled="submitting"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="handleSubmit"
           >
             {{ submitting ? 'Updating...' : 'Update Product' }}
@@ -175,7 +125,7 @@
               class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200"
               :class="[
                 currentTab === tab.id
-                  ? 'border-indigo-500 text-indigo-600'
+                  ? 'border-teal-500 text-teal-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               ]"
               @click="currentTab = tab.id"
@@ -203,7 +153,7 @@
                   v-model="form.title"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="Enter product title"
                 >
               </template>
@@ -223,7 +173,7 @@
                   type="text"
                   required
                   pattern="[a-z0-9-]+"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="product-slug"
                 >
               </template>
@@ -240,7 +190,7 @@
                   :id="inputId"
                   v-model="form.miniDescription"
                   rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                   placeholder="Enter a short summary..."
                 />
               </template>
@@ -262,7 +212,7 @@
                     min="0"
                     step="0.01"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="0.00"
                   >
                 </template>
@@ -281,7 +231,7 @@
                     type="number"
                     min="0"
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                     placeholder="0"
                   >
                 </template>
@@ -297,7 +247,7 @@
                 <select
                   :id="inputId"
                   v-model="form.categoryId"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   <option value="">
                     Select a category (optional)
@@ -322,7 +272,7 @@
                 id="isActive"
                 v-model="form.isActive"
                 type="checkbox"
-                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
               >
               <label
                 for="isActive"
@@ -373,6 +323,7 @@
               <ProductVariantsTable 
                 :product-id="productId" 
                 :variants="variants" 
+                :options="options"
                 :product-images="productImages"
                 :legacy-images="form.images"
                 @refresh="fetchProduct" 
@@ -402,7 +353,7 @@
           <button
             type="submit"
             :disabled="submitting"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ submitting ? 'Updating...' : 'Update Product' }}
           </button>

@@ -24,11 +24,11 @@ interface Props {
   icon: string
   label: string
   value: number | string
-  color?: 'purple' | 'blue' | 'green' | 'orange' | 'red'
+  color?: 'teal' | 'blue' | 'green' | 'orange' | 'red'
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  color: 'purple'
+  color: 'teal'
 })
 
 const formattedValue = computed(() => {
@@ -44,8 +44,8 @@ const formattedValue = computed(() => {
   @apply p-6 rounded-xl backdrop-blur-sm border transition-all duration-200 hover:scale-105;
 }
 
-.stat-card-purple {
-  @apply bg-purple-900/50 border-purple-500/30 text-purple-100;
+.stat-card-teal {
+  @apply bg-teal-900/50 border-teal-500/30 text-teal-100;
 }
 
 .stat-card-blue {

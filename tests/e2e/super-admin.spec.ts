@@ -242,4 +242,15 @@ test.describe('Super Admin Dashboard', () => {
         // Cleanup
         await prisma.user.delete({ where: { id: regularUser.id } })
     })
+
+    test('should redirect super admin from tenant admin area to super admin dashboard', async ({ page }) => {
+        await loginSuperAdmin(page)
+
+        // Try to access tenant admin dashboard
+        await page.goto('/admin')
+
+        // Should be redirected back to super admin dashboard
+        await expect(page).toHaveURL(/\/super-admin\/?$/)
+        await expect(page.locator('h1:has-text("Platform Dashboard")')).toBeVisible()
+    })
 })

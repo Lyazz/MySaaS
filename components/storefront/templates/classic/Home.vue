@@ -54,19 +54,7 @@ defineProps<{
           class="text-brand font-medium hover:opacity-80 flex items-center gap-1 group"
         >
           View all
-          <svg
-            class="w-4 h-4 transition-transform group-hover:translate-x-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 8l4 4m0 0l-4 4m4-4H3"
-            />
-          </svg>
+          <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </NuxtLink>
       </div>
 
@@ -84,19 +72,7 @@ defineProps<{
         v-else-if="featuredProducts.length === 0"
         class="text-center py-12 bg-white rounded-2xl shadow-sm border border-slate-100"
       >
-        <svg
-          class="w-12 h-12 text-slate-300 mx-auto mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-          />
-        </svg>
+        <Icon name="lucide:package" class="w-12 h-12 text-slate-300 mx-auto mb-4" />
         <p class="text-slate-500">
           No products available yet. Check back soon!
         </p>

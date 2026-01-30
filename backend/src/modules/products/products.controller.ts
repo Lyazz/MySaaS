@@ -169,6 +169,32 @@ export class ProductsController {
         }
     }
 
+    async updateOptionValue(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const valueId = req.params.valueId as string
+            const body = req.body
+            const value = await productsService.updateOptionValue(tenant.id, valueId, body)
+            res.json(value)
+        } catch (error: any) {
+            console.error('Update option value error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message })
+        }
+    }
+
+    async updateOption(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const optionId = req.params.optionId as string
+            const body = req.body
+            const option = await productsService.updateOption(tenant.id, optionId, body)
+            res.json(option)
+        } catch (error: any) {
+            console.error('Update option error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message })
+        }
+    }
+
     async deleteOption(req: Request, res: Response) {
         try {
             const tenant = req.tenant!

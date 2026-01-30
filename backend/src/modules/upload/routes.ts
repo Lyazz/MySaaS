@@ -31,8 +31,9 @@ router.post('/', requireTenantAdmin, upload.single('file'), async (req, res) => 
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' })
         }
-        if (req.file.mimetype !== 'image/png') {
-            return res.status(400).json({ error: 'Only PNG uploads are allowed' })
+        const ALLOWED_MIMES = ['image/png', 'image/jpeg', 'image/webp']
+        if (!ALLOWED_MIMES.includes(req.file.mimetype)) {
+            return res.status(400).json({ error: 'Only PNG, JPEG, and WebP uploads are allowed' })
         }
 
         const tenant = req.tenant
@@ -43,7 +44,13 @@ router.post('/', requireTenantAdmin, upload.single('file'), async (req, res) => 
         const file = req.file
         // Create a unique file name under tenant scope to avoid collisions and leaks
         const safeOriginal = file.originalname.replace(/[^a-zA-Z0-9_.-]/g, '_')
-        const ext = safeOriginal.toLowerCase().endsWith('.png') ? '.png' : '.png'
+        // Derive extension from mimetype
+        const MIME_TO_EXT: Record<string, string> = {
+            'image/png': '.png',
+            'image/jpeg': '.jpg',
+            'image/webp': '.webp'
+        }
+        const ext = MIME_TO_EXT[file.mimetype] || '.png'
         const baseName = safeOriginal.replace(/\.[^.]+$/, '')
         const fileName = `${tenant.id}/${Date.now()}-${crypto.randomBytes(6).toString('hex')}-${baseName}${ext}`
 

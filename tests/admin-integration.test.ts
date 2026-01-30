@@ -14,6 +14,7 @@ describe('Express Admin API', async () => {
     let token: string // Valid JWT token
     let productId: string
     let categoryId: string
+    let secondCategoryId: string
 
     it('registers a tenant successfully', async () => {
         const res = await fetch('/api/register', {
@@ -119,6 +120,50 @@ describe('Express Admin API', async () => {
         expect(listRes.status).toBe(200)
         const found = listBody.find((c: any) => c.slug === 'phones')
         expect(found.imageUrl).toBe(newImage)
+    })
+
+    it('Get Category by id (Admin)', async () => {
+        const res = await fetch(`/api/admin/categories/${categoryId}`, {
+            headers: {
+                'X-Forwarded-Host': `${slug}.localhost:3000`,
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        const body = await res.json()
+        expect(res.status).toBe(200)
+        expect(body.id).toBe(categoryId)
+        expect(body.slug).toBe('phones')
+    })
+
+    it('List Categories sorted by title (Admin)', async () => {
+        // Create another category to test sorting
+        const createRes = await fetch('/api/admin/categories', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Forwarded-Host': `${slug}.localhost:3000`,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: 'Accessories',
+                slug: 'accessories',
+                imageUrl: 'http://example.com/accessories.png'
+            })
+        })
+        const createBody = await createRes.json()
+        expect(createRes.status).toBe(200)
+        secondCategoryId = createBody.id
+
+        const listRes = await fetch('/api/admin/categories?sortBy=title&sortOrder=asc', {
+            headers: {
+                'X-Forwarded-Host': `${slug}.localhost:3000`,
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        const listBody = await listRes.json()
+        expect(listRes.status).toBe(200)
+        expect(Array.isArray(listBody)).toBe(true)
+        expect(listBody[0].title).toBe('Accessories')
     })
 
     it('Update Product Images (Admin)', async () => {

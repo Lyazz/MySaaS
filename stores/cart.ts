@@ -25,7 +25,7 @@ export const useCartStore = defineStore('cart', {
     },
 
     actions: {
-        addItem(product: Omit<CartItem, 'quantity'>) {
+        addItem(product: Omit<CartItem, 'quantity'> & { quantity?: number }) {
             const existingItem = this.items.find(item => {
                 if (product.variantId) {
                     return item.variantId === product.variantId
@@ -36,14 +36,18 @@ export const useCartStore = defineStore('cart', {
             if (existingItem) {
                 // Increase quantity if item exists, but don't exceed stock
                 if (existingItem.quantity < product.stock) {
-                    existingItem.quantity++
+                    existingItem.quantity += (product.quantity || 1)
+                    // Ensure we don't exceed stock after addition
+                    if (existingItem.quantity > product.stock) {
+                        existingItem.quantity = product.stock
+                    }
                     this.saveToLocalStorage()
                 }
             } else {
-                // Add new item with quantity 1
+                // Add new item with quantity (default 1)
                 this.items.push({
                     ...product,
-                    quantity: 1
+                    quantity: product.quantity || 1
                 })
                 this.saveToLocalStorage()
             }

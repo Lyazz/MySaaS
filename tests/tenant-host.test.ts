@@ -14,6 +14,18 @@ describe('tenant host parsing', () => {
     expect(parseHost('tenant-a.platform.com')).toEqual({ kind: 'tenant-subdomain', slug: 'tenant-a' })
   })
 
+  it('parses {slug}.{ip}.nip.io as tenant subdomain for LAN dev', () => {
+    expect(parseHost('apple.192.168.1.5.nip.io')).toEqual({ kind: 'tenant-subdomain', slug: 'apple' })
+  })
+
+  it('treats bare {ip}.nip.io as SaaS host', () => {
+    expect(parseHost('192.168.1.5.nip.io')).toEqual({ kind: 'saas' })
+  })
+
+  it('treats plain IPv4 host as SaaS host', () => {
+    expect(parseHost('192.168.1.5')).toEqual({ kind: 'saas' })
+  })
+
   it('ignores www.platform.com as SaaS host', () => {
     expect(parseHost('www.platform.com')).toEqual({ kind: 'saas' })
   })

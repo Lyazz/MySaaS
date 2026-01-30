@@ -2,25 +2,14 @@
   <NuxtLayout name="super-admin">
     <div class="space-y-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-white">
+        <h1 class="text-3xl font-bold text-gray-800">
           Audit Logs
         </h1>
         <button
-          class="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-purple-300 transition-colors"
+          class="px-4 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-lg text-teal-700 transition-colors"
           @click="loadLogs"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 inline-block mr-2"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-              clip-rule="evenodd"
-            />
-          </svg>
+          <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block mr-2" />
           Refresh
         </button>
       </div>
@@ -28,19 +17,19 @@
       <!-- Filters -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Search</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search logs..."
-            class="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
           >
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Action Type</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Action Type</label>
           <select
             v-model="filterAction"
-            class="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
           >
             <option value="">
               All Actions
@@ -66,10 +55,10 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Sort By</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
           <select
             v-model="sortOrder"
-            class="w-full px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
           >
             <option value="desc">
               Newest First
@@ -82,16 +71,16 @@
       </div>
 
       <!-- Logs Table -->
-      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden">
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         <div
           v-if="loading"
-          class="p-8 text-center text-gray-400"
+          class="p-8 text-center text-gray-500"
         >
           Loading logs...
         </div>
         <div
           v-else-if="filteredLogs.length === 0"
-          class="p-8 text-center text-gray-400"
+          class="p-8 text-center text-gray-500"
         >
           No logs found
         </div>
@@ -100,32 +89,32 @@
           class="overflow-x-auto"
         >
           <table class="w-full">
-            <thead class="bg-slate-900/50 border-b border-slate-700">
+            <thead class="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Timestamp
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Action
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Details
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   User ID
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-300">
+                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
                   Target
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-700">
+            <tbody class="divide-y divide-slate-100">
               <tr
                 v-for="log in paginatedLogs"
                 :key="log.id"
-                class="hover:bg-slate-900/30 transition-colors"
-              >
-                <td class="px-6 py-4 text-gray-300 text-sm whitespace-nowrap">
+                class="hover:bg-slate-50 transition-colors"
+                >
+                <td class="px-6 py-4 text-gray-600 text-sm whitespace-nowrap">
                   {{ formatDateTime(log.createdAt) }}
                 </td>
                 <td class="px-6 py-4">
@@ -136,13 +125,13 @@
                     {{ getActionIcon(log.action) }} {{ log.action.replace(/_/g, ' ') }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-gray-300">
+                <td class="px-6 py-4 text-gray-600 text-sm">
                   {{ log.details || '-' }}
                 </td>
-                <td class="px-6 py-4 text-gray-300 font-mono text-xs">
+                <td class="px-6 py-4 text-gray-500 font-mono text-xs">
                   {{ log.userId ? log.userId.substring(0, 8) + '...' : '-' }}
                 </td>
-                <td class="px-6 py-4 text-gray-300 font-mono text-xs">
+                <td class="px-6 py-4 text-gray-500 font-mono text-xs">
                   {{ log.targetId ? log.targetId.substring(0, 8) + '...' : '-' }}
                 </td>
               </tr>
@@ -153,22 +142,22 @@
         <!-- Pagination -->
         <div
           v-if="filteredLogs.length > 0"
-          class="flex items-center justify-between px-6 py-4 border-t border-slate-700"
+          class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50"
         >
-          <p class="text-sm text-gray-400">
+          <p class="text-sm text-gray-500">
             Showing {{ (currentPage - 1) * perPage + 1 }} to {{ Math.min(currentPage * perPage, filteredLogs.length) }} of {{ filteredLogs.length }} logs
           </p>
           <div class="flex space-x-2">
             <button
               :disabled="currentPage === 1"
-              class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 bg-white border border-slate-300 hover:bg-slate-50 rounded text-gray-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
               @click="currentPage--"
             >
               Previous
             </button>
             <button
               :disabled="currentPage >= totalPages"
-              class="px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-1 bg-white border border-slate-300 hover:bg-slate-50 rounded text-gray-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
               @click="currentPage++"
             >
               Next
@@ -265,7 +254,7 @@ const getActionBadgeClass = (action: string) => {
     'DELETE_TENANT': 'bg-red-500/20 border border-red-500/50 text-red-300',
     'SUSPEND_TENANT': 'bg-orange-500/20 border border-orange-500/50 text-orange-300',
     'UNSUSPEND_TENANT': 'bg-green-500/20 border border-green-500/50 text-green-300',
-    'IMPERSONATE_USER': 'bg-purple-500/20 border border-purple-500/50 text-purple-300'
+    'IMPERSONATE_USER': 'bg-teal-500/20 border border-teal-500/50 text-teal-300'
   }
   return classes[action] || 'bg-gray-500/20 border border-gray-500/50 text-gray-300'
 }

@@ -33,13 +33,30 @@ const normalizeImageUrl = (value: unknown): string | null | undefined => {
 }
 
 export class CategoriesService {
-    async listAdmin(tenantId: string) {
+    async listAdmin(tenantId: string, sortBy?: string, sortOrder?: 'asc' | 'desc') {
+        const sortableFields: Record<string, boolean> = {
+            createdAt: true,
+            title: true,
+            slug: true,
+            products: true
+        }
+
+        const orderBy = (() => {
+            if (sortBy && sortableFields[sortBy]) {
+                if (sortBy === 'products') {
+                    return { products: { _count: sortOrder === 'asc' ? 'asc' : 'desc' } }
+                }
+                return { [sortBy]: sortOrder === 'asc' ? 'asc' : 'desc' }
+            }
+            return { createdAt: 'desc' as const }
+        })()
+
         return prisma.category.findMany({
             where: { tenantId },
             include: {
                 _count: { select: { products: true } }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy
         })
     }
 
@@ -119,6 +136,15 @@ export class CategoriesService {
             throw new Error('Category not found')
         }
 
+        return prisma.category.findFirst({
+            where: { id: categoryId, tenantId },
+            include: {
+                _count: { select: { products: true } }
+            }
+        })
+    }
+
+    async getCategory(tenantId: string, categoryId: string) {
         return prisma.category.findFirst({
             where: { id: categoryId, tenantId },
             include: {

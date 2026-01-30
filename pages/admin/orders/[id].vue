@@ -9,24 +9,14 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/orders"
-            class="text-gray-700 hover:text-indigo-600"
+            class="text-gray-700 hover:text-teal-600"
           >
             Orders
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <svg
-              class="w-6 h-6 text-gray-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
             <span class="ml-1 text-gray-500">Order #{{ orderId.substring(0, 8) }}</span>
           </div>
         </li>
@@ -38,7 +28,7 @@
       v-if="loading"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
         Loading order...
       </p>
@@ -98,7 +88,7 @@
             <p class="mt-1 text-sm text-gray-900">
               <a
                 :href="`tel:${order.customerPhone}`"
-                class="text-indigo-600 hover:text-indigo-800"
+                class="text-teal-600 hover:text-teal-800"
               >
                 {{ order.customerPhone }}
               </a>
@@ -165,7 +155,7 @@
                 >
                   Total
                 </td>
-                <td class="px-4 py-3 text-sm font-semibold text-indigo-600 text-right">
+                <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
                   ${{ Number(order.totalAmount).toFixed(2) }}
                 </td>
               </tr>
@@ -193,7 +183,7 @@
             <select
               id="status"
               v-model="newStatus"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="PENDING">
                 Pending
@@ -241,7 +231,7 @@
             <button
               type="submit"
               :disabled="updating || newStatus === order.status"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {{ updating ? 'Updating...' : 'Update Status' }}
             </button>
@@ -255,19 +245,7 @@
       v-else
       class="bg-white rounded-lg shadow p-12 text-center"
     >
-      <svg
-        class="mx-auto h-12 w-12 text-red-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
+      <Icon name="lucide:alert-circle" class="mx-auto h-12 w-12 text-red-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
         Order not found
       </h3>
@@ -277,7 +255,7 @@
       <div class="mt-6">
         <NuxtLink
           to="/admin/orders"
-          class="text-indigo-600 hover:text-indigo-800"
+          class="text-teal-600 hover:text-teal-800"
         >
           Back to Orders
         </NuxtLink>

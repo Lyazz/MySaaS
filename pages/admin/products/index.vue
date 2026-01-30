@@ -12,21 +12,9 @@
       </div>
       <NuxtLink
         to="/admin/products/create"
-        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center space-x-2"
+        class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
       >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
+        <Icon name="lucide:plus" class="w-5 h-5" />
         <span>Add Product</span>
       </NuxtLink>
     </div>
@@ -40,14 +28,14 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search products..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
           <select
             v-model="selectedCategory"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             <option value="">
               All Categories
@@ -65,7 +53,7 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
           <select
             v-model="selectedStatus"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             <option value="">
               All Status
@@ -86,7 +74,7 @@
       v-if="loading"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
         Loading products...
       </p>
@@ -97,19 +85,7 @@
       v-else-if="filteredProducts.length === 0"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
-      <svg
-        class="mx-auto h-12 w-12 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-        />
-      </svg>
+      <Icon name="lucide:package" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
         No products
       </h3>
@@ -119,21 +95,9 @@
       <div class="mt-6">
         <NuxtLink
           to="/admin/products/create"
-          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
         >
-          <svg
-            class="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
+          <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
           New Product
         </NuxtLink>
       </div>
@@ -155,26 +119,17 @@
             :class="[
               'inline-flex items-center px-3 py-1 text-sm font-medium border rounded-md transition-colors',
               sortBy === option.key
-                ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                ? 'bg-teal-50 border-teal-500 text-teal-700'
                 : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
             ]"
             @click="setSort(option.key)"
           >
             <span>{{ option.label }}</span>
-            <svg
+            <Icon
               v-if="sortBy === option.key"
+              :name="sortOrder === 'asc' ? 'lucide:chevron-up' : 'lucide:chevron-down'"
               class="w-4 h-4 ml-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                :d="sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'"
-              />
-            </svg>
+            />
           </button>
         </div>
       </div>
@@ -220,20 +175,11 @@
                       :alt="product.title" 
                       class="h-10 w-10 object-cover" 
                     >
-                    <svg
+                    <Icon
                       v-else
+                      name="lucide:image"
                       class="w-6 h-6 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                      />
-                    </svg>
+                    />
                   </div>
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900">
@@ -281,37 +227,17 @@
                     <a
                       :href="getProductUrl(product.slug)"
                       target="_blank"
-                      class="text-indigo-600 hover:text-indigo-900"
+                      class="text-teal-600 hover:text-teal-900"
                       title="Open Product Page"
                     >
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      /></svg>
+                      <Icon name="lucide:external-link" class="w-4 h-4" />
                     </a>
                     <button
                       class="text-gray-400 hover:text-gray-600"
                       title="Copy Product Link"
                       @click="copyLink(`/p/${product.slug}`)"
                     >
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                      /></svg>
+                      <Icon name="lucide:copy" class="w-4 h-4" />
                     </button>
                   </div>
                   <!-- Landing Link -->
@@ -320,54 +246,38 @@
                     <a
                       :href="getLandingUrl(product.slug)"
                       target="_blank"
-                      class="text-indigo-600 hover:text-indigo-900"
+                      class="text-teal-600 hover:text-teal-900"
                       title="Open Landing Page"
                     >
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      /></svg>
+                      <Icon name="lucide:external-link" class="w-4 h-4" />
                     </a>
                     <button
                       class="text-gray-400 hover:text-gray-600"
                       title="Copy Landing Link"
                       @click="copyLink(`/p/${product.slug}?mode=landing`)"
                     >
-                      <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                      /></svg>
+                      <Icon name="lucide:copy" class="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                <NuxtLink
-                  :to="`/admin/products/${product.id}`"
-                  class="text-indigo-600 hover:text-indigo-900"
-                >
-                  Edit
-                </NuxtLink>
-                <button
-                  class="text-red-600 hover:text-red-900"
-                  @click="confirmDelete(product)"
-                >
-                  Delete
-                </button>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end space-x-3">
+                  <NuxtLink
+                    :to="`/admin/products/${product.id}`"
+                    class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                  >
+                    <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
+                    <span>Edit</span>
+                  </NuxtLink>
+                  <button
+                    class="inline-flex items-center text-red-600 hover:text-red-900 transition-colors"
+                    @click="confirmDelete(product)"
+                  >
+                    <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
+                    <span>Delete</span>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -419,7 +329,7 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
                     : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                 ]"
                 @click="currentPage = page"
@@ -493,7 +403,7 @@ const showDeleteModal = ref(false)
 const productToDelete = ref<Product | null>(null)
 
 // Helper to get main product image
-const getProductMainImage = (product: Product): string | null => {
+const getProductMainImage = (product: Product): string | undefined => {
   // Check productImages array first (new structure)
   if (product.productImages && product.productImages.length > 0) {
     const mainImage = product.productImages.find(img => img.isMain)
@@ -503,7 +413,7 @@ const getProductMainImage = (product: Product): string | null => {
   if (product.images && product.images.length > 0) {
     return product.images[0]
   }
-  return null
+  return undefined
 }
 const sortBy = ref<'createdAt' | 'title' | 'price' | 'stock' | 'isActive'>('createdAt')
 const sortOrder = ref<'asc' | 'desc'>('desc')

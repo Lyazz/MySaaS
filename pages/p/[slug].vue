@@ -62,20 +62,26 @@ useHead({
 
 definePageMeta({
   middleware: 'tenant-only',
-  layout: 'store'
+  layout: false // Disable static layout to allow dynamic component usage
 })
 
+const isLandingMode = computed(() => route.query.mode === 'landing' || route.query.layout === 'landing')
+
 const ActiveTemplate = computed(() => {
-  if (route.query.mode === 'landing' || route.query.layout === 'landing') {
+  if (isLandingMode.value) {
     return defineAsyncComponent(() => import('~/components/storefront/templates/modern/ProductLandingPage.vue')) 
   }
   return productTemplates[templateKey.value]
 })
+
+const layoutName = computed(() => isLandingMode.value ? 'landing' : 'store')
 </script>
 
 <template>
-  <component
-    :is="ActiveTemplate"
-    :product="product"
-  />
+  <NuxtLayout :name="layoutName">
+    <component
+        :is="ActiveTemplate"
+        :product="product"
+    />
+  </NuxtLayout>
 </template>

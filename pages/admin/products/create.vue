@@ -9,24 +9,14 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/products"
-            class="text-gray-700 hover:text-indigo-600"
+            class="text-gray-700 hover:text-teal-600"
           >
             Products
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <svg
-              class="w-6 h-6 text-gray-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
             <span class="ml-1 text-gray-500">Create Product</span>
           </div>
         </li>
@@ -60,7 +50,7 @@
             v-model="form.title"
             type="text"
             required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             placeholder="Enter product title"
           >
         </template>
@@ -80,7 +70,7 @@
             type="text"
             required
             pattern="[a-z0-9-]+"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             placeholder="product-slug"
           >
         </template>
@@ -97,7 +87,7 @@
             :id="inputId"
             v-model="form.miniDescription"
             rows="3"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             placeholder="Enter a short summary..."
           />
         </template>
@@ -133,7 +123,7 @@
               min="0"
               step="0.01"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="0.00"
             >
           </template>
@@ -152,7 +142,7 @@
               type="number"
               min="0"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
               placeholder="0"
             >
           </template>
@@ -168,7 +158,7 @@
           <select
             :id="inputId"
             v-model="form.categoryId"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             <option value="">
               Select a category (optional)
@@ -185,7 +175,7 @@
       </AdminFormField>
 
       <!-- Product Images -->
-      <ImageUploader v-model="form.images" />
+      <ImageUploader v-model="productImages" />
 
       <!-- Active Status -->
       <div class="flex items-center">
@@ -193,7 +183,7 @@
           id="isActive"
           v-model="form.isActive"
           type="checkbox"
-          class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
         >
         <label
           for="isActive"
@@ -224,7 +214,7 @@
         <button
           type="submit"
           :disabled="submitting"
-          class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {{ submitting ? 'Creating...' : 'Create Product' }}
         </button>
@@ -260,9 +250,18 @@ const form = ref({
   price: 0,
   stock: 0,
   categoryId: '',
-  isActive: true,
-  images: [] as string[]
+  isActive: true
 })
+
+const productImages = ref<ProductImage[]>([])
+
+interface ProductImage {
+  id?: string | null
+  url: string
+  alt?: string
+  position: number
+  isMain: boolean
+}
 
 const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
@@ -310,7 +309,7 @@ async function handleSubmit() {
       price: form.value.price,
       stock: form.value.stock,
       isActive: form.value.isActive,
-      images: form.value.images
+      images: productImages.value.map(img => img.url)
     }
 
     if (form.value.categoryId) {

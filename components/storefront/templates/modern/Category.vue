@@ -147,19 +147,7 @@ const sortedProducts = computed(() => {
             v-if="categoryProducts.length === 0"
             class="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center"
           >
-            <svg
-              class="w-16 h-16 text-slate-200 mx-auto mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="1.5"
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
+            <Icon name="lucide:package-open" class="w-16 h-16 text-slate-200 mx-auto mb-4" />
             <h3 class="text-lg font-medium text-slate-900">
               No products found
             </h3>

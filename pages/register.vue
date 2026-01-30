@@ -54,7 +54,7 @@ async function register() {
     <div class="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12 text-white">
       <!-- Animated Background -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-[10%] left-[10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[100px] animate-blob" />
+        <div class="absolute top-[10%] left-[10%] w-[50%] h-[50%] bg-teal-600/20 rounded-full blur-[100px] animate-blob" />
         <div class="absolute bottom-[10%] right-[10%] w-[50%] h-[50%] bg-violet-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000" />
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
       </div>
@@ -63,7 +63,7 @@ async function register() {
 
       <div class="relative z-10 max-w-lg">
         <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
-          Launch your <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Empire</span> today.
+          Launch your <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Empire</span> today.
         </h2>
         <p class="text-lg text-slate-400 mb-8 leading-relaxed">
           Join thousands of merchants building the next generation of commerce. 
@@ -104,7 +104,7 @@ async function register() {
         <div v-if="successData" class="rounded-2xl bg-green-50 p-6 border border-green-100 animate-fadeIn">
           <div class="flex">
             <div class="flex-shrink-0">
-              <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <Icon name="lucide:check-circle" class="h-6 w-6 text-green-500" />
             </div>
             <div class="ml-4">
               <h3 class="text-lg font-bold text-green-800">You're in!</h3>
@@ -132,7 +132,7 @@ async function register() {
                 name="name" 
                 type="text" 
                 required 
-                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
                 placeholder="Ex. Acme Corp"
               >
             </div>
@@ -147,14 +147,14 @@ async function register() {
                   name="slug" 
                   type="text" 
                   required 
-                  class="flex-1 min-w-0 block w-full px-4 py-3 rounded-none rounded-l-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                  class="flex-1 min-w-0 block w-full px-4 py-3 rounded-none rounded-l-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all"
                   placeholder="acme"
                 >
                 <span class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-sm font-medium">
                   .mysaas.com
                 </span>
               </div>
-              <p v-if="form.slug" class="mt-1 text-xs text-indigo-500 font-medium">
+              <p v-if="form.slug" class="mt-1 text-xs text-teal-500 font-medium">
                 Your store will be at: {{ form.slug }}.mysaas.com
               </p>
             </div>
@@ -169,7 +169,7 @@ async function register() {
                 type="email" 
                 autocomplete="email" 
                 required 
-                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
                 placeholder="name@company.com"
               >
             </div>
@@ -184,14 +184,14 @@ async function register() {
                 type="password" 
                 autocomplete="current-password" 
                 required 
-                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
                 placeholder="••••••••"
               >
             </div>
           </div>
 
           <div v-if="error" class="rounded-lg bg-red-50 p-4 border border-red-100 flex items-center gap-3">
-            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0" />
             <span class="text-sm text-red-700 font-medium">{{ error }}</span>
           </div>
 
@@ -199,10 +199,10 @@ async function register() {
             <button 
               type="submit" 
               :disabled="loading"
-              class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5"
+              class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-teal-500/30 hover:-translate-y-0.5"
             >
               <span v-if="loading" class="flex items-center gap-2">
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <Icon name="lucide:loader-2" class="animate-spin h-5 w-5 text-white" />
                 Creating Account...
               </span>
               <span v-else>Register & Create Tenant</span>
@@ -210,7 +210,7 @@ async function register() {
           </div>
           
           <div class="text-center text-sm text-slate-500">
-            Already have an account? <NuxtLink to="/login" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">Log in</NuxtLink>
+            Already have an account? <NuxtLink to="/login" class="font-medium text-teal-600 hover:text-teal-500 hover:underline">Log in</NuxtLink>
           </div>
         </form>
       </div>

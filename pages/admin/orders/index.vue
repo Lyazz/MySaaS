@@ -21,14 +21,14 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search by customer name or phone..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Status Filter</label>
           <select
             v-model="selectedStatus"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             <option value="">
               All Orders
@@ -58,7 +58,7 @@
       v-if="loading"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
         Loading orders...
       </p>
@@ -69,19 +69,7 @@
       v-else-if="orders.length === 0"
       class="bg-white rounded-lg shadow p-12 text-center"
     >
-      <svg
-        class="mx-auto h-12 w-12 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-        />
-      </svg>
+      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
         No orders found
       </h3>
@@ -155,12 +143,15 @@
                 {{ formatDate(order.createdAt) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <NuxtLink
-                  :to="`/admin/orders/${order.id}`"
-                  class="text-indigo-600 hover:text-indigo-900"
-                >
-                  View
-                </NuxtLink>
+                <div class="flex items-center justify-end">
+                  <NuxtLink
+                    :to="`/admin/orders/${order.id}`"
+                    class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                  >
+                    <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
+                    <span>View</span>
+                  </NuxtLink>
+                </div>
               </td>
             </tr>
           </tbody>

@@ -9,7 +9,7 @@ const ActiveShell = computed(() => storeShellTemplates[templateKey.value])
 </script>
 
 <template>
-  <component :is="ActiveShell">
+  <component :is="ActiveShell" v-bind="$attrs">
     <slot />
   </component>
 </template>

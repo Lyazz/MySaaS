@@ -12,6 +12,7 @@ import publicOrdersRouter from './modules/orders/public.routes'
 import uploadRouter from './modules/upload/routes'
 import storeSettingsRouter from './modules/store-settings/routes'
 import publicStoreSettingsRouter from './modules/store-settings/public.routes'
+import deliveryRouter from './modules/delivery/routes'
 
 const router = Router()
 
@@ -34,6 +35,7 @@ router.use('/admin/variants', variantsRouter)
 router.use('/admin/orders', ordersRouter)
 router.use('/admin/store-settings', storeSettingsRouter)
 router.use('/upload', uploadRouter)
+router.use('/', deliveryRouter)
 
 // Super Admin
 router.use('/super-admin', superAdminRouter)

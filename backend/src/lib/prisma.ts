@@ -14,7 +14,17 @@ export const getTenantPrisma = (tenant: { id: string }) => {
             $allModels: {
                 async $allOperations({ model, operation, args, query }) {
                     // Models that require tenant isolation
-                    const tenantModels = ['Product', 'Category', 'Variant', 'User', 'Order', 'OrderItem']
+                    const tenantModels = [
+                        'Product',
+                        'Category',
+                        'Variant',
+                        'User',
+                        'Order',
+                        'OrderItem',
+                        'Shipment',
+                        'ShipmentEvent',
+                        'DeliveryRate'
+                    ]
 
                     if (tenantModels.includes(model)) {
                         const safeArgs = args as any
@@ -74,5 +84,4 @@ export const getTenantPrisma = (tenant: { id: string }) => {
         }
     })
 }
-
 

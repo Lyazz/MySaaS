@@ -44,7 +44,7 @@ async function handleLogin() {
     <div class="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden flex-col justify-between p-12 text-white">
       <!-- Animated Background -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-[10%] left-[10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[100px] animate-blob" />
+        <div class="absolute top-[10%] left-[10%] w-[50%] h-[50%] bg-teal-600/20 rounded-full blur-[100px] animate-blob" />
         <div class="absolute bottom-[10%] right-[10%] w-[50%] h-[50%] bg-violet-600/20 rounded-full blur-[100px] animate-blob animation-delay-2000" />
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
       </div>
@@ -53,7 +53,7 @@ async function handleLogin() {
 
       <div class="relative z-10 max-w-lg">
         <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
-          Welcome back, <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Builder</span>.
+          Welcome back, <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Builder</span>.
         </h2>
         <p class="text-lg text-slate-400 mb-8 leading-relaxed">
           Your dashboard is ready. Continue managing your orders, products, and analytics from one central hub.
@@ -62,7 +62,7 @@ async function handleLogin() {
     <!-- Mini Feature Highlight -->
         <div class="flex items-start gap-4 p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
           <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+             <Icon name="lucide:trending-up" class="w-6 h-6" />
           </div>
           <div>
             <h4 class="font-bold text-white mb-1">Revenue Tracking</h4>
@@ -91,13 +91,13 @@ async function handleLogin() {
           <!-- OAuth Buttons -->
           <div class="grid grid-cols-3 gap-3">
              <button type="button" class="flex items-center justify-center py-2.5 px-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google">
+                <Icon name="logos:google-icon" class="h-5 w-5" />
              </button>
              <button type="button" class="flex items-center justify-center py-2.5 px-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
-                <img src="https://www.svgrepo.com/show/448234/apple.svg" class="h-5 w-5" alt="Apple">
+                <Icon name="logos:apple" class="h-5 w-5" />
              </button>
              <button type="button" class="flex items-center justify-center py-2.5 px-4 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors bg-white">
-                <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook">
+                <Icon name="logos:facebook" class="h-5 w-5" />
              </button>
           </div>
 
@@ -121,7 +121,7 @@ async function handleLogin() {
                 type="email" 
                 autocomplete="email" 
                 required 
-                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
                 placeholder="name@company.com"
               >
             </div>
@@ -130,7 +130,7 @@ async function handleLogin() {
             <div>
               <div class="flex items-center justify-between mb-1">
                  <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
-                 <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Forgot password?</a>
+                 <a href="#" class="text-sm font-medium text-teal-600 hover:text-teal-500">Forgot password?</a>
               </div>
               <input 
                 id="password" 
@@ -139,14 +139,14 @@ async function handleLogin() {
                 type="password" 
                 autocomplete="current-password" 
                 required 
-                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all" 
+                class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
                 placeholder="••••••••"
               >
             </div>
           </div>
 
           <div v-if="errorMessage" class="rounded-lg bg-red-50 p-4 border border-red-100 flex items-center gap-3">
-            <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0" />
             <span class="text-sm text-red-700 font-medium">{{ errorMessage }}</span>
           </div>
 
@@ -154,10 +154,10 @@ async function handleLogin() {
             <button 
               type="submit" 
               :disabled="loading"
-              class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5"
+              class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-teal-500/30 hover:-translate-y-0.5"
             >
               <span v-if="loading" class="flex items-center gap-2">
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <Icon name="lucide:loader-2" class="animate-spin h-5 w-5 text-white" />
                 Signing in...
               </span>
               <span v-else>Sign in</span>
@@ -165,7 +165,7 @@ async function handleLogin() {
           </div>
           
           <div class="text-center text-sm text-slate-500">
-            Don't have an account? <NuxtLink to="/register" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">Start for free</NuxtLink>
+            Don't have an account? <NuxtLink to="/register" class="font-medium text-teal-600 hover:text-teal-500 hover:underline">Start for free</NuxtLink>
           </div>
         </form>
       </div>
