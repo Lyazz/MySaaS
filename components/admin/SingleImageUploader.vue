@@ -21,7 +21,7 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="relative aspect-video bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden flex items-center justify-center">
+      <div class="relative aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden flex items-center justify-center">
         <template v-if="modelValue">
           <img
             :src="modelValue"
@@ -51,17 +51,7 @@
         </template>
       </div>
 
-      <div class="space-y-2 text-sm text-gray-600">
-        <p class="font-medium text-gray-800">
-          Guidelines
-        </p>
-        <ul class="list-disc list-inside space-y-1">
-          <li>Use a 4:3 or 16:9 image for best results</li>
-          <li>PNG only, max size 5MB</li>
-          <li>Visible on storefront category tiles</li>
-          <li>Uploads save automatically; no need to paste a URL</li>
-        </ul>
-      </div>
+      <!-- Guidelines removed as per request -->
     </div>
   </div>
 </template>
@@ -87,37 +77,59 @@ const handleFileSelect = async (event: Event) => {
 
   const [file] = input.files
   if (file.type !== 'image/png') {
-    alert('Please upload a PNG image for the category.')
+    alert('Please upload a PNG image.')
     input.value = ''
     return
   }
-  uploading.value = true
 
-  try {
-    const formData = new FormData()
-    formData.append('file', file)
-
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${useCookie('auth_token').value}`
-      },
-      body: formData
-    })
-
-    if (!response.ok) {
-      throw new Error('Upload failed')
+  // Check dimensions
+  const img = new Image()
+  const objectUrl = URL.createObjectURL(file)
+  
+  img.onload = async () => {
+    URL.revokeObjectURL(objectUrl)
+    if (img.width !== img.height) {
+      alert(`Image must be square (current: ${img.width}x${img.height}px).`)
+      input.value = ''
+      return
     }
 
-    const data = await response.json()
-    emit('update:modelValue', data.url)
-  } catch (error) {
-    console.error('Upload error:', error)
-    alert('Failed to upload image')
-  } finally {
-    uploading.value = false
+    // Proceed with upload
+    uploading.value = true
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${useCookie('auth_token').value}`
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const data = await response.json()
+      emit('update:modelValue', data.url)
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert('Failed to upload image')
+    } finally {
+      uploading.value = false
+      input.value = ''
+    }
+  }
+
+  img.onerror = () => {
+    URL.revokeObjectURL(objectUrl)
+    alert('Failed to read image dimensions.')
     input.value = ''
   }
+  
+  img.src = objectUrl
 }
 
 const removeImage = () => {

@@ -248,9 +248,14 @@ const navItems = [
     icon: 'lucide:shopping-bag' // or clipboard-list
   },
   {
-    path: '/admin/settings',
-    label: 'Settings',
-    icon: 'lucide:settings'
+    path: '/admin/settings/appearance',
+    label: 'Appearance Settings',
+    icon: 'lucide:palette'
+  },
+  {
+    path: '/admin/settings/functional',
+    label: 'Functional Settings',
+    icon: 'lucide:sliders'
   },
   {
     path: '/admin/delivery',

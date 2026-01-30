@@ -9,7 +9,7 @@ export class StoreSettingsController {
             const tenant = req.tenant!
             const settings = await service.getOrCreate(tenant.id)
             res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify(settings))
+            res.end(JSON.stringify({ ...settings, name: tenant.name, slug: tenant.slug }))
         } catch (error) {
             console.error('Get store settings error:', error)
             res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })

@@ -36,6 +36,8 @@ const isLanguage = (value: string): value is StoreLanguage => STORE_LANGUAGES.so
 
 
 export type StoreSettingsPatchInput = Partial<{
+    name: string
+    slug: string
     logoUrl: string | null
     primaryColor: string
     templateKey: string
@@ -59,20 +61,47 @@ export class StoreSettingsService {
     }
 
     async update(tenantId: string, input: StoreSettingsPatchInput) {
-        const update: any = {}
+        const updateSettings: any = {}
+        const updateTenant: any = {}
+
+        // Tenant Name
+        if (input.name !== undefined) {
+            if (typeof input.name !== 'string' || input.name.trim().length === 0) {
+                throw new StoreSettingsValidationError('Store Name cannot be empty')
+            }
+            updateTenant.name = input.name.trim()
+        }
+
+        // Tenant Slug
+        if (input.slug !== undefined) {
+            if (typeof input.slug !== 'string' || !/^[a-z0-9-]+$/.test(input.slug)) {
+                throw new StoreSettingsValidationError('Slug must contain only lowercase letters, numbers, and hyphens')
+            }
+
+            // Check for uniqueness if changed
+            if (input.slug) {
+                const existing = await prisma.tenant.findUnique({ where: { slug: input.slug } })
+                if (existing && existing.id !== tenantId) {
+                    throw new StoreSettingsValidationError('This URL slug is already taken')
+                }
+            }
+            updateTenant.slug = input.slug
+        }
+
+        // --- Store Settings Fields ---
 
         if (input.logoUrl !== undefined) {
             if (input.logoUrl !== null && typeof input.logoUrl !== 'string') {
                 throw new StoreSettingsValidationError('logoUrl must be a string URL or null')
             }
-            update.logoUrl = input.logoUrl
+            updateSettings.logoUrl = input.logoUrl
         }
 
         if (input.primaryColor !== undefined) {
             if (typeof input.primaryColor !== 'string' || !isHexColor(input.primaryColor)) {
                 throw new StoreSettingsValidationError('primaryColor must be a hex color like #4F46E5')
             }
-            update.primaryColor = input.primaryColor.toUpperCase()
+            updateSettings.primaryColor = input.primaryColor.toUpperCase()
         }
 
         if (input.templateKey !== undefined) {
@@ -81,10 +110,8 @@ export class StoreSettingsService {
                     `templateKey must be one of: ${STORE_TEMPLATES.map((t) => t.key).join(', ')}`
                 )
             }
-            update.templateKey = input.templateKey
+            updateSettings.templateKey = input.templateKey
         }
-
-
 
         if (input.language !== undefined) {
             if (typeof input.language !== 'string' || !isLanguage(input.language)) {
@@ -92,56 +119,74 @@ export class StoreSettingsService {
                     `language must be one of: ${STORE_LANGUAGES.map((l) => l.key).join(', ')}`
                 )
             }
-            update.language = input.language
+            updateSettings.language = input.language
         }
 
         if (input.cartEnabled !== undefined) {
             if (typeof input.cartEnabled !== 'boolean') {
                 throw new StoreSettingsValidationError('cartEnabled must be a boolean')
             }
-            update.cartEnabled = input.cartEnabled
+            updateSettings.cartEnabled = input.cartEnabled
         }
 
         if (input.codEnabled !== undefined) {
             if (typeof input.codEnabled !== 'boolean') {
                 throw new StoreSettingsValidationError('codEnabled must be a boolean')
             }
-            update.codEnabled = input.codEnabled
+            updateSettings.codEnabled = input.codEnabled
         }
 
         if (input.currencyCode !== undefined) {
             if (typeof input.currencyCode !== 'string' || !/^[A-Z]{3}$/.test(input.currencyCode)) {
                 throw new StoreSettingsValidationError('currencyCode must be an ISO-4217 code (3 uppercase letters)')
             }
-            update.currencyCode = input.currencyCode.toUpperCase()
+            updateSettings.currencyCode = input.currencyCode.toUpperCase()
         }
 
         if (input.currencyCountry !== undefined) {
             if (typeof input.currencyCountry !== 'string' || !/^[A-Z]{2}$/.test(input.currencyCountry)) {
                 throw new StoreSettingsValidationError('currencyCountry must be an ISO-3166-1 alpha-2 code')
             }
-            update.currencyCountry = input.currencyCountry.toUpperCase()
+            updateSettings.currencyCountry = input.currencyCountry.toUpperCase()
         }
 
         if (input.isCompleted !== undefined) {
             if (typeof input.isCompleted !== 'boolean') {
                 throw new StoreSettingsValidationError('isCompleted must be a boolean')
             }
-            update.isCompleted = input.isCompleted
+            updateSettings.isCompleted = input.isCompleted
         }
 
         if (input.allowedDeliveryProviders !== undefined) {
             if (!Array.isArray(input.allowedDeliveryProviders) || !input.allowedDeliveryProviders.every(p => typeof p === 'string')) {
                 throw new StoreSettingsValidationError('allowedDeliveryProviders must be an array of strings')
             }
-            update.allowedDeliveryProviders = input.allowedDeliveryProviders
+            updateSettings.allowedDeliveryProviders = input.allowedDeliveryProviders
         }
 
-        return await prisma.storeSettings.upsert({
+        // Execute Transaction if tenant fields need updating
+        if (Object.keys(updateTenant).length > 0) {
+            const [updatedTenant, updatedSettings] = await prisma.$transaction([
+                prisma.tenant.update({ where: { id: tenantId }, data: updateTenant }),
+                prisma.storeSettings.upsert({
+                    where: { tenantId },
+                    create: { tenantId, ...updateSettings },
+                    update: updateSettings
+                })
+            ])
+            return { ...updatedSettings, name: updatedTenant.name, slug: updatedTenant.slug }
+        }
+
+        // Just update settings
+        const s = await prisma.storeSettings.upsert({
             where: { tenantId },
-            create: { tenantId, ...update },
-            update
+            create: { tenantId, ...updateSettings },
+            update: updateSettings
         })
+
+        // We need to fetch tenant data to return consistent shape
+        const t = await prisma.tenant.findUnique({ where: { id: tenantId } })
+        return { ...s, name: t?.name, slug: t?.slug }
     }
 
     buildFrontendAgentSummary(args: {
