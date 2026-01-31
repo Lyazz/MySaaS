@@ -19,16 +19,19 @@ type Product = {
 }
 
 const productUrl = useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`)
-const product = ref<Product | null>(null)
+const { data: product, error } = await useFetch<Product>(productUrl, {
+    headers: useTenantApiHeaders(),
+    key: `product-${slug}`
+})
+
 const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
-try {
-  product.value = await $fetch<Product>(productUrl, { headers: useTenantApiHeaders() })
-} catch (e: any) {
-  const statusCode = e?.statusCode || e?.response?.status || 500
-  throw createError({
-    statusCode,
-    statusMessage: statusCode === 404 ? 'Product not found' : 'Failed to load product'
-  })
+
+if (error.value || !product.value) {
+    throw createError({
+        statusCode: 404,
+        statusMessage: 'Product not found',
+        fatal: true
+    })
 }
 
 const mainImage = computed(() => product.value?.images?.[0] || 'https://placehold.co/600x400')

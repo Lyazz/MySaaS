@@ -14,6 +14,7 @@ export default {
                 sans: ['Outfit', 'sans-serif'],
                 display: ['Outfit', 'sans-serif'],
                 serif: ['Playfair Display', 'serif'],
+                stationery: ['Merriweather', 'serif'],
                 street: ['Anton', 'sans-serif'],
                 cozy: ['Nunito', 'sans-serif'],
                 cyber: ['Orbitron', 'sans-serif'],

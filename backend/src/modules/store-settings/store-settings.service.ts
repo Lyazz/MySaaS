@@ -1,6 +1,6 @@
 import prisma from '../../lib/prisma'
 
-export type StoreTemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber'
+export type StoreTemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery'
 export type StoreLanguage = 'ar' | 'fr' | 'en'
 
 
@@ -9,7 +9,8 @@ export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; descriptio
     { key: 'modern', label: 'Modern', description: 'Bolder typography and more visual spacing.' },
     { key: 'street', label: 'Street', description: 'High-energy, bold layout with high-contrast elements.' },
     { key: 'cozy', label: 'Cozy', description: 'Soft, minimalist design with warm colors.' },
-    { key: 'cyber', label: 'Cyber', description: 'Futuristic dark mode with neon accents.' }
+    { key: 'cyber', label: 'Cyber', description: 'Futuristic dark mode with neon accents.' },
+    { key: 'stationnery', label: 'Stationnery', description: 'Stationery oriented theme.' }
 ]
 
 export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [

@@ -328,6 +328,12 @@ const templates = [
     label: 'Cyber Future', 
     description: 'Futuristic dark mode with neon accents and high-tech UI components.',
     icon: 'lucide:cpu'
+  },
+  { 
+    key: 'stationnery', 
+    label: 'Stationery', 
+    description: 'Stationery oriented theme.',
+    icon: 'lucide:pen-tool'
   }
 ]
 

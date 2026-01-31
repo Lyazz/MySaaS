@@ -60,18 +60,31 @@ import CyberProduct from './cyber/Product.vue'
 import CyberShop from './cyber/Shop.vue'
 import CyberCart from './cyber/Cart.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber'
+// Stationnery Imports
+import StationneryHome from './stationnery/Home.vue'
+import StationneryStoreShell from './stationnery/StoreShell.vue'
+import StationneryThemeProvider from './stationnery/ThemeProvider.vue'
+import StationneryCategory from './stationnery/Category.vue'
+import StationneryContact from './stationnery/ContactPage.vue'
+import StationneryAbout from './stationnery/AboutPage.vue'
+import StationneryCheckout from './stationnery/Checkout.vue'
+import StationneryProduct from './stationnery/Product.vue'
+import StationneryShop from './stationnery/Shop.vue'
+import StationneryCart from './stationnery/Cart.vue'
+
+export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
   modern: ModernHome,
   street: StreetHome,
   cozy: CozyHome,
-  cyber: CyberHome
+  cyber: CyberHome,
+  stationnery: StationneryHome
 } satisfies Record<TemplateKey, Component>
 
 export const productTemplates = {
@@ -79,7 +92,8 @@ export const productTemplates = {
   modern: ModernProduct,
   street: StreetProduct,
   cozy: CozyProduct,
-  cyber: CyberProduct
+  cyber: CyberProduct,
+  stationnery: StationneryProduct
 } satisfies Record<TemplateKey, Component>
 
 export const categoryTemplates = {
@@ -87,7 +101,8 @@ export const categoryTemplates = {
   modern: ModernCategory,
   street: StreetCategory,
   cozy: CozyCategory,
-  cyber: CyberCategory
+  cyber: CyberCategory,
+  stationnery: StationneryCategory
 } satisfies Record<TemplateKey, Component>
 
 export const storeShellTemplates = {
@@ -95,7 +110,8 @@ export const storeShellTemplates = {
   modern: ModernStoreShell,
   street: StreetStoreShell,
   cozy: CozyStoreShell,
-  cyber: CyberStoreShell
+  cyber: CyberStoreShell,
+  stationnery: StationneryStoreShell
 } satisfies Record<TemplateKey, Component>
 
 export const shopTemplates = {
@@ -103,7 +119,8 @@ export const shopTemplates = {
   modern: ModernShop,
   street: StreetShop,
   cozy: CozyShop,
-  cyber: CyberShop
+  cyber: CyberShop,
+  stationnery: StationneryShop
 } satisfies Record<TemplateKey, Component>
 
 export const checkoutTemplates = {
@@ -111,7 +128,8 @@ export const checkoutTemplates = {
   modern: ModernCheckout,
   street: StreetCheckout,
   cozy: CozyCheckout,
-  cyber: CyberCheckout
+  cyber: CyberCheckout,
+  stationnery: StationneryCheckout
 } satisfies Record<TemplateKey, Component>
 
 export const cartTemplates = {
@@ -119,7 +137,8 @@ export const cartTemplates = {
   modern: ModernCart,
   street: StreetCart,
   cozy: CozyCart,
-  cyber: CyberCart
+  cyber: CyberCart,
+  stationnery: StationneryCart
 } satisfies Record<TemplateKey, Component>
 
 export const aboutPageTemplates = {
@@ -127,7 +146,8 @@ export const aboutPageTemplates = {
   modern: ModernAbout,
   street: StreetAbout,
   cozy: CozyAbout,
-  cyber: CyberAbout
+  cyber: CyberAbout,
+  stationnery: StationneryAbout
 } satisfies Record<TemplateKey, Component>
 
 export const contactPageTemplates = {
@@ -135,7 +155,8 @@ export const contactPageTemplates = {
   modern: ModernContact,
   street: StreetContact,
   cozy: CozyContact,
-  cyber: CyberContact
+  cyber: CyberContact,
+  stationnery: StationneryContact
 } satisfies Record<TemplateKey, Component>
 
 export const themeProviderTemplates = {
@@ -143,7 +164,8 @@ export const themeProviderTemplates = {
   modern: ModernThemeProvider,
   street: StreetThemeProvider,
   cozy: CozyThemeProvider,
-  cyber: CyberThemeProvider
+  cyber: CyberThemeProvider,
+  stationnery: StationneryThemeProvider
 } satisfies Record<TemplateKey, Component>
 
 export const selectTemplate = (

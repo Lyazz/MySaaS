@@ -20,7 +20,11 @@ type Product = {
 const productsUrl = useTenantApiUrl('/api/products')
 const { data: products } = await useFetch<Product[]>(productsUrl, { 
     headers: useTenantApiHeaders(),
-    default: () => []
+    key: 'products-list',
+    default: () => [],
+    onResponseError({ error }) {
+        console.error('Products fetch error:', error)
+    }
 })
 
 useTenantSeo({
