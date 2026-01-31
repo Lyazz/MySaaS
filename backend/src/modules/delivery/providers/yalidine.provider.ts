@@ -1,5 +1,6 @@
-import axios, { AxiosInstance } from 'axios'
-import type { ShipmentProvider, ShipmentStatus } from '@prisma/client'
+import axios from 'axios'
+import type { AxiosInstance } from 'axios'
+import type { Shipment, ShipmentProvider, ShipmentStatus } from '@prisma/client'
 import type {
     CreateShipmentInput,
     CreateShipmentResult,
@@ -90,7 +91,7 @@ export class YalidineProvider implements DeliveryProvider {
         }
     }
 
-    async track(shipment: { providerShipmentId?: string }): Promise<TrackingEvent[]> {
+    async track(shipment: Shipment): Promise<TrackingEvent[]> {
         if (!shipment.providerShipmentId) return []
         const res = await this.http.get(`/parcels/${shipment.providerShipmentId}`)
         const data = res.data?.parcel || res.data

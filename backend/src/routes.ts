@@ -13,6 +13,12 @@ import uploadRouter from './modules/upload/routes'
 import storeSettingsRouter from './modules/store-settings/routes'
 import publicStoreSettingsRouter from './modules/store-settings/public.routes'
 import deliveryRouter from './modules/delivery/routes'
+import dashboardRouter from './modules/dashboard/routes'
+import billingRouter from './modules/billing/routes'
+import billingAdminRouter from './modules/billing-admin/routes'
+import inventoryRouter from './modules/inventory/routes'
+import suppliersRouter from './modules/suppliers/routes'
+import purchasesRouter from './modules/purchases/routes'
 
 const router = Router()
 
@@ -33,12 +39,18 @@ router.use('/admin/products', productsRouter)
 router.use('/admin/categories', categoriesRouter)
 router.use('/admin/variants', variantsRouter)
 router.use('/admin/orders', ordersRouter)
+router.use('/admin/dashboard', dashboardRouter)
+router.use('/admin/inventory', inventoryRouter)
+router.use('/admin/suppliers', suppliersRouter)
+router.use('/admin/purchases', purchasesRouter)
+router.use('/admin/billing', billingRouter)
 router.use('/admin/store-settings', storeSettingsRouter)
 router.use('/upload', uploadRouter)
 router.use('/', deliveryRouter)
 
 // Super Admin
 router.use('/super-admin', superAdminRouter)
+router.use('/super-admin/billing', billingAdminRouter)
 router.use('/super-admin/tenants', tenantsRouter)
 
 export default router

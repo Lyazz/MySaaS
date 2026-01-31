@@ -10,7 +10,7 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
-const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
+const { currencyCode, format: formatPrice } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 
 // Option Selection Logic (Cloned from Product.vue for reusability of logic)
@@ -31,6 +31,7 @@ watch(() => props.product, (newProduct) => {
 
 const currentVariant = computed(() => {
     if (!props.product?.variants || props.product.variants.length === 0) return null
+    if (!props.product?.options || props.product.options.length === 0) return props.product.variants[0] ?? null
     if (Object.keys(selectedOptions.value).length === 0) return null
 
     return props.product.variants.find((v: any) => {
@@ -43,7 +44,12 @@ const currentPrice = computed(() => {
 })
 
 const currentStock = computed(() => {
-    return currentVariant.value ? currentVariant.value.stock : props.product?.stock
+    if (!currentVariant.value) return props.product?.stock
+    if (currentVariant.value.trackInventory === false) return Number.POSITIVE_INFINITY
+    const stock = Number(currentVariant.value.stock ?? 0)
+    const reserved = Number(currentVariant.value.reserved ?? 0)
+    const safety = Number(currentVariant.value.safetyStock ?? 0)
+    return Math.max(stock - reserved - safety, 0)
 })
 
 // Image Gallery Logic
@@ -62,16 +68,7 @@ const images = computed(() => {
 
 const cartImage = computed(() => images.value[0])
 
-// Price Formatting
-const formatPrice = (val: number | string) => {
-    return (
-        Number(val)
-            .toLocaleString('en-US', { style: 'currency', currency: currencyCode.value })
-            .replace(currencyCode.value, '')
-            .trim() +
-        ` ${currencyCode.value}`
-    )
-}
+// Price Formatting handled by useCurrency
 </script>
 
 <template>

@@ -8,6 +8,9 @@ const router = Router()
 
 router.use(requireSuperAdmin)
 
+const addUtcMonths = (date: Date, months: number) =>
+    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
+
 // GET / - List tenants
 router.get('/', async (req, res) => {
     try {
@@ -57,6 +60,7 @@ router.post('/', async (req, res) => {
 
         // Create tenant and owner user in a transaction
         const tenant = await prisma.$transaction(async (tx) => {
+            const now = new Date()
             const newTenant = await tx.tenant.create({
                 data: { name, slug }
             })
@@ -73,6 +77,17 @@ router.post('/', async (req, res) => {
             await tx.storeSettings.create({
                 data: {
                     tenantId: newTenant.id
+                }
+            })
+
+            await tx.tenantSubscription.create({
+                data: {
+                    tenantId: newTenant.id,
+                    planCode: 'basic',
+                    interval: 'month',
+                    status: 'ACTIVE',
+                    currentPeriodStart: now,
+                    currentPeriodEnd: addUtcMonths(now, 1)
                 }
             })
 

@@ -3,7 +3,7 @@ import prisma from '../../lib/prisma'
 import { MaystroProvider } from './providers/maystro.provider'
 import { YalidineProvider } from './providers/yalidine.provider'
 import { SelfDeliveryProvider } from './providers/self.provider'
-import { DolivrooProvider } from './providers/dolivroo.provider'
+import { ManualCarrierProvider } from './providers/manual.provider'
 import type {
     CreateShipmentInput,
     QuoteOption,
@@ -22,9 +22,9 @@ export class DeliveryService {
         this.prisma = client
         this.providers = {
             MAYSTRO: new MaystroProvider(),
-            YALIDINE: new DolivrooProvider('YALIDINE'),
-            ECOTRACK: new DolivrooProvider('ECOTRACK'),
-            ZR_EXPRESS: new DolivrooProvider('ZR_EXPRESS'),
+            YALIDINE: new YalidineProvider(),
+            ECOTRACK: new ManualCarrierProvider('ECOTRACK'),
+            ZR_EXPRESS: new ManualCarrierProvider('ZR_EXPRESS'),
             SELF: new SelfDeliveryProvider()
         }
     }

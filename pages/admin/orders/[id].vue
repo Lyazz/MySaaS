@@ -137,13 +137,13 @@
                   {{ item.product?.title || 'Product' }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900">
-                  {{ Number(item.price).toFixed(2) }} {{ currencyCode }}
+                  {{ formatCurrency(item.price) }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900">
                   {{ item.quantity }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900 text-right">
-                  {{ (Number(item.price) * item.quantity).toFixed(2) }} {{ currencyCode }}
+                  {{ formatCurrency(Number(item.price) * item.quantity) }}
                 </td>
               </tr>
             </tbody>
@@ -156,7 +156,7 @@
                   Total
                 </td>
                 <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
-                  {{ Number(order.totalAmount).toFixed(2) }} {{ currencyCode }}
+                  {{ formatCurrency(order.totalAmount) }}
                 </td>
               </tr>
             </tfoot>
@@ -184,20 +184,12 @@
               id="status"
               v-model="newStatus"
             >
-              <option value="PENDING">
-                Pending
-              </option>
-              <option value="CONFIRMED">
-                Confirmed
-              </option>
-              <option value="SHIPPED">
-                Shipped
-              </option>
-              <option value="DELIVERED">
-                Delivered
-              </option>
-              <option value="CANCELLED">
-                Cancelled
+              <option
+                v-for="s in selectableStatuses"
+                :key="s"
+                :value="s"
+              >
+                {{ statusLabels[s] || s }}
               </option>
             </BaseSelect>
           </div>
@@ -276,7 +268,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const storeSettings = useState<any>('storeSettings')
-const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
+const { format: formatCurrency } = useCurrency()
 const route = useRoute()
 const orderId = route.params.id as string
 
@@ -307,6 +299,30 @@ const order = ref<Order | null>(null)
 const newStatus = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
+
+const statusLabels: Record<string, string> = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  SHIPPED: 'Shipped',
+  DELIVERED: 'Delivered',
+  CANCELLED: 'Cancelled',
+  RETURNED: 'Returned'
+}
+
+const selectableStatuses = computed(() => {
+  const current = order.value?.status
+  if (!current) return []
+
+  const next = (() => {
+    if (current === 'PENDING') return ['CONFIRMED', 'CANCELLED']
+    if (current === 'CONFIRMED') return ['SHIPPED', 'CANCELLED']
+    if (current === 'SHIPPED') return ['DELIVERED', 'RETURNED']
+    if (current === 'DELIVERED') return ['RETURNED']
+    return []
+  })()
+
+  return Array.from(new Set([current, ...next]))
+})
 
 async function fetchOrder() {
   loading.value = true

@@ -19,7 +19,8 @@ const badgeClasses = computed(() => {
     'CONFIRMED': 'bg-blue-100 text-blue-800',
     'SHIPPED': 'bg-cyan-100 text-cyan-800',
     'DELIVERED': 'bg-green-100 text-green-800',
-    'CANCELLED': 'bg-red-100 text-red-800'
+    'CANCELLED': 'bg-red-100 text-red-800',
+    'RETURNED': 'bg-purple-100 text-purple-800'
   }
   
   const colorClass = statusColors[props.status] || 'bg-gray-100 text-gray-800'

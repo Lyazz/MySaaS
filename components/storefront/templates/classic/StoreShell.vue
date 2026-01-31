@@ -1,83 +1,135 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
-import StoreThemeProvider from '../../StoreThemeProvider.vue'
+import StoreThemeProvider from './ThemeProvider.vue'
 
 const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+const { currencyCode } = useCurrency()
+
+const categoriesUrl = useTenantApiUrl('/api/categories')
+const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
+    headers: useTenantApiHeaders(),
+    // lazy: true
+})
+
+// Build dynamic menu
+const categories = computed(() => {
+    const base = [
+        { name: 'Home', href: '/' },
+        { name: 'Shop', href: '/products' },
+    ]
+    
+    // Add top 3 categories
+    if (tenantCategories.value) {
+        tenantCategories.value.slice(0, 3).forEach(cat => {
+            base.push({ name: cat.title, href: `/c/${cat.slug}` })
+        })
+    }
+    
+    // Add Contact at the end
+    base.push({ name: 'Contact', href: '/contact' }) 
+    return base
+})
+
+const props = defineProps<{
+    hideNavigation?: boolean
+    mobileHeaderHidden?: boolean
+    hideAnnouncementBar?: boolean
+}>()
+
 </script>
 
 <template>
   <StoreThemeProvider>
-    <div class="min-h-screen flex flex-col">
-      <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-slate-200/60 shadow-sm transition-all duration-300">
+    <div class="min-h-screen flex flex-col font-sans text-slate-600 bg-white">
+      <!-- Top Announcement Bar (Minimal) -->
+      <div v-if="!hideNavigation && !hideAnnouncementBar" class="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest py-2.5 px-4 text-center">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+          <span>Welcome to {{ tenantName }} — Collection 2026</span>
+          <button class="text-white/80 hover:text-white transition-colors">
+            <Icon name="lucide:x" class="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <header v-if="!hideNavigation" :class="['bg-white border-b border-slate-100 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between h-20 items-center">
-            <div class="flex-shrink-0 flex items-center gap-2">
+          <div class="h-20 md:h-24 flex items-center justify-between gap-8">
+            <!-- Logo -->
+            <NuxtLink
+              to="/"
+              class="flex-shrink-0 flex items-center gap-2 group"
+            >
               <template v-if="storeSettings?.logoUrl">
                 <img 
                   :src="storeSettings.logoUrl" 
                   :alt="tenantName" 
-                  class="h-8 max-w-[120px] object-contain"
+                  class="h-10 max-w-[140px] object-contain"
                 >
               </template>
               <template v-else>
-                <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white shadow-md">
+                <div class="h-10 w-10 bg-slate-900 text-white flex items-center justify-center">
                   <Icon name="lucide:store" class="w-5 h-5" />
                 </div>
               </template>
-              <NuxtLink
-                to="/"
-                class="text-2xl font-sans font-bold text-slate-900 tracking-tight hover-text-brand transition-colors"
+              <span class="text-2xl font-serif font-bold text-slate-900 tracking-tight">{{ tenantName }}</span>
+            </NuxtLink>
+
+            <!-- Desktop Menu (Centered) -->
+            <nav class="hidden lg:flex items-center gap-8">
+              <NuxtLink 
+                v-for="item in categories" 
+                :key="item.name" 
+                :to="item.href"
+                class="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors"
+                active-class="text-slate-900"
               >
-                {{ tenantName }}
+                {{ item.name }}
               </NuxtLink>
-            </div>
+            </nav>
 
-            <div class="flex items-center space-x-8">
-              <nav class="hidden md:flex space-x-8">
-                <NuxtLink
-                  to="/"
-                  class="text-sm font-medium text-slate-600 hover:text-brand transition-colors"
-                >
-                  Home
-                </NuxtLink>
-                <NuxtLink
-                  to="/products"
-                  class="text-sm font-medium text-slate-600 hover:text-brand transition-colors"
-                >
-                  Products
-                </NuxtLink>
-                <NuxtLink
-                  to="/about"
-                  class="text-sm font-medium text-slate-600 hover:text-brand transition-colors"
-                >
-                  About
-                </NuxtLink>
-                <NuxtLink
-                  to="/contact"
-                  class="text-sm font-medium text-slate-600 hover:text-brand transition-colors"
-                >
-                  Contact
-                </NuxtLink>
-              </nav>
+            <!-- Actions -->
+            <div class="flex items-center gap-6">
+               <!-- Search (Minimal Icon Trigger or Expanded) -->
+               <div class="hidden md:flex relative group items-center">
+                  <input 
+                    type="text" 
+                    placeholder="Search..." 
+                    class="w-48 border-b border-slate-300 bg-transparent py-1 text-sm focus:border-slate-900 focus:ring-0 placeholder:text-slate-400 text-slate-900 transition-all outline-none"
+                  >
+                  <Icon name="lucide:search" class="w-4 h-4 text-slate-900 absolute right-0 pointer-events-none" />
+               </div>
 
-              <div class="h-6 w-px bg-slate-200 hidden md:block" />
+              <div class="h-4 w-px bg-slate-200 hidden lg:block" />
 
-              <div class="flex items-center space-x-4">
+              <div class="flex items-center gap-4">
+                <button
+                  class="text-slate-900 hover:text-slate-600 transition-colors"
+                  title="Wishlist"
+                >
+                  <Icon name="lucide:heart" class="w-5 h-5" />
+                </button>
+                <button
+                  class="text-slate-900 hover:text-slate-600 transition-colors"
+                  title="Account"
+                >
+                  <Icon name="lucide:user" class="w-5 h-5" />
+                </button>
+
+                <!-- Cart -->
                 <NuxtLink
                   v-if="storeSettings?.cartEnabled !== false"
                   to="/cart"
-                  class="relative group p-2 rounded-full hover:bg-slate-100 transition-colors"
+                  class="relative flex items-center gap-2 text-slate-900 hover:text-brand-600 transition-colors"
                 >
-                  <Icon name="lucide:handbag" class="w-6 h-6 text-slate-600 group-hover:text-brand transition-colors" />
+                  <Icon name="lucide:shopping-bag" class="w-5 h-5" />
                   <span
                     v-if="cartStore.itemCount > 0"
-                    class="absolute -top-0.5 -right-0.5 bg-brand text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white shadow-sm"
-                  >
-                    {{ cartStore.itemCount }}
-                  </span>
+                    class="flex h-4 w-4 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white absolute -top-1 -right-1"
+                  >{{ cartStore.itemCount }}</span>
                 </NuxtLink>
               </div>
             </div>
@@ -85,76 +137,83 @@ const storeSettings = useState<any>('storeSettings')
         </div>
       </header>
 
+      <!-- Main Content -->
       <main class="flex-grow">
         <slot />
       </main>
 
-      <footer class="bg-white border-t border-slate-200 mt-auto">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div class="col-span-1 md:col-span-2">
-              <div class="flex items-center gap-2 mb-4">
-                <div class="w-6 h-6 rounded bg-brand flex items-center justify-center text-white">
-                    <Icon name="lucide:store" class="w-3 h-3" />
-                </div>
-                <span class="text-xl font-sans font-bold text-slate-900">{{ tenantName }}</span>
-              </div>
-              <p class="text-slate-500 text-sm leading-relaxed max-w-xs">
-                Powered by MySaaS.
-              </p>
-            </div>
-            <div>
-              <h3 class="text-sm font-semibold text-slate-900 tracking-wider uppercase mb-4">
-                Shop
+      <!-- Footer (Minimal Light) -->
+      <footer class="bg-white pt-20 pb-12 border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <!-- Brand Column -->
+            <div class="col-span-1 md:col-span-1">
+              <h3 class="text-2xl font-serif font-bold text-slate-900 mb-6">
+                {{ tenantName }}
               </h3>
-              <ul class="space-y-3">
-                <li>
-                  <NuxtLink
-                    to="/products"
-                    class="text-sm text-slate-500 hover-text-brand transition-colors"
-                  >
-                    All Products
-                  </NuxtLink>
+              <ul class="space-y-4 text-sm text-slate-500">
+                <li class="flex items-start gap-3">
+                  <span>0770838576</span>
                 </li>
-                <li>
-                  <NuxtLink
-                    v-if="storeSettings?.cartEnabled !== false"
-                    to="/checkout"
-                    class="text-sm text-slate-500 hover-text-brand transition-colors"
-                  >
-                    Checkout
-                  </NuxtLink>
+                <li class="flex items-start gap-3">
+                  <span>noukhba.contact@gmail.com</span>
                 </li>
+              </ul>
+              <div class="flex gap-4 mt-8">
+                <a
+                  href="#"
+                  class="text-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  <Icon name="lucide:facebook" class="w-5 h-5" />
+                </a>
+                <a
+                  href="#"
+                  class="text-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  <Icon name="lucide:instagram" class="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+
+            <!-- Links Column -->
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6">
+                Company
+              </h4>
+              <ul class="space-y-4 text-sm text-slate-500">
+                <li><a href="#" class="hover:text-slate-900 transition-colors">About</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">Contact</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">Careers</a></li>
               </ul>
             </div>
             <div>
-              <h3 class="text-sm font-semibold text-slate-900 tracking-wider uppercase mb-4">
-                Pages
-              </h3>
-              <ul class="space-y-3">
-                <li>
-                  <NuxtLink
-                    to="/about"
-                    class="text-sm text-slate-500 hover-text-brand transition-colors"
-                  >
-                    About
-                  </NuxtLink>
-                </li>
-                <li>
-                  <NuxtLink
-                    to="/contact"
-                    class="text-sm text-slate-500 hover-text-brand transition-colors"
-                  >
-                    Contact
-                  </NuxtLink>
-                </li>
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6">
+                Legal
+              </h4>
+              <ul class="space-y-4 text-sm text-slate-500">
+                <li><a href="#" class="hover:text-slate-900 transition-colors">Terms of Service</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">Privacy Policy</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">Return Policy</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6">
+                Help
+              </h4>
+              <ul class="space-y-4 text-sm text-slate-500">
+                <li><a href="#" class="hover:text-slate-900 transition-colors">FAQ</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">Shipping</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">Returns</a></li>
               </ul>
             </div>
           </div>
-          <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-center text-sm text-slate-400">
-              &copy; {{ new Date().getFullYear() }} {{ tenantName }}. All rights reserved.
-            </p>
+
+          <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <p>&copy; 2026 {{ tenantName }}. All rights reserved.</p>
+            <div class="flex gap-4">
+                <span>Privacy & Cookies</span>
+                <span>Accessibility</span>
+            </div>
           </div>
         </div>
       </footer>

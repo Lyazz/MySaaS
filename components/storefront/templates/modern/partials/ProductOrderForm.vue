@@ -23,18 +23,47 @@ const successTitle = ref('')
 const successMessage = ref('')
 const orderError = ref('')
 const quantity = ref(1)
+const LOW_STOCK_THRESHOLD = 5
 
 const totalPrice = computed(() => {
     return (props.currentPrice || 0) * quantity.value
 })
 
+const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
+
+const maxQuantity = computed(() => {
+    if (props.currentVariant?.trackInventory === false) return 99
+    const stock = Number(props.currentStock ?? 0)
+    return Math.max(0, stock)
+})
+
+const isInStock = computed(() => {
+    if (props.product?.isActive === false) return false
+    if (hasVariants.value && !props.currentVariant) return false
+    if (props.currentVariant?.trackInventory === false) return true
+    return maxQuantity.value > 0
+})
+
+const isOutOfStock = computed(() => !isInStock.value)
+
+const isLowStock = computed(() => {
+    if (!isInStock.value) return false
+    if (props.currentVariant?.trackInventory === false) return false
+    return maxQuantity.value > 0 && maxQuantity.value <= LOW_STOCK_THRESHOLD
+})
+
+const canPurchase = computed(() => isInStock.value)
+
+const cartStockCap = computed(() => (props.currentVariant?.trackInventory === false ? 9999 : maxQuantity.value))
 
 const incrementQuantity = () => {
-    if (props.currentStock && quantity.value >= props.currentStock) return
+    if (!canPurchase.value) return
+    if (maxQuantity.value > 0 && quantity.value >= maxQuantity.value) return
     quantity.value++
 }
 
 const decrementQuantity = () => {
+    if (!canPurchase.value) return
     if (quantity.value > 1) {
         quantity.value--
     }
@@ -57,9 +86,19 @@ watch(() => props.currentVariant, () => {
     quantity.value = 1
 })
 
+watch([() => props.currentStock, () => props.currentVariant], () => {
+    if (!canPurchase.value) {
+        quantity.value = 1
+        return
+    }
+    if (maxQuantity.value > 0 && quantity.value > maxQuantity.value) {
+        quantity.value = Math.max(1, maxQuantity.value)
+    }
+})
+
 
 function getVariantTitle(variant: any) {
-    if (!variant.optionValues) return ''
+    if (!variant.optionValues || variant.optionValues.length === 0) return ''
     
     // Sort logic
     let values = [...variant.optionValues]
@@ -85,6 +124,11 @@ const triggerSuccessToast = (title: string, message: string) => {
 const handleOrderSubmit = async () => {
     if (!props.product) return
     orderError.value = ''
+
+    if (!canPurchase.value) {
+        orderError.value = 'This variant is out of stock.'
+        return
+    }
 
     if (codEnabled.value && !quickForm.fullName.trim()) {
         orderError.value = 'Please fill in your full name.'
@@ -146,15 +190,21 @@ const handleOrderSubmit = async () => {
 
 const handleAddToCart = async () => {
     if (!props.product) return
+    if (!canPurchase.value) {
+        triggerSuccessToast('Out of stock', 'Please select an in-stock option.')
+        return
+    }
     addToCartSubmitting.value = true
+
+    const variantLabel = props.currentVariant ? getVariantTitle(props.currentVariant) : ''
 
     cartStore.addItem({
         productId: props.product.id,
         variantId: props.currentVariant?.id,
-        title: props.product.title + (props.currentVariant ? ` (${getVariantTitle(props.currentVariant)})` : ''),
+        title: props.product.title + (variantLabel ? ` (${variantLabel})` : ''),
         slug: props.product.slug,
         price: props.currentPrice,
-        stock: props.currentStock || 0,
+        stock: cartStockCap.value,
         image: props.activeImage,
         quantity: quantity.value
     })
@@ -168,12 +218,20 @@ const handleAddToCart = async () => {
     <div>
         <!-- Quantity Selector (Global for both COD and Cart) -->
         <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-6">
-            <span class="font-semibold text-slate-700">Quantity</span>
+            <div class="flex flex-col gap-0.5">
+                <span class="font-semibold text-slate-700">Quantity</span>
+                <span v-if="product?.isActive === false" class="text-xs font-semibold text-slate-500">Unavailable</span>
+                <span v-else-if="isOutOfStock" class="text-xs font-semibold text-red-700">Out of stock</span>
+                <span v-else-if="isLowStock" class="text-xs font-semibold text-amber-700">
+                    Low stock: {{ maxQuantity }} left
+                </span>
+                <span v-else class="text-xs font-semibold text-emerald-700">In stock</span>
+            </div>
             <div class="flex items-center bg-slate-50 rounded-xl shadow-inner border border-slate-200 p-1">
                 <button 
                     type="button"
                     class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                    :disabled="quantity <= 1"
+                    :disabled="!canPurchase || quantity <= 1"
                     @click="decrementQuantity"
                 >
                     <Icon name="lucide:minus" class="w-4 h-4" />
@@ -182,14 +240,14 @@ const handleAddToCart = async () => {
                     v-model.number="quantity" 
                     type="number" 
                     min="1" 
-                    :max="props.currentStock"
+                    :max="maxQuantity"
                     class="w-12 text-center border-none bg-transparent font-bold text-slate-900 focus:ring-0 p-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     readonly
                 >
                 <button 
                     type="button"
                     class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                    :disabled="quantity >= props.currentStock"
+                    :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
                     @click="incrementQuantity"
                 >
                     <Icon name="lucide:plus" class="w-4 h-4" />
@@ -290,7 +348,7 @@ const handleAddToCart = async () => {
 
                 <button 
                 type="submit"
-                :disabled="orderSubmitting"
+                :disabled="orderSubmitting || !canPurchase"
                 class="w-full h-14 bg-slate-900 hover:bg-brand-600 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl shadow-lg shadow-slate-900/20 hover:shadow-brand-600/30 transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
                 >
                 <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
@@ -309,7 +367,7 @@ const handleAddToCart = async () => {
         <div v-if="cartEnabled" class="mt-6">
             <button 
                 type="button"
-                :disabled="addToCartSubmitting"
+                :disabled="addToCartSubmitting || !canPurchase"
                 class="w-full h-14 bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-50 font-bold text-lg rounded-xl transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
                 @click="handleAddToCart"
             >

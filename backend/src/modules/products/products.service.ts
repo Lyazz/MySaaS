@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { InventoryService } from '../inventory/inventory.service'
 
 const normalizeImages = (images: unknown): string[] | undefined => {
     if (images === undefined) return undefined
@@ -15,6 +16,33 @@ const normalizeImages = (images: unknown): string[] | undefined => {
 }
 
 export class ProductsService {
+    private inventory = new InventoryService()
+
+    private isDefaultVariant(variant: any): boolean {
+        return !variant?.optionValues || variant.optionValues.length === 0
+    }
+
+    private async ensureDefaultVariant(tenantId: string, product: { id: string; price: any; stock: number }) {
+        const existing = await prisma.productVariant.findFirst({
+            where: { tenantId, productId: product.id, optionValues: { none: {} } }
+        })
+
+        if (existing) return existing
+
+        return prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: product.id,
+                price: product.price,
+                stock: product.stock ?? 0,
+                isActive: true,
+                trackInventory: true,
+                reserved: 0,
+                safetyStock: 0
+            }
+        })
+    }
+
     async listProducts(
         tenantId: string,
         categoryId?: string,
@@ -90,23 +118,44 @@ export class ProductsService {
 
         const images = normalizeImages(data.images)
 
-        return await prisma.product.create({
-            data: {
-                tenantId: tenantId,
-                title: data.title,
-                slug: data.slug,
-                description: data.description,
-                miniDescription: data.miniDescription,
-                price: data.price || 0,
-                stock: data.stock || 0,
-                isActive: data.isActive ?? true,
-                categoryId: data.categoryId,
-                images: images ?? []
-            }
+        const created = await prisma.$transaction(async (tx) => {
+            const product = await tx.product.create({
+                data: {
+                    tenantId: tenantId,
+                    title: data.title,
+                    slug: data.slug,
+                    description: data.description,
+                    miniDescription: data.miniDescription,
+                    price: data.price || 0,
+                    stock: data.stock || 0,
+                    isActive: data.isActive ?? true,
+                    categoryId: data.categoryId,
+                    images: images ?? []
+                }
+            })
+
+            // Always create a "default" variant for products without options (stock source of truth).
+            await tx.productVariant.create({
+                data: {
+                    tenantId,
+                    productId: product.id,
+                    price: product.price,
+                    stock: product.stock,
+                    isActive: true,
+                    trackInventory: true,
+                    reserved: 0,
+                    safetyStock: 0
+                }
+            })
+
+            return product
         })
+
+        return created
     }
 
-    async getProduct(tenantId: string, productId: string) {
+    async getProduct(tenantId: string, productId: string, opts?: { includeInactiveVariants?: boolean }) {
+        const includeInactiveVariants = opts?.includeInactiveVariants === true
         const product = await prisma.product.findFirst({
             where: { id: productId, tenantId },
             include: {
@@ -115,30 +164,93 @@ export class ProductsService {
                     include: { values: { orderBy: { position: 'asc' } } },
                     orderBy: { position: 'asc' }
                 },
-                variants: {
-                    include: {
-                        optionValues: {
-                            include: { optionValue: true }
+                variants: includeInactiveVariants
+                    ? {
+                        include: {
+                            optionValues: {
+                                include: { optionValue: true }
+                            },
+                            images: {
+                                include: { image: true },
+                                orderBy: { position: 'asc' }
+                            }
                         },
-                        images: {
-                            include: { image: true },
-                            orderBy: { position: 'asc' }
+                        orderBy: {
+                            createdAt: 'asc'
+                        }
+                    }
+                    : {
+                        where: { isActive: true },
+                        include: {
+                            optionValues: {
+                                include: { optionValue: true }
+                            },
+                            images: {
+                                include: { image: true },
+                                orderBy: { position: 'asc' }
+                            }
+                        },
+                        orderBy: {
+                            createdAt: 'asc'
                         }
                     },
-                    orderBy: {
-                        createdAt: 'asc'
-                    }
-                },
                 productImages: {
                     orderBy: { position: 'asc' }
                 }
             }
         })
 
+        if (product && (!product.options || product.options.length === 0) && (!product.variants || product.variants.length === 0)) {
+            await this.ensureDefaultVariant(tenantId, product)
+            return prisma.product.findFirst({
+                where: { id: productId, tenantId },
+                include: {
+                    category: true,
+                    options: {
+                        include: { values: { orderBy: { position: 'asc' } } },
+                        orderBy: { position: 'asc' }
+                    },
+                    variants: includeInactiveVariants
+                        ? {
+                            include: {
+                                optionValues: {
+                                    include: { optionValue: true }
+                                },
+                                images: {
+                                    include: { image: true },
+                                    orderBy: { position: 'asc' }
+                                }
+                            },
+                            orderBy: {
+                                createdAt: 'asc'
+                            }
+                        }
+                        : {
+                            where: { isActive: true },
+                            include: {
+                                optionValues: {
+                                    include: { optionValue: true }
+                                },
+                                images: {
+                                    include: { image: true },
+                                    orderBy: { position: 'asc' }
+                                }
+                            },
+                            orderBy: {
+                                createdAt: 'asc'
+                            }
+                        },
+                    productImages: {
+                        orderBy: { position: 'asc' }
+                    }
+                }
+            })
+        }
+
         return product
     }
 
-    async updateProduct(tenantId: string, productId: string, data: any) {
+    async updateProduct(tenantId: string, productId: string, data: any, actor?: { userId?: string | null }) {
         // Verify ownership
         const existing = await this.getProduct(tenantId, productId)
 
@@ -173,6 +285,32 @@ export class ProductsService {
         })
 
         if (updateResult.count === 0) throw new Error('Product not found')
+
+        const refreshed = await this.getProduct(tenantId, productId)
+        if (!refreshed) throw new Error('Product not found')
+
+        // Keep default variant in sync for no-options products (bidirectional sync handled in InventoryService too).
+        if (!refreshed.options || refreshed.options.length === 0) {
+            const defaultVariant = (refreshed.variants || []).find((v: any) => this.isDefaultVariant(v))
+            const ensured = defaultVariant ?? (await this.ensureDefaultVariant(tenantId, refreshed))
+
+            if (data.price !== undefined) {
+                await prisma.productVariant.updateMany({
+                    where: { tenantId, id: ensured.id },
+                    data: { price: data.price }
+                })
+            }
+
+            if (data.stock !== undefined) {
+                await this.inventory.updateVariantInventory(
+                    tenantId,
+                    ensured.id,
+                    { stock: Number(data.stock), reason: 'product_update' },
+                    { userId: actor?.userId ?? null }
+                )
+            }
+        }
+
         return await this.getProduct(tenantId, productId)
     }
 
@@ -199,6 +337,7 @@ export class ProductsService {
 
         const option = await prisma.productOption.create({
             data: {
+                tenantId,
                 productId,
                 name: data.name,
                 position: data.position || 0,
@@ -222,7 +361,7 @@ export class ProductsService {
     async updateOption(tenantId: string, optionId: string, data: any) {
         // Verify ownership via option -> product -> tenant
         const option = await prisma.productOption.findFirst({
-            where: { id: optionId, product: { tenantId } }
+            where: { id: optionId, tenantId }
         })
         if (!option) throw new Error('Option not found')
 
@@ -238,7 +377,7 @@ export class ProductsService {
 
     async deleteOption(tenantId: string, optionId: string) {
         const option = await prisma.productOption.findFirst({
-            where: { id: optionId, product: { tenantId } }
+            where: { id: optionId, tenantId }
         })
         if (!option) throw new Error('Option not found')
 
@@ -250,16 +389,18 @@ export class ProductsService {
 
     async addOptionValue(tenantId: string, optionId: string, data: any) {
         const option = await prisma.productOption.findFirst({
-            where: { id: optionId, product: { tenantId } }
+            where: { id: optionId, tenantId }
         })
         if (!option) throw new Error('Option not found')
 
         const value = await prisma.productOptionValue.create({
             data: {
-                optionId,
                 label: data.label,
                 position: data.position || 0,
-                meta: data.meta ? (typeof data.meta === 'string' ? data.meta : JSON.stringify(data.meta)) : null
+                meta: data.meta ? (typeof data.meta === 'string' ? data.meta : JSON.stringify(data.meta)) : null,
+                option: {
+                    connect: { tenantId_id: { tenantId, id: optionId } }
+                }
             }
         })
 
@@ -269,7 +410,7 @@ export class ProductsService {
 
     async deleteOptionValue(tenantId: string, valueId: string) {
         const value = await prisma.productOptionValue.findFirst({
-            where: { id: valueId, option: { product: { tenantId } } },
+            where: { id: valueId, tenantId },
             include: { option: true }
         })
         if (!value) throw new Error('Option Value not found')
@@ -281,7 +422,7 @@ export class ProductsService {
 
     async updateOptionValue(tenantId: string, valueId: string, data: any) {
         const value = await prisma.productOptionValue.findFirst({
-            where: { id: valueId, option: { product: { tenantId } } },
+            where: { id: valueId, tenantId },
             include: { option: true }
         })
         if (!value) throw new Error('Option Value not found')
@@ -326,13 +467,34 @@ export class ProductsService {
      * - Avoid duplicates
      */
     async syncVariants(tenantId: string, productId: string) {
-        const product = await this.getProduct(tenantId, productId)
+        const product = await this.getProduct(tenantId, productId, { includeInactiveVariants: true })
         if (!product) throw new Error('Product not found')
 
-        // If no options, remove all variants
+        // If no options, ensure a single default variant exists (used as stock source of truth).
         if (!product.options || product.options.length === 0) {
-            await prisma.productVariant.deleteMany({ where: { productId, product: { tenantId } } })
-            return []
+            const defaultVariant = (product.variants || []).find((v: any) => this.isDefaultVariant(v))
+            const ensured = defaultVariant ?? (await this.ensureDefaultVariant(tenantId, product))
+
+            // Deactivate any other variants for safety (keep history/order links intact).
+            await prisma.productVariant.updateMany({
+                where: { tenantId, productId, id: { not: ensured.id } },
+                data: { isActive: false }
+            })
+
+            // Mirror Product.stock to default variant stock for legacy/admin displays.
+            await prisma.product.updateMany({
+                where: { tenantId, id: productId },
+                data: { stock: ensured.stock }
+            })
+
+            return prisma.productVariant.findMany({
+                where: { productId, tenantId, isActive: true },
+                include: {
+                    optionValues: { include: { optionValue: true } },
+                    images: { include: { image: true }, orderBy: { position: 'asc' } }
+                },
+                orderBy: { createdAt: 'asc' }
+            })
         }
 
         const cartesian = (sets: any[]) => {
@@ -355,42 +517,122 @@ export class ProductsService {
             combinations.map((combo) => this.buildVariantSignature(combo.map((val: any) => ({ optionValueId: val.id }))))
         )
 
-        // Variants to delete: signatures not in target
-        const toDelete = existingVariants.filter(
+        // Variants to deactivate: signatures not in target (never hard-delete to preserve order history).
+        const toDeactivate = existingVariants.filter(
             (v) => !targetSignatures.has(this.buildVariantSignature(v.optionValues || []))
         )
 
         // Signatures to create: target not already existing
         const toCreate = Array.from(targetSignatures).filter((sig) => !existingBySignature.has(sig))
 
-        await prisma.$transaction([
-            // Delete obsolete variants (cascade removes option value joins & images via FK)
-            prisma.productVariant.deleteMany({
-                where: {
-                    id: { in: toDelete.map((v) => v.id) },
-                    product: { tenantId }
-                }
-            }),
+        const defaultVariant = existingBySignature.get('') as any | undefined
+        const carryStock = defaultVariant ? defaultVariant.stock : 0
+        const carryReserved = defaultVariant ? defaultVariant.reserved : 0
+        const carrySafety = defaultVariant ? defaultVariant.safetyStock : 0
+        const hasCarryover = carryStock !== 0 || carryReserved !== 0 || carrySafety !== 0
+
+        await prisma.$transaction(async (tx) => {
+            // Deactivate obsolete variants
+            if (toDeactivate.length > 0) {
+                await tx.productVariant.updateMany({
+                    where: { tenantId, id: { in: toDeactivate.map((v) => v.id) } },
+                    data: { isActive: false }
+                })
+            }
+
+            // Ensure all target variants are active (reactivate previously deactivated ones)
+            const toActivate = existingVariants
+                .filter((v) => targetSignatures.has(this.buildVariantSignature(v.optionValues || [])))
+                .map((v) => v.id)
+            if (toActivate.length > 0) {
+                await tx.productVariant.updateMany({
+                    where: { tenantId, id: { in: toActivate } },
+                    data: { isActive: true }
+                })
+            }
+
             // Create missing variants
-            ...toCreate.map((sig) => {
+            for (const sig of toCreate) {
                 const valueIds = sig.split('|').filter(Boolean)
-                return prisma.productVariant.create({
+                await tx.productVariant.create({
                     data: {
+                        tenantId,
                         productId,
                         price: product.price,
                         stock: 0,
+                        reserved: 0,
+                        safetyStock: 0,
                         isActive: true,
+                        trackInventory: true,
                         optionValues: {
                             create: valueIds.map((optionValueId) => ({ optionValueId }))
                         }
                     }
                 })
-            })
-        ])
+            }
+
+            // Carry over stock from default variant (no-options) into the first target variant to avoid silent loss.
+            if (defaultVariant && hasCarryover) {
+                const receiver = await tx.productVariant.findFirst({
+                    where: { tenantId, productId, optionValues: { some: {} } },
+                    orderBy: { createdAt: 'asc' }
+                })
+
+                if (receiver) {
+                    await tx.productVariant.update({
+                        where: { id: receiver.id },
+                        data: {
+                            stock: { increment: carryStock },
+                            reserved: { increment: carryReserved },
+                            safetyStock: { increment: carrySafety }
+                        }
+                    })
+
+                    await tx.productVariant.update({
+                        where: { id: defaultVariant.id },
+                        data: { stock: 0, reserved: 0, safetyStock: 0, isActive: false }
+                    })
+
+                    await tx.inventoryMovement.createMany({
+                        data: [
+                            {
+                                tenantId,
+                                variantId: receiver.id,
+                                type: 'MANUAL_ADJUSTMENT' as any,
+                                delta: carryStock,
+                                reservedDelta: carryReserved,
+                                safetyStockDelta: carrySafety,
+                                reason: 'variant_sync_carryover',
+                                note: 'Carried stock from default variant after enabling options',
+                                stockAfter: receiver.stock + carryStock,
+                                reservedAfter: receiver.reserved + carryReserved,
+                                safetyStockAfter: receiver.safetyStock + carrySafety,
+                                createdByUserId: null
+                            },
+                            {
+                                tenantId,
+                                variantId: defaultVariant.id,
+                                type: 'MANUAL_ADJUSTMENT' as any,
+                                delta: -carryStock,
+                                reservedDelta: -carryReserved,
+                                safetyStockDelta: -carrySafety,
+                                reason: 'variant_sync_carryover',
+                                note: 'Moved stock into option variants; default variant deactivated',
+                                stockAfter: 0,
+                                reservedAfter: 0,
+                                safetyStockAfter: 0,
+                                createdByUserId: null
+                            }
+                        ],
+                        skipDuplicates: false
+                    })
+                }
+            }
+        })
 
         // Return refreshed variants with relations
         return prisma.productVariant.findMany({
-            where: { productId, product: { tenantId } },
+            where: { productId, tenantId, isActive: true },
             include: {
                 optionValues: { include: { optionValue: true } },
                 images: { include: { image: true }, orderBy: { position: 'asc' } }

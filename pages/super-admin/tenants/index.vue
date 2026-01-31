@@ -119,6 +119,14 @@
                     <Icon name="lucide:pencil" class="h-4 w-4" />
                   </button>
                   <button
+                    type="button"
+                    class="p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 transition-colors inline-flex items-center justify-center"
+                    title="Payments"
+                    @click.stop="openPayments(tenant)"
+                  >
+                    <Icon name="lucide:receipt" class="h-4 w-4" />
+                  </button>
+                  <button
                     v-if="!tenant.isSuspended"
                     class="p-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded text-orange-600 transition-colors" 
                     title="Suspend"
@@ -244,7 +252,8 @@
 
 <script setup lang="ts">
 definePageMeta({
-  middleware: 'super-admin'
+  middleware: 'super-admin',
+  title: 'Tenant Management'
 })
 
 const authStore = useAuthStore()
@@ -298,6 +307,11 @@ const editTenant = (tenant: any) => {
     ownerPassword: ''
   }
   showEditModal.value = true
+}
+
+const openPayments = async (tenant: any) => {
+  if (!tenant?.id) return
+  await navigateTo(`/super-admin/tenants/${tenant.id}/payments`)
 }
 
 const handleSubmit = async () => {

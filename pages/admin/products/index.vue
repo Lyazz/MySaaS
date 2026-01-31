@@ -200,7 +200,7 @@
                 >Uncategorized</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${{ Number(product.price).toFixed(2) }}
+                {{ formatCurrency(product.price) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ product.stock }}
@@ -371,6 +371,7 @@ definePageMeta({
  
 const authStore = useAuthStore()
 const config = useRuntimeConfig()
+const { format: formatCurrency } = useCurrency()
  
 interface Product {
   id: string

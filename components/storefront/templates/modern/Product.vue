@@ -3,6 +3,7 @@ import { useCartStore } from '~/stores/cart'
 import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
+import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
 
 const props = defineProps<{
     product: any
@@ -11,28 +12,24 @@ const props = defineProps<{
 const cartStore = useCartStore()
 
 // Option Selection Logic
-const selectedOptions = ref<Record<string, string>>({})
+const selectedOptions = ref<SelectedOptions>({})
 
 // Initialize options
 watch(() => props.product, (newProduct) => {
-    if (newProduct?.options) {
-        const initialoptions: Record<string, string> = {}
-        newProduct.options.forEach((opt: any) => {
-            if (opt.values && opt.values.length > 0) {
-                initialoptions[opt.id] = opt.values[0].id
-            }
-        })
-        selectedOptions.value = initialoptions
+    if (!newProduct?.options || newProduct.options.length === 0) {
+        selectedOptions.value = {}
+        return
     }
+
+    selectedOptions.value = getPreferredInitialSelection(newProduct)
 }, { immediate: true })
 
 const currentVariant = computed(() => {
     if (!props.product?.variants || props.product.variants.length === 0) return null
+    if (!props.product?.options || props.product.options.length === 0) return props.product.variants[0] ?? null
     if (Object.keys(selectedOptions.value).length === 0) return null
 
-    return props.product.variants.find((v: any) => {
-        return v.optionValues.every((ov: any) => selectedOptions.value[ov.optionValue.optionId] === ov.optionValueId)
-    })
+    return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
 const currentPrice = computed(() => {
@@ -40,7 +37,12 @@ const currentPrice = computed(() => {
 })
 
 const currentStock = computed(() => {
-    return currentVariant.value ? currentVariant.value.stock : props.product?.stock
+    if (!currentVariant.value) return props.product?.stock
+    if (currentVariant.value.trackInventory === false) return Number.POSITIVE_INFINITY
+    const stock = Number(currentVariant.value.stock ?? 0)
+    const reserved = Number(currentVariant.value.reserved ?? 0)
+    const safety = Number(currentVariant.value.safetyStock ?? 0)
+    return Math.max(stock - reserved - safety, 0)
 })
 
 // Image Gallery Logic (Updated for Variants)
@@ -61,6 +63,15 @@ const images = computed(() => {
 
 // Main image for cart (first image)
 const cartImage = computed(() => images.value[0])
+
+// If selection becomes invalid (e.g. options changed), recover to a valid one.
+watch([() => props.product, selectedOptions], ([product]) => {
+    if (!product?.variants || product.variants.length === 0) return
+    const best = findBestVariantForSelection({ product, selectedOptions: selectedOptions.value })
+    if (!best) {
+        selectedOptions.value = getPreferredInitialSelection(product)
+    }
+})
 
 </script>
 

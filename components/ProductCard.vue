@@ -33,13 +33,14 @@
       <!-- Price and Stock -->
       <div class="mt-3 flex items-center justify-between">
         <span class="text-2xl font-bold text-brand">
-          ${{ Number(product.price).toFixed(2) }}
+          {{ formatCurrency(product.price) }}
         </span>
         <span
           v-if="product.stock > 0"
-          class="text-sm text-green-600"
+          class="text-sm"
+          :class="product.stock <= LOW_STOCK_THRESHOLD ? 'text-amber-700' : 'text-green-600'"
         >
-          In Stock: {{ product.stock }}
+          {{ product.stock <= LOW_STOCK_THRESHOLD ? `Low Stock: ${product.stock}` : `In Stock: ${product.stock}` }}
         </span>
         <span
           v-else
@@ -83,6 +84,8 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
+const { format: formatCurrency } = useCurrency()
+const LOW_STOCK_THRESHOLD = 5
 
 const mainImage = computed(() => {
   if (props.product.images && props.product.images.length > 0) {

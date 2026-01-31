@@ -50,42 +50,65 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
-        <NuxtLink
-          v-for="item in navItems"
-          :key="item.path"
-          :to="item.path"
-          class="group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 mb-1 relative overflow-hidden h-11"
-          active-class="text-white bg-white/10 shadow-sm ring-1 ring-white/20"
-          :class="['text-slate-400 hover:text-white hover:bg-white/5', sidebarOpen ? 'justify-start gap-3' : 'justify-center gap-0']"
-        >
-          <!-- Active Indicator Strip -->
-          <div 
-            v-if="route.path === item.path"
-            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full"
-            :style="{ backgroundColor: 'var(--brand)' }"
-          ></div>
-
-          <Icon 
-            :name="item.icon" 
-            class="w-5 h-5 transition-transform duration-300 group-hover:scale-110 shrink-0"
-            :style="route.path === item.path ? { color: 'var(--brand)' } : {}"
-          />
-          <span 
-            class="font-medium text-sm transition-all duration-300 whitespace-nowrap overflow-hidden"
-            :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
+      <nav class="flex-1 py-6 px-3 overflow-y-auto custom-scrollbar">
+        <div v-for="(group, index) in navGroups" :key="index" class="mb-6 last:mb-0">
+          <button 
+            v-if="group.title" 
+            @click="toggleGroup(index)"
+            class="w-full flex items-center justify-between px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider transition-opacity duration-300 hover:text-slate-300 group/header"
+            :class="sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'"
           >
-            {{ item.label }}
-          </span>
+            <span>{{ group.title }}</span>
+            <Icon 
+              name="lucide:chevron-down" 
+              class="w-3 h-3 transition-transform duration-200"
+              :class="group.collapsed ? '-rotate-90' : 'rotate-0'"
+            />
+          </button>
           
-          <!-- Tooltip for collapsed state -->
           <div 
-            v-if="!sidebarOpen" 
-            class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
+            class="space-y-1 transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden"
+            :class="[
+              (!group.collapsed || !sidebarOpen) ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+            ]"
           >
-            {{ item.label }}
+            <NuxtLink
+              v-for="item in group.items"
+              :key="item.path"
+              :to="item.path"
+              class="group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden h-11"
+              active-class="text-white bg-white/10 shadow-sm ring-1 ring-white/20"
+              :class="['text-slate-400 hover:text-white hover:bg-white/5', sidebarOpen ? 'justify-start gap-3' : 'justify-center gap-0']"
+            >
+              <!-- Active Indicator Strip -->
+              <div 
+                v-if="route.path === item.path"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full"
+                :style="{ backgroundColor: 'var(--brand)' }"
+              ></div>
+
+              <Icon 
+                :name="item.icon" 
+                class="w-5 h-5 transition-transform duration-300 group-hover:scale-110 shrink-0"
+                :style="route.path === item.path ? { color: 'var(--brand)' } : {}"
+              />
+              <span 
+                class="font-medium text-sm transition-all duration-300 whitespace-nowrap overflow-hidden"
+                :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
+              >
+                {{ item.label }}
+              </span>
+              
+              <!-- Tooltip for collapsed state -->
+              <div 
+                v-if="!sidebarOpen" 
+                class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
+              >
+                {{ item.label }}
+              </div>
+            </NuxtLink>
           </div>
-        </NuxtLink>
+        </div>
       </nav>
 
       <!-- User Section -->
@@ -225,44 +248,111 @@ const pageTitle = computed(() => {
   return meta || 'Admin Dashboard'
 })
 
-// Navigation items with icon components
-const navItems = [
+// Navigation Groups
+const navGroups = ref([
   {
-    path: '/admin',
-    label: 'Dashboard',
-    icon: 'lucide:layout-dashboard'
+    title: 'Overview',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin',
+        label: 'Dashboard',
+        icon: 'lucide:layout-dashboard'
+      }
+    ]
   },
   {
-    path: '/admin/products',
-    label: 'Products',
-    icon: 'lucide:package'
+    title: 'Catalog',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/products',
+        label: 'Products',
+        icon: 'lucide:package'
+      },
+      {
+        path: '/admin/inventory',
+        label: 'Inventory',
+        icon: 'lucide:warehouse'
+      },
+      {
+        path: '/admin/categories',
+        label: 'Categories',
+        icon: 'lucide:tags'
+      }
+    ]
   },
   {
-    path: '/admin/categories',
-    label: 'Categories',
-    icon: 'lucide:tags'
+    title: 'Purchasing',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/suppliers',
+        label: 'Suppliers',
+        icon: 'lucide:truck'
+      },
+      {
+        path: '/admin/purchases',
+        label: 'Purchases',
+        icon: 'lucide:shopping-cart'
+      }
+    ]
   },
   {
-    path: '/admin/orders',
-    label: 'Orders',
-    icon: 'lucide:handbag' // or clipboard-list
+    title: 'Sales',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/orders',
+        label: 'Orders',
+        icon: 'lucide:handbag'
+      }
+    ]
   },
   {
-    path: '/admin/settings/appearance',
-    label: 'Appearance Settings',
-    icon: 'lucide:palette'
+    title: 'Delivery',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/delivery',
+        label: 'Delivery',
+        icon: 'lucide:truck'
+      }
+    ]
   },
   {
-    path: '/admin/settings/functional',
-    label: 'Functional Settings',
-    icon: 'lucide:sliders'
+    title: 'Finance',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/billing',
+        label: 'Billing',
+        icon: 'lucide:credit-card'
+      }
+    ]
   },
   {
-    path: '/admin/delivery',
-    label: 'Delivery',
-    icon: 'lucide:truck'
+    title: 'Settings',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/settings/appearance',
+        label: 'Appearance',
+        icon: 'lucide:palette'
+      },
+      {
+        path: '/admin/settings/functional',
+        label: 'Functional',
+        icon: 'lucide:sliders'
+      }
+    ]
   }
-]
+])
+
+function toggleGroup(index: number) {
+  navGroups.value[index].collapsed = !navGroups.value[index].collapsed
+}
+
 
 function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value

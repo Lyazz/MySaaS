@@ -2,6 +2,9 @@ import { createError, defineEventHandler, getRequestHeader } from 'h3'
 import prisma from '../../backend/src/lib/prisma'
 import { parseHost } from '../../backend/src/lib/tenant-host'
 
+const addUtcMonths = (date: Date, months: number) =>
+    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
+
 export default defineEventHandler(async (event) => {
     const url = event.node.req.url || '/'
 
@@ -33,6 +36,33 @@ export default defineEventHandler(async (event) => {
 
         if (!tenant) {
             throw createError({ statusCode: 404, statusMessage: 'Tenant not found' })
+        }
+
+        if (tenant.isSuspended) {
+            throw createError({ statusCode: 403, statusMessage: 'Tenant is suspended' })
+        }
+
+        const now = new Date()
+        const defaultEnd = addUtcMonths(now, 1)
+        const subscription = await prisma.tenantSubscription.upsert({
+            where: { tenantId: tenant.id },
+            create: {
+                tenantId: tenant.id,
+                planCode: 'basic',
+                interval: 'month',
+                status: 'ACTIVE',
+                currentPeriodStart: now,
+                currentPeriodEnd: defaultEnd
+            },
+            update: {}
+        })
+
+        const end = subscription.currentPeriodEnd ?? defaultEnd
+        if (now >= end) {
+            if (subscription.status !== 'PAST_DUE') {
+                await prisma.tenantSubscription.update({ where: { tenantId: tenant.id }, data: { status: 'PAST_DUE' } })
+            }
+            throw createError({ statusCode: 402, statusMessage: 'Subscription payment required' })
         }
 
         event.context.tenant = tenant

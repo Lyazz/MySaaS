@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { getPlanByCode } from '../../../../shared/pricing/plans'
 
 export class OrderValidationError extends Error {
     statusCode: number
@@ -31,7 +32,20 @@ export type PublicOrderInput = {
     items: PublicOrderItemInput[]
 }
 
-const ORDER_STATUSES = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const
+type SubscriptionContext = {
+    planCode: string
+    currentPeriodStart: Date
+    currentPeriodEnd: Date | null
+    interval: string
+}
+
+const ORDER_STATUSES = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'] as const
+
+const addUtcMonths = (date: Date, months: number) =>
+    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
+
+const addUtcYears = (date: Date, years: number) =>
+    new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
 
 export class OrdersService {
     async list(tenantId: string, filters: { status?: string; search?: string }) {
@@ -75,19 +89,345 @@ export class OrdersService {
             throw new OrderValidationError(400, 'Invalid status value')
         }
 
-        const updated = await prisma.order.updateMany({
+        const existing = await prisma.order.findFirst({
             where: { id, tenantId },
-            data: { status }
+            include: { items: true }
         })
+        if (!existing) throw new OrderValidationError(404, 'Order not found')
 
-        if (updated.count === 0) {
-            throw new OrderValidationError(404, 'Order not found')
+        const fromStatus = existing.status
+        const toStatus = status
+        if (fromStatus === toStatus) return prisma.order.findFirst({ where: { id, tenantId } })
+
+        const adjustInventoryForDefaultVariant = async (
+            tx: any,
+            tenantIdArg: string,
+            variantId: string,
+            productId: string,
+            nextStock: number | null
+        ) => {
+            if (nextStock === null) return
+            const isDefaultVariant =
+                (await tx.productVariantOptionValue.count({ where: { tenantId: tenantIdArg, variantId } })) === 0
+            if (!isDefaultVariant) return
+            const hasOptions = (await tx.productOption.count({ where: { tenantId: tenantIdArg, productId } })) > 0
+            if (hasOptions) return
+            await tx.product.updateMany({
+                where: { tenantId: tenantIdArg, id: productId },
+                data: { stock: nextStock }
+            })
         }
+
+        await prisma.$transaction(async (tx) => {
+            const items = existing.items
+
+            const legacyAlreadyDecremented =
+                (await tx.inventoryMovement.count({ where: { tenantId, orderId: id, type: 'ORDER_DECREMENT' } })) > 0
+            const legacyReservedAtPending =
+                (await tx.inventoryMovement.count({ where: { tenantId, orderId: id, type: 'RESERVED_ADJUSTMENT' } })) >
+                0
+
+            const isTransitionAllowed = (() => {
+                if (fromStatus === 'PENDING') return toStatus === 'CONFIRMED' || toStatus === 'CANCELLED'
+                if (fromStatus === 'CONFIRMED') return toStatus === 'SHIPPED' || toStatus === 'CANCELLED'
+                if (fromStatus === 'SHIPPED') return toStatus === 'DELIVERED' || toStatus === 'RETURNED'
+                if (fromStatus === 'DELIVERED') return toStatus === 'RETURNED'
+                return false
+            })()
+            if (!isTransitionAllowed) {
+                throw new OrderValidationError(400, `Invalid status transition: ${fromStatus} -> ${toStatus}`)
+            }
+
+            for (const item of items) {
+                if (!item.variantId) continue
+
+                const variantBefore = await tx.productVariant.findFirst({
+                    where: { tenantId, id: item.variantId },
+                    select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                })
+                if (!variantBefore) continue
+                if (variantBefore.trackInventory === false) continue
+
+                const qty = item.quantity
+
+                // PENDING -> CONFIRMED : reserve (unless this order already reserved in older versions)
+                if (fromStatus === 'PENDING' && toStatus === 'CONFIRMED') {
+                    if (legacyAlreadyDecremented || legacyReservedAtPending) {
+                        // Don't double-apply inventory for old orders.
+                        continue
+                    }
+
+                    if (variantBefore.stock < variantBefore.reserved + variantBefore.safetyStock + qty) {
+                        throw new OrderValidationError(409, 'Insufficient stock')
+                    }
+
+                    const result = await tx.productVariant.updateMany({
+                        where: {
+                            tenantId,
+                            id: item.variantId,
+                            stock: variantBefore.stock,
+                            reserved: variantBefore.reserved,
+                            safetyStock: variantBefore.safetyStock
+                        },
+                        data: { reserved: { increment: qty } }
+                    })
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+
+                    const after = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { stock: true, reserved: true, safetyStock: true }
+                    })
+
+                    await tx.inventoryMovement.create({
+                        data: {
+                            tenantId,
+                            variantId: item.variantId,
+                            type: 'RESERVED_ADJUSTMENT',
+                            delta: 0,
+                            reservedDelta: qty,
+                            safetyStockDelta: 0,
+                            reason: 'order_confirm',
+                            note: null,
+                            orderId: id,
+                            stockAfter: after?.stock ?? null,
+                            reservedAfter: after?.reserved ?? null,
+                            safetyStockAfter: after?.safetyStock ?? null,
+                            createdByUserId: null
+                        }
+                    })
+                }
+
+                // CONFIRMED -> SHIPPED : decrement stock and release reserved.
+                if (fromStatus === 'CONFIRMED' && toStatus === 'SHIPPED') {
+                    if (legacyAlreadyDecremented) {
+                        // If stock was already decremented in legacy flows, only release reserved if present.
+                        if (variantBefore.reserved >= qty) {
+                            await tx.productVariant.updateMany({
+                                where: { tenantId, id: item.variantId, reserved: variantBefore.reserved },
+                                data: { reserved: { decrement: qty } }
+                            })
+                        }
+                        continue
+                    }
+
+                    if (variantBefore.reserved < qty) throw new OrderValidationError(409, 'Insufficient reserved stock')
+                    if (variantBefore.stock < qty) throw new OrderValidationError(409, 'Insufficient stock')
+                    if (variantBefore.stock < variantBefore.reserved + variantBefore.safetyStock) {
+                        throw new OrderValidationError(409, 'Inventory invariant violated')
+                    }
+
+                    const result = await tx.productVariant.updateMany({
+                        where: {
+                            tenantId,
+                            id: item.variantId,
+                            stock: variantBefore.stock,
+                            reserved: variantBefore.reserved,
+                            safetyStock: variantBefore.safetyStock
+                        },
+                        data: { stock: { decrement: qty }, reserved: { decrement: qty } }
+                    })
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+
+                    const after = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { stock: true, reserved: true, safetyStock: true }
+                    })
+
+                    await tx.inventoryMovement.create({
+                        data: {
+                            tenantId,
+                            variantId: item.variantId,
+                            type: 'ORDER_DECREMENT',
+                            delta: -qty,
+                            reservedDelta: -qty,
+                            safetyStockDelta: 0,
+                            reason: 'order_ship',
+                            note: null,
+                            orderId: id,
+                            stockAfter: after?.stock ?? null,
+                            reservedAfter: after?.reserved ?? null,
+                            safetyStockAfter: after?.safetyStock ?? null,
+                            createdByUserId: null
+                        }
+                    })
+
+                    await adjustInventoryForDefaultVariant(tx, tenantId, item.variantId, variantBefore.productId, after?.stock ?? null)
+                }
+
+                // CONFIRMED -> CANCELLED : release reserved.
+                if (fromStatus === 'CONFIRMED' && toStatus === 'CANCELLED') {
+                    if (variantBefore.reserved < qty) throw new OrderValidationError(409, 'Insufficient reserved stock')
+
+                    const result = await tx.productVariant.updateMany({
+                        where: {
+                            tenantId,
+                            id: item.variantId,
+                            stock: variantBefore.stock,
+                            reserved: variantBefore.reserved,
+                            safetyStock: variantBefore.safetyStock
+                        },
+                        data: { reserved: { decrement: qty } }
+                    })
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+
+                    const after = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { stock: true, reserved: true, safetyStock: true }
+                    })
+
+                    await tx.inventoryMovement.create({
+                        data: {
+                            tenantId,
+                            variantId: item.variantId,
+                            type: 'RESERVED_ADJUSTMENT',
+                            delta: 0,
+                            reservedDelta: -qty,
+                            safetyStockDelta: 0,
+                            reason: 'order_cancel',
+                            note: null,
+                            orderId: id,
+                            stockAfter: after?.stock ?? null,
+                            reservedAfter: after?.reserved ?? null,
+                            safetyStockAfter: after?.safetyStock ?? null,
+                            createdByUserId: null
+                        }
+                    })
+                }
+
+                // PENDING -> CANCELLED : normally nothing; but if legacy reserved-at-pending or legacy decrement existed, undo it.
+                if (fromStatus === 'PENDING' && toStatus === 'CANCELLED') {
+                    if (legacyReservedAtPending && variantBefore.reserved >= qty) {
+                        const result = await tx.productVariant.updateMany({
+                            where: { tenantId, id: item.variantId, reserved: variantBefore.reserved },
+                            data: { reserved: { decrement: qty } }
+                        })
+                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+
+                        const after = await tx.productVariant.findFirst({
+                            where: { tenantId, id: item.variantId },
+                            select: { stock: true, reserved: true, safetyStock: true }
+                        })
+
+                        await tx.inventoryMovement.create({
+                            data: {
+                                tenantId,
+                                variantId: item.variantId,
+                                type: 'RESERVED_ADJUSTMENT',
+                                delta: 0,
+                                reservedDelta: -qty,
+                                safetyStockDelta: 0,
+                                reason: 'order_cancel',
+                                note: 'legacy_pending_reserved_release',
+                                orderId: id,
+                                stockAfter: after?.stock ?? null,
+                                reservedAfter: after?.reserved ?? null,
+                                safetyStockAfter: after?.safetyStock ?? null,
+                                createdByUserId: null
+                            }
+                        })
+                    }
+
+                    if (legacyAlreadyDecremented) {
+                        const result = await tx.productVariant.updateMany({
+                            where: { tenantId, id: item.variantId, stock: variantBefore.stock },
+                            data: { stock: { increment: qty } }
+                        })
+                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+
+                        const after = await tx.productVariant.findFirst({
+                            where: { tenantId, id: item.variantId },
+                            select: { stock: true, reserved: true, safetyStock: true }
+                        })
+
+                        await tx.inventoryMovement.create({
+                            data: {
+                                tenantId,
+                                variantId: item.variantId,
+                                type: 'MANUAL_ADJUSTMENT',
+                                delta: qty,
+                                reservedDelta: 0,
+                                safetyStockDelta: 0,
+                                reason: 'order_cancel_restock',
+                                note: 'legacy_pending_order_restock',
+                                orderId: id,
+                                stockAfter: after?.stock ?? null,
+                                reservedAfter: after?.reserved ?? null,
+                                safetyStockAfter: after?.safetyStock ?? null,
+                                createdByUserId: null
+                            }
+                        })
+
+                        await adjustInventoryForDefaultVariant(tx, tenantId, item.variantId, variantBefore.productId, after?.stock ?? null)
+                    }
+                }
+
+                // SHIPPED/DELIVERED -> RETURNED : restock.
+                if ((fromStatus === 'SHIPPED' || fromStatus === 'DELIVERED') && toStatus === 'RETURNED') {
+                    const result = await tx.productVariant.updateMany({
+                        where: { tenantId, id: item.variantId, stock: variantBefore.stock },
+                        data: { stock: { increment: qty } }
+                    })
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+
+                    const after = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { stock: true, reserved: true, safetyStock: true }
+                    })
+
+                    await tx.inventoryMovement.create({
+                        data: {
+                            tenantId,
+                            variantId: item.variantId,
+                            type: 'MANUAL_ADJUSTMENT',
+                            delta: qty,
+                            reservedDelta: 0,
+                            safetyStockDelta: 0,
+                            reason: 'order_return',
+                            note: null,
+                            orderId: id,
+                            stockAfter: after?.stock ?? null,
+                            reservedAfter: after?.reserved ?? null,
+                            safetyStockAfter: after?.safetyStock ?? null,
+                            createdByUserId: null
+                        }
+                    })
+
+                    await adjustInventoryForDefaultVariant(tx, tenantId, item.variantId, variantBefore.productId, after?.stock ?? null)
+                }
+            }
+
+            const updated = await tx.order.updateMany({ where: { tenantId, id }, data: { status: toStatus } })
+            if (updated.count !== 1) throw new OrderValidationError(404, 'Order not found')
+        })
 
         return prisma.order.findFirst({ where: { id, tenantId } })
     }
 
-    async createPublicOrder(input: PublicOrderInput) {
+    async createPublicOrder(input: PublicOrderInput, subscription?: SubscriptionContext | null) {
+        if (subscription) {
+            const plan = getPlanByCode(subscription.planCode as any) ?? getPlanByCode('basic')
+            const limit = plan?.ordersPerMonth ?? 0
+
+            const periodStart = subscription.currentPeriodStart
+            const periodEnd =
+                subscription.currentPeriodEnd ??
+                (subscription.interval === 'year' ? addUtcYears(periodStart, 1) : addUtcMonths(periodStart, 1))
+
+            const ordersInPeriod = await prisma.order.count({
+                where: {
+                    tenantId: input.tenantId,
+                    createdAt: { gte: periodStart, lt: periodEnd }
+                }
+            })
+
+            if (limit > 0 && ordersInPeriod >= limit) {
+                throw new OrderValidationError(
+                    429,
+                    `Monthly order limit reached (${ordersInPeriod}/${limit}). Upgrade your plan to accept more orders.`
+                )
+            }
+        }
+
         const customerName = (input.customerName || '').trim()
         const customerPhone = (input.customerPhone || '').trim()
         const deliveryMode = (input.deliveryMode || 'home').toLowerCase()
@@ -135,12 +475,19 @@ export class OrdersService {
 
         const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
         const variantIds = Array.from(
-            new Set(normalizedItems.map((item) => item.variantId).filter(Boolean)) as string[]
+            new Set(
+                normalizedItems
+                    .map((item) => item.variantId)
+                    .filter((v): v is string => typeof v === 'string' && v.length > 0)
+            )
+        )
+        const productIdsWithoutVariant = Array.from(
+            new Set(normalizedItems.filter((item) => !item.variantId).map((item) => item.productId))
         )
 
         const products = await prisma.product.findMany({
             where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, price: true, stock: true, title: true }
+            select: { id: true, price: true, title: true, stock: true }
         })
 
         if (products.length !== productIds.length) {
@@ -149,35 +496,82 @@ export class OrdersService {
 
         const productMap = new Map(products.map((p) => [p.id, p]))
 
-        const variants = variantIds.length
+        const variantsById = variantIds.length
             ? await prisma.productVariant.findMany({
-                where: { id: { in: variantIds }, product: { tenantId: input.tenantId }, isActive: true },
-                select: { id: true, productId: true, price: true, stock: true, trackInventory: true }
+                where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
+                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
             : []
 
-        if (variants.length !== variantIds.length) {
+        if (variantsById.length !== variantIds.length) {
             throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
         }
 
-        const variantMap = new Map(variants.map((v) => [v.id, v]))
+        const defaultVariants = productIdsWithoutVariant.length
+            ? await prisma.productVariant.findMany({
+                where: {
+                    tenantId: input.tenantId,
+                    productId: { in: productIdsWithoutVariant },
+                    isActive: true,
+                    optionValues: { none: {} }
+                },
+                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+            })
+            : []
+
+        const variantMap = new Map(variantsById.map((v) => [v.id, v]))
+        const defaultVariantByProductId = new Map(defaultVariants.map((v) => [v.productId, v]))
+
+        // Back-compat / safety: if a product has no variantId but also has no default variant,
+        // create one on-the-fly only when the product has no options.
+        if (productIdsWithoutVariant.length > 0) {
+            const optionRows = await prisma.productOption.findMany({
+                where: { tenantId: input.tenantId, productId: { in: productIdsWithoutVariant } },
+                select: { productId: true },
+                distinct: ['productId']
+            })
+            const productsWithOptions = new Set(optionRows.map((r) => r.productId))
+
+            for (const pid of productIdsWithoutVariant) {
+                if (defaultVariantByProductId.has(pid)) continue
+                if (productsWithOptions.has(pid)) continue
+
+                const product = productMap.get(pid)
+                if (!product) continue
+
+                const created = await prisma.productVariant.create({
+                    data: {
+                        tenantId: input.tenantId,
+                        productId: pid,
+                        price: product.price,
+                        stock: product.stock,
+                        reserved: 0,
+                        safetyStock: 0,
+                        trackInventory: true,
+                        isActive: true
+                    }
+                })
+                defaultVariantByProductId.set(pid, created as any)
+            }
+        }
 
         let total = 0
         const validatedItems = normalizedItems.map((item) => {
             const product = productMap.get(item.productId)!
-            let price = Number(product.price)
-            let availableStock = product.stock
-            let trackInventory = true
+            const variant =
+                item.variantId
+                    ? variantMap.get(item.variantId)
+                    : defaultVariantByProductId.get(product.id)
 
-            if (item.variantId) {
-                const variant = variantMap.get(item.variantId)
-                if (!variant || variant.productId !== product.id) {
-                    throw new OrderValidationError(400, 'Variant does not belong to product')
-                }
-                price = Number(variant.price ?? product.price)
-                availableStock = variant.trackInventory ? variant.stock : Number.POSITIVE_INFINITY
-                trackInventory = variant.trackInventory
+            if (!variant || variant.productId !== product.id) {
+                throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
+
+            const price = Number(variant.price ?? product.price)
+            const availableStock = variant.trackInventory
+                ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
+                : Number.POSITIVE_INFINITY
+            const trackInventory = variant.trackInventory
 
             if (trackInventory && item.quantity > availableStock) {
                 throw new OrderValidationError(400, `Insufficient stock for ${product.title}`)
@@ -187,10 +581,13 @@ export class OrdersService {
 
             return {
                 productId: product.id,
-                variantId: item.variantId,
+                variantId: variant.id,
                 quantity: item.quantity,
                 price,
-                trackInventory
+                trackInventory,
+                reserved: variant.reserved,
+                safetyStock: variant.safetyStock,
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
             }
         })
 
@@ -224,39 +621,25 @@ export class OrdersService {
 
             await tx.orderItem.createMany({
                 data: validatedItems.map((item) => ({
+                    tenantId: input.tenantId,
                     orderId: createdOrder.id,
                     productId: item.productId,
-                    variantId: item.variantId ?? undefined,
+                    variantId: item.variantId,
                     quantity: item.quantity,
                     price: item.price
                 }))
             })
 
             for (const item of validatedItems) {
-                if (item.variantId) {
-                    if (item.trackInventory !== false) {
-                        const result = await tx.productVariant.updateMany({
-                            where: {
-                                id: item.variantId,
-                                product: { tenantId: input.tenantId },
-                                stock: { gte: item.quantity }
-                            },
-                            data: { stock: { decrement: item.quantity } }
-                        })
-                        if (result.count !== 1) {
-                            throw new OrderValidationError(409, 'Insufficient stock')
-                        }
-                    }
-                } else {
-                    const result = await tx.product.updateMany({
-                        where: {
-                            id: item.productId,
-                            tenantId: input.tenantId,
-                            stock: { gte: item.quantity }
-                        },
-                        data: { stock: { decrement: item.quantity } }
+                if (item.trackInventory !== false) {
+                    // COD flow: no inventory change at PENDING. Reserve at CONFIRMED, decrement at SHIPPED.
+                    const current = await tx.productVariant.findFirst({
+                        where: { id: item.variantId, tenantId: input.tenantId },
+                        select: { stock: true, reserved: true, safetyStock: true, trackInventory: true }
                     })
-                    if (result.count !== 1) {
+                    if (!current) throw new OrderValidationError(409, 'Insufficient stock')
+                    if (current.trackInventory === false) continue
+                    if (current.stock < item.quantity + current.reserved + current.safetyStock) {
                         throw new OrderValidationError(409, 'Insufficient stock')
                     }
                 }

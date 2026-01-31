@@ -16,16 +16,79 @@ model Tenant {
   updatedAt   DateTime @updatedAt
 
   users          User[]
+  subscription   TenantSubscription?
+  payments       BillingPayment[]
   products       Product[]
+  productImages  ProductImage[]
+  productOptions ProductOption[]
+  optionValues   ProductOptionValue[]
+  variants       ProductVariant[]
+  variantValues  ProductVariantOptionValue[]
+  variantImages  ProductVariantImage[]
+  inventoryMoves InventoryMovement[]
+  suppliers      Supplier[]
+  purchaseOrders PurchaseOrder[]
+  purchaseOrderItems PurchaseOrderItem[]
   categories     Category[]
   orders         Order[]
+  orderItems     OrderItem[]
   shipments      Shipment[]
   deliveryRates  DeliveryRate[]
   storeSettings  StoreSettings?
   domains        TenantDomain[]
-  shipmentEvents ShipmentEvent[] @relation("TenantShipmentEvents")
+  shipmentEvents ShipmentEvent[]             @relation("TenantShipmentEvents")
 }
 
+model TenantSubscription {
+  id       String @id @default(uuid())
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  planCode String // from shared pricing catalog (e.g. basic, merchant, professional)
+  interval String @default("month") // month | year
+  status   String @default("ACTIVE") // TRIALING | ACTIVE | CANCELED | PAST_DUE ...
+
+  currentPeriodStart DateTime  @default(now())
+  currentPeriodEnd   DateTime?
+  trialEnd           DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([planCode])
+}
+
+model BillingPayment {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  planCode String
+  interval String @default("month") // month | year
+
+  amountDzd Int
+  currency  String @default("DA")
+
+  method String @default("SIMULATED") // SIMULATED | MANUAL_PROOF
+  status String @default("PAID") // PAID | PENDING | REJECTED | IMPORTED
+
+  proofUrl          String?
+  notes             String?
+  externalReference String?
+
+  createdByUserId  String?
+  reviewedByUserId String?
+
+  periodStart DateTime?
+  periodEnd   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
 
 model TenantDomain {
   id       String @id @default(uuid())
@@ -46,16 +109,16 @@ model StoreSettings {
 
   logoUrl      String? // URL of the tenant's store logo
   primaryColor String  @default("#0d9488") // teal-600
-  templateKey  String @default("modern") // e.g. classic | modern
-  fontFamily   String @default("Outfit")
-  language     String @default("fr") // ar | fr | en
+  templateKey  String  @default("modern") // e.g. classic | modern
+  fontFamily   String  @default("Outfit")
+  language     String  @default("fr") // ar | fr | en
 
   cartEnabled     Boolean @default(true)
   codEnabled      Boolean @default(true)
   currencyCode    String  @default("DZD") // ISO currency code
   currencyCountry String  @default("DZ") // ISO country for flag/locale
 
-  isCompleted Boolean @default(false)
+  isCompleted              Boolean  @default(false)
   allowedDeliveryProviders String[] @default(["SELF"])
 
   createdAt DateTime @default(now())
@@ -73,7 +136,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  inventoryMovements InventoryMovement[]
+  purchaseOrdersCreated PurchaseOrder[] @relation("PurchaseOrderCreatedBy")
+
   @@unique([tenantId, email])
+  @@unique([tenantId, id])
   @@index([tenantId])
 }
 
@@ -91,6 +158,7 @@ model Category {
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId])
 }
 
@@ -111,7 +179,7 @@ model Product {
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [tenantId, categoryId], references: [tenantId, id])
 
   options  ProductOption[]
   variants ProductVariant[]
@@ -122,13 +190,16 @@ model Product {
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId])
 }
 
 model ProductImage {
   id        String  @id @default(uuid())
+  tenantId  String
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
   url       String
   alt       String?
   position  Int     @default(0)
@@ -139,13 +210,17 @@ model ProductImage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([productId])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, productId])
 }
 
 model ProductOption {
   id          String  @id @default(uuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   productId   String
-  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
   name        String // e.g. "Color", "Size"
   position    Int     @default(0)
   displayType String  @default("dropdown") // dropdown, button, color, image
@@ -155,13 +230,17 @@ model ProductOption {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([productId])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, productId])
 }
 
 model ProductOptionValue {
   id       String        @id @default(uuid())
+  tenantId String
+  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   optionId String
-  option   ProductOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  option   ProductOption @relation(fields: [tenantId, optionId], references: [tenantId, id], onDelete: Cascade)
   label    String // e.g. "Red", "XL"
   position Int           @default(0)
   meta     String? // JSON string for swatch colors, etc.
@@ -171,17 +250,22 @@ model ProductOptionValue {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([optionId])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, optionId])
 }
 
 model ProductVariant {
   id        String  @id @default(uuid())
+  tenantId  String
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
 
   sku            String?
   price          Decimal  @default(0)
   compareAtPrice Decimal?
+  cost           Decimal  @default(0) // prix d'achat (latest unit cost)
   isActive       Boolean  @default(true)
 
   // Inventory
@@ -193,64 +277,176 @@ model ProductVariant {
   optionValues ProductVariantOptionValue[]
   images       ProductVariantImage[]
   movements    InventoryMovement[]
+  purchaseOrderItems PurchaseOrderItem[]
   orderItems   OrderItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([productId])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, productId])
 }
 
 model ProductVariantOptionValue {
+  tenantId      String
+  tenant        Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   variantId     String
-  variant       ProductVariant     @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variant       ProductVariant     @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
   optionValueId String
-  optionValue   ProductOptionValue @relation(fields: [optionValueId], references: [id], onDelete: Cascade)
+  optionValue   ProductOptionValue @relation(fields: [tenantId, optionValueId], references: [tenantId, id], onDelete: Cascade)
 
-  @@id([variantId, optionValueId])
+  @@id([tenantId, variantId, optionValueId])
+  @@index([tenantId])
   @@index([optionValueId])
 }
 
 model ProductVariantImage {
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   variantId String
-  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
   imageId   String
-  image     ProductImage   @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  image     ProductImage   @relation(fields: [tenantId, imageId], references: [tenantId, id], onDelete: Cascade)
   position  Int            @default(0)
 
-  @@id([variantId, imageId])
+  @@id([tenantId, variantId, imageId])
+  @@index([tenantId])
   @@index([imageId])
 }
 
 model InventoryMovement {
   id        String         @id @default(uuid())
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   variantId String
-  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  delta     Int
+  variant   ProductVariant @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
+  type      InventoryMovementType @default(MANUAL_ADJUSTMENT)
+  delta     Int // stock delta
+  reservedDelta Int @default(0)
+  safetyStockDelta Int @default(0)
   reason    String // e.g. "order", "restock", "correction"
+  note      String?
   orderId   String?
+  order     Order? @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+
+  stockAfter       Int?
+  reservedAfter    Int?
+  safetyStockAfter Int?
+
+  createdByUserId String?
+  createdBy       User? @relation(fields: [tenantId, createdByUserId], references: [tenantId, id])
 
   createdAt DateTime @default(now())
 
+  @@index([tenantId])
   @@index([variantId])
+  @@index([tenantId, variantId, createdAt])
+  @@index([tenantId, orderId])
+}
+
+enum InventoryMovementType {
+  MANUAL_ADJUSTMENT
+  MANUAL_SET
+  ORDER_DECREMENT
+  PURCHASE_RECEIPT
+  RESERVED_ADJUSTMENT
+  SAFETY_STOCK_CHANGE
+  TRACKING_CHANGE
+}
+
+model Supplier {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name    String
+  phone   String?
+  email   String?
+  address String?
+  notes   String?
+
+  purchaseOrders PurchaseOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+}
+
+model PurchaseOrder {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  supplierId String?
+  supplier   Supplier? @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: Restrict)
+
+  status   String @default("DRAFT") // DRAFT | ORDERED | RECEIVED | CANCELLED
+  reference String?
+  currency String @default("DZD")
+  notes    String?
+
+  createdByUserId String?
+  createdBy       User? @relation("PurchaseOrderCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
+
+  orderedAt  DateTime?
+  receivedAt DateTime?
+
+  items PurchaseOrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, status])
+}
+
+model PurchaseOrderItem {
+  id             String @id @default(uuid())
+  tenantId       String
+  tenant         Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  purchaseOrderId String
+  purchaseOrder  PurchaseOrder @relation(fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: Cascade)
+
+  variantId String
+  variant   ProductVariant @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
+
+  quantityOrdered  Int
+  quantityReceived Int @default(0)
+
+  unitCost  Decimal @default(0) // prix d'achat
+  salePrice Decimal? // prix de vente (optional update)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, purchaseOrderId])
+  @@index([tenantId, variantId])
 }
 
 model Order {
-  id           String @id @default(uuid())
-  tenantId     String
-  tenant       Tenant @relation(fields: [tenantId], references: [id])
-  status       String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
-  totalAmount  Float
+  id          String @id @default(uuid())
+  tenantId    String
+  tenant      Tenant @relation(fields: [tenantId], references: [id])
+  status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  totalAmount Float
 
   customerName    String
   customerPhone   String
   customerAddress String?
 
-  deliveryMode         String           @default("home") // home | pickup | store
+  deliveryMode         String            @default("home") // home | pickup | store
   shippingProvider     ShipmentProvider?
   shippingServiceLevel String?
   shippingAmount       Float?
-  shippingCurrency     String           @default("DZD")
+  shippingCurrency     String            @default("DZD")
   shippingWilayaCode   String?
   shippingCommuneCode  String?
   shippingAddressLine1 String?
@@ -261,10 +457,12 @@ model Order {
 
   items     OrderItem[]
   shipments Shipment[]
+  inventoryMovements InventoryMovement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([tenantId, id])
   @@index([tenantId])
 }
 
@@ -312,7 +510,7 @@ model Shipment {
   tenantId           String
   tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orderId            String
-  order              Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order              Order            @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
   provider           ShipmentProvider
   providerShipmentId String?
   status             ShipmentStatus   @default(PENDING)
@@ -335,6 +533,7 @@ model Shipment {
   events ShipmentEvent[]
 
   @@unique([tenantId, provider, orderId])
+  @@unique([tenantId, id])
   @@index([tenantId])
   @@index([provider, tenantId])
 }
@@ -344,7 +543,7 @@ model ShipmentEvent {
   tenantId    String
   tenant      Tenant          @relation("TenantShipmentEvents", fields: [tenantId], references: [id], onDelete: Cascade)
   shipmentId  String
-  shipment    Shipment        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  shipment    Shipment        @relation(fields: [tenantId, shipmentId], references: [tenantId, id], onDelete: Cascade)
   status      ShipmentStatus?
   code        String?
   description String?
@@ -359,16 +558,21 @@ model ShipmentEvent {
 
 model OrderItem {
   id        String  @id @default(uuid())
+  tenantId  String
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [tenantId, orderId], references: [tenantId, id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [tenantId, productId], references: [tenantId, id])
 
   quantity Int
   price    Float // Price at the time of order
 
   variantId String?
-  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  variant   ProductVariant? @relation(fields: [tenantId, variantId], references: [tenantId, id])
+
+  @@index([tenantId])
+  @@index([tenantId, orderId])
 }
 
 model AuditLog {
@@ -380,4 +584,3 @@ model AuditLog {
   tenantId  String? // Tenant context usually null for super admin actions but good to have
   createdAt DateTime @default(now())
 }
-

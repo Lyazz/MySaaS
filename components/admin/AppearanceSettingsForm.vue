@@ -310,6 +310,24 @@ const templates = [
     label: 'Modern Minimal', 
     description: 'Clean, spacious design with large imagery and bold typography.',
     icon: 'lucide:layout-template'
+  },
+  { 
+    key: 'street', 
+    label: 'Street Urban', 
+    description: 'High-energy, bold layout with high-contrast elements and urban aesthetics.',
+    icon: 'lucide:zap'
+  },
+  { 
+    key: 'cozy', 
+    label: 'Cozy Warm', 
+    description: 'Soft, minimalist design with warm colors and elegant typography.',
+    icon: 'lucide:coffee'
+  },
+  { 
+    key: 'cyber', 
+    label: 'Cyber Future', 
+    description: 'Futuristic dark mode with neon accents and high-tech UI components.',
+    icon: 'lucide:cpu'
   }
 ]
 

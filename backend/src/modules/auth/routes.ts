@@ -5,6 +5,9 @@ import { signAccessToken } from '../../lib/jwt'
 
 const router = Router()
 
+const addUtcMonths = (date: Date, months: number) =>
+    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
+
 router.post('/register', async (req, res) => {
     // Tenants must register from the SaaS host (root domain), not from a tenant subdomain.
     if (req.tenant) {
@@ -49,6 +52,7 @@ router.post('/register', async (req, res) => {
 
         // Transaction: Create Tenant + Create Owner User
         const result = await prisma.$transaction(async (tx) => {
+            const now = new Date()
             const tenant = await tx.tenant.create({
                 data: {
                     name,
@@ -69,6 +73,17 @@ router.post('/register', async (req, res) => {
             await tx.storeSettings.create({
                 data: {
                     tenantId: tenant.id
+                }
+            })
+
+            await tx.tenantSubscription.create({
+                data: {
+                    tenantId: tenant.id,
+                    planCode: 'basic',
+                    interval: 'month',
+                    status: 'ACTIVE',
+                    currentPeriodStart: now,
+                    currentPeriodEnd: addUtcMonths(now, 1)
                 }
             })
 

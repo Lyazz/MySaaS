@@ -18,12 +18,10 @@ type Product = {
 }
 
 const productsUrl = useTenantApiUrl('/api/products')
-const products = ref<Product[]>([])
-try {
-  products.value = await $fetch<Product[]>(productsUrl, { headers: useTenantApiHeaders() })
-} catch {
-  // Silent fail
-}
+const { data: products } = await useFetch<Product[]>(productsUrl, { 
+    headers: useTenantApiHeaders(),
+    default: () => []
+})
 
 useTenantSeo({
   title: 'Shop',

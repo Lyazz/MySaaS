@@ -21,7 +21,7 @@ defineEmits(['quick-view'])
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
-const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
+const { currencyCode } = useCurrency()
 
 const mainImage = computed(() => {
     if (props.product.images && props.product.images.length > 0) {
@@ -43,6 +43,10 @@ const isNew = computed(() => {
     // For now, random or based on ID if we had that info, defaulting to false or passed prop
     return false 
 })
+
+const LOW_STOCK_THRESHOLD = 5
+const isOutOfStock = computed(() => Number(props.product.stock ?? 0) <= 0)
+const isLowStock = computed(() => !isOutOfStock.value && Number(props.product.stock ?? 0) <= LOW_STOCK_THRESHOLD)
 
 function handleAddToCart() {
   cartStore.addItem({
@@ -121,7 +125,7 @@ function handleAddToCart() {
 
         <button
           v-if="storeSettings?.cartEnabled !== false"
-          :disabled="product.stock === 0"
+          :disabled="isOutOfStock || !product.isActive"
           class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-700 hover:bg-brand-600 hover:text-white shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Add to Cart"
           @click.prevent="handleAddToCart"
@@ -135,7 +139,23 @@ function handleAddToCart() {
         v-if="product.stock > 0 && viewMode !== 'list'"
         class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
-        <span class="px-2.5 py-1 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-bold rounded-full shadow-sm">In Stock</span>
+        <span
+          v-if="isLowStock"
+          class="px-2.5 py-1 bg-amber-50/95 backdrop-blur text-amber-800 text-[10px] font-bold rounded-full shadow-sm ring-1 ring-amber-200"
+        >Low Stock</span>
+        <span
+          v-else
+          class="px-2.5 py-1 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-bold rounded-full shadow-sm"
+        >In Stock</span>
+      </div>
+
+      <div
+        v-if="isOutOfStock && viewMode !== 'list'"
+        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      >
+        <span class="px-2.5 py-1 bg-red-50/95 backdrop-blur text-red-800 text-[10px] font-bold rounded-full shadow-sm ring-1 ring-red-200">
+          Out of Stock
+        </span>
       </div>
     </div>
 

@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer'
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
+import type { AxiosInstance } from 'axios'
 import type { ShipmentProvider, ShipmentStatus } from '@prisma/client'
 import type {
     CreateShipmentInput,

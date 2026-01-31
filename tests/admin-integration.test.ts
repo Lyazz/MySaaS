@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { setup, fetch } from '@nuxt/test-utils'
+import request from 'supertest'
 import prisma from '../backend/src/lib/prisma'
-import jwt from 'jsonwebtoken'
+import app from '../backend/src/app'
+import { signAccessToken } from '../backend/src/lib/jwt'
 
-describe('Express Admin API', async () => {
-    await setup({ setupTimeout: 300_000 })
+describe('Express Admin API', () => {
 
     // Setup test data
     const slug = `admin-test-${Date.now()}`
@@ -17,17 +17,14 @@ describe('Express Admin API', async () => {
     let secondCategoryId: string
 
     it('registers a tenant successfully', async () => {
-        const res = await fetch('/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: 'Admin Test Tenant',
-                slug,
-                email,
-                password: 'password123'
-            })
+        const res = await request(app).post('/api/register').send({
+            name: 'Admin Test Tenant',
+            slug,
+            email,
+            password: 'password123'
         })
-        const body = await res.json()
+
+        const body = res.body
         expect(res.status).toBe(200)
         expect(body.success).toBe(true)
 
@@ -37,33 +34,24 @@ describe('Express Admin API', async () => {
         expect(user).toBeTruthy()
         userId = user!.id
 
-        // Generate valid JWT using matching secret
-        const secret = process.env.JWT_SECRET!
-        token = jwt.sign(
-            { userId: user!.id, email: user!.email, role: user!.role, tenantId: user!.tenantId },
-            secret,
-            { expiresIn: '1h' }
-        )
+        token = signAccessToken({ userId })
     })
 
     it('Create Product (Admin)', async () => {
         const images = ['http://example.com/a.jpg']
-        const res = await fetch('/api/admin/products', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Forwarded-Host': `${slug}.localhost:3000`, // Simulate tenant domain
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
+        const res = await request(app)
+            .post('/api/admin/products')
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
                 title: 'Test Product',
                 slug: 'test-product',
                 price: 100,
                 stock: 10,
                 images
             })
-        })
-        const body = await res.json()
+
+        const body = res.body
         if (res.status !== 200) console.log('Create Product Failed:', res.status, body)
         expect(res.status).toBe(200)
         expect(body.title).toBe('Test Product')
@@ -73,20 +61,17 @@ describe('Express Admin API', async () => {
 
     it('Create Category with image (Admin)', async () => {
         const imageUrl = 'http://example.com/category-a.png'
-        const res = await fetch('/api/admin/categories', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
+        const res = await request(app)
+            .post('/api/admin/categories')
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
                 title: 'Phones',
                 slug: 'phones',
                 imageUrl
             })
-        })
-        const body = await res.json()
+
+        const body = res.body
         expect(res.status).toBe(200)
         expect(body.imageUrl).toBe(imageUrl)
         categoryId = body.id
@@ -94,42 +79,34 @@ describe('Express Admin API', async () => {
 
     it('Update Category image (Admin)', async () => {
         const newImage = 'http://example.com/category-b.png'
-        const res = await fetch(`/api/admin/categories/${categoryId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
+        const res = await request(app)
+            .put(`/api/admin/categories/${categoryId}`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
                 title: 'Phones',
                 slug: 'phones',
                 imageUrl: newImage
             })
-        })
-        const body = await res.json()
+
+        const body = res.body
         expect(res.status).toBe(200)
         expect(body.imageUrl).toBe(newImage)
 
-        const listRes = await fetch('/api/categories', {
-            headers: {
-                'X-Forwarded-Host': `${slug}.localhost:3000`
-            }
-        })
-        const listBody = await listRes.json()
+        const listRes = await request(app).get('/api/categories').set('X-Forwarded-Host', `${slug}.localhost:3000`)
+        const listBody = listRes.body
         expect(listRes.status).toBe(200)
         const found = listBody.find((c: any) => c.slug === 'phones')
         expect(found.imageUrl).toBe(newImage)
     })
 
     it('Get Category by id (Admin)', async () => {
-        const res = await fetch(`/api/admin/categories/${categoryId}`, {
-            headers: {
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        const body = await res.json()
+        const res = await request(app)
+            .get(`/api/admin/categories/${categoryId}`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+
+        const body = res.body
         expect(res.status).toBe(200)
         expect(body.id).toBe(categoryId)
         expect(body.slug).toBe('phones')
@@ -137,30 +114,26 @@ describe('Express Admin API', async () => {
 
     it('List Categories sorted by title (Admin)', async () => {
         // Create another category to test sorting
-        const createRes = await fetch('/api/admin/categories', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
+        const createRes = await request(app)
+            .post('/api/admin/categories')
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
                 title: 'Accessories',
                 slug: 'accessories',
                 imageUrl: 'http://example.com/accessories.png'
             })
-        })
-        const createBody = await createRes.json()
+
+        const createBody = createRes.body
         expect(createRes.status).toBe(200)
         secondCategoryId = createBody.id
 
-        const listRes = await fetch('/api/admin/categories?sortBy=title&sortOrder=asc', {
-            headers: {
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        const listBody = await listRes.json()
+        const listRes = await request(app)
+            .get('/api/admin/categories?sortBy=title&sortOrder=asc')
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+
+        const listBody = listRes.body
         expect(listRes.status).toBe(200)
         expect(Array.isArray(listBody)).toBe(true)
         expect(listBody[0].title).toBe('Accessories')
@@ -169,45 +142,40 @@ describe('Express Admin API', async () => {
     it('Update Product Images (Admin)', async () => {
         const images = ['http://example.com/b.jpg', 'http://example.com/c.jpg']
 
-        const updateRes = await fetch(`/api/admin/products/${productId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
+        const updateRes = await request(app)
+            .put(`/api/admin/products/${productId}`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
                 title: 'Test Product',
                 slug: 'test-product',
                 price: 100,
                 stock: 10,
                 images
             })
-        })
-        const updateBody = await updateRes.json()
+
+        const updateBody = updateRes.body
         if (updateRes.status !== 200) console.log('Update Product Failed:', updateRes.status, updateBody)
         expect(updateRes.status).toBe(200)
         expect(updateBody.images).toEqual(images)
 
-        const getRes = await fetch(`/api/admin/products/${productId}`, {
-            headers: {
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        const getBody = await getRes.json()
+        const getRes = await request(app)
+            .get(`/api/admin/products/${productId}`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+
+        const getBody = getRes.body
         expect(getRes.status).toBe(200)
         expect(getBody.images).toEqual(images)
     })
 
     it('List Products (Admin)', async () => {
-        const res = await fetch('/api/admin/products', {
-            headers: {
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        const body = await res.json()
+        const res = await request(app)
+            .get('/api/admin/products')
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+
+        const body = res.body
         expect(res.status).toBe(200)
         expect(Array.isArray(body)).toBe(true)
         expect(body.length).toBeGreaterThan(0)
@@ -216,42 +184,34 @@ describe('Express Admin API', async () => {
 
     it('Create Options and Generate Variants (Admin)', async () => {
         // 1. Create Option
-        const optRes = await fetch(`/api/admin/products/${productId}/options`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
+        const optRes = await request(app)
+            .post(`/api/admin/products/${productId}/options`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
                 name: 'Size',
                 displayType: 'dropdown',
                 values: [{ label: 'Small' }, { label: 'Medium' }]
             })
-        })
         expect(optRes.status).toBe(200)
 
         // 2. Generate Variants
-        const genRes = await fetch(`/api/admin/products/${productId}/variants/generate`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        const genBody = await genRes.json()
+        const genRes = await request(app)
+            .post(`/api/admin/products/${productId}/variants/generate`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+
+        const genBody = genRes.body
         expect(genRes.status).toBe(200)
         expect(genBody.length).toBe(2)
 
         // 3. Verify Variants created via Get Product
-        const productRes = await fetch(`/api/admin/products/${productId}`, {
-            headers: {
-                'X-Forwarded-Host': `${slug}.localhost:3000`,
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        const productBody = await productRes.json()
+        const productRes = await request(app)
+            .get(`/api/admin/products/${productId}`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+
+        const productBody = productRes.body
         expect(productBody.variants.length).toBe(2)
         expect(productBody.options.length).toBe(1)
         expect(productBody.options[0].name).toBe('Size')
@@ -260,10 +220,17 @@ describe('Express Admin API', async () => {
     // Cleanup
     it('cleanups', async () => {
         // Delete tenant-owned data first (FKs do not cascade on Tenant delete)
-        await prisma.productVariant.deleteMany({ where: { productId } })
-        await prisma.product.deleteMany({ where: { id: productId } })
-        await prisma.category.deleteMany({ where: { tenantId } })
-        await prisma.user.deleteMany({ where: { email } })
-        await prisma.tenant.delete({ where: { slug } })
+        if (tenantId) {
+            await prisma.orderItem.deleteMany({ where: { tenantId } })
+            await prisma.order.deleteMany({ where: { tenantId } })
+            await prisma.productVariant.deleteMany({ where: { tenantId } })
+            await prisma.productOptionValue.deleteMany({ where: { tenantId } })
+            await prisma.productOption.deleteMany({ where: { tenantId } })
+            await prisma.productImage.deleteMany({ where: { tenantId } })
+            await prisma.product.deleteMany({ where: { tenantId } })
+            await prisma.category.deleteMany({ where: { tenantId } })
+            await prisma.user.deleteMany({ where: { tenantId } })
+            await prisma.tenant.delete({ where: { id: tenantId } })
+        }
     })
 })

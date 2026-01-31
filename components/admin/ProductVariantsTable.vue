@@ -29,7 +29,31 @@
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Stock
+              Track
+            </th>
+            <th
+              scope="col"
+              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+            >
+              On-hand
+            </th>
+            <th
+              scope="col"
+              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+            >
+              Reserved
+            </th>
+            <th
+              scope="col"
+              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+            >
+              Safety
+            </th>
+            <th
+              scope="col"
+              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+            >
+              Available
             </th>
             <th
               scope="col"
@@ -70,23 +94,53 @@
                 v-model.number="variant.price" 
                 type="number"
                 class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
-                @change="updateVariant(variant)"
+                @change="updateVariantInfo(variant)"
               >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <input 
-                v-model.number="variant.stock" 
-                type="number"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
-                @change="updateVariant(variant)"
+              <input
+                v-model="variant.trackInventory"
+                type="checkbox"
+                class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                :disabled="savingInventoryIds.has(variant.id)"
+                @change="updateVariantInventory(variant, { trackInventory: Boolean(variant.trackInventory) })"
               >
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+              <input
+                v-model.number="variant.stock"
+                type="number"
+                min="0"
+                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
+                :disabled="savingInventoryIds.has(variant.id)"
+                @change="updateVariantInventory(variant, { stock: Number(variant.stock) })"
+              >
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
+              {{ Number(variant.reserved || 0) }}
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+              <input
+                v-model.number="variant.safetyStock"
+                type="number"
+                min="0"
+                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
+                :disabled="savingInventoryIds.has(variant.id)"
+                @change="updateVariantInventory(variant, { safetyStock: Number(variant.safetyStock) })"
+              >
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
+              <span v-if="variant.trackInventory !== false">
+                {{ getAvailable(variant) }}
+              </span>
+              <span v-else class="text-gray-400">∞</span>
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
               <input 
                 v-model="variant.sku" 
                 type="text"
                 class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
-                @change="updateVariant(variant)"
+                @change="updateVariantInfo(variant)"
               >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -94,7 +148,7 @@
                 v-model="variant.isActive" 
                 type="checkbox"
                 class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" 
-                @change="updateVariant(variant)"
+                @change="updateVariantInfo(variant)"
               >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -107,11 +161,108 @@
               </button>
             </td>
             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-              <!-- Placeholder for future row actions -->
+              <button
+                type="button"
+                class="text-gray-600 hover:text-gray-900"
+                @click="openMovements(variant)"
+              >
+                Movements
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Movements modal -->
+    <div
+      v-if="movementsVariant"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+    >
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 space-y-4">
+        <div class="flex items-start justify-between">
+          <div class="min-w-0">
+            <h4 class="text-lg font-semibold text-gray-900 truncate">
+              Inventory movements — {{ getVariantTitle(movementsVariant) }}
+            </h4>
+            <p class="text-sm text-gray-500">
+              Latest 50 movements for this variant.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="text-gray-400 hover:text-gray-600"
+            @click="closeMovements"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div
+          v-if="movementsLoading"
+          class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
+        >
+          Loading movements…
+        </div>
+
+        <div
+          v-else-if="movements.length === 0"
+          class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
+        >
+          No movements recorded yet.
+        </div>
+
+        <div
+          v-else
+          class="overflow-x-auto"
+        >
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Δ stock</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Δ reserved</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Δ safety</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">After</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">By</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <tr v-for="m in movements" :key="m.id">
+                <td class="px-3 py-2 text-sm text-gray-700">{{ formatDate(m.createdAt) }}</td>
+                <td class="px-3 py-2 text-sm text-gray-700">
+                  <div class="min-w-0">
+                    <p class="truncate font-medium">{{ m.type }}</p>
+                    <p v-if="m.orderId" class="truncate text-xs text-gray-500">Order: {{ m.orderId }}</p>
+                  </div>
+                </td>
+                <td class="px-3 py-2 text-sm text-gray-700">{{ m.delta }}</td>
+                <td class="px-3 py-2 text-sm text-gray-700">{{ m.reservedDelta }}</td>
+                <td class="px-3 py-2 text-sm text-gray-700">{{ m.safetyStockDelta }}</td>
+                <td class="px-3 py-2 text-sm text-gray-700">
+                  <span v-if="m.stockAfter !== null">S={{ m.stockAfter }}</span><span v-else>—</span>
+                  <span class="text-gray-400"> · </span>
+                  <span v-if="m.reservedAfter !== null">R={{ m.reservedAfter }}</span><span v-else>—</span>
+                  <span class="text-gray-400"> · </span>
+                  <span v-if="m.safetyStockAfter !== null">SS={{ m.safetyStockAfter }}</span><span v-else>—</span>
+                </td>
+                <td class="px-3 py-2 text-sm text-gray-700">{{ m.createdBy?.email || 'system' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-md border text-sm"
+            @click="closeMovements"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Image picker modal -->
@@ -228,22 +379,103 @@ function getVariantTitle(variant: any) {
     return values.map((ov: any) => ov.optionValue?.label || '?').join(' / ')
 }
 
-async function updateVariant(variant: any) {
+function getAvailable(variant: any) {
+    const stock = Number(variant.stock || 0)
+    const reserved = Number(variant.reserved || 0)
+    const safetyStock = Number(variant.safetyStock || 0)
+    return Math.max(stock - reserved - safetyStock, 0)
+}
+
+async function updateVariantInfo(variant: any) {
     try {
         await $fetch(`/api/admin/variants/${variant.id}`, {
             method: 'PUT',
             headers: { Authorization: `Bearer ${authStore.token}` },
             body: {
                 price: variant.price,
-                stock: variant.stock,
                 sku: variant.sku,
-                isActive: variant.isActive
+                isActive: variant.isActive,
+                compareAtPrice: variant.compareAtPrice
             }
         })
     } catch (e) {
         console.error(e)
         alert('Failed to update variant')
     }
+}
+
+const savingInventoryIds = ref<Set<string>>(new Set())
+
+async function updateVariantInventory(variant: any, patch: any) {
+    savingInventoryIds.value.add(variant.id)
+    try {
+        const updated = await $fetch(`/api/admin/inventory/variants/${variant.id}`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${authStore.token}` },
+            body: {
+                ...patch,
+                reason: 'admin_product_variants'
+            }
+        })
+
+        if (updated && typeof updated === 'object') {
+            if (typeof (updated as any).stock === 'number') variant.stock = (updated as any).stock
+            if (typeof (updated as any).reserved === 'number') variant.reserved = (updated as any).reserved
+            if (typeof (updated as any).safetyStock === 'number') variant.safetyStock = (updated as any).safetyStock
+            if (typeof (updated as any).trackInventory === 'boolean') variant.trackInventory = (updated as any).trackInventory
+        }
+    } catch (e) {
+        console.error(e)
+        alert('Failed to update inventory')
+        emit('refresh')
+    } finally {
+        savingInventoryIds.value.delete(variant.id)
+    }
+}
+
+type Movement = {
+    id: string
+    type: string
+    delta: number
+    reservedDelta: number
+    safetyStockDelta: number
+    orderId: string | null
+    stockAfter: number | null
+    reservedAfter: number | null
+    safetyStockAfter: number | null
+    createdAt: string
+    createdBy: { id: string; email: string } | null
+}
+
+const movementsVariant = ref<any | null>(null)
+const movements = ref<Movement[]>([])
+const movementsLoading = ref(false)
+
+async function openMovements(variant: any) {
+    movementsVariant.value = variant
+    movements.value = []
+    movementsLoading.value = true
+    try {
+        const data = await $fetch<Movement[]>(`/api/admin/inventory/variants/${variant.id}/movements`, {
+            headers: { Authorization: `Bearer ${authStore.token}` }
+        })
+        movements.value = data
+    } catch (e) {
+        console.error(e)
+        movements.value = []
+    } finally {
+        movementsLoading.value = false
+    }
+}
+
+function closeMovements() {
+    movementsVariant.value = null
+    movements.value = []
+}
+
+function formatDate(iso: string) {
+    const d = new Date(iso)
+    return d.toLocaleString()
 }
 
 const editingVariantId = ref<string | null>(null)

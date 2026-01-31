@@ -88,7 +88,12 @@ export class OrdersController {
                 deliveryMode: req.body?.deliveryMode,
                 shippingProvider: req.body?.shippingProvider,
                 items: req.body?.items ?? []
-            })
+            }, req.subscription ? {
+                planCode: req.subscription.planCode,
+                interval: req.subscription.interval,
+                currentPeriodStart: req.subscription.currentPeriodStart,
+                currentPeriodEnd: req.subscription.currentPeriodEnd
+            } : null)
 
             res.status(201).json({ success: true, orderId: order?.id, order })
         } catch (error: any) {

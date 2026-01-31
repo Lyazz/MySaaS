@@ -1,4 +1,30 @@
-import { PrismaClient } from '@prisma/client'
+import fs from 'node:fs'
+import path from 'node:path'
+import { createRequire } from 'node:module'
+
+const findProjectRoot = () => {
+    let current = process.cwd()
+
+    for (;;) {
+        const hasSchema = fs.existsSync(path.join(current, 'prisma', 'schema.prisma'))
+        const hasPackageJson = fs.existsSync(path.join(current, 'package.json'))
+        const hasBackendSources = fs.existsSync(path.join(current, 'backend', 'src', 'app.ts'))
+
+        if (hasSchema && hasPackageJson && hasBackendSources) return current
+        const parent = path.dirname(current)
+        if (parent === current) return process.cwd()
+        current = parent
+    }
+}
+
+// Nuxt test builds run the Express app inside a Nitro output directory.
+// Ensure Prisma loads from the real project root where `prisma generate` was run.
+const projectRoot = findProjectRoot()
+const requireFromRoot = createRequire(path.join(projectRoot, 'package.json'))
+const prismaPkg = requireFromRoot(
+    path.join(projectRoot, 'node_modules', '.prisma', 'client', 'default.js')
+) as typeof import('@prisma/client')
+const { PrismaClient } = prismaPkg
 
 const prisma = new PrismaClient()
 
@@ -15,15 +41,29 @@ export const getTenantPrisma = (tenant: { id: string }) => {
                 async $allOperations({ model, operation, args, query }) {
                     // Models that require tenant isolation
                     const tenantModels = [
-                        'Product',
+                        'AuditLog',
+                        'BillingPayment',
                         'Category',
-                        'Variant',
-                        'User',
+                        'DeliveryRate',
+                        'InventoryMovement',
                         'Order',
                         'OrderItem',
+                        'Product',
+                        'ProductImage',
+                        'ProductOption',
+                        'ProductOptionValue',
+                        'ProductVariant',
+                        'ProductVariantImage',
+                        'ProductVariantOptionValue',
+                        'PurchaseOrder',
+                        'PurchaseOrderItem',
+                        'Supplier',
                         'Shipment',
                         'ShipmentEvent',
-                        'DeliveryRate'
+                        'StoreSettings',
+                        'TenantDomain',
+                        'TenantSubscription',
+                        'User'
                     ]
 
                     if (tenantModels.includes(model)) {
@@ -84,4 +124,3 @@ export const getTenantPrisma = (tenant: { id: string }) => {
         }
     })
 }
-

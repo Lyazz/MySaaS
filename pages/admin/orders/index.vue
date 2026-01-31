@@ -45,6 +45,9 @@
             <option value="CANCELLED">
               Cancelled
             </option>
+            <option value="RETURNED">
+              Returned
+            </option>
           </BaseSelect>
         </div>
       </div>
@@ -130,7 +133,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">
-                  {{ Number(order.totalAmount).toFixed(2) }} {{ currencyCode }}
+                  {{ formatCurrency(order.totalAmount) }}
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -170,8 +173,9 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const route = useRoute()
 const storeSettings = useState<any>('storeSettings')
-const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
+const { format: formatCurrency } = useCurrency()
 
 interface Order {
   id: string
@@ -186,8 +190,8 @@ interface Order {
 
 const loading = ref(true)
 const orders = ref<Order[]>([])
-const searchQuery = ref('')
-const selectedStatus = ref('')
+const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
 
 async function fetchOrders() {
   loading.value = true

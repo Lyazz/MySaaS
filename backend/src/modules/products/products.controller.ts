@@ -77,13 +77,14 @@ export class ProductsController {
     async updateProduct(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
+            const user = req.user
             const id = req.params.id as string
             const body = req.body
 
             if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
 
             try {
-                const product = await productsService.updateProduct(tenant.id, id, body)
+                const product = await productsService.updateProduct(tenant.id, id, body, { userId: user?.id ?? null })
                 res.json(product)
             } catch (e: any) {
                 if (e.message === 'Product not found') {

@@ -14,7 +14,7 @@ export class ProductImagesService {
         // If this is marked as main, unset any existing main images
         if (data.isMain) {
             await prisma.productImage.updateMany({
-                where: { productId, isMain: true },
+                where: { tenantId, productId, isMain: true },
                 data: { isMain: false }
             })
         }
@@ -23,7 +23,7 @@ export class ProductImagesService {
         let position = data.position ?? 0
         if (data.position === undefined) {
             const maxPosition = await prisma.productImage.findFirst({
-                where: { productId },
+                where: { tenantId, productId },
                 orderBy: { position: 'desc' },
                 select: { position: true }
             })
@@ -32,6 +32,7 @@ export class ProductImagesService {
 
         return await prisma.productImage.create({
             data: {
+                tenantId,
                 productId,
                 url: data.url,
                 alt: data.alt || null,
@@ -52,14 +53,14 @@ export class ProductImagesService {
     ) {
         // Verify ownership
         const image = await prisma.productImage.findFirst({
-            where: { id: imageId, productId, product: { tenantId } }
+            where: { id: imageId, tenantId, productId }
         })
         if (!image) throw new Error('Image not found')
 
         // If setting as main, unset other main images
         if (data.isMain === true) {
             await prisma.productImage.updateMany({
-                where: { productId, isMain: true, id: { not: imageId } },
+                where: { tenantId, productId, isMain: true, id: { not: imageId } },
                 data: { isMain: false }
             })
         }
@@ -81,7 +82,7 @@ export class ProductImagesService {
     async deleteImage(tenantId: string, productId: string, imageId: string) {
         // Verify ownership
         const image = await prisma.productImage.findFirst({
-            where: { id: imageId, productId, product: { tenantId } }
+            where: { id: imageId, tenantId, productId }
         })
         if (!image) throw new Error('Image not found')
 
@@ -106,7 +107,7 @@ export class ProductImagesService {
         await prisma.$transaction(
             imageOrders.map((order) =>
                 prisma.productImage.updateMany({
-                    where: { id: order.id, productId },
+                    where: { id: order.id, tenantId, productId },
                     data: { position: order.position }
                 })
             )
@@ -121,14 +122,14 @@ export class ProductImagesService {
     async setMainImage(tenantId: string, productId: string, imageId: string) {
         // Verify image ownership
         const image = await prisma.productImage.findFirst({
-            where: { id: imageId, productId, product: { tenantId } }
+            where: { id: imageId, tenantId, productId }
         })
         if (!image) throw new Error('Image not found')
 
         // Unset all main images for this product, then set the specified one
         await prisma.$transaction([
             prisma.productImage.updateMany({
-                where: { productId, isMain: true },
+                where: { tenantId, productId, isMain: true },
                 data: { isMain: false }
             }),
             prisma.productImage.update({
@@ -151,7 +152,7 @@ export class ProductImagesService {
         if (!product) throw new Error('Product not found')
 
         return await prisma.productImage.findMany({
-            where: { productId },
+            where: { tenantId, productId },
             orderBy: [{ isMain: 'desc' }, { position: 'asc' }]
         })
     }
@@ -175,7 +176,7 @@ export class ProductImagesService {
 
         // Get existing images
         const existingImages = await prisma.productImage.findMany({
-            where: { productId }
+            where: { tenantId, productId }
         })
 
         const existingIds = new Set(existingImages.map(img => img.id))
@@ -192,8 +193,8 @@ export class ProductImagesService {
             if (img.id && existingIds.has(img.id)) {
                 // Update existing
                 updates.push(
-                    prisma.productImage.update({
-                        where: { id: img.id },
+                    prisma.productImage.updateMany({
+                        where: { id: img.id, tenantId },
                         data: {
                             url: img.url,
                             alt: img.alt,
@@ -207,6 +208,7 @@ export class ProductImagesService {
                 creates.push(
                     prisma.productImage.create({
                         data: {
+                            tenantId,
                             productId,
                             url: img.url,
                             alt: img.alt || null,
@@ -222,7 +224,7 @@ export class ProductImagesService {
         await prisma.$transaction([
             // Delete
             ...toDelete.map(img =>
-                prisma.productImage.delete({ where: { id: img.id } })
+                prisma.productImage.deleteMany({ where: { id: img.id, tenantId } })
             ),
             // Update
             ...updates,

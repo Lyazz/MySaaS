@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { Vue3Marquee } from 'vue3-marquee'
+import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
 
 useSeoMeta({
   title: 'Swekly - The Future of Commerce',
@@ -83,46 +84,29 @@ const features = [
   }
 ]
 
-// --- Pricing (Preserved but styled) ---
-const pricingPlans = [
-  {
-    name: 'Starter',
-    price: 'Free',
-    currency: '',
-    period: 'forever',
-    description: 'Perfect for testing the waters.',
-    features: ['10 Orders/mo', 'Basic Analytics', 'Community Support'],
-    cta: 'Start Free',
-    popular: false
-  },
-  {
-    name: 'Merchant',
-    price: '2,990',
-    currency: 'DA',
-    period: '/mo',
-    description: 'Everything you need to grow.',
-    features: ['Unlimited Orders', 'Priority Support', 'Custom Domain', 'Delivery Integrations'],
-    cta: 'Get Started',
-    popular: true
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    currency: '',
-    period: '',
-    description: 'For large volume sellers.',
-    features: ['Dedicated Account Manager', 'Custom API Access', 'SSO & Advanced Security'],
-    cta: 'Contact Sales',
-    popular: false
-  }
-]
+// --- Pricing ---
+const pricingPlans = computed(() => {
+  return PRICING_PLANS.map((plan) => {
+    const card = pricingPlanCardForUi(plan, 'month')
+    return {
+      name: card.name,
+      price: card.priceText,
+      currency: card.currency,
+      period: card.periodText,
+      description: card.description,
+      features: card.features.map((f) => f.text),
+      cta: card.cta,
+      popular: card.popular
+    }
+  })
+})
 
 // --- FAQ ---
 const activeFaq = ref<number | null>(null)
 const faqs = [
-  { question: 'Do I need a credit card to start?', answer: 'No, our Starter plan is completely free and requires no payment information.' },
-  { question: 'Can I use my own domain?', answer: 'Yes, both Merchant and Enterprise plans allow full custom domain mapping.' },
-  { question: 'Is my data secure?', answer: 'We use enterprise-grade encryption and daily backups to ensure your business data is safe.' }
+  { question: 'Do I need a credit card to start?', answer: 'No. You can start right away and upgrade/downgrade later.' },
+  { question: 'Can I change my plan later?', answer: 'Yes. You can change your plan anytime from the admin Billing page.' },
+  { question: 'What changes between plans right now?', answer: 'For now (testing), plans only differ by the number of orders allowed per month.' }
 ]
 
 
@@ -305,7 +289,7 @@ onMounted(() => {
             <p class="text-slate-500">No hidden fees. Scale as you grow.</p>
          </div>
 
-         <div class="grid md:grid-cols-3 gap-8">
+         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
            <div 
              v-for="(plan, idx) in pricingPlans" 
              :key="idx" 

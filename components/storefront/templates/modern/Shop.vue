@@ -12,8 +12,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true // Non-blocking
 })
 
-const storeSettings = useState<any>('storeSettings')
-const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
+const { currencyCode, format: formatCurrency } = useCurrency()
 
 // Dynamic Filters
 const filters = computed(() => ({
@@ -329,7 +328,7 @@ const closeQuickView = () => {
                      </div>
                       <div>
                           <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">Premium Headphones</h5>
-                          <span class="text-xs font-semibold text-slate-500">299.00 {{ currencyCode }}</span>
+                          <span class="text-xs font-semibold text-slate-500">{{ formatCurrency(299) }}</span>
                       </div>
                  </div>
                  <div class="flex gap-3 group cursor-pointer">
@@ -338,7 +337,7 @@ const closeQuickView = () => {
                      </div>
                       <div>
                           <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">Ergonomic Chair</h5>
-                          <span class="text-xs font-semibold text-slate-500">549.00 {{ currencyCode }}</span>
+                          <span class="text-xs font-semibold text-slate-500">{{ formatCurrency(549) }}</span>
                       </div>
                  </div>
                  <div class="flex gap-3 group cursor-pointer">
@@ -347,7 +346,7 @@ const closeQuickView = () => {
                      </div>
                       <div>
                           <h5 class="text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-brand-600 transition-colors">4K Monitor</h5>
-                          <span class="text-xs font-semibold text-slate-500">399.00 {{ currencyCode }}</span>
+                          <span class="text-xs font-semibold text-slate-500">{{ formatCurrency(399) }}</span>
                       </div>
                  </div>
              </div>
@@ -539,7 +538,7 @@ const closeQuickView = () => {
                     <span class="inline-block px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-xs font-bold uppercase tracking-widest mb-4">In Stock</span>
                     <h2 class="text-3xl font-bold text-slate-900 mb-2">{{ quickViewProduct.title }}</h2>
                     <div class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                        {{ Number(quickViewProduct.price).toLocaleString() }} <span class="text-sm font-medium text-slate-500">{{ currencyCode }}</span>
+                        {{ formatCurrency(quickViewProduct.price) }}
                     </div>
                     <p class="text-slate-600 leading-relaxed mb-8">
                         {{ quickViewProduct.description || 'Experience the perfect blend of style and functionality. Crafted with premium materials for lasting durability.' }}

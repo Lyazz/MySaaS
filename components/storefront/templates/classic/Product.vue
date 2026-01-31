@@ -1,84 +1,157 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
+import ProductGallery from './partials/ProductGallery.vue'
+import ProductDetails from './partials/ProductDetails.vue'
+import ProductOrderForm from './partials/ProductOrderForm.vue'
+import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
 
 const props = defineProps<{
     product: any
 }>()
 
 const cartStore = useCartStore()
-const storeSettings = useState<any>('storeSettings')
-const mainImage = computed(() => props.product?.images?.[0] || 'https://placehold.co/600x400')
 
-const handleAddToCart = () => {
-  if (!props.product) return
-  cartStore.addItem({
-    productId: props.product.id,
-    title: props.product.title,
-    slug: props.product.slug,
-    price: Number(props.product.price),
-    stock: props.product.stock,
-    image: mainImage.value
-  })
-}
+// Option Selection Logic
+const selectedOptions = ref<SelectedOptions>({})
+
+// Initialize options
+watch(() => props.product, (newProduct) => {
+    if (!newProduct?.options || newProduct.options.length === 0) {
+        selectedOptions.value = {}
+        return
+    }
+
+    selectedOptions.value = getPreferredInitialSelection(newProduct)
+}, { immediate: true })
+
+const currentVariant = computed(() => {
+    if (!props.product?.variants || props.product.variants.length === 0) return null
+    if (!props.product?.options || props.product.options.length === 0) return props.product.variants[0] ?? null
+    if (Object.keys(selectedOptions.value).length === 0) return null
+
+    return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
+})
+
+const currentPrice = computed(() => {
+    return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
+})
+
+const currentStock = computed(() => {
+    if (!currentVariant.value) return props.product?.stock
+    if (currentVariant.value.trackInventory === false) return Number.POSITIVE_INFINITY
+    const stock = Number(currentVariant.value.stock ?? 0)
+    const reserved = Number(currentVariant.value.reserved ?? 0)
+    const safety = Number(currentVariant.value.safetyStock ?? 0)
+    return Math.max(stock - reserved - safety, 0)
+})
+
+// Image Gallery Logic (Updated for Variants)
+const images = computed(() => {
+    // 1. Try variant images
+    if (currentVariant.value && currentVariant.value.images && currentVariant.value.images.length > 0) {
+        return currentVariant.value.images.map((vi: any) => vi.image.url)
+    }
+    // 2. Fallback to product images
+    if (props.product?.productImages && props.product.productImages.length > 0) {
+        return props.product.productImages.map((pi: any) => pi.url)
+    }
+    if (props.product?.images && props.product.images.length > 0) {
+        return props.product.images
+    }
+    return ['https://placehold.co/600x400', 'https://placehold.co/600x400?text=View+2']
+})
+
+// Main image for cart (first image)
+const cartImage = computed(() => images.value[0])
+
+// If selection becomes invalid (e.g. options changed), recover to a valid one.
+watch([() => props.product, selectedOptions], ([product]) => {
+    if (!product?.variants || product.variants.length === 0) return
+    const best = findBestVariantForSelection({ product, selectedOptions: selectedOptions.value })
+    if (!best) {
+        selectedOptions.value = getPreferredInitialSelection(product)
+    }
+})
+
 </script>
 
 <template>
-  <div class="py-10">
-    <div class="max-w-5xl mx-auto px-4">
-      <NuxtLink
-        to="/products"
-        class="text-brand-600 hover:underline mb-6 inline-flex items-center gap-2"
-      >
-        <span aria-hidden="true">&larr;</span> Back to Products
-      </NuxtLink>
+  <div class="bg-white min-h-screen py-8 lg:py-12 font-sans">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Minimal Breadcrumb -->
+      <nav class="flex items-center justify-center text-xs uppercase tracking-widest text-slate-500 mb-12 animate-fade-in-up">
+        <NuxtLink
+          to="/"
+          class="hover:text-slate-900 transition-colors"
+        >
+          Home
+        </NuxtLink>
+        <span class="mx-3 text-slate-300">/</span>
+        <NuxtLink
+          to="/products"
+          class="hover:text-slate-900 transition-colors"
+        >
+          Shop
+        </NuxtLink>
+        <span class="mx-3 text-slate-300">/</span>
+        <span class="text-slate-900 font-bold border-b border-slate-900 truncate max-w-xs">{{ product?.title }}</span>
+      </nav>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <img
-            :src="mainImage"
-            :alt="product?.title"
-            class="w-full h-80 object-cover bg-slate-100"
-          >
+      <div class="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-20 items-start">
+        <!-- Gallery Section (Left - 7 cols) -->
+        <div class="lg:col-span-7 mb-12 lg:mb-0">
+             <ProductGallery :images="images" :title="product?.title" />
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <h1 class="text-3xl font-bold text-slate-900">
-            {{ product?.title }}
-          </h1>
-          <div 
-            v-if="product?.description" 
-            class="mt-3 prose prose-slate text-slate-600 leading-relaxed"
-            v-html="product.description"
-          />
+        <!-- Product Info Section (Right - 5 cols) -->
+        <div class="lg:col-span-5 flex flex-col gap-10 sticky top-24">
+            <ProductDetails 
+                :product="product" 
+                :current-price="currentPrice" 
+                v-model:selected-options="selectedOptions" 
+            />
 
-          <div class="mt-6 flex items-center justify-between">
-            <div class="text-3xl font-bold text-brand-600">
-              {{ Number(product?.price ?? 0).toFixed(2) }} DA
-            </div>
+            <ProductOrderForm 
+                :product="product"
+                :current-variant="currentVariant"
+                :current-price="currentPrice"
+                :current-stock="currentStock"
+                :active-image="cartImage"
+            />
+            
+            <!-- Full Description (Rich Text) -->
             <div
-              v-if="(product?.stock ?? 0) > 0"
-              class="text-sm text-green-700 bg-green-50 px-3 py-1 rounded-full"
+                class="pt-8 border-t border-slate-100 animate-fade-in-up"
+                style="animation-delay: 0.2s"
             >
-              In stock: {{ product?.stock }}
+                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-900 mb-6">
+                Details
+                </h2>
+                <div 
+                v-if="product?.description" 
+                class="prose prose-slate prose-sm text-slate-600 max-w-none leading-relaxed font-light"
+                v-html="product.description"
+                />
+                <div
+                v-else
+                class="prose prose-slate prose-sm text-slate-600 max-w-none leading-relaxed font-light"
+                >
+                <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+                </div>
             </div>
-            <div
-              v-else
-              class="text-sm text-red-700 bg-red-50 px-3 py-1 rounded-full"
-            >
-              Out of stock
-            </div>
-          </div>
-
-          <button
-            v-if="storeSettings?.cartEnabled !== false"
-            class="mt-6 w-full px-5 py-3 rounded-xl bg-brand-600 text-white font-medium hover:opacity-90 disabled:bg-slate-300 disabled:cursor-not-allowed transition-opacity"
-            :disabled="(product?.stock ?? 0) === 0 || product?.isActive === false"
-            @click="handleAddToCart"
-          >
-            Add to cart
-          </button>
         </div>
-      </div>
+        </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>

@@ -13,6 +13,11 @@ export default {
             fontFamily: {
                 sans: ['Outfit', 'sans-serif'],
                 display: ['Outfit', 'sans-serif'],
+                serif: ['Playfair Display', 'serif'],
+                street: ['Anton', 'sans-serif'],
+                cozy: ['Nunito', 'sans-serif'],
+                cyber: ['Orbitron', 'sans-serif'],
+                mono: ['JetBrains Mono', 'monospace'],
             },
             colors: {
                 brand: {
