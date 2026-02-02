@@ -146,7 +146,7 @@ async function handleSubmit() {
           }))
         }
 
-        const response = await $fetch<{ orderId: string }>(url, {
+        const response = await $fetch(url, {
           method: 'POST',
           body: payload,
           headers: {
@@ -169,7 +169,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="bg-white min-h-screen py-12 font-sans text-slate-600">
+  <div class="bg-white min-h-screen py-12 font-serif text-slate-600">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-12 text-center">

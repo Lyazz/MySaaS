@@ -19,6 +19,17 @@ const mainImage = computed(() => {
 
 const isHovered = ref(false)
 
+const showSuccess = ref(false)
+const successTitle = ref('')
+const successMessage = ref('')
+
+const triggerSuccessToast = (title: string, message: string) => {
+    successTitle.value = title
+    successMessage.value = message
+    showSuccess.value = true
+    setTimeout(() => { showSuccess.value = false }, 3000)
+}
+
 function handleAddToCart() {
   cartStore.addItem({
     productId: props.product.id,
@@ -28,6 +39,7 @@ function handleAddToCart() {
     stock: props.product.stock,
     image: mainImage.value
   })
+  triggerSuccessToast('ADDED!', 'Item in your cart')
 }
 </script>
 
@@ -86,5 +98,28 @@ function handleAddToCart() {
                 </div>
             </div>
         </div>
+        
+        <!-- Success Toast -->
+        <Transition
+          enter-active-class="transform ease-out duration-200 transition"
+          enter-from-class="translate-y-4 opacity-0"
+          enter-to-class="translate-y-0 opacity-100"
+          leave-active-class="transition ease-in duration-100"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
+          <div
+            v-if="showSuccess"
+            class="fixed bottom-4 right-4 z-50 bg-black text-white px-6 py-4 border-2 border-brand shadow-[4px_4px_0px_0px_var(--brand)] flex items-center gap-4"
+          >
+            <div class="w-8 h-8 bg-brand flex items-center justify-center text-black shrink-0 border-2 border-black">
+              <Icon name="lucide:check" class="w-5 h-5" />
+            </div>
+            <div>
+              <div class="font-street text-xl uppercase">{{ successTitle }}</div>
+              <div class="text-xs text-gray-400 uppercase">{{ successMessage }}</div>
+            </div>
+          </div>
+        </Transition>
     </div>
 </template>

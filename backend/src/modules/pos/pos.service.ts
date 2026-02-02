@@ -1,0 +1,370 @@
+import prisma from '../../lib/prisma'
+import { getPlanByCode } from '../../../../shared/pricing/plans'
+
+export class PosValidationError extends Error {
+    statusCode: number
+    statusMessage: string
+
+    constructor(statusCode: number, statusMessage: string) {
+        super(statusMessage)
+        this.statusCode = statusCode
+        this.statusMessage = statusMessage
+    }
+}
+
+type SubscriptionContext = {
+    planCode: string
+    currentPeriodStart: Date
+    currentPeriodEnd: Date | null
+    interval: string
+}
+
+type PosOrderItemInput = {
+    productId: string
+    variantId?: string | null
+    quantity: number
+}
+
+export type CreatePosSaleInput = {
+    customerId?: string | null
+    items: PosOrderItemInput[]
+}
+
+const addUtcMonths = (date: Date, months: number) =>
+    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
+
+const addUtcYears = (date: Date, years: number) =>
+    new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
+
+export class PosService {
+    private async enforceOrderLimit(tenantId: string, subscription?: SubscriptionContext | null) {
+        if (!subscription) return
+
+        const plan = getPlanByCode(subscription.planCode as any) ?? getPlanByCode('basic')
+        const limit = plan?.ordersPerMonth ?? 0
+        if (limit <= 0) return
+
+        const periodStart = subscription.currentPeriodStart
+        const periodEnd =
+            subscription.currentPeriodEnd ??
+            (subscription.interval === 'year' ? addUtcYears(periodStart, 1) : addUtcMonths(periodStart, 1))
+
+        const [ordersInPeriod, salesInPeriod] = await Promise.all([
+            prisma.order.count({
+                where: {
+                    tenantId,
+                    createdAt: { gte: periodStart, lt: periodEnd }
+                }
+            }),
+            prisma.sale.count({
+                where: {
+                    tenantId,
+                    createdAt: { gte: periodStart, lt: periodEnd }
+                }
+            })
+        ])
+        const total = ordersInPeriod + salesInPeriod
+
+        if (total >= limit) {
+            throw new PosValidationError(
+                429,
+                `Monthly order limit reached (${total}/${limit}). Upgrade your plan to accept more orders.`
+            )
+        }
+    }
+
+    async createSale(
+        tenantId: string,
+        input: CreatePosSaleInput,
+        subscription?: SubscriptionContext | null,
+        actor?: { userId: string | null }
+    ) {
+        await this.enforceOrderLimit(tenantId, subscription)
+
+        if (!Array.isArray(input.items) || input.items.length === 0) {
+            throw new PosValidationError(400, 'At least one item is required')
+        }
+
+        const normalizedItems = input.items.map((item) => ({
+            productId: String(item.productId || '').trim(),
+            variantId: item.variantId ? String(item.variantId).trim() : undefined,
+            quantity: Number(item.quantity || 0)
+        }))
+
+        normalizedItems.forEach((item) => {
+            if (!item.productId) throw new PosValidationError(400, 'Product ID is required for each item')
+            if (!Number.isFinite(item.quantity) || item.quantity < 1) {
+                throw new PosValidationError(400, 'Quantity must be at least 1')
+            }
+        })
+
+        const customerId = input.customerId ? String(input.customerId).trim() : null
+
+        const resolvedCustomer = customerId
+            ? await prisma.customer.findUnique({
+                where: { tenantId_id: { tenantId, id: customerId } },
+                select: { id: true, name: true, phone: true, address: true }
+            })
+            : null
+
+        if (customerId && !resolvedCustomer) {
+            throw new PosValidationError(400, 'Invalid customer')
+        }
+
+        const customerName = resolvedCustomer?.name ?? null
+        const customerPhone = resolvedCustomer?.phone ?? null
+        const customerAddress = resolvedCustomer?.address ?? null
+
+        const productIds = Array.from(new Set(normalizedItems.map((i) => i.productId)))
+        const variantIds = Array.from(
+            new Set(normalizedItems.map((i) => i.variantId).filter((v): v is string => typeof v === 'string' && v.length > 0))
+        )
+        const productIdsWithoutVariant = Array.from(new Set(normalizedItems.filter((i) => !i.variantId).map((i) => i.productId)))
+
+        const products = await prisma.product.findMany({
+            where: { id: { in: productIds }, tenantId, isActive: true },
+            select: { id: true, price: true, title: true, stock: true }
+        })
+        if (products.length !== productIds.length) {
+            throw new PosValidationError(400, 'Some products are invalid or unavailable')
+        }
+
+        const productMap = new Map(products.map((p) => [p.id, p]))
+
+        const variantsById = variantIds.length
+            ? await prisma.productVariant.findMany({
+                where: { id: { in: variantIds }, tenantId, isActive: true },
+                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+            })
+            : []
+
+        if (variantsById.length !== variantIds.length) {
+            throw new PosValidationError(400, 'Some variants are invalid or unavailable')
+        }
+
+        const defaultVariants = productIdsWithoutVariant.length
+            ? await prisma.productVariant.findMany({
+                where: {
+                    tenantId,
+                    productId: { in: productIdsWithoutVariant },
+                    isActive: true,
+                    optionValues: { none: {} }
+                },
+                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+            })
+            : []
+
+        const variantMap = new Map(variantsById.map((v) => [v.id, v]))
+        const defaultVariantByProductId = new Map(defaultVariants.map((v) => [v.productId, v]))
+
+        if (productIdsWithoutVariant.length > 0) {
+            const optionRows = await prisma.productOption.findMany({
+                where: { tenantId, productId: { in: productIdsWithoutVariant } },
+                select: { productId: true },
+                distinct: ['productId']
+            })
+            const productsWithOptions = new Set(optionRows.map((r) => r.productId))
+
+            for (const pid of productIdsWithoutVariant) {
+                if (defaultVariantByProductId.has(pid)) continue
+                if (productsWithOptions.has(pid)) continue
+
+                const product = productMap.get(pid)
+                if (!product) continue
+
+                const created = await prisma.productVariant.create({
+                    data: {
+                        tenantId,
+                        productId: pid,
+                        price: product.price,
+                        stock: product.stock,
+                        reserved: 0,
+                        safetyStock: 0,
+                        trackInventory: true,
+                        isActive: true
+                    }
+                })
+                defaultVariantByProductId.set(pid, created as any)
+            }
+        }
+
+        let total = 0
+        const validatedItems = normalizedItems.map((item) => {
+            const product = productMap.get(item.productId)!
+            const variant = item.variantId ? variantMap.get(item.variantId) : defaultVariantByProductId.get(product.id)
+
+            if (!variant || variant.productId !== product.id) {
+                throw new PosValidationError(400, 'Variant selection is required for this product')
+            }
+
+            const price = Number(variant.price ?? product.price)
+            const availableStock = variant.trackInventory
+                ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
+                : Number.POSITIVE_INFINITY
+
+            if (variant.trackInventory && item.quantity > availableStock) {
+                throw new PosValidationError(400, `Insufficient stock for ${product.title}`)
+            }
+
+            total += price * item.quantity
+
+            return {
+                productId: product.id,
+                variantId: variant.id,
+                productTitle: product.title,
+                quantity: item.quantity,
+                price,
+                trackInventory: variant.trackInventory,
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
+            }
+        })
+
+        const adjustInventoryForDefaultVariant = async (tx: any, variantId: string, productId: string, nextStock: number | null) => {
+            if (nextStock === null) return
+            const isDefaultVariant = (await tx.productVariantOptionValue.count({ where: { tenantId, variantId } })) === 0
+            if (!isDefaultVariant) return
+            const hasOptions = (await tx.productOption.count({ where: { tenantId, productId } })) > 0
+            if (hasOptions) return
+            await tx.product.updateMany({ where: { tenantId, id: productId }, data: { stock: nextStock } })
+        }
+
+        const sale = await prisma.$transaction(async (tx) => {
+            const createdSale = await tx.sale.create({
+                data: {
+                    tenantId,
+                    customerId: resolvedCustomer?.id ?? null,
+                    customerName,
+                    customerPhone,
+                    customerAddress,
+                    notes: 'POS sale',
+                    totalAmount: total,
+                    status: 'COMPLETED',
+                    createdByUserId: actor?.userId ?? null
+                }
+            })
+
+            await tx.saleItem.createMany({
+                data: validatedItems.map((i) => ({
+                    tenantId,
+                    saleId: createdSale.id,
+                    productId: i.productId,
+                    variantId: i.variantId,
+                    quantity: i.quantity,
+                    price: i.price
+                }))
+            })
+
+            for (const item of validatedItems) {
+                if (item.trackInventory === false) continue
+
+                const variantBefore = await tx.productVariant.findFirst({
+                    where: { id: item.variantId, tenantId },
+                    select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                })
+                if (!variantBefore) throw new PosValidationError(409, 'Insufficient stock')
+                if (variantBefore.trackInventory === false) continue
+
+                if (variantBefore.stock < item.quantity + variantBefore.reserved + variantBefore.safetyStock) {
+                    throw new PosValidationError(409, `Insufficient stock for ${item.productTitle}`)
+                }
+
+                const updated = await tx.productVariant.updateMany({
+                    where: {
+                        tenantId,
+                        id: item.variantId,
+                        stock: variantBefore.stock,
+                        reserved: variantBefore.reserved,
+                        safetyStock: variantBefore.safetyStock
+                    },
+                    data: { stock: { decrement: item.quantity } }
+                })
+                if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry')
+
+                const after = await tx.productVariant.findFirst({
+                    where: { tenantId, id: item.variantId },
+                    select: { stock: true, reserved: true, safetyStock: true }
+                })
+
+                await tx.inventoryMovement.create({
+                    data: {
+                        tenantId,
+                        variantId: item.variantId,
+                        type: 'ORDER_DECREMENT',
+                        delta: -item.quantity,
+                        reservedDelta: 0,
+                        safetyStockDelta: 0,
+                        reason: 'pos_sale',
+                        note: null,
+                        orderId: null,
+                        saleId: createdSale.id,
+                        stockAfter: after?.stock ?? null,
+                        reservedAfter: after?.reserved ?? null,
+                        safetyStockAfter: after?.safetyStock ?? null,
+                        createdByUserId: actor?.userId ?? null
+                    }
+                })
+
+                if (item.isDefaultVariant) {
+                    await adjustInventoryForDefaultVariant(tx, item.variantId, variantBefore.productId, after?.stock ?? null)
+                }
+            }
+
+            return createdSale
+        })
+
+        return prisma.sale.findFirst({
+            where: { id: sale.id, tenantId },
+            include: { items: { include: { product: true, variant: true } } }
+        })
+    }
+
+    async lookupByCode(tenantId: string, code: string) {
+        const normalized = String(code || '').trim()
+        if (!normalized) return null
+
+        const variant = await prisma.productVariant.findFirst({
+            where: {
+                tenantId,
+                isActive: true,
+                OR: [{ sku: normalized }]
+            },
+            include: {
+                product: {
+                    include: {
+                        productImages: { orderBy: { position: 'asc' } }
+                    }
+                },
+                optionValues: {
+                    include: { optionValue: true }
+                }
+            }
+        })
+
+        if (!variant) return null
+
+        const labels = Array.isArray(variant.optionValues)
+            ? variant.optionValues.map((ov: any) => ov?.optionValue?.label).filter(Boolean)
+            : []
+
+        const stock = Number(variant.stock ?? 0)
+        const reserved = Number(variant.reserved ?? 0)
+        const safety = Number(variant.safetyStock ?? 0)
+        const trackInventory = variant.trackInventory !== false
+        const availableStock = trackInventory ? Math.max(stock - reserved - safety, 0) : Number.POSITIVE_INFINITY
+
+        const productImages = variant.product?.productImages ?? []
+        const mainImage = productImages.find((i: any) => i?.isMain) ?? productImages[0]
+
+        return {
+            productId: variant.productId,
+            variantId: variant.id,
+            sku: variant.sku ?? null,
+            title: variant.product?.title ?? '',
+            variantLabel: labels.length > 0 ? labels.join(' / ') : null,
+            price: Number((variant as any).price ?? variant.product?.price ?? 0),
+            trackInventory,
+            availableStock,
+            imageUrl: mainImage?.url ?? null
+        }
+    }
+}

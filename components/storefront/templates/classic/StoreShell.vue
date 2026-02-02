@@ -1,11 +1,27 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
+import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 
 const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
+const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
+const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
+const primaryContactInfos = computed(() =>
+    activeContactInfos.value.filter((i) => CONTACT_INFO_DEF_BY_KIND[i.kind].category !== 'social')
+)
+const socialContactInfosWithHref = computed(() =>
+    activeContactInfos.value
+        .filter((i) => CONTACT_INFO_DEF_BY_KIND[i.kind].category === 'social')
+        .map((i) => ({ ...i, href: buildContactInfoHref(i.kind, i.value) }))
+        .filter((i): i is ContactInfoRow & { href: string } => Boolean(i.href))
+)
+const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
+const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
+const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
 const { currencyCode } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
@@ -43,16 +59,14 @@ const props = defineProps<{
 
 <template>
   <StoreThemeProvider>
-    <div class="min-h-screen flex flex-col font-sans text-slate-600 bg-white">
+    <div class="min-h-screen flex flex-col font-serif text-slate-600 bg-white">
       <!-- Top Announcement Bar (Minimal) -->
-      <div v-if="!hideNavigation && !hideAnnouncementBar" class="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest py-2.5 px-4 text-center">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-          <span>Welcome to {{ tenantName }} — Collection 2026</span>
-          <button class="text-white/80 hover:text-white transition-colors">
-            <Icon name="lucide:x" class="w-3 h-3" />
-          </button>
-        </div>
-      </div>
+      <!-- Top Announcement Bar (Minimal) -->
+      <StorefrontSharedAnnouncementBar 
+        v-if="!hideNavigation && !hideAnnouncementBar"
+        background-color="bg-slate-900"
+        text-color="text-white"
+      />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['bg-white border-b border-slate-100 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
@@ -151,26 +165,31 @@ const props = defineProps<{
               <h3 class="text-2xl font-serif font-bold text-slate-900 mb-6">
                 {{ tenantName }}
               </h3>
-              <ul class="space-y-4 text-sm text-slate-500">
-                <li class="flex items-start gap-3">
-                  <span>0770838576</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <span>noukhba.contact@gmail.com</span>
+              <ul v-if="primaryContactInfos.length" class="space-y-4 text-sm text-slate-500">
+                <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
+                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4 text-slate-400 mt-0.5" />
+                  <a
+                    v-if="hrefFor(info)"
+                    :href="hrefFor(info)!"
+                    class="hover:text-slate-900 transition-colors"
+                    :target="isExternalHref(hrefFor(info)!) ? '_blank' : undefined"
+                    :rel="isExternalHref(hrefFor(info)!) ? 'noopener noreferrer' : undefined"
+                  >
+                    <span>{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
+                  </a>
+                  <span v-else>{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
                 </li>
               </ul>
-              <div class="flex gap-4 mt-8">
+              <div v-if="socialContactInfosWithHref.length" class="flex gap-4 mt-8">
                 <a
-                  href="#"
+                  v-for="info in socialContactInfosWithHref"
+                  :key="info.id"
+                  :href="info.href"
                   class="text-slate-400 hover:text-slate-900 transition-colors"
+                  :target="isExternalHref(info.href) ? '_blank' : undefined"
+                  :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
                 >
-                  <Icon name="lucide:facebook" class="w-5 h-5" />
-                </a>
-                <a
-                  href="#"
-                  class="text-slate-400 hover:text-slate-900 transition-colors"
-                >
-                  <Icon name="lucide:instagram" class="w-5 h-5" />
+                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5" />
                 </a>
               </div>
             </div>

@@ -134,6 +134,9 @@ The platform is designed to start with **~100 tenants** and scale safely.
 - **Touch-friendly**: All interactive elements sized for touch targets (44px minimum)
 - **Performance**: Optimized for 3G networks common in Algeria
 
+### 📱 Mobile App (Android/iOS)
+- Capacitor wrapper for native builds (see `MOBILE.md`)
+
 ---
 
 ## 🚚 Delivery Module (Express + Prisma)

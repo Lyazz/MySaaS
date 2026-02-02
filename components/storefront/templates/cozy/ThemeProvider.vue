@@ -44,7 +44,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-[#FDFBF7] font-cozy text-slate-600 selection:bg-brand-200 selection:text-brand-900"
+    class="min-h-screen bg-[#F5F2EA] font-cozy text-slate-600 selection:bg-brand-200 selection:text-brand-900"
     :style="storeStyle"
   >
     <slot />

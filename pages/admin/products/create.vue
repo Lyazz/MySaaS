@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-3xl mx-auto">
+  <div class="max-w-7xl mx-auto">
     <!-- Breadcrumb -->
     <nav
       class="flex mb-6"

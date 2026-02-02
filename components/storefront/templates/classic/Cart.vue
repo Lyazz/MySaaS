@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-white py-16 font-sans text-slate-600">
+  <div class="min-h-screen bg-white py-16 font-serif text-slate-600">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div
         v-if="!cartStore.hasItems"

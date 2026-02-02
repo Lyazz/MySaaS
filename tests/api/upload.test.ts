@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { setup, fetch } from '@nuxt/test-utils'
 import prisma from '../../backend/src/lib/prisma'
 import jwt from 'jsonwebtoken'
-import path from 'path'
-import fs from 'fs'
+import crypto from 'crypto'
 
 describe('Upload API (Tenant Admin)', async () => {
     await setup({ setupTimeout: 300_000 })
@@ -13,6 +12,20 @@ describe('Upload API (Tenant Admin)', async () => {
 
     let token = ''
     let tenantId = ''
+
+    const buildMultipart = (args: { filename: string; contentType: string; data: Buffer }) => {
+        const boundary = `----mysaas-test-${crypto.randomBytes(8).toString('hex')}`
+        const header =
+            `--${boundary}\r\n` +
+            `Content-Disposition: form-data; name="file"; filename="${args.filename}"\r\n` +
+            `Content-Type: ${args.contentType}\r\n\r\n`
+        const footer = `\r\n--${boundary}--\r\n`
+
+        return {
+            body: Buffer.concat([Buffer.from(header, 'utf8'), args.data, Buffer.from(footer, 'utf8')]),
+            contentType: `multipart/form-data; boundary=${boundary}`
+        }
+    }
 
     // Create a minimal 1x1 PNG for testing
     const createTestPng = () => {
@@ -91,16 +104,15 @@ describe('Upload API (Tenant Admin)', async () => {
 
     it('uploads a PNG image successfully', async () => {
         const pngBuffer = createTestPng()
-        const file = new File([pngBuffer], 'test-image.png', { type: 'image/png' })
-        const formData = new FormData()
-        formData.append('file', file)
+        const mp = buildMultipart({ filename: 'test-image.png', contentType: 'image/png', data: pngBuffer })
 
         const res = await fetch('/api/upload', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': mp.contentType
             },
-            body: formData
+            body: mp.body
         })
 
         // May get 503 if MinIO is not running, which is OK in CI
@@ -118,16 +130,15 @@ describe('Upload API (Tenant Admin)', async () => {
 
     it('uploads a JPEG image successfully', async () => {
         const jpegBuffer = createTestJpeg()
-        const file = new File([jpegBuffer], 'test-image.jpg', { type: 'image/jpeg' })
-        const formData = new FormData()
-        formData.append('file', file)
+        const mp = buildMultipart({ filename: 'test-image.jpg', contentType: 'image/jpeg', data: jpegBuffer })
 
         const res = await fetch('/api/upload', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': mp.contentType
             },
-            body: formData
+            body: mp.body
         })
 
         // May get 503 if MinIO is not running
@@ -145,16 +156,15 @@ describe('Upload API (Tenant Admin)', async () => {
     it('rejects unsupported file types', async () => {
         // Send a GIF which is not in the allowed list
         const gifBuffer = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]) // GIF89a header
-        const file = new File([gifBuffer], 'test.gif', { type: 'image/gif' })
-        const formData = new FormData()
-        formData.append('file', file)
+        const mp = buildMultipart({ filename: 'test.gif', contentType: 'image/gif', data: gifBuffer })
 
         const res = await fetch('/api/upload', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': mp.contentType
             },
-            body: formData
+            body: mp.body
         })
 
         const body = await res.json()
@@ -164,13 +174,12 @@ describe('Upload API (Tenant Admin)', async () => {
 
     it('blocks unauthorized requests (no token)', async () => {
         const pngBuffer = createTestPng()
-        const file = new File([pngBuffer], 'test.png', { type: 'image/png' })
-        const formData = new FormData()
-        formData.append('file', file)
+        const mp = buildMultipart({ filename: 'test.png', contentType: 'image/png', data: pngBuffer })
 
         const res = await fetch('/api/upload', {
             method: 'POST',
-            body: formData
+            headers: { 'Content-Type': mp.contentType },
+            body: mp.body
         })
 
         expect(res.status).toBe(401)

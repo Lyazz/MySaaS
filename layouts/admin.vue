@@ -306,6 +306,21 @@ const navGroups = ref([
         path: '/admin/orders',
         label: 'Orders',
         icon: 'lucide:handbag'
+      },
+      {
+        path: '/admin/sales',
+        label: 'Sales',
+        icon: 'lucide:badge-dollar-sign'
+      },
+      {
+        path: '/admin/pos',
+        label: 'POS',
+        icon: 'lucide:monitor-smartphone'
+      },
+      {
+        path: '/admin/customers',
+        label: 'Customers',
+        icon: 'lucide:users'
       }
     ]
   },
@@ -339,6 +354,16 @@ const navGroups = ref([
         path: '/admin/settings/appearance',
         label: 'Appearance',
         icon: 'lucide:palette'
+      },
+      {
+        path: '/admin/settings/homepage',
+        label: 'Homepage',
+        icon: 'lucide:home'
+      },
+      {
+        path: '/admin/settings/contact',
+        label: 'Contact Info',
+        icon: 'lucide:phone'
       },
       {
         path: '/admin/settings/functional',

@@ -123,6 +123,8 @@ router.post('/login', async (req, res) => {
 
     const { email, password } = req.body
 
+    console.log('Login attempt:', { email, passwordProvided: !!password })
+
     if (!email || !password) {
         return res.status(400).json({
             statusCode: 400,
@@ -136,6 +138,8 @@ router.post('/login', async (req, res) => {
             include: { tenant: true }
         })
 
+        console.log('Login user found:', user ? user.email : 'not found')
+
         if (!user || !user.passwordHash) {
             return res.status(401).json({
                 statusCode: 401,
@@ -144,6 +148,8 @@ router.post('/login', async (req, res) => {
         }
 
         const isValid = await bcrypt.compare(password, user.passwordHash)
+        console.log('Login password valid:', isValid)
+
         if (!isValid) {
             return res.status(401).json({
                 statusCode: 401,

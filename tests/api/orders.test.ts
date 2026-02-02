@@ -113,6 +113,8 @@ describe('Public checkout order flow', () => {
         expect(saved?.items[0].variantId).toBe(variantId)
         expect(saved?.items[0].quantity).toBe(2)
 
+        expect(saved?.customerId).toBeNull()
+
         const variantAfter = await prisma.productVariant.findUnique({ where: { id: variantId } })
         expect(variantAfter?.stock).toBe(variantStockBefore)
         expect(variantAfter?.reserved).toBe(0)

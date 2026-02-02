@@ -48,6 +48,17 @@ const LOW_STOCK_THRESHOLD = 5
 const isOutOfStock = computed(() => Number(props.product.stock ?? 0) <= 0)
 const isLowStock = computed(() => !isOutOfStock.value && Number(props.product.stock ?? 0) <= LOW_STOCK_THRESHOLD)
 
+const showSuccess = ref(false)
+const successTitle = ref('')
+const successMessage = ref('')
+
+const triggerSuccessToast = (title: string, message: string) => {
+    successTitle.value = title
+    successMessage.value = message
+    showSuccess.value = true
+    setTimeout(() => { showSuccess.value = false }, 3000)
+}
+
 function handleAddToCart() {
   cartStore.addItem({
     productId: props.product.id,
@@ -57,6 +68,7 @@ function handleAddToCart() {
     stock: props.product.stock,
     image: mainImage.value
   })
+  triggerSuccessToast('Added to cart', 'Product added to your cart')
 }
 </script>
 
@@ -197,5 +209,28 @@ function handleAddToCart() {
           </button>
        </div>
     </div>
+    
+    <!-- Success Toast -->
+    <Transition
+      enter-active-class="transform ease-out duration-300 transition"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showSuccess"
+        class="fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-6 py-4 shadow-xl flex items-center gap-4 border border-slate-700"
+      >
+        <div class="w-6 h-6 flex items-center justify-center text-white shrink-0">
+          <Icon name="lucide:check" class="w-5 h-5" />
+        </div>
+        <div>
+          <div class="font-bold text-sm uppercase tracking-wider">{{ successTitle }}</div>
+          <div class="text-xs text-slate-300">{{ successMessage }}</div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>

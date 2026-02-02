@@ -1,6 +1,6 @@
 import prisma from '../../lib/prisma'
 
-export type StoreTemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery'
+export type StoreTemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness'
 export type StoreLanguage = 'ar' | 'fr' | 'en'
 
 
@@ -10,7 +10,9 @@ export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; descriptio
     { key: 'street', label: 'Street', description: 'High-energy, bold layout with high-contrast elements.' },
     { key: 'cozy', label: 'Cozy', description: 'Soft, minimalist design with warm colors.' },
     { key: 'cyber', label: 'Cyber', description: 'Futuristic dark mode with neon accents.' },
-    { key: 'stationnery', label: 'Stationnery', description: 'Stationery oriented theme.' }
+    { key: 'stationnery', label: 'Stationnery', description: 'Stationery oriented theme.' },
+    { key: 'food', label: 'Food Market', description: 'Appetizing design with warm stone tones.' },
+    { key: 'wellness', label: 'Wellness', description: 'Organic, health-focused design with Sage Green tones.' }
 ]
 
 export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [
@@ -45,6 +47,9 @@ export type StoreSettingsPatchInput = Partial<{
     logoUrl: string | null
     primaryColor: string
     templateKey: string
+
+    announcementText: string
+    announcementScrolling: boolean
 
     language: string
     cartEnabled: boolean
@@ -115,6 +120,21 @@ export class StoreSettingsService {
                 )
             }
             updateSettings.templateKey = input.templateKey
+        }
+
+        if (input.announcementText !== undefined) {
+            // allow empty string to clear it
+            if (typeof input.announcementText !== 'string') {
+                throw new StoreSettingsValidationError('announcementText must be a string')
+            }
+            updateSettings.announcementText = input.announcementText
+        }
+
+        if (input.announcementScrolling !== undefined) {
+            if (typeof input.announcementScrolling !== 'boolean') {
+                throw new StoreSettingsValidationError('announcementScrolling must be a boolean')
+            }
+            updateSettings.announcementScrolling = input.announcementScrolling
         }
 
         if (input.language !== undefined) {
@@ -199,6 +219,8 @@ export class StoreSettingsService {
             logoUrl: string | null
             primaryColor: string
             templateKey: string
+            announcementText: string | null
+            announcementScrolling: boolean
             language: string
             cartEnabled: boolean
             codEnabled: boolean
@@ -242,6 +264,7 @@ export class StoreSettingsService {
             `## Store Settings (Chosen)`,
             `- Template: ${args.settings.templateKey}`,
             `- Primary color: ${args.settings.primaryColor}`,
+            `- Announcement: ${args.settings.announcementText ? `"${args.settings.announcementText}"` : '(none)'} (scrolling: ${args.settings.announcementScrolling})`,
             `- Language: ${args.settings.language}`,
             `- Cart + checkout enabled: ${args.settings.cartEnabled ? 'yes' : 'no'}`,
             `- Product page COD form: ${args.settings.codEnabled ? 'enabled' : 'disabled'}`,

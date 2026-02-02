@@ -7,8 +7,8 @@ export class OrdersController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { status, search } = req.query as { status?: string; search?: string }
-            const orders = await service.list(tenant.id, { status, search })
+            const { status, search, startDate, endDate } = req.query as { status?: string; search?: string; startDate?: string; endDate?: string }
+            const orders = await service.list(tenant.id, { status, search, startDate, endDate })
             res.json(orders)
         } catch (error) {
             console.error('List orders error:', error)

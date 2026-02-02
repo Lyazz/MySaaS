@@ -1,11 +1,27 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
+import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 
 const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
+const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
+const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
+const primaryContactInfos = computed(() =>
+    activeContactInfos.value.filter((i) => CONTACT_INFO_DEF_BY_KIND[i.kind].category !== 'social')
+)
+const socialContactInfosWithHref = computed(() =>
+    activeContactInfos.value
+        .filter((i) => CONTACT_INFO_DEF_BY_KIND[i.kind].category === 'social')
+        .map((i) => ({ ...i, href: buildContactInfoHref(i.kind, i.value) }))
+        .filter((i): i is ContactInfoRow & { href: string } => Boolean(i.href))
+)
+const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
+const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
+const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
 const { currencyCode } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
@@ -45,14 +61,12 @@ const currentYear = new Date().getFullYear()
   <StoreThemeProvider>
     <div class="min-h-screen flex flex-col border-x-4 border-black max-w-[1920px] mx-auto bg-white shadow-[8px_0_0_0_#000,-8px_0_0_0_#000]">
       <!-- Top Announcement Bar -->
-      <div v-if="!hideNavigation && !hideAnnouncementBar" class="bg-brand text-black font-mono text-xs py-2 px-4 text-center border-b-4 border-black uppercase">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-          <span>{{ tenantName }} 6% | 4,000 {{ currencyCode }} min | 3 item(s)</span>
-          <button class="hover:text-white">
-            &times;
-          </button>
-        </div>
-      </div>
+      <!-- Top Announcement Bar -->
+      <StorefrontSharedAnnouncementBar 
+        v-if="!hideNavigation && !hideAnnouncementBar"
+        background-color="bg-brand border-b-4 border-black"
+        text-color="text-black font-mono uppercase"
+      />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['sticky top-0 z-50 bg-white border-b-4 border-black', { 'hidden md:block': mobileHeaderHidden }]">
@@ -134,28 +148,31 @@ const currentYear = new Date().getFullYear()
               <h3 class="font-street text-4xl mb-6 bg-white text-black inline-block px-2 border-2 border-brand shadow-[4px_4px_0px_0px_var(--brand)]">
                 {{ tenantName }}
               </h3>
-              <ul class="space-y-4 font-mono text-sm uppercase">
-                <li class="flex items-start gap-3">
-                  <Icon name="lucide:phone" class="w-5 h-5 text-brand mt-0.5" />
-                  <span>0770838576</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <Icon name="lucide:mail" class="w-5 h-5 text-brand mt-0.5" />
-                  <span>noukhba.contact@gmail.com</span>
+              <ul v-if="primaryContactInfos.length" class="space-y-4 font-mono text-sm uppercase">
+                <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
+                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5 text-brand mt-0.5" />
+                  <a
+                    v-if="hrefFor(info)"
+                    :href="hrefFor(info)!"
+                    class="hover:text-brand transition-colors"
+                    :target="isExternalHref(hrefFor(info)!) ? '_blank' : undefined"
+                    :rel="isExternalHref(hrefFor(info)!) ? 'noopener noreferrer' : undefined"
+                  >
+                    <span>{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
+                  </a>
+                  <span v-else>{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
                 </li>
               </ul>
-              <div class="flex gap-4 mt-6">
+              <div v-if="socialContactInfosWithHref.length" class="flex gap-4 mt-6">
                 <a
-                  href="#"
+                  v-for="info in socialContactInfosWithHref"
+                  :key="info.id"
+                  :href="info.href"
                   class="w-12 h-12 border-2 border-white flex items-center justify-center hover:bg-brand hover:border-brand hover:text-black transition-all shadow-[4px_4px_0px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
+                  :target="isExternalHref(info.href) ? '_blank' : undefined"
+                  :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
                 >
-                  <Icon name="lucide:facebook" class="w-5 h-5" />
-                </a>
-                <a
-                  href="#"
-                  class="w-12 h-12 border-2 border-white flex items-center justify-center hover:bg-brand hover:border-brand hover:text-black transition-all shadow-[4px_4px_0px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
-                >
-                  <Icon name="lucide:instagram" class="w-5 h-5" />
+                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5" />
                 </a>
               </div>
             </div>

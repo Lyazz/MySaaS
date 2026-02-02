@@ -37,9 +37,25 @@ const normalizeSalePriceMode = (value: unknown): SalePriceMode => {
 const toDecimal = (value: string) => new Prisma.Decimal(value)
 
 export class PurchasesService {
-    async list(tenantId: string) {
+    async list(tenantId: string, filters?: { startDate?: string; endDate?: string }) {
+        const where: any = { tenantId }
+
+        if (filters?.startDate || filters?.endDate) {
+            where.createdAt = {}
+            if (filters.startDate) {
+                const start = new Date(filters.startDate)
+                start.setHours(0, 0, 0, 0)
+                where.createdAt.gte = start
+            }
+            if (filters.endDate) {
+                const end = new Date(filters.endDate)
+                end.setHours(23, 59, 59, 999)
+                where.createdAt.lte = end
+            }
+        }
+
         return prisma.purchaseOrder.findMany({
-            where: { tenantId },
+            where,
             include: { supplier: true, items: true },
             orderBy: { createdAt: 'desc' }
         })

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Swekly</string>
+    <string name="title_activity_main">Swekly</string>
+    <string name="package_name">com.swekly.app</string>
+    <string name="custom_url_scheme">com.swekly.app</string>
+</resources>

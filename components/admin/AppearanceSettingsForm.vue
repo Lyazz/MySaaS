@@ -164,6 +164,48 @@
         </div>
       </div>
 
+      <!-- Announcement Bar -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
+          <div class="md:col-span-1">
+            <h3 class="text-lg font-semibold text-slate-900">
+              Announcement Bar
+            </h3>
+            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+              Display a message at the top of your store (e.g. promotions, shipping info).
+            </p>
+          </div>
+          
+          <div class="mt-6 md:mt-0 md:col-span-2 space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Message</label>
+              <input
+                v-model="form.announcementText"
+                type="text"
+                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                placeholder="Welcome to our store!"
+              >
+              <p class="mt-2 text-xs text-slate-500">Leave empty to hide.</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="flex items-center h-5">
+                <input
+                  id="announcementScrolling"
+                  v-model="form.announcementScrolling"
+                  type="checkbox"
+                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                >
+              </div>
+              <label for="announcementScrolling" class="text-sm font-medium text-slate-700">Enable Scrolling (Marquee)</label>
+            </div>
+            <p class="text-xs text-slate-500 ml-7">
+               If checked, the text will scroll horizontally. Useful for long messages.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Template Selection -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
@@ -273,7 +315,9 @@ const form = reactive({
   slug: '',
   logoUrl: null as string | null,
   primaryColor: '#0F766E', // Default to teal
-  templateKey: 'classic'
+  templateKey: 'classic',
+  announcementText: '',
+  announcementScrolling: false
 })
 
 const baseDomain = ref('')
@@ -334,6 +378,18 @@ const templates = [
     label: 'Stationery', 
     description: 'Stationery oriented theme.',
     icon: 'lucide:pen-tool'
+  },
+  { 
+    key: 'food', 
+    label: 'Food Market', 
+    description: 'Appetizing design with warm stone tones, perfect for restaurants and food delivery.',
+    icon: 'lucide:utensils'
+  },
+  { 
+    key: 'wellness', 
+    label: 'Wellness', 
+    description: 'Organic, health-focused design with Sage Green tones and Solway font.',
+    icon: 'lucide:flower-2'
   }
 ]
 
@@ -351,6 +407,8 @@ const updateForm = (data: any) => {
   form.logoUrl = data.logoUrl || null
   form.primaryColor = data.primaryColor || '#0F766E'
   form.templateKey = data.templateKey || 'classic'
+  form.announcementText = data.announcementText || ''
+  form.announcementScrolling = data.announcementScrolling || false
 }
 
 const fetchSettings = async () => {
@@ -381,7 +439,9 @@ const save = async () => {
         slug: form.slug,
         primaryColor: form.primaryColor,
         templateKey: form.templateKey,
-        logoUrl: form.logoUrl
+        logoUrl: form.logoUrl,
+        announcementText: form.announcementText,
+        announcementScrolling: form.announcementScrolling
       }
     })
     useState<any>('storeSettings').value = updated

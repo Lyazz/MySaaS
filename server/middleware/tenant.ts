@@ -74,5 +74,13 @@ export default defineEventHandler(async (event) => {
         })
 
         event.context.storeSettings = storeSettings
+
+        const contactInfos = await prisma.tenantContactInfo.findMany({
+            where: { tenantId: tenant.id, isActive: true },
+            orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+            select: { id: true, kind: true, label: true, value: true, position: true, isActive: true }
+        })
+
+        event.context.contactInfos = contactInfos
     }
 })

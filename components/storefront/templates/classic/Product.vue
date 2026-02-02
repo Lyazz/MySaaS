@@ -76,7 +76,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
 </script>
 
 <template>
-  <div class="bg-white min-h-screen py-8 lg:py-12 font-sans">
+  <div class="bg-white min-h-screen py-8 lg:py-12 font-serif">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Minimal Breadcrumb -->
       <nav class="flex items-center justify-center text-xs uppercase tracking-widest text-slate-500 mb-12 animate-fade-in-up">

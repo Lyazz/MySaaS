@@ -193,35 +193,11 @@ const closeQuickView = () => {
       </aside>
     </Transition>
 
-    <!-- Hero Banner -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 pt-8">
-      <div class="relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 shadow-xl min-h-[300px] flex items-center">
-         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd800a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-40"></div>
-         <div class="relative z-10 px-8 md:px-12 py-12 max-w-3xl">
-             <span class="inline-block px-3 py-1 bg-brand-500/20 border border-brand-500/50 backdrop-blur-sm text-brand-300 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
-                 New Collection
-             </span>
-
-             <p class="text-lg text-slate-300 mb-8 max-w-xl leading-relaxed">
-                 Discover our latest arrivals designed for performance and style. Limited edition items available now.
-             </p>
-             <button class="px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-brand-50 transition-all shadow-lg active:scale-95 flex items-center gap-2 group">
-                 Shop Now
-                 <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-             </button>
-         </div>
-      </div>
-    </div>
+    <!-- Hero Banner Removed -->
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header / Title Section -->
       <div class="mb-8 lg:mb-10">
-        <h1 class="text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight mb-2">
-          {{ pageTitle }}
-        </h1>
-        <p class="text-slate-500 text-sm lg:text-base">
-          Explore our latest collection of premium products.
-        </p>
              
         <!-- Specials Pills (Still useful navigation, keeping for now as they are feature toggles often) -->
         <div class="flex flex-wrap gap-2 mt-6 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">

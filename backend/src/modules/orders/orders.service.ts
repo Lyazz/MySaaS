@@ -48,7 +48,7 @@ const addUtcYears = (date: Date, years: number) =>
     new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
 
 export class OrdersService {
-    async list(tenantId: string, filters: { status?: string; search?: string }) {
+    async list(tenantId: string, filters: { status?: string; search?: string; startDate?: string; endDate?: string }) {
         const where: any = { tenantId }
 
         if (filters.status) {
@@ -60,6 +60,22 @@ export class OrdersService {
                 { customerName: { contains: filters.search, mode: 'insensitive' } },
                 { customerPhone: { contains: filters.search } }
             ]
+        }
+
+        if (filters.startDate || filters.endDate) {
+            where.createdAt = {}
+            if (filters.startDate) {
+                // Parse start date and set time to beginning of day
+                const start = new Date(filters.startDate)
+                start.setHours(0, 0, 0, 0)
+                where.createdAt.gte = start
+            }
+            if (filters.endDate) {
+                // Parse end date and set time to end of day
+                const end = new Date(filters.endDate)
+                end.setHours(23, 59, 59, 999)
+                where.createdAt.lte = end
+            }
         }
 
         return prisma.order.findMany({
@@ -605,6 +621,9 @@ export class OrdersService {
             const createdOrder = await tx.order.create({
                 data: {
                     tenantId: input.tenantId,
+                    // Guest checkout: keep customerId null.
+                    // Authenticated customer checkout (future): will set customerId explicitly.
+                    customerId: null,
                     customerName,
                     customerPhone,
                     customerAddress: input.customerAddress || null,

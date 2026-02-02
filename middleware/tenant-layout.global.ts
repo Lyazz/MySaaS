@@ -9,6 +9,10 @@ export default defineNuxtRouteMiddleware((to) => {
             if (!storeSettings.value && event.context.storeSettings) {
                 storeSettings.value = event.context.storeSettings
             }
+            const contactInfos = useState<any[]>('contactInfos', () => [])
+            if ((!contactInfos.value || contactInfos.value.length === 0) && event.context.contactInfos) {
+                contactInfos.value = event.context.contactInfos as any
+            }
         }
     }
 

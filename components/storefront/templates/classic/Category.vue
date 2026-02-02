@@ -35,7 +35,7 @@ const sortedProducts = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white min-h-screen py-8 lg:py-12 font-sans">
+  <div class="bg-white min-h-screen py-8 lg:py-12 font-serif">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Minimal Breadcrumb -->
       <nav class="flex mb-12 text-xs uppercase tracking-widest text-slate-500 justify-center">

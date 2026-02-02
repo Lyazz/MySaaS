@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useCartStore } from '~/stores/cart'
+
 const props = defineProps<{
     product: any
     viewMode?: 'grid' | 'list'
@@ -8,6 +10,7 @@ const emit = defineEmits<{
     (e: 'quick-view', product: any): void
 }>()
 
+const cartStore = useCartStore()
 const { format: formatPrice } = useCurrency()
 
 const primaryImage = computed(() => {
@@ -28,6 +31,29 @@ const isInStock = computed(() => {
     const stock = Number(props.product?.stock ?? 0)
     return stock > 0
 })
+
+const showSuccess = ref(false)
+const successTitle = ref('')
+const successMessage = ref('')
+
+const triggerSuccessToast = (title: string, message: string) => {
+    successTitle.value = title
+    successMessage.value = message
+    showSuccess.value = true
+    setTimeout(() => { showSuccess.value = false }, 3000)
+}
+
+function handleAddToCart() {
+  cartStore.addItem({
+    productId: props.product.id,
+    title: props.product.title,
+    slug: props.product.slug,
+    price: Number(props.product.price),
+    stock: props.product.stock,
+    image: primaryImage.value
+  })
+  triggerSuccessToast('Added to cart', 'Product added to your cart')
+}
 </script>
 
 <template>
@@ -144,10 +170,35 @@ const isInStock = computed(() => {
           class="p-2 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 shadow-lg shadow-pink-500/30 hover:from-pink-600 hover:to-orange-600 transition-all active:scale-95"
           :disabled="!isInStock"
           title="Add to Cart"
+          @click.prevent="handleAddToCart"
         >
           <Icon name="lucide:plus" class="w-4 h-4 text-white" />
         </button>
       </div>
     </div>
   </div>
+    
+  <!-- Success Toast -->
+  <Transition
+    enter-active-class="transform ease-out duration-300 transition"
+    enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+    enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+    leave-active-class="transition ease-in duration-100"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
+  >
+    <div
+      v-if="showSuccess"
+      class="fixed bottom-4 right-4 z-50 bg-[#1a0a2e] text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 border border-pink-500/30 backdrop-blur-md"
+    >
+      <div class="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-white shrink-0">
+        <Icon name="lucide:check" class="w-5 h-5" />
+      </div>
+      <div>
+        <div class="font-bold">{{ successTitle }}</div>
+        <div class="text-xs text-purple-300">{{ successMessage }}</div>
+      </div>
+    </div>
+  </Transition>
 </template>
+

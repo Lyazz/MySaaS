@@ -1,43 +1,32 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import ProductCard from './ProductCard.vue'
+import { DEFAULT_STOREFRONT_HOME_CONFIG, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const props = defineProps<{
   tenantName: string
   featuredProducts: any[]
+  bestSellerProducts?: any[]
+  homeConfig?: StorefrontHomeConfig
   pending: boolean
 }>()
 
 const cartStore = useCartStore()
 
-// Hero Slider Data
-const heroSlides = [
-    {
-        id: 1,
-        title: 'New Collection 2026',
-        subtitle: 'Discover the latest trends in books and stationery.',
-        buttonText: 'Shop Now',
-        image: 'https://placehold.co/1920x800/0f172a/ffffff?text=New+Collection+2026'
-    },
-    {
-        id: 2,
-        title: 'Best Sellers',
-        subtitle: 'Get your hands on the most popular items this week.',
-        buttonText: 'Browse',
-        image: 'https://placehold.co/1920x800/334155/ffffff?text=Best+Sellers'
-    },
-     {
-        id: 3,
-        title: 'Special Offers',
-        subtitle: 'Up to 50% off on selected items.',
-        buttonText: 'View Deals',
-        image: 'https://placehold.co/1920x800/475569/ffffff?text=Special+Offers'
-    }
-]
+const defaultHeroSlides = DEFAULT_STOREFRONT_HOME_CONFIG.carousel
+const heroSlides = computed(() => {
+    const slides = props.homeConfig?.carousel
+    return Array.isArray(slides) && slides.length > 0 ? slides : defaultHeroSlides
+})
+
+const sections = computed(() => props.homeConfig?.sections || DEFAULT_STOREFRONT_HOME_CONFIG.sections)
+const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
+
+const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
 
 const currentSlide = ref(0)
-const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.length }
-const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.length) % heroSlides.length }
+const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length }
+const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
 // Auto-advance slider
 let slideInterval: any
@@ -72,27 +61,34 @@ const categories = computed(() => {
 })
 
 // Check if we have any displayed products
-const displayedProducts = computed(() => {
-    if (props.featuredProducts && props.featuredProducts.length > 0) {
-        return props.featuredProducts
-    }
-    return [] 
-})
+// Auto-scroll for Featured Products
+const { 
+  scrollContainer: featuredScrollContainer, 
+  infiniteList: featuredInfiniteList, 
+  isHovering: isHoveringFeatured 
+} = useAutoScroll(computed(() => props.featuredProducts || []))
+
+// Auto-scroll for Best Sellers
+const { 
+  scrollContainer: bestSellersScrollContainer, 
+  infiniteList: bestSellersInfiniteList, 
+  isHovering: isHoveringBestSellers 
+} = useAutoScroll(bestSellersDisplayed)
 </script>
 
 <template>
-  <div class="bg-white min-h-screen pb-24 font-sans">
+  <div class="bg-white min-h-screen pb-24 font-serif">
     <!-- Hero Slider -->
     <div class="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden group">
       <!-- Slides -->
       <div 
         v-for="(slide, index) in heroSlides" 
-        :key="slide.id"
+        :key="index"
         class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
         :class="index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'"
       >
         <img
-          :src="slide.image"
+          :src="slide.imageUrl"
           class="w-full h-full object-cover"
           :alt="slide.title"
         >
@@ -113,10 +109,10 @@ const displayedProducts = computed(() => {
                 {{ slide.subtitle }}
               </p>
               <NuxtLink
-                to="/products"
+                :to="slideTo(slide.buttonHref)"
                 class="inline-block px-10 py-4 bg-white text-slate-900 text-sm font-bold uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-colors duration-300 min-w-[200px]"
               >
-                {{ slide.buttonText }}
+                {{ slide.buttonText || 'Shop Now' }}
               </NuxtLink>
             </div>
           </div>
@@ -127,7 +123,7 @@ const displayedProducts = computed(() => {
       <div class="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-4">
         <button 
           v-for="(slide, index) in heroSlides" 
-          :key="slide.id" 
+          :key="index" 
           class="w-3 h-3 border border-white transition-all duration-300 rounded-full"
           :class="index === currentSlide ? 'bg-white scale-125' : 'bg-transparent hover:bg-white/50'"
           @click="currentSlide = index"
@@ -150,12 +146,12 @@ const displayedProducts = computed(() => {
     </div>
 
     <!-- Categories Section (Grid) -->
-    <section class="py-16 md:py-24 bg-white">
+    <section v-if="sections.browseByCategory.enabled" class="py-16 md:py-24 bg-white">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-16">
-          <span class="text-slate-500 uppercase tracking-widest text-xs font-bold mb-3 block">Collections</span>
+          <span class="text-slate-500 uppercase tracking-widest text-xs font-bold mb-3 block">{{ sections.browseByCategory.eyebrow }}</span>
           <h2 class="text-3xl md:text-4xl font-serif text-slate-900">
-            Shop by Category
+            {{ sections.browseByCategory.title }}
           </h2>
         </div>
 
@@ -196,24 +192,24 @@ const displayedProducts = computed(() => {
     </section>
 
     <!-- Featured Products -->
-    <section class="py-16 md:py-24 bg-[#fcfcfc] border-t border-slate-100">
+    <section v-if="sections.newArrivals.enabled" class="py-16 md:py-24 bg-[#fcfcfc] border-t border-slate-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <span class="text-slate-500 uppercase tracking-widest text-xs font-bold mb-3 block">New Arrivals</span>
+          <span class="text-slate-500 uppercase tracking-widest text-xs font-bold mb-3 block">{{ sections.newArrivals.eyebrow }}</span>
           <h2 class="text-3xl md:text-4xl font-serif text-slate-900">
-            Trending Now
+            {{ sections.newArrivals.title }}
           </h2>
         </div>
 
+        <!-- Skeleton Loading - Horizontal -->
         <div
           v-if="pending"
-          class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-y-12"
+          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
         >
-          <!-- Skeletons -->
           <div
             v-for="i in 4"
             :key="i"
-            class="animate-pulse"
+            class="flex-shrink-0 w-64 md:w-72 animate-pulse"
           >
             <div class="bg-slate-200 h-[350px] mb-4 w-full" />
             <div class="h-4 bg-slate-200 w-3/4 mx-auto mb-3" />
@@ -223,15 +219,66 @@ const displayedProducts = computed(() => {
 
         <div
           v-else
-          class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-y-12"
+          ref="featuredScrollContainer"
+          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
+          style="scroll-behavior: auto;"
+          @mouseenter="isHoveringFeatured = true"
+          @mouseleave="isHoveringFeatured = false"
         >
-          <ProductCard
-            v-for="product in displayedProducts"
-            :key="product.id"
-            :product="product"
-          />
+          <div
+            v-for="(product, index) in featuredInfiniteList"
+            :key="`${product.id}-${index}`"
+             class="flex-shrink-0 w-64 md:w-72"
+          >
+           <ProductCard
+             :product="product"
+           />
+          </div>
         </div>
             
+        <div class="mt-16 text-center">
+          <NuxtLink
+            to="/products"
+            class="inline-block border-b border-slate-900 pb-1 text-slate-900 text-sm font-bold uppercase tracking-widest hover:text-brand-600 hover:border-brand-600 transition-colors"
+          >
+            View all products
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- Best Sellers -->
+    <section v-if="sections.bestSellers.enabled" class="py-16 md:py-24 bg-white border-t border-slate-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <span class="text-slate-500 uppercase tracking-widest text-xs font-bold mb-3 block">{{ sections.bestSellers.eyebrow }}</span>
+          <h2 class="text-3xl md:text-4xl font-serif text-slate-900">
+            {{ sections.bestSellers.title }}
+          </h2>
+        </div>
+
+        <div v-if="bestSellersDisplayed.length === 0" class="text-center text-sm text-slate-600">
+          No best sellers yet.
+        </div>
+
+        <div v-else 
+          ref="bestSellersScrollContainer"
+          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
+          style="scroll-behavior: auto;"
+          @mouseenter="isHoveringBestSellers = true"
+          @mouseleave="isHoveringBestSellers = false"
+        >
+          <div
+            v-for="(product, index) in bestSellersInfiniteList"
+            :key="`${product.id}-${index}`"
+            class="flex-shrink-0 w-64 md:w-72"
+          >
+            <ProductCard
+             :product="product"
+            />
+           </div>
+        </div>
+
         <div class="mt-16 text-center">
           <NuxtLink
             to="/products"

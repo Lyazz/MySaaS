@@ -23,6 +23,12 @@
           />
         </div>
         <div>
+          <DateFilter
+            v-model:startDate="startDate"
+            v-model:endDate="endDate"
+          />
+        </div>
+        <div>
           <BaseSelect
             v-model="selectedStatus"
             label="Status Filter"
@@ -165,6 +171,7 @@
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import DateFilter from '~/components/ui/DateFilter.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -192,6 +199,8 @@ const loading = ref(true)
 const orders = ref<Order[]>([])
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
+const startDate = ref('')
+const endDate = ref('')
 
 async function fetchOrders() {
   loading.value = true
@@ -199,6 +208,8 @@ async function fetchOrders() {
     const params = new URLSearchParams()
     if (selectedStatus.value) params.append('status', selectedStatus.value)
     if (searchQuery.value) params.append('search', searchQuery.value)
+    if (startDate.value) params.append('startDate', startDate.value)
+    if (endDate.value) params.append('endDate', endDate.value)
     
     const queryString = params.toString()
     const url = `/api/admin/orders${queryString ? '?' + queryString : ''}`
@@ -233,7 +244,7 @@ onMounted(() => {
   fetchOrders()
 })
 
-watch([searchQuery, selectedStatus], () => {
+watch([searchQuery, selectedStatus, startDate, endDate], () => {
   fetchOrders()
 })
 </script>

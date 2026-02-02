@@ -7,7 +7,8 @@ export class PurchasesController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            res.json(await service.list(tenant.id))
+            const { startDate, endDate } = req.query as { startDate?: string; endDate?: string }
+            res.json(await service.list(tenant.id, { startDate, endDate }))
         } catch (error) {
             console.error('List purchases error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -82,7 +83,7 @@ export class PurchasesController {
         try {
             const tenant = req.tenant!
             const { id } = req.params
-            if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+            if (!id || Array.isArray(id)) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
             await service.delete(tenant.id, id)
             res.status(204).send()
         } catch (error: any) {
@@ -98,6 +99,8 @@ export class PurchasesController {
         try {
             const tenant = req.tenant!
             const { id, itemId } = req.params
+            if (!id || Array.isArray(id)) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+            if (!itemId || Array.isArray(itemId)) return res.status(400).json({ statusCode: 400, statusMessage: 'Item ID required' })
             const updated = await service.updateItem(tenant.id, id, itemId, req.body)
             res.json(updated)
         } catch (error: any) {
@@ -113,6 +116,8 @@ export class PurchasesController {
         try {
             const tenant = req.tenant!
             const { id, itemId } = req.params
+            if (!id || Array.isArray(id)) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+            if (!itemId || Array.isArray(itemId)) return res.status(400).json({ statusCode: 400, statusMessage: 'Item ID required' })
             await service.removeItem(tenant.id, id, itemId)
             res.status(204).send()
         } catch (error: any) {

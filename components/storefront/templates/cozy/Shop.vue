@@ -186,10 +186,8 @@ const closeQuickView = () => {
       </aside>
     </Transition>
 
-    <!-- Header -->
-    <div class="py-12 px-4 text-center">
-      <h1 class="font-cozy font-black text-4xl md:text-5xl text-slate-800 mb-4">{{ pageTitle }}</h1>
-      <p class="text-slate-500 max-w-xl mx-auto">Explore our latest collection of premium products.</p>
+    <!-- Header Removed -->
+    <div class="py-4 px-4 text-center">
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

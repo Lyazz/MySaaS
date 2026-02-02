@@ -18,6 +18,17 @@ const mainImage = computed(() => {
 
 const isHovered = ref(false)
 
+const showSuccess = ref(false)
+const successTitle = ref('')
+const successMessage = ref('')
+
+const triggerSuccessToast = (title: string, message: string) => {
+    successTitle.value = title
+    successMessage.value = message
+    showSuccess.value = true
+    setTimeout(() => { showSuccess.value = false }, 3000)
+}
+
 function handleAddToCart() {
   cartStore.addItem({
     productId: props.product.id,
@@ -27,19 +38,20 @@ function handleAddToCart() {
     stock: props.product.stock,
     image: mainImage.value
   })
+  triggerSuccessToast('Added to basket', 'View your basket to checkout')
 }
 </script>
 
 <template>
     <div 
-        class="group relative bg-white rounded-[2rem] p-4 transition-all duration-500 hover:shadow-xl hover:shadow-brand-100/50 hover:-translate-y-1"
+        class="group relative bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-xl hover:shadow-brand-100/40 hover:-translate-y-1"
         :class="[ viewMode === 'list' ? 'flex gap-6 items-center' : 'flex flex-col' ]"
         @mouseenter="isHovered = true"
         @mouseleave="isHovered = false"
     >
         <!-- Image Container -->
         <div 
-            class="relative overflow-hidden rounded-[1.5rem] bg-slate-50 aspect-square"
+            class="relative overflow-hidden rounded-[2rem] bg-slate-50 aspect-square"
             :class="[ viewMode === 'list' ? 'w-48 mb-0' : 'w-full mb-4' ]"
         >
             <NuxtLink :to="`/p/${product.slug}`" class="block w-full h-full">
@@ -65,7 +77,7 @@ function handleAddToCart() {
                 {{ product.category?.title || 'Essentials' }}
             </div>
             
-            <h3 class="font-cozy font-bold text-lg text-slate-700 mb-2 leading-tight">
+            <h3 class="font-cozy font-bold text-lg text-slate-800/90 mb-2 leading-tight">
                 <NuxtLink :to="`/p/${product.slug}`">
                     {{ product.title }}
                 </NuxtLink>
@@ -74,6 +86,29 @@ function handleAddToCart() {
             <span class="font-bold text-brand-600 bg-brand-50 px-4 py-1 rounded-full text-sm mt-auto">
                 {{ formatPrice(product.price) }}
             </span>
-        </div>
     </div>
+    
+    <!-- Success Toast -->
+    <Transition
+      enter-active-class="transform ease-out duration-300 transition"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showSuccess"
+        class="fixed bottom-4 right-4 z-50 bg-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-100 flex items-center gap-4"
+      >
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+          <Icon name="lucide:check" class="w-5 h-5 text-green-600" />
+        </div>
+        <div>
+          <div class="font-bold text-slate-800">{{ successTitle }}</div>
+          <div class="text-sm text-slate-500">{{ successMessage }}</div>
+        </div>
+      </div>
+    </Transition>
+  </div>
 </template>

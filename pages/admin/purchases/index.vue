@@ -32,7 +32,13 @@
             <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
           </BaseSelect>
         </div>
-        <div class="flex items-end">
+        <div>
+          <DateFilter
+            v-model:startDate="startDate"
+            v-model:endDate="endDate"
+          />
+        </div>
+        <div class="hidden">
           <p class="text-sm text-gray-500">
             View and manage your purchase history.
           </p>
@@ -194,6 +200,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import DateFilter from '~/components/ui/DateFilter.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -215,6 +222,8 @@ const suppliers = ref<Supplier[]>([])
 const orders = ref<PurchaseOrder[]>([])
 const loading = ref(true)
 const selectedSupplier = ref('')
+const startDate = ref('')
+const endDate = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
@@ -246,7 +255,11 @@ const fetchOrders = async () => {
   loading.value = true
   try {
     orders.value = await $fetch<PurchaseOrder[]>('/api/admin/purchases', {
-      headers: { Authorization: `Bearer ${authStore.token}` }
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      query: {
+        startDate: startDate.value || undefined,
+        endDate: endDate.value || undefined
+      }
     })
   } catch (e: any) {
     console.error('Failed to load purchases', e)
@@ -274,6 +287,10 @@ const getStatusClass = (status: string) => {
 }
 
 watch(selectedSupplier, () => currentPage.value = 1)
+watch([startDate, endDate], () => {
+    currentPage.value = 1
+    fetchOrders()
+})
 
 onMounted(async () => {
   await fetchSuppliers()

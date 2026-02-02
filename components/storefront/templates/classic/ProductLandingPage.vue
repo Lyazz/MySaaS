@@ -70,7 +70,7 @@ const cartImage = computed(() => images.value[0])
 </script>
 
 <template>
-  <div class="bg-white min-h-screen py-10 font-sans pb-24 md:pb-20 overflow-x-hidden w-full">
+  <div class="bg-white min-h-screen py-10 font-serif pb-24 md:pb-20 overflow-x-hidden w-full">
     <!-- Description Section (Clean & Centered) -->
     <div class="max-w-4xl mx-auto mb-16 animate-fade-in-up px-4 text-center">
         <h1 class="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-8 leading-tight">

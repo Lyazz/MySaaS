@@ -24,6 +24,18 @@ import ModernStoreShell from './modern/StoreShell.vue'
 import ModernThemeProvider from './modern/ThemeProvider.vue'
 import ModernCart from './modern/Cart.vue'
 
+// Food Imports
+import FoodCategory from './food/Category.vue'
+import FoodContact from './food/ContactPage.vue'
+import FoodAbout from './food/AboutPage.vue'
+import FoodCheckout from './food/Checkout.vue'
+import FoodHome from './food/Home.vue'
+import FoodProduct from './food/Product.vue'
+import FoodShop from './food/Shop.vue'
+import FoodStoreShell from './food/StoreShell.vue'
+import FoodThemeProvider from './food/ThemeProvider.vue'
+import FoodCart from './food/Cart.vue'
+
 // Street Imports
 import StreetHome from './street/Home.vue'
 import StreetStoreShell from './street/StoreShell.vue'
@@ -72,11 +84,23 @@ import StationneryProduct from './stationnery/Product.vue'
 import StationneryShop from './stationnery/Shop.vue'
 import StationneryCart from './stationnery/Cart.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery'
+// Wellness Imports
+import WellnessHome from './wellness/Home.vue'
+import WellnessStoreShell from './wellness/StoreShell.vue'
+import WellnessThemeProvider from './wellness/ThemeProvider.vue'
+import WellnessCategory from './wellness/Category.vue'
+import WellnessContact from './wellness/ContactPage.vue'
+import WellnessAbout from './wellness/AboutPage.vue'
+import WellnessCheckout from './wellness/Checkout.vue'
+import WellnessProduct from './wellness/Product.vue'
+import WellnessShop from './wellness/Shop.vue'
+import WellnessCart from './wellness/Cart.vue'
+
+export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
@@ -84,7 +108,9 @@ export const homeTemplates = {
   street: StreetHome,
   cozy: CozyHome,
   cyber: CyberHome,
-  stationnery: StationneryHome
+  stationnery: StationneryHome,
+  food: FoodHome,
+  wellness: WellnessHome
 } satisfies Record<TemplateKey, Component>
 
 export const productTemplates = {
@@ -93,7 +119,9 @@ export const productTemplates = {
   street: StreetProduct,
   cozy: CozyProduct,
   cyber: CyberProduct,
-  stationnery: StationneryProduct
+  stationnery: StationneryProduct,
+  food: FoodProduct,
+  wellness: WellnessProduct
 } satisfies Record<TemplateKey, Component>
 
 export const categoryTemplates = {
@@ -102,7 +130,9 @@ export const categoryTemplates = {
   street: StreetCategory,
   cozy: CozyCategory,
   cyber: CyberCategory,
-  stationnery: StationneryCategory
+  stationnery: StationneryCategory,
+  food: FoodCategory,
+  wellness: WellnessCategory
 } satisfies Record<TemplateKey, Component>
 
 export const storeShellTemplates = {
@@ -111,7 +141,9 @@ export const storeShellTemplates = {
   street: StreetStoreShell,
   cozy: CozyStoreShell,
   cyber: CyberStoreShell,
-  stationnery: StationneryStoreShell
+  stationnery: StationneryStoreShell,
+  food: FoodStoreShell,
+  wellness: WellnessStoreShell
 } satisfies Record<TemplateKey, Component>
 
 export const shopTemplates = {
@@ -120,7 +152,9 @@ export const shopTemplates = {
   street: StreetShop,
   cozy: CozyShop,
   cyber: CyberShop,
-  stationnery: StationneryShop
+  stationnery: StationneryShop,
+  food: FoodShop,
+  wellness: WellnessShop
 } satisfies Record<TemplateKey, Component>
 
 export const checkoutTemplates = {
@@ -129,7 +163,9 @@ export const checkoutTemplates = {
   street: StreetCheckout,
   cozy: CozyCheckout,
   cyber: CyberCheckout,
-  stationnery: StationneryCheckout
+  stationnery: StationneryCheckout,
+  food: FoodCheckout,
+  wellness: WellnessCheckout
 } satisfies Record<TemplateKey, Component>
 
 export const cartTemplates = {
@@ -138,7 +174,9 @@ export const cartTemplates = {
   street: StreetCart,
   cozy: CozyCart,
   cyber: CyberCart,
-  stationnery: StationneryCart
+  stationnery: StationneryCart,
+  food: FoodCart,
+  wellness: WellnessCart
 } satisfies Record<TemplateKey, Component>
 
 export const aboutPageTemplates = {
@@ -147,7 +185,9 @@ export const aboutPageTemplates = {
   street: StreetAbout,
   cozy: CozyAbout,
   cyber: CyberAbout,
-  stationnery: StationneryAbout
+  stationnery: StationneryAbout,
+  food: FoodAbout,
+  wellness: WellnessAbout
 } satisfies Record<TemplateKey, Component>
 
 export const contactPageTemplates = {
@@ -156,7 +196,9 @@ export const contactPageTemplates = {
   street: StreetContact,
   cozy: CozyContact,
   cyber: CyberContact,
-  stationnery: StationneryContact
+  stationnery: StationneryContact,
+  food: FoodContact,
+  wellness: WellnessContact
 } satisfies Record<TemplateKey, Component>
 
 export const themeProviderTemplates = {
@@ -165,7 +207,9 @@ export const themeProviderTemplates = {
   street: StreetThemeProvider,
   cozy: CozyThemeProvider,
   cyber: CyberThemeProvider,
-  stationnery: StationneryThemeProvider
+  stationnery: StationneryThemeProvider,
+  food: FoodThemeProvider,
+  wellness: WellnessThemeProvider
 } satisfies Record<TemplateKey, Component>
 
 export const selectTemplate = (

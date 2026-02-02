@@ -40,7 +40,6 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
   } as Record<string, string>
 
   return result
@@ -53,7 +52,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-slate-50 font-sans text-slate-600"
+    class="min-h-screen bg-slate-50 font-serif text-slate-600"
     :style="storeStyle"
   >
     <slot />

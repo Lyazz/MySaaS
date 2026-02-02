@@ -45,7 +45,7 @@ describe('ProductLandingPage', () => {
         // Check for Sticky Bar presence (mobile bottom element)
         const stickyBar = wrapper.find('.fixed.bottom-0')
         expect(stickyBar.exists()).toBe(true)
-        expect(stickyBar.text()).toContain('1,500.00 DZD')
+        expect(stickyBar.text()).toMatch(/1[\s\u202f\u00a0]*500,00[\s\u202f\u00a0]*DA/)
     })
 
     it('renders description before the gallery/details section', () => {
@@ -62,36 +62,15 @@ describe('ProductLandingPage', () => {
             }
         })
 
-        const html = wrapper.html()
-        const descriptionIndex = html.indexOf('Visual description goes here.')
-
-        // Find component stub names. Depends on how Vue Test Utils names stubs.
-        // Usually <product-gallery-stub> or similar.
-        // Let's rely on wrapper.findComponent to locate them and ensure they exist.
         expect(wrapper.findComponent({ name: 'ProductGallery' }).exists()).toBe(true)
 
-        // For order check, we can check the order of elements in the DOM string
-        // The description div is .prose. The grid logic is in .lg:grid
+        const html = wrapper.html()
+        const descriptionIndex = html.indexOf('Visual description goes here.')
+        const galleryStubIndex = html.indexOf('product-gallery-stub')
 
-        // Let's approximate: Description text index vs "product-gallery-stub"
-        // Note: stub name in HTML might differ.
-
-        // Simpler check: wrapper.element.children order
-        // The main container has a .flex.flex-col and .gap-8
-        // First child should be the description container (bg-white rounded-3xl...)
-        // Second child should be the Grid container
-
-        const mainContainer = wrapper.find('.max-w-6xl > .flex.gap-8')
-        if (mainContainer.exists()) {
-            // The structure in template is:
-            // <div class="flex flex-col gap-8">
-            //   <div> Description </div>
-            //   <div> Grid </div>
-            // </div>
-            const children = mainContainer.element.children
-            expect(children.length).toBeGreaterThanOrEqual(2)
-            expect(children[0].innerHTML).toContain('Visual description goes here.')
-        }
+        expect(descriptionIndex).toBeGreaterThanOrEqual(0)
+        expect(galleryStubIndex).toBeGreaterThanOrEqual(0)
+        expect(descriptionIndex).toBeLessThan(galleryStubIndex)
     })
 
     it('passes correct props to ProductOrderForm', () => {

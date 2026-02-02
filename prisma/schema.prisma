@@ -16,6 +16,7 @@ model Tenant {
   updatedAt   DateTime @updatedAt
 
   users          User[]
+  customers      Customer[]
   subscription   TenantSubscription?
   payments       BillingPayment[]
   products       Product[]
@@ -32,9 +33,12 @@ model Tenant {
   categories     Category[]
   orders         Order[]
   orderItems     OrderItem[]
+  sales          Sale[]
+  saleItems      SaleItem[]
   shipments      Shipment[]
   deliveryRates  DeliveryRate[]
   storeSettings  StoreSettings?
+  contactInfos   TenantContactInfo[]
   domains        TenantDomain[]
   shipmentEvents ShipmentEvent[]             @relation("TenantShipmentEvents")
 }
@@ -113,6 +117,13 @@ model StoreSettings {
   fontFamily   String  @default("Outfit")
   language     String  @default("fr") // ar | fr | en
 
+  announcementText      String?
+  announcementScrolling Boolean @default(false)
+
+  // Storefront homepage configuration (carousel + sections).
+  // Tenant-scoped via StoreSettings. Treated as an opaque JSON blob but validated at the API layer.
+  homeConfig Json?
+
   cartEnabled     Boolean @default(true)
   codEnabled      Boolean @default(true)
   currencyCode    String  @default("DZD") // ISO currency code
@@ -123,6 +134,27 @@ model StoreSettings {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model TenantContactInfo {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind  String
+  label String?
+  value String
+
+  position Int     @default(0)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, kind])
+  @@index([tenantId, position])
 }
 
 model User {
@@ -138,6 +170,7 @@ model User {
 
   inventoryMovements InventoryMovement[]
   purchaseOrdersCreated PurchaseOrder[] @relation("PurchaseOrderCreatedBy")
+  salesCreated Sale[] @relation("SaleCreatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
@@ -185,6 +218,7 @@ model Product {
   variants ProductVariant[]
 
   orderItems OrderItem[]
+  saleItems  SaleItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -279,6 +313,7 @@ model ProductVariant {
   movements    InventoryMovement[]
   purchaseOrderItems PurchaseOrderItem[]
   orderItems   OrderItem[]
+  saleItems    SaleItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -329,6 +364,8 @@ model InventoryMovement {
   note      String?
   orderId   String?
   order     Order? @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+  saleId    String?
+  sale      Sale?  @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Cascade)
 
   stockAfter       Int?
   reservedAfter    Int?
@@ -343,6 +380,7 @@ model InventoryMovement {
   @@index([variantId])
   @@index([tenantId, variantId, createdAt])
   @@index([tenantId, orderId])
+  @@index([tenantId, saleId])
 }
 
 enum InventoryMovementType {
@@ -353,6 +391,58 @@ enum InventoryMovementType {
   RESERVED_ADJUSTMENT
   SAFETY_STOCK_CHANGE
   TRACKING_CHANGE
+}
+
+model Sale {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  totalAmount Float
+  status      String @default("COMPLETED") // COMPLETED | REFUNDED (future)
+
+  customerId String?
+  customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
+
+  customerName    String?
+  customerPhone   String?
+  customerAddress String?
+
+  notes String?
+
+  createdByUserId String?
+  createdBy       User? @relation("SaleCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
+
+  items     SaleItem[]
+  movements InventoryMovement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, customerId])
+}
+
+model SaleItem {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  saleId String
+  sale   Sale @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [tenantId, productId], references: [tenantId, id])
+
+  quantity Int
+  price    Float // Price at the time of sale
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [tenantId, variantId], references: [tenantId, id])
+
+  @@index([tenantId])
+  @@index([tenantId, saleId])
 }
 
 model Supplier {
@@ -438,6 +528,9 @@ model Order {
   status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
   totalAmount Float
 
+  customerId String?
+  customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
+
   customerName    String
   customerPhone   String
   customerAddress String?
@@ -464,6 +557,33 @@ model Order {
 
   @@unique([tenantId, id])
   @@index([tenantId])
+  @@index([tenantId, customerId])
+}
+
+model Customer {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name    String
+  phone   String
+  email   String?
+  address String?
+
+  // For future customer-auth/customer-space. Not used in MVP flows yet.
+  passwordHash String?
+
+  orders Order[]
+  sales  Sale[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, phone])
+  @@unique([tenantId, email])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
 }
 
 enum ShipmentProvider {

@@ -1,11 +1,27 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
+import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 
 const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
+const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
+const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
+const primaryContactInfos = computed(() =>
+    activeContactInfos.value.filter((i) => CONTACT_INFO_DEF_BY_KIND[i.kind].category !== 'social')
+)
+const socialContactInfosWithHref = computed(() =>
+    activeContactInfos.value
+        .filter((i) => CONTACT_INFO_DEF_BY_KIND[i.kind].category === 'social')
+        .map((i) => ({ ...i, href: buildContactInfoHref(i.kind, i.value) }))
+        .filter((i): i is ContactInfoRow & { href: string } => Boolean(i.href))
+)
+const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
+const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
+const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
 const { currencyCode } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
@@ -43,20 +59,14 @@ const currentYear = new Date().getFullYear()
 
 <template>
   <StoreThemeProvider>
-    <div class="min-h-screen flex flex-col max-w-[1920px] mx-auto bg-gradient-to-b from-amber-50/30 to-white">
+    <div class="min-h-screen flex flex-col max-w-[1920px] mx-auto">
       <!-- Top Announcement Bar -->
-      <div v-if="!hideNavigation && !hideAnnouncementBar" class="bg-brand-100/50 text-brand-800 text-xs font-medium py-2 px-4 text-center">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-          <span class="inline-block px-3 py-1 bg-white/50 rounded-full backdrop-blur-sm">{{ tenantName }} 6% | 4,000 {{ currencyCode }} min | 3 item(s)</span>
-          <button class="text-brand-600 hover:text-brand-800">
-            &times;
-          </button>
-        </div>
-      </div>
+      <!-- Top Announcement Bar -->
+      <StorefrontSharedAnnouncementBar v-if="!hideNavigation && !hideAnnouncementBar" />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['sticky top-4 z-50 px-4 md:px-8', { 'hidden md:block': mobileHeaderHidden }]">
-        <div class="max-w-7xl mx-auto bg-white/80 backdrop-blur-lg border border-white/50 shadow-soft rounded-[2rem] px-6 py-4 flex items-center justify-between gap-4 transition-all duration-500 hover:shadow-lg hover:bg-white/95">
+        <div class="max-w-7xl mx-auto bg-[#FDFBF7]/90 backdrop-blur-lg border border-white/40 shadow-soft rounded-[2rem] px-6 py-4 flex items-center justify-between gap-4 transition-all duration-500 hover:shadow-lg hover:bg-[#FDFBF7]/95">
           <!-- Logo -->
           <NuxtLink to="/" class="flex-shrink-0 flex items-center gap-2 group">
             <template v-if="storeSettings?.logoUrl">
@@ -135,28 +145,31 @@ const currentYear = new Date().getFullYear()
               <h3 class="font-cozy font-bold text-lg text-slate-800 mb-6">
                 {{ tenantName }}
               </h3>
-              <ul class="space-y-4 text-sm">
-                <li class="flex items-start gap-3">
-                  <Icon name="lucide:phone" class="w-5 h-5 text-brand-400 mt-0.5" />
-                  <span class="text-slate-500">0770838576</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <Icon name="lucide:mail" class="w-5 h-5 text-brand-400 mt-0.5" />
-                  <span class="text-slate-500">noukhba.contact@gmail.com</span>
+              <ul v-if="primaryContactInfos.length" class="space-y-4 text-sm">
+                <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
+                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5 text-brand-400 mt-0.5" />
+                  <a
+                    v-if="hrefFor(info)"
+                    :href="hrefFor(info)!"
+                    class="hover:text-brand-500 transition-colors text-slate-500"
+                    :target="isExternalHref(hrefFor(info)!) ? '_blank' : undefined"
+                    :rel="isExternalHref(hrefFor(info)!) ? 'noopener noreferrer' : undefined"
+                  >
+                    <span>{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
+                  </a>
+                  <span v-else class="text-slate-500">{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
                 </li>
               </ul>
-              <div class="flex gap-4 mt-6">
+              <div v-if="socialContactInfosWithHref.length" class="flex gap-4 mt-6">
                 <a
-                  href="#"
+                  v-for="info in socialContactInfosWithHref"
+                  :key="info.id"
+                  :href="info.href"
                   class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-brand-50 transition-colors text-slate-400 hover:text-brand-500"
+                  :target="isExternalHref(info.href) ? '_blank' : undefined"
+                  :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
                 >
-                  <Icon name="lucide:facebook" class="w-5 h-5" />
-                </a>
-                <a
-                  href="#"
-                  class="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-brand-50 transition-colors text-slate-400 hover:text-brand-500"
-                >
-                  <Icon name="lucide:instagram" class="w-5 h-5" />
+                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5" />
                 </a>
               </div>
             </div>

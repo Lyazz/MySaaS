@@ -186,10 +186,7 @@ const closeQuickView = () => {
       </aside>
     </Transition>
 
-    <!-- Header -->
-    <div class="bg-white border-b-4 border-black py-12 px-4 md:px-8">
-        <h1 class="font-street text-6xl md:text-8xl uppercase leading-none">{{ pageTitle }}</h1>
-    </div>
+    <!-- Header Removed -->
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex flex-col lg:flex-row gap-10">

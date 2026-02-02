@@ -39,54 +39,90 @@
                             <option value="image">Image with Text</option>
                         </BaseSelect>
                         <p class="mt-2 text-xs font-medium text-gray-500">Preview:</p>
-                        <div class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
+                        <div
+                            class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50"
+                            :data-testid="`option-preview-${option.id}`"
+                        >
                              <!-- Dropdown Preview -->
                             <div v-if="option.displayType === 'dropdown'" class="relative max-w-xs">
-                                <div class="block w-full h-9 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm flex items-center justify-between">
-                                    <span>Select value...</span>
+                                <select
+                                    disabled
+                                    class="block w-full h-9 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8"
+                                >
+                                    <option
+                                        v-for="v in previewValuesForOption(option, { max: 6, min: 1 })"
+                                        :key="v.id"
+                                        :value="v.id"
+                                    >
+                                        {{ v.label }}
+                                    </option>
+                                </select>
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <Icon name="lucide:chevron-down" class="w-4 h-4 text-gray-500" />
                                 </div>
                             </div>
                             
                             <!-- Button Preview -->
                             <div v-else-if="option.displayType === 'button'" class="flex flex-wrap gap-2">
-                                <div class="px-3 py-1.5 rounded-md text-sm font-medium border bg-teal-600 text-white border-teal-600 shadow-sm">
-                                    Value 1
-                                </div>
-                                <div class="px-3 py-1.5 rounded-md text-sm font-medium border bg-white text-gray-700 border-gray-200 hover:border-teal-300">
-                                    Value 2
+                                <div
+                                    v-for="(v, i) in previewValuesForOption(option, { max: 2, min: 2 })"
+                                    :key="v.id"
+                                    class="px-3 py-1.5 rounded-md text-sm font-medium border shadow-sm"
+                                    :class="i === 0 ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-700 border-gray-200 hover:border-teal-300'"
+                                >
+                                    {{ v.label }}
                                 </div>
                             </div>
 
                             <!-- Radio Preview -->
                             <div v-else-if="option.displayType === 'radio'" class="space-y-2">
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 rounded-full border border-teal-600 flex items-center justify-center">
-                                        <div class="w-2 h-2 rounded-full bg-teal-600"></div>
+                                <div
+                                    v-for="(v, i) in previewValuesForOption(option, { max: 2, min: 2 })"
+                                    :key="v.id"
+                                    class="flex items-center"
+                                >
+                                    <div
+                                        class="w-4 h-4 rounded-full border flex items-center justify-center"
+                                        :class="i === 0 ? 'border-teal-600' : 'border-gray-300'"
+                                    >
+                                        <div v-if="i === 0" class="w-2 h-2 rounded-full bg-teal-600"></div>
                                     </div>
-                                    <span class="ml-2 text-sm text-gray-700 font-medium">Value 1</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 rounded-full border border-gray-300"></div>
-                                    <span class="ml-2 text-sm text-gray-600">Value 2</span>
+                                    <span
+                                        class="ml-2 text-sm"
+                                        :class="i === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'"
+                                    >
+                                        {{ v.label }}
+                                    </span>
                                 </div>
                             </div>
 
                              <!-- Color Preview -->
                             <div v-else-if="option.displayType === 'color'" class="flex flex-wrap gap-3">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center relative ring-2 ring-offset-2 ring-teal-600 shadow-sm" style="background-color: #EF4444;">
-                                    <Icon name="lucide:check" class="w-4 h-4 text-white drop-shadow-sm" />
+                                <div
+                                    v-for="(v, i) in previewValuesForOption(option, { max: 4, min: 2 })"
+                                    :key="v.id"
+                                    class="w-8 h-8 rounded-full flex items-center justify-center relative shadow-sm"
+                                    :class="i === 0 ? 'ring-2 ring-offset-2 ring-teal-600' : 'ring-1 ring-black/5'"
+                                    :style="{ backgroundColor: previewColor(v, i) }"
+                                    :title="v.label"
+                                >
+                                    <Icon v-if="i === 0" name="lucide:check" class="w-4 h-4 text-white drop-shadow-sm" />
                                 </div>
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center relative ring-1 ring-black/5" style="background-color: #3B82F6;"></div>
                             </div>
 
                              <!-- Image Preview -->
                             <div v-else-if="option.displayType === 'image'" class="flex flex-wrap gap-3">
-                                <div class="w-12 h-12 rounded-lg border-2 border-teal-600 shadow-sm relative overflow-hidden bg-gray-200">
-                                   <div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400">Img</div>
-                                </div>
-                                <div class="w-12 h-12 rounded-lg border-2 border-slate-100 relative overflow-hidden bg-gray-200">
-                                    <div class="absolute inset-0 flex items-center justify-center text-xs text-gray-400">Img</div>
+                                <div
+                                    v-for="(v, i) in previewValuesForOption(option, { max: 4, min: 2 })"
+                                    :key="v.id"
+                                    class="w-12 h-12 rounded-lg border-2 relative overflow-hidden bg-gray-200"
+                                    :class="i === 0 ? 'border-teal-600 shadow-sm' : 'border-slate-100'"
+                                    :title="v.label"
+                                >
+                                   <img v-if="v.meta" :src="v.meta" class="absolute inset-0 w-full h-full object-cover" />
+                                   <div v-else class="absolute inset-0 flex items-center justify-center text-xs text-gray-500 font-medium">
+                                       {{ v.label?.[0]?.toUpperCase() || 'Img' }}
+                                   </div>
                                 </div>
                             </div>
                         </div>
@@ -205,51 +241,84 @@
                                 <option value="image">Image with Text</option>
                             </BaseSelect>
                             <p class="mt-1 text-xs font-medium text-gray-500">Preview:</p>
-                            <div class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50">
+                            <div class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50" data-testid="new-option-preview">
                                  <!-- Dropdown Preview -->
                                 <div v-if="newOptionType === 'dropdown'" class="relative max-w-xs">
-                                    <div class="block w-full h-8 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm flex items-center justify-between">
-                                        <span>Select value...</span>
+                                    <select
+                                        disabled
+                                        class="block w-full h-8 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8"
+                                    >
+                                        <option
+                                            v-for="v in newOptionPreviewValues.slice(0, 6)"
+                                            :key="v.id"
+                                            :value="v.id"
+                                        >
+                                            {{ v.label }}
+                                        </option>
+                                    </select>
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                         <Icon name="lucide:chevron-down" class="w-4 h-4 text-gray-500" />
                                     </div>
                                 </div>
                                 
                                 <!-- Button Preview -->
                                 <div v-else-if="newOptionType === 'button'" class="flex flex-wrap gap-2">
-                                    <div class="px-2 py-1 rounded text-xs font-medium border bg-teal-600 text-white border-teal-600 shadow-sm">
-                                        Value 1
-                                    </div>
-                                    <div class="px-2 py-1 rounded text-xs font-medium border bg-white text-gray-700 border-gray-200">
-                                        Value 2
+                                    <div
+                                        v-for="(v, i) in newOptionPreviewValues.slice(0, 2)"
+                                        :key="v.id"
+                                        class="px-2 py-1 rounded text-xs font-medium border shadow-sm"
+                                        :class="i === 0 ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-700 border-gray-200'"
+                                    >
+                                        {{ v.label }}
                                     </div>
                                 </div>
 
                                 <!-- Radio Preview -->
                                 <div v-else-if="newOptionType === 'radio'" class="space-y-2">
-                                    <div class="flex items-center">
-                                        <span class="w-3 h-3 rounded-full border border-teal-600 flex items-center justify-center">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+                                    <div
+                                        v-for="(v, i) in newOptionPreviewValues.slice(0, 2)"
+                                        :key="v.id"
+                                        class="flex items-center"
+                                    >
+                                        <span
+                                            class="w-3 h-3 rounded-full border flex items-center justify-center"
+                                            :class="i === 0 ? 'border-teal-600' : 'border-gray-300'"
+                                        >
+                                            <span v-if="i === 0" class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
                                         </span>
-                                        <span class="ml-2 text-xs text-gray-700 font-medium">Value 1</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <span class="w-3 h-3 rounded-full border border-gray-300"></span>
-                                        <span class="ml-2 text-xs text-gray-600">Value 2</span>
+                                        <span class="ml-2 text-xs" :class="i === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'">
+                                            {{ v.label }}
+                                        </span>
                                     </div>
                                 </div>
 
                                  <!-- Color Preview -->
                                 <div v-else-if="newOptionType === 'color'" class="flex flex-wrap gap-2">
-                                    <div class="w-6 h-6 rounded-full flex items-center justify-center relative ring-2 ring-offset-1 ring-teal-600 shadow-sm" style="background-color: #EF4444;">
-                                        <Icon name="lucide:check" class="w-3 h-3 text-white" />
+                                    <div
+                                        v-for="(v, i) in newOptionPreviewValues.slice(0, 4)"
+                                        :key="v.id"
+                                        class="w-6 h-6 rounded-full flex items-center justify-center relative shadow-sm"
+                                        :class="i === 0 ? 'ring-2 ring-offset-1 ring-teal-600' : 'ring-1 ring-black/5'"
+                                        :style="{ backgroundColor: previewColor(v, i) }"
+                                        :title="v.label"
+                                    >
+                                        <Icon v-if="i === 0" name="lucide:check" class="w-3 h-3 text-white" />
                                     </div>
-                                    <div class="w-6 h-6 rounded-full ring-1 ring-black/5" style="background-color: #3B82F6;"></div>
                                 </div>
 
                                  <!-- Image Preview -->
                                 <div v-else-if="newOptionType === 'image'" class="flex flex-wrap gap-2">
-                                    <div class="w-8 h-8 rounded border-2 border-teal-600 shadow-sm bg-gray-200"></div>
-                                    <div class="w-8 h-8 rounded border border-gray-200 bg-gray-200"></div>
+                                    <div
+                                        v-for="(v, i) in newOptionPreviewValues.slice(0, 4)"
+                                        :key="v.id"
+                                        class="w-8 h-8 rounded border-2 bg-gray-200 relative overflow-hidden"
+                                        :class="i === 0 ? 'border-teal-600 shadow-sm' : 'border-gray-200'"
+                                        :title="v.label"
+                                    >
+                                        <div class="absolute inset-0 flex items-center justify-center text-[10px] text-gray-500 font-medium">
+                                            {{ v.label?.[0]?.toUpperCase() || 'Img' }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -436,6 +505,56 @@ const editingOption = ref<any>(null)
 const editingValue = ref<any>(null)
 const editingMetaType = ref<'color'|'image'>('color')
 const editingMetaValue = ref('')
+
+type PreviewValue = { id: string; label: string; meta?: string | null }
+
+const PREVIEW_FALLBACK_LABELS = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5', 'Value 6']
+const PREVIEW_FALLBACK_COLORS = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899']
+
+function previewValuesForOption(option: any, params: { max: number; min: number }): PreviewValue[] {
+    const raw = Array.isArray(option?.values) ? option.values : []
+    const normalized: PreviewValue[] = raw
+        .slice(0, params.max)
+        .map((v: any, i: number) => ({
+            id: String(v?.id ?? `value-${i}`),
+            label: String(v?.label ?? PREVIEW_FALLBACK_LABELS[i] ?? `Value ${i + 1}`),
+            meta: v?.meta
+        }))
+
+    while (normalized.length < params.min) {
+        const i = normalized.length
+        normalized.push({
+            id: `placeholder-${i}`,
+            label: PREVIEW_FALLBACK_LABELS[i] ?? `Value ${i + 1}`
+        })
+    }
+
+    return normalized
+}
+
+function previewColor(v: PreviewValue, index: number): string {
+    return v.meta || PREVIEW_FALLBACK_COLORS[index % PREVIEW_FALLBACK_COLORS.length]
+}
+
+const newOptionPreviewValues = computed<PreviewValue[]>(() => {
+    const labels = newOptionValues.value
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean)
+        .slice(0, 6)
+
+    const normalized: PreviewValue[] = labels.map((label, i) => ({ id: `new-${i}`, label }))
+
+    while (normalized.length < 2) {
+        const i = normalized.length
+        normalized.push({
+            id: `placeholder-new-${i}`,
+            label: PREVIEW_FALLBACK_LABELS[i] ?? `Value ${i + 1}`
+        })
+    }
+
+    return normalized
+})
 
 // --- Meta Management ---
 function editValueMeta(option: any, value: any) {

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import ModernStoreShell from '../../components/storefront/templates/modern/StoreShell.vue'
 import { createTestingPinia } from '@pinia/testing'
-import { useState } from '#imports'
+import { defineComponent } from 'vue'
 
 // Mock useFetch and other composables
 vi.mock('#imports', async () => {
@@ -17,22 +17,29 @@ vi.mock('#imports', async () => {
 })
 
 describe('ModernStoreShell', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         // Mock useState for tenant and settings
         const mocks: Record<string, any> = {
             'tenant': { name: 'Test Tenant' },
             'storeSettings': { currencyCode: 'DZD', cartEnabled: true }
         }
 
-        // Setup useState mock implementation
-        vi.mocked(useState).mockImplementation((key: string, init?: () => any) => {
+        const { useState } = await import('#imports')
+
+        // Setup useState mock implementation (auto-import composable)
+        ;(useState as any).mockImplementation((key: string, init?: () => any) => {
             if (init && !mocks[key]) mocks[key] = init()
             return { value: mocks[key] } as any
         })
     })
 
     it('renders header and announcement bar by default', () => {
-        const wrapper = mount(ModernStoreShell, {
+        const SuspenseWrapper = defineComponent({
+            components: { ModernStoreShell },
+            template: '<Suspense><ModernStoreShell /></Suspense>'
+        })
+
+        const wrapper = mount(SuspenseWrapper, {
             global: {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
                 stubs: {
@@ -42,16 +49,20 @@ describe('ModernStoreShell', () => {
             }
         })
 
-        expect(wrapper.find('header').exists()).toBe(true)
+        return flushPromises().then(() => {
+            expect(wrapper.find('header').exists()).toBe(true)
         // Announcement bar checking: look for currency text
-        expect(wrapper.text()).toContain('4,000 DZD')
+            expect(wrapper.text()).toContain('4,000 DZD')
+        })
     })
 
     it('hides header and announcement bar when hideNavigation prop is true', () => {
-        const wrapper = mount(ModernStoreShell, {
-            props: {
-                hideNavigation: true
-            },
+        const SuspenseWrapper = defineComponent({
+            components: { ModernStoreShell },
+            template: '<Suspense><ModernStoreShell :hideNavigation="true" /></Suspense>'
+        })
+
+        const wrapper = mount(SuspenseWrapper, {
             global: {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
                 stubs: {
@@ -61,7 +72,9 @@ describe('ModernStoreShell', () => {
             }
         })
 
-        expect(wrapper.find('header').exists()).toBe(false)
-        expect(wrapper.text()).not.toContain('4,000 DZD')
+        return flushPromises().then(() => {
+            expect(wrapper.find('header').exists()).toBe(false)
+            expect(wrapper.text()).not.toContain('4,000 DZD')
+        })
     })
 })

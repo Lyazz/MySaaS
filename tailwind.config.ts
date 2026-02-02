@@ -13,12 +13,14 @@ export default {
             fontFamily: {
                 sans: ['Outfit', 'sans-serif'],
                 display: ['Outfit', 'sans-serif'],
-                serif: ['Playfair Display', 'serif'],
+                serif: ['Alice', 'serif'],
                 stationery: ['Merriweather', 'serif'],
                 street: ['Anton', 'sans-serif'],
                 cozy: ['Nunito', 'sans-serif'],
+                food: ['Nunito', 'sans-serif'],
                 cyber: ['Orbitron', 'sans-serif'],
                 mono: ['JetBrains Mono', 'monospace'],
+                wellness: ['Solway', 'serif'],
             },
             colors: {
                 brand: {
@@ -79,5 +81,21 @@ export default {
             }
         },
     },
-    plugins: [],
+    plugins: [
+        function ({ addUtilities }: any) {
+            const newUtilities = {
+                '.scrollbar-hide': {
+                    /* IE and Edge */
+                    '-ms-overflow-style': 'none',
+                    /* Firefox */
+                    'scrollbar-width': 'none',
+                    /* Safari and Chrome */
+                    '&::-webkit-scrollbar': {
+                        display: 'none'
+                    }
+                }
+            }
+            addUtilities(newUtilities)
+        }
+    ],
 }

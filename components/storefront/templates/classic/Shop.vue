@@ -111,7 +111,7 @@ const closeQuickView = () => {
 </script>
 
 <template>
-  <div class="bg-white min-h-screen py-8 lg:py-12 font-sans relative">
+  <div class="bg-white min-h-screen py-8 lg:py-12 font-serif relative">
     <!-- Mobile Filter Drawer Overlay -->
     <Transition
       enter-active-class="transition-opacity duration-300 ease-in-out"
@@ -191,34 +191,11 @@ const closeQuickView = () => {
       </aside>
     </Transition>
 
-    <!-- Hero Banner (Simplified) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 pt-4">
-      <div class="relative bg-slate-900 min-h-[300px] flex items-center justify-center text-center">
-         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1441986300917-64674bd800a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-40 grayscale"></div>
-         <div class="relative z-10 px-6 py-12 max-w-2xl mx-auto">
-             <span class="inline-block px-3 py-1 bg-white text-slate-900 text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
-                 New Collection
-             </span>
-
-             <h2 class="text-3xl md:text-5xl font-serif text-white mb-6">
-                 Timeless Elegance
-             </h2>
-             <button class="px-8 py-3 border border-white text-white text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-colors">
-                 Shop Now
-             </button>
-         </div>
-      </div>
-    </div>
+    <!-- Hero Banner Removed -->
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header / Title Section -->
       <div class="mb-12 text-center">
-        <h1 class="text-3xl lg:text-4xl font-serif font-bold text-slate-900 mb-3">
-          {{ pageTitle }}
-        </h1>
-        <p class="text-slate-500 text-sm lg:text-base max-w-2xl mx-auto">
-          Explore our latest collection of premium products, curated for quality and style.
-        </p>
              
         <!-- Specials Pills (Replaced with specific simple links or removed for minimalism. Let's keep a simple tab list) -->
         <div class="flex flex-wrap justify-center gap-6 mt-8 border-b border-slate-100 pb-4">
