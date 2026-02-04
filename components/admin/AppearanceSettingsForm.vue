@@ -228,18 +228,32 @@
                 @click="form.templateKey = t.key"
               >
                 <div class="flex items-start justify-between mb-3">
-                  <div class="p-2 rounded-lg" :class="form.templateKey === t.key ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500 group-hover:bg-teal-50 group-hover:text-teal-600'">
-                     <Icon :name="t.icon" class="w-6 h-6" />
+                  <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg" :class="form.templateKey === t.key ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500 group-hover:bg-teal-50 group-hover:text-teal-600'">
+                       <Icon :name="t.icon" class="w-6 h-6" />
+                    </div>
+                    <!-- Color Preview Circle -->
+                    <div 
+                        class="w-6 h-6 rounded-full border border-slate-200 shadow-sm"
+                        :style="{ backgroundColor: t.color }"
+                        :title="t.label + ' Theme Color'"
+                    ></div>
                   </div>
                   <div v-if="form.templateKey === t.key" class="text-teal-600">
                     <Icon name="lucide:check-circle-2" class="w-6 h-6" />
                   </div>
                 </div>
                 
-                <h4 class="font-semibold text-slate-900 mb-1">{{ t.label }}</h4>
+                <h4 
+                    class="font-semibold text-slate-900 mb-1 text-lg"
+                    :class="t.fontClass"
+                >
+                    {{ t.label }}
+                </h4>
                 <p class="text-sm text-slate-500 leading-relaxed">
                   {{ t.description }}
                 </p>
+
               </div>
             </div>
           </div>
@@ -346,50 +360,66 @@ const templates = [
   { 
     key: 'classic', 
     label: 'Classic Shop', 
-    description: 'Traditional e-commerce layout optimized for large product catalogs.',
-    icon: 'lucide:layout-grid'
+    description: 'A timeless, elegant layout featuring serif typography and deep navy tones. Perfect for luxury brands and established businesses.',
+    icon: 'lucide:layout-grid',
+    fontClass: 'font-serif',
+    color: '#0f172a'
   },
   { 
     key: 'modern', 
     label: 'Modern Minimal', 
-    description: 'Clean, spacious design with large imagery and bold typography.',
-    icon: 'lucide:layout-template'
+    description: 'A clean, contemporary aesthetic with bold teal accents and outfit typography. Ideal for tech, fashion, and lifestyle stores.',
+    icon: 'lucide:layout-template',
+    fontClass: 'font-sans',
+    color: '#0d9488'
   },
   { 
     key: 'street', 
     label: 'Street Urban', 
-    description: 'High-energy, bold layout with high-contrast elements and urban aesthetics.',
-    icon: 'lucide:zap'
+    description: 'Urban and energetic, featuring yellow high-contrast highlights and bold typography. Great for streetwear and youth culture brands.',
+    icon: 'lucide:zap',
+    fontClass: 'font-street',
+    color: '#FACC15'
   },
   { 
     key: 'cozy', 
     label: 'Cozy Warm', 
-    description: 'Soft, minimalist design with warm colors and elegant typography.',
-    icon: 'lucide:coffee'
+    description: 'Warm and inviting, with soft sage greens and rounded nuances. Creates a comfortable atmosphere for home decor and lifestyle products.',
+    icon: 'lucide:coffee',
+    fontClass: 'font-cozy',
+    color: '#A4C3B2'
   },
   { 
     key: 'cyber', 
     label: 'Cyber Future', 
-    description: 'Futuristic dark mode with neon accents and high-tech UI components.',
-    icon: 'lucide:cpu'
+    description: 'Futuristic dark mode with neon pink accents and digital-inspired styling. Designed for gaming, tech, and forward-thinking brands.',
+    icon: 'lucide:cpu',
+    fontClass: 'font-cyber',
+    color: '#F43F5E'
   },
   { 
     key: 'stationnery', 
     label: 'Stationery', 
-    description: 'Stationery oriented theme.',
-    icon: 'lucide:pen-tool'
+    description: 'Refined and structured, using slate tones and serif typography. Tailored for books, paper goods, and professional supplies.',
+    icon: 'lucide:pen-tool',
+    fontClass: 'font-stationery',
+    color: '#334155'
   },
   { 
     key: 'food', 
     label: 'Food Market', 
-    description: 'Appetizing design with warm stone tones, perfect for restaurants and food delivery.',
-    icon: 'lucide:utensils'
+    description: 'Vibrant and appetizing, featuring zest orange colors and clear layouts. Optimized for restaurants, grocery, and culinary businesses.',
+    icon: 'lucide:utensils',
+    fontClass: 'font-food',
+    color: '#EA580C'
   },
   { 
     key: 'wellness', 
     label: 'Wellness', 
-    description: 'Organic, health-focused design with Sage Green tones and Solway font.',
-    icon: 'lucide:flower-2'
+    description: 'Calm and organic, combining moss greens with natural serif fonts. Suited for health, beauty, and sustainable product lines.',
+    icon: 'lucide:flower-2',
+    fontClass: 'font-wellness',
+    color: '#8A9A5B'
   }
 ]
 
@@ -414,7 +444,7 @@ const updateForm = (data: any) => {
 const fetchSettings = async () => {
   loading.value = true
   try {
-    const data = await $fetch<any>('/api/admin/store-settings', {
+    const data = await $fetch('/api/admin/store-settings', {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
     updateForm(data)
@@ -431,7 +461,7 @@ const save = async () => {
   successMessage.value = ''
   errorMessage.value = ''
   try {
-    const updated = await $fetch<any>('/api/admin/store-settings', {
+    const updated = await $fetch('/api/admin/store-settings', {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: {

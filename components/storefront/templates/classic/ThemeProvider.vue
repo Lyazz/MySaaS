@@ -16,12 +16,12 @@ useHead(() => ({
 }))
 
 const storeStyle = computed(() => {
-  const primaryColor = storeSettings.value?.primaryColor || '#0d9488'
+  const primaryColor = '#0f172a' // Navy 900
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {
     // Ensure hex is valid
-    if (!hex || typeof hex !== 'string') return '13 148 136'
+    if (!hex || typeof hex !== 'string') return '15 23 42'
     
     // Remove hash
     hex = hex.replace('#', '')
@@ -32,7 +32,7 @@ const storeStyle = computed(() => {
     }
     
     const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    if (!result) return '13 148 136'
+    if (!result) return '15 23 42'
     
     return `${parseInt(result[1], 16)} ${parseInt(result[2], 16)} ${parseInt(result[3], 16)}`
   }
@@ -40,6 +40,7 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
+    fontFamily: "'Alice', serif"
   } as Record<string, string>
 
   return result

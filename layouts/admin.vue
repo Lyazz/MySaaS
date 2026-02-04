@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-slate-50 flex font-sans text-slate-600" :style="adminStyle">
+  <div class="h-screen overflow-hidden bg-slate-50 flex font-sans text-slate-600" :style="adminStyle">
     <!-- Sidebar -->
     <!-- Mobile Backdrop -->
     <div 

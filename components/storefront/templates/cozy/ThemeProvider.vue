@@ -16,9 +16,7 @@ useHead(() => ({
 }))
 
 const storeStyle = computed(() => {
-  // Default to Sage Green (#A4C3B2) if no primary color is set or if matching generic default
-  const themeDefaultColor = '#A4C3B2' 
-  const primaryColor = storeSettings.value?.primaryColor || themeDefaultColor
+  const primaryColor = '#A4C3B2' // Sage Green
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {

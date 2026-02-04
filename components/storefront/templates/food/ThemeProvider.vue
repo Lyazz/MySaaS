@@ -16,7 +16,7 @@ useHead(() => ({
 }))
 
   const storeStyle = computed(() => {
-    const primaryColor = storeSettings.value?.primaryColor || '#ea580c' // Orange-600 default
+    const primaryColor = '#ea580c' // Orange-600 default
   
     // Helper to convert hex to rgb
     const hexToRgb = (hex: string) => {
@@ -40,7 +40,7 @@ useHead(() => ({
     const result = {
       '--brand': primaryColor,
       '--brand-rgb': hexToRgb(primaryColor),
-      fontFamily: "'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
+      fontFamily: "'Nunito', sans-serif",
       '--font-serif': "'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif"
     } as Record<string, string>
 

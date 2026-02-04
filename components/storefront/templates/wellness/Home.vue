@@ -114,8 +114,8 @@ const displayedProducts = computed(() => {
                :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
              >
                 <div class="inline-flex items-center gap-2 mb-6">
-                    <span class="inline-block w-8 h-[2px] bg-emerald-400"></span>
-                    <span class="text-emerald-300 text-sm font-bold uppercase tracking-widest">Featured Collection</span>
+                    <span class="inline-block w-8 h-[2px] bg-brand-400"></span>
+                    <span class="text-brand-300 text-sm font-bold uppercase tracking-widest">Featured Collection</span>
                 </div>
                 
                 <h2 class="font-wellness text-5xl md:text-6xl lg:text-7xl text-white mb-6 leading-none drop-shadow-md">
@@ -128,7 +128,7 @@ const displayedProducts = computed(() => {
 
                 <NuxtLink
                   :to="slideTo(slide.buttonHref)"
-                  class="group inline-flex items-center gap-3 px-8 py-4 bg-white text-stone-900 font-medium rounded-full hover:bg-emerald-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                  class="group inline-flex items-center gap-3 px-8 py-4 bg-white text-stone-900 font-medium rounded-full hover:bg-brand-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                 >
                   {{ slide.buttonText || 'Discover Collection' }}
                   <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />

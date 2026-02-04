@@ -16,7 +16,7 @@ useHead(() => ({
 }))
 
 const storeStyle = computed(() => {
-  const primaryColor = storeSettings.value?.primaryColor || '#0d9488'
+  const primaryColor = '#0d9488' // Teal 600
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {
