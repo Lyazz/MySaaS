@@ -101,11 +101,31 @@
 </template>
 
 <script setup lang="ts">
+import { useTenantApiUrl } from '~/composables/useTenantApi'
+
 const route = useRoute()
 const orderId = ref<string | null>(null)
+const metaPixel = useMetaPixel()
 
 onMounted(() => {
   orderId.value = route.query.orderId as string || null
+
+  const id = orderId.value
+  if (!id) return
+
+  $fetch(useTenantApiUrl(`/api/orders/${encodeURIComponent(id)}/pixel`))
+    .then((payload: any) => {
+      if (!payload) return
+      const contents = Array.isArray(payload.contents) ? payload.contents : []
+      metaPixel.purchase({
+        orderId: id,
+        contents,
+        value: typeof payload.value === 'number' ? payload.value : undefined,
+        currency: typeof payload.currency === 'string' ? payload.currency : undefined,
+        pixelIds: Array.isArray(payload.pixelIds) ? payload.pixelIds : undefined
+      })
+    })
+    .catch(() => {})
 })
 
 definePageMeta({

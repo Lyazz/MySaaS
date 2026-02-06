@@ -4,10 +4,10 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">
-          Purchases
+          {{ t('admin.nav.purchases') }}
         </h2>
         <p class="text-gray-600 mt-1">
-          Manage your purchase orders and incoming stock
+          {{ t('admin.pages.purchases.index.subtitle') }}
         </p>
       </div>
       <NuxtLink
@@ -15,7 +15,7 @@
         class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
-        <span>New Purchase</span>
+        <span>{{ t('admin.pages.purchases.index.newPurchase') }}</span>
       </NuxtLink>
     </div>
 
@@ -25,10 +25,10 @@
         <div>
            <BaseSelect
             v-model="selectedSupplier"
-            label="Filter by Supplier"
-            placeholder="All Suppliers"
+            :label="t('admin.pages.purchases.index.filters.supplierLabel')"
+            :placeholder="t('admin.pages.purchases.index.filters.allSuppliers')"
           >
-            <option value="">All Suppliers</option>
+            <option value="">{{ t('admin.pages.purchases.index.filters.allSuppliers') }}</option>
             <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
           </BaseSelect>
         </div>
@@ -53,7 +53,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading purchases...
+        {{ t('admin.pages.purchases.index.loading') }}
       </p>
     </div>
 
@@ -64,10 +64,10 @@
     >
       <Icon name="lucide:shopping-bag" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        No purchases found
+        {{ t('admin.pages.purchases.index.empty.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        Get started by creating a new purchase order.
+        {{ t('admin.pages.purchases.index.empty.hint') }}
       </p>
       <div class="mt-6">
         <NuxtLink
@@ -75,7 +75,7 @@
           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
         >
           <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
-          New Purchase
+          {{ t('admin.pages.purchases.index.newPurchase') }}
         </NuxtLink>
       </div>
     </div>
@@ -90,22 +90,22 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID
+                {{ t('admin.pages.purchases.index.table.id') }}
               </th>
                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Supplier
+                {{ t('admin.pages.purchases.index.table.supplier') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {{ t('admin.pages.purchases.index.table.status') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Items
+                {{ t('admin.pages.purchases.index.table.items') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
+                {{ t('admin.pages.purchases.index.table.date') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Action
+                {{ t('admin.pages.purchases.index.table.action') }}
               </th>
             </tr>
           </thead>
@@ -127,7 +127,7 @@
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ order.items?.length || 0 }} items
+                {{ t('admin.pages.purchases.index.table.itemsCount', { count: order.items?.length || 0 }) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(order.createdAt) }}
@@ -137,7 +137,7 @@
                   :to="`/admin/purchases/${order.id}`"
                   class="text-teal-600 hover:text-teal-900 flex items-center justify-end"
                 >
-                  <span class="mr-1">Manage</span>
+                  <span class="mr-1">{{ t('admin.pages.purchases.index.table.manage') }}</span>
                   <Icon name="lucide:arrow-right" class="w-4 h-4" />
                 </NuxtLink>
               </td>
@@ -151,13 +151,11 @@
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
-              Showing
-              <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
-              to
-              <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredOrders.length) }}</span>
-              of
-              <span class="font-medium">{{ filteredOrders.length }}</span>
-              results
+              {{ t('admin.pages.purchases.index.pagination.showing', {
+                from: (currentPage - 1) * itemsPerPage + 1,
+                to: Math.min(currentPage * itemsPerPage, filteredOrders.length),
+                total: filteredOrders.length
+              }) }}
             </p>
           </div>
           <div>
@@ -167,7 +165,7 @@
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage--"
               >
-                Previous
+                {{ t('admin.common.previous') }}
               </button>
               <button
                 v-for="page in totalPages"
@@ -187,7 +185,7 @@
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage++"
               >
-                Next
+                {{ t('admin.common.next') }}
               </button>
             </nav>
           </div>
@@ -205,7 +203,7 @@ import DateFilter from '~/components/ui/DateFilter.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Purchases'
+  titleKey: 'admin.pages.purchases.index.title'
 })
 
 type Supplier = { id: string; name: string }
@@ -218,6 +216,7 @@ type PurchaseOrder = {
 }
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 const suppliers = ref<Supplier[]>([])
 const orders = ref<PurchaseOrder[]>([])
 const loading = ref(true)

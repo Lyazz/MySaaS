@@ -12,6 +12,12 @@ export default defineNuxtRouteMiddleware(() => {
         storeSettings.value = event.context.storeSettings
       }
 
+      const facebookPixelId = useState<string | null>('facebookPixelId', () => null)
+      const pixelId = (event.context as any)?.facebookPixelId
+      if (!facebookPixelId.value && (typeof pixelId === 'string' || pixelId == null)) {
+        facebookPixelId.value = pixelId ?? null
+      }
+
       return
     }
   }

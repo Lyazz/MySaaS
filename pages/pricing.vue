@@ -3,8 +3,14 @@ import { computed, ref } from 'vue'
 import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
 
 definePageMeta({
-  layout: 'marketing',
-  title: 'Pricing - Swekly'
+  layout: 'marketing'
+})
+
+const { t } = useI18n({ useScope: 'global' })
+
+useSeoMeta({
+  title: computed(() => t('pricing.seo.title')),
+  description: computed(() => t('pricing.seo.description'))
 })
 
 const isAnnual = ref(false)
@@ -16,14 +22,14 @@ const plans = computed(() => {
 
     return {
       code: plan.code,
-      name: plan.name,
-      description: plan.description,
+      name: t(`pricing.plans.${plan.code}.name`),
+      description: t(`pricing.plans.${plan.code}.description`),
       price: monthly.priceText,
       priceAnnual: annual.priceText,
       currency: monthly.currency,
-      period: monthly.periodText,
-      features: monthly.features,
-      cta: monthly.cta,
+      period: t('pricing.period.perMonth'),
+      features: [{ text: t('pricing.features.ordersPerMonth', { count: plan.ordersPerMonth }), included: true }],
+      cta: t(`pricing.plans.${plan.code}.cta`),
       popular: monthly.popular,
       highlight: monthly.highlight
     }
@@ -41,10 +47,10 @@ const plans = computed(() => {
        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 pointer-events-none"></div>
        
        <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
-         Simple, transparent pricing
+         {{ t('pricing.page.title') }}
        </h1>
        <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10">
-         Choose the plan that fits your growth stage. No hidden fees.
+         {{ t('pricing.page.subtitle') }}
        </p>
        
        <!-- Toggle -->
@@ -54,7 +60,7 @@ const plans = computed(() => {
            :class="!isAnnual ? 'text-white shadow-lg shadow-teal-500/20' : 'text-slate-400 hover:text-white'"
            @click="isAnnual = false"
          >
-           Monthly
+           {{ t('pricing.toggle.monthly') }}
            <div v-if="!isAnnual" class="absolute inset-0 bg-teal-600 rounded-full -z-10 layout-id-monthly"></div>
          </button>
          <button 
@@ -62,7 +68,7 @@ const plans = computed(() => {
            :class="isAnnual ? 'text-white' : 'text-slate-400 hover:text-white'"
            @click="isAnnual = true"
          >
-           Annual <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide border border-emerald-500/20">Save 20%</span>
+           {{ t('pricing.toggle.annual') }} <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide border border-emerald-500/20">{{ t('pricing.toggle.save', { percent: 20 }) }}</span>
            <div v-if="isAnnual" class="absolute inset-0 bg-teal-600 rounded-full -z-10 layout-id-annual shadow-lg shadow-teal-500/20"></div>
          </button>
        </div>
@@ -82,12 +88,12 @@ const plans = computed(() => {
         >
           <!-- Popular Badge -->
           <div v-if="plan.popular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-teal-500/30 whitespace-nowrap">
-            Most Popular
+            {{ t('pricing.badges.mostPopular') }}
           </div>
           
            <!-- Highlight Badge -->
           <div v-if="plan.highlight" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/30 whitespace-nowrap">
-            Recommended
+            {{ t('pricing.badges.recommended') }}
           </div>
 
           <div class="mb-6">

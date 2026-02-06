@@ -2,20 +2,20 @@
   <div class="space-y-6">
     <div class="flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-800">Billing</h1>
-        <p class="text-slate-600 mt-1">View your current plan, limits, and usage.</p>
+        <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.billing.title') }}</h1>
+        <p class="text-slate-600 mt-1">{{ t('admin.pages.billing.subtitle') }}</p>
       </div>
       <NuxtLink
         to="/pricing"
         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
       >
         <Icon name="lucide:arrow-up-right" class="w-4 h-4" />
-        <span class="text-sm font-semibold">See Pricing</span>
+        <span class="text-sm font-semibold">{{ t('admin.pages.billing.seePricing') }}</span>
       </NuxtLink>
     </div>
 
     <div v-if="error" class="p-4 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm">
-      Failed to load billing info.
+      {{ t('admin.pages.billing.errors.loadFailed') }}
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -23,8 +23,8 @@
       <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
         <div class="flex items-center justify-between gap-4 mb-4">
           <div>
-            <h2 class="text-lg font-bold text-slate-900">Current Plan</h2>
-            <p class="text-xs text-slate-500">You can switch plans for testing (monthly only).</p>
+            <h2 class="text-lg font-bold text-slate-900">{{ t('admin.pages.billing.currentPlan.title') }}</h2>
+            <p class="text-xs text-slate-500">{{ t('admin.pages.billing.currentPlan.hint') }}</p>
           </div>
           <div class="flex items-center gap-2">
             <span
@@ -38,7 +38,7 @@
               :disabled="pending"
               @click="() => refresh()"
             >
-              Refresh
+              {{ t('admin.common.refresh') }}
             </button>
           </div>
         </div>
@@ -46,7 +46,7 @@
         <div class="flex flex-col md:flex-row md:items-end gap-3 mb-5">
           <BaseSelect
             v-model="selectedPlanCode"
-            label="Change plan"
+            :label="t('admin.pages.billing.currentPlan.changePlan')"
             :options="planOptions"
             class="md:w-[320px]"
           />
@@ -56,23 +56,23 @@
             @click="simulatePay"
           >
             <Icon name="lucide:repeat" class="w-4 h-4" />
-            Pay (Simulate) & Apply
+            {{ t('admin.pages.billing.currentPlan.paySimulate') }}
           </button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
-            <div class="text-xs text-slate-500">Plan</div>
+            <div class="text-xs text-slate-500">{{ t('admin.pages.billing.currentPlan.cards.plan') }}</div>
             <div class="text-lg font-black text-slate-900 mt-1">{{ snapshot?.plan?.name || '—' }}</div>
             <div class="text-xs text-slate-500 mt-1">{{ snapshot?.plan?.description || '' }}</div>
           </div>
           <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
-            <div class="text-xs text-slate-500">Billing Interval</div>
+            <div class="text-xs text-slate-500">{{ t('admin.pages.billing.currentPlan.cards.interval') }}</div>
             <div class="text-lg font-black text-slate-900 mt-1">{{ snapshot?.subscription?.interval || '—' }}</div>
-            <div class="text-xs text-slate-500 mt-1">Source: {{ snapshot?.subscription?.source || '—' }}</div>
+            <div class="text-xs text-slate-500 mt-1">{{ t('admin.pages.billing.currentPlan.cards.source', { source: snapshot?.subscription?.source || '—' }) }}</div>
           </div>
           <div class="p-4 rounded-lg bg-slate-50 border border-slate-100">
-            <div class="text-xs text-slate-500">Orders This Period</div>
+            <div class="text-xs text-slate-500">{{ t('admin.pages.billing.currentPlan.cards.ordersThisPeriod') }}</div>
             <div class="text-lg font-black text-slate-900 mt-1">
               {{ snapshot?.usage?.ordersInPeriod ?? 0 }}
               <span class="text-xs text-slate-500 font-semibold">
@@ -84,7 +84,7 @@
         </div>
 
         <div class="mt-6">
-          <h3 class="text-sm font-bold text-slate-900 mb-2">Plan Limits</h3>
+          <h3 class="text-sm font-bold text-slate-900 mb-2">{{ t('admin.pages.billing.currentPlan.limitsTitle') }}</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div
               v-for="row in limitRows"
@@ -100,8 +100,8 @@
 
       <!-- Available Plans -->
       <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-        <h2 class="text-lg font-bold text-slate-900 mb-4">Available Plans</h2>
-        <div v-if="pending" class="text-sm text-slate-500">Loading...</div>
+        <h2 class="text-lg font-bold text-slate-900 mb-4">{{ t('admin.pages.billing.availablePlans.title') }}</h2>
+        <div v-if="pending" class="text-sm text-slate-500">{{ t('admin.common.loading') }}</div>
         <div v-else class="space-y-3">
           <div
             v-for="plan in plans"
@@ -114,7 +114,7 @@
                 <div class="text-sm font-bold text-slate-900">{{ plan.name }}</div>
                 <div class="text-xs text-slate-500 mt-1">{{ plan.description }}</div>
                 <div class="text-xs text-slate-600 mt-2 font-semibold">
-                  {{ plan.ordersPerMonth }} Orders / month
+                  {{ t('admin.pages.billing.availablePlans.ordersPerMonth', { count: plan.ordersPerMonth }) }}
                 </div>
               </div>
               <div class="text-right">
@@ -122,7 +122,7 @@
                   {{ formatDzd(plan.pricing?.monthlyAmountDzd) }}
                   <span class="text-[10px] font-bold text-slate-500 ml-1 uppercase">{{ plan.pricing?.currency || '' }}</span>
                 </div>
-                <div class="text-[10px] text-slate-500">/mo</div>
+                <div class="text-[10px] text-slate-500">{{ t('admin.pages.billing.availablePlans.perMonth') }}</div>
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Billing'
+  titleKey: 'admin.pages.billing.metaTitle'
 })
 
 type BillingSnapshot = {
@@ -176,6 +176,7 @@ type PlanCatalogItem = {
 }
 
 const authStore = useAuthStore()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 const { data, pending, error, refresh } = await useAsyncData(
   'adminBilling',
@@ -205,7 +206,8 @@ const formatLimit = (limit: number | null | undefined) => {
 
 const formatDzd = (amount: number | null | undefined) => {
   if (typeof amount !== 'number') return '—'
-  return new Intl.NumberFormat('fr-DZ', { maximumFractionDigits: 0 }).format(amount)
+  const intlLocale = locale.value === 'fr' ? 'fr-DZ' : locale.value === 'ar' ? 'ar-DZ' : 'en-DZ'
+  return new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 0 }).format(amount)
 }
 
 const periodLabel = computed(() => {
@@ -219,12 +221,12 @@ const periodLabel = computed(() => {
 
 const limitRows = computed(() => {
   return [
-    { label: 'Orders / month', value: formatLimit(snapshot.value?.plan?.ordersPerMonth) }
+    { label: t('admin.pages.billing.limits.ordersPerMonth'), value: formatLimit(snapshot.value?.plan?.ordersPerMonth) }
   ]
 })
 
 const planOptions = computed(() =>
-  plans.value.map((p) => ({ value: p.code, label: `${p.name} (${p.ordersPerMonth} orders/mo)` }))
+  plans.value.map((p) => ({ value: p.code, label: t('admin.pages.billing.planOption', { name: p.name, orders: p.ordersPerMonth }) }))
 )
 
 const selectedPlanCode = ref<string>('')

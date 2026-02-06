@@ -6,16 +6,16 @@
         class="text-center py-24"
       >
         <h2 class="text-4xl font-serif font-bold text-slate-900 mb-6">
-          Your Cart is Empty
+          {{ storefrontContent.cart.empty.title }}
         </h2>
         <p class="text-slate-500 mb-10 max-w-md mx-auto leading-relaxed">
-          It looks like you haven't added any items to your cart yet. Explore our collection to find something you love.
+          {{ storefrontContent.cart.empty.subtitle }}
         </p>
         <NuxtLink
           to="/products"
           class="inline-block px-10 py-4 bg-slate-900 text-white font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-colors"
         >
-          Start Shopping
+          {{ storefrontContent.cart.empty.cta }}
         </NuxtLink>
       </div>
 
@@ -26,9 +26,9 @@
         <section class="lg:col-span-7">
           <div class="flex items-end justify-between border-b border-slate-200 pb-6 mb-8">
             <h1 class="text-4xl font-serif font-bold text-slate-900">
-              Shopping Cart
+              {{ storefrontContent.cart.title }}
             </h1>
-            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">{{ cartStore.itemCount }} items</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">{{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}</span>
           </div>
 
           <ul role="list" class="space-y-8">
@@ -70,7 +70,7 @@
                       </button>
                     </div>
                     <p class="mt-1 text-xs text-slate-500 uppercase tracking-wider">
-                      {{ item.variantId ? 'Variant Selected' : 'Standard Item' }}
+                      {{ item.variantId ? storefrontContent.cart.item.variantSelected : storefrontContent.cart.item.standardItem }}
                     </p>
                   </div>
 
@@ -112,13 +112,13 @@
             id="summary-heading"
             class="text-xl font-serif font-bold text-slate-900 border-b border-slate-200 pb-4 mb-6"
           >
-            Order Summary
+            {{ storefrontContent.cart.summary.title }}
           </h2>
 
           <div class="space-y-4 text-sm">
             <div class="flex items-center justify-between">
               <dt class="text-slate-500 uppercase tracking-wider text-xs font-bold">
-                Subtotal
+                {{ storefrontContent.cart.summary.subtotal }}
               </dt>
               <dd class="font-medium text-slate-900">
                 {{ formatCurrency(cartStore.total) }}
@@ -126,16 +126,16 @@
             </div>
             <div class="flex items-center justify-between">
               <dt class="text-slate-500 uppercase tracking-wider text-xs font-bold">
-                Shipping
+                {{ storefrontContent.cart.summary.shipping }}
               </dt>
               <dd class="text-slate-400 italic">
-                Calculated at checkout
+                {{ storefrontContent.cart.summary.shippingHint }}
               </dd>
             </div>
             
             <div class="flex items-center justify-between pt-4 border-t border-slate-200 mt-4">
               <dt class="text-xl font-serif font-bold text-slate-900">
-                Total
+                {{ storefrontContent.cart.summary.total }}
               </dt>
               <dd class="text-xl font-serif font-bold text-slate-900">
                 {{ formatCurrency(cartStore.total) }}
@@ -148,14 +148,14 @@
               to="/checkout"
               class="w-full flex items-center justify-center bg-slate-900 px-6 py-4 text-xs font-bold uppercase tracking-widest text-white hover:bg-slate-800 transition-colors"
             >
-              Proceed to Checkout
+              {{ storefrontContent.cart.actions.proceedToCheckout }}
             </NuxtLink>
             
             <NuxtLink
               to="/products"
               class="w-full flex items-center justify-center border border-slate-900 bg-transparent px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
             >
-              Continue Shopping
+              {{ storefrontContent.actions.continueShopping }}
             </NuxtLink>
           </div>
         </section>
@@ -169,6 +169,7 @@ import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
 </script>
 

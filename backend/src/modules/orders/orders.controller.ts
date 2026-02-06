@@ -108,4 +108,25 @@ export class OrdersController {
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
+
+    async pixelPayloadPublic(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(404).json({ statusCode: 404, statusMessage: 'Tenant not found' })
+
+        const { id } = req.params
+        if (!id || Array.isArray(id)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+        }
+
+        try {
+            const payload = await service.getPublicPixelPayload(tenant.id, id)
+            if (!payload) return res.status(404).json({ statusCode: 404, statusMessage: 'Order not found' })
+
+            res.setHeader('Cache-Control', 'no-store')
+            res.json(payload)
+        } catch (error) {
+            console.error('Order pixel payload error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
 }

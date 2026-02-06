@@ -27,8 +27,7 @@
           </template>
           <template v-else>
             <div 
-              class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors"
-              :style="{ backgroundColor: 'var(--brand)' }"
+              class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors bg-teal-600"
             >
               {{ tenantInitial }}
             </div>
@@ -43,7 +42,7 @@
         <button 
           @click="toggleSidebar" 
           class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors lg:hidden"
-          aria-label="Close sidebar"
+          :aria-label="t('admin.actions.closeSidebar')"
         >
           <Icon name="lucide:x" class="w-5 h-5" />
         </button>
@@ -53,12 +52,12 @@
       <nav class="flex-1 py-6 px-3 overflow-y-auto custom-scrollbar">
         <div v-for="(group, index) in navGroups" :key="index" class="mb-6 last:mb-0">
           <button 
-            v-if="group.title" 
+            v-if="group.titleKey" 
             @click="toggleGroup(index)"
             class="w-full flex items-center justify-between px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider transition-opacity duration-300 hover:text-slate-300 group/header"
             :class="sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'"
           >
-            <span>{{ group.title }}</span>
+            <span>{{ t(group.titleKey) }}</span>
             <Icon 
               name="lucide:chevron-down" 
               class="w-3 h-3 transition-transform duration-200"
@@ -83,20 +82,19 @@
               <!-- Active Indicator Strip -->
               <div 
                 v-if="route.path === item.path"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full"
-                :style="{ backgroundColor: 'var(--brand)' }"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-teal-600"
               ></div>
 
               <Icon 
                 :name="item.icon" 
                 class="w-5 h-5 transition-transform duration-300 group-hover:scale-110 shrink-0"
-                :style="route.path === item.path ? { color: 'var(--brand)' } : {}"
+                :class="{ 'text-teal-600': route.path === item.path }"
               />
               <span 
                 class="font-medium text-sm transition-all duration-300 whitespace-nowrap overflow-hidden"
                 :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
               >
-                {{ item.label }}
+                {{ t(item.labelKey) }}
               </span>
               
               <!-- Tooltip for collapsed state -->
@@ -104,7 +102,7 @@
                 v-if="!sidebarOpen" 
                 class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
               >
-                {{ item.label }}
+                {{ t(item.labelKey) }}
               </div>
             </NuxtLink>
           </div>
@@ -140,7 +138,7 @@
             <button 
               @click="toggleSidebar" 
               class="p-2 -ml-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label="Toggle sidebar"
+              :aria-label="t('admin.actions.toggleSidebar')"
             >
               <Icon name="lucide:menu" class="w-6 h-6" />
             </button>
@@ -150,11 +148,13 @@
           <div class="flex items-center gap-4">
             <a
               :href="storefrontUrl"
-              class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-brand bg-slate-50 rounded-lg transition-all border border-slate-200 hover:border-brand"
+              class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 bg-slate-50 rounded-lg transition-all border border-slate-200 hover:border-teal-600"
             >
               <Icon name="lucide:external-link" class="w-4 h-4" />
-              <span>View Store</span>
+              <span>{{ t('admin.actions.viewStore') }}</span>
             </a>
+
+            <LocaleSwitcher class="inline-flex" />
             
             <div class="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
@@ -163,7 +163,7 @@
               class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
             >
               <Icon name="lucide:log-out" class="w-4 h-4" />
-              <span>Logout</span>
+              <span>{{ t('admin.actions.logout') }}</span>
             </button>
           </div>
         </div>
@@ -182,6 +182,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
+import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -244,131 +247,139 @@ const adminStyle = computed(() => {
 
 // Page title from route meta or default
 const pageTitle = computed(() => {
-  const meta = route.meta.title as string
-  return meta || 'Admin Dashboard'
+  const metaTitleKey = route.meta.titleKey as string | undefined
+  if (metaTitleKey) return t(metaTitleKey)
+  const metaTitle = route.meta.title as string | undefined
+  return metaTitle || t('admin.layout.defaultTitle')
 })
 
 // Navigation Groups
 const navGroups = ref([
   {
-    title: 'Overview',
+    titleKey: 'admin.nav.overview',
     collapsed: false,
     items: [
       {
         path: '/admin',
-        label: 'Dashboard',
+        labelKey: 'admin.nav.dashboard',
         icon: 'lucide:layout-dashboard'
       }
     ]
   },
   {
-    title: 'Catalog',
+    titleKey: 'admin.nav.catalog',
     collapsed: false,
     items: [
       {
         path: '/admin/products',
-        label: 'Products',
+        labelKey: 'admin.nav.products',
         icon: 'lucide:package'
       },
       {
         path: '/admin/inventory',
-        label: 'Inventory',
+        labelKey: 'admin.nav.inventory',
         icon: 'lucide:warehouse'
       },
       {
         path: '/admin/categories',
-        label: 'Categories',
+        labelKey: 'admin.nav.categories',
         icon: 'lucide:tags'
       }
     ]
   },
   {
-    title: 'Purchasing',
+    titleKey: 'admin.nav.purchasing',
     collapsed: false,
     items: [
       {
         path: '/admin/suppliers',
-        label: 'Suppliers',
+        labelKey: 'admin.nav.suppliers',
         icon: 'lucide:truck'
       },
       {
         path: '/admin/purchases',
-        label: 'Purchases',
+        labelKey: 'admin.nav.purchases',
         icon: 'lucide:shopping-cart'
       }
     ]
   },
   {
-    title: 'Sales',
+    titleKey: 'admin.nav.sales',
     collapsed: false,
     items: [
       {
         path: '/admin/orders',
-        label: 'Orders',
+        labelKey: 'admin.nav.orders',
         icon: 'lucide:handbag'
       },
       {
         path: '/admin/sales',
-        label: 'Sales',
+        labelKey: 'admin.nav.salesItem',
         icon: 'lucide:badge-dollar-sign'
       },
       {
         path: '/admin/pos',
-        label: 'POS',
+        labelKey: 'admin.nav.pos',
         icon: 'lucide:monitor-smartphone'
       },
       {
         path: '/admin/customers',
-        label: 'Customers',
+        labelKey: 'admin.nav.customers',
         icon: 'lucide:users'
       }
     ]
   },
   {
-    title: 'Delivery',
+    titleKey: 'admin.nav.delivery',
     collapsed: false,
     items: [
       {
         path: '/admin/delivery',
-        label: 'Delivery',
+        labelKey: 'admin.nav.deliveryItem',
         icon: 'lucide:truck'
       }
     ]
   },
   {
-    title: 'Finance',
+    titleKey: 'admin.nav.finance',
     collapsed: false,
     items: [
       {
         path: '/admin/billing',
-        label: 'Billing',
+        labelKey: 'admin.nav.billing',
         icon: 'lucide:credit-card'
       }
     ]
   },
+
   {
-    title: 'Settings',
+    titleKey: 'admin.nav.settings',
     collapsed: false,
     items: [
       {
         path: '/admin/settings/appearance',
-        label: 'Appearance',
+        labelKey: 'admin.nav.appearance',
         icon: 'lucide:palette'
       },
       {
         path: '/admin/settings/homepage',
-        label: 'Homepage',
+        labelKey: 'admin.nav.homepage',
         icon: 'lucide:home'
       },
       {
         path: '/admin/settings/contact',
-        label: 'Contact Info',
+        labelKey: 'admin.nav.contactInfo',
         icon: 'lucide:phone'
       },
       {
         path: '/admin/settings/functional',
-        label: 'Functional',
+        labelKey: 'admin.nav.functional',
         icon: 'lucide:sliders'
+      },
+      {
+        path: '/admin/integrations',
+        labelKey: 'admin.nav.integrations',
+        icon: 'lucide:puzzle'
       }
     ]
   }

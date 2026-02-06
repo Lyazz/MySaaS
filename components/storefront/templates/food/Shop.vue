@@ -13,6 +13,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 })
 
 const { currencyCode, format: formatCurrency } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
 const filters = computed(() => ({
@@ -22,7 +23,7 @@ const filters = computed(() => ({
 // Filtering Logic
 const selectedCategories = ref<string[]>([])
 const searchQuery = ref('')
-const sortOption = ref('Relevance')
+const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
@@ -56,24 +57,25 @@ const filteredProducts = computed(() => {
     })
 
     // Sort
-    if (sortOption.value === 'Price: Low to High') {
+    if (sortOption.value === 'priceAsc') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'Price: High to Low') {
-        result.sort((a, b) => Number(a.price) - Number(a.price))
+    } else if (sortOption.value === 'priceDesc') {
+        result.sort((a, b) => Number(b.price) - Number(a.price))
     }
 
     return result
 })
 
 const pageTitle = computed(() => {
+    const content = storefrontContent.value
     if (selectedCategories.value.length === 1) {
         const cat = filters.value.categories.find(c => c.id === selectedCategories.value[0])
-        return cat ? cat.title : 'Full Catalog'
+        return cat ? cat.title : content.shop.catalogTitle
     }
     if (selectedCategories.value.length > 1) {
-        return 'Filtered Products'
+        return content.shop.filteredTitle
     }
-    return 'Full Catalog'
+    return content.shop.catalogTitle
 })
 
 const isFilterDrawerOpen = ref(false)
@@ -94,7 +96,7 @@ const removeCategory = (catId: string) => {
 const resetFilters = () => {
     selectedCategories.value = []
     searchQuery.value = ''
-    sortOption.value = 'Relevance'
+    sortOption.value = 'relevance'
     minPriceInput.value = 0
     maxPriceInput.value = 200000
 }
@@ -188,7 +190,7 @@ const closeQuickView = () => {
               class="w-full py-4 bg-stone-900 text-white font-bold rounded-[2rem] shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
               @click="isFilterDrawerOpen = false"
             >
-              Show Results ({{ filteredProducts.length }})
+              {{ storefrontContent.shop.showResults(filteredProducts.length) }}
             </button>
           </div>
         </div>
@@ -207,8 +209,8 @@ const closeQuickView = () => {
             class="px-6 py-2.5 rounded-full bg-stone-900 text-white text-sm font-bold shadow-md hover:bg-brand-600 hover:scale-105 transition-all"
             @click="resetFilters"
             >
-            All Products
-            </button>
+            {{ storefrontContent.shop.allProducts }}
+          </button>
              <!-- Placeholder for future dynamic pills -->
         </div>
     </div>
@@ -229,14 +231,14 @@ const closeQuickView = () => {
                         class="text-[10px] font-bold text-brand-600 hover:text-brand-800 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded hover:bg-brand-100 transition-colors"
                         @click="resetFilters"
                     >
-                        Reset
+                        {{ storefrontContent.actions.reset }}
                     </button>
                 </div>
 
                 <!-- Categories -->
                 <div class="mb-8">
                     <h4 class="font-bold text-stone-400 mb-4 text-xs uppercase tracking-widest">
-                    Category
+                    {{ storefrontContent.shop.categories }}
                     </h4>
                     <div class="space-y-2">
                     <label
@@ -260,24 +262,26 @@ const closeQuickView = () => {
                 <!-- Price Filter -->
                 <div>
                     <h4 class="font-bold text-stone-400 mb-4 text-xs uppercase tracking-widest">
-                    Price Range
+                    {{ storefrontContent.shop.priceRange.label }}
                     </h4>
                     <div class="flex items-center gap-2 mb-4">
                         <div class="relative w-full">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-bold">{{ currencyCode }}</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-bold rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
                             <input 
                                 v-model.number="minPriceInput"
                                 type="number" 
-                                class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-7 pr-2 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 font-bold"
+                                :placeholder="storefrontContent.shop.priceRange.min"
+                                class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-7 rtl:pl-2 rtl:pr-7 pr-2 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 font-bold"
                             >
                         </div>
                         <span class="text-stone-300">-</span>
                         <div class="relative w-full">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-bold">{{ currencyCode }}</span>
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-bold rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
                             <input 
                                 v-model.number="maxPriceInput"
                                 type="number"
-                                class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-7 pr-2 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 font-bold"
+                                :placeholder="storefrontContent.shop.priceRange.max"
+                                class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-7 rtl:pl-2 rtl:pr-7 pr-2 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 font-bold"
                             >
                         </div>
                     </div>
@@ -303,10 +307,10 @@ const closeQuickView = () => {
               <input 
                 v-model="searchQuery" 
                 type="text"
-                placeholder="Search products..." 
-                class="w-full bg-stone-50 border-none text-stone-900 text-sm rounded-lg focus:ring-2 focus:ring-brand-200 block pl-10 h-11 transition-all hover:bg-stone-100 placeholder-stone-400 font-medium" 
+                :placeholder="storefrontContent.shop.searchPlaceholder" 
+                class="w-full bg-stone-50 border-none text-stone-900 text-sm rounded-lg focus:ring-2 focus:ring-brand-200 block pl-10 rtl:pl-3 rtl:pr-10 h-11 transition-all hover:bg-stone-100 placeholder-stone-400 font-medium" 
               >
-              <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+              <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-3.5 rtl:pl-0 rtl:pr-3.5 pointer-events-none">
                 <Icon name="lucide:search" class="w-5 h-5 text-stone-400" />
               </div>
             </div>
@@ -318,9 +322,9 @@ const closeQuickView = () => {
                   v-model="sortOption"
                   class="w-full appearance-none bg-transparent text-sm py-2 pl-2 pr-8 cursor-pointer text-stone-600 font-bold hover:text-stone-900 focus:ring-0 border-none text-right"
                 >
-                  <option>Relevance</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                  <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
+                  <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
+                  <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-stone-500" />
@@ -335,7 +339,7 @@ const closeQuickView = () => {
                         class="p-2 rounded-md transition-all"
                         :class="viewMode === 'grid' ? 'bg-stone-100 text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600'"
                         @click="viewMode = 'grid'"
-                        title="Grid View"
+                        :title="storefrontContent.shop.view.gridTitle"
                     >
                         <Icon name="lucide:layout-grid" class="w-5 h-5" />
                     </button>
@@ -343,7 +347,7 @@ const closeQuickView = () => {
                         class="p-2 rounded-md transition-all"
                         :class="viewMode === 'list' ? 'bg-stone-100 text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600'"
                         @click="viewMode = 'list'"
-                        title="List View"
+                        :title="storefrontContent.shop.view.listTitle"
                     >
                         <Icon name="lucide:list" class="w-5 h-5" />
                     </button>
@@ -365,7 +369,7 @@ const closeQuickView = () => {
                   </button>
               </div>
               <button @click="resetFilters" class="text-sm font-bold text-stone-400 hover:text-stone-600 underline underline-offset-4 px-2 decoration-2 decoration-brand-200">
-                  Clear filters
+                  {{ storefrontContent.actions.clearAll }}
               </button>
           </div>
 
@@ -378,16 +382,16 @@ const closeQuickView = () => {
                  <Icon name="lucide:search-x" class="w-10 h-10 text-stone-300" />
             </div>
             <h3 class="text-2xl font-bold text-stone-900 mb-2">
-              No products found
+              {{ storefrontContent.shop.results.noResults }}
             </h3>
             <p class="text-stone-500 max-w-xs mx-auto mb-8">
-              We couldn't find any items matching your filters.
+              {{ storefrontContent.shop.results.noResultsHint }}
             </p>
             <button
               class="px-8 py-3 bg-stone-900 text-white font-bold rounded-full hover:bg-brand-600 transition-colors shadow-lg"
               @click="resetFilters"
             >
-              Clear Filters
+              {{ storefrontContent.actions.clearAll }}
             </button>
           </div>
 
@@ -436,8 +440,8 @@ const closeQuickView = () => {
                     :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : 'https://placehold.co/600x600'" 
                     class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   >
-                   <div class="absolute bottom-6 left-6 inline-block px-4 py-2 bg-white/90 backdrop-blur rounded-full text-xs font-bold uppercase tracking-widest text-brand-700 shadow-lg">
-                        In Stock
+                   <div class="absolute bottom-6 left-6 rtl:left-auto rtl:right-6 inline-block px-4 py-2 bg-white/90 backdrop-blur rounded-full text-xs font-bold uppercase tracking-widest text-brand-700 shadow-lg">
+                        {{ storefrontContent.product.inStock }}
                    </div>
               </div>
 
@@ -449,17 +453,17 @@ const closeQuickView = () => {
                   
                   <div class="flex items-baseline gap-2 mb-8">
                      <span class="text-3xl font-bold text-stone-900">{{ formatCurrency(quickViewProduct.price) }}</span>
-                     <span class="text-sm text-stone-400 font-medium">per unit</span>
+                     <span class="text-sm text-stone-400 font-medium">{{ storefrontContent.product.perUnit }}</span>
                   </div>
 
                   <p class="text-stone-600 leading-relaxed text-lg mb-10 font-medium opacity-80">
-                      {{ quickViewProduct.description || 'Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.' }}
+                      {{ quickViewProduct.description || storefrontContent.product.descriptionFallback }}
                   </p>
 
                   <div class="mt-auto w-full space-y-4">
                       <button class="w-full py-5 bg-stone-900 text-white text-lg font-bold rounded-[2rem] hover:bg-brand-600 transition-colors shadow-xl hover:shadow-2xl active:scale-95 flex items-center justify-center gap-3">
                         <Icon name="lucide:shopping-basket" class="w-6 h-6" />
-                        Add to Cart
+                        {{ storefrontContent.actions.addToCart }}
                       </button>
                       <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 text-stone-500 font-bold hover:text-brand-600 transition-colors text-center text-sm uppercase tracking-widest" @click="closeQuickView">
                         View Product Details

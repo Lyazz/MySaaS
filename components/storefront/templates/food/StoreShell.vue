@@ -7,6 +7,7 @@ const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -33,8 +34,8 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 // Build dynamic menu
 const categories = computed(() => {
     const base = [
-        { name: 'Home', href: '/' },
-        { name: 'Shop', href: '/products' },
+        { name: storefrontContent.value.nav.home, href: '/' },
+        { name: storefrontContent.value.nav.shop, href: '/products' },
     ]
     
     // Add top 3 categories
@@ -45,7 +46,7 @@ const categories = computed(() => {
     }
     
     // Add Contact at the end
-    base.push({ name: 'Contact', href: '/contact' }) // contact is usually static or handled elsewhere
+    base.push({ name: storefrontContent.value.nav.contact, href: '/contact' }) // contact is usually static or handled elsewhere
     return base
 })
 const props = defineProps<{
@@ -124,9 +125,11 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
               <div class="h-8 w-px bg-stone-200 hidden sm:block" />
 
+              <LocaleSwitcher class="hidden lg:inline-flex" />
+
               <button
                 class="hidden sm:flex h-11 w-11 items-center justify-center text-stone-500 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-colors"
-                title="Account"
+                :title="storefrontContent.header.accountTitle"
               >
                 <Icon name="lucide:user" class="w-5 h-5" />
               </button>
@@ -210,38 +213,32 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             <!-- Links Columns (Masonry style spacing) -->
             <div class="md:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-8">
                <div>
-                 <h4 class="text-white font-bold mb-6 text-lg">Shop</h4>
+                 <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.contact }}</h4>
                  <ul class="space-y-4 text-sm text-stone-400">
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> All Products</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> New Arrivals</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> Best Sellers</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.contactUs }}</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.aboutUs }}</a></li>
                  </ul>
                </div>
                <div>
-                 <h4 class="text-white font-bold mb-6 text-lg">Support</h4>
+                 <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.termsPrivacy }}</h4>
                  <ul class="space-y-4 text-sm text-stone-400">
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> Help Center</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> Delivery Info</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> Returns</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.termsOfService }}</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.privacyPolicy }}</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.returnPolicy }}</a></li>
                  </ul>
                </div>
                 <div>
-                 <h4 class="text-white font-bold mb-6 text-lg">Legal</h4>
+                 <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.help }}</h4>
                  <ul class="space-y-4 text-sm text-stone-400">
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> Privacy Policy</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.faq }}</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.shippingInfo }}</a></li>
                  </ul>
                </div>
             </div>
           </div>
 
           <div class="pt-8 border-t border-stone-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-stone-600">
-            <div>&copy; 2026 {{ tenantName }}. All rights reserved.</div>
-            <div class="flex gap-4">
-                <span>Secure Payment</span>
-                <span class="w-px h-3 bg-stone-700"></span>
-                <span>Fast Delivery</span>
-            </div>
+            <div>{{ storefrontContent.footer.copyright(tenantName) }}</div>
           </div>
         </div>
       </footer>

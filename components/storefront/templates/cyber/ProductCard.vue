@@ -12,6 +12,7 @@ const emit = defineEmits<{
 
 const cartStore = useCartStore()
 const { format: formatPrice } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 const primaryImage = computed(() => {
     if (props.product?.productImages?.length > 0) {
@@ -49,8 +50,10 @@ function handleAddToCart() {
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
+    bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
-    image: primaryImage.value
+    image: primaryImage.value,
+    metaPixelIds: (props.product as any)?.metaPixelIds
   })
   triggerSuccessToast('Added to cart', 'Product added to your cart')
 }
@@ -169,7 +172,7 @@ function handleAddToCart() {
           type="button"
           class="p-2 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 shadow-lg shadow-pink-500/30 hover:from-pink-600 hover:to-orange-600 transition-all active:scale-95"
           :disabled="!isInStock"
-          title="Add to Cart"
+          :title="storefrontContent.actions.addToCart"
           @click.prevent="handleAddToCart"
         >
           <Icon name="lucide:plus" class="w-4 h-4 text-white" />
@@ -201,4 +204,3 @@ function handleAddToCart() {
     </div>
   </Transition>
 </template>
-

@@ -3,10 +3,10 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
         <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
-          Welcome back, {{ tenantName }}
+          {{ t('admin.pages.dashboard.welcomeBack', { tenant: tenantName }) }}
         </h2>
         <p class="mt-1 text-slate-600">
-          A quick snapshot of your store.
+          {{ t('admin.pages.dashboard.snapshot') }}
         </p>
       </div>
 
@@ -22,15 +22,15 @@
             class="h-4 w-4"
             :class="pending ? 'animate-spin' : ''"
           />
-          Refresh
+          {{ t('admin.pages.dashboard.refresh') }}
         </button>
         <NuxtLink
           v-if="!storeSettings?.isCompleted"
           to="/admin/onboarding"
-          class="inline-flex items-center gap-2 rounded-lg bg-[rgb(var(--brand-rgb))] px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
+          class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
         >
           <Icon name="lucide:sparkles" class="h-4 w-4" />
-          Finish setup
+          {{ t('admin.pages.dashboard.finishSetup') }}
         </NuxtLink>
       </div>
     </div>
@@ -43,10 +43,10 @@
         <Icon name="lucide:triangle-alert" class="mt-0.5 h-4 w-4" />
         <div class="min-w-0">
           <p class="font-medium">
-            Dashboard data couldn’t be loaded.
+            {{ t('admin.pages.dashboard.loadErrorTitle') }}
           </p>
           <p class="mt-1 text-red-700/80">
-            Try refreshing. If it keeps happening, check your connection or login session.
+            {{ t('admin.pages.dashboard.loadErrorHint') }}
           </p>
         </div>
       </div>
@@ -54,7 +54,7 @@
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <AdminDashboardStatCard
-        label="Orders (7 days)"
+        :label="t('admin.pages.dashboard.stats.orders7d')"
         :value="dashboard.last7d.orders"
         icon="lucide:clipboard-list"
         :loading="pending"
@@ -62,7 +62,7 @@
         to="/admin/orders"
       />
       <AdminDashboardStatCard
-        label="Revenue (7 days)"
+        :label="t('admin.pages.dashboard.stats.revenue7d')"
         :value="formatMoney(dashboard.last7d.revenue)"
         icon="lucide:banknote"
         :loading="pending"
@@ -70,7 +70,7 @@
         to="/admin/orders"
       />
       <AdminDashboardStatCard
-        label="Products"
+        :label="t('admin.pages.dashboard.stats.products')"
         :value="dashboard.counts.products"
         icon="lucide:package"
         :loading="pending"
@@ -78,9 +78,9 @@
         to="/admin/products"
       />
       <AdminDashboardStatCard
-        label="Low stock"
+        :label="t('admin.pages.dashboard.stats.lowStock')"
         :value="dashboard.inventory.lowStockProducts"
-        :hint="dashboard.inventory.outOfStockProducts ? `${dashboard.inventory.outOfStockProducts} out of stock` : undefined"
+        :hint="dashboard.inventory.outOfStockProducts ? t('admin.pages.dashboard.stats.outOfStock', { count: dashboard.inventory.outOfStockProducts }) : undefined"
         icon="lucide:alert-circle"
         :loading="pending"
         tone="amber"
@@ -93,17 +93,17 @@
         <div class="flex items-center justify-between gap-4 border-b border-slate-200/70 px-5 py-4">
           <div class="min-w-0">
             <h3 class="font-semibold text-slate-900">
-              Recent orders
+              {{ t('admin.pages.dashboard.recentOrders.title') }}
             </h3>
             <p class="mt-0.5 text-sm text-slate-500">
-              Latest 8 orders for this tenant.
+              {{ t('admin.pages.dashboard.recentOrders.hint') }}
             </p>
           </div>
           <NuxtLink
             to="/admin/orders"
             class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            View all
+            {{ t('admin.pages.dashboard.recentOrders.viewAll') }}
             <Icon name="lucide:arrow-right" class="h-4 w-4" />
           </NuxtLink>
         </div>
@@ -113,22 +113,22 @@
             <thead class="bg-slate-50">
               <tr>
                 <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Order
+                  {{ t('admin.pages.dashboard.recentOrders.table.order') }}
                 </th>
                 <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Customer
+                  {{ t('admin.pages.dashboard.recentOrders.table.customer') }}
                 </th>
                 <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Total
+                  {{ t('admin.pages.dashboard.recentOrders.table.total') }}
                 </th>
                 <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Status
+                  {{ t('admin.pages.dashboard.recentOrders.table.status') }}
                 </th>
                 <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Date
+                  {{ t('admin.pages.dashboard.recentOrders.table.date') }}
                 </th>
                 <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Action
+                  {{ t('admin.pages.dashboard.recentOrders.table.action') }}
                 </th>
               </tr>
             </thead>
@@ -170,16 +170,16 @@
                 >
                   <Icon name="lucide:inbox" class="mx-auto h-10 w-10 text-slate-300" />
                   <p class="mt-3 text-sm font-medium text-slate-900">
-                    No orders yet
+                    {{ t('admin.pages.dashboard.recentOrders.empty.title') }}
                   </p>
                   <p class="mt-1 text-sm text-slate-500">
-                    New orders will appear here as customers checkout.
+                    {{ t('admin.pages.dashboard.recentOrders.empty.hint') }}
                   </p>
                   <NuxtLink
                     to="/"
                     class="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
-                    View storefront
+                    {{ t('admin.pages.dashboard.recentOrders.empty.viewStorefront') }}
                     <Icon name="lucide:external-link" class="h-4 w-4" />
                   </NuxtLink>
                 </td>
@@ -218,10 +218,10 @@
                 <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <NuxtLink
                     :to="`/admin/orders/${order.id}`"
-                    class="inline-flex items-center gap-2 text-[rgb(var(--brand-rgb))] hover:opacity-80"
+                    class="inline-flex items-center gap-2 text-teal-600 hover:opacity-80"
                   >
                     <Icon name="lucide:eye" class="h-4 w-4" />
-                    View
+                    {{ t('common.view') }}
                   </NuxtLink>
                 </td>
               </tr>
@@ -233,10 +233,10 @@
       <div class="space-y-6">
         <div class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
           <h3 class="font-semibold text-slate-900">
-            Order status
+            {{ t('admin.pages.dashboard.orderStatus.title') }}
           </h3>
           <p class="mt-1 text-sm text-slate-500">
-            Quick filters to jump into your order list.
+            {{ t('admin.pages.dashboard.orderStatus.hint') }}
           </p>
 
           <div class="mt-4 space-y-2">
@@ -246,28 +246,28 @@
               :to="`/admin/orders?status=${encodeURIComponent(s.status)}`"
               class="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
             >
-              <span class="inline-flex items-center gap-2 text-slate-700">
-                <span
-                  class="h-2.5 w-2.5 rounded-full"
-                  :class="s.dotClass"
-                />
-                <span class="font-medium">
-                  {{ s.label }}
+                <span class="inline-flex items-center gap-2 text-slate-700">
+                  <span
+                    class="h-2.5 w-2.5 rounded-full"
+                    :class="s.dotClass"
+                  />
+                  <span class="font-medium">
+                    {{ t(s.labelKey) }}
+                  </span>
                 </span>
-              </span>
-              <span class="font-semibold text-slate-900">
-                {{ s.count }}
-              </span>
+                <span class="font-semibold text-slate-900">
+                  {{ s.count }}
+                </span>
             </NuxtLink>
           </div>
         </div>
 
         <div class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
           <h3 class="font-semibold text-slate-900">
-            Quick actions
+            {{ t('admin.pages.dashboard.quickLinks.title') }}
           </h3>
           <p class="mt-1 text-sm text-slate-500">
-            The most common admin tasks.
+            {{ t('admin.pages.dashboard.quickLinks.hint') }}
           </p>
 
           <div class="mt-4 grid grid-cols-1 gap-2">
@@ -277,7 +277,7 @@
             >
               <span class="inline-flex items-center gap-2 font-medium text-slate-700">
                 <Icon name="lucide:plus" class="h-4 w-4" />
-                Add product
+                {{ t('admin.pages.dashboard.quickLinks.addProduct') }}
               </span>
               <Icon name="lucide:chevron-right" class="h-4 w-4 text-slate-400" />
             </NuxtLink>
@@ -287,7 +287,7 @@
             >
               <span class="inline-flex items-center gap-2 font-medium text-slate-700">
                 <Icon name="lucide:package" class="h-4 w-4" />
-                Manage products
+                {{ t('admin.pages.dashboard.quickLinks.manageProducts') }}
               </span>
               <Icon name="lucide:chevron-right" class="h-4 w-4 text-slate-400" />
             </NuxtLink>
@@ -297,7 +297,7 @@
             >
               <span class="inline-flex items-center gap-2 font-medium text-slate-700">
                 <Icon name="lucide:tags" class="h-4 w-4" />
-                Categories
+                {{ t('admin.pages.dashboard.quickLinks.categories') }}
               </span>
               <Icon name="lucide:chevron-right" class="h-4 w-4 text-slate-400" />
             </NuxtLink>
@@ -307,7 +307,7 @@
             >
               <span class="inline-flex items-center gap-2 font-medium text-slate-700">
                 <Icon name="lucide:palette" class="h-4 w-4" />
-                Appearance
+                {{ t('admin.pages.dashboard.quickLinks.appearance') }}
               </span>
               <Icon name="lucide:chevron-right" class="h-4 w-4 text-slate-400" />
             </NuxtLink>
@@ -324,10 +324,11 @@ import { useAuthStore } from '~/stores/auth'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Dashboard'
+  titleKey: 'admin.pages.dashboard.title'
 })
 
 const authStore = useAuthStore()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 type DashboardResponse = {
   counts: {
@@ -389,7 +390,8 @@ const { format: formatMoney } = useCurrency()
 
 function formatDateTime(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleString('en-US', {
+  const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return date.toLocaleString(intlLocale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -401,12 +403,12 @@ function formatDateTime(dateString: string) {
 const statusRows = computed(() => {
   const byStatus = dashboard.value.ordersByStatus || {}
   const rows = [
-    { status: 'PENDING', label: 'Pending', dotClass: 'bg-amber-500' },
-    { status: 'CONFIRMED', label: 'Confirmed', dotClass: 'bg-blue-500' },
-    { status: 'SHIPPED', label: 'Shipped', dotClass: 'bg-cyan-500' },
-    { status: 'DELIVERED', label: 'Delivered', dotClass: 'bg-green-500' },
-    { status: 'CANCELLED', label: 'Cancelled', dotClass: 'bg-red-500' },
-    { status: 'RETURNED', label: 'Returned', dotClass: 'bg-purple-500' }
+    { status: 'PENDING', labelKey: 'admin.orderStatus.pending', dotClass: 'bg-amber-500' },
+    { status: 'CONFIRMED', labelKey: 'admin.orderStatus.confirmed', dotClass: 'bg-blue-500' },
+    { status: 'SHIPPED', labelKey: 'admin.orderStatus.shipped', dotClass: 'bg-cyan-500' },
+    { status: 'DELIVERED', labelKey: 'admin.orderStatus.delivered', dotClass: 'bg-green-500' },
+    { status: 'CANCELLED', labelKey: 'admin.orderStatus.cancelled', dotClass: 'bg-red-500' },
+    { status: 'RETURNED', labelKey: 'admin.orderStatus.returned', dotClass: 'bg-purple-500' }
   ]
   return rows.map((r) => ({ ...r, count: Number(byStatus[r.status] || 0) }))
 })

@@ -5,13 +5,13 @@
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
           <NuxtLink to="/admin/suppliers" class="text-gray-700 hover:text-teal-600">
-            Suppliers
+            {{ t('admin.nav.suppliers') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">Create Supplier</span>
+            <span class="ml-1 text-gray-500">{{ t('admin.pages.suppliers.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -19,8 +19,8 @@
 
     <!-- Header -->
     <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Create New Supplier</h2>
-      <p class="text-gray-600 mt-1">Add a supplier to your database</p>
+      <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.suppliers.create.title') }}</h2>
+      <p class="text-gray-600 mt-1">{{ t('admin.pages.suppliers.create.subtitle') }}</p>
     </div>
 
     <!-- Form -->
@@ -28,42 +28,42 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <BaseInput
           v-model="form.name"
-          label="Name"
+          :label="t('admin.forms.supplier.name.label')"
           :error="errors.name"
-          placeholder="Supplier name"
+          :placeholder="t('admin.forms.supplier.name.placeholder')"
           required
         />
 
         <BaseInput
           v-model="form.phone"
-          label="Phone"
+          :label="t('admin.forms.supplier.phone.label')"
           :error="errors.phone"
-          placeholder="Phone number"
+          :placeholder="t('admin.forms.supplier.phone.placeholder')"
         />
 
         <BaseInput
           v-model="form.email"
-          label="Email"
+          :label="t('admin.forms.supplier.email.label')"
           type="email"
           :error="errors.email"
-          placeholder="email@example.com"
+          :placeholder="t('admin.forms.supplier.email.placeholder')"
         />
 
         <BaseInput
           v-model="form.address"
-          label="Address"
+          :label="t('admin.forms.supplier.address.label')"
           :error="errors.address"
-          placeholder="Supplier address"
+          :placeholder="t('admin.forms.supplier.address.placeholder')"
         />
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.forms.supplier.notes.label') }}</label>
         <textarea
           v-model="form.notes"
           rows="3"
           class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
-          placeholder="Additional notes..."
+          :placeholder="t('admin.forms.supplier.notes.placeholder')"
         ></textarea>
       </div>
 
@@ -76,7 +76,7 @@
           to="/admin/suppliers"
           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
-          Cancel
+          {{ t('admin.common.cancel') }}
         </NuxtLink>
         <button
           type="button"
@@ -85,7 +85,7 @@
           @click="handleSubmit"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
-          {{ submitting ? 'Creating...' : 'Create Supplier' }}
+          {{ submitting ? t('admin.common.creating') : t('admin.pages.suppliers.create.submit') }}
         </button>
       </div>
     </form>
@@ -99,11 +99,12 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Create Supplier'
+  titleKey: 'admin.pages.suppliers.create.metaTitle'
 })
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 
 const form = reactive({
   name: '',
@@ -122,7 +123,7 @@ async function handleSubmit() {
   errorMessage.value = ''
   
   if (!form.name.trim()) {
-    errors.value.name = 'Name is required'
+    errors.value.name = t('admin.forms.supplier.name.required')
     return
   }
 
@@ -149,7 +150,7 @@ async function handleSubmit() {
     if (error.data?.statusMessage) {
       errorMessage.value = error.data.statusMessage
     } else {
-      errorMessage.value = 'Failed to create supplier. Please try again.'
+      errorMessage.value = t('admin.pages.suppliers.create.errors.createFailed')
     }
   } finally {
     submitting.value = false

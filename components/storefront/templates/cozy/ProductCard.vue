@@ -35,8 +35,10 @@ function handleAddToCart() {
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
+    bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
-    image: mainImage.value
+    image: mainImage.value,
+    metaPixelIds: (props.product as any)?.metaPixelIds
   })
   triggerSuccessToast('Added to basket', 'View your basket to checkout')
 }

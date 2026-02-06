@@ -24,6 +24,28 @@ class ApiService {
 
   Dio get client => _dio;
 
+  /// Resolves relative URLs like `/uploads/...` against the API host
+  /// (e.g. `http://localhost:3000/api` -> `http://localhost:3000/uploads/...`).
+  ///
+  /// Use this for image/file URLs returned by the backend.
+  String resolvePublicUrl(String url) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    final lower = trimmed.toLowerCase();
+    if (lower.startsWith('http://') || lower.startsWith('https://')) {
+      return trimmed;
+    }
+
+    final base = Uri.parse(_dio.options.baseUrl);
+    final origin = base.replace(path: '', query: null, fragment: null);
+
+    if (trimmed.startsWith('/')) {
+      return origin.resolve(trimmed).toString();
+    }
+    return origin.resolve('/$trimmed').toString();
+  }
+
   void setToken(String? token) {
     if (token != null) {
       _dio.options.headers['Authorization'] = 'Bearer $token';

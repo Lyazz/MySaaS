@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/stationnery/ProductCard.vue'
-import { DEFAULT_STOREFRONT_HOME_CONFIG, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const props = defineProps<{
   tenantName: string
@@ -13,13 +13,15 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 
-const defaultHeroSlides = DEFAULT_STOREFRONT_HOME_CONFIG.carousel
+const storefrontContent = useStorefrontContent()
+const homeDefaults = useStorefrontHomeDefaults()
+const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
-    const slides = props.homeConfig?.carousel
-    return Array.isArray(slides) && slides.length > 0 ? slides : defaultHeroSlides
+    const slides = isCustomHomeConfig.value ? props.homeConfig?.carousel : undefined
+    return Array.isArray(slides) && slides.length > 0 ? slides : homeDefaults.value.carousel
 })
 
-const sections = computed(() => props.homeConfig?.sections || DEFAULT_STOREFRONT_HOME_CONFIG.sections)
+const sections = computed(() => (isCustomHomeConfig.value ? props.homeConfig?.sections : undefined) || homeDefaults.value.sections)
 const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
@@ -94,7 +96,7 @@ const {
               class="max-w-2xl text-white transform transition-all duration-1000 delay-300" 
               :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
             >
-              <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-sm text-xs md:text-sm font-medium mb-4 tracking-wide border border-white/10 uppercase">Welcome to {{ tenantName }}</span>
+              <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-sm text-xs md:text-sm font-medium mb-4 tracking-wide border border-white/10 uppercase">{{ storefrontContent.home.welcomeTo(tenantName) }}</span>
               <h2 class="text-4xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight tracking-tight">
                 {{ slide.title }}
               </h2>
@@ -105,9 +107,9 @@ const {
                 :to="slideTo(slide.buttonHref)"
                 class="group inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-white text-slate-900 font-bold rounded-sm hover:bg-[#fdfbf7] transition-all transform hover:scale-105 shadow-sm text-sm md:text-base border border-stone-200"
               >
-                {{ slide.buttonText || 'Shop Now' }}
-                <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </NuxtLink>
+	                {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
+	                <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+	              </NuxtLink>
             </div>
           </div>
         </div>
@@ -201,9 +203,9 @@ const {
                 {{ cat.title }}
               </h3>
               <p class="text-stone-500 font-medium text-sm md:text-base flex items-center gap-2">
-                {{ cat.itemCount }} Products
-              </p>
-            </div>
+	                {{ storefrontContent.common.productsCount(cat.itemCount) }}
+	              </p>
+	            </div>
           </NuxtLink>
         </div>
       </div>

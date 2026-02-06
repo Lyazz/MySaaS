@@ -9,17 +9,17 @@
           <Icon name="lucide:shopping-basket" class="h-24 w-24 text-stone-300" />
         </div>
         <h2 class="text-3xl font-extrabold text-stone-900 tracking-tight sm:text-4xl">
-          Your cart is empty
+          {{ storefrontContent.cart.empty.title }}
         </h2>
         <p class="mt-4 max-w-2xl mx-auto text-xl text-stone-500">
-          Looks like you haven't added anything to your cart yet.
+          {{ storefrontContent.cart.empty.subtitle }}
         </p>
         <div class="mt-10">
           <NuxtLink
             to="/products"
             class="inline-flex items-center px-10 py-4 border border-transparent text-lg font-bold rounded-full shadow-lg text-white bg-stone-900 hover:bg-brand-600 focus:outline-none transition-all duration-200 active:scale-95"
           >
-            Start Shopping
+            {{ storefrontContent.cart.empty.cta }}
           </NuxtLink>
         </div>
       </div>
@@ -31,9 +31,9 @@
         <section class="lg:col-span-7">
           <div class="flex items-center justify-between border-b border-dashed border-stone-300 pb-6 mb-8">
             <h1 class="text-4xl font-bold tracking-tight text-stone-900">
-              Shopping Cart
+              {{ storefrontContent.cart.title }}
             </h1>
-            <span class="text-brand-600 font-bold bg-brand-50 px-3 py-1 rounded-full text-sm border border-brand-100">{{ cartStore.itemCount }} items</span>
+            <span class="text-brand-600 font-bold bg-brand-50 px-3 py-1 rounded-full text-sm border border-brand-100">{{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}</span>
           </div>
 
           <ul
@@ -64,7 +64,7 @@
                   </div>
                 </div>
 
-                <div class="ml-6 flex flex-1 flex-col justify-between">
+                <div class="ml-6 rtl:ml-0 rtl:mr-6 flex flex-1 flex-col justify-between">
                   <div class="flex justify-between items-start">
                     <div class="min-w-0 flex-1 pr-4">
                       <h3 class="text-xl font-bold text-stone-900 hover:text-brand-600 transition-colors leading-tight">
@@ -79,10 +79,10 @@
                     
                     <button
                         type="button"
-                        class="text-stone-300 hover:text-red-500 transition-colors p-2 -mr-2"
+                        class="text-stone-300 hover:text-red-500 transition-colors p-2 -mr-2 rtl:-mr-0 rtl:-ml-2"
                         @click="cartStore.removeItem(item.productId, item.variantId)"
                       >
-                        <span class="sr-only">Remove</span>
+                        <span class="sr-only">{{ storefrontContent.cart.item.remove }}</span>
                         <Icon name="lucide:trash-2" class="h-5 w-5" />
                     </button>
                   </div>
@@ -92,7 +92,7 @@
                       {{ formatCurrency(item.price) }}
                     </p>
 
-                    <div class="flex items-center space-x-1 bg-stone-100 rounded-full p-1 border border-stone-200">
+                    <div class="flex items-center space-x-1 rtl:space-x-reverse bg-stone-100 rounded-full p-1 border border-stone-200">
                       <button
                         :disabled="item.quantity <= 1"
                         class="w-8 h-8 flex items-center justify-center rounded-full bg-white text-stone-900 shadow-sm hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 transition-all"
@@ -132,13 +132,13 @@
               id="summary-heading"
               class="text-2xl font-bold text-stone-900 text-center mb-8 border-b-2 border-stone-900 pb-4 uppercase tracking-widest pt-4"
             >
-              Order Summary
+              {{ storefrontContent.cart.summary.title }}
             </h2>
 
             <div class="space-y-4 text-sm">
               <div class="flex items-center justify-between border-b border-dashed border-stone-300 pb-4">
                 <dt class="text-stone-600">
-                  Subtotal
+                  {{ storefrontContent.cart.summary.subtotal }}
                 </dt>
                 <dd class="font-bold text-stone-900">
                   {{ formatCurrency(cartStore.total) }}
@@ -146,15 +146,15 @@
               </div>
               <div class="flex items-center justify-between border-b border-dashed border-stone-300 pb-4">
                 <dt class="flex items-center text-stone-600">
-                  <span>Shipping</span>
+                  <span>{{ storefrontContent.cart.summary.shipping }}</span>
                 </dt>
                 <dd class="text-stone-500 italic">
-                  --
+                  {{ storefrontContent.cart.summary.shippingHint }}
                 </dd>
               </div>
               <div class="flex items-center justify-between border-b border-dashed border-stone-300 pb-4">
                 <dt class="text-stone-600">
-                  Tax
+                  {{ storefrontContent.cart.summary.tax }}
                 </dt>
                 <dd class="font-bold text-stone-900">
                   {{ formatCurrency(0) }}
@@ -164,7 +164,7 @@
               <!-- Total -->
               <div class="flex items-center justify-between pt-4 pb-8">
                 <dt class="text-xl font-bold text-stone-900 uppercase">
-                  Total
+                  {{ storefrontContent.cart.summary.total }}
                 </dt>
                 <dd class="text-2xl font-bold text-stone-900">
                   {{ formatCurrency(cartStore.total) }}
@@ -177,15 +177,15 @@
                 to="/checkout"
                 class="w-full flex items-center justify-center rounded-[2rem] border border-transparent bg-stone-900 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-brand-600 focus:outline-none transition-all hover:scale-[1.02] active:scale-95 flex gap-2"
               >
-                <span>Proceed to Checkout</span>
-                <Icon name="lucide:arrow-right" class="w-5 h-5" />
+                <span>{{ storefrontContent.cart.actions.proceedToCheckout }}</span>
+                <Icon name="lucide:arrow-right" class="w-5 h-5 rtl:rotate-180" />
               </NuxtLink>
               
               <NuxtLink
                 to="/products"
                 class="w-full flex items-center justify-center rounded-[2rem] border-2 border-stone-200 bg-transparent px-6 py-4 text-base font-bold text-stone-600 shadow-sm hover:bg-stone-50 focus:outline-none transition-all hover:border-stone-300"
               >
-                Continue Shopping
+                {{ storefrontContent.actions.continueShopping }}
               </NuxtLink>
             </div>
             
@@ -203,6 +203,7 @@ import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
 </script>
 

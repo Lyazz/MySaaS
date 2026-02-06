@@ -150,6 +150,51 @@ class _AppShellState extends ConsumerState<AppShell> {
       return 'Edit Product';
     }
     if (GoRouterState.of(context).uri.toString() == '/orders') return 'Orders';
+    if (GoRouterState.of(context).uri.toString() == '/inventory') {
+      return 'Inventory';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/sales') {
+      return 'Sales';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/purchases') {
+      return 'Purchases';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/purchases/create') {
+      return 'Add Purchase';
+    }
+    if (GoRouterState.of(context).uri.toString().startsWith('/purchases/')) {
+      return 'Purchase Details';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/pos') {
+      return 'POS';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/delivery') {
+      return 'Delivery Settings';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/billing') {
+      return 'Billing & Subscription';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/categories') {
+      return 'Categories';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/suppliers') {
+      return 'Suppliers';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/suppliers/create') {
+      return 'Add Supplier';
+    }
+    if (GoRouterState.of(context).uri.toString().startsWith('/suppliers/')) {
+      return 'Supplier Details';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/customers') {
+      return 'Customers';
+    }
+    if (GoRouterState.of(context).uri.toString().startsWith('/customers/')) {
+      return 'Customer Details';
+    }
+    if (GoRouterState.of(context).uri.toString() == '/settings') {
+      return 'Settings';
+    }
     return 'Admin Dashboard';
   }
 }

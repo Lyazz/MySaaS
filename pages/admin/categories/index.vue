@@ -4,10 +4,10 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">
-          Categories
+          {{ t('admin.nav.categories') }}
         </h2>
         <p class="text-gray-600 mt-1">
-          Organize your catalog with categories
+          {{ t('admin.pages.categories.index.subtitle') }}
         </p>
       </div>
       <NuxtLink
@@ -15,7 +15,7 @@
         class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
-        <span>Add Category</span>
+        <span>{{ t('admin.pages.categories.index.addCategory') }}</span>
       </NuxtLink>
     </div>
 
@@ -23,16 +23,16 @@
     <div class="bg-white p-4 rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.categories.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             type="text"
-            placeholder="Search categories..."
+            :placeholder="t('admin.pages.categories.index.filters.searchPlaceholder')"
           />
         </div>
         <div class="flex items-end">
           <p class="text-sm text-gray-500">
-            Use the chips above the table to sort by newest, title, slug, or product count.
+            {{ t('admin.pages.categories.index.filters.sortHint') }}
           </p>
         </div>
       </div>
@@ -45,7 +45,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading categories...
+        {{ t('admin.pages.categories.index.loading') }}
       </p>
     </div>
 
@@ -56,10 +56,10 @@
     >
       <Icon name="lucide:shapes" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        No categories
+        {{ t('admin.pages.categories.index.empty.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        Get started by creating a new category.
+        {{ t('admin.pages.categories.index.empty.hint') }}
       </p>
       <div class="mt-6">
         <NuxtLink
@@ -67,7 +67,7 @@
           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
         >
           <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
-          New Category
+          {{ t('admin.pages.categories.index.empty.newCategory') }}
         </NuxtLink>
       </div>
     </div>
@@ -79,7 +79,7 @@
     >
       <div class="px-4 py-3 bg-gray-50 flex flex-wrap items-center gap-3 justify-between">
         <div class="text-sm text-gray-700">
-          Sort by:
+          {{ t('admin.pages.categories.index.sort.sortBy') }}
         </div>
         <div class="flex flex-wrap gap-2">
           <button
@@ -93,7 +93,7 @@
             ]"
             @click="setSort(option.key)"
           >
-            <span>{{ option.label }}</span>
+            <span>{{ t(option.labelKey) }}</span>
             <Icon
               v-if="sortBy === option.key"
               :name="sortOrder === 'asc' ? 'lucide:chevron-up' : 'lucide:chevron-down'"
@@ -107,16 +107,16 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
+                {{ t('admin.pages.categories.index.table.category') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Products
+                {{ t('admin.pages.categories.index.table.products') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Links
+                {{ t('admin.pages.categories.index.table.links') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ t('admin.pages.categories.index.table.actions') }}
               </th>
             </tr>
           </thead>
@@ -153,7 +153,7 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                  {{ category._count?.products || 0 }} products
+                  {{ t('admin.pages.categories.index.table.productsCount', { count: category._count?.products || 0 }) }}
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -162,13 +162,13 @@
                     :href="getCategoryUrl(category.slug)"
                     target="_blank"
                     class="text-teal-600 hover:text-teal-900"
-                    title="Open Category Page"
+                    :title="t('admin.pages.categories.index.links.openCategory')"
                   >
                     <Icon name="lucide:external-link" class="w-4 h-4" />
                   </a>
                   <button
                     class="text-gray-400 hover:text-gray-600"
-                    title="Copy Category Link"
+                    :title="t('admin.pages.categories.index.links.copyCategory')"
                     @click="copyLink(`/c/${category.slug}`)"
                   >
                     <Icon name="lucide:copy" class="w-4 h-4" />
@@ -182,14 +182,14 @@
                     class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
-                    <span>Edit</span>
+                    <span>{{ t('admin.common.edit') }}</span>
                   </NuxtLink>
                   <button
                     class="inline-flex items-center text-red-600 hover:text-red-900 transition-colors"
                     @click="confirmDelete(category)"
                   >
                     <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
-                    <span>Delete</span>
+                    <span>{{ t('admin.common.delete') }}</span>
                   </button>
                 </div>
               </td>
@@ -206,26 +206,24 @@
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             @click="currentPage--"
           >
-            Previous
+            {{ t('admin.common.previous') }}
           </button>
           <button
             :disabled="currentPage === totalPages"
             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             @click="currentPage++"
           >
-            Next
+            {{ t('admin.common.next') }}
           </button>
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
-              Showing
-              <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
-              to
-              <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredCategories.length) }}</span>
-              of
-              <span class="font-medium">{{ filteredCategories.length }}</span>
-              results
+              {{ t('admin.pages.categories.index.pagination.showing', {
+                from: (currentPage - 1) * itemsPerPage + 1,
+                to: Math.min(currentPage * itemsPerPage, filteredCategories.length),
+                total: filteredCategories.length
+              }) }}
             </p>
           </div>
           <div>
@@ -235,7 +233,7 @@
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage--"
               >
-                Previous
+                {{ t('admin.common.previous') }}
               </button>
               <button
                 v-for="page in totalPages"
@@ -255,7 +253,7 @@
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage++"
               >
-                Next
+                {{ t('admin.common.next') }}
               </button>
             </nav>
           </div>
@@ -266,10 +264,10 @@
     <!-- Delete Confirmation Modal -->
     <AdminConfirmModal
       v-model="showDeleteModal"
-      title="Delete Category"
+      :title="t('admin.pages.categories.index.deleteModal.title')"
       :message="deleteMessage"
-      confirm-text="Delete"
-      cancel-text="Cancel"
+      :confirm-text="t('admin.common.delete')"
+      :cancel-text="t('admin.common.cancel')"
       @confirm="handleDelete"
     />
   </div>
@@ -283,10 +281,11 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Categories'
+  titleKey: 'admin.pages.categories.index.title'
 })
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 
 interface Category {
   id: string
@@ -308,18 +307,18 @@ const showDeleteModal = ref(false)
 const categoryToDelete = ref<Category | null>(null)
 
 const sortOptions = [
-  { key: 'createdAt', label: 'Newest' },
-  { key: 'title', label: 'Title' },
-  { key: 'slug', label: 'Slug' },
-  { key: 'products', label: 'Products' }
+  { key: 'createdAt', labelKey: 'admin.pages.categories.index.sort.newest' },
+  { key: 'title', labelKey: 'admin.pages.categories.index.sort.title' },
+  { key: 'slug', labelKey: 'admin.pages.categories.index.sort.slug' },
+  { key: 'products', labelKey: 'admin.pages.categories.index.sort.products' }
 ] as const
 
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
 const deleteMessage = computed(() => {
   if (categoryToDelete.value?.title) {
-    return `Are you sure you want to delete \"${categoryToDelete.value.title}\"? Products in this category will become uncategorized.`
+    return t('admin.pages.categories.index.deleteModal.messageWithTitle', { title: categoryToDelete.value.title })
   }
-  return 'Are you sure you want to delete this category? Products in this category will become uncategorized.'
+  return t('admin.pages.categories.index.deleteModal.message')
 })
 
 const sortedCategories = computed(() => {
@@ -408,7 +407,7 @@ async function handleDelete() {
     categoryToDelete.value = null
   } catch (error) {
     console.error('Failed to delete category:', error)
-    alert('Failed to delete category. Please try again.')
+    alert(t('admin.pages.categories.index.deleteModal.error'))
   }
 }
 

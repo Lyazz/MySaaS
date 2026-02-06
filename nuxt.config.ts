@@ -7,7 +7,31 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   ssr: ssrEnabled,
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxt/icon', '@vueuse/motion/nuxt'],
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt',
+    '@nuxt/icon',
+    '@vueuse/motion/nuxt',
+    '@nuxtjs/i18n'
+  ],
+  i18n: {
+    restructureDir: '.',
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    locales: [
+      { code: 'en', iso: 'en-US', file: 'en.json', name: 'English', dir: 'ltr' },
+      { code: 'fr', iso: 'fr-FR', file: 'fr.json', name: 'Français', dir: 'ltr' },
+      { code: 'ar', iso: 'ar-DZ', file: 'ar.json', name: 'العربية', dir: 'rtl' }
+    ],
+    langDir: 'locales',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      alwaysRedirect: false,
+      fallbackLocale: 'en'
+    },
+    vueI18n: './i18n.config.ts'
+  },
   routeRules: {
     // Never allow crawlers to index API responses.
     '/api/**': { headers: { 'x-robots-tag': 'noindex, nofollow, noarchive, nosnippet' } },
@@ -35,7 +59,8 @@ export default defineNuxtConfig({
   vite: {
     server: {
       // Allow accessing the dev server via nip.io wildcard hosts from other devices on LAN
-      allowedHosts: ['.nip.io']
+      allowedHosts: ['.nip.io', '.localhost'],
+      cors: true
     }
   },
   app: {

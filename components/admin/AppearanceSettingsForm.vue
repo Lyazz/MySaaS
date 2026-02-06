@@ -1,316 +1,279 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="p-6 md:p-8">
-        <h2 class="text-xl font-bold text-slate-900">
-          Appearance Settings
-        </h2>
-        <p class="text-slate-600 mt-2 max-w-2xl">
-          Customize the look and feel of your storefront. These settings affect how your store appears to customers.
-        </p>
-      </div>
-    </div>
-
-    <!-- Form -->
-    <form @submit.prevent="save" class="space-y-6">
+  <div class="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-8 min-h-[calc(100vh-120px)] items-start">
+    
+    <!-- Left Column: Settings Form -->
+    <div class="lg:col-span-7 xl:col-span-8 space-y-6">
       
       <!-- Store Identity -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-gray-900">
-              Store Identity
-            </h3>
-            <p class="mt-2 text-sm text-gray-500 leading-relaxed">
-              Your store's public name and URL address.
-            </p>
-          </div>
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-1">Store Identity</h3>
+          <p class="text-sm text-slate-500 mb-6">Basic information about your store.</p>
           
-          <div class="mt-6 md:mt-0 md:col-span-2 space-y-6">
+          <div class="space-y-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Store Name</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Store Name</label>
               <input
                 v-model="form.name"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-shadow"
                 placeholder="My Awesome Store"
               >
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">URL Slug</label>
-              <div class="flex rounded-md shadow-sm border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-teal-500 focus-within:border-teal-500">
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">URL Slug</label>
+              <div class="flex rounded-lg shadow-sm">
                 <input
                   v-model="form.slug"
                   type="text"
                   required
                   pattern="^[a-z0-9-]+$"
-                  class="flex-1 block w-full px-3 py-2 border-none focus:ring-0 text-sm text-right"
+                  class="flex-1 block w-full rounded-none rounded-l-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 sm:text-sm text-right"
                   placeholder="my-store"
                   @input="handleSlugInput"
                 >
-                <span class="inline-flex items-center px-3 bg-gray-50 text-gray-500 text-sm border-l border-gray-300">
+                <span class="inline-flex items-center px-3 rounded-r-lg border border-l-0 border-slate-300 bg-slate-50 text-slate-500 sm:text-sm">
                   .{{ baseDomain }}
                 </span>
               </div>
-              <p class="mt-2 text-xs text-gray-500">
-                Only lowercase letters, numbers, and hyphens. Changing this will change your store's URL.
+              <p class="mt-1.5 text-xs text-slate-500">
+                Only lowercase letters, numbers, and hyphens.
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Brand Logo -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
-              Brand Logo
-            </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              This logo will be displayed on your storefront header, checkout page, and invoice emails.
-            </p>
-            
-            <div class="mt-4 bg-slate-50 rounded-lg p-4 border border-slate-100">
-              <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Guidelines</h4>
-              <ul class="text-xs text-slate-600 space-y-1.5 list-disc list-inside">
-                <li><strong>Square image required (1:1)</strong></li>
-                <li>PNG format only</li>
-                <li>Transparent background recommended</li>
-                <li>Max file size: 2MB</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2">
-            <SingleImageUploader
-              v-model="form.logoUrl"
-              label="Store Logo"
-              hint="Upload your brand logo here."
-              class="w-full"
-            />
-          </div>
-        </div>
-      </div>
+      <!-- Brand Assets -->
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-1">Brand Assets</h3>
+          <p class="text-sm text-slate-500 mb-6">Visual elements that define your brand.</p>
 
-      <!-- Brand Colors -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
-              Brand Colors
-            </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Define the primary color for your brand. This color will be used for buttons, links, and important highlights.
-            </p>
-          </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2 space-y-6">
+          <div class="grid md:grid-cols-2 gap-8">
+            <!-- Logo Upload -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Primary Color</label>
-              <div class="flex flex-wrap items-center gap-4">
-                <div class="relative flex items-center">
-                  <input
-                    v-model="form.primaryColor"
-                    type="color"
-                    class="h-12 w-12 rounded-lg border border-slate-200 p-1 cursor-pointer shadow-sm transition-transform hover:scale-105"
-                  >
-                </div>
-                <div class="flex-1 min-w-[120px]">
-                  <input
-                    v-model="form.primaryColor"
-                    type="text"
-                    pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
-                    class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 text-sm font-mono uppercase"
-                    placeholder="#4F46E5"
-                  >
-                </div>
-              </div>
+               <label class="block text-sm font-medium text-slate-700 mb-3">Brand Logo</label>
+               <SingleImageUploader
+                 v-model="form.logoUrl"
+                 label="Upload Logo"
+                 hint="Square (1:1), PNG recommended."
+                 class="w-full"
+               />
             </div>
 
-            <!-- Preview Component -->
-            <div class="rounded-xl border border-slate-200 overflow-hidden">
-              <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Live Preview</span>
-              </div>
-              <div class="p-6 bg-white space-y-6">
-                 <!-- Button Preview -->
-                 <div class="flex flex-wrap gap-4 items-center">
-                    <button
-                      type="button"
-                      class="px-5 py-2.5 rounded-lg text-white font-medium shadow-sm transition-opacity hover:opacity-90 flex items-center gap-2"
-                      :style="{ backgroundColor: form.primaryColor }"
-                    >
-                      <span>Primary Button</span>
-                      <Icon name="lucide:arrow-right" class="w-4 h-4" />
-                    </button>
-                    
-                    <button
-                      type="button"
-                      class="px-5 py-2.5 rounded-lg border font-medium shadow-sm bg-white transition-colors"
-                      :style="{ borderColor: form.primaryColor, color: form.primaryColor }"
-                    >
-                      Secondary Button
-                    </button>
-                    
-                    <a href="#" class="font-medium hover:underline" :style="{ color: form.primaryColor }">Text Link</a>
+            <!-- Color Picker -->
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-3">Primary Color</label>
+              <div class="space-y-4">
+                 <div class="flex items-center gap-4">
+                    <div class="relative overflow-hidden rounded-xl border border-slate-200 shadow-sm w-16 h-16 shrink-0 group cursor-pointer">
+                      <input
+                        v-model="form.primaryColor"
+                        type="color"
+                        class="absolute top-0 left-0 w-full h-full p-0 border-0 opacity-0 cursor-pointer z-10"
+                      >
+                      <div class="w-full h-full" :style="{ backgroundColor: form.primaryColor }"></div>
+                      <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                         <Icon name="lucide:pipette" class="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <input
+                        v-model="form.primaryColor"
+                        type="text"
+                        pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
+                        class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm font-mono uppercase"
+                        placeholder="#0F766E"
+                      >
+                      <p class="mt-1.5 text-xs text-slate-500">
+                        Used for buttons, links, and highlights.
+                      </p>
+                    </div>
+                 </div>
+                 
+                 <!-- Preset Colors -->
+                 <div class="flex flex-wrap gap-2">
+                    <button 
+                       v-for="color in presetColors" 
+                       :key="color"
+                       type="button"
+                       class="w-6 h-6 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-slate-400 transition-transform hover:scale-110"
+                       :style="{ backgroundColor: color }"
+                       @click="form.primaryColor = color"
+                    ></button>
                  </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Announcement Bar -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
-              Announcement Bar
-            </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Display a message at the top of your store (e.g. promotions, shipping info).
-            </p>
-          </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2 space-y-6">
+       <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Message</label>
+              <h3 class="text-lg font-semibold text-slate-900 mb-1">Announcement Bar</h3>
+              <p class="text-sm text-slate-500">Top banner for promotions.</p>
+            </div>
+            <div class="flex items-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="form.announcementScrolling" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                <span class="ml-3 text-sm font-medium text-slate-700">Marquee Mode</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+             <label class="block text-sm font-medium text-slate-700 mb-1.5">Message Text</label>
               <input
                 v-model="form.announcementText"
                 type="text"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
-                placeholder="Welcome to our store!"
+                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                placeholder="Free shipping on all orders over $50! ✨"
               >
-              <p class="mt-2 text-xs text-slate-500">Leave empty to hide.</p>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <div class="flex items-center h-5">
-                <input
-                  id="announcementScrolling"
-                  v-model="form.announcementScrolling"
-                  type="checkbox"
-                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                >
-              </div>
-              <label for="announcementScrolling" class="text-sm font-medium text-slate-700">Enable Scrolling (Marquee)</label>
-            </div>
-            <p class="text-xs text-slate-500 ml-7">
-               If checked, the text will scroll horizontally. Useful for long messages.
-            </p>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Template Selection -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
-              Store Template
-            </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Choose the layout structure for your storefront. You can switch anytime without losing data.
-            </p>
-          </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6">
+           <h3 class="text-lg font-semibold text-slate-900 mb-1">Store Template</h3>
+           <p class="text-sm text-slate-500 mb-6">Choose the layout that best fits your brand.</p>
+
+           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div
                 v-for="t in templates"
                 :key="t.key"
-                class="group relative rounded-xl border-2 p-5 cursor-pointer transition-all duration-200 ease-in-out hover:border-teal-500 hover:shadow-md"
-                :class="form.templateKey === t.key ? 'border-teal-500 bg-teal-50/10 ring-1 ring-teal-500' : 'border-slate-200 bg-white hover:bg-slate-50'"
+                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col h-full bg-white overflow-hidden"
+                :class="form.templateKey === t.key ? 'border-teal-600 ring-1 ring-teal-600' : 'border-slate-200 hover:border-teal-300 shadow-sm hover:shadow-md'"
                 @click="form.templateKey = t.key"
               >
-                <div class="flex items-start justify-between mb-3">
-                  <div class="flex items-center gap-3">
-                    <div class="p-2 rounded-lg" :class="form.templateKey === t.key ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500 group-hover:bg-teal-50 group-hover:text-teal-600'">
-                       <Icon :name="t.icon" class="w-6 h-6" />
+                 <!-- Template Screenshot -->
+                 <div class="aspect-[16/10] w-full bg-slate-100 border-b border-slate-100 relative overflow-hidden">
+                    <img 
+                      :src="`/templates/${t.key}.png`" 
+                      class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                      onerror="this.style.display='none'"
+                    >
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                 </div>
+
+                 <div class="p-4 flex flex-col flex-1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                           <div class="p-1.5 rounded-md bg-slate-50 border border-slate-100 text-slate-500">
+                              <Icon :name="t.icon" class="w-4 h-4" />
+                           </div>
+                           <span class="font-bold text-slate-900" :class="t.fontClass">{{ t.label }}</span>
+                        </div>
+                        <div class="w-3 h-3 rounded-full border border-slate-200" :style="{ backgroundColor: t.color }"></div>
                     </div>
-                    <!-- Color Preview Circle -->
-                    <div 
-                        class="w-6 h-6 rounded-full border border-slate-200 shadow-sm"
-                        :style="{ backgroundColor: t.color }"
-                        :title="t.label + ' Theme Color'"
-                    ></div>
-                  </div>
-                  <div v-if="form.templateKey === t.key" class="text-teal-600">
+                    
+                    <p class="text-xs text-slate-500 leading-relaxed mb-1">{{ t.description }}</p>
+                 </div>
+                 
+                 <div v-if="form.templateKey === t.key" class="absolute top-3 right-3 text-teal-600 bg-white rounded-full shadow-sm z-10">
                     <Icon name="lucide:check-circle-2" class="w-6 h-6" />
-                  </div>
-                </div>
-                
-                <h4 
-                    class="font-semibold text-slate-900 mb-1 text-lg"
-                    :class="t.fontClass"
-                >
-                    {{ t.label }}
-                </h4>
-                <p class="text-sm text-slate-500 leading-relaxed">
-                  {{ t.description }}
-                </p>
-
+                 </div>
               </div>
-            </div>
-          </div>
+           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Action Footer -->
-      <div class="fixed bottom-6 right-6 md:static md:flex md:justify-end">
-         <div class="bg-white md:bg-transparent p-2 md:p-0 rounded-full shadow-lg md:shadow-none border md:border-none border-slate-200 flex items-center gap-3">
-            <div
-              v-if="successMessage"
-              class="hidden md:block text-sm text-emerald-600 font-medium animate-fadeIn px-3"
-            >
-              {{ successMessage }}
-            </div>
-            <div
-              v-if="errorMessage"
-              class="hidden md:block text-sm text-red-600 font-medium animate-fadeIn px-3"
-            >
-              {{ errorMessage }}
-            </div>
-            
-            <button
-              type="button"
-              class="hidden md:px-5 md:py-2.5 border border-slate-300 rounded-xl shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 md:inline-flex"
-              :disabled="loading || saving"
-              @click="reset"
-            >
-              Discard Changes
-            </button>
-            
-            <button
-              type="submit"
-              class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
-              :disabled="loading || saving"
-            >
-              <Icon
-                v-if="saving"
-                name="lucide:loader-2"
-                class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-              />
-              {{ saving ? 'Saving...' : 'Save Changes' }}
-            </button>
-         </div>
-      </div>
-      
-      <!-- Mobile Notifications (Toast style) -->
-      <div v-if="successMessage || errorMessage" class="md:hidden fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4">
-        <div class="bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg flex items-center justify-between">
-           <span class="text-sm font-medium">{{ successMessage || errorMessage }}</span>
-           <button @click="successMessage = ''; errorMessage = ''" class="ml-4 text-slate-400 hover:text-white">
-             <Icon name="lucide:x" class="w-4 h-4" />
+    </div>
+
+    <!-- Right Column: Live Preview (Sticky) -->
+    <div class="hidden lg:block lg:col-span-5 xl:col-span-4 relative">
+       <div class="sticky top-24 space-y-4">
+          <div class="flex items-center justify-between">
+             <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Live Preview</h3>
+             <span class="text-xs px-2 py-1 bg-teal-100 text-teal-700 rounded font-medium">Mobile View</span>
+          </div>
+
+          <!-- Phone/Browser Mockup Window -->
+          <div class="bg-white border-8 border-slate-900 rounded-[2rem] shadow-2xl overflow-hidden aspect-[9/18] relative ring-1 ring-slate-900/5 mx-auto w-full" :style="{ maxWidth: 'calc((100vh - 12rem) * 9 / 18)' }">
+             
+             <!-- Mockup Status Bar -->
+             <div class="absolute top-0 left-0 right-0 h-6 bg-slate-900 z-20 flex items-center justify-between px-6">
+                <div class="text-[10px] text-white font-medium">9:41</div>
+                <div class="flex gap-1.5 opacity-90">
+                   <div class="w-3 h-3 text-white"><Icon name="lucide:signal" class="w-full h-full" /></div>
+                   <div class="w-3 h-3 text-white"><Icon name="lucide:wifi" class="w-full h-full" /></div>
+                   <div class="w-3 h-3 text-white"><Icon name="lucide:battery-medium" class="w-full h-full" /></div>
+                </div>
+             </div>
+
+             <!-- Mockup Scrollable Content -->
+             <div class="absolute top-6 inset-x-0 bottom-0 bg-white overflow-hidden rounded-b-[2rem]">
+                <iframe
+                  v-if="previewUrl"
+                  :src="previewUrl"
+                  class="w-full h-full border-none"
+                  title="Store Preview" 
+                />
+                <div v-else class="flex flex-col items-center justify-center h-full text-slate-400 p-6 text-center">
+                  <Icon name="lucide:loader" class="w-6 h-6 animate-spin mb-2" />
+                  <p class="text-xs">Loading preview...</p>
+                </div>
+             </div>
+
+             <!-- Mockup Home Indicator -->
+             <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-slate-900 rounded-full z-30 opacity-20"></div>
+          </div>
+
+
+
+          <p class="text-xs text-center text-slate-400">
+             Showing live preview of saved changes.
+             <a v-if="previewUrl" :href="previewUrl" target="_blank" class="text-teal-600 hover:underline">Open in new tab</a>
+          </p>
+       </div>
+    </div>
+    
+  <!-- Floating Save Bar (Mobile & Desktop) -->
+  <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 z-40 lg:sticky lg:bottom-6 lg:bg-transparent lg:border-none lg:p-0 lg:col-span-12 lg:flex lg:justify-end pointer-events-none">
+     <div class="pointer-events-auto max-w-7xl mx-auto flex items-center justify-between gap-4 lg:bg-white lg:px-4 lg:py-2 lg:rounded-2xl lg:shadow-xl lg:border lg:border-slate-100">
+        
+        <div class="flex items-center gap-3">
+           <div 
+              v-if="message.text" 
+              class="px-3 py-1.5 rounded-full text-sm font-medium animate-fadeIn"
+              :class="message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'"
+           >
+              {{ message.text }}
+           </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+           <button
+             type="button"
+             class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+             :disabled="loading || saving"
+             @click="reset"
+           >
+             Discard
+           </button>
+           
+           <button
+             @click="save"
+             class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30 active:scale-95 flex items-center gap-2"
+             :class="saving ? 'bg-teal-500 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'"
+             :disabled="loading || saving"
+           >
+             <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+             {{ saving ? 'Saving...' : 'Save Changes' }}
            </button>
         </div>
-      </div>
+     </div>
+  </div>
 
-    </form>
   </div>
 </template>
 
@@ -318,17 +281,31 @@
 import { useAuthStore } from '~/stores/auth'
 import SingleImageUploader from './SingleImageUploader.vue'
 
+// -- Types & Stores --
 const authStore = useAuthStore()
+
+// -- State --
 const loading = ref(false)
 const saving = ref(false)
-const successMessage = ref('')
-const errorMessage = ref('')
+const message = reactive({ type: '', text: '' })
+
+// Default colors
+const presetColors = [
+  '#0F766E', // Teal (Default)
+  '#0f172a', // Slate
+  '#4F46E5', // Indigo
+  '#F43F5E', // Rose
+  '#EA580C', // Orange
+  '#FACC15', // Yellow
+  '#8A9A5B', // Moss Green
+  '#7C3AED', // Violet
+]
 
 const form = reactive({
   name: '',
   slug: '',
   logoUrl: null as string | null,
-  primaryColor: '#0F766E', // Default to teal
+  primaryColor: '#0F766E',
   templateKey: 'classic',
   announcementText: '',
   announcementScrolling: false
@@ -336,15 +313,25 @@ const form = reactive({
 
 const baseDomain = ref('')
 
+// -- Computed --
+const previewUrl = computed(() => {
+  if (!form.slug || !baseDomain.value) return null
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:'
+  return `${protocol}//${form.slug}.${baseDomain.value}`
+})
+
+const getSelectedTemplateFont = computed(() => {
+  const t = templates.find(t => t.key === form.templateKey)
+  return t ? t.fontClass : 'font-sans'
+})
+
+// -- Lifecycle --
 onMounted(() => {
   if (typeof window !== 'undefined') {
     const host = window.location.host
     if (host.includes('localhost')) {
       baseDomain.value = 'localhost:3000'
     } else {
-      // Assuming the platform domain is the last two parts for now, or use 'swekly.com' as hinted
-      // But for generic SaaS, usually it's the root domain.
-      // Let's try to strip the current subdomain if it exists.
       const parts = host.split('.')
       if (parts.length > 2) {
          baseDomain.value = parts.slice(1).join('.')
@@ -356,11 +343,12 @@ onMounted(() => {
   fetchSettings()
 })
 
+// -- Templates Data --
 const templates = [
   { 
     key: 'classic', 
     label: 'Classic Shop', 
-    description: 'A timeless, elegant layout featuring serif typography and deep navy tones. Perfect for luxury brands and established businesses.',
+    description: 'Timeless elegance with serif typography.',
     icon: 'lucide:layout-grid',
     fontClass: 'font-serif',
     color: '#0f172a'
@@ -368,7 +356,7 @@ const templates = [
   { 
     key: 'modern', 
     label: 'Modern Minimal', 
-    description: 'A clean, contemporary aesthetic with bold teal accents and outfit typography. Ideal for tech, fashion, and lifestyle stores.',
+    description: 'Clean aesthetic with bold accents.',
     icon: 'lucide:layout-template',
     fontClass: 'font-sans',
     color: '#0d9488'
@@ -376,7 +364,7 @@ const templates = [
   { 
     key: 'street', 
     label: 'Street Urban', 
-    description: 'Urban and energetic, featuring yellow high-contrast highlights and bold typography. Great for streetwear and youth culture brands.',
+    description: 'Energetic, high-contrast style.',
     icon: 'lucide:zap',
     fontClass: 'font-street',
     color: '#FACC15'
@@ -384,7 +372,7 @@ const templates = [
   { 
     key: 'cozy', 
     label: 'Cozy Warm', 
-    description: 'Warm and inviting, with soft sage greens and rounded nuances. Creates a comfortable atmosphere for home decor and lifestyle products.',
+    description: 'Soft greens and rounded nuances.',
     icon: 'lucide:coffee',
     fontClass: 'font-cozy',
     color: '#A4C3B2'
@@ -392,7 +380,7 @@ const templates = [
   { 
     key: 'cyber', 
     label: 'Cyber Future', 
-    description: 'Futuristic dark mode with neon pink accents and digital-inspired styling. Designed for gaming, tech, and forward-thinking brands.',
+    description: 'Dark mode with neon accents.',
     icon: 'lucide:cpu',
     fontClass: 'font-cyber',
     color: '#F43F5E'
@@ -400,7 +388,7 @@ const templates = [
   { 
     key: 'stationnery', 
     label: 'Stationery', 
-    description: 'Refined and structured, using slate tones and serif typography. Tailored for books, paper goods, and professional supplies.',
+    description: 'Refined structure for professionals.',
     icon: 'lucide:pen-tool',
     fontClass: 'font-stationery',
     color: '#334155'
@@ -408,7 +396,7 @@ const templates = [
   { 
     key: 'food', 
     label: 'Food Market', 
-    description: 'Vibrant and appetizing, featuring zest orange colors and clear layouts. Optimized for restaurants, grocery, and culinary businesses.',
+    description: 'Vibrant and appetizing.',
     icon: 'lucide:utensils',
     fontClass: 'font-food',
     color: '#EA580C'
@@ -416,18 +404,23 @@ const templates = [
   { 
     key: 'wellness', 
     label: 'Wellness', 
-    description: 'Calm and organic, combining moss greens with natural serif fonts. Suited for health, beauty, and sustainable product lines.',
+    description: 'Organic, calm, and natural.',
     icon: 'lucide:flower-2',
     fontClass: 'font-wellness',
     color: '#8A9A5B'
   }
 ]
 
+// -- Methods --
 const handleSlugInput = (e: Event) => {
   const target = e.target as HTMLInputElement
-  // Force lowercase and replace spaces/invalid chars with hyphens if desired, 
-  // or just filter out invalid chars. Here we just simple filter for valid slug chars.
   form.slug = target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+}
+
+const showMessage = (type: 'success' | 'error', text: string) => {
+   message.type = type
+   message.text = text
+   setTimeout(() => { message.text = '' }, 4000)
 }
 
 const updateForm = (data: any) => {
@@ -450,7 +443,7 @@ const fetchSettings = async () => {
     updateForm(data)
   } catch (e) {
     console.error('Failed to load settings', e)
-    errorMessage.value = 'Failed to load settings.'
+    showMessage('error', 'Failed to load settings.')
   } finally {
     loading.value = false
   }
@@ -458,8 +451,7 @@ const fetchSettings = async () => {
 
 const save = async () => {
   saving.value = true
-  successMessage.value = ''
-  errorMessage.value = ''
+  message.text = ''
   try {
     const updated = await $fetch('/api/admin/store-settings', {
       method: 'PATCH',
@@ -474,27 +466,56 @@ const save = async () => {
         announcementScrolling: form.announcementScrolling
       }
     })
+    
+    // Update global state if used elsewhere
     useState<any>('storeSettings').value = updated
     
-    // Update local form with returned data (in case slug was sanitized/rejected or other side effects)
+    // Update local form
     updateForm(updated)
     
-    successMessage.value = 'Settings saved successfully!'
-    setTimeout(() => (successMessage.value = ''), 4000)
+    showMessage('success', 'Store settings updated!')
   } catch (e: any) {
     console.error('Failed to save settings', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to save changes. Please try again.'
-    setTimeout(() => (errorMessage.value = ''), 4000)
+    showMessage('error', e.data?.statusMessage || 'Failed to save changes.')
   } finally {
     saving.value = false
   }
 }
 
 const reset = () => {
-  if (confirm('Are you sure you want to discard your unsaved changes?')) {
+  if (confirm('Discard unsaved changes?')) {
     fetchSettings()
   }
 }
-
-
 </script>
+
+<style scoped>
+/* No scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  animation: marquee 15s linear infinite;
+  min-width: 200%; /* Ensure content is wide enough */
+}
+
+.animate-fadeIn {
+   animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+   from { opacity: 0; transform: translateY(5px); }
+   to { opacity: 1; transform: translateY(0); }
+}
+</style>

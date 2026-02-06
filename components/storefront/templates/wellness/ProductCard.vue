@@ -22,6 +22,7 @@ defineEmits(['quick-view'])
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const { currencyCode } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
     if (props.product.images && props.product.images.length > 0) {
@@ -65,8 +66,10 @@ function handleAddToCart() {
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
+    bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
-    image: mainImage.value
+    image: mainImage.value,
+    metaPixelIds: (props.product as any)?.metaPixelIds
   })
   triggerSuccessToast('Added to cart', 'Product added to your cart')
 }
@@ -134,7 +137,7 @@ function handleAddToCart() {
            v-if="storeSettings?.cartEnabled !== false"
            :disabled="isOutOfStock || !product.isActive"
            class="pointer-events-auto h-11 w-11 bg-brand-700 text-white rounded-full flex items-center justify-center hover:bg-brand-800 shadow-soft transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-           title="Add to Cart"
+           :title="storefrontContent.actions.addToCart"
            @click.prevent="handleAddToCart"
          >
            <Icon name="lucide:plus" class="w-5 h-5" />
@@ -191,7 +194,7 @@ function handleAddToCart() {
              class="px-8 py-3 rounded-full bg-brand-700 text-white text-sm font-medium hover:bg-brand-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
              @click.prevent="handleAddToCart"
           >
-             Add to Cart
+             {{ storefrontContent.actions.addToCart }}
           </button>
           <button class="px-5 py-3 rounded-full border border-stone-200 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors">
               <Icon name="lucide:heart" class="w-4 h-4" />

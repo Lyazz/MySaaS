@@ -1,0 +1,568 @@
+import prisma from '../../lib/prisma'
+import { parseCsv, stringifyCsv } from '../../lib/csv'
+import { InventoryService } from '../inventory/inventory.service'
+import { ProductsService } from './products.service'
+
+type ImportSummary = {
+    created: number
+    updated: number
+    skipped: number
+    errors: Array<{ row: number; message: string }>
+    warnings: Array<{ row: number; message: string }>
+}
+
+const toBool = (raw: string): boolean | null => {
+    const v = raw.trim().toLowerCase()
+    if (!v) return null
+    if (['true', '1', 'yes', 'y'].includes(v)) return true
+    if (['false', '0', 'no', 'n'].includes(v)) return false
+    return null
+}
+
+const toInt = (raw: string): number | null => {
+    const v = raw.trim()
+    if (!v) return null
+    const n = Number(v)
+    if (!Number.isFinite(n)) return null
+    return Math.trunc(n)
+}
+
+const toDecimalString = (raw: string): string | null => {
+    const v = raw.trim()
+    if (!v) return null
+    const n = Number(v)
+    if (!Number.isFinite(n)) return null
+    // Prisma Decimal is ok with numeric strings.
+    return String(n)
+}
+
+const normalizeImages = (raw: string): string[] | null => {
+    const v = raw.trim()
+    if (!v) return null
+    const parts = v
+        .split('|')
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .slice(0, 10)
+    if (parts.length === 0) return null
+    return parts
+}
+
+const buildUniqueSlug = async (tenantId: string, base: string) => {
+    const cleanBase = base.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '')
+    const root = cleanBase || `product-copy`
+
+    for (let i = 0; i < 50; i++) {
+        const slug = i === 0 ? root : `${root}-${i + 1}`
+        const exists = await prisma.product.findUnique({
+            where: { tenantId_slug: { tenantId, slug } },
+            select: { id: true }
+        })
+        if (!exists) return slug
+    }
+
+    return `${root}-${Date.now()}`
+}
+
+export class BulkProductsService {
+    private inventory = new InventoryService()
+    private products = new ProductsService()
+
+    async exportProductsCsv(tenantId: string, opts?: { ids?: string[] | null }) {
+        const ids = opts?.ids?.filter(Boolean) ?? null
+        const products = await prisma.product.findMany({
+            where: { tenantId, ...(ids && ids.length > 0 ? { id: { in: ids } } : {}) },
+            include: { category: { select: { id: true, slug: true, title: true } } },
+            orderBy: { createdAt: 'desc' }
+        })
+
+        const header = [
+            'id',
+            'title',
+            'slug',
+            'isActive',
+            'price',
+            'stock',
+            'categoryId',
+            'categorySlug',
+            'description',
+            'miniDescription',
+            'images'
+        ]
+
+        const rows = products.map((p) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            isActive: p.isActive ? 'true' : 'false',
+            price: String(p.price),
+            stock: String(p.stock),
+            categoryId: p.categoryId ?? '',
+            categorySlug: p.category?.slug ?? '',
+            description: p.description ?? '',
+            miniDescription: p.miniDescription ?? '',
+            images: (p.images ?? []).join('|')
+        }))
+
+        return stringifyCsv(header, rows)
+    }
+
+    async importProductsCsv(
+        tenantId: string,
+        csvText: string,
+        opts?: { actorUserId?: string | null }
+    ): Promise<ImportSummary> {
+        const parsed = parseCsv(csvText)
+        const summary: ImportSummary = { created: 0, updated: 0, skipped: 0, errors: [], warnings: [] }
+
+        const hasColumn = (name: string) => parsed.header.includes(name)
+        if (!hasColumn('id') && !hasColumn('slug')) {
+            throw new Error('CSV must include id or slug column')
+        }
+        if (!hasColumn('title')) {
+            summary.warnings.push({ row: 1, message: 'CSV does not include title; updates may be partial' })
+        }
+
+        for (let i = 0; i < parsed.records.length; i++) {
+            const rowNumber = i + 2 // header is row 1
+            const record = parsed.records[i]
+
+            try {
+                const rawId = record.id ?? ''
+                const rawSlug = record.slug ?? ''
+                const rawTitle = record.title ?? ''
+
+                const id = rawId.trim() || null
+                const slug = rawSlug.trim() || null
+
+                if (!id && !slug) {
+                    summary.skipped++
+                    summary.errors.push({ row: rowNumber, message: 'Missing id or slug' })
+                    continue
+                }
+
+                const existing = id
+                    ? await prisma.product.findFirst({
+                        where: { tenantId, id },
+                        select: { id: true, slug: true }
+                    })
+                    : await prisma.product.findUnique({
+                        where: { tenantId_slug: { tenantId, slug: slug! } },
+                        select: { id: true, slug: true }
+                    })
+
+                const categoryIdCell = (record.categoryId ?? '').trim()
+                const categorySlugCell = (record.categorySlug ?? '').trim()
+
+                const categoryId = await (async () => {
+                    if (categoryIdCell) {
+                        const found = await prisma.category.findFirst({ where: { tenantId, id: categoryIdCell }, select: { id: true } })
+                        if (!found) throw new Error('Invalid categoryId')
+                        return found.id
+                    }
+                    if (categorySlugCell) {
+                        const found = await prisma.category.findFirst({ where: { tenantId, slug: categorySlugCell }, select: { id: true } })
+                        if (!found) throw new Error('Invalid categorySlug')
+                        return found.id
+                    }
+                    if (hasColumn('categoryId') || hasColumn('categorySlug')) {
+                        // Explicitly present but empty => clear category.
+                        return null
+                    }
+                    return undefined
+                })()
+
+                const isActive = hasColumn('isActive') ? toBool(record.isActive ?? '') : null
+                if (hasColumn('isActive') && isActive === null && (record.isActive ?? '').trim()) {
+                    throw new Error('Invalid isActive (expected true/false)')
+                }
+
+                const price = hasColumn('price') ? toDecimalString(record.price ?? '') : null
+                if (hasColumn('price') && price === null && (record.price ?? '').trim()) throw new Error('Invalid price')
+
+                const stock = hasColumn('stock') ? toInt(record.stock ?? '') : null
+                if (hasColumn('stock') && stock === null && (record.stock ?? '').trim()) throw new Error('Invalid stock')
+                if (stock !== null && stock < 0) throw new Error('stock must be >= 0')
+
+                const description = hasColumn('description') ? (record.description ?? '') : undefined
+                const miniDescription = hasColumn('miniDescription') ? (record.miniDescription ?? '') : undefined
+                const images = hasColumn('images') ? normalizeImages(record.images ?? '') : undefined
+
+                if (!existing) {
+                    if (!rawTitle.trim()) throw new Error('Missing title for create')
+                    if (!slug) throw new Error('Missing slug for create')
+
+                    await this.products.createProduct(tenantId, {
+                        title: rawTitle.trim(),
+                        slug,
+                        description: description?.trim() ? description : null,
+                        miniDescription: miniDescription?.trim() ? miniDescription : null,
+                        isActive: isActive ?? true,
+                        categoryId: categoryId === undefined ? undefined : categoryId,
+                        price: price ?? undefined,
+                        stock: stock ?? undefined,
+                        images: images ?? undefined
+                    })
+
+                    summary.created++
+                    continue
+                }
+
+                // Update
+                const updateData: any = {}
+                if (rawTitle.trim()) updateData.title = rawTitle.trim()
+                if (description !== undefined) updateData.description = description.trim() ? description : null
+                if (miniDescription !== undefined) updateData.miniDescription = miniDescription.trim() ? miniDescription : null
+                if (isActive !== null) updateData.isActive = isActive
+                if (categoryId !== undefined) updateData.categoryId = categoryId
+                if (price !== null) updateData.price = price
+                if (images !== undefined) updateData.images = images ?? []
+
+                // Only allow slug change when targeting by id.
+                if (id && slug && slug !== existing.slug) {
+                    const conflict = await prisma.product.findUnique({
+                        where: { tenantId_slug: { tenantId, slug } },
+                        select: { id: true }
+                    })
+                    if (conflict && conflict.id !== existing.id) throw new Error('Slug already exists')
+                    updateData.slug = slug
+                }
+
+                if (Object.keys(updateData).length > 0) {
+                    await prisma.product.updateMany({ where: { tenantId, id: existing.id }, data: updateData })
+                }
+
+                if (price !== null) {
+                    const optionsCount = await prisma.productOption.count({ where: { tenantId, productId: existing.id } })
+                    if (optionsCount === 0) {
+                        const defaultVariant =
+                            (await prisma.productVariant.findFirst({
+                                where: { tenantId, productId: existing.id, optionValues: { none: {} } },
+                                select: { id: true }
+                            })) ??
+                            (await prisma.productVariant.create({
+                                data: {
+                                    tenantId,
+                                    productId: existing.id,
+                                    price,
+                                    stock: 0,
+                                    isActive: true,
+                                    trackInventory: true,
+                                    reserved: 0,
+                                    safetyStock: 0
+                                },
+                                select: { id: true }
+                            }))
+
+                        await prisma.productVariant.updateMany({ where: { tenantId, id: defaultVariant.id }, data: { price } })
+                    }
+                }
+
+                if (stock !== null) {
+                    const optionsCount = await prisma.productOption.count({ where: { tenantId, productId: existing.id } })
+                    if (optionsCount > 0) {
+                        summary.warnings.push({
+                            row: rowNumber,
+                            message: 'stock column ignored for products with variants; use inventory CSV for per-variant stock'
+                        })
+                    } else {
+                        const defaultVariant =
+                            (await prisma.productVariant.findFirst({
+                                where: { tenantId, productId: existing.id, optionValues: { none: {} } },
+                                select: { id: true }
+                            })) ??
+                            (await prisma.productVariant.create({
+                                data: {
+                                    tenantId,
+                                    productId: existing.id,
+                                    price: price ?? 0,
+                                    stock: 0,
+                                    isActive: true,
+                                    trackInventory: true,
+                                    reserved: 0,
+                                    safetyStock: 0
+                                },
+                                select: { id: true }
+                            }))
+
+                        await this.inventory.updateVariantInventory(
+                            tenantId,
+                            defaultVariant.id,
+                            { stock, reason: 'bulk_import', note: 'CSV product import' },
+                            { userId: opts?.actorUserId ?? null }
+                        )
+                    }
+                }
+
+                summary.updated++
+            } catch (error: any) {
+                summary.errors.push({ row: rowNumber, message: error?.message || 'Import failed' })
+            }
+        }
+
+        return summary
+    }
+
+    async bulkPatchProducts(
+        tenantId: string,
+        input: {
+            ids: string[]
+            data: { price?: unknown; stock?: unknown; isActive?: unknown; categoryId?: unknown }
+            options?: { propagatePriceToVariants?: boolean }
+            actorUserId?: string | null
+        }
+    ) {
+        const ids = (input.ids ?? []).filter(Boolean)
+        if (ids.length === 0) throw new Error('ids is required')
+
+        const data = input.data ?? {}
+        const propagatePriceToVariants = input.options?.propagatePriceToVariants === true
+
+        const patch: any = {}
+        if (data.isActive !== undefined) {
+            if (typeof data.isActive !== 'boolean') throw new Error('isActive must be boolean')
+            patch.isActive = data.isActive
+        }
+
+        if (data.categoryId !== undefined) {
+            if (data.categoryId === null || data.categoryId === '') {
+                patch.categoryId = null
+            } else if (typeof data.categoryId === 'string') {
+                const category = await prisma.category.findFirst({ where: { tenantId, id: data.categoryId }, select: { id: true } })
+                if (!category) throw new Error('Invalid categoryId')
+                patch.categoryId = category.id
+            } else {
+                throw new Error('categoryId must be string or null')
+            }
+        }
+
+        const price = data.price === undefined ? null : typeof data.price === 'number' ? String(data.price) : typeof data.price === 'string' ? data.price : null
+        if (data.price !== undefined && (price === null || !price.trim())) throw new Error('price must be a number/string')
+        if (price !== null) patch.price = price
+
+        const stock = data.stock === undefined ? null : typeof data.stock === 'number' ? Math.trunc(data.stock) : typeof data.stock === 'string' ? toInt(data.stock) : null
+        if (data.stock !== undefined && stock === null) throw new Error('stock must be an integer')
+        if (stock !== null && stock < 0) throw new Error('stock must be >= 0')
+
+        await prisma.product.updateMany({ where: { tenantId, id: { in: ids } }, data: patch })
+
+        if (price !== null && propagatePriceToVariants) {
+            await prisma.productVariant.updateMany({
+                where: { tenantId, productId: { in: ids }, isActive: true },
+                data: { price }
+            })
+        }
+
+        if (stock !== null) {
+            for (const productId of ids) {
+                const optionsCount = await prisma.productOption.count({ where: { tenantId, productId } })
+                if (optionsCount > 0) continue
+
+                const defaultVariant =
+                    (await prisma.productVariant.findFirst({
+                        where: { tenantId, productId, optionValues: { none: {} } },
+                        select: { id: true }
+                    })) ??
+                    (await prisma.productVariant.create({
+                        data: {
+                            tenantId,
+                            productId,
+                            price: price ?? 0,
+                            stock: 0,
+                            isActive: true,
+                            trackInventory: true,
+                            reserved: 0,
+                            safetyStock: 0
+                        },
+                        select: { id: true }
+                    }))
+
+                await this.inventory.updateVariantInventory(
+                    tenantId,
+                    defaultVariant.id,
+                    { stock, reason: 'bulk_patch', note: 'Bulk product stock update' },
+                    { userId: input.actorUserId ?? null }
+                )
+            }
+        }
+
+        return { success: true }
+    }
+
+    async duplicateProduct(
+        tenantId: string,
+        productId: string,
+        input?: { title?: unknown; slug?: unknown; isActive?: unknown; copyInventory?: unknown }
+    ) {
+        const product = await prisma.product.findFirst({
+            where: { tenantId, id: productId },
+            include: {
+                productImages: { orderBy: { position: 'asc' } },
+                options: { include: { values: { orderBy: { position: 'asc' } } }, orderBy: { position: 'asc' } },
+                variants: {
+                    include: {
+                        optionValues: { include: { optionValue: true } },
+                        images: { include: { image: true }, orderBy: { position: 'asc' } }
+                    },
+                    orderBy: { createdAt: 'asc' }
+                },
+                bundleDeals: { orderBy: { bundleQty: 'asc' } }
+            }
+        })
+
+        if (!product) throw new Error('Product not found')
+
+        const copyInventory = input?.copyInventory === true
+        const isActive = typeof input?.isActive === 'boolean' ? input?.isActive : false
+
+        const title = typeof input?.title === 'string' && input.title.trim() ? input.title.trim() : `${product.title} (Copy)`
+        const requestedSlug = typeof input?.slug === 'string' ? input.slug.trim() : ''
+        const slug = requestedSlug ? await buildUniqueSlug(tenantId, requestedSlug) : await buildUniqueSlug(tenantId, `${product.slug}-copy`)
+
+        const created = await prisma.$transaction(async (tx) => {
+            const createdProduct = await tx.product.create({
+                data: {
+                    tenantId,
+                    title,
+                    slug,
+                    description: product.description,
+                    miniDescription: product.miniDescription,
+                    price: product.price,
+                    stock: copyInventory ? product.stock : 0,
+                    isActive,
+                    categoryId: product.categoryId,
+                    images: product.images ?? []
+                },
+                select: { id: true }
+            })
+
+            const imageIdMap = new Map<string, string>()
+            for (const img of product.productImages ?? []) {
+                const createdImg = await tx.productImage.create({
+                    data: {
+                        tenantId,
+                        productId: createdProduct.id,
+                        url: img.url,
+                        alt: img.alt,
+                        position: img.position,
+                        isMain: img.isMain
+                    },
+                    select: { id: true }
+                })
+                imageIdMap.set(img.id, createdImg.id)
+            }
+
+            const optionIdMap = new Map<string, string>()
+            const valueIdMap = new Map<string, string>()
+
+            for (const opt of product.options ?? []) {
+                const createdOpt = await tx.productOption.create({
+                    data: {
+                        tenantId,
+                        productId: createdProduct.id,
+                        name: opt.name,
+                        position: opt.position,
+                        displayType: opt.displayType
+                    },
+                    select: { id: true }
+                })
+                optionIdMap.set(opt.id, createdOpt.id)
+
+                for (const val of opt.values ?? []) {
+                    const createdVal = await tx.productOptionValue.create({
+                        data: {
+                            tenantId,
+                            optionId: createdOpt.id,
+                            label: val.label,
+                            position: val.position,
+                            meta: val.meta
+                        },
+                        select: { id: true }
+                    })
+                    valueIdMap.set(val.id, createdVal.id)
+                }
+            }
+
+            const hasOptions = (product.options ?? []).length > 0
+
+            if (!hasOptions) {
+                await tx.productVariant.create({
+                    data: {
+                        tenantId,
+                        productId: createdProduct.id,
+                        price: product.price,
+                        stock: copyInventory ? product.stock : 0,
+                        reserved: 0,
+                        safetyStock: 0,
+                        isActive: true,
+                        trackInventory: true
+                    }
+                })
+            } else {
+                const variantsToCopy = (product.variants ?? []).filter((v) => v.isActive)
+                for (const v of variantsToCopy) {
+                    const optionValuesToCreate = (v.optionValues ?? []).map((ov) => {
+                        const mapped = valueIdMap.get(ov.optionValueId)
+                        if (!mapped) {
+                            throw new Error('Duplicate failed: missing option value mapping')
+                        }
+                        return { optionValueId: mapped }
+                    })
+
+                    const imagesToCreate = (v.images ?? [])
+                        .map((img) => {
+                            const mapped = imageIdMap.get(img.imageId)
+                            if (!mapped) return null
+                            return { imageId: mapped, position: img.position }
+                        })
+                        .filter(Boolean) as Array<{ imageId: string; position: number }>
+
+                    const createdVariant = await tx.productVariant.create({
+                        data: {
+                            tenantId,
+                            productId: createdProduct.id,
+                            sku: null,
+                            price: v.price,
+                            compareAtPrice: v.compareAtPrice,
+                            cost: v.cost,
+                            isActive: true,
+                            trackInventory: v.trackInventory,
+                            stock: copyInventory ? v.stock : 0,
+                            reserved: 0,
+                            safetyStock: 0,
+                            optionValues: {
+                                create: optionValuesToCreate
+                            },
+                            images: {
+                                create: imagesToCreate
+                            }
+                        },
+                        select: { id: true }
+                    })
+
+                    // Ensure variants created even if option values mapping is empty (defensive).
+                    if (!createdVariant?.id) throw new Error('Variant duplication failed')
+                }
+            }
+
+            if ((product.bundleDeals ?? []).length > 0) {
+                await tx.productBundleDeal.createMany({
+                    data: product.bundleDeals.map((d) => ({
+                        tenantId,
+                        productId: createdProduct.id,
+                        bundleQty: d.bundleQty,
+                        bundlePrice: d.bundlePrice,
+                        tag: d.tag,
+                        isActive: d.isActive,
+                        startsAt: d.startsAt,
+                        endsAt: d.endsAt
+                    }))
+                })
+            }
+
+            return createdProduct.id
+        })
+
+        return this.products.getProduct(tenantId, created)
+    }
+}

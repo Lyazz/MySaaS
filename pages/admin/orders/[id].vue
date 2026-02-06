@@ -11,13 +11,13 @@
             to="/admin/orders"
             class="text-gray-700 hover:text-teal-600"
           >
-            Orders
+            {{ t('admin.nav.orders') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">Order #{{ orderId.substring(0, 8) }}</span>
+            <span class="ml-1 text-gray-500">{{ t('admin.pages.orders.detail.breadcrumb', { id: orderId.substring(0, 8) }) }}</span>
           </div>
         </li>
       </ol>
@@ -30,7 +30,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading order...
+        {{ t('admin.pages.orders.detail.loading') }}
       </p>
     </div>
 
@@ -43,14 +43,14 @@
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-gray-900">
-            Order Information
+            {{ t('admin.pages.orders.detail.sections.orderInfo') }}
           </h2>
           <AdminOrderStatusBadge :status="order.status" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Order ID
+              {{ t('admin.pages.orders.detail.fields.orderId') }}
             </p>
             <p class="mt-1 text-sm text-gray-900">
               {{ order.id }}
@@ -58,7 +58,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Order Date
+              {{ t('admin.pages.orders.detail.fields.orderDate') }}
             </p>
             <p class="mt-1 text-sm text-gray-900">
               {{ formatDate(order.createdAt) }}
@@ -70,12 +70,12 @@
       <!-- Customer Info Card -->
       <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          Customer Information
+          {{ t('admin.pages.orders.detail.sections.customerInfo') }}
         </h2>
         <div class="space-y-3">
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Name
+              {{ t('admin.pages.orders.detail.fields.customerName') }}
             </p>
             <p class="mt-1 text-sm text-gray-900">
               {{ order.customerName }}
@@ -83,7 +83,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Phone
+              {{ t('admin.pages.orders.detail.fields.customerPhone') }}
             </p>
             <p class="mt-1 text-sm text-gray-900">
               <a
@@ -96,7 +96,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Delivery Address
+              {{ t('admin.pages.orders.detail.fields.deliveryAddress') }}
             </p>
             <p class="mt-1 text-sm text-gray-900">
               {{ order.customerAddress }}
@@ -108,23 +108,23 @@
       <!-- Order Items -->
       <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          Order Items
+          {{ t('admin.pages.orders.detail.sections.orderItems') }}
         </h2>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                  Product
+                  {{ t('admin.pages.orders.detail.itemsTable.product') }}
                 </th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                  Price
+                  {{ t('admin.pages.orders.detail.itemsTable.price') }}
                 </th>
                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                  Quantity
+                  {{ t('admin.pages.orders.detail.itemsTable.quantity') }}
                 </th>
                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                  Subtotal
+                  {{ t('admin.pages.orders.detail.itemsTable.subtotal') }}
                 </th>
               </tr>
             </thead>
@@ -134,7 +134,7 @@
                 :key="item.id"
               >
                 <td class="px-4 py-3 text-sm text-gray-900">
-                  {{ item.product?.title || 'Product' }}
+                  {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct') }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900">
                   {{ formatCurrency(item.price) }}
@@ -143,7 +143,7 @@
                   {{ item.quantity }}
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-900 text-right">
-                  {{ formatCurrency(Number(item.price) * item.quantity) }}
+                  {{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}
                 </td>
               </tr>
             </tbody>
@@ -153,7 +153,7 @@
                   colspan="3"
                   class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
                 >
-                  Total
+                  {{ t('admin.pages.orders.detail.itemsTable.total') }}
                 </td>
                 <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
                   {{ formatCurrency(order.totalAmount) }}
@@ -167,7 +167,7 @@
       <!-- Status Update -->
       <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          Update Order Status
+          {{ t('admin.pages.orders.detail.statusUpdate.title') }}
         </h2>
         <form
           class="space-y-4"
@@ -178,7 +178,7 @@
               for="status"
               class="block text-sm font-medium text-gray-700 mb-1"
             >
-              Status
+              {{ t('admin.pages.orders.detail.statusUpdate.statusLabel') }}
             </label>
             <BaseSelect
               id="status"
@@ -189,7 +189,7 @@
                 :key="s"
                 :value="s"
               >
-                {{ statusLabels[s] || s }}
+                {{ orderStatusLabel(s) }}
               </option>
             </BaseSelect>
           </div>
@@ -217,14 +217,14 @@
               to="/admin/orders"
               class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Back to Orders
+              {{ t('admin.pages.orders.detail.backToOrders') }}
             </NuxtLink>
             <button
               type="submit"
               :disabled="updating || newStatus === order.status"
               class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ updating ? 'Updating...' : 'Update Status' }}
+              {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
             </button>
           </div>
         </form>
@@ -238,17 +238,17 @@
     >
       <Icon name="lucide:alert-circle" class="mx-auto h-12 w-12 text-red-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        Order not found
+        {{ t('admin.pages.orders.detail.notFound.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        This order may not exist or you don't have permission to view it.
+        {{ t('admin.pages.orders.detail.notFound.hint') }}
       </p>
       <div class="mt-6">
         <NuxtLink
           to="/admin/orders"
           class="text-teal-600 hover:text-teal-800"
         >
-          Back to Orders
+          {{ t('admin.pages.orders.detail.backToOrders') }}
         </NuxtLink>
       </div>
     </div>
@@ -263,7 +263,7 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Order Detail'
+  titleKey: 'admin.pages.orders.detail.metaTitle'
 })
 
 const authStore = useAuthStore()
@@ -271,12 +271,14 @@ const storeSettings = useState<any>('storeSettings')
 const { format: formatCurrency } = useCurrency()
 const route = useRoute()
 const orderId = route.params.id as string
+const { t, locale } = useI18n({ useScope: 'global' })
 
 interface OrderItem {
   id: string
   productId: string
   quantity: number
   price: number
+  lineTotal?: number
   product?: {
     title: string
   }
@@ -300,13 +302,18 @@ const newStatus = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 
-const statusLabels: Record<string, string> = {
-  PENDING: 'Pending',
-  CONFIRMED: 'Confirmed',
-  SHIPPED: 'Shipped',
-  DELIVERED: 'Delivered',
-  CANCELLED: 'Cancelled',
-  RETURNED: 'Returned'
+const statusLabelKeyByCode: Record<string, string> = {
+  PENDING: 'admin.orderStatus.pending',
+  CONFIRMED: 'admin.orderStatus.confirmed',
+  SHIPPED: 'admin.orderStatus.shipped',
+  DELIVERED: 'admin.orderStatus.delivered',
+  CANCELLED: 'admin.orderStatus.cancelled',
+  RETURNED: 'admin.orderStatus.returned'
+}
+
+function orderStatusLabel(code: string) {
+  const key = statusLabelKeyByCode[code]
+  return key ? t(key) : code
 }
 
 const selectableStatuses = computed(() => {
@@ -362,7 +369,7 @@ async function handleStatusUpdate() {
     })
 
     order.value = updated
-    successMessage.value = 'Order status updated successfully!'
+    successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
     
     // Clear success message after 3 seconds
     setTimeout(() => {
@@ -370,7 +377,7 @@ async function handleStatusUpdate() {
     }, 3000)
   } catch (error: any) {
     console.error('Failed to update order:', error)
-    errorMessage.value = error.data?.statusMessage || 'Failed to update order status'
+    errorMessage.value = error.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')
   } finally {
     updating.value = false
   }
@@ -378,7 +385,8 @@ async function handleStatusUpdate() {
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return date.toLocaleDateString(intlLocale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

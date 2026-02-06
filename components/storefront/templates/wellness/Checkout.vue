@@ -5,6 +5,7 @@ import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi
 const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 
@@ -16,7 +17,7 @@ const availableProviders = computed(() => {
     YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
     ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
     ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
-    SELF: { label: 'Self Delivery', icon: 'lucide:bike', color: 'teal' }
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'teal' }
   }
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
@@ -33,11 +34,11 @@ const deliveryOptions = computed(() => {
       provider: provider.key,
       providerLabel: provider.label,
       mode: 'home',
-      modeLabel: 'Home Delivery',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
       icon: provider.icon,
       color: provider.color,
       price: '350', // Placeholder
-      description: 'Delivered to your doorstep'
+      description: storefrontContent.value.checkout.delivery.description.homeDelivery
     })
     
     // Pickup point option
@@ -46,11 +47,11 @@ const deliveryOptions = computed(() => {
       provider: provider.key,
       providerLabel: provider.label,
       mode: 'pickup',
-      modeLabel: 'Pickup Point',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
       icon: provider.icon,
       color: provider.color,
       price: '300', // Placeholder
-      description: 'Collect from nearby location'
+      description: storefrontContent.value.checkout.delivery.description.pickupPoint
     })
   })
   
@@ -60,11 +61,11 @@ const deliveryOptions = computed(() => {
     provider: null,
     providerLabel: 'Store',
     mode: 'store',
-    modeLabel: 'Store Pickup',
+    modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
     icon: 'lucide:store',
     color: 'green',
-    price: 'Free',
-    description: 'Pick up at our store in Ouled Fayet'
+    price: 'FREE',
+    description: storefrontContent.value.checkout.delivery.description.storePickup
   })
   
   return options
@@ -106,22 +107,22 @@ async function handleSubmit() {
     cartStore.loadFromLocalStorage()
 
     if (!cartStore.hasItems) {
-      errorMessage.value = 'Your cart is empty.'
+      errorMessage.value = storefrontContent.value.checkout.errors.emptyCart
       return
     }
 
     if (!form.value.fullName.trim()) {
-      errorMessage.value = 'Please enter your full name.'
+      errorMessage.value = storefrontContent.value.checkout.errors.fullNameRequired
       return
     }
 
     if (!form.value.phone.trim()) {
-      errorMessage.value = 'Phone number is required to place your order.'
+      errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
       return
     }
 
     if (!form.value.selectedDeliveryOption) {
-      errorMessage.value = 'Please select a delivery option.'
+      errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
       return
     }
 
@@ -161,7 +162,10 @@ async function handleSubmit() {
         })
     } catch (error: any) {
         console.error('Checkout submission failed:', error)
-        errorMessage.value = error?.data?.statusMessage || error?.data?.message || 'Failed to place order. Please try again.'
+        errorMessage.value =
+          error?.data?.statusMessage ||
+          error?.data?.message ||
+          storefrontContent.value.checkout.errors.submitFailed
     } finally {
         submitting.value = false
     }
@@ -181,7 +185,7 @@ async function handleSubmit() {
       <!-- Header -->
       <div class="mb-10 text-center">
         <h1 class="text-4xl font-wellness font-bold text-stone-900 mb-2">
-          Checkout
+          {{ storefrontContent.checkout.title }}
         </h1>
         <p class="text-stone-500">
           Complete your purchase securely
@@ -190,7 +194,7 @@ async function handleSubmit() {
           v-if="!cartEnabled"
           class="mt-4 inline-block rounded-full border border-amber-200 bg-amber-50 text-amber-900 text-sm px-6 py-2"
         >
-          Checkout is currently disabled for this store.
+          {{ storefrontContent.checkout.disabled }}
         </div>
       </div>
 
@@ -208,34 +212,34 @@ async function handleSubmit() {
               </h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div class="col-span-2 md:col-span-1 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ml-1">Full name</label>
+                    <label class="block text-sm font-medium text-stone-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                     <input
                       v-model="form.fullName"
                       type="text"
                       class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                      placeholder="e.g. John Doe"
+                    :placeholder="storefrontContent.checkout.form.fullName.placeholder"
                     >
                  </div>
                  <div class="col-span-2 md:col-span-1 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ml-1">Phone</label>
+                    <label class="block text-sm font-medium text-stone-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                     <input
                       v-model="form.phone"
                       type="tel"
                       class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                      placeholder="0XXXXXXXX"
+                    :placeholder="storefrontContent.checkout.form.phone.placeholder"
                     >
                  </div>
                  <div class="col-span-2 md:col-span-1 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ml-1">Wilaya</label>
+                    <label class="block text-sm font-medium text-stone-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                     <div class="relative">
                       <select
                         v-model="form.wilaya"
                         class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
                       >
-                        <option value="" disabled selected>Select a wilaya...</option>
+                        <option value="" disabled selected>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
                         <option value="16">16 - Alger</option>
                       </select>
-                      <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500">
+                      <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500">
                         <Icon name="lucide:chevron-down" class="w-4 h-4" />
                       </div>
                     </div>
@@ -247,21 +251,21 @@ async function handleSubmit() {
                         v-model="form.commune"
                         class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
                       >
-                         <option value="" disabled selected>Select a commune</option>
+                         <option value="" disabled selected>{{ storefrontContent.checkout.form.commune.placeholder }}</option>
                          <!-- Mock options -->
                       </select>
-                      <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500">
+                      <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500">
                         <Icon name="lucide:chevron-down" class="w-4 h-4" />
                       </div>
                     </div>
                  </div>
                  <div class="col-span-2 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ml-1">Address (optional)</label>
+                    <label class="block text-sm font-medium text-stone-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input
                       v-model="form.address"
                       type="text"
                       class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                      placeholder="Street address, apartment, etc."
+                    :placeholder="storefrontContent.checkout.form.address.placeholder"
                     >
                  </div>
               </div>
@@ -271,7 +275,7 @@ async function handleSubmit() {
             <div class="bg-white rounded-[2rem] shadow-sm border border-stone-100 p-8">
                <h2 class="text-xl font-wellness text-stone-900 mb-6 flex items-center gap-3">
                  <span class="flex items-center justify-center w-8 h-8 rounded-full bg-stone-100 text-stone-600 text-sm font-bold">2</span>
-                 Delivery Options
+                 {{ storefrontContent.checkout.sections.deliveryOptions }}
               </h2>
                <div class="space-y-4">
                   <div
@@ -309,7 +313,7 @@ async function handleSubmit() {
                        <!-- Price & Check -->
                        <div class="flex items-center gap-4">
                           <div class="font-bold text-brand-700 text-sm">
-                             {{ option.price === 'Free' ? option.price : `${option.price} ${currencyCode}` }}
+                             {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                           </div>
                           <div 
                             class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
@@ -339,10 +343,10 @@ async function handleSubmit() {
             >
                <span v-if="submitting" class="flex items-center gap-2">
                  <Icon name="lucide:loader-2" class="w-5 h-5 animate-spin" />
-                 Processing...
+                 {{ storefrontContent.checkout.actions.placingOrder }}
                </span>
                <span v-else>
-                 Place Order • {{ formatCurrency(cartStore.total) }}
+                 {{ storefrontContent.checkout.actions.placeOrder }} • {{ formatCurrency(cartStore.total) }}
                </span>
             </button>
             <p class="text-center text-xs text-stone-400 mt-2 flex items-center justify-center gap-1">
@@ -386,25 +390,25 @@ async function handleSubmit() {
               <div class="flex justify-between items-center mb-2">
                 <div class="flex items-center gap-2">
                   <Icon name="lucide:ticket" class="w-4 h-4 text-brand-600" />
-                  <span class="text-sm font-medium text-stone-700">Coupon code</span>
+                  <span class="text-sm font-medium text-stone-700">{{ storefrontContent.checkout.coupon.title }}</span>
                 </div>
               </div>
               <div class="flex gap-2">
                 <input
                   v-model="couponCode"
                   type="text"
-                  placeholder="Enter code"
+                  :placeholder="storefrontContent.checkout.coupon.placeholder"
                   class="flex-1 h-10 rounded-lg border border-stone-200 bg-white px-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all outline-none"
                 >
                 <button class="px-4 h-10 bg-stone-800 hover:bg-brand-700 text-white font-medium text-sm rounded-lg transition-all">
-                  Apply
+                  {{ storefrontContent.actions.apply }}
                 </button>
               </div>
             </div>
 
            <div class="border-t border-stone-100 pt-6 space-y-4">
               <div class="flex items-center justify-between text-sm">
-                 <dt class="text-stone-600">Subtotal</dt>
+                 <dt class="text-stone-600">{{ storefrontContent.cart.summary.subtotal }}</dt>
                  <dd class="font-medium text-stone-900">{{ formatCurrency(cartStore.total) }}</dd>
               </div>
               <div v-if="selectedDelivery" class="flex items-center justify-between text-sm">
@@ -412,10 +416,10 @@ async function handleSubmit() {
                    Shipping
                    <span class="text-xs text-stone-400">({{ selectedDelivery.providerLabel }})</span>
                  </dt>
-                 <dd class="font-medium text-brand-700">{{ selectedDelivery.price === 'Free' ? 'Free' : `${selectedDelivery.price} ${currencyCode}` }}</dd>
+                 <dd class="font-medium text-brand-700">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</dd>
               </div>
               <div class="flex items-center justify-between border-t border-stone-100 pt-4">
-                 <dt class="text-xl font-wellness text-stone-900">Total</dt>
+                 <dt class="text-xl font-wellness text-stone-900">{{ storefrontContent.cart.summary.total }}</dt>
                  <dd class="text-xl font-wellness text-stone-900">{{ formatCurrency(cartStore.total) }}</dd>
               </div>
            </div>

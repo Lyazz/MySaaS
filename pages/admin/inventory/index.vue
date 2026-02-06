@@ -3,26 +3,56 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
-          Inventory
+          {{ t('admin.nav.inventory') }}
         </h2>
         <p class="mt-1 text-slate-600">
-          Track on-hand stock, reserved units, and safety stock per variant.
+          {{ t('admin.pages.inventory.subtitle') }}
         </p>
       </div>
 
-      <button
-        type="button"
-        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-        :disabled="loading"
-        @click="fetchVariants"
-      >
-        <Icon
-          name="lucide:refresh-cw"
-          class="h-4 w-4"
-          :class="loading ? 'animate-spin' : ''"
-        />
-        Refresh
-      </button>
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          :disabled="loading"
+          @click="fetchVariants"
+        >
+          <Icon
+            name="lucide:refresh-cw"
+            class="h-4 w-4"
+            :class="loading ? 'animate-spin' : ''"
+          />
+          {{ t('admin.common.refresh') }}
+        </button>
+
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          :disabled="loading"
+          @click="exportVariantsCsv"
+        >
+          <Icon name="lucide:download" class="h-4 w-4" />
+          {{ t('admin.pages.inventory.bulk.exportCsv') }}
+        </button>
+
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          :disabled="loading"
+          @click="openImportVariantsPicker"
+        >
+          <Icon name="lucide:upload" class="h-4 w-4" />
+          {{ t('admin.pages.inventory.bulk.importCsv') }}
+        </button>
+
+        <input
+          ref="importVariantsInput"
+          type="file"
+          accept=".csv,text/csv"
+          class="hidden"
+          @change="onImportVariantsCsvFileChange"
+        >
+      </div>
     </div>
 
     <div class="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-sm">
@@ -30,19 +60,19 @@
         <div>
           <BaseInput
             v-model="search"
-            label="Search"
-            placeholder="Product title or SKU…"
+            :label="t('admin.common.search')"
+            :placeholder="t('admin.pages.inventory.filters.searchPlaceholder')"
           />
         </div>
         <div class="flex items-end gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-lg bg-[rgb(var(--brand-rgb))] px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
+            class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
             :disabled="loading"
             @click="fetchVariants"
           >
             <Icon name="lucide:search" class="h-4 w-4" />
-            Search
+            {{ t('admin.common.searchAction') }}
           </button>
           <button
             type="button"
@@ -51,7 +81,7 @@
             @click="clearSearch"
           >
             <Icon name="lucide:x" class="h-4 w-4" />
-            Clear
+            {{ t('admin.common.clear') }}
           </button>
         </div>
       </div>
@@ -69,7 +99,7 @@
         v-if="loading"
         class="p-8 text-center text-sm text-slate-600"
       >
-        Loading inventory…
+        {{ t('admin.pages.inventory.loading') }}
       </div>
 
       <div
@@ -78,7 +108,7 @@
       >
         <Icon name="lucide:package-search" class="mx-auto h-10 w-10 text-slate-300" />
         <p class="mt-3 text-sm text-slate-600">
-          No variants found.
+          {{ t('admin.pages.inventory.empty') }}
         </p>
       </div>
 
@@ -90,25 +120,25 @@
           <thead class="bg-slate-50">
             <tr>
               <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Variant
+                {{ t('admin.pages.inventory.table.variant') }}
               </th>
               <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Track
+                {{ t('admin.pages.inventory.table.track') }}
               </th>
               <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                On-hand
+                {{ t('admin.pages.inventory.table.onHand') }}
               </th>
               <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Reserved
+                {{ t('admin.pages.inventory.table.reserved') }}
               </th>
               <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Safety
+                {{ t('admin.pages.inventory.table.safety') }}
               </th>
               <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Available
+                {{ t('admin.pages.inventory.table.available') }}
               </th>
               <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Actions
+                {{ t('admin.common.actions') }}
               </th>
             </tr>
           </thead>
@@ -124,7 +154,7 @@
                     {{ v.productTitle }} — {{ v.optionTitle }}
                   </p>
                   <p class="mt-0.5 truncate text-xs text-slate-500">
-                    SKU: {{ v.sku || '—' }}
+                    {{ t('admin.pages.inventory.table.sku') }}: {{ v.sku || '—' }}
                   </p>
                 </div>
               </td>
@@ -191,7 +221,7 @@
                   @click="openMovements(v)"
                 >
                   <Icon name="lucide:history" class="h-4 w-4" />
-                  Movements
+                  {{ t('admin.pages.inventory.movements.button') }}
                 </button>
               </td>
             </tr>
@@ -209,10 +239,10 @@
         <div class="flex items-start justify-between gap-4 border-b border-slate-200/70 px-6 py-4">
           <div class="min-w-0">
             <h3 class="truncate text-lg font-semibold text-slate-900">
-              Movements — {{ movementsVariant.productTitle }} / {{ movementsVariant.optionTitle }}
+              {{ t('admin.pages.inventory.movements.title', { product: movementsVariant.productTitle, option: movementsVariant.optionTitle }) }}
             </h3>
             <p class="mt-0.5 text-sm text-slate-500">
-              Latest changes affecting stock / reserved / safety stock.
+              {{ t('admin.pages.inventory.movements.hint') }}
             </p>
           </div>
           <button
@@ -229,13 +259,13 @@
             v-if="movementsLoading"
             class="py-8 text-center text-sm text-slate-600"
           >
-            Loading movements…
+            {{ t('admin.pages.inventory.movements.loading') }}
           </div>
           <div
             v-else-if="movements.length === 0"
             class="rounded-xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600"
           >
-            No movements recorded yet.
+            {{ t('admin.pages.inventory.movements.empty') }}
           </div>
           <div
             v-else
@@ -245,25 +275,25 @@
               <thead class="bg-slate-50">
                 <tr>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Date
+                    {{ t('admin.pages.inventory.movements.table.date') }}
                   </th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Type
+                    {{ t('admin.pages.inventory.movements.table.type') }}
                   </th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Δ stock
+                    {{ t('admin.pages.inventory.movements.table.deltaStock') }}
                   </th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Δ reserved
+                    {{ t('admin.pages.inventory.movements.table.deltaReserved') }}
                   </th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Δ safety
+                    {{ t('admin.pages.inventory.movements.table.deltaSafety') }}
                   </th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    After
+                    {{ t('admin.pages.inventory.movements.table.after') }}
                   </th>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    By
+                    {{ t('admin.pages.inventory.movements.table.by') }}
                   </th>
                 </tr>
               </thead>
@@ -284,7 +314,7 @@
                         v-if="m.orderId"
                         class="truncate text-xs text-slate-500"
                       >
-                        Order: {{ m.orderId }}
+                        {{ t('admin.pages.inventory.movements.table.order') }}: {{ m.orderId }}
                       </p>
                     </div>
                   </td>
@@ -308,7 +338,7 @@
                     <span v-else>—</span>
                   </td>
                   <td class="px-4 py-2 text-sm text-slate-700">
-                    {{ m.createdBy?.email || 'system' }}
+                    {{ m.createdBy?.email || t('admin.pages.inventory.movements.system') }}
                   </td>
                 </tr>
               </tbody>
@@ -322,7 +352,7 @@
             class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             @click="closeMovements"
           >
-            Close
+            {{ t('admin.common.close') }}
           </button>
         </div>
       </div>
@@ -337,7 +367,7 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Inventory'
+  titleKey: 'admin.pages.inventory.title'
 })
 
 type Variant = {
@@ -371,11 +401,13 @@ type Movement = {
 }
 
 const authStore = useAuthStore()
-const variants = ref<Variant[]>([])
-const loading = ref(false)
-const errorMessage = ref<string | null>(null)
-const search = ref('')
-const savingIds = ref<Set<string>>(new Set())
+const { t } = useI18n({ useScope: 'global' })
+	const variants = ref<Variant[]>([])
+	const loading = ref(false)
+	const errorMessage = ref<string | null>(null)
+	const search = ref('')
+	const savingIds = ref<Set<string>>(new Set())
+	const importVariantsInput = ref<HTMLInputElement | null>(null)
 
 const movementsVariant = ref<Variant | null>(null)
 const movements = ref<Movement[]>([])
@@ -403,16 +435,68 @@ const fetchVariants = async () => {
     })
     variants.value = data
   } catch (e: any) {
-    errorMessage.value = e?.data?.statusMessage || 'Failed to load inventory'
+    errorMessage.value = e?.data?.statusMessage || t('admin.pages.inventory.errors.loadFailed')
   } finally {
     loading.value = false
   }
 }
 
-const clearSearch = () => {
-  search.value = ''
-  fetchVariants()
-}
+	const clearSearch = () => {
+	  search.value = ''
+	  fetchVariants()
+	}
+
+	const exportVariantsCsv = async () => {
+	  try {
+	    const csv = await $fetch<string>('/api/admin/inventory/variants/export.csv', {
+	      headers: { Authorization: `Bearer ${authStore.token}` },
+	      query: search.value.trim() ? { search: search.value.trim() } : undefined,
+	      responseType: 'text' as any
+	    })
+
+	    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+	    const url = URL.createObjectURL(blob)
+	    const a = document.createElement('a')
+	    a.href = url
+	    a.download = `inventory-variants-${new Date().toISOString().slice(0, 10)}.csv`
+	    document.body.appendChild(a)
+	    a.click()
+	    a.remove()
+	    URL.revokeObjectURL(url)
+	  } catch (e: any) {
+	    errorMessage.value = e?.data?.statusMessage || t('admin.pages.inventory.bulk.exportError')
+	  }
+	}
+
+	const openImportVariantsPicker = () => {
+	  importVariantsInput.value?.click()
+	}
+
+	const onImportVariantsCsvFileChange = async (event: Event) => {
+	  const input = event.target as HTMLInputElement
+	  const file = input.files?.[0]
+	  if (!file) return
+
+	  loading.value = true
+	  errorMessage.value = null
+	  try {
+	    const form = new FormData()
+	    form.append('file', file)
+
+	    await $fetch('/api/admin/inventory/variants/import.csv', {
+	      method: 'POST',
+	      headers: { Authorization: `Bearer ${authStore.token}` },
+	      body: form
+	    })
+
+	    await fetchVariants()
+	  } catch (e: any) {
+	    errorMessage.value = e?.data?.statusMessage || t('admin.pages.inventory.bulk.importError')
+	  } finally {
+	    loading.value = false
+	    if (importVariantsInput.value) importVariantsInput.value.value = ''
+	  }
+	}
 
 const patchVariant = async (variantId: string, patch: Partial<Pick<Variant, 'stock' | 'reserved' | 'safetyStock' | 'trackInventory'>>) => {
   const v = variants.value.find((x) => x.id === variantId)
@@ -436,7 +520,7 @@ const patchVariant = async (variantId: string, patch: Partial<Pick<Variant, 'sto
     if (typeof updated?.trackInventory === 'boolean') v.trackInventory = updated.trackInventory
     recomputeAvailable(v)
   } catch (e: any) {
-    errorMessage.value = e?.data?.statusMessage || 'Failed to update inventory'
+    errorMessage.value = e?.data?.statusMessage || t('admin.pages.inventory.errors.updateFailed')
     await fetchVariants()
   } finally {
     savingIds.value.delete(variantId)

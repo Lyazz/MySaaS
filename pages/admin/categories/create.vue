@@ -11,13 +11,13 @@
             to="/admin/categories"
             class="text-gray-700 hover:text-teal-600"
           >
-            Categories
+            {{ t('admin.nav.categories') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">Create Category</span>
+            <span class="ml-1 text-gray-500">{{ t('admin.pages.categories.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -26,10 +26,10 @@
     <!-- Header -->
     <div class="mb-6">
       <h2 class="text-2xl font-bold text-gray-800">
-        Create New Category
+        {{ t('admin.pages.categories.create.title') }}
       </h2>
       <p class="text-gray-600 mt-1">
-        Add a category to keep your products organized
+        {{ t('admin.pages.categories.create.subtitle') }}
       </p>
     </div>
 
@@ -40,26 +40,26 @@
     >
       <BaseInput
         v-model="form.title"
-        label="Category Title"
+        :label="t('admin.forms.category.title.label')"
         :error="errors.title"
-        placeholder="Enter category title"
+        :placeholder="t('admin.forms.category.title.placeholder')"
         required
       />
 
       <BaseInput
         v-model="form.slug"
-        label="Category Slug"
+        :label="t('admin.forms.category.slug.label')"
         :error="errors.slug"
-        placeholder="category-slug"
-        hint="URL-friendly version of the title (auto-generated)"
+        :placeholder="t('admin.forms.category.slug.placeholder')"
+        :hint="t('admin.forms.category.slug.hintCreate')"
         required
         pattern="[a-z0-9-]+"
       />
 
       <SingleImageUploader
         v-model="form.imageUrl"
-        label="Category image (optional)"
-        hint="Shown on storefront category tiles"
+        :label="t('admin.forms.category.image.label')"
+        :hint="t('admin.forms.category.image.hint')"
       />
 
       <div
@@ -76,14 +76,14 @@
           to="/admin/categories"
           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
-          Cancel
+          {{ t('admin.common.cancel') }}
         </NuxtLink>
         <button
           type="submit"
           :disabled="submitting"
           class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ submitting ? 'Creating...' : 'Create Category' }}
+          {{ submitting ? t('admin.common.creating') : t('admin.pages.categories.create.submit') }}
         </button>
       </div>
     </form>
@@ -98,11 +98,12 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Create Category'
+  titleKey: 'admin.pages.categories.create.metaTitle'
 })
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 
 const form = ref({
   title: '',
@@ -152,7 +153,7 @@ async function handleSubmit() {
     if (error.data?.statusMessage) {
       errorMessage.value = error.data.statusMessage
     } else {
-      errorMessage.value = 'Failed to create category. Please try again.'
+      errorMessage.value = t('admin.pages.categories.create.errors.createFailed')
     }
   } finally {
     submitting.value = false

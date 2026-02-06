@@ -11,13 +11,15 @@
             to="/admin/products"
             class="text-gray-700 hover:text-teal-600"
           >
-            Products
+            {{ t('admin.nav.products') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">Edit {{ form.title || 'Product' }}</span>
+            <span class="ml-1 text-gray-500">
+              {{ t('admin.pages.products.edit.breadcrumbEdit', { title: form.title || t('admin.pages.products.edit.fallbackTitle') }) }}
+            </span>
           </div>
         </li>
       </ol>
@@ -30,7 +32,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading product...
+        {{ t('admin.pages.products.edit.loading') }}
       </p>
     </div>
 
@@ -40,31 +42,31 @@
       <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
           <h2 class="text-2xl font-bold text-gray-800">
-            Edit Product
+            {{ t('admin.pages.products.edit.title') }}
           </h2>
           <p class="text-gray-600 mt-1">
-            Update product information
+            {{ t('admin.pages.products.edit.subtitle') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <!-- Public Links -->
           <div class="flex items-center space-x-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200">
-            <span class="text-xs font-medium text-gray-500 px-2">Links:</span>
+            <span class="text-xs font-medium text-gray-500 px-2">{{ t('admin.pages.products.edit.links.label') }}:</span>
                 
             <!-- Product Page -->
             <div class="flex items-center space-x-1 border-r border-gray-300 pr-2">
-              <span class="text-xs text-gray-400">Product</span>
+              <span class="text-xs text-gray-400">{{ t('admin.pages.products.edit.links.product') }}</span>
               <a
                 :href="productUrl"
                 target="_blank"
                 class="p-1 text-teal-600 hover:bg-teal-50 rounded"
-                title="Open Product Page"
+                :title="t('admin.pages.products.edit.links.openProduct')"
               >
                 <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
                 class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
-                title="Copy Product Link"
+                :title="t('admin.pages.products.edit.links.copyProduct')"
                 @click="copyUrl(productUrl)"
               >
                 <Icon name="lucide:copy" class="w-4 h-4" />
@@ -73,18 +75,18 @@
 
             <!-- Landing Page -->
             <div class="flex items-center space-x-1 pl-1">
-              <span class="text-xs text-gray-400">Landing</span>
+              <span class="text-xs text-gray-400">{{ t('admin.pages.products.edit.links.landing') }}</span>
               <a
                 :href="landingUrl"
                 target="_blank"
                 class="p-1 text-teal-600 hover:bg-teal-50 rounded"
-                title="Open Landing Page"
+                :title="t('admin.pages.products.edit.links.openLanding')"
               >
                 <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
                 class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
-                title="Copy Landing Link"
+                :title="t('admin.pages.products.edit.links.copyLanding')"
                 @click="copyUrl(landingUrl)"
               >
                 <Icon name="lucide:copy" class="w-4 h-4" />
@@ -96,14 +98,14 @@
             to="/admin/products"
             class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            {{ t('admin.common.cancel') }}
           </NuxtLink>
           <button
             :disabled="submitting"
             class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="handleSubmit"
           >
-            {{ submitting ? 'Updating...' : 'Update Product' }}
+            {{ submitting ? t('admin.common.updating') : t('admin.pages.products.edit.submit') }}
           </button>
         </div>
       </div>
@@ -145,9 +147,9 @@
             <!-- Title -->
             <BaseInput
               v-model="form.title"
-              label="Product Title"
+              :label="t('admin.forms.product.title.label')"
               :error="errors.title"
-              placeholder="Enter product title"
+              :placeholder="t('admin.forms.product.title.placeholder')"
               required
             />
 
@@ -155,19 +157,19 @@
             <!-- Slug -->
             <BaseInput
               v-model="form.slug"
-              label="Product Slug"
+              :label="t('admin.forms.product.slug.label')"
               :error="errors.slug"
-              placeholder="product-slug"
-              hint="URL-friendly version of the title"
+              :placeholder="t('admin.forms.product.slug.placeholder')"
+              :hint="t('admin.forms.product.slug.hintEdit')"
               required
               pattern="[a-z0-9-]+"
             />
 
             <!-- Mini Description -->
             <AdminFormField
-              label="Mini Description"
+              :label="t('admin.forms.product.miniDescription.label')"
               :error="errors.miniDescription"
-              hint="Short description for landing page header (optional)"
+              :hint="t('admin.forms.product.miniDescription.hint')"
             >
               <template #default="{ inputId }">
                 <textarea
@@ -175,7 +177,7 @@
                   v-model="form.miniDescription"
                   rows="3"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="Enter a short summary..."
+                  :placeholder="t('admin.forms.product.miniDescription.placeholder')"
                 />
               </template>
             </AdminFormField>
@@ -184,38 +186,38 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Price -->
               <!-- Price -->
-              <BaseInput
-                v-model.number="form.price"
-                label="Price ($)"
-                :error="errors.price"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                placeholder="0.00"
-              />
+            <BaseInput
+              v-model.number="form.price"
+              :label="t('admin.forms.product.price.label')"
+              :error="errors.price"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              :placeholder="t('admin.forms.product.price.placeholder')"
+            />
 
               <!-- Stock -->
               <!-- Stock -->
-              <BaseInput
-                v-model.number="form.stock"
-                label="Stock Quantity"
-                :error="errors.stock"
-                type="number"
-                min="0"
-                required
-                placeholder="0"
-              />
+            <BaseInput
+              v-model.number="form.stock"
+              :label="t('admin.forms.product.stock.label')"
+              :error="errors.stock"
+              type="number"
+              min="0"
+              required
+              :placeholder="t('admin.forms.product.stock.placeholder')"
+            />
             </div>
 
             <!-- Category -->
             <BaseSelect
               v-model="form.categoryId"
-              label="Category"
+              :label="t('admin.forms.product.category.label')"
               :error="errors.categoryId"
             >
               <option value="">
-                Select a category (optional)
+                {{ t('admin.forms.product.category.placeholder') }}
               </option>
               <option
                 v-for="cat in categories"
@@ -241,7 +243,7 @@
                 for="isActive"
                 class="ml-2 block text-sm text-gray-900"
               >
-                Product is active and visible to customers
+                {{ t('admin.forms.product.isActive.label') }}
               </label>
             </div>
           </div>
@@ -253,14 +255,14 @@
           >
             <!-- Description -->
             <AdminFormField
-              label="Landing Page Description"
+              :label="t('admin.pages.products.edit.descriptionTab.title')"
               :error="errors.description"
             >
               <template #default="{ inputId }">
                 <RichTextEditor
                   :id="inputId"
                   v-model="form.description"
-                  placeholder="Enter product description with rich formatting..."
+                  :placeholder="t('admin.forms.product.description.placeholder')"
                 />
               </template>
             </AdminFormField>
@@ -274,7 +276,7 @@
             <!-- Options & Variants -->
             <div>
               <h2 class="text-xl font-bold text-gray-800 mb-4">
-                Options & Variants
+                {{ t('admin.pages.products.edit.variantsTab.title') }}
               </h2>
               <ProductOptionsEditor 
                 :product-id="productId" 
@@ -291,6 +293,181 @@
                 :legacy-images="form.images"
                 @refresh="fetchProduct" 
               />
+            </div>
+          </div>
+
+          <!-- Bundles Tab -->
+          <div
+            v-show="currentTab === 'bundles'"
+            class="space-y-6"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold text-gray-800">
+                  {{ t('admin.pages.products.edit.bundlesTab.title') }}
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                  {{ t('admin.pages.products.edit.bundlesTab.hint') }}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800"
+                @click="addBundleDealRow"
+              >
+                {{ t('admin.pages.products.edit.bundlesTab.addBundle') }}
+              </button>
+            </div>
+
+            <div
+              v-if="bundleDealsError"
+              class="p-4 bg-red-50 border border-red-200 rounded-md"
+            >
+              <p class="text-sm text-red-800">
+                {{ bundleDealsError }}
+              </p>
+            </div>
+
+            <div class="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-white">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.qty') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.price') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.tag') }}</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.active') }}</th>
+                      <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.actions') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-if="bundleDeals.length === 0">
+                      <td colspan="5" class="px-4 py-6 text-sm text-gray-500">
+                        {{ t('admin.pages.products.edit.bundlesTab.table.empty') }}
+                      </td>
+                    </tr>
+                    <tr
+                      v-for="(deal, idx) in bundleDeals"
+                      :key="deal.id || `new-${idx}`"
+                    >
+                      <td class="px-4 py-3">
+                        <input
+                          v-model.number="deal.bundleQty"
+                          type="number"
+                          min="2"
+                          class="w-24 px-3 py-2 border border-gray-300 rounded-md"
+                        >
+                      </td>
+                      <td class="px-4 py-3">
+                        <input
+                          v-model="deal.bundlePrice"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="w-40 px-3 py-2 border border-gray-300 rounded-md"
+                        >
+                      </td>
+                      <td class="px-4 py-3">
+                        <select
+                          v-model="deal.tag"
+                          class="w-48 px-3 py-2 border border-gray-300 rounded-md bg-white"
+                        >
+                          <option :value="null">{{ t('admin.pages.products.edit.bundlesTab.tags.none') }}</option>
+                          <option value="MOST_POPULAR">{{ t('admin.pages.products.edit.bundlesTab.tags.mostPopular') }}</option>
+                          <option value="BEST_VALUE">{{ t('admin.pages.products.edit.bundlesTab.tags.bestValue') }}</option>
+                        </select>
+                      </td>
+                      <td class="px-4 py-3">
+                        <label class="inline-flex items-center gap-2">
+                          <input
+                            v-model="deal.isActive"
+                            type="checkbox"
+                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                          >
+                          <span class="text-sm text-gray-700">{{ t('admin.common.active') }}</span>
+                        </label>
+                      </td>
+                      <td class="px-4 py-3 text-right space-x-2">
+                        <button
+                          type="button"
+                          class="px-3 py-2 text-sm rounded-md bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50"
+                          :disabled="bundleDealsSubmitting"
+                          @click="saveBundleDeal(deal)"
+                        >
+                          {{ t('admin.common.save') }}
+                        </button>
+                        <button
+                          type="button"
+                          class="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                          :disabled="bundleDealsSubmitting"
+                          @click="deleteBundleDeal(deal, idx)"
+                        >
+                          {{ t('admin.common.delete') }}
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tracking Tab -->
+          <div
+            v-show="currentTab === 'tracking'"
+            class="space-y-6"
+          >
+            <div class="rounded-lg border border-gray-200 bg-white p-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h2 class="text-xl font-bold text-gray-800">Meta Pixels</h2>
+                  <p class="text-sm text-gray-600 mt-1">Select which pixels should fire for this product.</p>
+                </div>
+                <button
+                  type="button"
+                  class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 disabled:opacity-50"
+                  :disabled="metaPixelsSaving"
+                  @click="saveProductMetaPixels"
+                >
+                  {{ metaPixelsSaving ? 'Saving...' : 'Save Pixels' }}
+                </button>
+              </div>
+
+              <div v-if="metaPixelsError" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800">
+                {{ metaPixelsError }}
+              </div>
+
+              <div v-if="metaPixelsLoading" class="mt-4 text-sm text-gray-600">
+                Loading pixels...
+              </div>
+
+              <div v-else class="mt-4">
+                <div v-if="metaPixels.length === 0" class="text-sm text-gray-600">
+                  No meta pixels configured yet. Create them in Admin → Integrations → Meta Pixels.
+                </div>
+                <div v-else class="space-y-3">
+                  <label
+                    v-for="p in metaPixels"
+                    :key="p.id"
+                    class="flex items-center justify-between gap-4 rounded-lg border border-gray-200 px-4 py-3"
+                  >
+                    <div class="min-w-0">
+                      <div class="font-medium text-gray-900 truncate">
+                        {{ p.name || '—' }}
+                        <span v-if="p.isGlobal" class="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">Global</span>
+                        <span v-if="!p.isActive" class="ml-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">Inactive</span>
+                      </div>
+                      <div class="text-xs font-mono text-gray-600 truncate">{{ p.pixelId }}</div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                      :value="p.id"
+                      v-model="productMetaPixelIds"
+                    >
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -311,14 +488,14 @@
             to="/admin/products"
             class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            {{ t('admin.common.cancel') }}
           </NuxtLink>
           <button
             type="submit"
             :disabled="submitting"
             class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ submitting ? 'Updating...' : 'Update Product' }}
+            {{ submitting ? t('admin.common.updating') : t('admin.pages.products.edit.submit') }}
           </button>
         </div>
       </form>
@@ -339,12 +516,13 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Edit Product'
+  titleKey: 'admin.pages.products.edit.metaTitle'
 })
 
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 
 const productId = route.params.id as string
 
@@ -359,6 +537,17 @@ interface ProductImage {
   alt?: string
   position: number
   isMain: boolean
+}
+
+interface BundleDeal {
+  id?: string
+  bundleQty: number
+  bundlePrice: number | string
+  tag?: string | null
+  isActive?: boolean
+  startsAt?: string | null
+  endsAt?: string | null
+  _isNew?: boolean
 }
 
 const form = ref({
@@ -376,6 +565,9 @@ const form = ref({
 const options = ref<any[]>([])
 const variants = ref<any[]>([])
 const productImages = ref<ProductImage[]>([])
+const bundleDeals = ref<BundleDeal[]>([])
+const bundleDealsSubmitting = ref(false)
+const bundleDealsError = ref('')
 
 const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
@@ -384,12 +576,20 @@ const loading = ref(true)
 const categories = ref<Category[]>([])
 
 // Tabs configuration
-const tabs = [
-    { id: 'general', name: 'General' },
-    { id: 'description', name: 'Landing Page Description' },
-    { id: 'variants', name: 'Variants' }
-]
+const tabs = computed(() => ([
+  { id: 'general', name: t('admin.pages.products.edit.tabs.general') },
+  { id: 'description', name: t('admin.pages.products.edit.tabs.description') },
+  { id: 'variants', name: t('admin.pages.products.edit.tabs.variants') },
+  { id: 'bundles', name: t('admin.pages.products.edit.tabs.bundles') },
+  { id: 'tracking', name: 'Tracking' }
+]))
 const currentTab = ref('general')
+
+const metaPixels = ref<any[]>([])
+const productMetaPixelIds = ref<string[]>([])
+const metaPixelsLoading = ref(false)
+const metaPixelsSaving = ref(false)
+const metaPixelsError = ref('')
 
 async function fetchProduct() {
   loading.value = true
@@ -414,6 +614,15 @@ async function fetchProduct() {
 
     options.value = data.options || []
     variants.value = data.variants || []
+    bundleDeals.value = (data.bundleDeals || []).map((d: any) => ({
+      id: d.id,
+      bundleQty: Number(d.bundleQty),
+      bundlePrice: d.bundlePrice,
+      tag: d.tag || null,
+      isActive: d.isActive !== false,
+      startsAt: d.startsAt || null,
+      endsAt: d.endsAt || null
+    }))
     
     // Convert productImages from API to our format, or migrate legacy images
     if (data.productImages && data.productImages.length > 0) {
@@ -439,7 +648,7 @@ async function fetchProduct() {
 
   } catch (error) {
     console.error('Failed to fetch product:', error)
-    errorMessage.value = 'Failed to load product'
+    errorMessage.value = t('admin.pages.products.edit.errors.loadFailed')
   } finally {
     loading.value = false
   }
@@ -455,6 +664,106 @@ async function fetchCategories() {
     categories.value = data
   } catch (error) {
     console.error('Failed to fetch categories:', error)
+  }
+}
+
+async function refreshBundleDeals() {
+  bundleDealsError.value = ''
+  try {
+    const data = await $fetch<any[]>(`/api/admin/products/${productId}/bundles`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    bundleDeals.value = data.map((d: any) => ({
+      id: d.id,
+      bundleQty: Number(d.bundleQty),
+      bundlePrice: d.bundlePrice,
+      tag: d.tag || null,
+      isActive: d.isActive !== false,
+      startsAt: d.startsAt || null,
+      endsAt: d.endsAt || null
+    }))
+  } catch (error: any) {
+    console.error('Failed to fetch bundle deals:', error)
+    bundleDealsError.value = error?.data?.statusMessage || t('admin.pages.products.edit.errors.bundlesLoadFailed')
+  }
+}
+
+function addBundleDealRow() {
+  bundleDeals.value.push({
+    bundleQty: 2,
+    bundlePrice: 0,
+    tag: null,
+    isActive: true,
+    startsAt: null,
+    endsAt: null,
+    _isNew: true
+  })
+  currentTab.value = 'bundles'
+}
+
+async function saveBundleDeal(deal: BundleDeal) {
+  bundleDealsError.value = ''
+  bundleDealsSubmitting.value = true
+  try {
+    const payload = {
+      bundleQty: deal.bundleQty,
+      bundlePrice: deal.bundlePrice,
+      tag: deal.tag || null,
+      isActive: deal.isActive !== false,
+      startsAt: deal.startsAt || null,
+      endsAt: deal.endsAt || null
+    }
+
+    if (deal.id) {
+      await $fetch(`/api/admin/products/${productId}/bundles/${deal.id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${authStore.token}`
+        },
+        body: payload
+      })
+    } else {
+      await $fetch(`/api/admin/products/${productId}/bundles`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authStore.token}`
+        },
+        body: payload
+      })
+    }
+
+    await refreshBundleDeals()
+  } catch (error: any) {
+    console.error('Failed to save bundle deal:', error)
+    bundleDealsError.value = error?.data?.statusMessage || t('admin.pages.products.edit.errors.bundlesSaveFailed')
+  } finally {
+    bundleDealsSubmitting.value = false
+  }
+}
+
+async function deleteBundleDeal(deal: BundleDeal, index: number) {
+  bundleDealsError.value = ''
+  if (!deal.id) {
+    bundleDeals.value.splice(index, 1)
+    return
+  }
+
+  bundleDealsSubmitting.value = true
+  try {
+    await $fetch(`/api/admin/products/${productId}/bundles/${deal.id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    await refreshBundleDeals()
+  } catch (error: any) {
+    console.error('Failed to delete bundle deal:', error)
+    bundleDealsError.value = error?.data?.statusMessage || t('admin.pages.products.edit.errors.bundlesDeleteFailed')
+  } finally {
+    bundleDealsSubmitting.value = false
   }
 }
 
@@ -521,7 +830,7 @@ async function handleSubmit() {
     if (error.data?.statusMessage) {
       errorMessage.value = error.data.statusMessage
     } else {
-      errorMessage.value = 'Failed to update product. Please try again.'
+      errorMessage.value = t('admin.pages.products.edit.errors.updateFailed')
     }
   } finally {
     submitting.value = false
@@ -562,7 +871,56 @@ async function copyUrl(url: string) {
 onMounted(() => {
   fetchProduct()
   fetchCategories()
+  fetchMetaPixels()
+  fetchProductMetaPixels()
 })
+
+async function fetchMetaPixels() {
+  metaPixelsLoading.value = true
+  metaPixelsError.value = ''
+  try {
+    const data = await $fetch<any[]>('/api/admin/meta-pixels', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    metaPixels.value = Array.isArray(data) ? data : []
+  } catch (error: any) {
+    console.error('Failed to fetch meta pixels:', error)
+    metaPixelsError.value = error?.data?.statusMessage || 'Failed to load meta pixels'
+  } finally {
+    metaPixelsLoading.value = false
+  }
+}
+
+async function fetchProductMetaPixels() {
+  metaPixelsError.value = ''
+  try {
+    const data = await $fetch<{ metaPixelIds: string[] }>(`/api/admin/meta-pixels/products/${productId}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    productMetaPixelIds.value = Array.isArray(data?.metaPixelIds) ? data.metaPixelIds : []
+  } catch (error: any) {
+    console.error('Failed to fetch product meta pixels:', error)
+    // keep non-blocking
+  }
+}
+
+async function saveProductMetaPixels() {
+  metaPixelsSaving.value = true
+  metaPixelsError.value = ''
+  try {
+    const data = await $fetch<{ metaPixelIds: string[] }>(`/api/admin/meta-pixels/products/${productId}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { metaPixelIds: productMetaPixelIds.value }
+    })
+    productMetaPixelIds.value = Array.isArray(data?.metaPixelIds) ? data.metaPixelIds : productMetaPixelIds.value
+  } catch (error: any) {
+    console.error('Failed to save product meta pixels:', error)
+    metaPixelsError.value = error?.data?.statusMessage || 'Failed to save product meta pixels'
+  } finally {
+    metaPixelsSaving.value = false
+  }
+}
 </script>
 
 <style scoped>

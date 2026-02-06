@@ -34,7 +34,7 @@ const { data: homepageData } = await useFetch<PublicHomepageResponse>(homepageUr
   headers: useTenantApiHeaders()
 })
 
-const homeConfig = computed<StorefrontHomeConfig>(() => homepageData.value?.homeConfig || DEFAULT_STOREFRONT_HOME_CONFIG)
+const homeConfig = computed<StorefrontHomeConfig | undefined>(() => homepageData.value?.homeConfig)
 const bestSellerProducts = computed<Product[]>(() => homepageData.value?.bestSellers || [])
 
 const productsUrl = useTenantApiUrl('/api/products')
@@ -44,7 +44,7 @@ const { data: products, pending } = await useFetch<Product[]>(productsUrl, {
 
 const featuredProducts = computed(() => {
   if (!products.value) return []
-  const limit = homeConfig.value?.sections?.newArrivals?.limit ?? 6
+  const limit = homeConfig.value?.sections?.newArrivals?.limit ?? DEFAULT_STOREFRONT_HOME_CONFIG.sections.newArrivals.limit
   return products.value.slice(0, Math.max(1, Math.min(24, limit)))
 })
 

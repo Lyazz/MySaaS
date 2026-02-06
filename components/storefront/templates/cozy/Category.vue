@@ -6,6 +6,8 @@ const props = defineProps<{
     products: any[]
 }>()
 
+const storefrontContent = useStorefrontContent()
+
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
     headers: useTenantApiHeaders(),
@@ -26,9 +28,9 @@ const categoryProducts = computed(() => {
         <div class="text-center mb-16 relative">
             <div class="absolute inset-0 bg-brand-50 blur-3xl rounded-full opacity-50 z-0 scale-75"></div>
             <div class="relative z-10">
-                 <span class="text-brand-500 font-bold tracking-widest uppercase text-xs mb-2 block">Collection</span>
+                 <span class="text-brand-500 font-bold tracking-widest uppercase text-xs mb-2 block">{{ storefrontContent.category.label }}</span>
                  <h1 class="font-cozy font-black text-5xl md:text-6xl text-slate-800 mb-6">{{ category.title }}</h1>
-                 <p class="max-w-xl mx-auto text-slate-500 leading-relaxed">{{ category.description }}</p>
+                 <p class="max-w-xl mx-auto text-slate-500 leading-relaxed">{{ category.description || storefrontContent.category.description }}</p>
             </div>
         </div>
 
@@ -37,7 +39,7 @@ const categoryProducts = computed(() => {
             <!-- Sidebar -->
             <aside class="w-full lg:w-48 flex-shrink-0">
                 <div class="sticky top-24">
-                    <h3 class="font-bold text-slate-900 mb-6 text-sm uppercase tracking-wide">Explore</h3>
+                    <h3 class="font-bold text-slate-900 mb-6 text-sm uppercase tracking-wide">{{ storefrontContent.shop.categories }}</h3>
                     <div class="space-y-2">
                         <NuxtLink 
                             v-for="cat in allCategories" 
@@ -55,7 +57,14 @@ const categoryProducts = computed(() => {
             <!-- Grid -->
             <div class="flex-1">
                 <div v-if="categoryProducts.length === 0" class="bg-white/50 rounded-[3rem] p-16 text-center border dashed border-slate-300">
-                    <p class="text-slate-400 font-bold">No treasures found here yet.</p>
+                    <p class="text-slate-600 font-bold">{{ storefrontContent.shop.results.noResults }}</p>
+                    <p class="text-slate-500 mt-2">{{ storefrontContent.category.emptyHint }}</p>
+                    <NuxtLink
+                      to="/products"
+                      class="inline-flex items-center justify-center mt-6 px-6 py-2 rounded-full bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors"
+                    >
+                      {{ storefrontContent.shop.allProducts }}
+                    </NuxtLink>
                 </div>
                 
                 <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

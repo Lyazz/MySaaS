@@ -7,6 +7,7 @@ const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -33,8 +34,8 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 // Build dynamic menu
 const categories = computed(() => {
     const base = [
-        { name: 'Home', href: '/' },
-        { name: 'Shop', href: '/products' },
+        { name: storefrontContent.value.nav.home, href: '/' },
+        { name: storefrontContent.value.nav.shop, href: '/products' },
     ]
     
     // Add top 3 categories
@@ -45,7 +46,7 @@ const categories = computed(() => {
     }
     
     // Add Contact at the end
-    base.push({ name: 'Contact', href: '/contact' }) // contact is usually static or handled elsewhere
+    base.push({ name: storefrontContent.value.nav.contact, href: '/contact' }) // contact is usually static or handled elsewhere
     return base
 })
 const props = defineProps<{
@@ -101,7 +102,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
               <div class="relative group">
                 <input 
                   type="text" 
-                  placeholder="Search products..." 
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full h-10 bg-white border border-stone-300 text-slate-900 text-sm rounded-sm focus:ring-1 focus:ring-brand-500 focus:border-brand-500 block pl-5 pr-10 transition-all shadow-sm" 
                 >
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -129,15 +130,16 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
               <!-- Icons -->
               <div class="flex items-center gap-3">
+                <LocaleSwitcher class="hidden lg:inline-flex" />
                 <button
                   class="h-10 w-10 flex items-center justify-center text-stone-600 hover:text-brand-700 hover:bg-stone-100 rounded-sm transition-colors"
-                  title="Wishlist"
+                  :title="storefrontContent.header.wishlistTitle"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
                 </button>
                 <button
                   class="h-10 w-10 flex items-center justify-center text-stone-600 hover:text-brand-700 hover:bg-stone-100 rounded-sm transition-colors"
-                  title="Account"
+                  :title="storefrontContent.header.accountTitle"
                 >
                   <Icon name="lucide:user" class="w-5 h-5" />
                 </button>
@@ -206,71 +208,71 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             <!-- Links Column -->
             <div>
               <h4 class="text-white font-semibold mb-6">
-                Contact
+                {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 text-sm text-slate-400">
                 <li>
                   <a
                     href="#"
                     class="hover:text-brand-400 transition-colors"
-                  >Contact Us</a>
+                  >{{ storefrontContent.footer.contactUs }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-brand-400 transition-colors"
-                  >About Us</a>
+                  >{{ storefrontContent.footer.aboutUs }}</a>
                 </li>
               </ul>
             </div>
             <div>
               <h4 class="text-white font-semibold mb-6">
-                Terms & Privacy
+                {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 text-sm text-slate-400">
                 <li>
                   <a
                     href="#"
                     class="hover:text-brand-400 transition-colors"
-                  >Terms of Service</a>
+                  >{{ storefrontContent.footer.termsOfService }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-brand-400 transition-colors"
-                  >Privacy Policy</a>
+                  >{{ storefrontContent.footer.privacyPolicy }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-brand-400 transition-colors"
-                  >Return Policy</a>
+                  >{{ storefrontContent.footer.returnPolicy }}</a>
                 </li>
               </ul>
             </div>
             <div>
               <h4 class="text-white font-semibold mb-6">
-                Help
+                {{ storefrontContent.footer.help }}
               </h4>
               <ul class="space-y-3 text-sm text-slate-400">
                 <li>
                   <a
                     href="#"
                     class="hover:text-brand-400 transition-colors"
-                  >FAQ</a>
+                  >{{ storefrontContent.footer.faq }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-brand-400 transition-colors"
-                  >Shipping Info</a>
+                  >{{ storefrontContent.footer.shippingInfo }}</a>
                 </li>
               </ul>
             </div>
           </div>
 
           <div class="pt-8 border-t border-navy-800 text-center text-xs text-slate-500">
-            &copy; 2026 {{ tenantName }} — All rights reserved.
+            {{ storefrontContent.footer.copyright(tenantName) }}
           </div>
         </div>
       </footer>

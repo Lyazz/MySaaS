@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../services/api_service.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
 
@@ -484,8 +485,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             itemCount: products.length,
             separatorBuilder: (context, index) =>
                 const Divider(height: 1, color: Color(0xFFE2E8F0)),
-            itemBuilder: (context, index) {
+              itemBuilder: (context, index) {
               final product = products[index];
+              final rawImageUrl = product.mainImageUrl;
+              final imageUrl = rawImageUrl == null
+                  ? null
+                  : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -504,16 +509,16 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFFF1F5F9), // Slate-100
                               borderRadius: BorderRadius.circular(6),
-                              image: product.mainImageUrl != null
+                              image: imageUrl != null
                                   ? DecorationImage(
                                       image: NetworkImage(
-                                        product.mainImageUrl!,
+                                        imageUrl,
                                       ),
                                       fit: BoxFit.cover,
                                     )
                                   : null,
                             ),
-                            child: product.mainImageUrl == null
+                            child: imageUrl == null
                                 ? const Icon(
                                     LucideIcons.image,
                                     color: Color(0xFF94A3B8),

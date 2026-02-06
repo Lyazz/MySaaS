@@ -5,13 +5,13 @@
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
           <NuxtLink to="/admin/purchases" class="text-gray-700 hover:text-teal-600">
-            Purchases
+            {{ t('admin.nav.purchases') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">New Purchase</span>
+            <span class="ml-1 text-gray-500">{{ t('admin.pages.purchases.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -19,26 +19,26 @@
 
     <!-- Header -->
     <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">New Purchase Order</h2>
-      <p class="text-gray-600 mt-1">Start a new purchase order from a supplier</p>
+      <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.purchases.create.title') }}</h2>
+      <p class="text-gray-600 mt-1">{{ t('admin.pages.purchases.create.subtitle') }}</p>
     </div>
 
     <!-- Form -->
     <div class="bg-white rounded-lg shadow p-6 space-y-6">
       <BaseSelect
         v-model="form.supplierId"
-        label="Select Supplier"
-        placeholder="Choose a supplier..."
+        :label="t('admin.pages.purchases.create.supplier.label')"
+        :placeholder="t('admin.pages.purchases.create.supplier.placeholder')"
         required
       >
-        <option value="">Choose a supplier...</option>
+        <option value="">{{ t('admin.pages.purchases.create.supplier.placeholder') }}</option>
         <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
       </BaseSelect>
 
       <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
         <p class="text-sm text-blue-800">
           <Icon name="lucide:info" class="w-4 h-4 inline mr-1" />
-          You can add products and details after creating the draft.
+          {{ t('admin.pages.purchases.create.info') }}
         </p>
       </div>
 
@@ -51,7 +51,7 @@
           to="/admin/purchases"
           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
-          Cancel
+          {{ t('admin.common.cancel') }}
         </NuxtLink>
         <button
           type="button"
@@ -60,7 +60,7 @@
           @click="handleSubmit"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
-          {{ submitting ? 'Creating Draft...' : 'Create Draft' }}
+          {{ submitting ? t('admin.pages.purchases.create.creatingDraft') : t('admin.pages.purchases.create.submit') }}
         </button>
       </div>
     </div>
@@ -74,11 +74,12 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'New Purchase'
+  titleKey: 'admin.pages.purchases.create.metaTitle'
 })
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 
 const suppliers = ref<{ id: string; name: string }[]>([])
 const form = reactive({
@@ -95,7 +96,7 @@ onMounted(async () => {
     })
   } catch (e) {
     console.error('Failed to load suppliers', e)
-    errorMessage.value = 'Failed to load suppliers.'
+    errorMessage.value = t('admin.pages.purchases.create.errors.suppliersLoadFailed')
   }
 })
 
@@ -118,7 +119,7 @@ async function handleSubmit() {
     if (error.data?.statusMessage) {
       errorMessage.value = error.data.statusMessage
     } else {
-      errorMessage.value = 'Failed to create purchase. Please try again.'
+      errorMessage.value = t('admin.pages.purchases.create.errors.createFailed')
     }
   } finally {
     submitting.value = false

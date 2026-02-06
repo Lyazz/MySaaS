@@ -1,0 +1,1406 @@
+{
+  "common": {
+    "view": "Voir"
+  },
+  "i18n": {
+    "switcher": {
+      "label": "Langue"
+    },
+    "locales": {
+      "en": "Anglais",
+      "fr": "Français",
+      "ar": "Arabe"
+    }
+  },
+  "bundleTags": {
+    "MOST_POPULAR": "Le plus populaire",
+    "BEST_VALUE": "Meilleur rapport qualité/prix"
+  },
+  "saasLanding": {
+    "seo": {
+      "title": "Swekly - Le futur du commerce",
+      "description": "La plateforme tout-en-un pour créer, vendre et développer votre activité B2B ou B2C avec des outils de niveau entreprise."
+    },
+    "hero": {
+      "title": {
+        "buildSell": "Créez. Vendez.",
+        "scale": "Développez."
+      },
+      "subtitle": "La plateforme tout-en-un pensée pour le commerce moderne. Concentrez-vous sur votre produit, nous gérons l’infrastructure, les paiements et la logistique.",
+      "ctaPrimary": "Commencer gratuitement",
+      "ctaSecondary": "Voir la démo"
+    },
+    "features": {
+      "title": {
+        "prefix": "Tout ce qu’il vous faut pour",
+        "accent": "dominer"
+      },
+      "subtitle": "Des outils puissants conçus pour la croissance, réunis dans une interface élégante.",
+      "items": {
+        "storeBuilder": {
+          "title": "Créateur de boutique",
+          "description": "Éditeur glisser-déposer pour créer des vitrines superbes en quelques minutes."
+        },
+        "globalPayments": {
+          "title": "Paiements globaux",
+          "description": "Acceptez des paiements partout grâce à des passerelles intégrées."
+        },
+        "analytics": {
+          "title": "Analytique & insights",
+          "description": "Données en temps réel pour optimiser vos conversions."
+        },
+        "automatedShipping": {
+          "title": "Livraison automatisée",
+          "description": "Connectez Yalidine, Eckoz et plus pour l’expédition automatique."
+        }
+      }
+    },
+    "stats": {
+      "activeMerchants": "Marchands actifs",
+      "revenueGenerated": "Revenus générés",
+      "uptime": "Disponibilité"
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "subtitle": "Tout ce qu’il faut savoir sur le produit et la facturation.",
+      "items": {
+        "noCard": {
+          "question": "Ai-je besoin d’une carte bancaire pour commencer ?",
+          "answer": "Non. Vous pouvez commencer immédiatement et changer d’offre plus tard."
+        },
+        "changePlan": {
+          "question": "Puis-je changer d’offre plus tard ?",
+          "answer": "Oui. Vous pouvez changer d’offre à tout moment depuis la page Facturation de l’admin."
+        },
+        "planDifferences": {
+          "question": "Qu’est-ce qui change entre les offres pour le moment ?",
+          "answer": "Pour l’instant (test), les offres diffèrent uniquement par le nombre de commandes autorisées par mois."
+        }
+      }
+    },
+    "testimonials": {
+      "heading": {
+        "prefix": "Adopté par",
+        "accent": "les fondateurs",
+        "suffix": "comme vous."
+      },
+      "subtitle": "Rejoignez des milliers de commerçants qui sont passés à une plateforme pensée pour la croissance, la vitesse et la fiabilité.",
+      "avatarAlt": "Avatar",
+      "userAvatarAlt": "Avatar utilisateur",
+      "items": {
+        "sarah": {
+          "text": "J’ai quitté Shopify et je ne suis jamais revenue en arrière. Les pages se chargent instantanément et mon taux de conversion a augmenté de 40% du jour au lendemain.",
+          "role": "PDG, FashionNova"
+        },
+        "karim": {
+          "text": "Le tableau de bord analytique est superbe. Les données dont j’ai besoin sont à un clic. On dirait que cet outil a été conçu pour 2026.",
+          "role": "Fondateur, TechShop"
+        },
+        "emily": {
+          "text": "Enfin une plateforme qui n’applique pas des frais de transaction abusifs. Le support des domaines personnalisés est fluide.",
+          "role": "CTO, GreenEarth"
+        },
+        "michael": {
+          "text": "La meilleure décision pour notre entreprise. Le support est incroyable et les fonctionnalités correspondent exactement à nos besoins.",
+          "role": "COO, GearUp"
+        },
+        "lisa": {
+          "text": "Passer à 10 000 commandes par mois a été simple. Aucun downtime, aucun souci. Je recommande vivement.",
+          "role": "Propriétaire, Kicks"
+        },
+        "david": {
+          "text": "L’éditeur glisser-déposer est réellement utilisable. J’ai construit ma boutique en un après‑midi.",
+          "role": "Fondateur, ArtSpace"
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Prêt à lancer ?",
+      "subtitle": "Rejoignez la plateforme qui évolue avec vous.",
+      "cta": "Commencer maintenant"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "about": "À propos"
+    },
+    "actions": {
+      "dashboard": "Tableau de bord",
+      "logout": "Se déconnecter",
+      "login": "Se connecter",
+      "getStarted": "Commencer"
+    },
+    "footer": {
+      "tagline": "Donnez plus de puissance à votre entreprise avec des outils modernes et une expérience premium. Conçu pour évoluer, pensé pour vous.",
+      "product": {
+        "title": "Produit",
+        "changelog": "Historique des changements"
+      },
+      "support": {
+        "title": "Support",
+        "documentation": "Documentation",
+        "apiStatus": "Statut de l’API",
+        "contact": "Contact"
+      },
+      "copyright": "© {year} Plateforme Swekly. Tous droits réservés."
+    }
+  },
+  "pricing": {
+    "seo": {
+      "title": "Tarifs - Swekly",
+      "description": "Choisissez l’offre adaptée à votre étape de croissance."
+    },
+    "page": {
+      "title": "Tarifs simples et transparents",
+      "subtitle": "Choisissez l’offre adaptée à votre croissance. Aucun frais caché."
+    },
+    "section": {
+      "title": "Tarifs transparents",
+      "subtitle": "Aucun frais caché. Évoluez à votre rythme."
+    },
+    "toggle": {
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "save": "Économisez {percent}%"
+    },
+    "badges": {
+      "mostPopular": "Le plus populaire",
+      "recommended": "Recommandé"
+    },
+    "period": {
+      "perMonth": "/mois"
+    },
+    "features": {
+      "ordersPerMonth": "{count} commandes/mois"
+    },
+    "plans": {
+      "basic": {
+        "name": "Basique",
+        "description": "Idéal pour essayer",
+        "cta": "Commencer"
+      },
+      "beginner": {
+        "name": "Débutant",
+        "description": "Un démarrage simple pour booster votre boutique",
+        "cta": "Commencer"
+      },
+      "merchant": {
+        "name": "Marchand",
+        "description": "Le choix malin pour les entreprises en croissance",
+        "cta": "Commencer"
+      },
+      "professional": {
+        "name": "Professionnel",
+        "description": "Conçu pour évoluer en toute confiance",
+        "cta": "15 jours gratuits"
+      }
+    }
+  },
+  "storefront": {
+    "algeria": {
+      "wilayas": {
+        "16": "Alger",
+        "31": "Oran"
+      }
+    },
+    "common": {
+      "productsCount": "{count} produits",
+      "selectPlaceholder": "Sélectionner…"
+    },
+    "actions": {
+      "addToCart": "Ajouter au panier",
+      "adding": "Ajout…",
+      "outOfStock": "Rupture de stock",
+      "viewCart": "Voir le panier",
+      "checkout": "Paiement",
+      "continueShopping": "Continuer vos achats",
+      "startBrowsing": "Commencer vos achats",
+      "apply": "Appliquer",
+      "reset": "Réinitialiser",
+      "clearAll": "Tout effacer",
+      "filters": "Filtres",
+      "search": "Rechercher"
+    },
+    "home": {
+      "welcomeTo": "Bienvenue chez {tenant}",
+      "cta": {
+        "shopNow": "Acheter maintenant"
+      },
+      "carousel": {
+        "newCollection": {
+          "title": "Nouvelle collection 2026",
+          "subtitle": "Découvrez les dernières tendances en livres et papeterie.",
+          "buttonText": "Acheter maintenant"
+        },
+        "bestSellers": {
+          "title": "Meilleures ventes",
+          "subtitle": "Découvrez les articles les plus populaires cette semaine.",
+          "buttonText": "Parcourir"
+        },
+        "specialOffers": {
+          "title": "Offres spéciales",
+          "subtitle": "Jusqu’à -50% sur une sélection d’articles.",
+          "buttonText": "Voir les offres"
+        }
+      },
+      "sections": {
+        "browseByCategory": {
+          "eyebrow": "Collections",
+          "title": "Parcourir par catégorie"
+        },
+        "newArrivals": {
+          "eyebrow": "Nouveautés",
+          "title": "Tendance"
+        },
+        "bestSellers": {
+          "eyebrow": "Meilleures ventes",
+          "title": "Les plus populaires"
+        }
+      }
+    },
+    "nav": {
+      "home": "Accueil",
+      "shop": "Boutique",
+      "contact": "Contact"
+    },
+    "cart": {
+      "label": "Panier",
+      "title": "Votre panier",
+      "itemsCount": "{count} articles",
+      "item": {
+        "variantSelected": "Variante sélectionnée",
+        "standardItem": "Article standard",
+        "variant": "Variante",
+        "remove": "Supprimer"
+      },
+      "sections": {
+        "items": "Articles"
+      },
+      "empty": {
+        "title": "Votre panier est vide",
+        "subtitle": "Ajoutez des articles pour commencer.",
+        "cta": "Commencer vos achats"
+      },
+      "actions": {
+        "proceedToCheckout": "Passer au paiement"
+      },
+      "summary": {
+        "title": "Récapitulatif",
+        "subtotal": "Sous-total",
+        "shipping": "Livraison",
+        "shippingHint": "Calculé à la caisse",
+        "tax": "Taxe",
+        "total": "Total"
+      }
+    },
+    "checkout": {
+      "title": "Paiement",
+      "disabled": "Le paiement est désactivé pour cette boutique.",
+      "disabledShort": "Paiement désactivé",
+      "required": "Requis",
+      "help": {
+        "deliveryOptions": "Choisissez votre mode de livraison et le transporteur."
+      },
+      "coupon": {
+        "title": "Code promo",
+        "badge": "Remise",
+        "placeholder": "Entrez le code (ex : BIENVENUE10)"
+      },
+      "summary": {
+        "deliveryOption": "Option de livraison",
+        "shippingFee": "Frais de livraison",
+        "quantityShort": "Qté"
+      },
+      "minimumOrder": "Commande minimum : {amount} {currency}.",
+      "secureTransaction": "Transaction sécurisée",
+      "errors": {
+        "emptyCart": "Votre panier est vide.",
+        "fullNameRequired": "Veuillez entrer votre nom complet.",
+        "phoneRequired": "Le numéro de téléphone est requis pour passer la commande.",
+        "deliveryRequired": "Veuillez sélectionner une option de livraison.",
+        "requiredFields": "Veuillez remplir tous les champs requis.",
+        "submitFailed": "Impossible de passer la commande. Veuillez réessayer."
+      },
+      "actions": {
+        "returnToCart": "Retour au panier",
+        "placeOrder": "Confirmer la commande",
+        "placingOrder": "Commande en cours…"
+      },
+      "form": {
+        "fullName": { "label": "Nom complet", "placeholder": "ex : John Doe" },
+        "phone": { "label": "Téléphone", "placeholder": "0XXXXXXXX" },
+        "wilaya": { "label": "Wilaya", "placeholder": "Sélectionner une wilaya…" },
+        "commune": { "label": "Ville", "placeholder": "Sélectionner une commune…" },
+        "address": { "label": "Adresse (optionnel)", "placeholder": "Rue, immeuble, etc." }
+      },
+      "sections": {
+        "customerInformation": "Informations client",
+        "deliveryOptions": "Options de livraison",
+        "deliveryMethod": "Mode de livraison",
+        "orderSummary": "Récapitulatif de commande"
+      },
+      "itemsInCart": "{count} articles dans votre panier",
+      "delivery": {
+        "free": "Gratuit",
+        "mode": {
+          "homeDelivery": "Livraison à domicile",
+          "pickupPoint": "Point relais",
+          "storePickup": "Retrait en magasin"
+        },
+        "description": {
+          "homeDelivery": "Livré à votre porte",
+          "pickupPoint": "Récupération dans un point proche",
+          "storePickup": "Retrait dans notre magasin"
+        },
+        "provider": {
+          "self": "Livraison par le commerçant",
+          "storePickup": "Retrait en magasin",
+          "homeDelivery": "Livraison à domicile"
+        }
+      }
+    },
+    "product": {
+      "addedToCart": "{title} ajouté au panier !",
+      "inStock": "En stock",
+      "perUnit": "par unité",
+      "descriptionFallback": "Découvrez le parfait équilibre entre style et fonctionnalité.",
+      "viewFullDetails": "Voir les détails"
+    },
+    "productForm": {
+      "quantity": { "label": "Quantité" },
+      "stock": {
+        "unavailable": "Indisponible",
+        "outOfStock": "Rupture de stock",
+        "lowStock": "Stock faible : {count} restants"
+      },
+      "cod": {
+        "title": "Commander maintenant",
+        "badge": "Paiement à la livraison (COD)",
+        "submit": "Confirmer la commande",
+        "submitting": "Envoi…"
+      },
+      "totalPrice": "Prix total :",
+      "errors": {
+        "outOfStockVariant": "Cette variante est en rupture de stock."
+      }
+    },
+    "toasts": {
+      "orderReceived": {
+        "title": "Commande reçue !",
+        "message": "Nous vous contacterons bientôt pour confirmer votre commande."
+      },
+      "addedToCart": {
+        "title": "Ajouté au panier",
+        "message": "Consultez votre panier pour finaliser votre achat."
+      },
+      "outOfStock": {
+        "message": "Veuillez sélectionner une option disponible."
+      }
+    },
+    "shop": {
+      "title": "Boutique",
+      "catalogTitle": "Catalogue complet",
+      "filteredTitle": "Produits filtrés",
+      "searchPlaceholder": "Rechercher des produits…",
+      "searchWithinResultsPlaceholder": "Rechercher dans les résultats…",
+      "categories": "Catégories",
+      "categoryFallback": "Catégorie",
+      "allProducts": "Tous les produits",
+      "filtersAndSort": "Filtres & tri",
+      "sortBy": "Trier par :",
+      "showResults": "Afficher les résultats ({count})",
+      "sort": {
+        "label": "Trier",
+        "relevance": "Pertinence",
+        "priceLowToHigh": "Prix : croissant",
+        "priceHighToLow": "Prix : décroissant"
+      },
+      "view": {
+        "gridTitle": "Vue grille",
+        "listTitle": "Vue liste"
+      },
+      "priceRange": {
+        "label": "Fourchette de prix",
+        "min": "Min",
+        "max": "Max"
+      },
+      "results": {
+        "noResults": "Aucun produit trouvé.",
+        "noResultsHint": "Essayez de supprimer les filtres ou recherchez autre chose."
+      },
+      "sidebar": {
+        "bestSellers": "Meilleures ventes"
+      }
+    },
+    "category": {
+      "label": "Catégorie",
+      "description": "Découvrez les produits de cette collection.",
+      "productsAvailableLabel": "produits disponibles",
+      "productsAvailable": "{count} produits disponibles",
+      "showingResults": "Affichage de {count} résultats",
+      "sortBy": "Trier par :",
+      "sort": {
+        "mostPopular": "Les plus populaires",
+        "newest": "Nouveautés",
+        "priceLowToHigh": "Prix : croissant",
+        "priceHighToLow": "Prix : décroissant"
+      },
+      "emptyHint": "Essayez une autre catégorie ou parcourez tous les produits."
+    },
+    "search": {
+      "placeholder": "Rechercher des produits..."
+    },
+    "header": {
+      "wishlistTitle": "Favoris",
+      "accountTitle": "Compte"
+    },
+    "footer": {
+      "contact": "Contact",
+      "contactUs": "Nous contacter",
+      "aboutUs": "À propos",
+      "termsPrivacy": "Conditions & Confidentialité",
+      "termsOfService": "Conditions d’utilisation",
+      "privacyPolicy": "Politique de confidentialité",
+      "returnPolicy": "Politique de retour",
+      "help": "Aide",
+      "faq": "FAQ",
+      "shippingInfo": "Infos de livraison",
+      "copyright": "© {year} {tenant} — Tous droits réservés."
+    },
+    "announcement": {
+      "dismissAria": "Fermer l’annonce"
+    }
+  },
+  "admin": {
+    "layout": {
+      "defaultTitle": "Tableau de bord admin"
+    },
+    "actions": {
+      "toggleSidebar": "Afficher/masquer le menu",
+      "closeSidebar": "Fermer le menu",
+      "viewStore": "Voir la boutique",
+      "logout": "Se déconnecter"
+    },
+    "common": {
+      "actions": "Actions",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "search": "Rechercher",
+      "searchAction": "Rechercher",
+      "clear": "Effacer",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "loading": "Chargement…",
+      "refresh": "Actualiser",
+      "back": "Retour",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "close": "Fermer",
+      "copy": "Copier",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saveChanges": "Enregistrer les modifications",
+      "saving": "Enregistrement…",
+      "create": "Créer",
+      "creating": "Création…",
+      "update": "Mettre à jour",
+      "updating": "Mise à jour…",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "nav": {
+      "overview": "Aperçu",
+      "catalog": "Catalogue",
+      "purchasing": "Achats",
+      "sales": "Ventes",
+      "delivery": "Livraison",
+      "finance": "Finance",
+      "settings": "Paramètres",
+      "dashboard": "Tableau de bord",
+      "products": "Produits",
+      "inventory": "Stock",
+      "categories": "Catégories",
+      "suppliers": "Fournisseurs",
+      "purchases": "Achats",
+      "orders": "Commandes",
+      "salesItem": "Ventes",
+      "pos": "PDV",
+      "customers": "Clients",
+      "deliveryItem": "Livraison",
+      "billing": "Facturation",
+      "appearance": "Apparence",
+      "homepage": "Page d’accueil",
+      "contactInfo": "Infos de contact",
+      "functional": "Fonctionnel"
+    },
+    "orderStatus": {
+      "pending": "En attente",
+      "confirmed": "Confirmée",
+      "shipped": "Expédiée",
+      "delivered": "Livrée",
+      "cancelled": "Annulée",
+      "returned": "Retournée"
+    },
+    "forms": {
+      "product": {
+        "title": {
+          "label": "Titre du produit",
+          "placeholder": "Saisir le titre du produit"
+        },
+        "slug": {
+          "label": "Slug du produit",
+          "placeholder": "product-slug",
+          "hintCreate": "Version URL du titre (générée automatiquement)",
+          "hintEdit": "Version URL du titre"
+        },
+        "miniDescription": {
+          "label": "Mini description",
+          "hint": "Courte description pour l’en-tête de la landing page (optionnel)",
+          "placeholder": "Saisir un bref résumé…"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Saisir la description du produit avec mise en forme…"
+        },
+        "price": {
+          "label": "Prix (DZD)",
+          "placeholder": "0.00"
+        },
+        "stock": {
+          "label": "Quantité en stock",
+          "placeholder": "0"
+        },
+        "category": {
+          "label": "Catégorie",
+          "placeholder": "Sélectionner une catégorie (optionnel)"
+        },
+        "isActive": {
+          "label": "Le produit est actif et visible pour les clients"
+        }
+      },
+      "category": {
+        "title": {
+          "label": "Titre de la catégorie",
+          "placeholder": "Saisir le titre de la catégorie"
+        },
+        "slug": {
+          "label": "Slug de la catégorie",
+          "placeholder": "category-slug",
+          "hintCreate": "Version URL du titre (générée automatiquement)",
+          "hintEdit": "Version URL du titre"
+        },
+        "image": {
+          "label": "Image de la catégorie (optionnel)",
+          "hint": "Affichée sur les tuiles de catégories dans la boutique"
+        }
+      },
+      "supplier": {
+        "name": {
+          "label": "Nom",
+          "placeholder": "Nom du fournisseur",
+          "required": "Le nom est requis"
+        },
+        "phone": {
+          "label": "Téléphone",
+          "placeholder": "Numéro de téléphone"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "nom[at]exemple.com"
+        },
+        "address": {
+          "label": "Adresse",
+          "placeholder": "Adresse du fournisseur"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Notes supplémentaires…"
+        }
+      }
+    },
+    "pages": {
+      "dashboard": {
+        "title": "Tableau de bord",
+        "welcomeBack": "Bon retour, {tenant}",
+        "snapshot": "Un aperçu rapide de votre boutique.",
+        "refresh": "Actualiser",
+        "finishSetup": "Terminer la configuration",
+        "loadErrorTitle": "Les données du tableau de bord n’ont pas pu être chargées.",
+        "loadErrorHint": "Essayez d’actualiser. Si cela continue, vérifiez votre connexion ou votre session.",
+        "stats": {
+          "orders7d": "Commandes (7 jours)",
+          "revenue7d": "Chiffre d’affaires (7 jours)",
+          "products": "Produits",
+          "lowStock": "Stock faible",
+          "outOfStock": "{count} en rupture de stock"
+        },
+        "recentOrders": {
+          "title": "Commandes récentes",
+          "hint": "Les 8 dernières commandes de ce tenant.",
+          "viewAll": "Voir tout",
+          "table": {
+            "order": "Commande",
+            "customer": "Client",
+            "total": "Total",
+            "status": "Statut",
+            "date": "Date",
+            "action": "Action"
+          },
+          "empty": {
+            "title": "Aucune commande",
+            "hint": "Les nouvelles commandes apparaîtront ici après le paiement.",
+            "viewStorefront": "Voir la boutique"
+          }
+        },
+        "orderStatus": {
+          "title": "Statut des commandes",
+          "hint": "Filtres rapides pour accéder à la liste des commandes."
+        },
+        "quickLinks": {
+          "title": "Actions rapides",
+          "hint": "Les tâches admin les plus courantes.",
+          "addProduct": "Ajouter un produit",
+          "manageProducts": "Gérer les produits",
+          "categories": "Catégories",
+          "appearance": "Apparence"
+        }
+      },
+      "billing": {
+        "metaTitle": "Facturation",
+        "title": "Facturation",
+        "subtitle": "Consultez votre forfait actuel, ses limites et votre utilisation.",
+        "seePricing": "Voir les tarifs",
+        "errors": {
+          "loadFailed": "Impossible de charger les informations de facturation."
+        },
+        "currentPlan": {
+          "title": "Forfait actuel",
+          "hint": "Vous pouvez changer de forfait pour tester (mensuel uniquement).",
+          "changePlan": "Changer de forfait",
+          "paySimulate": "Payer (simulation) et appliquer",
+          "cards": {
+            "plan": "Forfait",
+            "interval": "Période de facturation",
+            "source": "Source : {source}",
+            "ordersThisPeriod": "Commandes sur la période"
+          },
+          "limitsTitle": "Limites du forfait"
+        },
+        "limits": {
+          "ordersPerMonth": "Commandes / mois"
+        },
+        "planOption": "{name} ({orders} commandes/mois)",
+        "availablePlans": {
+          "title": "Forfaits disponibles",
+          "ordersPerMonth": "{count} commandes / mois",
+          "perMonth": "/mois"
+        }
+      },
+      "products": {
+        "index": {
+          "title": "Produits",
+          "subtitle": "Gérez votre catalogue produits",
+          "addProduct": "Ajouter un produit",
+          "filters": {
+            "searchLabel": "Rechercher",
+            "searchPlaceholder": "Rechercher des produits…",
+            "category": "Catégorie",
+            "allCategories": "Toutes les catégories",
+            "status": "Statut",
+            "allStatus": "Tous les statuts"
+          },
+          "loading": "Chargement des produits…",
+          "empty": {
+            "title": "Aucun produit",
+            "hint": "Commencez par créer un nouveau produit.",
+            "newProduct": "Nouveau produit"
+          },
+          "sort": {
+            "sortBy": "Trier par :",
+            "newest": "Le plus récent",
+            "title": "Titre",
+            "price": "Prix",
+            "stock": "Stock",
+            "status": "Statut"
+          },
+          "table": {
+            "product": "Produit",
+            "category": "Catégorie",
+            "price": "Prix",
+            "stock": "Stock",
+            "status": "Statut",
+            "links": "Liens",
+            "actions": "Actions",
+            "uncategorized": "Sans catégorie"
+          },
+          "links": {
+            "product": "Produit",
+            "landing": "Landing",
+            "openProduct": "Ouvrir la page produit",
+            "copyProduct": "Copier le lien produit",
+            "openLanding": "Ouvrir la landing page",
+            "copyLanding": "Copier le lien landing"
+          },
+          "pagination": {
+            "showing": "Affichage de {from} à {to} sur {total} résultats"
+          },
+      "deleteModal": {
+        "title": "Supprimer le produit",
+        "message": "Voulez-vous vraiment supprimer « {title} » ? Cette action est irréversible.",
+        "error": "Impossible de supprimer le produit. Veuillez réessayer."
+      },
+      "bulk": {
+        "selected": "{count} sélectionné(s)",
+        "export": "Exporter CSV",
+        "import": "Importer CSV",
+        "update": "Modification en masse",
+        "duplicate": "Dupliquer",
+        "exportError": "Échec de l’export CSV. Veuillez réessayer.",
+        "importTitle": "Importer des produits (CSV)",
+        "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock, isActive, categoryId/categorySlug.",
+        "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez.",
+        "importResult": "Créés {created}, mis à jour {updated}, ignorés {skipped}.",
+        "importErrors": "{count} lignes contiennent des erreurs.",
+        "updateTitle": "Mise à jour en masse",
+        "updateHint": "Applique les changements aux produits sélectionnés.",
+        "updateError": "Échec de la mise à jour en masse. Veuillez réessayer.",
+        "duplicateError": "Échec de la duplication du produit. Veuillez réessayer.",
+        "noChanges": "Choisissez au moins un champ à modifier.",
+        "fields": {
+          "price": "Prix (définir)",
+          "pricePlaceholder": "ex. 1999",
+          "stock": "Stock (définir)",
+          "stockPlaceholder": "S'applique aux produits sans variantes",
+          "status": "Statut",
+          "category": "Catégorie",
+          "noChange": "Aucun changement",
+          "clearCategory": "Supprimer la catégorie",
+          "propagatePrice": "Mettre à jour aussi les prix des variantes"
+        }
+      }
+    },
+        "create": {
+          "metaTitle": "Créer un produit",
+          "breadcrumb": "Créer un produit",
+          "title": "Créer un nouveau produit",
+          "subtitle": "Ajoutez un nouveau produit à votre catalogue",
+          "submit": "Créer le produit",
+          "errors": {
+            "createFailed": "Impossible de créer le produit. Veuillez réessayer."
+          }
+        },
+        "edit": {
+          "metaTitle": "Modifier le produit",
+          "breadcrumbEdit": "Modifier {title}",
+          "fallbackTitle": "Produit",
+          "loading": "Chargement du produit…",
+          "title": "Modifier le produit",
+          "subtitle": "Mettre à jour les informations du produit",
+          "submit": "Mettre à jour le produit",
+          "tabs": {
+            "general": "Général",
+            "description": "Description de la landing page",
+            "variants": "Variantes",
+            "bundles": "Bundles"
+          },
+          "links": {
+            "label": "Liens",
+            "product": "Produit",
+            "landing": "Landing",
+            "openProduct": "Ouvrir la page produit",
+            "copyProduct": "Copier le lien produit",
+            "openLanding": "Ouvrir la landing page",
+            "copyLanding": "Copier le lien landing"
+          },
+          "descriptionTab": {
+            "title": "Description de la landing page"
+          },
+          "variantsTab": {
+            "title": "Options et variantes"
+          },
+          "bundlesTab": {
+            "title": "Offres en bundle",
+            "hint": "Créez des prix fixes comme « 2 pour 1800 DZD ». Le paiement choisira automatiquement la meilleure combinaison.",
+            "addBundle": "Ajouter un bundle",
+            "table": {
+              "qty": "Qté",
+              "price": "Prix du bundle",
+              "tag": "Tag",
+              "active": "Actif",
+              "actions": "Actions",
+              "empty": "Aucune offre bundle pour l’instant. Cliquez sur « Ajouter un bundle »."
+            },
+            "tags": {
+              "none": "Aucun",
+              "mostPopular": "Le plus populaire",
+              "bestValue": "Meilleur rapport"
+            }
+          },
+          "errors": {
+            "loadFailed": "Impossible de charger le produit",
+            "updateFailed": "Impossible de mettre à jour le produit. Veuillez réessayer.",
+            "bundlesLoadFailed": "Impossible de charger les offres bundle",
+            "bundlesSaveFailed": "Impossible d’enregistrer l’offre bundle",
+            "bundlesDeleteFailed": "Impossible de supprimer l’offre bundle"
+          }
+        }
+      },
+      "categories": {
+        "index": {
+          "title": "Catégories",
+          "subtitle": "Organisez votre catalogue avec des catégories",
+          "addCategory": "Ajouter une catégorie",
+          "filters": {
+            "searchLabel": "Rechercher",
+            "searchPlaceholder": "Rechercher des catégories…",
+            "sortHint": "Utilisez les puces au-dessus du tableau pour trier par date, titre, slug ou nombre de produits."
+          },
+          "loading": "Chargement des catégories…",
+          "empty": {
+            "title": "Aucune catégorie",
+            "hint": "Commencez par créer une nouvelle catégorie.",
+            "newCategory": "Nouvelle catégorie"
+          },
+          "sort": {
+            "sortBy": "Trier par :",
+            "newest": "Le plus récent",
+            "title": "Titre",
+            "slug": "Slug",
+            "products": "Produits"
+          },
+          "table": {
+            "category": "Catégorie",
+            "products": "Produits",
+            "links": "Liens",
+            "actions": "Actions",
+            "productsCount": "{count} produits"
+          },
+          "links": {
+            "openCategory": "Ouvrir la page catégorie",
+            "copyCategory": "Copier le lien catégorie"
+          },
+          "pagination": {
+            "showing": "Affichage de {from} à {to} sur {total} résultats"
+          },
+          "deleteModal": {
+            "title": "Supprimer la catégorie",
+            "message": "Voulez-vous vraiment supprimer cette catégorie ? Les produits deviendront « sans catégorie ».",
+            "messageWithTitle": "Voulez-vous vraiment supprimer « {title} » ? Les produits deviendront « sans catégorie ».",
+            "error": "Impossible de supprimer la catégorie. Veuillez réessayer."
+          }
+        },
+        "create": {
+          "metaTitle": "Créer une catégorie",
+          "breadcrumb": "Créer une catégorie",
+          "title": "Créer une nouvelle catégorie",
+          "subtitle": "Ajoutez une catégorie pour organiser vos produits",
+          "submit": "Créer la catégorie",
+          "errors": {
+            "createFailed": "Impossible de créer la catégorie. Veuillez réessayer."
+          }
+        },
+        "edit": {
+          "metaTitle": "Modifier la catégorie",
+          "breadcrumb": "Modifier la catégorie",
+          "loading": "Chargement de la catégorie…",
+          "title": "Modifier la catégorie",
+          "subtitle": "Mettre à jour les détails de la catégorie",
+          "links": {
+            "label": "Lien",
+            "openCategory": "Ouvrir la page catégorie",
+            "copyCategory": "Copier le lien catégorie"
+          },
+          "backToList": "Retour à la liste",
+          "submit": "Mettre à jour la catégorie",
+          "deleteLink": "Supprimer la catégorie",
+          "deleteModal": {
+            "title": "Supprimer la catégorie",
+            "message": "Voulez-vous vraiment supprimer cette catégorie ? Les produits deviendront « sans catégorie ».",
+            "messageWithTitle": "Voulez-vous vraiment supprimer « {title} » ? Les produits deviendront « sans catégorie »."
+          },
+          "errors": {
+            "loadFailed": "Impossible de charger la catégorie",
+            "updateFailed": "Impossible de mettre à jour la catégorie",
+            "deleteFailed": "Impossible de supprimer la catégorie. Veuillez réessayer."
+          }
+        }
+      },
+      "orders": {
+        "index": {
+          "title": "Commandes",
+          "subtitle": "Gérez les commandes clients",
+          "filters": {
+            "searchLabel": "Rechercher",
+            "searchPlaceholder": "Rechercher par nom ou téléphone…",
+            "statusLabel": "Filtre de statut",
+            "allOrders": "Toutes les commandes"
+          },
+          "loading": "Chargement des commandes…",
+          "empty": {
+            "title": "Aucune commande trouvée",
+            "hint": "Les commandes clients apparaîtront ici",
+            "hintFiltered": "Essayez d’ajuster vos filtres"
+          },
+          "table": {
+            "orderId": "ID commande",
+            "customer": "Client",
+            "phone": "Téléphone",
+            "total": "Total",
+            "status": "Statut",
+            "date": "Date",
+            "actions": "Actions"
+          }
+        },
+        "detail": {
+          "metaTitle": "Détail de la commande",
+          "breadcrumb": "Commande n°{id}",
+          "loading": "Chargement de la commande…",
+          "sections": {
+            "orderInfo": "Informations de commande",
+            "customerInfo": "Informations client",
+            "orderItems": "Articles de la commande"
+          },
+          "fields": {
+            "orderId": "ID commande",
+            "orderDate": "Date",
+            "customerName": "Nom",
+            "customerPhone": "Téléphone",
+            "deliveryAddress": "Adresse de livraison"
+          },
+          "itemsTable": {
+            "product": "Produit",
+            "price": "Prix",
+            "quantity": "Quantité",
+            "subtotal": "Sous-total",
+            "total": "Total",
+            "fallbackProduct": "Produit"
+          },
+          "statusUpdate": {
+            "title": "Mettre à jour le statut",
+            "statusLabel": "Statut",
+            "submit": "Mettre à jour",
+            "success": "Statut de la commande mis à jour !",
+            "errors": {
+              "updateFailed": "Impossible de mettre à jour le statut"
+            }
+          },
+          "backToOrders": "Retour aux commandes",
+          "notFound": {
+            "title": "Commande introuvable",
+            "hint": "Cette commande n’existe peut-être pas ou vous n’avez pas l’autorisation de la voir."
+          }
+        }
+      },
+      "customers": {
+        "index": {
+          "title": "Clients",
+          "subtitle": "Dérivé de l’historique des commandes",
+          "filters": {
+            "searchLabel": "Rechercher",
+            "searchPlaceholder": "Rechercher par nom ou téléphone…"
+          },
+          "loading": "Chargement des clients…",
+          "empty": {
+            "title": "Aucun client trouvé",
+            "hint": "Les clients apparaîtront ici une fois des commandes passées",
+            "hintFiltered": "Essayez d’ajuster votre recherche"
+          },
+          "table": {
+            "customer": "Client",
+            "phone": "Téléphone",
+            "orders": "Commandes",
+            "totalSpent": "Total dépensé",
+            "lastOrder": "Dernière commande",
+            "actions": "Actions"
+          }
+        },
+        "detail": {
+          "metaTitle": "Client",
+          "fallbackTitle": "Client",
+          "loading": "Chargement du client…",
+          "stats": {
+            "orders": "Commandes",
+            "totalSpent": "Total dépensé"
+          },
+          "empty": {
+            "title": "Aucune commande",
+            "hint": "Ce client n’a pas encore de commandes."
+          },
+          "table": {
+            "order": "Commande",
+            "total": "Total",
+            "status": "Statut",
+            "date": "Date",
+            "actions": "Actions"
+          }
+        }
+      },
+      "inventory": {
+        "title": "Stock",
+        "subtitle": "Suivez le stock disponible, réservé et le stock de sécurité par variante.",
+        "filters": {
+          "searchPlaceholder": "Titre du produit ou SKU…"
+        },
+        "loading": "Chargement du stock…",
+        "empty": "Aucune variante trouvée.",
+        "table": {
+          "variant": "Variante",
+          "track": "Suivi",
+          "onHand": "En stock",
+          "reserved": "Réservé",
+          "safety": "Sécurité",
+          "available": "Disponible",
+          "sku": "SKU"
+        },
+        "movements": {
+          "button": "Mouvements",
+          "title": "Mouvements — {product} / {option}",
+          "hint": "Derniers changements affectant stock / réservé / sécurité.",
+          "loading": "Chargement des mouvements…",
+          "empty": "Aucun mouvement enregistré.",
+          "system": "système",
+          "table": {
+            "date": "Date",
+            "type": "Type",
+            "deltaStock": "Δ stock",
+            "deltaReserved": "Δ réservé",
+            "deltaSafety": "Δ sécurité",
+            "after": "Après",
+            "by": "Par",
+            "order": "Commande"
+          }
+        },
+      "errors": {
+        "loadFailed": "Impossible de charger le stock",
+        "updateFailed": "Impossible de mettre à jour le stock"
+      },
+      "bulk": {
+        "exportCsv": "Exporter CSV",
+        "importCsv": "Importer CSV",
+        "exportError": "Échec de l’export CSV.",
+        "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez."
+      }
+    },
+      "delivery": {
+        "metaTitle": "Entreprises de livraison",
+        "title": "Entreprises de livraison",
+        "subtitle": "Gérez les transporteurs et les tarifs par wilaya",
+        "providers": {
+          "toggleLabel": "Activer",
+          "wilayasSupported": "{count} wilayas prises en charge",
+          "managePricing": "Gérer les tarifs"
+        },
+        "pricing": {
+          "title": "Configuration des tarifs : {provider}",
+          "hint": "Définissez les tarifs standard de livraison pour chaque wilaya. Ces tarifs s’appliquent à toutes les communes de la wilaya.",
+          "loading": "Chargement des tarifs…",
+          "table": {
+            "code": "Code",
+            "wilaya": "Wilaya",
+            "price": "Prix (DZD)"
+          }
+        },
+        "errors": {
+          "updateProviderFailed": "Impossible de mettre à jour le statut du transporteur",
+          "saveFailed": "Impossible d’enregistrer les tarifs"
+        }
+      },
+      "onboarding": {
+        "metaTitle": "Configuration de la boutique",
+        "title": "Configuration de la boutique",
+        "subtitle": "Choisissez votre couleur, votre template et votre langue.",
+        "loadingSettings": "Chargement des paramètres…",
+        "progress": {
+          "stepOf": "Étape {current} sur {total}"
+        },
+        "steps": {
+          "brand": "Marque",
+          "template": "Template",
+          "language": "Langue",
+          "summary": "Résumé"
+        },
+        "brand": {
+          "title": "Couleur de marque",
+          "pickColor": "Choisir une couleur",
+          "hexValue": "Valeur hex",
+          "example": "Exemple : {value}",
+          "preview": "Aperçu",
+          "primaryButton": "Bouton principal"
+        },
+        "template": {
+          "title": "Template de boutique"
+        },
+        "templates": {
+          "classic": {
+            "label": "Classique",
+            "description": "Mise en page propre, idéale pour la plupart des boutiques."
+          },
+          "modern": {
+            "label": "Moderne",
+            "description": "Typographie plus marquée et plus d’espace visuel."
+          }
+        },
+        "language": {
+          "title": "Langue",
+          "label": "Langue",
+          "rtlHint": "Si arabe, pensez à l’affichage RTL."
+        },
+        "summary": {
+          "title": "Résumé",
+          "cards": {
+            "template": "Template",
+            "primaryColor": "Couleur principale",
+            "language": "Langue"
+          },
+          "aiTitle": "Résumé IA du frontend",
+          "generate": "Générer",
+          "generating": "Génération…",
+          "placeholder": "Cliquez sur Générer pour créer un brief pour votre agent frontend."
+        },
+        "saveFinish": "Enregistrer et terminer",
+        "errors": {
+          "loadFailed": "Impossible de charger les paramètres de la boutique.",
+          "saveFailed": "Impossible d’enregistrer les paramètres de la boutique.",
+          "summaryFailed": "Impossible de générer le résumé."
+        }
+      },
+      "purchases": {
+        "index": {
+          "title": "Achats",
+          "subtitle": "Gérez vos bons de commande et les arrivages",
+          "newPurchase": "Nouvel achat",
+          "filters": {
+            "supplierLabel": "Filtrer par fournisseur",
+            "allSuppliers": "Tous les fournisseurs"
+          },
+          "loading": "Chargement des achats…",
+          "empty": {
+            "title": "Aucun achat",
+            "hint": "Commencez par créer un nouveau bon de commande."
+          },
+          "table": {
+            "id": "ID",
+            "supplier": "Fournisseur",
+            "status": "Statut",
+            "items": "Articles",
+            "date": "Date",
+            "action": "Action",
+            "itemsCount": "{count} articles",
+            "manage": "Gérer"
+          },
+          "pagination": {
+            "showing": "Affichage de {from} à {to} sur {total} résultats"
+          }
+        },
+	        "create": {
+	          "metaTitle": "Nouvel achat",
+	          "breadcrumb": "Nouvel achat",
+	          "title": "Nouveau bon de commande",
+	          "subtitle": "Démarrez un nouvel achat auprès d’un fournisseur",
+          "supplier": {
+            "label": "Choisir un fournisseur",
+            "placeholder": "Choisir un fournisseur…"
+          },
+          "info": "Vous pourrez ajouter des produits et des détails après la création du brouillon.",
+          "submit": "Créer un brouillon",
+          "creatingDraft": "Création du brouillon…",
+	          "errors": {
+	            "suppliersLoadFailed": "Impossible de charger les fournisseurs.",
+	            "createFailed": "Impossible de créer l’achat. Veuillez réessayer."
+	          }
+	        },
+	        "detail": {
+	          "metaTitle": "Bon de commande",
+	          "breadcrumb": "Commande n°{id}",
+	          "title": "Bon de commande",
+	          "addProducts": "Ajouter des produits",
+	          "cards": {
+	            "supplier": "Fournisseur",
+	            "noSupplier": "Aucun fournisseur assigné",
+	            "summary": "Résumé",
+	            "itemsOrdered": "Articles commandés",
+	            "itemsReceived": "Articles reçus",
+	            "estimatedTotal": "Coût total estimé",
+	            "notesPlaceholder": "Notes et pièces jointes bientôt disponibles"
+	          },
+	          "items": {
+	            "title": "Articles de la commande",
+	            "count": "{count} articles",
+	            "loading": "Chargement des articles…",
+	            "unknownProduct": "Produit inconnu",
+	            "sku": "SKU",
+	            "defaultVariant": "Variante par défaut",
+	            "empty": {
+	              "title": "Aucun article",
+	              "hint": "Ajoutez des produits à ce bon de commande."
+	            },
+	            "table": {
+	              "product": "Produit",
+	              "ordered": "Commandé",
+	              "unitCost": "Coût unitaire",
+	              "received": "Reçu",
+	              "receiveNow": "Recevoir",
+	              "total": "Total",
+	              "qtyPlaceholder": "Qté",
+	              "receiveStock": "Réceptionner le stock",
+	              "removeItem": "Supprimer l’article",
+	              "totalOrderValue": "Valeur totale de la commande",
+	              "salePriceMode": {
+	                "replace": "Mettre à jour le prix de vente",
+	                "weighted": "Coût moyen"
+	              }
+	            }
+	          },
+	          "deleteModal": {
+	            "title": "Supprimer le bon de commande",
+	            "message": "Voulez-vous vraiment supprimer ce bon de commande ? Cette action est irréversible.",
+	            "confirm": "Supprimer la commande"
+	          },
+	          "errors": {
+	            "loadFailed": "Impossible de charger l’achat",
+	            "addItemsFailed": "Impossible d’ajouter des articles. Certains ont peut-être été ignorés.",
+	            "receiveFailed": "Impossible de réceptionner le stock",
+	            "updateItemFailed": "Impossible de mettre à jour l’article",
+	            "removeConfirm": "Voulez-vous vraiment supprimer cet article ?",
+	            "removeItemFailed": "Impossible de supprimer l’article",
+	            "deleteFailed": "Impossible de supprimer la commande"
+	          }
+	        }
+	      },
+      "sales": {
+        "index": {
+          "title": "Ventes",
+          "subtitle": "Commandes terminées (LIVRÉE)",
+          "filters": {
+            "searchLabel": "Rechercher",
+            "searchPlaceholder": "Rechercher par nom, téléphone ou ID…"
+          },
+          "loading": "Chargement des ventes…",
+          "empty": {
+            "title": "Aucune vente",
+            "hint": "Les commandes livrées apparaîtront ici",
+            "hintFiltered": "Essayez d’ajuster votre recherche"
+          },
+          "table": {
+            "saleId": "ID vente",
+            "customer": "Client",
+            "phone": "Téléphone",
+            "total": "Total",
+            "completed": "Terminée",
+            "actions": "Actions"
+          }
+        },
+        "detail": {
+          "metaTitle": "Vente",
+          "breadcrumb": "Vente n°{id}",
+          "loading": "Chargement de la vente…",
+          "sections": {
+            "saleInfo": "Informations de vente",
+            "client": "Client",
+            "items": "Articles"
+          },
+          "fields": {
+            "saleId": "ID vente",
+            "date": "Date",
+            "customerName": "Nom",
+            "customerPhone": "Téléphone",
+            "guest": "Invité"
+          },
+          "itemsTable": {
+            "product": "Produit",
+            "variant": "Variante",
+            "qty": "Qté",
+            "price": "Prix",
+            "total": "Total",
+            "defaultVariant": "Par défaut"
+          },
+          "notFound": {
+            "title": "Vente introuvable",
+            "hint": "Cette vente a peut-être été supprimée."
+          }
+        }
+      },
+      "settings": {
+        "appearance": {
+          "metaTitle": "Apparence",
+          "title": "Paramètres d’apparence",
+          "subtitle": "Personnalisez l’apparence de votre boutique."
+        },
+        "homepage": {
+          "metaTitle": "Page d’accueil",
+          "title": "Paramètres de la page d’accueil",
+          "subtitle": "Gérez les sections et le carrousel de la page d’accueil."
+        },
+        "contact": {
+          "metaTitle": "Infos de contact",
+          "title": "Infos de contact",
+          "subtitle": "Gérez les informations de contact affichées dans le footer."
+        },
+        "functional": {
+          "metaTitle": "Fonctionnel",
+          "title": "Paramètres fonctionnels",
+          "subtitle": "Gérez les fonctionnalités et options principales de votre boutique."
+        }
+      },
+      "suppliers": {
+        "index": {
+          "title": "Fournisseurs",
+          "subtitle": "Gérez vos fournisseurs",
+          "addSupplier": "Ajouter un fournisseur",
+          "filters": {
+            "searchLabel": "Rechercher",
+            "searchPlaceholder": "Rechercher des fournisseurs…",
+            "sortHint": "Triez par nom, email ou téléphone via les en-têtes du tableau."
+          },
+          "loading": "Chargement des fournisseurs…",
+          "empty": {
+            "title": "Aucun fournisseur",
+            "hint": "Commencez par créer un nouveau fournisseur.",
+            "newSupplier": "Nouveau fournisseur"
+          },
+          "sort": {
+            "sortBy": "Trier par :",
+            "name": "Nom"
+          },
+          "table": {
+            "name": "Nom",
+            "info": "Infos",
+            "address": "Adresse"
+          },
+          "pagination": {
+            "showing": "Affichage de {from} à {to} sur {total} résultats"
+          },
+          "deleteModal": {
+            "title": "Supprimer le fournisseur",
+            "message": "Voulez-vous vraiment supprimer ce fournisseur ?",
+            "messageWithName": "Voulez-vous vraiment supprimer le fournisseur « {name} » ?",
+            "error": "Impossible de supprimer le fournisseur. Veuillez réessayer."
+          }
+        },
+        "create": {
+          "metaTitle": "Créer un fournisseur",
+          "breadcrumb": "Créer un fournisseur",
+          "title": "Créer un nouveau fournisseur",
+          "subtitle": "Ajoutez un fournisseur à votre base",
+          "submit": "Créer le fournisseur",
+          "errors": {
+            "createFailed": "Impossible de créer le fournisseur. Veuillez réessayer."
+          }
+        },
+        "edit": {
+          "metaTitle": "Modifier le fournisseur",
+          "breadcrumb": "Modifier le fournisseur",
+          "title": "Modifier le fournisseur",
+          "subtitle": "Mettre à jour les informations du fournisseur",
+          "loading": "Chargement du fournisseur…",
+          "errors": {
+            "loadFailed": "Impossible de charger les détails du fournisseur.",
+            "updateFailed": "Impossible de mettre à jour le fournisseur. Veuillez réessayer."
+          }
+        }
+      }
+    }
+  }
+}

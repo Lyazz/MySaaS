@@ -9,6 +9,7 @@ const props = defineProps<{
 const cartStore = useCartStore()
 const { format: formatPrice } = useCurrency()
 const { currencyCode } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 // Ensure image exists
 const mainImage = computed(() => {
@@ -36,8 +37,10 @@ function handleAddToCart() {
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
+    bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
-    image: mainImage.value
+    image: mainImage.value,
+    metaPixelIds: (props.product as any)?.metaPixelIds
   })
   triggerSuccessToast('ADDED!', 'Item in your cart')
 }
@@ -76,7 +79,7 @@ function handleAddToCart() {
                 @click.prevent="handleAddToCart"
                 class="absolute bottom-0 left-0 w-full bg-black text-white py-3 font-street text-xl uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-200 hover:bg-brand hover:text-black border-t-2 border-black"
             >
-                Add To Cart
+                {{ storefrontContent.actions.addToCart }}
             </button>
         </div>
 

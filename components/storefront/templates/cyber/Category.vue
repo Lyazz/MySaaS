@@ -6,10 +6,13 @@ const props = defineProps<{
     products: any[]
 }>()
 
+const storefrontContent = useStorefrontContent()
+
 const { format: formatPrice } = useCurrency()
 
 // Filtering Logic
-const sortOption = ref('Relevance')
+type SortOption = 'mostPopular' | 'newest' | 'priceLowToHigh' | 'priceHighToLow'
+const sortOption = ref<SortOption>('mostPopular')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 const quickViewProduct = ref<any>(null)
@@ -18,9 +21,11 @@ const isQuickViewOpen = ref(false)
 const filteredProducts = computed(() => {
     let result = [...props.products]
 
-    if (sortOption.value === 'Price: Low to High') {
+    if (sortOption.value === 'newest') {
+        result.sort((a, b) => Number(new Date(b.createdAt ?? 0)) - Number(new Date(a.createdAt ?? 0)))
+    } else if (sortOption.value === 'priceLowToHigh') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'Price: High to Low') {
+    } else if (sortOption.value === 'priceHighToLow') {
         result.sort((a, b) => Number(b.price) - Number(a.price))
     }
 
@@ -51,10 +56,10 @@ const closeQuickView = () => {
       <!-- Header -->
       <div class="mb-10">
         <nav class="flex items-center text-sm text-purple-300/60 mb-4 font-medium">
-          <NuxtLink to="/" class="hover:text-pink-400 transition-colors">Home</NuxtLink>
-          <Icon name="lucide:chevron-right" class="w-4 h-4 mx-2 text-purple-500/50" />
-          <NuxtLink to="/products" class="hover:text-pink-400 transition-colors">Shop</NuxtLink>
-          <Icon name="lucide:chevron-right" class="w-4 h-4 mx-2 text-purple-500/50" />
+          <NuxtLink to="/" class="hover:text-pink-400 transition-colors">{{ storefrontContent.nav.home }}</NuxtLink>
+          <Icon name="lucide:chevron-right" class="w-4 h-4 mx-2 text-purple-500/50 rtl:rotate-180" />
+          <NuxtLink to="/products" class="hover:text-pink-400 transition-colors">{{ storefrontContent.nav.shop }}</NuxtLink>
+          <Icon name="lucide:chevron-right" class="w-4 h-4 mx-2 text-purple-500/50 rtl:rotate-180" />
           <span class="text-pink-400 font-semibold">{{ category?.title }}</span>
         </nav>
 
@@ -64,12 +69,15 @@ const closeQuickView = () => {
         <p v-if="category?.description" class="text-purple-200/60 text-lg max-w-2xl">
           {{ category.description }}
         </p>
+        <p v-else class="text-purple-200/60 text-lg max-w-2xl">
+          {{ storefrontContent.category.description }}
+        </p>
       </div>
 
       <!-- Toolbar -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <p class="text-purple-300/60 text-sm">
-          {{ filteredProducts.length }} products found
+          {{ storefrontContent.category.showingResults(filteredProducts.length) }}
         </p>
 
         <div class="flex items-center gap-4">
@@ -79,9 +87,10 @@ const closeQuickView = () => {
               v-model="sortOption"
               class="appearance-none bg-[#1a0a2e]/90 rounded-full border border-purple-500/30 text-sm py-2 pl-4 pr-10 focus:border-pink-500 focus:ring-pink-500 cursor-pointer hover:border-pink-500/50 transition-colors text-white font-medium"
             >
-              <option class="bg-[#1a0a2e]">Relevance</option>
-              <option class="bg-[#1a0a2e]">Price: Low to High</option>
-              <option class="bg-[#1a0a2e]">Price: High to Low</option>
+              <option value="mostPopular" class="bg-[#1a0a2e]">{{ storefrontContent.category.sort.mostPopular }}</option>
+              <option value="newest" class="bg-[#1a0a2e]">{{ storefrontContent.category.sort.newest }}</option>
+              <option value="priceLowToHigh" class="bg-[#1a0a2e]">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
+              <option value="priceHighToLow" class="bg-[#1a0a2e]">{{ storefrontContent.category.sort.priceHighToLow }}</option>
             </select>
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <Icon name="lucide:chevron-down" class="w-4 h-4 text-purple-400" />
@@ -114,13 +123,13 @@ const closeQuickView = () => {
         class="bg-[#1a0a2e]/90 rounded-2xl border border-purple-500/30 p-12 text-center"
       >
         <Icon name="lucide:package-open" class="w-16 h-16 text-purple-500/30 mx-auto mb-4" />
-        <h3 class="text-lg font-medium text-white">No products in this category</h3>
-        <p class="text-purple-300/60 mt-1">Check back soon for new arrivals.</p>
+        <h3 class="text-lg font-medium text-white">{{ storefrontContent.shop.results.noResults }}</h3>
+        <p class="text-purple-300/60 mt-1">{{ storefrontContent.category.emptyHint }}</p>
         <NuxtLink
           to="/products"
           class="mt-6 inline-block px-6 py-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full hover:from-pink-600 hover:to-orange-600 transition-all font-bold"
         >
-          Browse All Products
+          {{ storefrontContent.shop.allProducts }}
         </NuxtLink>
       </div>
 
@@ -171,13 +180,13 @@ const closeQuickView = () => {
                 {{ formatPrice(quickViewProduct.price) }}
               </div>
               <p class="text-purple-200/70 leading-relaxed mb-8">
-                {{ quickViewProduct.description || 'Premium quality product.' }}
+                {{ quickViewProduct.description || storefrontContent.product.descriptionFallback }}
               </p>
             </div>
 
             <div class="mt-auto space-y-4">
               <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-bold rounded-xl text-center" @click="closeQuickView">
-                View Details
+                {{ storefrontContent.product.viewFullDetails }}
               </NuxtLink>
             </div>
           </div>

@@ -6,6 +6,8 @@ const props = defineProps<{
     products: any[] // All products passed, we filter here
 }>()
 
+const storefrontContent = useStorefrontContent()
+
 // Fetch dynamic categories for sidebar
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -19,13 +21,16 @@ const categoryProducts = computed(() => {
     return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && p.categoryId === id)
 })
 
-const sortOption = ref('Most Popular')
+type SortOption = 'mostPopular' | 'newest' | 'priceLowToHigh' | 'priceHighToLow'
+const sortOption = ref<SortOption>('mostPopular')
 
 const sortedProducts = computed(() => {
     const result = [...categoryProducts.value]
-    if (sortOption.value === 'Price: Low to High') {
+    if (sortOption.value === 'newest') {
+        result.sort((a, b) => Number(new Date(b.createdAt ?? 0)) - Number(new Date(a.createdAt ?? 0)))
+    } else if (sortOption.value === 'priceLowToHigh') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'Price: High to Low') {
+    } else if (sortOption.value === 'priceHighToLow') {
         result.sort((a, b) => Number(b.price) - Number(a.price))
     }
     return result
@@ -39,9 +44,9 @@ const sortedProducts = computed(() => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Minimal Breadcrumb -->
       <nav class="flex mb-12 text-xs uppercase tracking-widest text-slate-500 justify-center">
-        <NuxtLink to="/" class="hover:text-slate-900 transition-colors">Home</NuxtLink>
+        <NuxtLink to="/" class="hover:text-slate-900 transition-colors">{{ storefrontContent.nav.home }}</NuxtLink>
         <span class="mx-3 text-slate-300">/</span>
-        <NuxtLink to="/products" class="hover:text-slate-900 transition-colors">Shop</NuxtLink>
+        <NuxtLink to="/products" class="hover:text-slate-900 transition-colors">{{ storefrontContent.nav.shop }}</NuxtLink>
         <span class="mx-3 text-slate-300">/</span>
         <span class="text-slate-900 font-bold border-b border-slate-900">{{ category.title }}</span>
       </nav>
@@ -52,7 +57,7 @@ const sortedProducts = computed(() => {
             {{ category.title }}
          </h1>
          <p class="text-slate-500 leading-relaxed font-light text-lg">
-             {{ category.description || 'Discover our curated selection of products in this collection.' }}
+             {{ category.description || storefrontContent.category.description }}
          </p>
       </div>
 
@@ -61,7 +66,7 @@ const sortedProducts = computed(() => {
         <aside class="w-full lg:w-64 flex-shrink-0 space-y-10">
           <div>
             <h3 class="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6 border-b border-slate-200 pb-2">
-               Collections
+               {{ storefrontContent.shop.categories }}
             </h3>
             <div class="space-y-3">
               <NuxtLink 
@@ -83,23 +88,23 @@ const sortedProducts = computed(() => {
           <!-- Toolbar -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <span class="text-sm text-slate-500 font-medium">
-              Showing {{ categoryProducts.length }} results
+              {{ storefrontContent.category.showingResults(categoryProducts.length) }}
             </span>
                       
             <!-- Sort -->
             <div class="flex items-center gap-3">
-              <span class="text-sm text-slate-500">Sort by:</span>
+              <span class="text-sm text-slate-500">{{ storefrontContent.category.sortBy }}</span>
               <div class="relative">
                   <select 
                       v-model="sortOption"
                       class="appearance-none bg-transparent border-none text-sm py-2 pr-8 pl-0 focus:ring-0 cursor-pointer text-slate-900 font-bold hover:text-slate-700 transition-colors"
                   >
-                    <option>Most Popular</option>
-                    <option>Newest</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
+                    <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
+                    <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
+                    <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
+                    <option value="priceHighToLow">{{ storefrontContent.category.sort.priceHighToLow }}</option>
                   </select>
-                  <Icon name="lucide:chevron-down" class="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <Icon name="lucide:chevron-down" class="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rtl:right-auto rtl:left-0" />
               </div>
             </div>
           </div>
@@ -111,16 +116,16 @@ const sortedProducts = computed(() => {
           >
             <Icon name="lucide:package-open" class="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <h3 class="text-lg font-serif text-slate-900">
-              No products found
+              {{ storefrontContent.shop.results.noResults }}
             </h3>
             <p class="text-slate-500 mt-2 text-sm">
-              Try checking other categories.
+              {{ storefrontContent.category.emptyHint }}
             </p>
             <NuxtLink
               to="/products"
               class="inline-block mt-6 px-8 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors"
             >
-              View All Products
+              {{ storefrontContent.shop.allProducts }}
             </NuxtLink>
           </div>
           <div

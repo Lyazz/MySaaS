@@ -6,6 +6,8 @@ const props = defineProps<{
     products: any[] // All products passed, we filter here
 }>()
 
+const storefrontContent = useStorefrontContent()
+
 // Fetch dynamic categories for sidebar
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -19,13 +21,16 @@ const categoryProducts = computed(() => {
     return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && p.categoryId === id)
 })
 
-const sortOption = ref('Most Popular')
+type SortOption = 'mostPopular' | 'newest' | 'priceLowToHigh' | 'priceHighToLow'
+const sortOption = ref<SortOption>('mostPopular')
 
 const sortedProducts = computed(() => {
     const result = [...categoryProducts.value]
-    if (sortOption.value === 'Price: Low to High') {
+    if (sortOption.value === 'newest') {
+        result.sort((a, b) => Number(new Date(b.createdAt ?? 0)) - Number(new Date(a.createdAt ?? 0)))
+    } else if (sortOption.value === 'priceLowToHigh') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'Price: High to Low') {
+    } else if (sortOption.value === 'priceHighToLow') {
         result.sort((a, b) => Number(b.price) - Number(a.price))
     }
     return result
@@ -43,14 +48,14 @@ const sortedProducts = computed(() => {
           to="/"
           class="hover:text-brand-600"
         >
-          Home
+          {{ storefrontContent.nav.home }}
         </NuxtLink>
         <span class="mx-2">/</span>
         <NuxtLink
           to="/products"
           class="hover:text-brand-600"
         >
-          Shop
+          {{ storefrontContent.nav.shop }}
         </NuxtLink>
         <span class="mx-2">/</span>
         <span class="font-medium text-slate-900">{{ category.title }}</span>
@@ -67,20 +72,20 @@ const sortedProducts = computed(() => {
         <div class="relative p-8 sm:p-10 lg:p-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p class="text-xs uppercase tracking-[0.2em] text-brand-200 mb-2">
-              Category
+              {{ storefrontContent.category.label }}
             </p>
             <h1 class="text-3xl sm:text-4xl font-bold font-sans">
               {{ category.title }}
             </h1>
             <p class="mt-3 text-slate-200 text-sm">
-              Curated products ready to ship.
+              {{ category.description || storefrontContent.category.description }}
             </p>
           </div>
           <div class="flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-2 text-sm border border-white/20">
             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white font-semibold">
               {{ categoryProducts.length }}
             </span>
-            <span class="text-slate-100">products available</span>
+            <span class="text-slate-100">{{ storefrontContent.category.productsAvailableLabel }}</span>
           </div>
         </div>
       </div>
@@ -92,7 +97,7 @@ const sortedProducts = computed(() => {
           <div>
             <div class="flex items-center justify-between mb-4">
               <h3 class="font-bold text-slate-900">
-                Categories
+                {{ storefrontContent.shop.categories }}
               </h3>
             </div>
             <div class="space-y-2">
@@ -126,41 +131,47 @@ const sortedProducts = computed(() => {
                 {{ category.title }}
               </h1>
               <p class="text-slate-500 text-sm mt-1">
-                Showing {{ categoryProducts.length }} results
+                {{ storefrontContent.category.showingResults(categoryProducts.length) }}
               </p>
             </div>
                       
             <!-- Sort -->
             <div class="flex items-center gap-3">
-              <span class="text-sm text-slate-500">Sort by:</span>
-              <select class="rounded-lg border-slate-200 text-sm focus:border-brand-500 focus:ring-brand-500">
-                <option>Most Popular</option>
-                <option>Newest</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
+              <span class="text-sm text-slate-500">{{ storefrontContent.category.sortBy }}</span>
+              <select v-model="sortOption" class="rounded-lg border-slate-200 text-sm focus:border-brand-500 focus:ring-brand-500">
+                <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
+                <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
+                <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
+                <option value="priceHighToLow">{{ storefrontContent.category.sort.priceHighToLow }}</option>
               </select>
             </div>
           </div>
 
           <!-- Grid -->
           <div
-            v-if="categoryProducts.length === 0"
+            v-if="sortedProducts.length === 0"
             class="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center"
           >
             <Icon name="lucide:package-open" class="w-16 h-16 text-slate-200 mx-auto mb-4" />
             <h3 class="text-lg font-medium text-slate-900">
-              No products found
+              {{ storefrontContent.shop.results.noResults }}
             </h3>
             <p class="text-slate-500 mt-1">
-              Try adjusting your filters or check back later.
+              {{ storefrontContent.category.emptyHint }}
             </p>
+            <NuxtLink
+              to="/products"
+              class="inline-flex items-center justify-center mt-6 px-6 py-2 rounded-full bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors"
+            >
+              {{ storefrontContent.shop.allProducts }}
+            </NuxtLink>
           </div>
           <div
             v-else
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
           >
             <ProductCard
-              v-for="product in categoryProducts"
+              v-for="product in sortedProducts"
               :key="product.id"
               :product="product"
             />

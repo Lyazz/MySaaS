@@ -4,10 +4,10 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">
-          Orders
+          {{ t('admin.nav.orders') }}
         </h2>
         <p class="text-gray-600 mt-1">
-          Manage customer orders
+          {{ t('admin.pages.orders.index.subtitle') }}
         </p>
       </div>
     </div>
@@ -16,10 +16,10 @@
     <div class="bg-white p-4 rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.orders.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
-            placeholder="Search by customer name or phone..."
+            :placeholder="t('admin.pages.orders.index.filters.searchPlaceholder')"
           />
         </div>
         <div>
@@ -31,28 +31,28 @@
         <div>
           <BaseSelect
             v-model="selectedStatus"
-            label="Status Filter"
+            :label="t('admin.pages.orders.index.filters.statusLabel')"
           >
             <option value="">
-              All Orders
+              {{ t('admin.pages.orders.index.filters.allOrders') }}
             </option>
             <option value="PENDING">
-              Pending
+              {{ t('admin.orderStatus.pending') }}
             </option>
             <option value="CONFIRMED">
-              Confirmed
+              {{ t('admin.orderStatus.confirmed') }}
             </option>
             <option value="SHIPPED">
-              Shipped
+              {{ t('admin.orderStatus.shipped') }}
             </option>
             <option value="DELIVERED">
-              Delivered
+              {{ t('admin.orderStatus.delivered') }}
             </option>
             <option value="CANCELLED">
-              Cancelled
+              {{ t('admin.orderStatus.cancelled') }}
             </option>
             <option value="RETURNED">
-              Returned
+              {{ t('admin.orderStatus.returned') }}
             </option>
           </BaseSelect>
         </div>
@@ -66,7 +66,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading orders...
+        {{ t('admin.pages.orders.index.loading') }}
       </p>
     </div>
 
@@ -77,10 +77,10 @@
     >
       <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        No orders found
+        {{ t('admin.pages.orders.index.empty.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        {{ searchQuery || selectedStatus ? 'Try adjusting your filters' : 'Customer orders will appear here' }}
+        {{ emptyHint }}
       </p>
     </div>
 
@@ -94,25 +94,25 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Order ID
+                {{ t('admin.pages.orders.index.table.orderId') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
+                {{ t('admin.pages.orders.index.table.customer') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Phone
+                {{ t('admin.pages.orders.index.table.phone') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total
+                {{ t('admin.pages.orders.index.table.total') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {{ t('admin.pages.orders.index.table.status') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
+                {{ t('admin.pages.orders.index.table.date') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ t('admin.pages.orders.index.table.actions') }}
               </th>
             </tr>
           </thead>
@@ -155,7 +155,7 @@
                     class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                    <span>View</span>
+                    <span>{{ t('common.view') }}</span>
                   </NuxtLink>
                 </div>
               </td>
@@ -176,13 +176,14 @@ import DateFilter from '~/components/ui/DateFilter.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Orders'
+  titleKey: 'admin.pages.orders.index.title'
 })
 
 const authStore = useAuthStore()
 const route = useRoute()
 const storeSettings = useState<any>('storeSettings')
 const { format: formatCurrency } = useCurrency()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 interface Order {
   id: string
@@ -201,6 +202,11 @@ const searchQuery = ref(typeof route.query.search === 'string' ? route.query.sea
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
 const startDate = ref('')
 const endDate = ref('')
+
+const emptyHint = computed(() => {
+  if (searchQuery.value || selectedStatus.value) return t('admin.pages.orders.index.empty.hintFiltered')
+  return t('admin.pages.orders.index.empty.hint')
+})
 
 async function fetchOrders() {
   loading.value = true
@@ -230,7 +236,8 @@ async function fetchOrders() {
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { 
+  const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return date.toLocaleDateString(intlLocale, { 
     year: 'numeric', 
     month: 'short', 
     day: 'numeric',

@@ -49,6 +49,7 @@ export const getTenantPrisma = (tenant: { id: string }) => {
                         'Order',
                         'OrderItem',
                         'Product',
+                        'ProductBundleDeal',
                         'ProductImage',
                         'ProductOption',
                         'ProductOptionValue',

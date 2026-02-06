@@ -10,16 +10,16 @@
       <!-- Header -->
       <div class="mb-10 text-center">
         <h1 class="text-4xl font-bold text-stone-900 mb-2">
-          Checkout
+          {{ storefrontContent.checkout.title }}
         </h1>
         <p class="text-lg text-stone-500 font-medium">
-          {{ cartStore.itemCount }} items
+          {{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}
         </p>
         <div
           v-if="!cartEnabled"
           class="mt-6 inline-block rounded-full border border-amber-200 bg-amber-50 text-amber-800 text-sm px-6 py-2 font-bold uppercase tracking-wider shadow-sm"
         >
-          Checkout is currently disabled for this store.
+          {{ storefrontContent.checkout.disabled }}
         </div>
       </div>
 
@@ -32,30 +32,30 @@
             
             <h3 class="text-xl font-bold text-stone-900 mb-8 flex items-center gap-3">
                 <span class="w-8 h-8 rounded-full bg-stone-900 text-white flex items-center justify-center text-sm font-sans font-bold shadow-lg">1</span>
-                Your Details
+                {{ storefrontContent.checkout.sections.customerInformation }}
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Full name</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                 <input
                   v-model="form.fullName"
                   type="text"
                   class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 placeholder:text-stone-300 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium"
-                  placeholder="e.g. John Doe"
+                  :placeholder="storefrontContent.checkout.form.fullName.placeholder"
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Phone</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                 <input
                   v-model="form.phone"
                   type="tel"
                   class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 placeholder:text-stone-300 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium"
-                  placeholder="0XXXXXXXX"
+                  :placeholder="storefrontContent.checkout.form.phone.placeholder"
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Wilaya</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <div class="relative">
                   <select
                     v-model="form.wilaya"
@@ -66,20 +66,20 @@
                       disabled
                       selected
                     >
-                      Select a wilaya...
+                      {{ storefrontContent.checkout.form.wilaya.placeholder }}
                     </option>
                     <option value="16">
                       16 - Alger
                     </option>
                     <!-- Mock options -->
                   </select>
-                  <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                  <div class="absolute right-5 rtl:right-auto rtl:left-5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
                     <Icon name="lucide:chevron-down" class="w-5 h-5" />
                   </div>
                 </div>
               </div>
               <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">City</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                 <div class="relative">
                   <select
                     v-model="form.commune"
@@ -90,22 +90,22 @@
                       disabled
                       selected
                     >
-                      Select a commune
+                      {{ storefrontContent.checkout.form.commune.placeholder }}
                     </option>
                     <!-- Mock options -->
                   </select>
-                  <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                  <div class="absolute right-5 rtl:right-auto rtl:left-5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
                     <Icon name="lucide:chevron-down" class="w-5 h-5" />
                   </div>
                 </div>
               </div>
               <div class="col-span-2 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Address (optional)</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
                   type="text"
                   class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 placeholder:text-stone-300 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium"
-                  placeholder="Street address, apartment, etc."
+                  :placeholder="storefrontContent.checkout.form.address.placeholder"
                 >
               </div>
             </div>
@@ -116,7 +116,7 @@
             <div class="flex items-center justify-between mb-8">
               <h3 class="text-xl font-bold text-stone-900 flex items-center gap-3">
                 <span class="w-8 h-8 rounded-full bg-stone-900 text-white flex items-center justify-center text-sm font-sans font-bold shadow-lg">2</span>
-                Delivery Method
+                {{ storefrontContent.checkout.sections.deliveryMethod }}
               </h3>
             </div>
                     
@@ -190,7 +190,7 @@
 
             <div class="flex items-center justify-center mb-8 pb-6 border-b-2 border-stone-900 border-double">
               <h2 class="text-2xl font-bold text-stone-900 uppercase tracking-widest text-center">
-                Order Summary
+                {{ storefrontContent.checkout.sections.orderSummary }}
               </h2>
             </div>
 
@@ -206,11 +206,11 @@
                     {{ item.title }}
                   </h4>
                   <p class="text-xs text-stone-500 mt-1">
-                    Qty: {{ item.quantity }} x {{ item.price }} {{ currencyCode }}
+                    {{ storefrontContent.checkout.summary.quantityShort }}: {{ item.quantity }} x {{ item.price }} {{ currencyCode }}
                   </p>
                 </div>
                 <div class="font-bold text-stone-900">
-                  {{ (Number(item.price) * item.quantity).toFixed(2) }} {{ currencyCode }}
+                  {{ (Number(item.lineTotal ?? (Number(item.price) * item.quantity))).toFixed(2) }} {{ currencyCode }}
                 </div>
               </div>
             </div>
@@ -218,14 +218,14 @@
             <!-- Coupon -->
             <div class="p-4 bg-stone-50 rounded-xl border border-dashed border-stone-300 mb-8">
               <div class="flex gap-2">
-                <input
-                  v-model="couponCode"
-                  type="text"
-                  placeholder="Promo Code"
-                  class="flex-1 h-10 bg-transparent border-b border-stone-300 text-sm focus:border-stone-900 focus:outline-none placeholder:text-stone-400"
-                >
+                  <input
+                    v-model="couponCode"
+                    type="text"
+                    :placeholder="storefrontContent.checkout.coupon.placeholder"
+                    class="flex-1 h-10 bg-transparent border-b border-stone-300 text-sm focus:border-stone-900 focus:outline-none placeholder:text-stone-400"
+                  >
                 <button class="text-xs font-bold uppercase tracking-widest text-stone-900 hover:text-brand-600 transition-colors">
-                  Apply
+                  {{ storefrontContent.actions.apply }}
                 </button>
               </div>
             </div>
@@ -233,20 +233,20 @@
             <!-- Totals -->
             <div class="space-y-3 pt-6 border-t-2 border-stone-900 border-dashed text-sm">
               <div class="flex justify-between">
-                <span class="text-stone-600 uppercase">Subtotal</span>
+                <span class="text-stone-600 uppercase">{{ storefrontContent.cart.summary.subtotal }}</span>
                 <span class="font-bold text-stone-900">{{ cartStore.total }} {{ currencyCode }}</span>
               </div>
               <div v-if="selectedDelivery" class="flex justify-between">
-                <span class="text-stone-600 uppercase">Delivery</span>
-                <span class="font-bold text-stone-900">{{ selectedDelivery.price === 'Free' ? '0.00' : selectedDelivery.price }} {{ currencyCode }}</span>
+                <span class="text-stone-600 uppercase">{{ storefrontContent.cart.summary.shipping }}</span>
+                <span class="font-bold text-stone-900">{{ selectedDelivery.price }} {{ currencyCode }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-stone-600 uppercase">Tax</span>
+                <span class="text-stone-600 uppercase">{{ storefrontContent.cart.summary.tax }}</span>
                 <span class="font-bold text-stone-900">0.00 {{ currencyCode }}</span>
               </div>
                         
               <div class="flex justify-between items-end pt-6 mt-4 border-t-2 border-stone-900">
-                <span class="font-bold text-xl text-stone-900 uppercase">Total Due</span>
+                <span class="font-bold text-xl text-stone-900 uppercase">{{ storefrontContent.cart.summary.total }}</span>
                 <span class="font-bold text-2xl text-stone-900">{{ cartStore.total }} {{ currencyCode }}</span>
               </div>
             </div>
@@ -270,7 +270,7 @@
                 class="w-5 h-5 animate-spin"
               />
               <span class="text-sm uppercase tracking-widest">
-                {{ submitting ? 'Processing...' : (!cartEnabled ? 'Checkout disabled' : 'Place Order') }}
+                {{ submitting ? storefrontContent.checkout.actions.placingOrder : (!cartEnabled ? storefrontContent.checkout.disabledShort : storefrontContent.checkout.actions.placeOrder) }}
               </span>
               <Icon
                 v-if="!submitting && cartEnabled && hasRequiredFields"
@@ -282,7 +282,7 @@
             <div class="mt-6 text-center">
                  <Icon name="lucide:shield-check" class="w-5 h-5 text-stone-300 mx-auto mb-2" />
                  <p class="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
-                     Secure Transaction
+                     {{ storefrontContent.checkout.secureTransaction }}
                  </p>
             </div>
           </div>
@@ -297,6 +297,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 const { currencyCode } = useCurrency()
 const { data: storeSettings } = await useFetch('/api/store/settings')
 
@@ -315,42 +316,42 @@ const submitting = ref(false)
 const errorMessage = ref('')
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled ?? true)
 
-// Delivery Options Mock Data
-const deliveryOptions = [
-  {
-    id: 1,
-    provider: 'yalidine',
-    providerLabel: 'Yalidine',
-    mode: 'home',
-    modeLabel: 'Home Delivery',
-    price: 500,
-    description: 'Delivery to your door in 2-4 days',
-    icon: 'lucide:truck',
-    color: 'emerald'
-  },
-  {
-    id: 2,
-    provider: 'yalidine',
-    providerLabel: 'Yalidine',
-    mode: 'desk',
-    modeLabel: 'Desk Pickup',
-    price: 300,
-    description: 'Pick up from nearest Yalidine desk',
-    icon: 'lucide:package',
-    color: 'blue'
-  },
-  {
-    id: 3,
-    provider: 'zr_express',
-    providerLabel: 'ZR Express',
-    mode: 'home',
-    modeLabel: 'Home Delivery',
-    price: 550,
-    description: 'Fast delivery to your home',
-    icon: 'lucide:truck',
-    color: 'emerald'
-  }
-]
+	// Delivery Options Mock Data
+	const deliveryOptions = [
+	  {
+	    id: 1,
+	    provider: 'yalidine',
+	    providerLabel: 'Yalidine',
+	    mode: 'home',
+	    modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
+	    price: 500,
+	    description: storefrontContent.value.checkout.delivery.description.homeDelivery,
+	    icon: 'lucide:truck',
+	    color: 'emerald'
+	  },
+	  {
+	    id: 2,
+	    provider: 'yalidine',
+	    providerLabel: 'Yalidine',
+	    mode: 'desk',
+	    modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
+	    price: 300,
+	    description: storefrontContent.value.checkout.delivery.description.pickupPoint,
+	    icon: 'lucide:package',
+	    color: 'blue'
+	  },
+	  {
+	    id: 3,
+	    provider: 'zr_express',
+	    providerLabel: 'ZR Express',
+	    mode: 'home',
+	    modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
+	    price: 550,
+	    description: storefrontContent.value.checkout.delivery.description.homeDelivery,
+	    icon: 'lucide:truck',
+	    color: 'emerald'
+	  }
+	]
 
 const selectedDelivery = computed(() => {
   return deliveryOptions.find(opt => opt.id === form.selectedDeliveryOption)
@@ -361,11 +362,11 @@ const hasRequiredFields = computed(() => {
 })
 
 const handleSubmit = async () => {
-    if (!cartEnabled.value) return
-    if (!hasRequiredFields.value) {
-        errorMessage.value = 'Please fill in all required fields.'
-        return
-    }
+	    if (!cartEnabled.value) return
+	    if (!hasRequiredFields.value) {
+	        errorMessage.value = storefrontContent.value.checkout.errors.requiredFields
+	        return
+	    }
 
     submitting.value = true
     errorMessage.value = ''

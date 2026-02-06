@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import ProductCard from './ProductCard.vue'
-import { DEFAULT_STOREFRONT_HOME_CONFIG, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const props = defineProps<{
   tenantName: string
@@ -13,13 +13,15 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 
-const defaultHeroSlides = DEFAULT_STOREFRONT_HOME_CONFIG.carousel
+const storefrontContent = useStorefrontContent()
+const homeDefaults = useStorefrontHomeDefaults()
+const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
-    const slides = props.homeConfig?.carousel
-    return Array.isArray(slides) && slides.length > 0 ? slides : defaultHeroSlides
+    const slides = isCustomHomeConfig.value ? props.homeConfig?.carousel : undefined
+    return Array.isArray(slides) && slides.length > 0 ? slides : homeDefaults.value.carousel
 })
 
-const sections = computed(() => props.homeConfig?.sections || DEFAULT_STOREFRONT_HOME_CONFIG.sections)
+const sections = computed(() => (isCustomHomeConfig.value ? props.homeConfig?.sections : undefined) || homeDefaults.value.sections)
 const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
@@ -107,7 +109,7 @@ const {
                 :to="slideTo(slide.buttonHref)"
                 class="inline-block px-10 py-4 bg-brand text-black font-street text-2xl uppercase border-4 border-black shadow-[8px_8px_0_0_#000] hover:translate-x-2 hover:translate-y-2 hover:shadow-none transition-all"
               >
-                {{ slide.buttonText || 'Shop Now' }}
+                {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
               </NuxtLink>
             </div>
           </div>
@@ -177,7 +179,7 @@ const {
                     {{ cat.title }}
                   </h3>
                   <p class="font-mono text-xs text-black uppercase">
-                    {{ cat.itemCount }} Products
+                    {{ storefrontContent.common.productsCount(cat.itemCount) }}
                   </p>
                </div>
             </div>

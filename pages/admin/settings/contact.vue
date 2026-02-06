@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-slate-800">Contact Info</h1>
-      <p class="text-slate-600 mt-1">Manage the contact details shown in your storefront footer.</p>
+      <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.contact.title') }}</h1>
+      <p class="text-slate-600 mt-1">{{ t('admin.pages.settings.contact.subtitle') }}</p>
     </div>
 
     <ContactInfosForm />
@@ -15,7 +15,8 @@ import ContactInfosForm from '~/components/admin/ContactInfosForm.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Contact Info'
+  titleKey: 'admin.pages.settings.contact.metaTitle'
 })
-</script>
 
+const { t } = useI18n({ useScope: 'global' })
+</script>

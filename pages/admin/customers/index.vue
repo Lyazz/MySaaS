@@ -3,10 +3,10 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">
-          Customers
+          {{ t('admin.nav.customers') }}
         </h2>
         <p class="text-gray-600 mt-1">
-          Derived from orders history
+          {{ t('admin.pages.customers.index.subtitle') }}
         </p>
       </div>
     </div>
@@ -14,10 +14,10 @@
     <div class="bg-white p-4 rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.customers.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
-            placeholder="Search by customer name or phone..."
+            :placeholder="t('admin.pages.customers.index.filters.searchPlaceholder')"
           />
         </div>
       </div>
@@ -29,7 +29,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading customers...
+        {{ t('admin.pages.customers.index.loading') }}
       </p>
     </div>
 
@@ -39,10 +39,10 @@
     >
       <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        No customers found
+        {{ t('admin.pages.customers.index.empty.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        {{ searchQuery ? 'Try adjusting your search' : 'Customers will appear here once orders are placed' }}
+        {{ emptyHint }}
       </p>
     </div>
 
@@ -55,22 +55,22 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
+                {{ t('admin.pages.customers.index.table.customer') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Phone
+                {{ t('admin.pages.customers.index.table.phone') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Orders
+                {{ t('admin.pages.customers.index.table.orders') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total Spent
+                {{ t('admin.pages.customers.index.table.totalSpent') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Last Order
+                {{ t('admin.pages.customers.index.table.lastOrder') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ t('admin.pages.customers.index.table.actions') }}
               </th>
             </tr>
           </thead>
@@ -116,7 +116,7 @@
                     class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                    <span>View</span>
+                    <span>{{ t('common.view') }}</span>
                   </NuxtLink>
                 </div>
               </td>
@@ -135,12 +135,13 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Customers'
+  titleKey: 'admin.pages.customers.index.title'
 })
 
 const authStore = useAuthStore()
 const route = useRoute()
 const { format: formatCurrency } = useCurrency()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 interface CustomerSummary {
   id: string
@@ -156,6 +157,11 @@ interface CustomerSummary {
 const loading = ref(true)
 const customers = ref<CustomerSummary[]>([])
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+
+const emptyHint = computed(() => {
+  if (searchQuery.value) return t('admin.pages.customers.index.empty.hintFiltered')
+  return t('admin.pages.customers.index.empty.hint')
+})
 
 async function fetchCustomers() {
   loading.value = true
@@ -184,7 +190,8 @@ function formatDate(dateString: string | null) {
   if (!dateString) return '—'
   const date = new Date(dateString)
   if (Number.isNaN(date.getTime())) return '—'
-  return date.toLocaleDateString('en-US', {
+  const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return date.toLocaleDateString(intlLocale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric'

@@ -7,6 +7,7 @@ const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -32,8 +33,8 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 // Build dynamic menu (same as Modern)
 const categories = computed(() => {
     const base = [
-        { name: 'Home', href: '/' },
-        { name: 'Shop', href: '/products' },
+        { name: storefrontContent.value.nav.home, href: '/' },
+        { name: storefrontContent.value.nav.shop, href: '/products' },
     ]
     
     // Add top 3 categories
@@ -44,7 +45,7 @@ const categories = computed(() => {
     }
     
     // Add Contact at the end
-    base.push({ name: 'Contact', href: '/contact' })
+    base.push({ name: storefrontContent.value.nav.contact, href: '/contact' })
     return base
 })
 
@@ -95,7 +96,7 @@ const props = defineProps<{
               <div class="relative group">
                 <input 
                   type="text" 
-                  placeholder="Search products..." 
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full h-10 bg-purple-900/30 border border-purple-500/30 text-white text-sm rounded-full focus:ring-2 focus:ring-pink-500 focus:border-transparent block pl-5 pr-10 transition-all shadow-sm group-hover:bg-purple-900/50 placeholder:text-purple-400/50" 
                 >
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -123,15 +124,16 @@ const props = defineProps<{
 
               <!-- Icons -->
               <div class="flex items-center gap-3">
+                <LocaleSwitcher class="hidden lg:inline-flex border-purple-500/30 bg-purple-900/20" />
                 <button
                   class="h-10 w-10 flex items-center justify-center text-purple-300 hover:text-pink-400 hover:bg-purple-900/50 rounded-full transition-colors"
-                  title="Wishlist"
+                  :title="storefrontContent.header.wishlistTitle"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
                 </button>
                 <button
                   class="h-10 w-10 flex items-center justify-center text-purple-300 hover:text-pink-400 hover:bg-purple-900/50 rounded-full transition-colors"
-                  title="Account"
+                  :title="storefrontContent.header.accountTitle"
                 >
                   <Icon name="lucide:user" class="w-5 h-5" />
                 </button>
@@ -200,71 +202,71 @@ const props = defineProps<{
             <!-- Links Column -->
             <div>
               <h4 class="text-white font-semibold mb-6">
-                Contact
+                {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 text-sm text-purple-200">
                 <li>
                   <a
                     href="#"
                     class="hover:text-pink-400 transition-colors"
-                  >Contact Us</a>
+                  >{{ storefrontContent.footer.contactUs }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-pink-400 transition-colors"
-                  >About Us</a>
+                  >{{ storefrontContent.footer.aboutUs }}</a>
                 </li>
               </ul>
             </div>
             <div>
               <h4 class="text-white font-semibold mb-6">
-                Terms & Privacy
+                {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 text-sm text-purple-200">
                 <li>
                   <a
                     href="#"
                     class="hover:text-pink-400 transition-colors"
-                  >Terms of Service</a>
+                  >{{ storefrontContent.footer.termsOfService }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-pink-400 transition-colors"
-                  >Privacy Policy</a>
+                  >{{ storefrontContent.footer.privacyPolicy }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-pink-400 transition-colors"
-                  >Return Policy</a>
+                  >{{ storefrontContent.footer.returnPolicy }}</a>
                 </li>
               </ul>
             </div>
             <div>
               <h4 class="text-white font-semibold mb-6">
-                Help
+                {{ storefrontContent.footer.help }}
               </h4>
               <ul class="space-y-3 text-sm text-purple-200">
                 <li>
                   <a
                     href="#"
                     class="hover:text-pink-400 transition-colors"
-                  >FAQ</a>
+                  >{{ storefrontContent.footer.faq }}</a>
                 </li>
                 <li>
                   <a
                     href="#"
                     class="hover:text-pink-400 transition-colors"
-                  >Shipping Info</a>
+                  >{{ storefrontContent.footer.shippingInfo }}</a>
                 </li>
               </ul>
             </div>
           </div>
 
           <div class="pt-8 border-t border-purple-500/20 text-center text-xs text-purple-300">
-            &copy; 2026 {{ tenantName }} — All rights reserved.
+            {{ storefrontContent.footer.copyright(tenantName) }}
           </div>
         </div>
       </footer>

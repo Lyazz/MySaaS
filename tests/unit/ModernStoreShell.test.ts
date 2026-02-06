@@ -51,8 +51,8 @@ describe('ModernStoreShell', () => {
 
         return flushPromises().then(() => {
             expect(wrapper.find('header').exists()).toBe(true)
-        // Announcement bar checking: look for currency text
-            expect(wrapper.text()).toContain('4,000 DZD')
+            // Announcement bar should render default text
+            expect(wrapper.text()).toContain('Welcome to our store!')
         })
     })
 
@@ -74,7 +74,7 @@ describe('ModernStoreShell', () => {
 
         return flushPromises().then(() => {
             expect(wrapper.find('header').exists()).toBe(false)
-            expect(wrapper.text()).not.toContain('4,000 DZD')
+            expect(wrapper.text()).not.toContain('Welcome to our store!')
         })
     })
 })

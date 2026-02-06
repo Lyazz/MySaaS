@@ -82,7 +82,10 @@ export default {
         },
     },
     plugins: [
-        function ({ addUtilities }: any) {
+        function ({ addUtilities, addVariant }: any) {
+            addVariant('rtl', '[dir="rtl"] &')
+            addVariant('ltr', '[dir="ltr"] &')
+
             const newUtilities = {
                 '.scrollbar-hide': {
                     /* IE and Edge */

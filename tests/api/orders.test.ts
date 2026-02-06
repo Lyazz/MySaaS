@@ -15,6 +15,9 @@ describe('Public checkout order flow', () => {
     let variantStockBefore = 0
     let simpleProductId: string
     let simpleVariantId: string | null = null
+    let bundleProductId: string
+    let bundleVariantId: string
+    let productPixel: any
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
@@ -71,11 +74,50 @@ describe('Public checkout order flow', () => {
         })
         variantId = variant.id
         variantStockBefore = variant.stock
+
+        const bundleProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Bundle Product',
+                slug: `bundle-${Date.now()}`,
+                price: 1000,
+                stock: 100,
+                isActive: true
+            }
+        })
+        bundleProductId = bundleProduct.id
+
+        const bundleVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: bundleProductId,
+                price: 1000,
+                stock: 100
+            }
+        })
+        bundleVariantId = bundleVariant.id
+
+        await prisma.productBundleDeal.createMany({
+            data: [
+                { tenantId, productId: bundleProductId, bundleQty: 2, bundlePrice: 1800, isActive: true },
+                { tenantId, productId: bundleProductId, bundleQty: 3, bundlePrice: 2400, isActive: true }
+            ]
+        })
+
+        productPixel = await prisma.tenantMetaPixel.create({
+            data: { tenantId, pixelId: '777777', name: 'Product Pixel', isActive: true, isGlobal: false }
+        })
+        await prisma.productMetaPixel.create({
+            data: { tenantId, productId, metaPixelId: productPixel.id }
+        })
     })
 
     afterAll(async () => {
+        await prisma.productMetaPixel.deleteMany({ where: { tenantId } })
+        await prisma.tenantMetaPixel.deleteMany({ where: { tenantId } })
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
+        await prisma.productBundleDeal.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.storeSettings.deleteMany({ where: { tenantId } })
@@ -136,6 +178,49 @@ describe('Public checkout order flow', () => {
         const afterCancel = await prisma.productVariant.findUnique({ where: { id: variantId } })
         expect(afterCancel?.stock).toBe(variantStockBefore)
         expect(afterCancel?.reserved).toBe(0)
+    })
+
+    it('returns a public Meta Pixel payload for the order (tenant-scoped)', async () => {
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Pixel Buyer',
+                customerPhone: '0550999000',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(created.status).toBe(201)
+        const orderId = created.body.orderId as string
+
+        const payloadRes = await request(app)
+            .get(`/api/orders/${orderId}/pixel`)
+            .set('X-Forwarded-Host', hostHeader)
+
+        expect(payloadRes.status).toBe(200)
+        expect(payloadRes.body.orderId).toBe(orderId)
+        expect(payloadRes.body.currency).toBe('DZD')
+        expect(typeof payloadRes.body.value).toBe('number')
+        expect(Array.isArray(payloadRes.body.contents)).toBe(true)
+        expect(Array.isArray(payloadRes.body.pixelIds)).toBe(true)
+        expect(payloadRes.body.pixelIds).toContain('777777')
+        expect(payloadRes.body.customerPhone).toBeUndefined()
+        expect(payloadRes.body.customerName).toBeUndefined()
+
+        const otherSlug = `other-${Date.now()}`
+        const otherHost = `${otherSlug}.localhost:3000`
+        const otherTenant = await prisma.tenant.create({ data: { name: 'Other', slug: otherSlug } })
+        await prisma.storeSettings.create({ data: { tenantId: otherTenant.id, cartEnabled: true, codEnabled: true } })
+
+        const otherRes = await request(app)
+            .get(`/api/orders/${orderId}/pixel`)
+            .set('X-Forwarded-Host', otherHost)
+
+        expect(otherRes.status).toBe(404)
+
+        await prisma.storeSettings.deleteMany({ where: { tenantId: otherTenant.id } })
+        await prisma.user.deleteMany({ where: { tenantId: otherTenant.id } })
+        await prisma.tenant.deleteMany({ where: { id: otherTenant.id } })
     })
 
     it('reserves on CONFIRMED, decrements on SHIPPED, and restocks on RETURNED', async () => {
@@ -273,5 +358,37 @@ describe('Public checkout order flow', () => {
             where: { tenantId, productId: simpleProductId, optionValues: { none: {} } }
         })
         expect(afterCancel?.reserved).toBe(0)
+    })
+
+    it('applies fixed bundle deals and stores line totals', async () => {
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Bundle Buyer',
+                customerPhone: '0550999000',
+                items: [{ productId: bundleProductId, variantId: bundleVariantId, quantity: 5 }]
+            })
+
+        expect(res.status).toBe(201)
+        expect(res.body.orderId).toBeDefined()
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.tenantId).toBe(tenantId)
+        expect(saved?.items.length).toBe(1)
+
+        const item = saved?.items[0] as any
+        expect(item.quantity).toBe(5)
+        expect(item.lineTotal).toBeCloseTo(4200, 5) // 3-pack + 2-pack
+        expect(saved?.totalAmount).toBeCloseTo(4200, 5)
+
+        expect(item.pricingBreakdown?.bestTotalCents).toBe(420000)
+        const breakdown = item.pricingBreakdown?.breakdown ?? []
+        expect(breakdown.find((b: any) => b.kind === 'bundle' && b.bundleQty === 2)?.count).toBe(1)
+        expect(breakdown.find((b: any) => b.kind === 'bundle' && b.bundleQty === 3)?.count).toBe(1)
     })
 })

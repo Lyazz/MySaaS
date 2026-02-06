@@ -67,7 +67,7 @@ const NuxtLink = resolveComponent('NuxtLink')
 
 const iconWrapClass = computed(() => {
   const tones: Record<Tone, string> = {
-    brand: 'bg-[rgb(var(--brand-rgb)/0.08)] border-[rgb(var(--brand-rgb)/0.20)]',
+    brand: 'bg-teal-50 border-teal-200',
     teal: 'bg-teal-50 border-teal-200',
     blue: 'bg-blue-50 border-blue-200',
     amber: 'bg-amber-50 border-amber-200',
@@ -79,7 +79,7 @@ const iconWrapClass = computed(() => {
 
 const iconClass = computed(() => {
   const tones: Record<Tone, string> = {
-    brand: 'text-[rgb(var(--brand-rgb))]',
+    brand: 'text-teal-700',
     teal: 'text-teal-700',
     blue: 'text-blue-700',
     amber: 'text-amber-700',

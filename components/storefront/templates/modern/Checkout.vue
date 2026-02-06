@@ -5,6 +5,7 @@ import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi
 const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 const { currencyCode } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 
@@ -16,7 +17,7 @@ const availableProviders = computed(() => {
     YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
     ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
     ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
-    SELF: { label: 'Self Delivery', icon: 'lucide:bike', color: 'teal' }
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'teal' }
   }
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
@@ -33,11 +34,11 @@ const deliveryOptions = computed(() => {
       provider: provider.key,
       providerLabel: provider.label,
       mode: 'home',
-      modeLabel: 'Home Delivery',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
       icon: provider.icon,
       color: provider.color,
       price: '350', // Placeholder
-      description: 'Delivered to your doorstep'
+      description: storefrontContent.value.checkout.delivery.description.homeDelivery
     })
     
     // Pickup point option
@@ -46,11 +47,11 @@ const deliveryOptions = computed(() => {
       provider: provider.key,
       providerLabel: provider.label,
       mode: 'pickup',
-      modeLabel: 'Pickup Point',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
       icon: provider.icon,
       color: provider.color,
       price: '300', // Placeholder
-      description: 'Collect from nearby location'
+      description: storefrontContent.value.checkout.delivery.description.pickupPoint
     })
   })
   
@@ -60,11 +61,11 @@ const deliveryOptions = computed(() => {
     provider: null,
     providerLabel: 'Store',
     mode: 'store',
-    modeLabel: 'Store Pickup',
+    modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
     icon: 'lucide:store',
     color: 'green',
-    price: 'Free',
-    description: 'Pick up at our store in Ouled Fayet'
+    price: 'FREE',
+    description: storefrontContent.value.checkout.delivery.description.storePickup
   })
   
   return options
@@ -106,22 +107,22 @@ async function handleSubmit() {
     cartStore.loadFromLocalStorage()
 
     if (!cartStore.hasItems) {
-      errorMessage.value = 'Your cart is empty.'
+      errorMessage.value = storefrontContent.value.checkout.errors.emptyCart
       return
     }
 
     if (!form.value.fullName.trim()) {
-      errorMessage.value = 'Please enter your full name.'
+      errorMessage.value = storefrontContent.value.checkout.errors.fullNameRequired
       return
     }
 
     if (!form.value.phone.trim()) {
-      errorMessage.value = 'Phone number is required to place your order.'
+      errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
       return
     }
 
     if (!form.value.selectedDeliveryOption) {
-      errorMessage.value = 'Please select a delivery option.'
+      errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
       return
     }
 
@@ -161,7 +162,10 @@ async function handleSubmit() {
         })
     } catch (error: any) {
         console.error('Checkout submission failed:', error)
-        errorMessage.value = error?.data?.statusMessage || error?.data?.message || 'Failed to place order. Please try again.'
+        errorMessage.value =
+          error?.data?.statusMessage ||
+          error?.data?.message ||
+          storefrontContent.value.checkout.errors.submitFailed
     } finally {
         submitting.value = false
     }
@@ -174,16 +178,16 @@ async function handleSubmit() {
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-slate-900">
-          Checkout
+          {{ storefrontContent.checkout.title }}
         </h1>
         <p class="text-lg text-slate-500 font-medium">
-          {{ cartStore.itemCount }} items
+          {{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}
         </p>
         <div
           v-if="!cartEnabled"
           class="mt-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-sm px-4 py-3"
         >
-          Checkout is currently disabled for this store.
+          {{ storefrontContent.checkout.disabled }}
         </div>
       </div>
 
@@ -194,25 +198,25 @@ async function handleSubmit() {
           <div class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1">Full name</label>
+                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                 <input
                   v-model="form.fullName"
                   type="text"
                   class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                  placeholder="e.g. John Doe"
+                  :placeholder="storefrontContent.checkout.form.fullName.placeholder"
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1">Phone</label>
+                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                 <input
                   v-model="form.phone"
                   type="tel"
                   class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                  placeholder="0XXXXXXXX"
+                  :placeholder="storefrontContent.checkout.form.phone.placeholder"
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1">Wilaya</label>
+                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <div class="relative">
                   <select
                     v-model="form.wilaya"
@@ -223,20 +227,20 @@ async function handleSubmit() {
                       disabled
                       selected
                     >
-                      Select a wilaya...
+                      {{ storefrontContent.checkout.form.wilaya.placeholder }}
                     </option>
                     <option value="16">
                       16 - Alger
                     </option>
                     <!-- Mock options -->
                   </select>
-                  <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                  <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
                     <Icon name="lucide:chevron-down" class="w-4 h-4" />
                   </div>
                 </div>
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1">City</label>
+                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                 <div class="relative">
                   <select
                     v-model="form.commune"
@@ -247,22 +251,22 @@ async function handleSubmit() {
                       disabled
                       selected
                     >
-                      Select a commune
+                      {{ storefrontContent.checkout.form.commune.placeholder }}
                     </option>
                     <!-- Mock options -->
                   </select>
-                  <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                  <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
                     <Icon name="lucide:chevron-down" class="w-4 h-4" />
                   </div>
                 </div>
               </div>
               <div class="col-span-2 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1">Address (optional)</label>
+                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
                   type="text"
                   class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                  placeholder="Street address, apartment, etc."
+                  :placeholder="storefrontContent.checkout.form.address.placeholder"
                 >
               </div>
             </div>
@@ -272,14 +276,14 @@ async function handleSubmit() {
           <div class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                Delivery Options
+                {{ storefrontContent.checkout.sections.deliveryOptions }}
               </h3>
               <span class="text-[10px] font-bold text-brand-600 bg-brand-100 px-2 py-1 rounded-full uppercase">
-                Required
+                {{ storefrontContent.checkout.required }}
               </span>
             </div>
             <p class="text-xs text-slate-500 mb-6 font-medium">
-              Choose your preferred delivery method and provider.
+              {{ storefrontContent.checkout.help.deliveryOptions }}
             </p>
                     
             <div class="space-y-3">
@@ -330,7 +334,7 @@ async function handleSubmit() {
                   <div class="flex items-center gap-3 flex-shrink-0">
                     <div class="text-right">
                       <div class="font-bold text-brand-600 text-base">
-                        {{ option.price === 'Free' ? option.price : `${option.price} ${currencyCode}` }}
+                        {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                       </div>
                     </div>
                     <span
@@ -408,22 +412,22 @@ async function handleSubmit() {
                 <div class="flex items-center gap-2">
                   <Icon name="lucide:ticket-percent" class="w-4 h-4 text-brand-600" />
                   <h4 class="text-sm font-bold text-slate-800">
-                    Coupon code
+                    {{ storefrontContent.checkout.coupon.title }}
                   </h4>
                 </div>
                 <span class="text-[10px] font-bold text-brand-700 bg-brand-200/60 px-2.5 py-1 rounded-full uppercase tracking-wide">
-                  • Discount
+                  • {{ storefrontContent.checkout.coupon.badge }}
                 </span>
               </div>
               <div class="flex gap-2">
                 <input
                   v-model="couponCode"
                   type="text"
-                  placeholder="Enter code (e.g., BIENVENUE10)"
+                  :placeholder="storefrontContent.checkout.coupon.placeholder"
                   class="flex-1 h-11 rounded-xl border-2 border-slate-200 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm font-medium"
                 >
                 <button class="px-5 h-11 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-brand-200 hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap">
-                  Apply
+                  {{ storefrontContent.actions.apply }}
                 </button>
               </div>
             </div>
@@ -431,27 +435,27 @@ async function handleSubmit() {
             <!-- Totals -->
             <div class="space-y-3 pt-4 border-t border-slate-100">
               <div v-if="selectedDelivery" class="flex justify-between text-sm">
-                <span class="text-slate-500">Delivery option</span>
+                <span class="text-slate-500">{{ storefrontContent.checkout.summary.deliveryOption }}</span>
                 <div class="flex items-center gap-2">
                   <Icon :name="selectedDelivery.icon" class="w-4 h-4 text-slate-600" />
                   <span class="font-medium text-slate-900">{{ selectedDelivery.providerLabel }} - {{ selectedDelivery.modeLabel }}</span>
                 </div>
               </div>
               <div class="flex justify-between text-sm">
-                <span class="text-slate-500">Subtotal</span>
+                <span class="text-slate-500">{{ storefrontContent.cart.summary.subtotal }}</span>
                 <span class="font-bold text-slate-900">{{ cartStore.total }} {{ currencyCode }}</span>
               </div>
               <div v-if="selectedDelivery" class="flex justify-between text-sm">
-                <span class="text-slate-500">Shipping fee</span>
-                <span class="font-bold text-brand-600">{{ selectedDelivery.price === 'Free' ? selectedDelivery.price : `${selectedDelivery.price} ${currencyCode}` }}</span>
+                <span class="text-slate-500">{{ storefrontContent.checkout.summary.shippingFee }}</span>
+                <span class="font-bold text-brand-600">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</span>
               </div>
                         
               <div class="flex justify-between items-end pt-4 border-t border-slate-100 mt-4">
-                <span class="font-bold text-xl text-slate-900">Total</span>
+                <span class="font-bold text-xl text-slate-900">{{ storefrontContent.cart.summary.total }}</span>
                 <span class="font-bold text-xl text-slate-900">{{ cartStore.total }} {{ currencyCode }}</span>
               </div>
               <p class="text-xs text-slate-400 mt-1">
-                Minimum order: 1,000 {{ currencyCode }}.
+                {{ storefrontContent.checkout.minimumOrder('1,000', currencyCode) }}
               </p>
             </div>
 
@@ -476,12 +480,12 @@ async function handleSubmit() {
                 class="w-5 h-5 animate-spin relative z-10"
               />
               <span class="relative z-10 text-base">
-                {{ submitting ? 'Placing order...' : (!cartEnabled ? 'Checkout disabled' : 'Place order') }}
+                {{ submitting ? storefrontContent.checkout.actions.placingOrder : (!cartEnabled ? storefrontContent.checkout.disabledShort : storefrontContent.checkout.actions.placeOrder) }}
               </span>
               <Icon
                 v-if="!submitting && cartEnabled && hasRequiredFields"
                 name="lucide:arrow-right"
-                class="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform"
+                class="w-5 h-5 relative z-10 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180"
               />
             </button>
           </div>

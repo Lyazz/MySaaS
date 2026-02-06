@@ -2,10 +2,10 @@
   <div class="max-w-4xl mx-auto">
     <div class="mb-8">
       <h2 class="text-2xl font-bold text-slate-900">
-        Store setup
+        {{ t('admin.pages.onboarding.title') }}
       </h2>
       <p class="text-slate-600 mt-1">
-        Choose your brand color, template, and language.
+        {{ t('admin.pages.onboarding.subtitle') }}
       </p>
     </div>
 
@@ -15,7 +15,7 @@
     >
       <div class="flex items-center gap-3 text-slate-600">
         <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600" />
-        <span>Loading your store settings…</span>
+        <span>{{ t('admin.pages.onboarding.loadingSettings') }}</span>
       </div>
     </div>
 
@@ -27,7 +27,7 @@
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <div class="flex items-center justify-between mb-4">
           <p class="text-sm font-medium text-slate-700">
-            Step {{ step + 1 }} of {{ steps.length }}
+            {{ t('admin.pages.onboarding.progress.stepOf', { current: step + 1, total: steps.length }) }}
           </p>
           <p class="text-sm text-slate-500">
             {{ steps[step] }}
@@ -49,11 +49,11 @@
           class="space-y-4"
         >
           <h3 class="text-lg font-semibold text-slate-900">
-            Brand color
+            {{ t('admin.pages.onboarding.brand.title') }}
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Pick a color</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.pages.onboarding.brand.pickColor') }}</label>
               <input
                 v-model="form.primaryColor"
                 type="color"
@@ -61,7 +61,7 @@
               >
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Hex value</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.pages.onboarding.brand.hexValue') }}</label>
               <input
                 v-model="form.primaryColor"
                 type="text"
@@ -69,20 +69,20 @@
                 class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
               <p class="mt-1 text-xs text-slate-500">
-                Example: #4F46E5
+                {{ t('admin.pages.onboarding.brand.example', { value: '#4F46E5' }) }}
               </p>
             </div>
           </div>
           <div class="rounded-lg border border-slate-200 p-4">
             <p class="text-sm text-slate-600 mb-2">
-              Preview
+              {{ t('admin.pages.onboarding.brand.preview') }}
             </p>
             <button
               type="button"
               class="px-4 py-2 rounded-lg text-white font-medium"
               :style="{ backgroundColor: form.primaryColor }"
             >
-              Primary button
+              {{ t('admin.pages.onboarding.brand.primaryButton') }}
             </button>
           </div>
         </div>
@@ -93,7 +93,7 @@
           class="space-y-4"
         >
           <h3 class="text-lg font-semibold text-slate-900">
-            Store template
+            {{ t('admin.pages.onboarding.template.title') }}
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
@@ -128,10 +128,10 @@
           class="space-y-4"
         >
           <h3 class="text-lg font-semibold text-slate-900">
-            Language
+            {{ t('admin.pages.onboarding.language.title') }}
           </h3>
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Language</label>
+            <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.pages.onboarding.language.label') }}</label>
             <BaseSelect
               v-model="form.language"
             >
@@ -144,7 +144,7 @@
               </option>
             </BaseSelect>
             <p class="mt-1 text-xs text-slate-500">
-              If Arabic, consider RTL layout.
+              {{ t('admin.pages.onboarding.language.rtlHint') }}
             </p>
           </div>
         </div>
@@ -155,13 +155,13 @@
           class="space-y-4"
         >
           <h3 class="text-lg font-semibold text-slate-900">
-            Summary
+            {{ t('admin.pages.onboarding.summary.title') }}
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="rounded-xl border border-slate-200 p-4">
               <p class="text-sm text-slate-500">
-                Template
+                {{ t('admin.pages.onboarding.summary.cards.template') }}
               </p>
               <p class="font-semibold text-slate-900">
                 {{ form.templateKey }}
@@ -169,7 +169,7 @@
             </div>
             <div class="rounded-xl border border-slate-200 p-4">
               <p class="text-sm text-slate-500">
-                Primary color
+                {{ t('admin.pages.onboarding.summary.cards.primaryColor') }}
               </p>
               <div class="flex items-center gap-3">
                 <div
@@ -183,7 +183,7 @@
             </div>
             <div class="rounded-xl border border-slate-200 p-4">
               <p class="text-sm text-slate-500">
-                Language
+                {{ t('admin.pages.onboarding.summary.cards.language') }}
               </p>
               <p class="font-semibold text-slate-900">
                 {{ form.language }}
@@ -194,7 +194,7 @@
           <div class="rounded-xl border border-slate-200 p-4">
             <div class="flex items-center justify-between gap-3 mb-3">
               <p class="font-medium text-slate-900">
-                Frontend AI summary
+                {{ t('admin.pages.onboarding.summary.aiTitle') }}
               </p>
               <button
                 type="button"
@@ -202,14 +202,14 @@
                 :disabled="summaryLoading"
                 @click="loadSummary"
               >
-                {{ summaryLoading ? 'Generating…' : 'Generate' }}
+                {{ summaryLoading ? t('admin.pages.onboarding.summary.generating') : t('admin.pages.onboarding.summary.generate') }}
               </button>
             </div>
             <textarea
               v-model="summaryMarkdown"
               rows="10"
               class="w-full font-mono text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="Click Generate to create a brief for your frontend agent."
+              :placeholder="t('admin.pages.onboarding.summary.placeholder')"
             />
             <div class="mt-3 flex items-center justify-end gap-2">
               <button
@@ -218,7 +218,7 @@
                 :disabled="!summaryMarkdown"
                 @click="copySummary"
               >
-                Copy
+                {{ t('admin.common.copy') }}
               </button>
             </div>
           </div>
@@ -240,7 +240,7 @@
           :disabled="step === 0 || saving"
           @click="step--"
         >
-          Back
+          {{ t('admin.common.back') }}
         </button>
 
         <div class="flex items-center gap-3">
@@ -251,7 +251,7 @@
             :disabled="saving"
             @click="nextStep"
           >
-            Next
+            {{ t('admin.common.next') }}
           </button>
 
           <button
@@ -261,7 +261,7 @@
             :disabled="saving"
             @click="finish"
           >
-            {{ saving ? 'Saving…' : 'Save & finish' }}
+            {{ saving ? t('admin.common.saving') : t('admin.pages.onboarding.saveFinish') }}
           </button>
         </div>
       </div>
@@ -276,28 +276,34 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Store setup'
+  titleKey: 'admin.pages.onboarding.metaTitle'
 })
 
 const authStore = useAuthStore()
+const { t, setLocale } = useI18n({ useScope: 'global' })
 
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
 
 const step = ref(0)
-const steps = ['Brand', 'Template', 'Language', 'Summary']
-const progressPercent = computed(() => Math.round(((step.value + 1) / steps.length) * 100))
+const steps = computed(() => ([
+  t('admin.pages.onboarding.steps.brand'),
+  t('admin.pages.onboarding.steps.template'),
+  t('admin.pages.onboarding.steps.language'),
+  t('admin.pages.onboarding.steps.summary')
+]))
+const progressPercent = computed(() => Math.round(((step.value + 1) / steps.value.length) * 100))
 
-const templates = [
-  { key: 'classic', label: 'Classic', description: 'Clean layout, ideal for most stores.' },
-  { key: 'modern', label: 'Modern', description: 'Bolder typography and more visual spacing.' }
-]
-const languages = [
-  { key: 'ar', label: 'Arabic (AR)' },
-  { key: 'fr', label: 'French (FR)' },
-  { key: 'en', label: 'English (EN)' }
-]
+const templates = computed(() => ([
+  { key: 'classic', label: t('admin.pages.onboarding.templates.classic.label'), description: t('admin.pages.onboarding.templates.classic.description') },
+  { key: 'modern', label: t('admin.pages.onboarding.templates.modern.label'), description: t('admin.pages.onboarding.templates.modern.description') }
+]))
+const languages = computed(() => ([
+  { key: 'ar', label: `${t('i18n.locales.ar')} (AR)` },
+  { key: 'fr', label: `${t('i18n.locales.fr')} (FR)` },
+  { key: 'en', label: `${t('i18n.locales.en')} (EN)` }
+]))
 
 
 const form = reactive({
@@ -320,8 +326,9 @@ async function loadSettings() {
     form.primaryColor = data.primaryColor || form.primaryColor
     form.templateKey = data.templateKey || form.templateKey
     form.language = data.language || form.language
+    await setLocale(form.language as any)
   } catch (e: any) {
-    error.value = e.data?.statusMessage || 'Failed to load store settings.'
+    error.value = e.data?.statusMessage || t('admin.pages.onboarding.errors.loadFailed')
   } finally {
     loading.value = false
   }
@@ -347,7 +354,7 @@ async function save(partial?: { isCompleted?: boolean }) {
     useState<any>('storeSettings').value = updated
     return true
   } catch (e: any) {
-    error.value = e.data?.statusMessage || 'Failed to save store settings.'
+    error.value = e.data?.statusMessage || t('admin.pages.onboarding.errors.saveFailed')
     return false
   } finally {
     saving.value = false
@@ -374,11 +381,22 @@ async function loadSummary() {
     })
     summaryMarkdown.value = data.markdown || ''
   } catch (e: any) {
-    error.value = e.data?.statusMessage || 'Failed to generate summary.'
+    error.value = e.data?.statusMessage || t('admin.pages.onboarding.errors.summaryFailed')
   } finally {
     summaryLoading.value = false
   }
 }
+
+watch(
+  () => form.language,
+  async (next) => {
+    try {
+      await setLocale(next as any)
+    } catch (e) {
+      console.error('Failed to switch locale from onboarding', e)
+    }
+  }
+)
 
 async function copySummary() {
   if (!summaryMarkdown.value) return
@@ -393,4 +411,3 @@ onMounted(() => {
   loadSettings()
 })
 </script>
-

@@ -1,13 +1,37 @@
 import { Router } from 'express'
+import multer from 'multer'
 import { requireTenantAdmin } from '../../middleware/rbac.middleware'
 import { ProductsController } from './products.controller'
+import { BundleDealsController } from './bundle-deals.controller'
 import imagesRoutes from './images.routes'
+import { BulkProductsController } from './bulk.controller'
 
 const router = Router()
 const controller = new ProductsController()
+const bundleDealsController = new BundleDealsController()
+const bulkController = new BulkProductsController()
+
+const csvUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+    fileFilter: (_req, file, cb) => {
+        const ok =
+            file.mimetype === 'text/csv' ||
+            file.mimetype === 'application/vnd.ms-excel' ||
+            file.originalname.toLowerCase().endsWith('.csv')
+        if (!ok) return cb(new Error('Only CSV uploads are allowed'))
+        cb(null, true)
+    }
+})
 
 // Apply admin auth to all routes in this router
 router.use(requireTenantAdmin)
+
+// Bulk ops (must be defined before "/:id" routes)
+router.get('/export.csv', bulkController.exportCsv.bind(bulkController))
+router.post('/import.csv', csvUpload.single('file'), bulkController.importCsv.bind(bulkController))
+router.patch('/bulk', bulkController.bulkPatch.bind(bulkController))
+router.post('/:id/duplicate', bulkController.duplicate.bind(bulkController))
 
 // GET /products - List products
 router.get('/', controller.listProducts.bind(controller))
@@ -17,6 +41,19 @@ router.post('/', controller.createProduct.bind(controller))
 
 // GET /products/:id - Get product
 router.get('/:id', controller.getProduct.bind(controller))
+
+// Bundle deals (fixed bundle pricing)
+// GET /products/:productId/bundles - List bundle deals
+router.get('/:productId/bundles', bundleDealsController.list.bind(bundleDealsController))
+
+// POST /products/:productId/bundles - Create bundle deal
+router.post('/:productId/bundles', bundleDealsController.create.bind(bundleDealsController))
+
+// PATCH /products/:productId/bundles/:dealId - Update bundle deal
+router.patch('/:productId/bundles/:dealId', bundleDealsController.update.bind(bundleDealsController))
+
+// DELETE /products/:productId/bundles/:dealId - Delete bundle deal
+router.delete('/:productId/bundles/:dealId', bundleDealsController.delete.bind(bundleDealsController))
 
 // PUT /products/:id - Update product
 router.put('/:id', controller.updateProduct.bind(controller))

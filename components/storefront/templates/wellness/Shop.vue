@@ -13,6 +13,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 })
 
 const { currencyCode, format: formatCurrency } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
 const filters = computed(() => ({
@@ -22,7 +23,7 @@ const filters = computed(() => ({
 // Filtering Logic
 const selectedCategories = ref<string[]>([])
 const searchQuery = ref('')
-const sortOption = ref('Relevance')
+const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
@@ -33,6 +34,7 @@ const maxPriceInput = ref(200000)
 // Quick View State
 const isQuickViewOpen = ref(false)
 const quickViewProduct = ref<any>(null)
+const sidebarProducts = computed(() => props.products.slice(0, 2))
 
 const filteredProducts = computed(() => {
     let result = [...props.products]
@@ -56,24 +58,25 @@ const filteredProducts = computed(() => {
     })
 
     // Sort
-    if (sortOption.value === 'Price: Low to High') {
+    if (sortOption.value === 'priceAsc') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'Price: High to Low') {
-        result.sort((a, b) => Number(a.price) - Number(a.price))
+    } else if (sortOption.value === 'priceDesc') {
+        result.sort((a, b) => Number(b.price) - Number(a.price))
     }
 
     return result
 })
 
 const pageTitle = computed(() => {
+    const content = storefrontContent.value
     if (selectedCategories.value.length === 1) {
         const cat = filters.value.categories.find(c => c.id === selectedCategories.value[0])
-        return cat ? cat.title : 'Full Catalog'
+        return cat ? cat.title : content.shop.catalogTitle
     }
     if (selectedCategories.value.length > 1) {
-        return 'Filtered Products'
+        return content.shop.filteredTitle
     }
-    return 'Full Catalog'
+    return content.shop.catalogTitle
 })
 
 const isFilterDrawerOpen = ref(false)
@@ -94,7 +97,7 @@ const removeCategory = (catId: string) => {
 const resetFilters = () => {
     selectedCategories.value = []
     searchQuery.value = ''
-    sortOption.value = 'Relevance'
+    sortOption.value = 'relevance'
     minPriceInput.value = 0
     maxPriceInput.value = 200000
 }
@@ -143,7 +146,7 @@ const closeQuickView = () => {
       >
         <div class="flex items-center justify-between mb-8">
           <h3 class="font-bold text-stone-900 text-xl font-wellness">
-            Filters
+            {{ storefrontContent.actions.filters }}
           </h3>
           <button
             class="p-2 -mr-2 text-stone-400 hover:text-stone-900 transition-colors"
@@ -184,7 +187,7 @@ const closeQuickView = () => {
               class="w-full py-4 bg-stone-900 text-white font-bold rounded-full shadow-lg hover:bg-stone-800 active:scale-95 transition-all text-base"
               @click="isFilterDrawerOpen = false"
             >
-              Show Results ({{ filteredProducts.length }})
+              {{ storefrontContent.shop.showResults(filteredProducts.length) }}
             </button>
           </div>
         </div>
@@ -207,7 +210,7 @@ const closeQuickView = () => {
             class="px-6 py-2.5 rounded-full bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 transition-colors shadow-sm whitespace-nowrap"
             @click="resetFilters"
           >
-            All Products
+            {{ storefrontContent.shop.allProducts }}
           </button>
         </div>
       </div>
@@ -219,13 +222,13 @@ const closeQuickView = () => {
             <!-- Filter Header -->
             <div class="flex items-center justify-between mb-8 border-b border-stone-100 pb-6">
               <h3 class="font-bold text-stone-900 text-xl font-wellness">
-                Filters
+                {{ storefrontContent.actions.filters }}
               </h3>
               <button
                 class="text-xs font-bold text-stone-500 hover:text-stone-900 uppercase tracking-widest transition-colors"
                 @click="resetFilters"
               >
-                Reset
+                {{ storefrontContent.actions.reset }}
               </button>
             </div>
 
@@ -257,26 +260,26 @@ const closeQuickView = () => {
               <!-- Price Filter -->
               <div>
                 <h4 class="font-bold text-stone-900 mb-5 text-xs uppercase tracking-widest font-wellness">
-                  Price Range
+                  {{ storefrontContent.shop.priceRange.label }}
                 </h4>
                 <div class="flex items-center gap-3">
                    <div class="relative w-full">
-                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-medium">{{ currencyCode }}</span>
+                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-medium rtl:left-auto rtl:right-4">{{ currencyCode }}</span>
                       <input 
                         v-model.number="minPriceInput"
                         type="number" 
-                        placeholder="Min"
-                        class="w-full bg-stone-50 border border-stone-200 rounded-2xl py-2.5 pl-8 pr-3 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 placeholder:text-stone-300 outline-none transition-all"
+                        :placeholder="storefrontContent.shop.priceRange.min"
+                        class="w-full bg-stone-50 border border-stone-200 rounded-2xl py-2.5 pl-8 rtl:pl-3 rtl:pr-8 pr-3 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 placeholder:text-stone-300 outline-none transition-all"
                       >
                    </div>
                    <span class="text-stone-300">-</span>
                    <div class="relative w-full">
-                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-medium">{{ currencyCode }}</span>
+                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-medium rtl:left-auto rtl:right-4">{{ currencyCode }}</span>
                       <input 
                         v-model.number="maxPriceInput"
                         type="number"
-                        placeholder="Max" 
-                        class="w-full bg-stone-50 border border-stone-200 rounded-2xl py-2.5 pl-8 pr-3 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 placeholder:text-stone-300 outline-none transition-all"
+                        :placeholder="storefrontContent.shop.priceRange.max" 
+                        class="w-full bg-stone-50 border border-stone-200 rounded-2xl py-2.5 pl-8 rtl:pl-3 rtl:pr-8 pr-3 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 placeholder:text-stone-300 outline-none transition-all"
                       >
                    </div>
                 </div>
@@ -293,28 +296,29 @@ const closeQuickView = () => {
           <!-- Best Sellers Widget -->
           <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
              <h4 class="font-bold text-stone-900 mb-6 text-xs uppercase tracking-widest font-wellness">
-               Best Sellers
+               {{ storefrontContent.shop.sidebar.bestSellers }}
              </h4>
              <div class="space-y-6">
-                 <!-- Mock Widget Items -->
-                 <div class="flex gap-4 group cursor-pointer">
-                     <div class="w-16 h-16 bg-stone-100 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-50">
-                         <img src="https://placehold.co/100x100" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                     </div>
-                      <div class="py-1">
-                          <h5 class="text-sm font-bold text-stone-900 line-clamp-2 group-hover:text-amber-700 transition-colors font-wellness leading-snug mb-1">Premium Headphones</h5>
-                          <span class="text-xs font-semibold text-stone-500">{{ formatCurrency(299) }}</span>
-                      </div>
-                 </div>
-                 <div class="flex gap-4 group cursor-pointer">
-                     <div class="w-16 h-16 bg-stone-100 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-50">
-                         <img src="https://placehold.co/100x100" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                     </div>
-                      <div class="py-1">
-                          <h5 class="text-sm font-bold text-stone-900 line-clamp-2 group-hover:text-amber-700 transition-colors font-wellness leading-snug mb-1">Ergonomic Chair</h5>
-                          <span class="text-xs font-semibold text-stone-500">{{ formatCurrency(549) }}</span>
-                      </div>
-                 </div>
+                <NuxtLink
+                  v-for="p in sidebarProducts"
+                  :key="p.id"
+                  :to="`/p/${p.slug}`"
+                  class="flex gap-4 group"
+                >
+                  <div class="w-16 h-16 bg-stone-100 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-50">
+                    <img
+                      :src="p.images && p.images[0] ? p.images[0] : 'https://placehold.co/100x100'"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      :alt="p.title"
+                    >
+                  </div>
+                  <div class="py-1">
+                    <h5 class="text-sm font-bold text-stone-900 line-clamp-2 group-hover:text-amber-700 transition-colors font-wellness leading-snug mb-1">
+                      {{ p.title }}
+                    </h5>
+                    <span class="text-xs font-semibold text-stone-500">{{ formatCurrency(p.price) }}</span>
+                  </div>
+                </NuxtLink>
              </div>
           </div>
         </aside>
@@ -328,13 +332,13 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-full text-sm font-medium shadow-sm transition-all hover:-translate-y-0.5"
               >
-                  <span>{{ filters.categories.find(c => c.id === catId)?.title || 'Category' }}</span>
+                  <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
                   <button @click="removeCategory(catId)" class="hover:text-stone-300 transition-colors">
                       <Icon name="lucide:x" class="w-3.5 h-3.5" />
                   </button>
               </div>
               <button @click="resetFilters" class="px-3 py-2 text-sm text-stone-500 hover:text-stone-900 transition-colors underline-offset-4 hover:underline font-medium">
-                  Clear all
+                  {{ storefrontContent.actions.clearAll }}
               </button>
           </div>
           <!-- Toolbar -->
@@ -345,7 +349,7 @@ const closeQuickView = () => {
               @click="isFilterDrawerOpen = true"
             >
               <Icon name="lucide:sliders-horizontal" class="w-4 h-4" />
-              Filters & Sort
+              {{ storefrontContent.shop.filtersAndSort }}
             </button>
 
             <!-- Search in results -->
@@ -353,25 +357,25 @@ const closeQuickView = () => {
               <input 
                 v-model="searchQuery" 
                 type="text"
-                placeholder="Search collection..." 
-                class="w-full bg-white border border-stone-200 text-stone-900 text-sm rounded-full focus:ring-2 focus:ring-stone-100 focus:border-stone-400 block pl-12 pr-6 py-3.5 shadow-sm transition-all hover:bg-stone-50 placeholder:text-stone-400" 
+                :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
+                class="w-full bg-white border border-stone-200 text-stone-900 text-sm rounded-full focus:ring-2 focus:ring-stone-100 focus:border-stone-400 block pl-12 rtl:pl-6 rtl:pr-12 pr-6 py-3.5 shadow-sm transition-all hover:bg-stone-50 placeholder:text-stone-400" 
               >
-              <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+              <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-4 rtl:pl-0 rtl:pr-4 pointer-events-none">
                 <Icon name="lucide:search" class="w-5 h-5 text-stone-400" />
               </div>
             </div>
 
             <!-- Sort Dropdown -->
             <div class="hidden sm:flex items-center gap-4 w-full sm:w-auto">
-              <span class="text-sm text-stone-500 whitespace-nowrap font-medium">Sort by:</span>
+              <span class="text-sm text-stone-500 whitespace-nowrap font-medium">{{ storefrontContent.shop.sortBy }}</span>
               <div class="relative w-full sm:w-56">
                 <select
                   v-model="sortOption"
                   class="w-full appearance-none bg-white rounded-full border border-stone-200 text-sm py-3.5 pl-6 pr-12 focus:border-stone-400 focus:ring-stone-100 shadow-sm cursor-pointer hover:bg-stone-50 transition-colors text-stone-800 font-medium outline-none"
                 >
-                  <option>Relevance</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                  <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
+                  <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
+                  <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-stone-400" />
@@ -385,7 +389,7 @@ const closeQuickView = () => {
                     class="p-2.5 rounded-full transition-all duration-300"
                     :class="viewMode === 'grid' ? 'bg-stone-100 text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'"
                     @click="viewMode = 'grid'"
-                    title="Grid View"
+                    :title="storefrontContent.shop.view.gridTitle"
                 >
                     <Icon name="lucide:layout-grid" class="w-4 h-4" />
                 </button>
@@ -393,7 +397,7 @@ const closeQuickView = () => {
                     class="p-2.5 rounded-full transition-all duration-300"
                     :class="viewMode === 'list' ? 'bg-stone-100 text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'"
                     @click="viewMode = 'list'"
-                    title="List View"
+                    :title="storefrontContent.shop.view.listTitle"
                 >
                     <Icon name="lucide:list" class="w-4 h-4" />
                 </button>
@@ -409,16 +413,16 @@ const closeQuickView = () => {
               <Icon name="lucide:package-open" class="w-8 h-8 text-stone-300" />
             </div>
             <h3 class="text-xl font-bold text-stone-900 font-wellness mb-2">
-              No products found
+              {{ storefrontContent.shop.results.noResults }}
             </h3>
             <p class="text-stone-500 max-w-sm mx-auto">
-              We couldn't find matches for your search. Try adjusting your filters.
+              {{ storefrontContent.shop.results.noResultsHint }}
             </p>
             <button
               class="mt-8 px-8 py-3 bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-colors font-medium shadow-md hover:-translate-y-0.5 duration-300"
               @click="resetFilters"
             >
-              Clear Filters
+              {{ storefrontContent.actions.clearAll }}
             </button>
           </div>
 
@@ -500,23 +504,23 @@ const closeQuickView = () => {
               </div>
               <div class="w-full md:w-1/2 p-10 md:p-14 flex flex-col">
                   <div>
-                    <span class="inline-block px-4 py-1.5 bg-brand-50 text-brand-700 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-brand-100">In Stock</span>
+                    <span class="inline-block px-4 py-1.5 bg-brand-50 text-brand-700 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-brand-100">{{ storefrontContent.product.inStock }}</span>
                     <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-3 font-wellness">{{ quickViewProduct.title }}</h2>
                     <div class="text-2xl font-medium text-stone-600 mb-8 flex items-center gap-3 font-wellness">
                         {{ formatCurrency(quickViewProduct.price) }}
                     </div>
                     <p class="text-stone-600 leading-relaxed mb-10 font-light text-lg">
-                        {{ quickViewProduct.description || 'Experience the perfect blend of style and functionality. Crafted with premium materials for lasting durability.' }}
+                        {{ quickViewProduct.description || storefrontContent.product.descriptionFallback }}
                     </p>
                   </div>
 
                   <div class="mt-auto space-y-4">
                       <button class="w-full py-5 bg-stone-900 text-white font-bold rounded-full hover:bg-stone-800 transition-colors shadow-xl shadow-stone-200 active:scale-95 flex items-center justify-center gap-3 text-lg">
                         <Icon name="lucide:shopping-bag" class="w-5 h-5" />
-                        Add to Cart
+                        {{ storefrontContent.actions.addToCart }}
                       </button>
                       <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-5 border border-stone-200 text-stone-700 font-bold rounded-full hover:bg-stone-50 transition-colors text-center" @click="closeQuickView">
-                        View Full Details
+                        {{ storefrontContent.product.viewFullDetails }}
                       </NuxtLink>
                   </div>
               </div>

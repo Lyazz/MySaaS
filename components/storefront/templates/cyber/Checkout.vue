@@ -5,6 +5,7 @@ import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi
 const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 const { currencyCode } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 
@@ -16,7 +17,7 @@ const availableProviders = computed(() => {
     YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
     ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
     ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
-    SELF: { label: 'Self Delivery', icon: 'lucide:bike', color: 'teal' }
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'teal' }
   }
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
@@ -31,11 +32,11 @@ const deliveryOptions = computed(() => {
       provider: provider.key,
       providerLabel: provider.label,
       mode: 'home',
-      modeLabel: 'Home Delivery',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
       icon: provider.icon,
       color: provider.color,
       price: '350',
-      description: 'Delivered to your doorstep'
+      description: storefrontContent.value.checkout.delivery.description.homeDelivery
     })
     
     options.push({
@@ -43,11 +44,11 @@ const deliveryOptions = computed(() => {
       provider: provider.key,
       providerLabel: provider.label,
       mode: 'pickup',
-      modeLabel: 'Pickup Point',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
       icon: provider.icon,
       color: provider.color,
       price: '300',
-      description: 'Collect from nearby location'
+      description: storefrontContent.value.checkout.delivery.description.pickupPoint
     })
   })
   
@@ -56,11 +57,11 @@ const deliveryOptions = computed(() => {
     provider: null,
     providerLabel: 'Store',
     mode: 'store',
-    modeLabel: 'Store Pickup',
+    modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
     icon: 'lucide:store',
     color: 'green',
-    price: 'Free',
-    description: 'Pick up at our store'
+    price: 'FREE',
+    description: storefrontContent.value.checkout.delivery.description.storePickup
   })
   
   return options
@@ -101,22 +102,22 @@ async function handleSubmit() {
     cartStore.loadFromLocalStorage()
 
     if (!cartStore.hasItems) {
-      errorMessage.value = 'Your cart is empty.'
+      errorMessage.value = storefrontContent.value.checkout.errors.emptyCart
       return
     }
 
     if (!form.value.fullName.trim()) {
-      errorMessage.value = 'Please enter your full name.'
+      errorMessage.value = storefrontContent.value.checkout.errors.fullNameRequired
       return
     }
 
     if (!form.value.phone.trim()) {
-      errorMessage.value = 'Phone number is required to place your order.'
+      errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
       return
     }
 
     if (!form.value.selectedDeliveryOption) {
-      errorMessage.value = 'Please select a delivery option.'
+      errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
       return
     }
 
@@ -156,7 +157,10 @@ async function handleSubmit() {
         })
     } catch (error: any) {
         console.error('Checkout submission failed:', error)
-        errorMessage.value = error?.data?.statusMessage || error?.data?.message || 'Failed to place order. Please try again.'
+        errorMessage.value =
+          error?.data?.statusMessage ||
+          error?.data?.message ||
+          storefrontContent.value.checkout.errors.submitFailed
     } finally {
         submitting.value = false
     }
@@ -176,16 +180,16 @@ async function handleSubmit() {
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">
-          Checkout
+          {{ storefrontContent.checkout.title }}
         </h1>
         <p class="text-lg text-purple-300/70 font-medium">
-          {{ cartStore.itemCount }} items
+          {{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}
         </p>
         <div
           v-if="!cartEnabled"
           class="mt-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 text-yellow-300 text-sm px-4 py-3"
         >
-          Checkout is currently disabled for this store.
+          {{ storefrontContent.checkout.disabled }}
         </div>
       </div>
 
@@ -198,59 +202,59 @@ async function handleSubmit() {
             <div class="relative bg-[#1a0a2e]/95 p-6 rounded-2xl border border-pink-500/30 backdrop-blur-sm">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1">Full name</label>
+                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                   <input
                     v-model="form.fullName"
                     type="text"
                     class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white placeholder:text-purple-400/50 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none"
-                    placeholder="e.g. John Doe"
+                    :placeholder="storefrontContent.checkout.form.fullName.placeholder"
                   >
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1">Phone</label>
+                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                   <input
                     v-model="form.phone"
                     type="tel"
                     class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white placeholder:text-purple-400/50 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none"
-                    placeholder="0XXXXXXXX"
+                    :placeholder="storefrontContent.checkout.form.phone.placeholder"
                   >
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1">Wilaya</label>
+                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                   <div class="relative">
                     <select
                       v-model="form.wilaya"
                       class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none appearance-none cursor-pointer"
                     >
-                      <option value="" disabled selected class="bg-[#1a0a2e]">Select a wilaya...</option>
+                      <option value="" disabled selected class="bg-[#1a0a2e]">{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
                       <option value="16" class="bg-[#1a0a2e]">16 - Alger</option>
                     </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
+                    <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
                       <Icon name="lucide:chevron-down" class="w-4 h-4" />
                     </div>
                   </div>
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1">City</label>
+                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                   <div class="relative">
                     <select
                       v-model="form.commune"
                       class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none appearance-none cursor-pointer"
                     >
-                      <option value="" disabled selected class="bg-[#1a0a2e]">Select a commune</option>
+                      <option value="" disabled selected class="bg-[#1a0a2e]">{{ storefrontContent.checkout.form.commune.placeholder }}</option>
                     </select>
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
+                    <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
                       <Icon name="lucide:chevron-down" class="w-4 h-4" />
                     </div>
                   </div>
                 </div>
                 <div class="col-span-2 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1">Address (optional)</label>
+                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                   <input
                     v-model="form.address"
                     type="text"
                     class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white placeholder:text-purple-400/50 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none"
-                    placeholder="Street address, apartment, etc."
+                    :placeholder="storefrontContent.checkout.form.address.placeholder"
                   >
                 </div>
               </div>
@@ -262,16 +266,16 @@ async function handleSubmit() {
             <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-2xl blur"></div>
             <div class="relative bg-[#1a0a2e]/95 p-6 rounded-2xl border border-cyan-500/30 backdrop-blur-sm">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wide">
-                  Delivery Options
-                </h3>
-                <span class="text-[10px] font-bold text-pink-400 bg-pink-500/20 px-2 py-1 rounded-full uppercase border border-pink-500/30">
-                  Required
-                </span>
-              </div>
-              <p class="text-xs text-purple-300/60 mb-6 font-medium">
-                Choose your preferred delivery method and provider.
-              </p>
+                  <h3 class="text-sm font-bold text-white uppercase tracking-wide">
+                  {{ storefrontContent.checkout.sections.deliveryOptions }}
+                  </h3>
+                  <span class="text-[10px] font-bold text-pink-400 bg-pink-500/20 px-2 py-1 rounded-full uppercase border border-pink-500/30">
+                  {{ storefrontContent.checkout.required }}
+                  </span>
+                </div>
+                <p class="text-xs text-purple-300/60 mb-6 font-medium">
+                {{ storefrontContent.checkout.help.deliveryOptions }}
+                </p>
                       
               <div class="space-y-3">
                 <div 
@@ -320,9 +324,9 @@ async function handleSubmit() {
                     <!-- Price & Radio -->
                     <div class="flex items-center gap-3 flex-shrink-0">
                       <div class="text-right">
-                        <div class="font-bold text-pink-400 text-base">
-                          {{ option.price === 'Free' ? option.price : `${option.price} ${currencyCode}` }}
-                        </div>
+                  <div class="font-bold text-pink-400 text-base">
+                    {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
+                  </div>
                       </div>
                       <span
                         class="block w-5 h-5 rounded-full border-2 transition-all duration-300 flex-shrink-0"
@@ -402,22 +406,22 @@ async function handleSubmit() {
                   <div class="flex items-center gap-2">
                     <Icon name="lucide:ticket-percent" class="w-4 h-4 text-pink-400" />
                     <h4 class="text-sm font-bold text-white">
-                      Coupon code
+                      {{ storefrontContent.checkout.coupon.title }}
                     </h4>
                   </div>
                   <span class="text-[10px] font-bold text-cyan-400 bg-cyan-500/20 px-2.5 py-1 rounded-full uppercase tracking-wide border border-cyan-500/30">
-                    Discount
+                    {{ storefrontContent.checkout.coupon.badge }}
                   </span>
                 </div>
                 <div class="flex gap-2">
                   <input
                     v-model="couponCode"
                     type="text"
-                    placeholder="Enter code"
+                    :placeholder="storefrontContent.checkout.coupon.placeholder"
                     class="flex-1 h-11 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-sm text-white placeholder:text-purple-400/50 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none font-medium"
                   >
                   <button class="px-5 h-11 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-bold text-sm rounded-xl transition-all duration-200 shadow-lg shadow-pink-500/20 whitespace-nowrap">
-                    Apply
+                    {{ storefrontContent.actions.apply }}
                   </button>
                 </div>
               </div>
@@ -425,23 +429,23 @@ async function handleSubmit() {
               <!-- Totals -->
               <div class="space-y-3 pt-4 border-t border-purple-500/20">
                 <div v-if="selectedDelivery" class="flex justify-between text-sm">
-                  <span class="text-purple-300/60">Delivery option</span>
+                  <span class="text-purple-300/60">{{ storefrontContent.checkout.summary.deliveryOption }}</span>
                   <div class="flex items-center gap-2">
                     <Icon :name="selectedDelivery.icon" class="w-4 h-4 text-purple-300" />
                     <span class="font-medium text-white">{{ selectedDelivery.providerLabel }} - {{ selectedDelivery.modeLabel }}</span>
                   </div>
                 </div>
                 <div class="flex justify-between text-sm">
-                  <span class="text-purple-300/60">Subtotal</span>
+                  <span class="text-purple-300/60">{{ storefrontContent.cart.summary.subtotal }}</span>
                   <span class="font-bold text-white">{{ cartStore.total }} {{ currencyCode }}</span>
                 </div>
                 <div v-if="selectedDelivery" class="flex justify-between text-sm">
-                  <span class="text-purple-300/60">Shipping fee</span>
-                  <span class="font-bold text-cyan-400">{{ selectedDelivery.price === 'Free' ? selectedDelivery.price : `${selectedDelivery.price} ${currencyCode}` }}</span>
+                  <span class="text-purple-300/60">{{ storefrontContent.checkout.summary.shippingFee }}</span>
+                  <span class="font-bold text-cyan-400">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</span>
                 </div>
                           
                 <div class="flex justify-between items-end pt-4 border-t border-purple-500/20 mt-4">
-                  <span class="font-bold text-xl text-white">Total</span>
+                  <span class="font-bold text-xl text-white">{{ storefrontContent.cart.summary.total }}</span>
                   <span class="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">{{ cartStore.total }} {{ currencyCode }}</span>
                 </div>
               </div>
@@ -467,12 +471,12 @@ async function handleSubmit() {
                   class="w-5 h-5 animate-spin relative z-10"
                 />
                 <span class="relative z-10 text-base">
-                  {{ submitting ? 'Processing...' : (!cartEnabled ? 'Checkout disabled' : 'Place order') }}
+                  {{ submitting ? storefrontContent.checkout.actions.placingOrder : (!cartEnabled ? storefrontContent.checkout.disabledShort : storefrontContent.checkout.actions.placeOrder) }}
                 </span>
                 <Icon
                   v-if="!submitting && cartEnabled && hasRequiredFields"
                   name="lucide:arrow-right"
-                  class="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform"
+                  class="w-5 h-5 relative z-10 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform rtl:rotate-180"
                 />
               </button>
             </div>

@@ -1,0 +1,20 @@
+{
+  "error": true,
+  "url": "http://apple.localhost:3000/",
+  "statusCode": 500,
+  "statusMessage": "Server Error",
+  "message": "storeSettings is not defined",
+  "stack": [
+    "storeSettings is not defined",
+    "at /Users/lyazz/Documents/js projects/MySaaS/app.vue:57:25)",
+    "at callWithErrorHandling (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19)",
+    "at callWithAsyncErrorHandling (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17)",
+    "at baseWatchOptions.call (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:877:47)",
+    "at ReactiveEffect.getter [as fn] (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1843:25)",
+    "at ReactiveEffect.run (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19)",
+    "at job (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1902:14)",
+    "at baseWatchOptions.scheduler (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:887:9)",
+    "at Object.watch (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1933:5)",
+    "at doWatch (/Users/lyazz/Documents/js projects/MySaaS/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:905:34)"
+  ]
+}

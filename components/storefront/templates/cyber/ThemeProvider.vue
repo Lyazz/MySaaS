@@ -1,18 +1,5 @@
 <script setup lang="ts">
 // ThemeProvider for Cyber Synthwave template
-const storeSettings = useState<any>('storeSettings')
-
-console.log('CyberThemeProvider mounted. Settings:', storeSettings.value)
-
-const isRtl = computed(() => storeSettings.value?.language === 'ar')
-
-useHead(() => ({
-  htmlAttrs: {
-    dir: isRtl.value ? 'rtl' : 'ltr',
-    lang: storeSettings.value?.language || 'fr'
-  }
-}))
-
 const storeStyle = computed(() => {
   const primaryColor = '#F43F5E' // Rose 500
   

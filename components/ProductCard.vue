@@ -54,11 +54,11 @@
       <button
         v-if="storeSettings?.cartEnabled !== false"
         :disabled="product.stock === 0 || !product.isActive"
-        class="mt-4 w-full px-4 py-2 bg-brand text-white rounded-md hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+        class="mt-4 w-full px-4 py-2 bg-brand text-white rounded-md hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2 rtl:space-x-reverse"
         @click="handleAddToCart"
       >
         <Icon name="lucide:handbag" class="w-5 h-5" />
-        <span>{{ product.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}</span>
+        <span>{{ product.stock === 0 ? storefrontContent.actions.outOfStock : storefrontContent.actions.addToCart }}</span>
       </button>
     </div>
   </div>
@@ -76,6 +76,8 @@ interface Product {
   stock: number
   isActive: boolean
   images?: string[]
+  bundleDeals?: { id?: string; bundleQty: number; bundlePrice: number | string }[]
+  metaPixelIds?: string[]
 }
 
 const props = defineProps<{
@@ -85,6 +87,7 @@ const props = defineProps<{
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const { format: formatCurrency } = useCurrency()
+const storefrontContent = useStorefrontContent()
 const LOW_STOCK_THRESHOLD = 5
 
 const mainImage = computed(() => {
@@ -100,13 +103,15 @@ function handleAddToCart() {
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
+    bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
-    image: mainImage.value ?? undefined
+    image: mainImage.value ?? undefined,
+    metaPixelIds: props.product.metaPixelIds
   })
   
   // Optional: Show toast notification
   if (process.client) {
-    alert(`${props.product.title} added to cart!`)
+    alert(storefrontContent.value.product.addedToCart(props.product.title))
   }
 }
 </script>

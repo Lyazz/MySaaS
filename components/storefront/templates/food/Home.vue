@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import ProductCard from './ProductCard.vue'
-import { DEFAULT_STOREFRONT_HOME_CONFIG, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const props = defineProps<{
   tenantName: string
@@ -13,36 +13,15 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 
-const defaultHeroSlides = [
-    {
-        title: 'Fresh & Organic',
-        subtitle: 'Farm fresh ingredients delivered to your doorstep.',
-        buttonText: 'Shop Fresh',
-        buttonHref: '/products',
-        imageUrl: 'https://placehold.co/1920x800/1c1917/ffffff?text=Fresh+Organic'
-    },
-    {
-        title: 'Artisan Bakery',
-        subtitle: 'Handcrafted breads and pastries baked daily.',
-        buttonText: 'View Bakery',
-        buttonHref: '/products',
-        imageUrl: 'https://placehold.co/1920x800/292524/ffffff?text=Artisan+Bakery'
-    },
-     {
-        title: 'Weekly Specials',
-        subtitle: 'Delicious deals on seasonal favorites.',
-        buttonText: 'See Deals',
-        buttonHref: '/products',
-        imageUrl: 'https://placehold.co/1920x800/44403c/ffffff?text=Weekly+Specials'
-    }
-]
-
+const storefrontContent = useStorefrontContent()
+const homeDefaults = useStorefrontHomeDefaults()
+const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
-    const slides = props.homeConfig?.carousel
-    return Array.isArray(slides) && slides.length > 0 ? slides : defaultHeroSlides
+    const slides = isCustomHomeConfig.value ? props.homeConfig?.carousel : undefined
+    return Array.isArray(slides) && slides.length > 0 ? slides : homeDefaults.value.carousel
 })
 
-const sections = computed(() => props.homeConfig?.sections || DEFAULT_STOREFRONT_HOME_CONFIG.sections)
+const sections = computed(() => (isCustomHomeConfig.value ? props.homeConfig?.sections : undefined) || homeDefaults.value.sections)
 const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
@@ -122,7 +101,7 @@ const {
                         :to="slideTo(heroSlides[currentSlide].buttonHref)"
                         class="px-8 py-4 bg-stone-900 text-white rounded-full font-bold text-lg hover:bg-brand-600 hover:shadow-lg hover:shadow-brand-200 transition-all transform hover:-translate-y-1"
                     >
-                        {{ heroSlides[currentSlide].buttonText || 'Start Shopping' }}
+                        {{ heroSlides[currentSlide].buttonText || storefrontContent.home.cta.shopNow }}
                     </NuxtLink>
                     
                     <!-- Navigation Dots (Inline) -->
@@ -229,7 +208,7 @@ const {
                         <h3 class="text-2xl font-bold text-stone-900 mb-2 group-hover:text-brand-700 transition-colors">{{ cat.title }}</h3>
                         <div class="w-12 h-0.5 bg-brand-200 mx-auto mb-4" />
                         <span class="inline-block px-3 py-1 bg-white border border-stone-200 rounded-full text-xs font-bold text-stone-500 group-hover:border-brand-200 group-hover:text-brand-600 transition-colors">
-                            {{ cat.itemCount }} Items
+                            {{ storefrontContent.common.productsCount(cat.itemCount) }}
                         </span>
                     </div>
                 </div>

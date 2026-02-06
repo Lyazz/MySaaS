@@ -6,6 +6,21 @@ import 'screens/login_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'screens/orders_screen.dart';
+import 'screens/inventory_screen.dart';
+import 'screens/categories_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/customers_screen.dart';
+import 'screens/customer_detail_screen.dart';
+import 'screens/suppliers_screen.dart';
+import 'screens/supplier_form_screen.dart';
+import 'screens/supplier_detail_screen.dart';
+import 'screens/sales_screen.dart';
+import 'screens/purchases_screen.dart';
+import 'screens/purchase_form_screen.dart';
+import 'screens/purchase_detail_screen.dart';
+import 'screens/pos_screen.dart';
+import 'screens/delivery_screen.dart';
+import 'screens/billing_screen.dart';
 import 'widgets/app_shell.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -56,7 +71,72 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/orders',
             builder: (context, state) => const OrdersScreen(),
           ),
-          // Add other routes here as we build them
+          GoRoute(
+            path: '/sales',
+            builder: (context, state) => const SalesScreen(),
+          ),
+          GoRoute(
+            path: '/purchases',
+            builder: (context, state) => const PurchasesScreen(),
+          ),
+          GoRoute(
+            path: '/purchases/create',
+            builder: (context, state) => const PurchaseFormScreen(),
+          ),
+          GoRoute(
+            path: '/purchases/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id'];
+              return PurchaseDetailScreen(purchaseId: id!);
+            },
+          ),
+          GoRoute(
+            path: '/inventory',
+            builder: (context, state) => const InventoryScreen(),
+          ),
+          GoRoute(
+            path: '/categories',
+            builder: (context, state) => const CategoriesScreen(),
+          ),
+          GoRoute(
+            path: '/suppliers',
+            builder: (context, state) => const SuppliersScreen(),
+          ),
+          GoRoute(
+            path: '/suppliers/create',
+            builder: (context, state) => const SupplierFormScreen(),
+          ),
+          GoRoute(
+            path: '/suppliers/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id'];
+              return SupplierDetailScreen(supplierId: id!);
+            },
+          ),
+          GoRoute(
+            path: '/customers',
+            builder: (context, state) => const CustomersScreen(),
+          ),
+          GoRoute(
+            path: '/customers/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id'];
+              return CustomerDetailScreen(customerId: id!);
+            },
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(path: '/pos', builder: (context, state) => const PosScreen()),
+          GoRoute(
+            path: '/delivery',
+            builder: (context, state) => const DeliveryScreen(),
+          ),
+          GoRoute(
+            path: '/billing',
+            builder: (context, state) => const BillingScreen(),
+          ),
         ],
       ),
     ],

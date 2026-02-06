@@ -196,6 +196,9 @@ export class ProductsService {
                     },
                 productImages: {
                     orderBy: { position: 'asc' }
+                },
+                bundleDeals: {
+                    orderBy: { bundleQty: 'asc' }
                 }
             }
         })
@@ -242,6 +245,9 @@ export class ProductsService {
                         },
                     productImages: {
                         orderBy: { position: 'asc' }
+                    },
+                    bundleDeals: {
+                        orderBy: { bundleQty: 'asc' }
                     }
                 }
             })

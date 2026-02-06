@@ -3,10 +3,10 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">
-          Sales
+          {{ t('admin.nav.salesItem') }}
         </h2>
         <p class="text-gray-600 mt-1">
-          Completed orders (DELIVERED)
+          {{ t('admin.pages.sales.index.subtitle') }}
         </p>
       </div>
     </div>
@@ -14,10 +14,10 @@
     <div class="bg-white p-4 rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.sales.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
-            placeholder="Search by customer name, phone, or order id..."
+            :placeholder="t('admin.pages.sales.index.filters.searchPlaceholder')"
           />
         </div>
         <div>
@@ -35,7 +35,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading sales...
+        {{ t('admin.pages.sales.index.loading') }}
       </p>
     </div>
 
@@ -45,10 +45,10 @@
     >
       <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        No sales found
+        {{ t('admin.pages.sales.index.empty.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        {{ searchQuery ? 'Try adjusting your search' : 'Delivered orders will appear here' }}
+        {{ emptyHint }}
       </p>
     </div>
 
@@ -61,22 +61,22 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Sale ID
+                {{ t('admin.pages.sales.index.table.saleId') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
+                {{ t('admin.pages.sales.index.table.customer') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Phone
+                {{ t('admin.pages.sales.index.table.phone') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total
+                {{ t('admin.pages.sales.index.table.total') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Completed
+                {{ t('admin.pages.sales.index.table.completed') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ t('admin.pages.sales.index.table.actions') }}
               </th>
             </tr>
           </thead>
@@ -116,7 +116,7 @@
                     class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                    <span>View</span>
+                    <span>{{ t('common.view') }}</span>
                   </NuxtLink>
                 </div>
               </td>
@@ -136,12 +136,13 @@ import DateFilter from '~/components/ui/DateFilter.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Sales'
+  titleKey: 'admin.pages.sales.index.title'
 })
 
 const authStore = useAuthStore()
 const route = useRoute()
 const { format: formatCurrency } = useCurrency()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 interface Sale {
   id: string
@@ -159,6 +160,11 @@ const sales = ref<Sale[]>([])
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const startDate = ref('')
 const endDate = ref('')
+
+const emptyHint = computed(() => {
+  if (searchQuery.value) return t('admin.pages.sales.index.empty.hintFiltered')
+  return t('admin.pages.sales.index.empty.hint')
+})
 
 async function fetchSales() {
   loading.value = true
@@ -187,7 +193,8 @@ async function fetchSales() {
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return date.toLocaleDateString(intlLocale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

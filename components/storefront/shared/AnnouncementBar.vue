@@ -11,6 +11,7 @@ const props = withDefaults(defineProps<{
 })
 
 const { text: globalText, isScrolling: globalScrolling, isVisible, dismiss } = useAnnouncement()
+const { t } = useI18n({ useScope: 'global' })
 
 // Use props if provided, otherwise fallback to global state
 const displayText = computed(() => props.text ?? globalText.value)
@@ -80,7 +81,7 @@ const isScrollingActive = computed(() => props.scrolling ?? globalScrolling.valu
           @click="dismiss" 
           class="absolute right-4 p-1 rounded-full hover:bg-black/10 transition-colors z-50 cursor-pointer"
           :class="textColor || 'text-brand-600 hover:text-brand-800'"
-          aria-label="Dismiss announcement"
+          :aria-label="t('storefront.announcement.dismissAria')"
         >
           <Icon name="lucide:x" class="w-4 h-4" />
         </button>

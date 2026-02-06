@@ -1,0 +1,1406 @@
+{
+  "common": {
+    "view": "عرض"
+  },
+  "i18n": {
+    "switcher": {
+      "label": "اللغة"
+    },
+    "locales": {
+      "en": "الإنجليزية",
+      "fr": "الفرنسية",
+      "ar": "العربية"
+    }
+  },
+  "bundleTags": {
+    "MOST_POPULAR": "الأكثر شيوعًا",
+    "BEST_VALUE": "أفضل قيمة"
+  },
+  "saasLanding": {
+    "seo": {
+      "title": "Swekly - مستقبل التجارة",
+      "description": "منصة شاملة لبناء متجرك وبيع منتجاتك وتوسيع أعمالك B2B أو B2C بأدوات احترافية."
+    },
+    "hero": {
+      "title": {
+        "buildSell": "ابنِ. بِع.",
+        "scale": "نمِّ."
+      },
+      "subtitle": "منصة شاملة مصممة للتجارة الحديثة. ركّز على منتجك، ونحن نتكفل بالبنية التحتية والمدفوعات واللوجستيات.",
+      "ctaPrimary": "ابدأ مجاناً",
+      "ctaSecondary": "شاهد العرض"
+    },
+    "features": {
+      "title": {
+        "prefix": "كل ما تحتاجه لـ",
+        "accent": "التفوّق"
+      },
+      "subtitle": "أدوات قوية للنمو داخل واجهة جميلة وسهلة.",
+      "items": {
+        "storeBuilder": {
+          "title": "منشئ المتجر",
+          "description": "محرر سحب وإفلات لإنشاء واجهات متجر رائعة خلال دقائق."
+        },
+        "globalPayments": {
+          "title": "مدفوعات عالمية",
+          "description": "اقبل المدفوعات من أي مكان عبر بوابات مدمجة."
+        },
+        "analytics": {
+          "title": "تحليلات ورؤى",
+          "description": "بيانات لحظية لتحسين معدلات التحويل."
+        },
+        "automatedShipping": {
+          "title": "شحن آلي",
+          "description": "اربط Yalidine و Eckoz وغيرها لأتمتة الإرسال."
+        }
+      }
+    },
+    "stats": {
+      "activeMerchants": "تجار نشطون",
+      "revenueGenerated": "إيرادات محققة",
+      "uptime": "وقت التشغيل"
+    },
+    "faq": {
+      "title": "الأسئلة الشائعة",
+      "subtitle": "كل ما تحتاج معرفته عن المنتج والفوترة.",
+      "items": {
+        "noCard": {
+          "question": "هل أحتاج إلى بطاقة بنكية للبدء؟",
+          "answer": "لا. يمكنك البدء فوراً والترقية/التخفيض لاحقاً."
+        },
+        "changePlan": {
+          "question": "هل يمكنني تغيير الخطة لاحقاً؟",
+          "answer": "نعم. يمكنك تغيير الخطة في أي وقت من صفحة الفوترة في لوحة الإدارة."
+        },
+        "planDifferences": {
+          "question": "ما الفرق بين الخطط حالياً؟",
+          "answer": "حالياً (تجربة)، تختلف الخطط فقط بعدد الطلبات المسموح بها شهرياً."
+        }
+      }
+    },
+    "testimonials": {
+      "heading": {
+        "prefix": "محبوب من",
+        "accent": "المؤسسين",
+        "suffix": "مثلك."
+      },
+      "subtitle": "انضم إلى آلاف التجار الذين انتقلوا إلى منصة مبنية للنمو والسرعة والموثوقية.",
+      "avatarAlt": "صورة رمزية",
+      "userAvatarAlt": "صورة المستخدم",
+      "items": {
+        "sarah": {
+          "text": "انتقلت من Shopify ولم أنظر للخلف. سرعة تحميل الصفحات مذهلة وارتفع معدل التحويل لدي بنسبة 40% بين ليلة وضحاها.",
+          "role": "الرئيسة التنفيذية، FashionNova"
+        },
+        "karim": {
+          "text": "لوحة التحليلات جميلة. أي بيانات أحتاجها أصبحت على بعد نقرة واحدة. يبدو وكأن هذه الأداة صُممت لـ 2026.",
+          "role": "مؤسس، TechShop"
+        },
+        "emily": {
+          "text": "أخيرًا منصة لا تفرض رسوم معاملات مبالغًا فيها. دعم النطاقات المخصصة سلس للغاية.",
+          "role": "المديرة التقنية، GreenEarth"
+        },
+        "michael": {
+          "text": "أفضل قرار اتخذناه لأعمالنا. الدعم رائع والميزات بالضبط كما نحتاج.",
+          "role": "مدير العمليات، GearUp"
+        },
+        "lisa": {
+          "text": "التوسع إلى 10 آلاف طلب شهريًا كان سهلًا. بدون توقف وبدون مشاكل. أنصح بها بشدة.",
+          "role": "مالكة، Kicks"
+        },
+        "david": {
+          "text": "منشئ السحب والإفلات عملي فعلاً. أنشأت متجري خلال فترة بعد الظهر.",
+          "role": "مؤسس، ArtSpace"
+        }
+      }
+    },
+    "finalCta": {
+      "title": "جاهز للإطلاق؟",
+      "subtitle": "انضم إلى المنصة التي تنمو معك.",
+      "cta": "ابدأ الآن"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "features": "الميزات",
+      "pricing": "الأسعار",
+      "about": "حول"
+    },
+    "actions": {
+      "dashboard": "لوحة التحكم",
+      "logout": "تسجيل الخروج",
+      "login": "تسجيل الدخول",
+      "getStarted": "ابدأ الآن"
+    },
+    "footer": {
+      "tagline": "نمّ أعمالك بأدوات حديثة وتجربة مميزة. مصمم للتوسع ومبني لك.",
+      "product": {
+        "title": "المنتج",
+        "changelog": "سجل التغييرات"
+      },
+      "support": {
+        "title": "الدعم",
+        "documentation": "التوثيق",
+        "apiStatus": "حالة واجهة API",
+        "contact": "اتصل بنا"
+      },
+      "copyright": "© {year} منصة Swekly. جميع الحقوق محفوظة."
+    }
+  },
+  "pricing": {
+    "seo": {
+      "title": "الأسعار - Swekly",
+      "description": "اختر الخطة التي تناسب مرحلة نموك."
+    },
+    "page": {
+      "title": "أسعار بسيطة وشفافة",
+      "subtitle": "اختر الخطة المناسبة لنموك. بدون رسوم مخفية."
+    },
+    "section": {
+      "title": "أسعار شفافة",
+      "subtitle": "بدون رسوم مخفية. نمِّ أعمالك مع نموك."
+    },
+    "toggle": {
+      "monthly": "شهري",
+      "annual": "سنوي",
+      "save": "وفّر {percent}%"
+    },
+    "badges": {
+      "mostPopular": "الأكثر شيوعًا",
+      "recommended": "موصى به"
+    },
+    "period": {
+      "perMonth": "/شهر"
+    },
+    "features": {
+      "ordersPerMonth": "{count} طلب/شهر"
+    },
+    "plans": {
+      "basic": {
+        "name": "أساسية",
+        "description": "مناسبة للتجربة",
+        "cta": "ابدأ الآن"
+      },
+      "beginner": {
+        "name": "مبتدئ",
+        "description": "بداية بسيطة لتعزيز متجرك",
+        "cta": "ابدأ الآن"
+      },
+      "merchant": {
+        "name": "تاجر",
+        "description": "خيار ذكي للأعمال المتنامية",
+        "cta": "ابدأ الآن"
+      },
+      "professional": {
+        "name": "احترافية",
+        "description": "مصممة للتوسع بثقة",
+        "cta": "15 يومًا مجانًا"
+      }
+    }
+  },
+  "storefront": {
+    "algeria": {
+      "wilayas": {
+        "16": "الجزائر",
+        "31": "وهران"
+      }
+    },
+    "common": {
+      "productsCount": "{count} منتجات",
+      "selectPlaceholder": "اختر…"
+    },
+    "actions": {
+      "addToCart": "أضف إلى السلة",
+      "adding": "جارٍ الإضافة…",
+      "outOfStock": "غير متوفر",
+      "viewCart": "عرض السلة",
+      "checkout": "الدفع",
+      "continueShopping": "متابعة التسوق",
+      "startBrowsing": "ابدأ التسوق",
+      "apply": "تطبيق",
+      "reset": "إعادة ضبط",
+      "clearAll": "مسح الكل",
+      "filters": "الفلاتر",
+      "search": "بحث"
+    },
+    "home": {
+      "welcomeTo": "مرحبًا بك في {tenant}",
+      "cta": {
+        "shopNow": "تسوّق الآن"
+      },
+      "carousel": {
+        "newCollection": {
+          "title": "مجموعة جديدة 2026",
+          "subtitle": "اكتشف أحدث الاتجاهات في الكتب والقرطاسية.",
+          "buttonText": "تسوّق الآن"
+        },
+        "bestSellers": {
+          "title": "الأكثر مبيعًا",
+          "subtitle": "احصل على أكثر المنتجات رواجًا هذا الأسبوع.",
+          "buttonText": "تصفح"
+        },
+        "specialOffers": {
+          "title": "عروض خاصة",
+          "subtitle": "خصم حتى 50% على منتجات مختارة.",
+          "buttonText": "عرض العروض"
+        }
+      },
+      "sections": {
+        "browseByCategory": {
+          "eyebrow": "مجموعات",
+          "title": "تصفّح حسب التصنيف"
+        },
+        "newArrivals": {
+          "eyebrow": "وصل حديثًا",
+          "title": "الأكثر رواجًا الآن"
+        },
+        "bestSellers": {
+          "eyebrow": "الأكثر مبيعًا",
+          "title": "الأكثر شعبية"
+        }
+      }
+    },
+    "nav": {
+      "home": "الرئيسية",
+      "shop": "المتجر",
+      "contact": "اتصل بنا"
+    },
+    "cart": {
+      "label": "السلة",
+      "title": "سلتك",
+      "itemsCount": "{count} عناصر",
+      "item": {
+        "variantSelected": "تم اختيار النسخة",
+        "standardItem": "عنصر قياسي",
+        "variant": "النسخة",
+        "remove": "إزالة"
+      },
+      "sections": {
+        "items": "العناصر"
+      },
+      "empty": {
+        "title": "سلتك فارغة",
+        "subtitle": "أضف منتجات للبدء.",
+        "cta": "ابدأ التسوق"
+      },
+      "actions": {
+        "proceedToCheckout": "إتمام الشراء"
+      },
+      "summary": {
+        "title": "الملخص",
+        "subtotal": "المجموع الفرعي",
+        "shipping": "الشحن",
+        "shippingHint": "يتم احتسابه عند الدفع",
+        "tax": "الضريبة",
+        "total": "الإجمالي"
+      }
+    },
+    "checkout": {
+      "title": "الدفع",
+      "disabled": "الدفع غير متاح لهذا المتجر.",
+      "disabledShort": "الدفع غير متاح",
+      "required": "مطلوب",
+      "help": {
+        "deliveryOptions": "اختر طريقة التوصيل والمزوّد."
+      },
+      "coupon": {
+        "title": "كود الخصم",
+        "badge": "خصم",
+        "placeholder": "أدخل الكود (مثال: WELCOME10)"
+      },
+      "summary": {
+        "deliveryOption": "خيار التوصيل",
+        "shippingFee": "رسوم الشحن",
+        "quantityShort": "الكمية"
+      },
+      "minimumOrder": "الحد الأدنى للطلب: {amount} {currency}.",
+      "secureTransaction": "عملية آمنة",
+      "errors": {
+        "emptyCart": "سلتك فارغة.",
+        "fullNameRequired": "يرجى إدخال الاسم الكامل.",
+        "phoneRequired": "رقم الهاتف مطلوب لإتمام الطلب.",
+        "deliveryRequired": "يرجى اختيار خيار التوصيل.",
+        "requiredFields": "يرجى ملء جميع الحقول المطلوبة.",
+        "submitFailed": "تعذر إتمام الطلب. يرجى المحاولة مرة أخرى."
+      },
+      "actions": {
+        "returnToCart": "العودة إلى السلة",
+        "placeOrder": "تأكيد الطلب",
+        "placingOrder": "جارٍ تأكيد الطلب…"
+      },
+      "form": {
+        "fullName": { "label": "الاسم الكامل", "placeholder": "مثال: John Doe" },
+        "phone": { "label": "الهاتف", "placeholder": "0XXXXXXXX" },
+        "wilaya": { "label": "الولاية", "placeholder": "اختر ولاية…" },
+        "commune": { "label": "المدينة", "placeholder": "اختر بلدية…" },
+        "address": { "label": "العنوان (اختياري)", "placeholder": "الشارع، المبنى، إلخ." }
+      },
+      "sections": {
+        "customerInformation": "معلومات العميل",
+        "deliveryOptions": "خيارات التوصيل",
+        "deliveryMethod": "طريقة التوصيل",
+        "orderSummary": "ملخص الطلب"
+      },
+      "itemsInCart": "{count} عناصر في سلتك",
+      "delivery": {
+        "free": "مجاني",
+        "mode": {
+          "homeDelivery": "توصيل للمنزل",
+          "pickupPoint": "نقطة استلام",
+          "storePickup": "استلام من المتجر"
+        },
+        "description": {
+          "homeDelivery": "يتم التوصيل إلى باب منزلك",
+          "pickupPoint": "الاستلام من نقطة قريبة",
+          "storePickup": "الاستلام من متجرنا"
+        },
+        "provider": {
+          "self": "توصيل ذاتي",
+          "storePickup": "استلام من المتجر",
+          "homeDelivery": "توصيل للمنزل"
+        }
+      }
+    },
+    "product": {
+      "addedToCart": "تمت إضافة {title} إلى السلة",
+      "inStock": "متوفر",
+      "perUnit": "للوحدة",
+      "descriptionFallback": "استمتع بالمزيج المثالي بين الأناقة والعملية.",
+      "viewFullDetails": "عرض التفاصيل"
+    },
+    "productForm": {
+      "quantity": { "label": "الكمية" },
+      "stock": {
+        "unavailable": "غير متاح",
+        "outOfStock": "غير متوفر",
+        "lowStock": "المخزون منخفض: {count} متبقي"
+      },
+      "cod": {
+        "title": "اطلب الآن",
+        "badge": "الدفع عند الاستلام (COD)",
+        "submit": "تأكيد الطلب",
+        "submitting": "جارٍ الإرسال…"
+      },
+      "totalPrice": "السعر الإجمالي:",
+      "errors": {
+        "outOfStockVariant": "هذا الخيار غير متوفر."
+      }
+    },
+    "toasts": {
+      "orderReceived": {
+        "title": "تم استلام الطلب!",
+        "message": "سنتواصل معك قريبًا لتأكيد طلبك."
+      },
+      "addedToCart": {
+        "title": "تمت الإضافة إلى السلة",
+        "message": "راجع سلتك لإتمام عملية الشراء."
+      },
+      "outOfStock": {
+        "message": "يرجى اختيار خيار متوفر."
+      }
+    },
+    "shop": {
+      "title": "المتجر",
+      "catalogTitle": "كامل المنتجات",
+      "filteredTitle": "منتجات مفلترة",
+      "searchPlaceholder": "ابحث عن منتجات…",
+      "searchWithinResultsPlaceholder": "ابحث داخل النتائج…",
+      "categories": "التصنيفات",
+      "categoryFallback": "فئة",
+      "allProducts": "كل المنتجات",
+      "filtersAndSort": "الفلاتر والترتيب",
+      "sortBy": "ترتيب حسب:",
+      "showResults": "عرض النتائج ({count})",
+      "sort": {
+        "label": "الترتيب",
+        "relevance": "الأكثر صلة",
+        "priceLowToHigh": "السعر: من الأقل إلى الأعلى",
+        "priceHighToLow": "السعر: من الأعلى إلى الأقل"
+      },
+      "view": {
+        "gridTitle": "عرض شبكي",
+        "listTitle": "عرض قائمة"
+      },
+      "priceRange": {
+        "label": "نطاق السعر",
+        "min": "الحد الأدنى",
+        "max": "الحد الأقصى"
+      },
+      "results": {
+        "noResults": "لم يتم العثور على منتجات.",
+        "noResultsHint": "جرّب مسح الفلاتر أو ابحث عن شيء آخر."
+      },
+      "sidebar": {
+        "bestSellers": "الأكثر مبيعًا"
+      }
+    },
+    "category": {
+      "label": "الفئة",
+      "description": "اكتشف منتجات هذا التصنيف.",
+      "productsAvailableLabel": "منتجات متوفرة",
+      "productsAvailable": "{count} منتجات متوفرة",
+      "showingResults": "عرض {count} نتيجة",
+      "sortBy": "ترتيب حسب:",
+      "sort": {
+        "mostPopular": "الأكثر شيوعًا",
+        "newest": "الأحدث",
+        "priceLowToHigh": "السعر: من الأقل إلى الأعلى",
+        "priceHighToLow": "السعر: من الأعلى إلى الأقل"
+      },
+      "emptyHint": "جرّب فئة أخرى أو تصفّح كل المنتجات."
+    },
+    "search": {
+      "placeholder": "ابحث عن منتجات..."
+    },
+    "header": {
+      "wishlistTitle": "المفضلة",
+      "accountTitle": "الحساب"
+    },
+    "footer": {
+      "contact": "اتصل بنا",
+      "contactUs": "تواصل معنا",
+      "aboutUs": "من نحن",
+      "termsPrivacy": "الشروط والخصوصية",
+      "termsOfService": "شروط الاستخدام",
+      "privacyPolicy": "سياسة الخصوصية",
+      "returnPolicy": "سياسة الإرجاع",
+      "help": "المساعدة",
+      "faq": "الأسئلة الشائعة",
+      "shippingInfo": "معلومات الشحن",
+      "copyright": "© {year} {tenant} — جميع الحقوق محفوظة."
+    },
+    "announcement": {
+      "dismissAria": "إغلاق الإعلان"
+    }
+  },
+  "admin": {
+    "layout": {
+      "defaultTitle": "لوحة تحكم الإدارة"
+    },
+    "actions": {
+      "toggleSidebar": "إظهار/إخفاء القائمة",
+      "closeSidebar": "إغلاق القائمة",
+      "viewStore": "عرض المتجر",
+      "logout": "تسجيل الخروج"
+    },
+    "common": {
+      "actions": "الإجراءات",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "search": "بحث",
+      "searchAction": "بحث",
+      "clear": "مسح",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "loading": "جارٍ التحميل…",
+      "refresh": "تحديث",
+      "back": "رجوع",
+      "next": "التالي",
+      "previous": "السابق",
+      "close": "إغلاق",
+      "copy": "نسخ",
+      "cancel": "إلغاء",
+      "save": "حفظ",
+      "saveChanges": "حفظ التغييرات",
+      "saving": "جارٍ الحفظ…",
+      "create": "إنشاء",
+      "creating": "جارٍ الإنشاء…",
+      "update": "تحديث",
+      "updating": "جارٍ التحديث…",
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "nav": {
+      "overview": "نظرة عامة",
+      "catalog": "الكتالوج",
+      "purchasing": "المشتريات",
+      "sales": "المبيعات",
+      "delivery": "التوصيل",
+      "finance": "المالية",
+      "settings": "الإعدادات",
+      "dashboard": "لوحة التحكم",
+      "products": "المنتجات",
+      "inventory": "المخزون",
+      "categories": "التصنيفات",
+      "suppliers": "المورّدون",
+      "purchases": "المشتريات",
+      "orders": "الطلبات",
+      "salesItem": "المبيعات",
+      "pos": "نقطة البيع",
+      "customers": "العملاء",
+      "deliveryItem": "التوصيل",
+      "billing": "الفوترة",
+      "appearance": "المظهر",
+      "homepage": "الصفحة الرئيسية",
+      "contactInfo": "معلومات الاتصال",
+      "functional": "إعدادات التشغيل"
+    },
+    "orderStatus": {
+      "pending": "قيد الانتظار",
+      "confirmed": "مؤكد",
+      "shipped": "تم الشحن",
+      "delivered": "تم التسليم",
+      "cancelled": "ملغي",
+      "returned": "مرتجع"
+    },
+    "forms": {
+      "product": {
+        "title": {
+          "label": "عنوان المنتج",
+          "placeholder": "أدخل عنوان المنتج"
+        },
+        "slug": {
+          "label": "الرابط المختصر للمنتج",
+          "placeholder": "product-slug",
+          "hintCreate": "نسخة مناسبة للرابط من العنوان (تُولّد تلقائياً)",
+          "hintEdit": "نسخة مناسبة للرابط من العنوان"
+        },
+        "miniDescription": {
+          "label": "وصف مختصر",
+          "hint": "وصف قصير لعنوان صفحة الهبوط (اختياري)",
+          "placeholder": "اكتب ملخصاً قصيراً…"
+        },
+        "description": {
+          "label": "الوصف",
+          "placeholder": "اكتب وصف المنتج مع تنسيق غني…"
+        },
+        "price": {
+          "label": "السعر (DZD)",
+          "placeholder": "0.00"
+        },
+        "stock": {
+          "label": "كمية المخزون",
+          "placeholder": "0"
+        },
+        "category": {
+          "label": "التصنيف",
+          "placeholder": "اختر تصنيفاً (اختياري)"
+        },
+        "isActive": {
+          "label": "المنتج نشط ومرئي للعملاء"
+        }
+      },
+      "category": {
+        "title": {
+          "label": "عنوان التصنيف",
+          "placeholder": "أدخل عنوان التصنيف"
+        },
+        "slug": {
+          "label": "الرابط المختصر للتصنيف",
+          "placeholder": "category-slug",
+          "hintCreate": "نسخة مناسبة للرابط من العنوان (تُولّد تلقائياً)",
+          "hintEdit": "نسخة مناسبة للرابط من العنوان"
+        },
+        "image": {
+          "label": "صورة التصنيف (اختياري)",
+          "hint": "تُعرض في مربعات التصنيفات داخل المتجر"
+        }
+      },
+      "supplier": {
+        "name": {
+          "label": "الاسم",
+          "placeholder": "اسم المورّد",
+          "required": "الاسم مطلوب"
+        },
+        "phone": {
+          "label": "الهاتف",
+          "placeholder": "رقم الهاتف"
+        },
+        "email": {
+          "label": "البريد الإلكتروني",
+          "placeholder": "name[at]example.com"
+        },
+        "address": {
+          "label": "العنوان",
+          "placeholder": "عنوان المورّد"
+        },
+        "notes": {
+          "label": "ملاحظات",
+          "placeholder": "ملاحظات إضافية…"
+        }
+      }
+    },
+    "pages": {
+      "dashboard": {
+        "title": "لوحة التحكم",
+        "welcomeBack": "مرحباً بعودتك، {tenant}",
+        "snapshot": "نظرة سريعة على متجرك.",
+        "refresh": "تحديث",
+        "finishSetup": "إكمال الإعداد",
+        "loadErrorTitle": "تعذر تحميل بيانات لوحة التحكم.",
+        "loadErrorHint": "جرّب التحديث. إذا استمر الأمر، تحقق من الاتصال أو جلسة تسجيل الدخول.",
+        "stats": {
+          "orders7d": "الطلبات (7 أيام)",
+          "revenue7d": "الإيرادات (7 أيام)",
+          "products": "المنتجات",
+          "lowStock": "مخزون منخفض",
+          "outOfStock": "{count} غير متوفر"
+        },
+        "recentOrders": {
+          "title": "أحدث الطلبات",
+          "hint": "آخر 8 طلبات لهذا المتجر.",
+          "viewAll": "عرض الكل",
+          "table": {
+            "order": "الطلب",
+            "customer": "العميل",
+            "total": "الإجمالي",
+            "status": "الحالة",
+            "date": "التاريخ",
+            "action": "إجراء"
+          },
+          "empty": {
+            "title": "لا توجد طلبات بعد",
+            "hint": "ستظهر الطلبات الجديدة هنا عند إتمام الشراء.",
+            "viewStorefront": "عرض المتجر"
+          }
+        },
+        "orderStatus": {
+          "title": "حالة الطلبات",
+          "hint": "فلاتر سريعة للانتقال إلى قائمة الطلبات."
+        },
+        "quickLinks": {
+          "title": "إجراءات سريعة",
+          "hint": "أكثر مهام الإدارة شيوعاً.",
+          "addProduct": "إضافة منتج",
+          "manageProducts": "إدارة المنتجات",
+          "categories": "التصنيفات",
+          "appearance": "المظهر"
+        }
+      },
+      "billing": {
+        "metaTitle": "الفوترة",
+        "title": "الفوترة",
+        "subtitle": "عرض خطتك الحالية والحدود والاستخدام.",
+        "seePricing": "عرض الأسعار",
+        "errors": {
+          "loadFailed": "تعذر تحميل معلومات الفوترة."
+        },
+        "currentPlan": {
+          "title": "الخطة الحالية",
+          "hint": "يمكنك تغيير الخطة للاختبار (شهري فقط).",
+          "changePlan": "تغيير الخطة",
+          "paySimulate": "دفع (محاكاة) وتطبيق",
+          "cards": {
+            "plan": "الخطة",
+            "interval": "فترة الفوترة",
+            "source": "المصدر: {source}",
+            "ordersThisPeriod": "طلبات هذه الفترة"
+          },
+          "limitsTitle": "حدود الخطة"
+        },
+        "limits": {
+          "ordersPerMonth": "طلبات / شهر"
+        },
+        "planOption": "{name} ({orders} طلب/شهر)",
+        "availablePlans": {
+          "title": "الخطط المتاحة",
+          "ordersPerMonth": "{count} طلب / شهر",
+          "perMonth": "/شهر"
+        }
+      },
+      "products": {
+        "index": {
+          "title": "المنتجات",
+          "subtitle": "إدارة كتالوج المنتجات",
+          "addProduct": "إضافة منتج",
+          "filters": {
+            "searchLabel": "بحث",
+            "searchPlaceholder": "ابحث عن المنتجات…",
+            "category": "التصنيف",
+            "allCategories": "كل التصنيفات",
+            "status": "الحالة",
+            "allStatus": "كل الحالات"
+          },
+          "loading": "جارٍ تحميل المنتجات…",
+          "empty": {
+            "title": "لا توجد منتجات",
+            "hint": "ابدأ بإنشاء منتج جديد.",
+            "newProduct": "منتج جديد"
+          },
+          "sort": {
+            "sortBy": "الترتيب حسب:",
+            "newest": "الأحدث",
+            "title": "العنوان",
+            "price": "السعر",
+            "stock": "المخزون",
+            "status": "الحالة"
+          },
+          "table": {
+            "product": "المنتج",
+            "category": "التصنيف",
+            "price": "السعر",
+            "stock": "المخزون",
+            "status": "الحالة",
+            "links": "الروابط",
+            "actions": "الإجراءات",
+            "uncategorized": "غير مصنف"
+          },
+          "links": {
+            "product": "المنتج",
+            "landing": "الهبوط",
+            "openProduct": "فتح صفحة المنتج",
+            "copyProduct": "نسخ رابط المنتج",
+            "openLanding": "فتح صفحة الهبوط",
+            "copyLanding": "نسخ رابط الهبوط"
+          },
+          "pagination": {
+            "showing": "عرض {from} إلى {to} من أصل {total} نتيجة"
+          },
+      "deleteModal": {
+        "title": "حذف المنتج",
+        "message": "هل أنت متأكد من حذف “{title}”؟ لا يمكن التراجع عن هذا الإجراء.",
+        "error": "تعذر حذف المنتج. حاول مرة أخرى."
+      },
+      "bulk": {
+        "selected": "{count} محدد",
+        "export": "تصدير CSV",
+        "import": "استيراد CSV",
+        "update": "تعديل جماعي",
+        "duplicate": "نسخ",
+        "exportError": "فشل تصدير CSV. حاول مرة أخرى.",
+        "importTitle": "استيراد المنتجات (CSV)",
+        "importHint": "ارفع ملف CSV بالأعمدة: id (اختياري)، slug، title، price، stock، isActive، categoryId/categorySlug.",
+        "importError": "فشل استيراد CSV. تحقق من الملف وحاول مرة أخرى.",
+        "importResult": "تم إنشاء {created}، تحديث {updated}، تخطي {skipped}.",
+        "importErrors": "{count} صفوف تحتوي على أخطاء.",
+        "updateTitle": "تحديث جماعي",
+        "updateHint": "يطبق التغييرات على المنتجات المحددة.",
+        "updateError": "فشل التحديث الجماعي. حاول مرة أخرى.",
+        "duplicateError": "فشل نسخ المنتج. حاول مرة أخرى.",
+        "noChanges": "اختر حقلاً واحداً على الأقل للتحديث.",
+        "fields": {
+          "price": "السعر (تعيين)",
+          "pricePlaceholder": "مثال: 1999",
+          "stock": "المخزون (تعيين)",
+          "stockPlaceholder": "ينطبق فقط على المنتجات بدون خيارات",
+          "status": "الحالة",
+          "category": "التصنيف",
+          "noChange": "بدون تغيير",
+          "clearCategory": "إزالة التصنيف",
+          "propagatePrice": "تحديث أسعار الخيارات أيضاً"
+        }
+      }
+    },
+        "create": {
+          "metaTitle": "إنشاء منتج",
+          "breadcrumb": "إنشاء منتج",
+          "title": "إنشاء منتج جديد",
+          "subtitle": "أضف منتجاً جديداً إلى كتالوجك",
+          "submit": "إنشاء المنتج",
+          "errors": {
+            "createFailed": "تعذر إنشاء المنتج. حاول مرة أخرى."
+          }
+        },
+        "edit": {
+          "metaTitle": "تعديل المنتج",
+          "breadcrumbEdit": "تعديل {title}",
+          "fallbackTitle": "منتج",
+          "loading": "جارٍ تحميل المنتج…",
+          "title": "تعديل المنتج",
+          "subtitle": "تحديث معلومات المنتج",
+          "submit": "تحديث المنتج",
+          "tabs": {
+            "general": "عام",
+            "description": "وصف صفحة الهبوط",
+            "variants": "الخيارات والأنواع",
+            "bundles": "الباقات"
+          },
+          "links": {
+            "label": "الروابط",
+            "product": "المنتج",
+            "landing": "الهبوط",
+            "openProduct": "فتح صفحة المنتج",
+            "copyProduct": "نسخ رابط المنتج",
+            "openLanding": "فتح صفحة الهبوط",
+            "copyLanding": "نسخ رابط الهبوط"
+          },
+          "descriptionTab": {
+            "title": "وصف صفحة الهبوط"
+          },
+          "variantsTab": {
+            "title": "الخيارات والأنواع"
+          },
+          "bundlesTab": {
+            "title": "عروض الباقات",
+            "hint": "أنشئ أسعار باقات ثابتة مثل «2 مقابل 1800 دج». سيختار الدفع تلقائياً أفضل تركيبة.",
+            "addBundle": "إضافة باقة",
+            "table": {
+              "qty": "الكمية",
+              "price": "سعر الباقة",
+              "tag": "وسم",
+              "active": "نشط",
+              "actions": "الإجراءات",
+              "empty": "لا توجد عروض باقات بعد. اضغط على «إضافة باقة»."
+            },
+            "tags": {
+              "none": "بدون",
+              "mostPopular": "الأكثر شيوعاً",
+              "bestValue": "أفضل قيمة"
+            }
+          },
+          "errors": {
+            "loadFailed": "تعذر تحميل المنتج",
+            "updateFailed": "تعذر تحديث المنتج. حاول مرة أخرى.",
+            "bundlesLoadFailed": "تعذر تحميل عروض الباقات",
+            "bundlesSaveFailed": "تعذر حفظ عرض الباقة",
+            "bundlesDeleteFailed": "تعذر حذف عرض الباقة"
+          }
+        }
+      },
+      "categories": {
+        "index": {
+          "title": "التصنيفات",
+          "subtitle": "نظّم كتالوجك باستخدام التصنيفات",
+          "addCategory": "إضافة تصنيف",
+          "filters": {
+            "searchLabel": "بحث",
+            "searchPlaceholder": "ابحث عن التصنيفات…",
+            "sortHint": "استخدم الشرائح أعلى الجدول للفرز حسب الأحدث أو العنوان أو الرابط أو عدد المنتجات."
+          },
+          "loading": "جارٍ تحميل التصنيفات…",
+          "empty": {
+            "title": "لا توجد تصنيفات",
+            "hint": "ابدأ بإنشاء تصنيف جديد.",
+            "newCategory": "تصنيف جديد"
+          },
+          "sort": {
+            "sortBy": "الترتيب حسب:",
+            "newest": "الأحدث",
+            "title": "العنوان",
+            "slug": "الرابط",
+            "products": "المنتجات"
+          },
+          "table": {
+            "category": "التصنيف",
+            "products": "المنتجات",
+            "links": "الروابط",
+            "actions": "الإجراءات",
+            "productsCount": "{count} منتجات"
+          },
+          "links": {
+            "openCategory": "فتح صفحة التصنيف",
+            "copyCategory": "نسخ رابط التصنيف"
+          },
+          "pagination": {
+            "showing": "عرض {from} إلى {to} من أصل {total} نتيجة"
+          },
+          "deleteModal": {
+            "title": "حذف التصنيف",
+            "message": "هل أنت متأكد من حذف هذا التصنيف؟ ستصبح المنتجات غير مصنفة.",
+            "messageWithTitle": "هل أنت متأكد من حذف “{title}”؟ ستصبح المنتجات غير مصنفة.",
+            "error": "تعذر حذف التصنيف. حاول مرة أخرى."
+          }
+        },
+        "create": {
+          "metaTitle": "إنشاء تصنيف",
+          "breadcrumb": "إنشاء تصنيف",
+          "title": "إنشاء تصنيف جديد",
+          "subtitle": "أضف تصنيفاً لتنظيم منتجاتك",
+          "submit": "إنشاء التصنيف",
+          "errors": {
+            "createFailed": "تعذر إنشاء التصنيف. حاول مرة أخرى."
+          }
+        },
+        "edit": {
+          "metaTitle": "تعديل التصنيف",
+          "breadcrumb": "تعديل التصنيف",
+          "loading": "جارٍ تحميل التصنيف…",
+          "title": "تعديل التصنيف",
+          "subtitle": "تحديث تفاصيل التصنيف",
+          "links": {
+            "label": "الرابط",
+            "openCategory": "فتح صفحة التصنيف",
+            "copyCategory": "نسخ رابط التصنيف"
+          },
+          "backToList": "العودة للقائمة",
+          "submit": "تحديث التصنيف",
+          "deleteLink": "حذف التصنيف",
+          "deleteModal": {
+            "title": "حذف التصنيف",
+            "message": "هل أنت متأكد من حذف هذا التصنيف؟ ستصبح المنتجات غير مصنفة.",
+            "messageWithTitle": "هل أنت متأكد من حذف “{title}”؟ ستصبح المنتجات غير مصنفة."
+          },
+          "errors": {
+            "loadFailed": "تعذر تحميل التصنيف",
+            "updateFailed": "تعذر تحديث التصنيف",
+            "deleteFailed": "تعذر حذف التصنيف. حاول مرة أخرى."
+          }
+        }
+      },
+      "orders": {
+        "index": {
+          "title": "الطلبات",
+          "subtitle": "إدارة طلبات العملاء",
+          "filters": {
+            "searchLabel": "بحث",
+            "searchPlaceholder": "ابحث بالاسم أو الهاتف…",
+            "statusLabel": "تصفية الحالة",
+            "allOrders": "كل الطلبات"
+          },
+          "loading": "جارٍ تحميل الطلبات…",
+          "empty": {
+            "title": "لا توجد طلبات",
+            "hint": "ستظهر طلبات العملاء هنا",
+            "hintFiltered": "جرّب تعديل عوامل التصفية"
+          },
+          "table": {
+            "orderId": "رقم الطلب",
+            "customer": "العميل",
+            "phone": "الهاتف",
+            "total": "الإجمالي",
+            "status": "الحالة",
+            "date": "التاريخ",
+            "actions": "الإجراءات"
+          }
+        },
+        "detail": {
+          "metaTitle": "تفاصيل الطلب",
+          "breadcrumb": "طلب #{id}",
+          "loading": "جارٍ تحميل الطلب…",
+          "sections": {
+            "orderInfo": "معلومات الطلب",
+            "customerInfo": "معلومات العميل",
+            "orderItems": "عناصر الطلب"
+          },
+          "fields": {
+            "orderId": "رقم الطلب",
+            "orderDate": "تاريخ الطلب",
+            "customerName": "الاسم",
+            "customerPhone": "الهاتف",
+            "deliveryAddress": "عنوان التوصيل"
+          },
+          "itemsTable": {
+            "product": "المنتج",
+            "price": "السعر",
+            "quantity": "الكمية",
+            "subtotal": "الإجمالي الفرعي",
+            "total": "الإجمالي",
+            "fallbackProduct": "منتج"
+          },
+          "statusUpdate": {
+            "title": "تحديث حالة الطلب",
+            "statusLabel": "الحالة",
+            "submit": "تحديث الحالة",
+            "success": "تم تحديث حالة الطلب بنجاح!",
+            "errors": {
+              "updateFailed": "تعذر تحديث حالة الطلب"
+            }
+          },
+          "backToOrders": "العودة للطلبات",
+          "notFound": {
+            "title": "الطلب غير موجود",
+            "hint": "قد يكون هذا الطلب غير موجود أو ليس لديك صلاحية لعرضه."
+          }
+        }
+      },
+      "customers": {
+        "index": {
+          "title": "العملاء",
+          "subtitle": "مستخرج من سجل الطلبات",
+          "filters": {
+            "searchLabel": "بحث",
+            "searchPlaceholder": "ابحث بالاسم أو الهاتف…"
+          },
+          "loading": "جارٍ تحميل العملاء…",
+          "empty": {
+            "title": "لا يوجد عملاء",
+            "hint": "سيظهر العملاء هنا بعد إنشاء طلبات",
+            "hintFiltered": "جرّب تعديل البحث"
+          },
+          "table": {
+            "customer": "العميل",
+            "phone": "الهاتف",
+            "orders": "الطلبات",
+            "totalSpent": "إجمالي الإنفاق",
+            "lastOrder": "آخر طلب",
+            "actions": "الإجراءات"
+          }
+        },
+        "detail": {
+          "metaTitle": "عميل",
+          "fallbackTitle": "عميل",
+          "loading": "جارٍ تحميل العميل…",
+          "stats": {
+            "orders": "الطلبات",
+            "totalSpent": "إجمالي الإنفاق"
+          },
+          "empty": {
+            "title": "لا توجد طلبات",
+            "hint": "هذا العميل لا يملك طلبات بعد."
+          },
+          "table": {
+            "order": "الطلب",
+            "total": "الإجمالي",
+            "status": "الحالة",
+            "date": "التاريخ",
+            "actions": "الإجراءات"
+          }
+        }
+      },
+      "inventory": {
+        "title": "المخزون",
+        "subtitle": "تتبّع المخزون المتاح والمحجوز ومخزون الأمان لكل خيار.",
+        "filters": {
+          "searchPlaceholder": "عنوان المنتج أو SKU…"
+        },
+        "loading": "جارٍ تحميل المخزون…",
+        "empty": "لم يتم العثور على خيارات.",
+        "table": {
+          "variant": "الخيار",
+          "track": "تتبع",
+          "onHand": "متوفر",
+          "reserved": "محجوز",
+          "safety": "أمان",
+          "available": "متاح",
+          "sku": "SKU"
+        },
+        "movements": {
+          "button": "الحركات",
+          "title": "الحركات — {product} / {option}",
+          "hint": "آخر التغييرات التي تؤثر على المخزون / المحجوز / الأمان.",
+          "loading": "جارٍ تحميل الحركات…",
+          "empty": "لا توجد حركات مسجلة بعد.",
+          "system": "النظام",
+          "table": {
+            "date": "التاريخ",
+            "type": "النوع",
+            "deltaStock": "Δ مخزون",
+            "deltaReserved": "Δ محجوز",
+            "deltaSafety": "Δ أمان",
+            "after": "بعد",
+            "by": "بواسطة",
+            "order": "طلب"
+          }
+        },
+      "errors": {
+        "loadFailed": "تعذر تحميل المخزون",
+        "updateFailed": "تعذر تحديث المخزون"
+      },
+      "bulk": {
+        "exportCsv": "تصدير CSV",
+        "importCsv": "استيراد CSV",
+        "exportError": "فشل تصدير CSV.",
+        "importError": "فشل استيراد CSV. تحقق من الملف وحاول مرة أخرى."
+      }
+    },
+      "delivery": {
+        "metaTitle": "شركات التوصيل",
+        "title": "شركات التوصيل",
+        "subtitle": "إدارة مزوّدي التوصيل والأسعار حسب الولاية",
+        "providers": {
+          "toggleLabel": "تفعيل الإعداد",
+          "wilayasSupported": "{count} ولايات مدعومة",
+          "managePricing": "إدارة الأسعار"
+        },
+        "pricing": {
+          "title": "إعداد التسعير: {provider}",
+          "hint": "حدّد أسعار التوصيل القياسية لكل ولاية. تنطبق هذه الأسعار على جميع البلديات ضمن الولاية.",
+          "loading": "جارٍ تحميل الأسعار…",
+          "table": {
+            "code": "الرمز",
+            "wilaya": "اسم الولاية",
+            "price": "السعر (DZD)"
+          }
+        },
+        "errors": {
+          "updateProviderFailed": "تعذر تحديث حالة المزوّد",
+          "saveFailed": "تعذر حفظ التسعير"
+        }
+      },
+      "onboarding": {
+        "metaTitle": "إعداد المتجر",
+        "title": "إعداد المتجر",
+        "subtitle": "اختر لون العلامة والقالب واللغة.",
+        "loadingSettings": "جارٍ تحميل إعدادات المتجر…",
+        "progress": {
+          "stepOf": "الخطوة {current} من {total}"
+        },
+        "steps": {
+          "brand": "العلامة",
+          "template": "القالب",
+          "language": "اللغة",
+          "summary": "الملخص"
+        },
+        "brand": {
+          "title": "لون العلامة",
+          "pickColor": "اختر لوناً",
+          "hexValue": "قيمة HEX",
+          "example": "مثال: {value}",
+          "preview": "معاينة",
+          "primaryButton": "زر أساسي"
+        },
+        "template": {
+          "title": "قالب المتجر"
+        },
+        "templates": {
+          "classic": {
+            "label": "كلاسيكي",
+            "description": "تصميم نظيف ومناسب لمعظم المتاجر."
+          },
+          "modern": {
+            "label": "حديث",
+            "description": "خطوط أوضح ومساحات بصرية أكبر."
+          }
+        },
+        "language": {
+          "title": "اللغة",
+          "label": "اللغة",
+          "rtlHint": "إذا كانت العربية، فكر في واجهة RTL."
+        },
+        "summary": {
+          "title": "الملخص",
+          "cards": {
+            "template": "القالب",
+            "primaryColor": "اللون الأساسي",
+            "language": "اللغة"
+          },
+          "aiTitle": "ملخص واجهة المتجر (AI)",
+          "generate": "إنشاء",
+          "generating": "جارٍ الإنشاء…",
+          "placeholder": "اضغط «إنشاء» لتوليد موجز لوكيل الواجهة."
+        },
+        "saveFinish": "حفظ وإنهاء",
+        "errors": {
+          "loadFailed": "تعذر تحميل إعدادات المتجر.",
+          "saveFailed": "تعذر حفظ إعدادات المتجر.",
+          "summaryFailed": "تعذر إنشاء الملخص."
+        }
+      },
+      "purchases": {
+        "index": {
+          "title": "المشتريات",
+          "subtitle": "إدارة أوامر الشراء والمخزون الوارد",
+          "newPurchase": "شراء جديد",
+          "filters": {
+            "supplierLabel": "تصفية حسب المورّد",
+            "allSuppliers": "كل المورّدين"
+          },
+          "loading": "جارٍ تحميل المشتريات…",
+          "empty": {
+            "title": "لا توجد مشتريات",
+            "hint": "ابدأ بإنشاء أمر شراء جديد."
+          },
+          "table": {
+            "id": "المعرّف",
+            "supplier": "المورّد",
+            "status": "الحالة",
+            "items": "العناصر",
+            "date": "التاريخ",
+            "action": "إجراء",
+            "itemsCount": "{count} عناصر",
+            "manage": "إدارة"
+          },
+          "pagination": {
+            "showing": "عرض {from} إلى {to} من أصل {total} نتيجة"
+          }
+        },
+	        "create": {
+	          "metaTitle": "شراء جديد",
+	          "breadcrumb": "شراء جديد",
+	          "title": "أمر شراء جديد",
+	          "subtitle": "ابدأ أمر شراء جديد من مورّد",
+          "supplier": {
+            "label": "اختر مورّداً",
+            "placeholder": "اختر مورّداً…"
+          },
+          "info": "يمكنك إضافة المنتجات والتفاصيل بعد إنشاء المسودة.",
+          "submit": "إنشاء مسودة",
+          "creatingDraft": "جارٍ إنشاء المسودة…",
+	          "errors": {
+	            "suppliersLoadFailed": "تعذر تحميل المورّدين.",
+	            "createFailed": "تعذر إنشاء أمر الشراء. حاول مرة أخرى."
+	          }
+	        },
+	        "detail": {
+	          "metaTitle": "أمر شراء",
+	          "breadcrumb": "أمر #{id}",
+	          "title": "أمر شراء",
+	          "addProducts": "إضافة منتجات",
+	          "cards": {
+	            "supplier": "المورّد",
+	            "noSupplier": "لا يوجد مورّد مرتبط",
+	            "summary": "ملخص",
+	            "itemsOrdered": "العناصر المطلوبة",
+	            "itemsReceived": "العناصر المستلمة",
+	            "estimatedTotal": "التكلفة الإجمالية التقديرية",
+	            "notesPlaceholder": "الملاحظات والمرفقات قريباً"
+	          },
+	          "items": {
+	            "title": "عناصر الأمر",
+	            "count": "{count} عناصر",
+	            "loading": "جارٍ تحميل العناصر…",
+	            "unknownProduct": "منتج غير معروف",
+	            "sku": "SKU",
+	            "defaultVariant": "خيار افتراضي",
+	            "empty": {
+	              "title": "لا توجد عناصر بعد",
+	              "hint": "أضف منتجات إلى أمر الشراء."
+	            },
+	            "table": {
+	              "product": "المنتج",
+	              "ordered": "المطلوب",
+	              "unitCost": "تكلفة الوحدة",
+	              "received": "المستلم",
+	              "receiveNow": "استلام الآن",
+	              "total": "الإجمالي",
+	              "qtyPlaceholder": "الكمية",
+	              "receiveStock": "استلام المخزون",
+	              "removeItem": "إزالة العنصر",
+	              "totalOrderValue": "القيمة الإجمالية للأمر",
+	              "salePriceMode": {
+	                "replace": "تحديث سعر البيع",
+	                "weighted": "متوسط التكلفة"
+	              }
+	            }
+	          },
+	          "deleteModal": {
+	            "title": "حذف أمر الشراء",
+	            "message": "هل أنت متأكد من حذف أمر الشراء هذا؟ لا يمكن التراجع عن هذا الإجراء.",
+	            "confirm": "حذف الأمر"
+	          },
+	          "errors": {
+	            "loadFailed": "تعذر تحميل أمر الشراء",
+	            "addItemsFailed": "تعذر إضافة عناصر. قد يكون تم تجاوز بعض العناصر.",
+	            "receiveFailed": "تعذر استلام المخزون",
+	            "updateItemFailed": "تعذر تحديث العنصر",
+	            "removeConfirm": "هل أنت متأكد من إزالة هذا العنصر؟",
+	            "removeItemFailed": "تعذر إزالة العنصر",
+	            "deleteFailed": "تعذر حذف الأمر"
+	          }
+	        }
+	      },
+      "sales": {
+        "index": {
+          "title": "المبيعات",
+          "subtitle": "الطلبات المكتملة (تم التسليم)",
+          "filters": {
+            "searchLabel": "بحث",
+            "searchPlaceholder": "ابحث بالاسم أو الهاتف أو رقم الطلب…"
+          },
+          "loading": "جارٍ تحميل المبيعات…",
+          "empty": {
+            "title": "لا توجد مبيعات",
+            "hint": "ستظهر الطلبات المسلّمة هنا",
+            "hintFiltered": "جرّب تعديل البحث"
+          },
+          "table": {
+            "saleId": "رقم البيع",
+            "customer": "العميل",
+            "phone": "الهاتف",
+            "total": "الإجمالي",
+            "completed": "اكتمل",
+            "actions": "الإجراءات"
+          }
+        },
+        "detail": {
+          "metaTitle": "بيع",
+          "breadcrumb": "بيع #{id}",
+          "loading": "جارٍ تحميل البيع…",
+          "sections": {
+            "saleInfo": "معلومات البيع",
+            "client": "العميل",
+            "items": "العناصر"
+          },
+          "fields": {
+            "saleId": "رقم البيع",
+            "date": "التاريخ",
+            "customerName": "الاسم",
+            "customerPhone": "الهاتف",
+            "guest": "ضيف"
+          },
+          "itemsTable": {
+            "product": "المنتج",
+            "variant": "الخيار",
+            "qty": "الكمية",
+            "price": "السعر",
+            "total": "الإجمالي",
+            "defaultVariant": "افتراضي"
+          },
+          "notFound": {
+            "title": "البيع غير موجود",
+            "hint": "قد يكون هذا البيع قد تم حذفه."
+          }
+        }
+      },
+      "settings": {
+        "appearance": {
+          "metaTitle": "المظهر",
+          "title": "إعدادات المظهر",
+          "subtitle": "خصّص مظهر متجرك."
+        },
+        "homepage": {
+          "metaTitle": "الصفحة الرئيسية",
+          "title": "إعدادات الصفحة الرئيسية",
+          "subtitle": "إدارة أقسام الصفحة الرئيسية والسلايدر."
+        },
+        "contact": {
+          "metaTitle": "معلومات الاتصال",
+          "title": "معلومات الاتصال",
+          "subtitle": "إدارة بيانات الاتصال المعروضة في تذييل المتجر."
+        },
+        "functional": {
+          "metaTitle": "إعدادات التشغيل",
+          "title": "إعدادات التشغيل",
+          "subtitle": "إدارة الوظائف الأساسية وميزات المتجر."
+        }
+      },
+      "suppliers": {
+        "index": {
+          "title": "المورّدون",
+          "subtitle": "إدارة المورّدين",
+          "addSupplier": "إضافة مورّد",
+          "filters": {
+            "searchLabel": "بحث",
+            "searchPlaceholder": "ابحث عن المورّدين…",
+            "sortHint": "يمكنك الفرز حسب الاسم أو البريد أو الهاتف من رؤوس الجدول."
+          },
+          "loading": "جارٍ تحميل المورّدين…",
+          "empty": {
+            "title": "لا يوجد مورّدون",
+            "hint": "ابدأ بإنشاء مورّد جديد.",
+            "newSupplier": "مورّد جديد"
+          },
+          "sort": {
+            "sortBy": "الترتيب حسب:",
+            "name": "الاسم"
+          },
+          "table": {
+            "name": "الاسم",
+            "info": "معلومات",
+            "address": "العنوان"
+          },
+          "pagination": {
+            "showing": "عرض {from} إلى {to} من أصل {total} نتيجة"
+          },
+          "deleteModal": {
+            "title": "حذف المورّد",
+            "message": "هل أنت متأكد من حذف هذا المورّد؟",
+            "messageWithName": "هل أنت متأكد من حذف المورّد “{name}”؟",
+            "error": "تعذر حذف المورّد. حاول مرة أخرى."
+          }
+        },
+        "create": {
+          "metaTitle": "إنشاء مورّد",
+          "breadcrumb": "إنشاء مورّد",
+          "title": "إنشاء مورّد جديد",
+          "subtitle": "أضف مورّداً إلى قاعدة البيانات",
+          "submit": "إنشاء مورّد",
+          "errors": {
+            "createFailed": "تعذر إنشاء المورّد. حاول مرة أخرى."
+          }
+        },
+        "edit": {
+          "metaTitle": "تعديل المورّد",
+          "breadcrumb": "تعديل المورّد",
+          "title": "تعديل المورّد",
+          "subtitle": "تحديث معلومات المورّد",
+          "loading": "جارٍ تحميل المورّد…",
+          "errors": {
+            "loadFailed": "تعذر تحميل تفاصيل المورّد.",
+            "updateFailed": "تعذر تحديث المورّد. حاول مرة أخرى."
+          }
+        }
+      }
+    }
+  }
+}

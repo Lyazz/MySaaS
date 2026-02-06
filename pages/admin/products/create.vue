@@ -11,13 +11,13 @@
             to="/admin/products"
             class="text-gray-700 hover:text-teal-600"
           >
-            Products
+            {{ t('admin.nav.products') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">Create Product</span>
+            <span class="ml-1 text-gray-500">{{ t('admin.pages.products.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -26,10 +26,10 @@
     <!--  Header -->
     <div class="mb-6">
       <h2 class="text-2xl font-bold text-gray-800">
-        Create New Product
+        {{ t('admin.pages.products.create.title') }}
       </h2>
       <p class="text-gray-600 mt-1">
-        Add a new product to your catalog
+        {{ t('admin.pages.products.create.subtitle') }}
       </p>
     </div>
 
@@ -42,9 +42,9 @@
       <!-- Title -->
       <BaseInput
         v-model="form.title"
-        label="Product Title"
+        :label="t('admin.forms.product.title.label')"
         :error="errors.title"
-        placeholder="Enter product title"
+        :placeholder="t('admin.forms.product.title.placeholder')"
         required
       />
 
@@ -52,19 +52,19 @@
       <!-- Slug -->
       <BaseInput
         v-model="form.slug"
-        label="Product Slug"
+        :label="t('admin.forms.product.slug.label')"
         :error="errors.slug"
-        placeholder="product-slug"
-        hint="URL-friendly version of the title (auto-generated)"
+        :placeholder="t('admin.forms.product.slug.placeholder')"
+        :hint="t('admin.forms.product.slug.hintCreate')"
         required
         pattern="[a-z0-9-]+"
       />
 
       <!-- Mini Description -->
       <AdminFormField
-        label="Mini Description"
+        :label="t('admin.forms.product.miniDescription.label')"
         :error="errors.miniDescription"
-        hint="Short description for landing page header (optional)"
+        :hint="t('admin.forms.product.miniDescription.hint')"
       >
         <template #default="{ inputId }">
           <textarea
@@ -72,21 +72,21 @@
             v-model="form.miniDescription"
             rows="3"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-            placeholder="Enter a short summary..."
+            :placeholder="t('admin.forms.product.miniDescription.placeholder')"
           />
         </template>
       </AdminFormField>
 
       <!-- Description -->
       <AdminFormField
-        label="Description"
+        :label="t('admin.forms.product.description.label')"
         :error="errors.description"
       >
         <template #default="{ inputId }">
           <RichTextEditor
             :id="inputId"
             v-model="form.description"
-            placeholder="Enter product description with rich formatting..."
+            :placeholder="t('admin.forms.product.description.placeholder')"
           />
         </template>
       </AdminFormField>
@@ -97,36 +97,36 @@
         <!-- Price -->
         <BaseInput
           v-model.number="form.price"
-          label="Price ($)"
+          :label="t('admin.forms.product.price.label')"
           :error="errors.price"
           type="number"
           min="0"
           step="0.01"
           required
-          placeholder="0.00"
+          :placeholder="t('admin.forms.product.price.placeholder')"
         />
 
         <!-- Stock -->
         <!-- Stock -->
         <BaseInput
           v-model.number="form.stock"
-          label="Stock Quantity"
+          :label="t('admin.forms.product.stock.label')"
           :error="errors.stock"
           type="number"
           min="0"
           required
-          placeholder="0"
+          :placeholder="t('admin.forms.product.stock.placeholder')"
         />
       </div>
 
       <!-- Category -->
       <BaseSelect
         v-model="form.categoryId"
-        label="Category"
+        :label="t('admin.forms.product.category.label')"
         :error="errors.categoryId"
       >
         <option value="">
-          Select a category (optional)
+          {{ t('admin.forms.product.category.placeholder') }}
         </option>
         <option
           v-for="cat in categories"
@@ -152,7 +152,7 @@
           for="isActive"
           class="ml-2 block text-sm text-gray-900"
         >
-          Product is active and visible to customers
+          {{ t('admin.forms.product.isActive.label') }}
         </label>
       </div>
 
@@ -172,14 +172,14 @@
           to="/admin/products"
           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
-          Cancel
+          {{ t('admin.common.cancel') }}
         </NuxtLink>
         <button
           type="submit"
           :disabled="submitting"
           class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ submitting ? 'Creating...' : 'Create Product' }}
+          {{ submitting ? t('admin.common.creating') : t('admin.pages.products.create.submit') }}
         </button>
       </div>
     </form>
@@ -196,11 +196,12 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Create Product'
+  titleKey: 'admin.pages.products.create.metaTitle'
 })
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 
 interface Category {
   id: string
@@ -297,7 +298,7 @@ async function handleSubmit() {
     if (error.data?.statusMessage) {
       errorMessage.value = error.data.statusMessage
     } else {
-      errorMessage.value = 'Failed to create product. Please try again.'
+      errorMessage.value = t('admin.pages.products.create.errors.createFailed')
     }
   } finally {
     submitting.value = false

@@ -13,6 +13,11 @@ export default defineNuxtRouteMiddleware((to) => {
             if ((!contactInfos.value || contactInfos.value.length === 0) && event.context.contactInfos) {
                 contactInfos.value = event.context.contactInfos as any
             }
+            const facebookPixelId = useState<string | null>('facebookPixelId', () => null)
+            const pixelId = (event.context as any)?.facebookPixelId
+            if (!facebookPixelId.value && (typeof pixelId === 'string' || pixelId == null)) {
+                facebookPixelId.value = pixelId ?? null
+            }
         }
     }
 

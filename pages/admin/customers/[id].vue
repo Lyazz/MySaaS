@@ -7,10 +7,10 @@
           class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700"
         >
           <Icon name="lucide:arrow-left" class="w-4 h-4 mr-1" />
-          Customers
+          {{ t('admin.nav.customers') }}
         </NuxtLink>
         <h2 class="text-2xl font-bold text-gray-800 mt-2">
-          {{ summary?.name || 'Customer' }}
+          {{ summary?.name || t('admin.pages.customers.detail.fallbackTitle') }}
         </h2>
         <p class="text-gray-600 mt-1">
           {{ summary?.phone || '' }}
@@ -21,7 +21,7 @@
       <div class="flex gap-3">
         <div class="bg-white rounded-lg shadow px-4 py-3">
           <div class="text-xs text-gray-500">
-            Orders
+            {{ t('admin.pages.customers.detail.stats.orders') }}
           </div>
           <div class="text-lg font-semibold text-gray-900">
             {{ orders.length }}
@@ -29,7 +29,7 @@
         </div>
         <div class="bg-white rounded-lg shadow px-4 py-3">
           <div class="text-xs text-gray-500">
-            Total spent
+            {{ t('admin.pages.customers.detail.stats.totalSpent') }}
           </div>
           <div class="text-lg font-semibold text-gray-900">
             {{ formatCurrency(totalSpent) }}
@@ -44,7 +44,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading customer...
+        {{ t('admin.pages.customers.detail.loading') }}
       </p>
     </div>
 
@@ -54,10 +54,10 @@
     >
       <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        No orders found
+        {{ t('admin.pages.customers.detail.empty.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        This customer has no orders yet.
+        {{ t('admin.pages.customers.detail.empty.hint') }}
       </p>
     </div>
 
@@ -70,19 +70,19 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Order
+                {{ t('admin.pages.customers.detail.table.order') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total
+                {{ t('admin.pages.customers.detail.table.total') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                {{ t('admin.pages.customers.detail.table.status') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
+                {{ t('admin.pages.customers.detail.table.date') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ t('admin.pages.customers.detail.table.actions') }}
               </th>
             </tr>
           </thead>
@@ -115,7 +115,7 @@
                     class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                    <span>View</span>
+                    <span>{{ t('common.view') }}</span>
                   </NuxtLink>
                 </div>
               </td>
@@ -133,12 +133,13 @@ import { useAuthStore } from '~/stores/auth'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Customer'
+  titleKey: 'admin.pages.customers.detail.metaTitle'
 })
 
 const authStore = useAuthStore()
 const route = useRoute()
 const { format: formatCurrency } = useCurrency()
+const { t, locale } = useI18n({ useScope: 'global' })
 
 const customerId = computed(() => (typeof route.params.id === 'string' ? route.params.id : ''))
 
@@ -184,7 +185,8 @@ async function fetchCustomer() {
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
+  const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return date.toLocaleDateString(intlLocale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

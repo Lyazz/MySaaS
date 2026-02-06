@@ -4,12 +4,13 @@ import { useAuthStore } from '~/stores/auth'
 
 const authStore = useAuthStore()
 const mobileMenuOpen = ref(false)
+const { t } = useI18n({ useScope: 'global' })
 
-const navLinks = [
-  { name: 'Features', to: '/features' },
-  { name: 'Pricing', to: '/pricing' },
-  { name: 'About', to: '/about' }
-]
+const navLinks = computed(() => [
+  { name: t('marketing.nav.features'), to: '/features' },
+  { name: t('marketing.nav.pricing'), to: '/pricing' },
+  { name: t('marketing.nav.about'), to: '/about' }
+])
 
 function handleLogout() {
   authStore.logout()
@@ -45,25 +46,27 @@ function handleLogout() {
           <!-- Divider -->
           <div class="h-6 w-px bg-white/10"></div>
 
+          <LocaleSwitcher class="border-white/10 bg-slate-900/40" />
+
           <!-- Auth Actions -->
           <div class="flex items-center gap-4">
             <template v-if="authStore.isAuthenticated">
               <NuxtLink to="/admin" class="text-sm font-bold text-white hover:text-teal-400 transition-colors">
-                Dashboard
+                {{ t('marketing.actions.dashboard') }}
               </NuxtLink>
               <button @click="handleLogout" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">
-                Logout
+                {{ t('marketing.actions.logout') }}
               </button>
             </template>
             <template v-else>
               <NuxtLink to="/login" class="text-sm font-bold text-slate-300 hover:text-white transition-colors">
-                Log in
+                {{ t('marketing.actions.login') }}
               </NuxtLink>
               <NuxtLink 
                 to="/register" 
                 class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-sm font-bold shadow-lg shadow-teal-500/20 transition-all hover:-translate-y-0.5"
               >
-                Get Started
+                {{ t('marketing.actions.getStarted') }}
               </NuxtLink>
             </template>
           </div>
@@ -93,13 +96,24 @@ function handleLogout() {
         </NuxtLink>
         
         <div class="mt-6 pt-6 border-t border-white/10 flex flex-col gap-4 px-3">
+          <div class="flex justify-center">
+            <LocaleSwitcher class="border-white/10 bg-slate-900/40" />
+          </div>
           <template v-if="authStore.isAuthenticated">
-             <NuxtLink to="/admin" class="block text-center w-full py-3 rounded-xl bg-teal-600 text-white font-bold">Dashboard</NuxtLink>
-             <button @click="handleLogout" class="block text-center w-full py-3 text-slate-400 hover:text-white">Logout</button>
+             <NuxtLink to="/admin" class="block text-center w-full py-3 rounded-xl bg-teal-600 text-white font-bold">
+               {{ t('marketing.actions.dashboard') }}
+             </NuxtLink>
+             <button @click="handleLogout" class="block text-center w-full py-3 text-slate-400 hover:text-white">
+               {{ t('marketing.actions.logout') }}
+             </button>
           </template>
           <template v-else>
-            <NuxtLink to="/login" class="block text-center w-full py-3 text-slate-300 font-bold border border-white/10 rounded-xl hover:bg-slate-800">Log in</NuxtLink>
-            <NuxtLink to="/register" class="block text-center w-full py-3 rounded-xl bg-teal-600 text-white font-bold shadow-lg">Get Started</NuxtLink>
+            <NuxtLink to="/login" class="block text-center w-full py-3 text-slate-300 font-bold border border-white/10 rounded-xl hover:bg-slate-800">
+              {{ t('marketing.actions.login') }}
+            </NuxtLink>
+            <NuxtLink to="/register" class="block text-center w-full py-3 rounded-xl bg-teal-600 text-white font-bold shadow-lg">
+              {{ t('marketing.actions.getStarted') }}
+            </NuxtLink>
           </template>
         </div>
       </div>

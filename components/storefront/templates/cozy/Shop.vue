@@ -13,6 +13,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 })
 
 const { currencyCode, format: formatCurrency } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
 const filters = computed(() => ({
@@ -22,7 +23,7 @@ const filters = computed(() => ({
 // Filtering Logic
 const selectedCategories = ref<string[]>([])
 const searchQuery = ref('')
-const sortOption = ref('Relevance')
+const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
@@ -59,9 +60,9 @@ const filteredProducts = computed(() => {
     })
 
     // Sort
-    if (sortOption.value === 'Price: Low to High') {
+    if (sortOption.value === 'priceAsc') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'Price: High to Low') {
+    } else if (sortOption.value === 'priceDesc') {
         result.sort((a, b) => Number(b.price) - Number(a.price))
     }
 
@@ -69,14 +70,15 @@ const filteredProducts = computed(() => {
 })
 
 const pageTitle = computed(() => {
+    const content = storefrontContent.value
     if (selectedCategories.value.length === 1) {
         const cat = filters.value.categories.find(c => c.id === selectedCategories.value[0])
-        return cat ? cat.title : 'Full Catalog'
+        return cat ? cat.title : content.shop.catalogTitle
     }
     if (selectedCategories.value.length > 1) {
-        return 'Filtered Products'
+        return content.shop.filteredTitle
     }
-    return 'Full Catalog'
+    return content.shop.catalogTitle
 })
 
 // Toggle Category Selection
@@ -95,7 +97,7 @@ const removeCategory = (catId: string) => {
 const resetFilters = () => {
     selectedCategories.value = []
     searchQuery.value = ''
-    sortOption.value = 'Relevance'
+    sortOption.value = 'relevance'
     minPriceInput.value = 0
     maxPriceInput.value = 200000
 }
@@ -143,7 +145,7 @@ const closeQuickView = () => {
         class="fixed inset-y-0 right-0 w-[320px] bg-white z-50 p-6 overflow-y-auto lg:hidden shadow-2xl rounded-l-[2rem]"
       >
         <div class="flex items-center justify-between mb-8">
-          <h3 class="font-cozy font-bold text-xl text-slate-800">Filters</h3>
+          <h3 class="font-cozy font-bold text-xl text-slate-800">{{ storefrontContent.actions.filters }}</h3>
           <button
             class="p-2 hover:bg-slate-100 rounded-full transition-colors"
             @click="isFilterDrawerOpen = false"
@@ -155,7 +157,7 @@ const closeQuickView = () => {
         <div class="space-y-8">
           <!-- Categories -->
           <div>
-            <h4 class="font-medium text-slate-700 mb-4">Categories</h4>
+            <h4 class="font-medium text-slate-700 mb-4">{{ storefrontContent.shop.categories }}</h4>
             <div class="space-y-3">
               <label
                 v-for="cat in filters.categories"
@@ -179,7 +181,7 @@ const closeQuickView = () => {
               class="w-full py-4 bg-brand-500 text-white rounded-full font-bold shadow-lg shadow-brand-200 hover:bg-brand-600 transition-all"
               @click="isFilterDrawerOpen = false"
             >
-              Show Results ({{ filteredProducts.length }})
+              {{ storefrontContent.shop.showResults(filteredProducts.length) }}
             </button>
           </div>
         </div>
@@ -197,20 +199,20 @@ const closeQuickView = () => {
           <!-- Filter Header -->
           <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
             <h3 class="font-cozy font-bold text-lg text-slate-800">
-              Filters
+              {{ storefrontContent.actions.filters }}
             </h3>
             <button
               class="text-sm text-brand-500 hover:text-brand-600"
               @click="resetFilters"
             >
-              Reset
+              {{ storefrontContent.actions.reset }}
             </button>
           </div>
 
           <!-- Categories -->
           <div>
             <h4 class="font-medium text-slate-700 mb-4">
-              Categories
+              {{ storefrontContent.shop.categories }}
             </h4>
             <div class="space-y-3">
               <label
@@ -232,26 +234,26 @@ const closeQuickView = () => {
           <!-- Price Filter -->
           <div>
             <h4 class="font-medium text-slate-700 mb-4">
-              Price Range
+              {{ storefrontContent.shop.priceRange.label }}
             </h4>
             <div class="flex items-center gap-2">
                <div class="relative flex-1">
-                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">{{ currencyCode }}</span>
+                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
                  <input 
                    v-model.number="minPriceInput"
                    type="number" 
-                   placeholder="Min"
-                   class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 pl-10 text-sm focus:ring-2 focus:ring-brand-200 outline-none"
+                   :placeholder="storefrontContent.shop.priceRange.min"
+                   class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 pl-10 rtl:pl-3 rtl:pr-10 text-sm focus:ring-2 focus:ring-brand-200 outline-none"
                  >
                </div>
                <span class="text-slate-400">-</span>
                <div class="relative flex-1">
-                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">{{ currencyCode }}</span>
+                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
                  <input 
                    v-model.number="maxPriceInput"
                    type="number"
-                   placeholder="Max" 
-                   class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 pl-10 text-sm focus:ring-2 focus:ring-brand-200 outline-none"
+                   :placeholder="storefrontContent.shop.priceRange.max" 
+                   class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 pl-10 rtl:pl-3 rtl:pr-10 text-sm focus:ring-2 focus:ring-brand-200 outline-none"
                  >
                </div>
             </div>
@@ -267,13 +269,13 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-3 py-1.5 bg-brand-50 text-brand-600 rounded-full text-sm"
               >
-                <span>{{ filters.categories.find(c => c.id === catId)?.title || 'Category' }}</span>
+                <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
                 <button @click="removeCategory(catId)" class="hover:text-brand-800">
                     <Icon name="lucide:x" class="w-4 h-4" />
                 </button>
               </div>
               <button @click="resetFilters" class="text-sm text-slate-500 hover:text-brand-500 underline">
-                  Clear all
+                  {{ storefrontContent.actions.clearAll }}
               </button>
           </div>
           
@@ -285,7 +287,7 @@ const closeQuickView = () => {
               @click="isFilterDrawerOpen = true"
             >
               <Icon name="lucide:sliders-horizontal" class="w-5 h-5" />
-              Filters & Sort
+              {{ storefrontContent.shop.filtersAndSort }}
             </button>
 
             <!-- Search in results -->
@@ -293,7 +295,7 @@ const closeQuickView = () => {
               <input 
                 v-model="searchQuery" 
                 type="text"
-                placeholder="Search within results..." 
+                :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
                 class="w-full bg-white border border-slate-200 text-slate-800 text-sm rounded-full focus:ring-2 focus:ring-brand-200 focus:border-brand-400 block pl-5 pr-10 py-3 shadow-sm transition-shadow hover:shadow-md" 
               >
               <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
@@ -303,15 +305,15 @@ const closeQuickView = () => {
 
             <!-- Sort Dropdown -->
             <div class="hidden sm:flex items-center gap-3 w-full sm:w-auto">
-              <span class="text-sm text-slate-500 whitespace-nowrap">Sort by:</span>
+              <span class="text-sm text-slate-500 whitespace-nowrap">{{ storefrontContent.shop.sortBy }}</span>
               <div class="relative w-full sm:w-48">
                 <select
                   v-model="sortOption"
                   class="w-full appearance-none bg-white rounded-full border border-slate-200 text-sm py-3 pl-4 pr-10 focus:border-brand-400 focus:ring-brand-200 shadow-sm cursor-pointer hover:border-brand-300 transition-colors text-slate-600 font-medium"
                 >
-                  <option>Relevance</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                  <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
+                  <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
+                  <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-slate-500" />
@@ -329,16 +331,16 @@ const closeQuickView = () => {
               <Icon name="lucide:package-open" class="w-10 h-10" />
             </div>
             <h3 class="text-lg font-medium text-slate-800">
-              No products found
+              {{ storefrontContent.shop.results.noResults }}
             </h3>
             <p class="text-slate-500 mt-1">
-              Try clearing filters or search for something else.
+              {{ storefrontContent.shop.results.noResultsHint }}
             </p>
             <button
               class="mt-6 px-6 py-2 bg-brand-500 text-white rounded-full hover:bg-brand-600 transition-colors"
               @click="resetFilters"
             >
-              Clear All
+              {{ storefrontContent.actions.clearAll }}
             </button>
           </div>
 
@@ -381,22 +383,22 @@ const closeQuickView = () => {
                 </div>
                 <div class="w-full md:w-1/2 p-8 flex flex-col">
                     <div>
-                      <span class="inline-block px-3 py-1 bg-brand-50 text-brand-500 rounded-full text-xs font-medium mb-4">In Stock</span>
+                      <span class="inline-block px-3 py-1 bg-brand-50 text-brand-500 rounded-full text-xs font-medium mb-4">{{ storefrontContent.product.inStock }}</span>
                       <h2 class="font-cozy font-bold text-2xl text-slate-800 mb-4">{{ quickViewProduct.title }}</h2>
                       <div class="text-2xl font-bold text-brand-500 mb-6">
                           {{ formatCurrency(quickViewProduct.price) }}
                       </div>
                       <p class="text-slate-500 leading-relaxed mb-8">
-                          {{ quickViewProduct.description || 'Experience the perfect blend of style and functionality.' }}
+                          {{ quickViewProduct.description || storefrontContent.product.descriptionFallback }}
                       </p>
                     </div>
 
                     <div class="mt-auto space-y-4">
                         <button class="w-full py-4 bg-slate-800 text-white font-bold rounded-full shadow-lg hover:bg-brand-500 hover:shadow-xl transition-all">
-                          Add to Cart
+                          {{ storefrontContent.actions.addToCart }}
                         </button>
                         <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-3 text-center text-slate-500 hover:text-brand-500 font-medium transition-colors" @click="closeQuickView">
-                          View Full Details
+                          {{ storefrontContent.product.viewFullDetails }}
                         </NuxtLink>
                     </div>
                 </div>

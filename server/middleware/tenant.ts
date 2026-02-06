@@ -31,8 +31,8 @@ export default defineEventHandler(async (event) => {
             parsed.kind === 'tenant-subdomain'
                 ? await prisma.tenant.findUnique({ where: { slug: parsed.slug } })
                 : await prisma.tenantDomain
-                      .findUnique({ where: { domain: parsed.domain }, include: { tenant: true } })
-                      .then((m) => m?.tenant ?? null)
+                    .findUnique({ where: { domain: parsed.domain }, include: { tenant: true } })
+                    .then((m) => m?.tenant ?? null)
 
         if (!tenant) {
             throw createError({ statusCode: 404, statusMessage: 'Tenant not found' })
@@ -82,5 +82,14 @@ export default defineEventHandler(async (event) => {
         })
 
         event.context.contactInfos = contactInfos
+
+        const globalMetaPixel = await prisma.tenantMetaPixel.findFirst({
+            where: { tenantId: tenant.id, isGlobal: true, isActive: true },
+            orderBy: { updatedAt: 'desc' },
+            select: { pixelId: true }
+        })
+
+        const pixelId = typeof globalMetaPixel?.pixelId === 'string' ? globalMetaPixel.pixelId.trim() : ''
+        event.context.facebookPixelId = pixelId && /^[0-9]+$/.test(pixelId) ? pixelId : null
     }
 })

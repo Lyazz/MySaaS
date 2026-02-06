@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-slate-800">Appearance Settings</h1>
-      <p class="text-slate-600 mt-1">Customize the look and feel of your storefront.</p>
+      <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.appearance.title') }}</h1>
+      <p class="text-slate-600 mt-1">{{ t('admin.pages.settings.appearance.subtitle') }}</p>
     </div>
 
     <AppearanceSettingsForm />
@@ -15,6 +15,8 @@ import AppearanceSettingsForm from '~/components/admin/AppearanceSettingsForm.vu
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Appearance Settings'
+  titleKey: 'admin.pages.settings.appearance.metaTitle'
 })
+
+const { t } = useI18n({ useScope: 'global' })
 </script>

@@ -1,0 +1,1432 @@
+{
+  "common": {
+    "view": "View"
+  },
+  "i18n": {
+    "switcher": {
+      "label": "Language"
+    },
+    "locales": {
+      "en": "English",
+      "fr": "French",
+      "ar": "Arabic"
+    }
+  },
+  "bundleTags": {
+    "MOST_POPULAR": "Most popular",
+    "BEST_VALUE": "Best value"
+  },
+  "saasLanding": {
+    "seo": {
+      "title": "Swekly - The Future of Commerce",
+      "description": "The all-in-one platform to build, sell, and scale your B2B or B2C business with enterprise-grade tools."
+    },
+    "hero": {
+      "title": {
+        "buildSell": "Build. Sell.",
+        "scale": "Scale."
+      },
+      "subtitle": "The all-in-one platform engineered for modern commerce. Focus on your product, we handle the infrastructure, payments, and logistics.",
+      "ctaPrimary": "Start Building Free",
+      "ctaSecondary": "Watch Demo"
+    },
+    "features": {
+      "title": {
+        "prefix": "Everything you need to",
+        "accent": "dominate"
+      },
+      "subtitle": "Powerful tools designed for growth, packaged in a beautiful interface.",
+      "items": {
+        "storeBuilder": {
+          "title": "Store Builder",
+          "description": "Drag-and-drop editor to create stunning storefronts in minutes."
+        },
+        "globalPayments": {
+          "title": "Global Payments",
+          "description": "Accept payments from anywhere with integrated gateways."
+        },
+        "analytics": {
+          "title": "Analytics & Insights",
+          "description": "Real-time data to optimize your conversion rates."
+        },
+        "automatedShipping": {
+          "title": "Automated Shipping",
+          "description": "Connect with Yalidine, Eckoz, and more for auto-dispatching."
+        }
+      }
+    },
+    "stats": {
+      "activeMerchants": "Active merchants",
+      "revenueGenerated": "Revenue generated",
+      "uptime": "Uptime"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about the product and billing.",
+      "items": {
+        "noCard": {
+          "question": "Do I need a credit card to start?",
+          "answer": "No. You can start right away and upgrade/downgrade later."
+        },
+        "changePlan": {
+          "question": "Can I change my plan later?",
+          "answer": "Yes. You can change your plan anytime from the admin Billing page."
+        },
+        "planDifferences": {
+          "question": "What changes between plans right now?",
+          "answer": "For now (testing), plans only differ by the number of orders allowed per month."
+        }
+      }
+    },
+    "testimonials": {
+      "heading": {
+        "prefix": "Loved by",
+        "accent": "Founders",
+        "suffix": "like you."
+      },
+      "subtitle": "Join thousands of merchants who have switched to a platform built for growth, speed, and reliability.",
+      "avatarAlt": "Avatar",
+      "userAvatarAlt": "User avatar",
+      "items": {
+        "sarah": {
+          "text": "I switched from Shopify and never looked back. The page load speeds are instant and my conversion rate went up 40% overnight.",
+          "role": "CEO, FashionNova"
+        },
+        "karim": {
+          "text": "The analytics dashboard is beautiful. Whatever data I need is just one click away. It feels like this tool was made for 2026.",
+          "role": "Founder, TechShop"
+        },
+        "emily": {
+          "text": "Finally, a platform that doesn't charge ridiculous transaction fees. The custom domain support is seamless.",
+          "role": "CTO, GreenEarth"
+        },
+        "michael": {
+          "text": "The best decision we made for our business. Support is incredible and the features are exactly what we needed.",
+          "role": "COO, GearUp"
+        },
+        "lisa": {
+          "text": "Scaling to 10k orders a month was a breeze. No downtime, no issues. Highly recommended.",
+          "role": "Owner, Kicks"
+        },
+        "david": {
+          "text": "The drag and drop builder is actually usable. I built my store in an afternoon.",
+          "role": "Founder, ArtSpace"
+        }
+      }
+    },
+    "finalCta": {
+      "title": "Ready to launch?",
+      "subtitle": "Join the platform that grows with you.",
+      "cta": "Get Started Now"
+    }
+  },
+  "marketing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "about": "About"
+    },
+    "actions": {
+      "dashboard": "Dashboard",
+      "logout": "Logout",
+      "login": "Log in",
+      "getStarted": "Get Started"
+    },
+    "footer": {
+      "tagline": "Empowering businesses with cutting-edge tools and a premium experience. Built for scale, designed for you.",
+      "product": {
+        "title": "Product",
+        "changelog": "Changelog"
+      },
+      "support": {
+        "title": "Support",
+        "documentation": "Documentation",
+        "apiStatus": "API Status",
+        "contact": "Contact"
+      },
+      "copyright": "© {year} Swekly Platform. All rights reserved."
+    }
+  },
+  "pricing": {
+    "seo": {
+      "title": "Pricing - Swekly",
+      "description": "Choose a plan that fits your growth stage."
+    },
+    "page": {
+      "title": "Simple, transparent pricing",
+      "subtitle": "Choose the plan that fits your growth stage. No hidden fees."
+    },
+    "section": {
+      "title": "Transparent Pricing",
+      "subtitle": "No hidden fees. Scale as you grow."
+    },
+    "toggle": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "save": "Save {percent}%"
+    },
+    "badges": {
+      "mostPopular": "Most Popular",
+      "recommended": "Recommended"
+    },
+    "period": {
+      "perMonth": "/mo"
+    },
+    "features": {
+      "ordersPerMonth": "{count} Orders/mo"
+    },
+    "plans": {
+      "basic": {
+        "name": "Basic",
+        "description": "Best for trying out",
+        "cta": "Get Started"
+      },
+      "beginner": {
+        "name": "Beginner",
+        "description": "A simple start to boost your store",
+        "cta": "Get Started"
+      },
+      "merchant": {
+        "name": "Merchant",
+        "description": "Smart choice for growing businesses",
+        "cta": "Get Started"
+      },
+      "professional": {
+        "name": "Professional",
+        "description": "Built for scaling with confidence",
+        "cta": "Get 15 days for free"
+      }
+    }
+  },
+  "storefront": {
+    "algeria": {
+      "wilayas": {
+        "16": "Algiers",
+        "31": "Oran"
+      }
+    },
+    "common": {
+      "productsCount": "{count} Products",
+      "selectPlaceholder": "Select…"
+    },
+    "actions": {
+      "addToCart": "Add to cart",
+      "adding": "Adding…",
+      "outOfStock": "Out of stock",
+      "viewCart": "View cart",
+      "checkout": "Checkout",
+      "continueShopping": "Continue shopping",
+      "startBrowsing": "Start browsing",
+      "apply": "Apply",
+      "reset": "Reset",
+      "clearAll": "Clear all",
+      "filters": "Filters",
+      "search": "Search"
+    },
+    "home": {
+      "welcomeTo": "Welcome to {tenant}",
+      "cta": {
+        "shopNow": "Shop now"
+      },
+      "carousel": {
+        "newCollection": {
+          "title": "New Collection 2026",
+          "subtitle": "Discover the latest trends in books and stationery.",
+          "buttonText": "Shop now"
+        },
+        "bestSellers": {
+          "title": "Best Sellers",
+          "subtitle": "Get your hands on the most popular items this week.",
+          "buttonText": "Browse"
+        },
+        "specialOffers": {
+          "title": "Special Offers",
+          "subtitle": "Up to 50% off on selected items.",
+          "buttonText": "View deals"
+        }
+      },
+      "sections": {
+        "browseByCategory": {
+          "eyebrow": "Collections",
+          "title": "Browse by Category"
+        },
+        "newArrivals": {
+          "eyebrow": "New Arrivals",
+          "title": "Trending Now"
+        },
+        "bestSellers": {
+          "eyebrow": "Best Sellers",
+          "title": "Most Popular"
+        }
+      }
+    },
+    "nav": {
+      "home": "Home",
+      "shop": "Shop",
+      "contact": "Contact"
+    },
+    "cart": {
+      "label": "Cart",
+      "title": "Your cart",
+      "itemsCount": "{count} items",
+      "item": {
+        "variantSelected": "Variant selected",
+        "standardItem": "Standard item",
+        "variant": "Variant",
+        "remove": "Remove"
+      },
+      "sections": {
+        "items": "Items"
+      },
+      "empty": {
+        "title": "Your cart is empty",
+        "subtitle": "Add items to get started.",
+        "cta": "Start browsing"
+      },
+      "actions": {
+        "proceedToCheckout": "Proceed to checkout"
+      },
+      "summary": {
+        "title": "Summary",
+        "subtotal": "Subtotal",
+        "shipping": "Shipping",
+        "shippingHint": "Calculated at checkout",
+        "tax": "Tax",
+        "total": "Total"
+      }
+    },
+    "checkout": {
+      "title": "Checkout",
+      "disabled": "Checkout is currently disabled for this store.",
+      "disabledShort": "Checkout disabled",
+      "required": "Required",
+      "help": {
+        "deliveryOptions": "Choose your preferred delivery method and provider."
+      },
+      "coupon": {
+        "title": "Coupon code",
+        "badge": "Discount",
+        "placeholder": "Enter code (e.g., WELCOME10)"
+      },
+      "summary": {
+        "deliveryOption": "Delivery option",
+        "shippingFee": "Shipping fee",
+        "quantityShort": "Qty"
+      },
+      "minimumOrder": "Minimum order: {amount} {currency}.",
+      "secureTransaction": "Secure transaction",
+      "errors": {
+        "emptyCart": "Your cart is empty.",
+        "fullNameRequired": "Please enter your full name.",
+        "phoneRequired": "Phone number is required to place your order.",
+        "deliveryRequired": "Please select a delivery option.",
+        "requiredFields": "Please fill in all required fields.",
+        "submitFailed": "Failed to place order. Please try again."
+      },
+      "actions": {
+        "returnToCart": "Return to cart",
+        "placeOrder": "Place order",
+        "placingOrder": "Placing order…"
+      },
+      "form": {
+        "fullName": {
+          "label": "Full name",
+          "placeholder": "e.g. John Doe"
+        },
+        "phone": {
+          "label": "Phone",
+          "placeholder": "0XXXXXXXX"
+        },
+        "wilaya": {
+          "label": "Wilaya",
+          "placeholder": "Select a wilaya…"
+        },
+        "commune": {
+          "label": "City",
+          "placeholder": "Select a commune…"
+        },
+        "address": {
+          "label": "Address (optional)",
+          "placeholder": "Street, building, etc."
+        }
+      },
+      "sections": {
+        "customerInformation": "Customer information",
+        "deliveryOptions": "Delivery options",
+        "deliveryMethod": "Delivery method",
+        "orderSummary": "Order summary"
+      },
+      "itemsInCart": "{count} items in your cart",
+      "delivery": {
+        "free": "Free",
+        "mode": {
+          "homeDelivery": "Home delivery",
+          "pickupPoint": "Pickup point",
+          "storePickup": "Store pickup"
+        },
+        "description": {
+          "homeDelivery": "Delivered to your doorstep",
+          "pickupPoint": "Collect from a nearby location",
+          "storePickup": "Pick up at our store"
+        },
+        "provider": {
+          "self": "Self delivery",
+          "storePickup": "Store pickup",
+          "homeDelivery": "Home delivery"
+        }
+      }
+    },
+    "product": {
+      "addedToCart": "{title} added to cart!",
+      "inStock": "In stock",
+      "perUnit": "per unit",
+      "descriptionFallback": "Experience the perfect blend of style and functionality.",
+      "viewFullDetails": "View full details"
+    },
+    "productForm": {
+      "quantity": {
+        "label": "Quantity"
+      },
+      "stock": {
+        "unavailable": "Unavailable",
+        "outOfStock": "Out of stock",
+        "lowStock": "Low stock: {count} left"
+      },
+      "cod": {
+        "title": "Order now",
+        "badge": "Cash on delivery (COD)",
+        "submit": "Confirm order",
+        "submitting": "Submitting…"
+      },
+      "totalPrice": "Total price:",
+      "errors": {
+        "outOfStockVariant": "This variant is out of stock."
+      }
+    },
+    "toasts": {
+      "orderReceived": {
+        "title": "Order received!",
+        "message": "We will contact you shortly to confirm your order."
+      },
+      "addedToCart": {
+        "title": "Added to cart",
+        "message": "Review your cart to complete checkout."
+      },
+      "outOfStock": {
+        "message": "Please select an in-stock option."
+      }
+    },
+    "shop": {
+      "title": "Shop",
+      "catalogTitle": "Full catalog",
+      "filteredTitle": "Filtered products",
+      "searchPlaceholder": "Search products…",
+      "searchWithinResultsPlaceholder": "Search within results…",
+      "categories": "Categories",
+      "categoryFallback": "Category",
+      "allProducts": "All products",
+      "filtersAndSort": "Filters & sort",
+      "sortBy": "Sort by:",
+      "showResults": "Show results ({count})",
+      "sort": {
+        "label": "Sort",
+        "relevance": "Relevance",
+        "priceLowToHigh": "Price: Low to High",
+        "priceHighToLow": "Price: High to Low"
+      },
+      "view": {
+        "gridTitle": "Grid view",
+        "listTitle": "List view"
+      },
+      "priceRange": {
+        "label": "Price range",
+        "min": "Min",
+        "max": "Max"
+      },
+      "results": {
+        "noResults": "No products found.",
+        "noResultsHint": "Try clearing filters or search for something else."
+      },
+      "sidebar": {
+        "bestSellers": "Best sellers"
+      }
+    },
+    "category": {
+      "label": "Category",
+      "description": "Discover products in this collection.",
+      "productsAvailableLabel": "products available",
+      "productsAvailable": "{count} products available",
+      "showingResults": "Showing {count} results",
+      "sortBy": "Sort by:",
+      "sort": {
+        "mostPopular": "Most Popular",
+        "newest": "Newest",
+        "priceLowToHigh": "Price: Low to High",
+        "priceHighToLow": "Price: High to Low"
+      },
+      "emptyHint": "Try checking other categories or browse all products."
+    },
+    "search": {
+      "placeholder": "Search products..."
+    },
+    "header": {
+      "wishlistTitle": "Wishlist",
+      "accountTitle": "Account"
+    },
+    "footer": {
+      "contact": "Contact",
+      "contactUs": "Contact us",
+      "aboutUs": "About us",
+      "termsPrivacy": "Terms & Privacy",
+      "termsOfService": "Terms of service",
+      "privacyPolicy": "Privacy policy",
+      "returnPolicy": "Return policy",
+      "help": "Help",
+      "faq": "FAQ",
+      "shippingInfo": "Shipping info",
+      "copyright": "© {year} {tenant} — All rights reserved."
+    },
+    "announcement": {
+      "dismissAria": "Dismiss announcement"
+    }
+  },
+  "admin": {
+    "layout": {
+      "defaultTitle": "Admin Dashboard"
+    },
+    "actions": {
+      "toggleSidebar": "Toggle sidebar",
+      "closeSidebar": "Close sidebar",
+      "viewStore": "View Store",
+      "logout": "Logout"
+    },
+    "common": {
+      "actions": "Actions",
+      "active": "Active",
+      "inactive": "Inactive",
+      "search": "Search",
+      "searchAction": "Search",
+      "clear": "Clear",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "loading": "Loading…",
+      "refresh": "Refresh",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "close": "Close",
+      "copy": "Copy",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saveChanges": "Save changes",
+      "saving": "Saving…",
+      "create": "Create",
+      "creating": "Creating…",
+      "update": "Update",
+      "updating": "Updating…",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "nav": {
+      "overview": "Overview",
+      "catalog": "Catalog",
+      "purchasing": "Purchasing",
+      "sales": "Sales",
+      "delivery": "Delivery",
+      "finance": "Finance",
+      "settings": "Settings",
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "inventory": "Inventory",
+      "categories": "Categories",
+      "suppliers": "Suppliers",
+      "purchases": "Purchases",
+      "orders": "Orders",
+      "salesItem": "Sales",
+      "pos": "POS",
+      "customers": "Customers",
+      "deliveryItem": "Delivery",
+      "billing": "Billing",
+      "appearance": "Appearance",
+      "homepage": "Homepage",
+      "contactInfo": "Contact Info",
+      "functional": "Functional",
+      "apps": "Apps",
+      "integrations": "Integrations"
+    },
+    "orderStatus": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "returned": "Returned"
+    },
+    "forms": {
+      "product": {
+        "title": {
+          "label": "Product title",
+          "placeholder": "Enter product title"
+        },
+        "slug": {
+          "label": "Product slug",
+          "placeholder": "product-slug",
+          "hintCreate": "URL-friendly version of the title (auto-generated)",
+          "hintEdit": "URL-friendly version of the title"
+        },
+        "miniDescription": {
+          "label": "Mini description",
+          "hint": "Short description for landing page header (optional)",
+          "placeholder": "Enter a short summary…"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Enter product description with rich formatting…"
+        },
+        "price": {
+          "label": "Price (DZD)",
+          "placeholder": "0.00"
+        },
+        "stock": {
+          "label": "Stock quantity",
+          "placeholder": "0"
+        },
+        "category": {
+          "label": "Category",
+          "placeholder": "Select a category (optional)"
+        },
+        "isActive": {
+          "label": "Product is active and visible to customers"
+        }
+      },
+      "category": {
+        "title": {
+          "label": "Category title",
+          "placeholder": "Enter category title"
+        },
+        "slug": {
+          "label": "Category slug",
+          "placeholder": "category-slug",
+          "hintCreate": "URL-friendly version of the title (auto-generated)",
+          "hintEdit": "URL-friendly version of the title"
+        },
+        "image": {
+          "label": "Category image (optional)",
+          "hint": "Shown on storefront category tiles"
+        }
+      },
+      "supplier": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Supplier name",
+          "required": "Name is required"
+        },
+        "phone": {
+          "label": "Phone",
+          "placeholder": "Phone number"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "name[at]example.com"
+        },
+        "address": {
+          "label": "Address",
+          "placeholder": "Supplier address"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Additional notes…"
+        }
+      }
+    },
+    "integrations": {
+      "connect": "Connect"
+    },
+    "pages": {
+      "integrations": {
+        "title": "Apps & Integrations",
+        "subtitle": "Connect your store with third-party tools and services."
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "welcomeBack": "Welcome back, {tenant}",
+        "snapshot": "A quick snapshot of your store.",
+        "refresh": "Refresh",
+        "finishSetup": "Finish setup",
+        "loadErrorTitle": "Dashboard data couldn’t be loaded.",
+        "loadErrorHint": "Try refreshing. If it keeps happening, check your connection or login session.",
+        "stats": {
+          "orders7d": "Orders (7 days)",
+          "revenue7d": "Revenue (7 days)",
+          "products": "Products",
+          "lowStock": "Low stock",
+          "outOfStock": "{count} out of stock"
+        },
+        "recentOrders": {
+          "title": "Recent orders",
+          "hint": "Latest 8 orders for this tenant.",
+          "viewAll": "View all",
+          "table": {
+            "order": "Order",
+            "customer": "Customer",
+            "total": "Total",
+            "status": "Status",
+            "date": "Date",
+            "action": "Action"
+          },
+          "empty": {
+            "title": "No orders yet",
+            "hint": "New orders will appear here as customers checkout.",
+            "viewStorefront": "View storefront"
+          }
+        },
+        "orderStatus": {
+          "title": "Order status",
+          "hint": "Quick filters to jump into your order list."
+        },
+        "quickLinks": {
+          "title": "Quick actions",
+          "hint": "The most common admin tasks.",
+          "addProduct": "Add product",
+          "manageProducts": "Manage products",
+          "categories": "Categories",
+          "appearance": "Appearance"
+        }
+      },
+      "billing": {
+        "metaTitle": "Billing",
+        "title": "Billing",
+        "subtitle": "View your current plan, limits, and usage.",
+        "seePricing": "See Pricing",
+        "errors": {
+          "loadFailed": "Failed to load billing info."
+        },
+        "currentPlan": {
+          "title": "Current Plan",
+          "hint": "You can switch plans for testing (monthly only).",
+          "changePlan": "Change plan",
+          "paySimulate": "Pay (Simulate) & Apply",
+          "cards": {
+            "plan": "Plan",
+            "interval": "Billing interval",
+            "source": "Source: {source}",
+            "ordersThisPeriod": "Orders this period"
+          },
+          "limitsTitle": "Plan Limits"
+        },
+        "limits": {
+          "ordersPerMonth": "Orders / month"
+        },
+        "planOption": "{name} ({orders} orders/mo)",
+        "availablePlans": {
+          "title": "Available Plans",
+          "ordersPerMonth": "{count} Orders / month",
+          "perMonth": "/mo"
+        }
+      },
+      "products": {
+        "index": {
+          "title": "Products",
+          "subtitle": "Manage your product catalog",
+          "addProduct": "Add product",
+          "filters": {
+            "searchLabel": "Search",
+            "searchPlaceholder": "Search products…",
+            "category": "Category",
+            "allCategories": "All categories",
+            "status": "Status",
+            "allStatus": "All status"
+          },
+          "loading": "Loading products…",
+          "empty": {
+            "title": "No products",
+            "hint": "Get started by creating a new product.",
+            "newProduct": "New product"
+          },
+          "sort": {
+            "sortBy": "Sort by:",
+            "newest": "Newest",
+            "title": "Title",
+            "price": "Price",
+            "stock": "Stock",
+            "status": "Status"
+          },
+          "table": {
+            "product": "Product",
+            "category": "Category",
+            "price": "Price",
+            "stock": "Stock",
+            "status": "Status",
+            "links": "Links",
+            "actions": "Actions",
+            "uncategorized": "Uncategorized"
+          },
+          "links": {
+            "product": "Product",
+            "landing": "Landing",
+            "openProduct": "Open product page",
+            "copyProduct": "Copy product link",
+            "openLanding": "Open landing page",
+            "copyLanding": "Copy landing link"
+          },
+          "pagination": {
+            "showing": "Showing {from} to {to} of {total} results"
+          },
+          "deleteModal": {
+            "title": "Delete product",
+            "message": "Are you sure you want to delete “{title}”? This action cannot be undone.",
+            "error": "Failed to delete product. Please try again."
+          },
+          "bulk": {
+            "selected": "{count} selected",
+            "export": "Export CSV",
+            "import": "Import CSV",
+            "update": "Bulk edit",
+            "duplicate": "Duplicate",
+            "exportError": "Failed to export CSV. Please try again.",
+            "importTitle": "Import products CSV",
+            "importHint": "Upload a CSV with columns: id (optional), slug, title, price, stock, isActive, categoryId/categorySlug.",
+            "importError": "Failed to import CSV. Please check the file and try again.",
+            "importResult": "Created {created}, updated {updated}, skipped {skipped}.",
+            "importErrors": "{count} rows had errors.",
+            "updateTitle": "Bulk update",
+            "updateHint": "Applies changes to the selected products.",
+            "updateError": "Bulk update failed. Please try again.",
+            "duplicateError": "Failed to duplicate product. Please try again.",
+            "noChanges": "Select at least one field to update.",
+            "fields": {
+              "price": "Price (set)",
+              "pricePlaceholder": "e.g. 1999",
+              "stock": "Stock (set)",
+              "stockPlaceholder": "Only applies to products without variants",
+              "status": "Status",
+              "category": "Category",
+              "noChange": "No change",
+              "clearCategory": "Clear category",
+              "propagatePrice": "Also update variant prices"
+            }
+          }
+        },
+        "create": {
+          "metaTitle": "Create product",
+          "breadcrumb": "Create product",
+          "title": "Create new product",
+          "subtitle": "Add a new product to your catalog",
+          "submit": "Create product",
+          "errors": {
+            "createFailed": "Failed to create product. Please try again."
+          }
+        },
+        "edit": {
+          "metaTitle": "Edit product",
+          "breadcrumbEdit": "Edit {title}",
+          "fallbackTitle": "Product",
+          "loading": "Loading product…",
+          "title": "Edit product",
+          "subtitle": "Update product information",
+          "submit": "Update product",
+          "tabs": {
+            "general": "General",
+            "description": "Landing page description",
+            "variants": "Variants",
+            "bundles": "Bundles"
+          },
+          "links": {
+            "label": "Links",
+            "product": "Product",
+            "landing": "Landing",
+            "openProduct": "Open product page",
+            "copyProduct": "Copy product link",
+            "openLanding": "Open landing page",
+            "copyLanding": "Copy landing link"
+          },
+          "descriptionTab": {
+            "title": "Landing page description"
+          },
+          "variantsTab": {
+            "title": "Options & Variants"
+          },
+          "bundlesTab": {
+            "title": "Bundle deals",
+            "hint": "Create fixed bundle prices like “2 for 1800 DZD”. Checkout will automatically pick the best combination.",
+            "addBundle": "Add bundle",
+            "table": {
+              "qty": "Qty",
+              "price": "Bundle price",
+              "tag": "Tag",
+              "active": "Active",
+              "actions": "Actions",
+              "empty": "No bundle deals yet. Click “Add bundle”."
+            },
+            "tags": {
+              "none": "None",
+              "mostPopular": "Most popular",
+              "bestValue": "Best value"
+            }
+          },
+          "errors": {
+            "loadFailed": "Failed to load product",
+            "updateFailed": "Failed to update product. Please try again.",
+            "bundlesLoadFailed": "Failed to load bundle deals",
+            "bundlesSaveFailed": "Failed to save bundle deal",
+            "bundlesDeleteFailed": "Failed to delete bundle deal"
+          }
+        }
+      },
+      "categories": {
+        "index": {
+          "title": "Categories",
+          "subtitle": "Organize your catalog with categories",
+          "addCategory": "Add category",
+          "filters": {
+            "searchLabel": "Search",
+            "searchPlaceholder": "Search categories…",
+            "sortHint": "Use the chips above the table to sort by newest, title, slug, or product count."
+          },
+          "loading": "Loading categories…",
+          "empty": {
+            "title": "No categories",
+            "hint": "Get started by creating a new category.",
+            "newCategory": "New category"
+          },
+          "sort": {
+            "sortBy": "Sort by:",
+            "newest": "Newest",
+            "title": "Title",
+            "slug": "Slug",
+            "products": "Products"
+          },
+          "table": {
+            "category": "Category",
+            "products": "Products",
+            "links": "Links",
+            "actions": "Actions",
+            "productsCount": "{count} products"
+          },
+          "links": {
+            "openCategory": "Open category page",
+            "copyCategory": "Copy category link"
+          },
+          "pagination": {
+            "showing": "Showing {from} to {to} of {total} results"
+          },
+          "deleteModal": {
+            "title": "Delete category",
+            "message": "Are you sure you want to delete this category? Products in this category will become uncategorized.",
+            "messageWithTitle": "Are you sure you want to delete “{title}”? Products in this category will become uncategorized.",
+            "error": "Failed to delete category. Please try again."
+          }
+        },
+        "create": {
+          "metaTitle": "Create category",
+          "breadcrumb": "Create category",
+          "title": "Create new category",
+          "subtitle": "Add a category to keep your products organized",
+          "submit": "Create category",
+          "errors": {
+            "createFailed": "Failed to create category. Please try again."
+          }
+        },
+        "edit": {
+          "metaTitle": "Edit category",
+          "breadcrumb": "Edit category",
+          "loading": "Loading category…",
+          "title": "Edit category",
+          "subtitle": "Update category details",
+          "links": {
+            "label": "Link",
+            "openCategory": "Open category page",
+            "copyCategory": "Copy category link"
+          },
+          "backToList": "Back to list",
+          "submit": "Update category",
+          "deleteLink": "Delete category",
+          "deleteModal": {
+            "title": "Delete category",
+            "message": "Are you sure you want to delete this category? Products in this category will become uncategorized.",
+            "messageWithTitle": "Are you sure you want to delete “{title}”? Products in this category will become uncategorized."
+          },
+          "errors": {
+            "loadFailed": "Failed to load category",
+            "updateFailed": "Failed to update category",
+            "deleteFailed": "Failed to delete category. Please try again."
+          }
+        }
+      },
+      "orders": {
+        "index": {
+          "title": "Orders",
+          "subtitle": "Manage customer orders",
+          "filters": {
+            "searchLabel": "Search",
+            "searchPlaceholder": "Search by customer name or phone…",
+            "statusLabel": "Status filter",
+            "allOrders": "All orders"
+          },
+          "loading": "Loading orders…",
+          "empty": {
+            "title": "No orders found",
+            "hint": "Customer orders will appear here",
+            "hintFiltered": "Try adjusting your filters"
+          },
+          "table": {
+            "orderId": "Order ID",
+            "customer": "Customer",
+            "phone": "Phone",
+            "total": "Total",
+            "status": "Status",
+            "date": "Date",
+            "actions": "Actions"
+          }
+        },
+        "detail": {
+          "metaTitle": "Order detail",
+          "breadcrumb": "Order #{id}",
+          "loading": "Loading order…",
+          "sections": {
+            "orderInfo": "Order information",
+            "customerInfo": "Customer information",
+            "orderItems": "Order items"
+          },
+          "fields": {
+            "orderId": "Order ID",
+            "orderDate": "Order date",
+            "customerName": "Name",
+            "customerPhone": "Phone",
+            "deliveryAddress": "Delivery address"
+          },
+          "itemsTable": {
+            "product": "Product",
+            "price": "Price",
+            "quantity": "Quantity",
+            "subtotal": "Subtotal",
+            "total": "Total",
+            "fallbackProduct": "Product"
+          },
+          "statusUpdate": {
+            "title": "Update order status",
+            "statusLabel": "Status",
+            "submit": "Update status",
+            "success": "Order status updated successfully!",
+            "errors": {
+              "updateFailed": "Failed to update order status"
+            }
+          },
+          "backToOrders": "Back to orders",
+          "notFound": {
+            "title": "Order not found",
+            "hint": "This order may not exist or you don't have permission to view it."
+          }
+        }
+      },
+      "customers": {
+        "index": {
+          "title": "Customers",
+          "subtitle": "Derived from orders history",
+          "filters": {
+            "searchLabel": "Search",
+            "searchPlaceholder": "Search by customer name or phone…"
+          },
+          "loading": "Loading customers…",
+          "empty": {
+            "title": "No customers found",
+            "hint": "Customers will appear here once orders are placed",
+            "hintFiltered": "Try adjusting your search"
+          },
+          "table": {
+            "customer": "Customer",
+            "phone": "Phone",
+            "orders": "Orders",
+            "totalSpent": "Total spent",
+            "lastOrder": "Last order",
+            "actions": "Actions"
+          }
+        },
+        "detail": {
+          "metaTitle": "Customer",
+          "fallbackTitle": "Customer",
+          "loading": "Loading customer…",
+          "stats": {
+            "orders": "Orders",
+            "totalSpent": "Total spent"
+          },
+          "empty": {
+            "title": "No orders found",
+            "hint": "This customer has no orders yet."
+          },
+          "table": {
+            "order": "Order",
+            "total": "Total",
+            "status": "Status",
+            "date": "Date",
+            "actions": "Actions"
+          }
+        }
+      },
+      "inventory": {
+        "title": "Inventory",
+        "subtitle": "Track on-hand stock, reserved units, and safety stock per variant.",
+        "filters": {
+          "searchPlaceholder": "Product title or SKU…"
+        },
+        "loading": "Loading inventory…",
+        "empty": "No variants found.",
+        "table": {
+          "variant": "Variant",
+          "track": "Track",
+          "onHand": "On-hand",
+          "reserved": "Reserved",
+          "safety": "Safety",
+          "available": "Available",
+          "sku": "SKU"
+        },
+        "movements": {
+          "button": "Movements",
+          "title": "Movements — {product} / {option}",
+          "hint": "Latest changes affecting stock / reserved / safety stock.",
+          "loading": "Loading movements…",
+          "empty": "No movements recorded yet.",
+          "system": "system",
+          "table": {
+            "date": "Date",
+            "type": "Type",
+            "deltaStock": "Δ stock",
+            "deltaReserved": "Δ reserved",
+            "deltaSafety": "Δ safety",
+            "after": "After",
+            "by": "By",
+            "order": "Order"
+          }
+        },
+        "errors": {
+          "loadFailed": "Failed to load inventory",
+          "updateFailed": "Failed to update inventory"
+        },
+        "bulk": {
+          "exportCsv": "Export CSV",
+          "importCsv": "Import CSV",
+          "exportError": "Failed to export CSV.",
+          "importError": "Failed to import CSV. Please check the file and try again."
+        }
+      },
+      "delivery": {
+        "metaTitle": "Delivery companies",
+        "title": "Delivery companies",
+        "subtitle": "Manage delivery providers and pricing per Wilaya",
+        "providers": {
+          "toggleLabel": "Use setting",
+          "wilayasSupported": "{count} Wilayas supported",
+          "managePricing": "Manage pricing"
+        },
+        "pricing": {
+          "title": "Pricing configuration: {provider}",
+          "hint": "Set standard delivery rates for each Wilaya. These rates apply to all communes within the Wilaya.",
+          "loading": "Loading rates…",
+          "table": {
+            "code": "Code",
+            "wilaya": "Wilaya name",
+            "price": "Price (DZD)"
+          }
+        },
+        "errors": {
+          "updateProviderFailed": "Failed to update provider status",
+          "saveFailed": "Failed to save pricing"
+        }
+      },
+      "onboarding": {
+        "metaTitle": "Store setup",
+        "title": "Store setup",
+        "subtitle": "Choose your brand color, template, and language.",
+        "loadingSettings": "Loading your store settings…",
+        "progress": {
+          "stepOf": "Step {current} of {total}"
+        },
+        "steps": {
+          "brand": "Brand",
+          "template": "Template",
+          "language": "Language",
+          "summary": "Summary"
+        },
+        "brand": {
+          "title": "Brand color",
+          "pickColor": "Pick a color",
+          "hexValue": "Hex value",
+          "example": "Example: {value}",
+          "preview": "Preview",
+          "primaryButton": "Primary button"
+        },
+        "template": {
+          "title": "Store template"
+        },
+        "templates": {
+          "classic": {
+            "label": "Classic",
+            "description": "Clean layout, ideal for most stores."
+          },
+          "modern": {
+            "label": "Modern",
+            "description": "Bolder typography and more visual spacing."
+          }
+        },
+        "language": {
+          "title": "Language",
+          "label": "Language",
+          "rtlHint": "If Arabic, consider RTL layout."
+        },
+        "summary": {
+          "title": "Summary",
+          "cards": {
+            "template": "Template",
+            "primaryColor": "Primary color",
+            "language": "Language"
+          },
+          "aiTitle": "Frontend AI summary",
+          "generate": "Generate",
+          "generating": "Generating…",
+          "placeholder": "Click Generate to create a brief for your frontend agent."
+        },
+        "saveFinish": "Save & finish",
+        "errors": {
+          "loadFailed": "Failed to load store settings.",
+          "saveFailed": "Failed to save store settings.",
+          "summaryFailed": "Failed to generate summary."
+        }
+      },
+      "purchases": {
+        "index": {
+          "title": "Purchases",
+          "subtitle": "Manage your purchase orders and incoming stock",
+          "newPurchase": "New purchase",
+          "filters": {
+            "supplierLabel": "Filter by supplier",
+            "allSuppliers": "All suppliers"
+          },
+          "loading": "Loading purchases…",
+          "empty": {
+            "title": "No purchases found",
+            "hint": "Get started by creating a new purchase order."
+          },
+          "table": {
+            "id": "ID",
+            "supplier": "Supplier",
+            "status": "Status",
+            "items": "Items",
+            "date": "Date",
+            "action": "Action",
+            "itemsCount": "{count} items",
+            "manage": "Manage"
+          },
+          "pagination": {
+            "showing": "Showing {from} to {to} of {total} results"
+          }
+        },
+        "create": {
+          "metaTitle": "New purchase",
+          "breadcrumb": "New purchase",
+          "title": "New purchase order",
+          "subtitle": "Start a new purchase order from a supplier",
+          "supplier": {
+            "label": "Select supplier",
+            "placeholder": "Choose a supplier…"
+          },
+          "info": "You can add products and details after creating the draft.",
+          "submit": "Create draft",
+          "creatingDraft": "Creating draft…",
+          "errors": {
+            "suppliersLoadFailed": "Failed to load suppliers.",
+            "createFailed": "Failed to create purchase. Please try again."
+          }
+        },
+        "detail": {
+          "metaTitle": "Purchase order",
+          "breadcrumb": "Order #{id}",
+          "title": "Purchase order",
+          "addProducts": "Add products",
+          "cards": {
+            "supplier": "Supplier",
+            "noSupplier": "No supplier assigned",
+            "summary": "Summary",
+            "itemsOrdered": "Items ordered",
+            "itemsReceived": "Items received",
+            "estimatedTotal": "Estimated total cost",
+            "notesPlaceholder": "Notes & attachments coming soon"
+          },
+          "items": {
+            "title": "Order items",
+            "count": "{count} items",
+            "loading": "Loading order items…",
+            "unknownProduct": "Unknown product",
+            "sku": "SKU",
+            "defaultVariant": "Default variant",
+            "empty": {
+              "title": "No items yet",
+              "hint": "Add products to this purchase order."
+            },
+            "table": {
+              "product": "Product",
+              "ordered": "Ordered",
+              "unitCost": "Unit cost",
+              "received": "Received",
+              "receiveNow": "Receive now",
+              "total": "Total",
+              "qtyPlaceholder": "Qty",
+              "receiveStock": "Receive stock",
+              "removeItem": "Remove item",
+              "totalOrderValue": "Total order value",
+              "salePriceMode": {
+                "replace": "Update sell price",
+                "weighted": "Avg cost"
+              }
+            }
+          },
+          "deleteModal": {
+            "title": "Delete purchase order",
+            "message": "Are you sure you want to delete this purchase order? This action cannot be undone.",
+            "confirm": "Delete order"
+          },
+          "errors": {
+            "loadFailed": "Failed to load purchase",
+            "addItemsFailed": "Failed to add items. Some items may have been skipped.",
+            "receiveFailed": "Failed to receive stock",
+            "updateItemFailed": "Failed to update item",
+            "removeConfirm": "Are you sure you want to remove this item?",
+            "removeItemFailed": "Failed to remove item",
+            "deleteFailed": "Failed to delete order"
+          }
+        }
+      },
+      "sales": {
+        "index": {
+          "title": "Sales",
+          "subtitle": "Completed orders (DELIVERED)",
+          "filters": {
+            "searchLabel": "Search",
+            "searchPlaceholder": "Search by customer name, phone, or order id…"
+          },
+          "loading": "Loading sales…",
+          "empty": {
+            "title": "No sales found",
+            "hint": "Delivered orders will appear here",
+            "hintFiltered": "Try adjusting your search"
+          },
+          "table": {
+            "saleId": "Sale ID",
+            "customer": "Customer",
+            "phone": "Phone",
+            "total": "Total",
+            "completed": "Completed",
+            "actions": "Actions"
+          }
+        },
+        "detail": {
+          "metaTitle": "Sale",
+          "breadcrumb": "Sale #{id}",
+          "loading": "Loading sale…",
+          "sections": {
+            "saleInfo": "Sale information",
+            "client": "Client",
+            "items": "Items"
+          },
+          "fields": {
+            "saleId": "Sale ID",
+            "date": "Date",
+            "customerName": "Name",
+            "customerPhone": "Phone",
+            "guest": "Guest"
+          },
+          "itemsTable": {
+            "product": "Product",
+            "variant": "Variant",
+            "qty": "Qty",
+            "price": "Price",
+            "total": "Total",
+            "defaultVariant": "Default"
+          },
+          "notFound": {
+            "title": "Sale not found",
+            "hint": "This sale may have been deleted."
+          }
+        }
+      },
+      "settings": {
+        "appearance": {
+          "metaTitle": "Appearance",
+          "title": "Appearance settings",
+          "subtitle": "Customize the look and feel of your storefront."
+        },
+        "homepage": {
+          "metaTitle": "Homepage",
+          "title": "Homepage settings",
+          "subtitle": "Manage your storefront homepage sections and carousel."
+        },
+        "contact": {
+          "metaTitle": "Contact info",
+          "title": "Contact info",
+          "subtitle": "Manage the contact details shown in your storefront footer."
+        },
+        "functional": {
+          "metaTitle": "Functional",
+          "title": "Functional settings",
+          "subtitle": "Manage core functionality and features of your store."
+        }
+      },
+      "suppliers": {
+        "index": {
+          "title": "Suppliers",
+          "subtitle": "Manage your suppliers",
+          "addSupplier": "Add supplier",
+          "filters": {
+            "searchLabel": "Search",
+            "searchPlaceholder": "Search suppliers…",
+            "sortHint": "Sort by name, email or phone using the table headers."
+          },
+          "loading": "Loading suppliers…",
+          "empty": {
+            "title": "No suppliers",
+            "hint": "Get started by creating a new supplier.",
+            "newSupplier": "New supplier"
+          },
+          "sort": {
+            "sortBy": "Sort by:",
+            "name": "Name"
+          },
+          "table": {
+            "name": "Name",
+            "info": "Info",
+            "address": "Address"
+          },
+          "pagination": {
+            "showing": "Showing {from} to {to} of {total} results"
+          },
+          "deleteModal": {
+            "title": "Delete supplier",
+            "message": "Are you sure you want to delete this supplier?",
+            "messageWithName": "Are you sure you want to delete supplier “{name}”?",
+            "error": "Failed to delete supplier. Please try again."
+          }
+        },
+        "create": {
+          "metaTitle": "Create supplier",
+          "breadcrumb": "Create supplier",
+          "title": "Create new supplier",
+          "subtitle": "Add a supplier to your database",
+          "submit": "Create supplier",
+          "errors": {
+            "createFailed": "Failed to create supplier. Please try again."
+          }
+        },
+        "edit": {
+          "metaTitle": "Edit supplier",
+          "breadcrumb": "Edit supplier",
+          "title": "Edit supplier",
+          "subtitle": "Update supplier information",
+          "loading": "Loading supplier…",
+          "errors": {
+            "loadFailed": "Failed to load supplier details.",
+            "updateFailed": "Failed to update supplier. Please try again."
+          }
+        }
+      }
+    }
+  }
+}

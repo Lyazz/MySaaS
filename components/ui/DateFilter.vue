@@ -2,7 +2,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-end">
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">
-        Start Date
+        {{ t('admin.common.startDate') }}
       </label>
       <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -19,7 +19,7 @@
 
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">
-        End Date
+        {{ t('admin.common.endDate') }}
       </label>
       <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -37,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'global' })
+
 const props = defineProps<{
   startDate?: string
   endDate?: string

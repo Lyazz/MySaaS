@@ -7,6 +7,7 @@ const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -35,8 +36,8 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 // Build dynamic menu
 const categories = computed(() => {
     const base = [
-        { name: 'Home', href: '/' },
-        { name: 'Shop', href: '/products' },
+        { name: storefrontContent.value.nav.home, href: '/' },
+        { name: storefrontContent.value.nav.shop, href: '/products' },
     ]
     
     // Add top 3 categories
@@ -47,7 +48,7 @@ const categories = computed(() => {
     }
     
     // Add Contact at the end
-    base.push({ name: 'Contact', href: '/contact' }) // contact is usually static or handled elsewhere
+    base.push({ name: storefrontContent.value.nav.contact, href: '/contact' }) // contact is usually static or handled elsewhere
     return base
 })
 const props = defineProps<{
@@ -122,9 +123,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                <div class="h-6 w-px bg-stone-200 hidden lg:block" />
 
                <div class="flex items-center gap-2">
+                 <LocaleSwitcher class="hidden lg:inline-flex" />
                   <button
                     class="p-3 text-stone-500 hover:text-brand-700 hover:bg-white rounded-full transition-all"
-                    title="Account"
+                    :title="storefrontContent.header.accountTitle"
                   >
                     <Icon name="lucide:user" class="w-5 h-5" />
                   </button>
@@ -195,36 +197,36 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
             <!-- Links Column (Contact) -->
             <div>
-              <h4 class="font-wellness font-semibold text-stone-900 mb-6">Contact</h4>
+              <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.contact }}</h4>
               <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-brand-700 transition-colors">Contact Us</a></li>
-                <li><a href="#" class="hover:text-brand-700 transition-colors">About Us</a></li>
+                <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.contactUs }}</a></li>
+                <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.aboutUs }}</a></li>
               </ul>
             </div>
 
             <!-- Terms & Privacy Column -->
             <div>
-               <h4 class="font-wellness font-semibold text-stone-900 mb-6">Terms & Privacy</h4>
+               <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.termsPrivacy }}</h4>
                <ul class="space-y-3 text-sm">
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">Terms of Service</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">Privacy Policy</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">Return Policy</a></li>
+                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.termsOfService }}</a></li>
+                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.privacyPolicy }}</a></li>
+                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.returnPolicy }}</a></li>
                </ul>
             </div>
 
             <!-- Help Column -->
             <div>
-               <h4 class="font-wellness font-semibold text-stone-900 mb-6">Help</h4>
+               <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.help }}</h4>
                <ul class="space-y-3 text-sm">
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">FAQ</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">Shipping Info</a></li>
+                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.faq }}</a></li>
+                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.shippingInfo }}</a></li>
                </ul>
             </div>
           </div>
 
           <!-- Bottom -->
           <div class="pt-8 border-t border-stone-200 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-stone-400">
-            <div>&copy; 2026 {{ tenantName }}. All rights reserved.</div>
+            <div>{{ storefrontContent.footer.copyright(tenantName) }}</div>
             <div class="hidden md:block">
                <!-- Payment icons or other bottom elements could go here -->
             </div>

@@ -3,21 +3,22 @@ import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
 </script>
 
 <template>
   <div class="min-h-[80vh] px-4 py-12 bg-gradient-to-b from-amber-50/30 to-white">
     <div class="max-w-5xl mx-auto">
-        <h1 class="font-cozy font-black text-4xl text-slate-800 text-center mb-12">Your Basket</h1>
+        <h1 class="font-cozy font-black text-4xl text-slate-800 text-center mb-12">{{ storefrontContent.cart.title }}</h1>
 
         <div v-if="!cartStore.hasItems" class="text-center py-20 bg-white/80 backdrop-blur-sm rounded-[3rem] shadow-soft">
             <div class="w-24 h-24 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-300">
                 <Icon name="lucide:handbag" class="w-10 h-10" />
             </div>
-            <h2 class="font-bold text-xl text-slate-600 mb-6">Seems a bit light in here.</h2>
+            <h2 class="font-bold text-xl text-slate-600 mb-6">{{ storefrontContent.cart.empty.subtitle }}</h2>
             <NuxtLink to="/products" class="inline-block bg-brand-500 text-white font-bold px-8 py-3 rounded-full hover:bg-brand-600 transition-colors shadow-lg shadow-brand-200">
-                Start Browsing
+                {{ storefrontContent.cart.empty.cta }}
             </NuxtLink>
         </div>
 
@@ -63,7 +64,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                                     </button>
                                 </div>
                                 <div class="font-bold text-slate-700">
-                                    {{ formatCurrency(item.price * item.quantity) }}
+                                    {{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}
                                 </div>
                             </div>
                         </div>
@@ -78,22 +79,22 @@ const { currencyCode, format: formatCurrency } = useCurrency()
             <!-- Summary -->
             <section class="lg:col-span-4">
                 <div class="bg-white p-8 rounded-[2rem] shadow-soft sticky top-24">
-                    <h2 class="font-bold text-slate-800 text-xl mb-6">Summary</h2>
+                    <h2 class="font-bold text-slate-800 text-xl mb-6">{{ storefrontContent.cart.summary.title }}</h2>
                     <dl class="space-y-4 text-sm font-medium text-slate-500 mb-8">
                          <div class="flex justify-between">
-                            <dt>Subtotal</dt>
+                            <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
                             <dd class="text-slate-700 font-bold">{{ formatCurrency(cartStore.total) }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt>Shipping</dt>
-                            <dd class="text-slate-400 text-xs">Calculated at checkout</dd>
+                            <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
+                            <dd class="text-slate-400 text-xs">{{ storefrontContent.cart.summary.shippingHint }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt>Tax</dt>
+                            <dt>{{ storefrontContent.cart.summary.tax }}</dt>
                             <dd class="text-slate-700">{{ formatCurrency(0) }}</dd>
                         </div>
                         <div class="flex justify-between pt-4 border-t border-slate-100 text-lg">
-                            <dt class="text-slate-800 font-bold">Total</dt>
+                            <dt class="text-slate-800 font-bold">{{ storefrontContent.cart.summary.total }}</dt>
                             <dd class="text-brand-500 font-bold">{{ formatCurrency(cartStore.total) }}</dd>
                         </div>
                     </dl>
@@ -102,14 +103,14 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                         to="/checkout"
                         class="block w-full text-center bg-slate-800 text-white font-bold py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-brand-500 hover:shadow-brand-300 hover:-translate-y-1 transition-all duration-300"
                     >
-                        Proceed to Checkout
+                        {{ storefrontContent.cart.actions.proceedToCheckout }}
                     </NuxtLink>
 
                     <NuxtLink
                       to="/products"
                       class="block w-full text-center text-slate-500 hover:text-brand-500 font-medium py-3 mt-4 transition-colors"
                     >
-                      Continue Shopping
+                      {{ storefrontContent.actions.continueShopping }}
                     </NuxtLink>
                 </div>
             </section>

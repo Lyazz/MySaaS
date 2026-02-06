@@ -74,6 +74,7 @@ describe('Tenancy (DB-level constraints)', () => {
         await prisma.orderItem.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.order.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
 
+        await prisma.productBundleDeal.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.productOptionValue.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.productOption.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.productImage.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
@@ -136,5 +137,17 @@ describe('Tenancy (DB-level constraints)', () => {
             })
         ).rejects.toHaveProperty('code', 'P2003')
     })
-})
 
+    it('prevents creating a ProductBundleDeal that links to another tenant product', async () => {
+        await expect(
+            prisma.productBundleDeal.create({
+                data: {
+                    tenantId: tenantAId,
+                    productId: productBId,
+                    bundleQty: 2,
+                    bundlePrice: 150
+                }
+            })
+        ).rejects.toHaveProperty('code', 'P2003')
+    })
+})

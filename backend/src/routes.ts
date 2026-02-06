@@ -26,6 +26,9 @@ import salesRouter from './modules/sales/routes'
 import customersRouter from './modules/customers/routes'
 import posRouter from './modules/pos/routes'
 import contactInfosRouter from './modules/contact-infos/routes'
+import integrationsRouter from './modules/integrations/routes'
+import metaPixelsRouter from './modules/meta-pixels/routes'
+import integrationsPublicRouter from './modules/integrations/public.routes'
 
 const router = Router()
 
@@ -39,6 +42,7 @@ router.use('/orders', publicOrdersRouter)
 router.use('/store', publicStoreSettingsRouter)
 router.use('/store', publicHomepageSettingsRouter)
 router.use('/store', publicContactInfosRouter)
+router.use('/pixel', integrationsPublicRouter)
 
 // Admin Modules
 // Note: These modules have internal RBAC checks, but we could wrap them here too.
@@ -61,6 +65,8 @@ router.use('/admin/store-settings', storeSettingsRouter)
 router.use('/admin/homepage-settings', homepageSettingsRouter)
 router.use('/upload', uploadRouter)
 router.use('/', deliveryRouter)
+router.use('/admin/integrations', integrationsRouter)
+router.use('/admin/meta-pixels', metaPixelsRouter)
 
 // Super Admin
 router.use('/super-admin', superAdminRouter)

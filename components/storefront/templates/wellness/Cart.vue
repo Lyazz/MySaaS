@@ -9,17 +9,17 @@
           <Icon name="lucide:shopping-bag" class="h-20 w-20 text-stone-300" />
         </div>
         <h2 class="text-4xl font-wellness text-stone-900 mb-4">
-          Your cart is empty
+          {{ storefrontContent.cart.empty.title }}
         </h2>
         <p class="max-w-xl mx-auto text-lg text-stone-500 font-light mb-10">
-          Looks like you haven't added anything to your cart yet. Discover our rituals.
+          {{ storefrontContent.cart.empty.subtitle }}
         </p>
         <div>
           <NuxtLink
             to="/products"
             class="inline-flex items-center px-10 py-4 text-base font-medium rounded-full shadow-lg text-white bg-stone-900 hover:bg-brand-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
           >
-            Start Shopping
+            {{ storefrontContent.cart.empty.cta }}
           </NuxtLink>
         </div>
       </div>
@@ -31,9 +31,9 @@
         <section class="lg:col-span-7">
           <div class="flex items-end justify-between border-b border-stone-200 pb-6 mb-10">
             <h1 class="text-4xl font-wellness text-stone-900">
-              Shopping Cart
+              {{ storefrontContent.cart.title }}
             </h1>
-            <span class="text-stone-500 font-medium bg-stone-100 px-4 py-1 rounded-full text-sm">{{ cartStore.itemCount }} items</span>
+            <span class="text-stone-500 font-medium bg-stone-100 px-4 py-1 rounded-full text-sm">{{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}</span>
           </div>
 
           <ul
@@ -61,7 +61,7 @@
                   </div>
                 </div>
 
-                <div class="ml-8 flex flex-1 flex-col justify-between">
+                <div class="ml-8 rtl:ml-0 rtl:mr-8 flex flex-1 flex-col justify-between">
                   <div class="flex justify-between items-start">
                     <div class="min-w-0 flex-1">
                       <h3 class="text-xl font-wellness text-stone-900 hover:text-brand-700 transition-colors mb-2">
@@ -70,7 +70,7 @@
                         </NuxtLink>
                       </h3>
                       <p class="text-sm text-stone-500 font-light">
-                        {{ item.variantName || 'Standard' }}
+                        {{ item.variantName || storefrontContent.cart.item.standardItem }}
                       </p>
                     </div>
                     <button
@@ -78,13 +78,13 @@
                       class="-m-2 p-3 text-stone-400 hover:text-red-500 transition-colors rounded-full hover:bg-stone-50"
                       @click="cartStore.removeItem(item.productId, item.variantId)"
                     >
-                      <span class="sr-only">Remove</span>
+                      <span class="sr-only">{{ storefrontContent.cart.item.remove }}</span>
                       <Icon name="lucide:trash-2" class="h-5 w-5" />
                     </button>
                   </div>
 
                   <div class="flex items-center justify-between pt-4">
-                     <div class="flex items-center space-x-4 bg-stone-50 rounded-full px-4 py-2 border border-stone-200">
+                     <div class="flex items-center space-x-4 rtl:space-x-reverse bg-stone-50 rounded-full px-4 py-2 border border-stone-200">
                       <button
                         :disabled="item.quantity <= 1"
                         class="text-stone-400 hover:text-stone-900 disabled:opacity-30 disabled:hover:text-stone-400 transition-colors"
@@ -103,7 +103,7 @@
                     </div>
 
                     <p class="text-xl font-wellness text-stone-900">
-                      {{ formatCurrency(item.price * item.quantity) }}
+                      {{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}
                     </p>
                   </div>
                 </div>
@@ -121,13 +121,13 @@
             id="summary-heading"
             class="text-2xl font-wellness text-stone-900 mb-8"
           >
-            Order Summary
+            {{ storefrontContent.cart.summary.title }}
           </h2>
 
           <div class="space-y-4">
             <div class="flex items-center justify-between border-b border-stone-100 pb-4">
               <dt class="text-stone-600">
-                Subtotal
+                {{ storefrontContent.cart.summary.subtotal }}
               </dt>
               <dd class="font-medium text-stone-900">
                 {{ formatCurrency(cartStore.total) }}
@@ -135,15 +135,15 @@
             </div>
             <div class="flex items-center justify-between border-b border-stone-100 pb-4">
               <dt class="flex items-center text-stone-500 font-light">
-                <span>Shipping estimate</span>
+                <span>{{ storefrontContent.cart.summary.shipping }}</span>
               </dt>
               <dd class="text-sm font-medium text-stone-400 italic">
-                Calculated at checkout
+                {{ storefrontContent.cart.summary.shippingHint }}
               </dd>
             </div>
             <div class="flex items-center justify-between pt-4">
               <dt class="text-xl font-wellness text-stone-900">
-                Total
+                {{ storefrontContent.cart.summary.total }}
               </dt>
               <dd class="text-3xl font-wellness text-stone-900">
                 {{ formatCurrency(cartStore.total) }}
@@ -156,14 +156,14 @@
               to="/checkout"
               class="w-full flex items-center justify-center rounded-full bg-stone-900 px-8 py-4 text-base font-bold text-white shadow-lg hover:bg-brand-700 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
             >
-              Proceed to Checkout
+              {{ storefrontContent.cart.actions.proceedToCheckout }}
             </NuxtLink>
             
             <NuxtLink
               to="/products"
               class="w-full flex items-center justify-center rounded-full border border-stone-200 bg-white px-8 py-4 text-base font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all duration-300"
             >
-              Continue Shopping
+              {{ storefrontContent.actions.continueShopping }}
             </NuxtLink>
           </div>
         </section>
@@ -177,6 +177,7 @@ import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
 </script>
 

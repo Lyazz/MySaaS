@@ -1,5 +1,9 @@
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
+import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
+import { TelegramService } from '../integrations/telegram.service'
+
+const telegramService = new TelegramService()
 
 export class OrderValidationError extends Error {
     statusCode: number
@@ -98,6 +102,58 @@ export class OrdersService {
                 }
             }
         })
+    }
+
+    async getPublicPixelPayload(tenantId: string, orderId: string) {
+        const order = await prisma.order.findFirst({
+            where: { tenantId, id: orderId },
+            select: {
+                id: true,
+                totalAmount: true,
+                items: {
+                    select: {
+                        productId: true,
+                        quantity: true,
+                        price: true
+                    }
+                }
+            }
+        })
+
+        if (!order) return null
+
+        const storeSettings = await prisma.storeSettings.findUnique({
+            where: { tenantId },
+            select: { currencyCode: true }
+        })
+
+        const currency = storeSettings?.currencyCode || 'DZD'
+        const contents = order.items.map((i) => ({ id: i.productId, quantity: i.quantity, item_price: i.price }))
+        const numItems = order.items.reduce((sum, i) => sum + (i.quantity || 0), 0)
+
+        const productIds = Array.from(new Set(order.items.map((i) => i.productId).filter(Boolean)))
+        const pixelRows = productIds.length
+            ? await prisma.productMetaPixel.findMany({
+                  where: { tenantId, productId: { in: productIds }, metaPixel: { isActive: true } },
+                  select: { metaPixel: { select: { pixelId: true } } }
+              })
+            : []
+        const pixelIds = Array.from(
+            new Set(
+                pixelRows
+                    .map((r) => r.metaPixel?.pixelId)
+                    .filter((p): p is string => typeof p === 'string' && /^[0-9]+$/.test(p))
+            )
+        )
+
+        return {
+            orderId: order.id,
+            value: order.totalAmount,
+            currency,
+            numItems,
+            contents,
+            pixelIds
+        }
     }
 
     async updateStatus(tenantId: string, id: string, status: string) {
@@ -571,7 +627,28 @@ export class OrdersService {
             }
         }
 
-        let total = 0
+        const now = new Date()
+        const activeBundleDeals = await prisma.productBundleDeal.findMany({
+            where: {
+                tenantId: input.tenantId,
+                productId: { in: productIds },
+                isActive: true,
+                AND: [
+                    { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+                    { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }
+                ]
+            },
+            select: { productId: true, bundleQty: true, bundlePrice: true }
+        })
+
+        const bundleDealsByProductId = new Map<string, { bundleQty: number; bundlePrice: number }[]>()
+        for (const d of activeBundleDeals) {
+            const arr = bundleDealsByProductId.get(d.productId) ?? []
+            arr.push({ bundleQty: d.bundleQty, bundlePrice: Number(d.bundlePrice) })
+            bundleDealsByProductId.set(d.productId, arr)
+        }
+
+        let totalCents = 0
         const validatedItems = normalizedItems.map((item) => {
             const product = productMap.get(item.productId)!
             const variant =
@@ -593,13 +670,25 @@ export class OrdersService {
                 throw new OrderValidationError(400, `Insufficient stock for ${product.title}`)
             }
 
-            total += price * item.quantity
+            const unitPriceCents = moneyToCents(price)
+            const bundleDeals = bundleDealsByProductId.get(product.id) ?? []
+            const pricing = computeBestBundleTotal({
+                quantity: item.quantity,
+                unitPriceCents,
+                bundleDeals: bundleDeals.map((d) => ({
+                    bundleQty: d.bundleQty,
+                    bundlePriceCents: moneyToCents(d.bundlePrice)
+                }))
+            })
+            totalCents += pricing.bestTotalCents
 
             return {
                 productId: product.id,
                 variantId: variant.id,
                 quantity: item.quantity,
                 price,
+                lineTotal: centsToMoney(pricing.bestTotalCents),
+                pricingBreakdown: pricing,
                 trackInventory,
                 reserved: variant.reserved,
                 safetyStock: variant.safetyStock,
@@ -633,7 +722,7 @@ export class OrdersService {
                     shippingCommuneCode: input.shippingCommuneCode || null,
                     shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
                     shippingNotes: input.shippingNotes || null,
-                    totalAmount: total,
+                    totalAmount: centsToMoney(totalCents),
                     status: 'PENDING'
                 }
             })
@@ -645,7 +734,9 @@ export class OrdersService {
                     productId: item.productId,
                     variantId: item.variantId,
                     quantity: item.quantity,
-                    price: item.price
+                    price: item.price,
+                    lineTotal: item.lineTotal,
+                    pricingBreakdown: item.pricingBreakdown as any
                 }))
             })
 
@@ -667,7 +758,8 @@ export class OrdersService {
             return createdOrder
         })
 
-        return prisma.order.findFirst({
+        // Fire and forget notification
+        const finalOrder = await prisma.order.findFirst({
             where: { id: order.id, tenantId: input.tenantId },
             include: {
                 items: {
@@ -675,5 +767,11 @@ export class OrdersService {
                 }
             }
         })
+
+        if (finalOrder) {
+            telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
+        }
+
+        return finalOrder
     }
 }

@@ -17,9 +17,19 @@ All requests must be tenant-scoped by resolved tenant (server-side).
 - POST /api/admin/products
 - PATCH /api/admin/products/:id
 - DELETE /api/admin/products/:id
+- GET /api/admin/products/export.csv?ids=comma,separated,ids
+- POST /api/admin/products/import.csv (multipart form-data: file)
+- PATCH /api/admin/products/bulk
+- POST /api/admin/products/:id/duplicate
 
 - GET /api/admin/orders?status=
 - PATCH /api/admin/orders/:id/status
+
+- GET /api/admin/inventory/variants
+- GET /api/admin/inventory/variants/export.csv
+- POST /api/admin/inventory/variants/import.csv (multipart form-data: file)
+- PATCH /api/admin/inventory/variants/bulk
+- PATCH /api/admin/inventory/variants/:id
 
 - GET /api/admin/settings/theme
 - PATCH /api/admin/settings/theme

@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-slate-800">Homepage Settings</h1>
-      <p class="text-slate-600 mt-1">Manage your storefront homepage sections and carousel.</p>
+      <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.homepage.title') }}</h1>
+      <p class="text-slate-600 mt-1">{{ t('admin.pages.settings.homepage.subtitle') }}</p>
     </div>
 
     <HomepageSettingsForm />
@@ -15,7 +15,8 @@ import HomepageSettingsForm from '~/components/admin/HomepageSettingsForm.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Homepage Settings'
+  titleKey: 'admin.pages.settings.homepage.metaTitle'
 })
-</script>
 
+const { t } = useI18n({ useScope: 'global' })
+</script>

@@ -16,6 +16,7 @@ type Product = {
   stock: number
   isActive: boolean
   images?: string[]
+  metaPixelIds?: string[]
 }
 
 const productUrl = useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`)
@@ -40,6 +41,29 @@ useTenantSeo({
   title: `${product.value?.title ?? slug}`,
   description: product.value?.description ?? undefined,
   image: mainImage.value
+})
+
+const metaPixel = useMetaPixel()
+const lastViewedProductId = ref<string | null>(null)
+onMounted(() => {
+  watchEffect(() => {
+    const id = product.value?.id
+    if (!id) return
+    if (lastViewedProductId.value === id) return
+    lastViewedProductId.value = id
+
+    const value = Number(product.value?.price || 0) || undefined
+    const extraPixelIds = Array.isArray((product.value as any)?.metaPixelIds) ? ((product.value as any).metaPixelIds as string[]) : []
+    metaPixel.viewContent({
+      productId: id,
+      value,
+      currency: currencyCode.value,
+      contents: [{ id, quantity: 1, item_price: value }],
+      pixelIds: extraPixelIds,
+      // If this product has assigned pixels, fire ViewContent only to those pixels (not the global one).
+      includeGlobal: extraPixelIds.length === 0
+    })
+  })
 })
 
 // Schema.org Product

@@ -7,6 +7,7 @@ const cartStore = useCartStore()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
+const storefrontContent = useStorefrontContent()
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -33,8 +34,8 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 // Build dynamic menu
 const categories = computed(() => {
     const base = [
-        { name: 'Home', href: '/' },
-        { name: 'Shop', href: '/products' },
+        { name: storefrontContent.value.nav.home, href: '/' },
+        { name: storefrontContent.value.nav.shop, href: '/products' },
     ]
     
     // Add top 3 categories
@@ -45,7 +46,7 @@ const categories = computed(() => {
     }
     
     // Add Contact at the end
-    base.push({ name: 'Contact', href: '/contact' }) 
+    base.push({ name: storefrontContent.value.nav.contact, href: '/contact' }) 
     return base
 })
 
@@ -111,7 +112,7 @@ const props = defineProps<{
                <div class="hidden md:flex relative group items-center">
                   <input 
                     type="text" 
-                    placeholder="Search..." 
+                    :placeholder="storefrontContent.search.placeholder"
                     class="w-48 border-b border-slate-300 bg-transparent py-1 text-sm focus:border-slate-900 focus:ring-0 placeholder:text-slate-400 text-slate-900 transition-all outline-none"
                   >
                   <Icon name="lucide:search" class="w-4 h-4 text-slate-900 absolute right-0 pointer-events-none" />
@@ -120,15 +121,16 @@ const props = defineProps<{
               <div class="h-4 w-px bg-slate-200 hidden lg:block" />
 
               <div class="flex items-center gap-4">
+                <LocaleSwitcher class="hidden lg:inline-flex" />
                 <button
                   class="text-slate-900 hover:text-slate-600 transition-colors"
-                  title="Wishlist"
+                  :title="storefrontContent.header.wishlistTitle"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
                 </button>
                 <button
                   class="text-slate-900 hover:text-slate-600 transition-colors"
-                  title="Account"
+                  :title="storefrontContent.header.accountTitle"
                 >
                   <Icon name="lucide:user" class="w-5 h-5" />
                 </button>
@@ -197,42 +199,36 @@ const props = defineProps<{
             <!-- Links Column -->
             <div>
               <h4 class="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6">
-                Company
+                {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-4 text-sm text-slate-500">
-                <li><a href="#" class="hover:text-slate-900 transition-colors">About</a></li>
-                <li><a href="#" class="hover:text-slate-900 transition-colors">Contact</a></li>
-                <li><a href="#" class="hover:text-slate-900 transition-colors">Careers</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">{{ storefrontContent.footer.aboutUs }}</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">{{ storefrontContent.footer.contactUs }}</a></li>
               </ul>
             </div>
             <div>
               <h4 class="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6">
-                Legal
+                {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-4 text-sm text-slate-500">
-                <li><a href="#" class="hover:text-slate-900 transition-colors">Terms of Service</a></li>
-                <li><a href="#" class="hover:text-slate-900 transition-colors">Privacy Policy</a></li>
-                <li><a href="#" class="hover:text-slate-900 transition-colors">Return Policy</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">{{ storefrontContent.footer.termsOfService }}</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">{{ storefrontContent.footer.privacyPolicy }}</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">{{ storefrontContent.footer.returnPolicy }}</a></li>
               </ul>
             </div>
             <div>
               <h4 class="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6">
-                Help
+                {{ storefrontContent.footer.help }}
               </h4>
               <ul class="space-y-4 text-sm text-slate-500">
-                <li><a href="#" class="hover:text-slate-900 transition-colors">FAQ</a></li>
-                <li><a href="#" class="hover:text-slate-900 transition-colors">Shipping</a></li>
-                <li><a href="#" class="hover:text-slate-900 transition-colors">Returns</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">{{ storefrontContent.footer.faq }}</a></li>
+                <li><a href="#" class="hover:text-slate-900 transition-colors">{{ storefrontContent.footer.shippingInfo }}</a></li>
               </ul>
             </div>
           </div>
 
           <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-            <p>&copy; 2026 {{ tenantName }}. All rights reserved.</p>
-            <div class="flex gap-4">
-                <span>Privacy & Cookies</span>
-                <span>Accessibility</span>
-            </div>
+            <p>{{ storefrontContent.footer.copyright(tenantName) }}</p>
           </div>
         </div>
       </footer>

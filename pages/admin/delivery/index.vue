@@ -4,10 +4,10 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">
-          Delivery Companies
+          {{ t('admin.pages.delivery.title') }}
         </h2>
         <p class="text-gray-600 mt-1">
-          Manage delivery providers and pricing per Wilaya
+          {{ t('admin.pages.delivery.subtitle') }}
         </p>
       </div>
     </div>
@@ -38,57 +38,57 @@
                         class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
                         :class="[provider.enabled ? 'bg-green-500' : 'bg-gray-200']"
                         role="switch" 
-                        :aria-checked="provider.enabled"
-                        @click="toggleProvider(provider, $event)"
-                    >
-                        <span class="sr-only">Use setting</span>
-                        <span 
-                            aria-hidden="true" 
-                            class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+	                        :aria-checked="provider.enabled"
+	                        @click="toggleProvider(provider, $event)"
+	                    >
+	                        <span class="sr-only">{{ t('admin.pages.delivery.providers.toggleLabel') }}</span>
+	                        <span 
+	                            aria-hidden="true" 
+	                            class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
                             :class="[provider.enabled ? 'translate-x-5' : 'translate-x-0']"
                         ></span>
                     </button>
                  </div>
             </div>
 
-            <div class="flex justify-between items-center text-sm">
-                <span class="text-gray-500">58 Wilayas supported</span>
-                <span class="text-teal-600 font-medium">Manage Pricing &rarr;</span>
-            </div>
-        </div>
-      </div>
-    </div>
+	            <div class="flex justify-between items-center text-sm">
+	                <span class="text-gray-500">{{ t('admin.pages.delivery.providers.wilayasSupported', { count: 58 }) }}</span>
+	                <span class="text-teal-600 font-medium">{{ t('admin.pages.delivery.providers.managePricing') }} &rarr;</span>
+	            </div>
+	        </div>
+	      </div>
+	    </div>
 
     <!-- Pricing Configuration -->
-    <div v-if="selectedProvider" class="bg-white rounded-lg shadow">
-        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-            <div>
-                <h3 class="text-lg font-medium text-gray-900">Pricing Configuration: {{ selectedProvider.name }}</h3>
-                <p class="text-sm text-gray-500">Set standard delivery rates for each Wilaya. These rates apply to all communes within the Wilaya.</p>
-            </div>
-            <button 
-                @click="saveRates" 
-                :disabled="saving"
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50"
-            >
-                {{ saving ? 'Saving...' : 'Save Changes' }}
-            </button>
-        </div>
+	    <div v-if="selectedProvider" class="bg-white rounded-lg shadow">
+	        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+	            <div>
+	                <h3 class="text-lg font-medium text-gray-900">{{ t('admin.pages.delivery.pricing.title', { provider: selectedProvider.name }) }}</h3>
+	                <p class="text-sm text-gray-500">{{ t('admin.pages.delivery.pricing.hint') }}</p>
+	            </div>
+	            <button 
+	                @click="saveRates" 
+	                :disabled="saving"
+	                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50"
+	            >
+	                {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
+	            </button>
+	        </div>
         
-        <div v-if="loadingRates" class="p-12 text-center">
-             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-             <p class="mt-2 text-gray-500">Loading rates...</p>
-        </div>
+	        <div v-if="loadingRates" class="p-12 text-center">
+	             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+	             <p class="mt-2 text-gray-500">{{ t('admin.pages.delivery.pricing.loading') }}</p>
+	        </div>
 
         <div v-else class="p-0">
              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Code</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wilaya Name</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Price (DZD)</th>
-                    </tr>
-                </thead>
+	                <thead class="bg-gray-50">
+	                    <tr>
+	                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">{{ t('admin.pages.delivery.pricing.table.code') }}</th>
+	                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ t('admin.pages.delivery.pricing.table.wilaya') }}</th>
+	                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">{{ t('admin.pages.delivery.pricing.table.price') }}</th>
+	                    </tr>
+	                </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <tr v-for="wilaya in wilayas" :key="wilaya.code" class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{{ wilaya.code }}</td>
@@ -120,10 +120,11 @@ import { useAuthStore } from '~/stores/auth'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Delivery Companies'
+  titleKey: 'admin.pages.delivery.metaTitle'
 })
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 
 interface Provider {
     key: string
@@ -198,7 +199,7 @@ async function toggleProvider(provider: Provider, event: Event) {
         // Revert on error
         provider.enabled = !provider.enabled
         console.error('Failed to update provider status', e)
-        alert('Failed to update provider status')
+        alert(t('admin.pages.delivery.errors.updateProviderFailed'))
     }
 }
 
@@ -218,7 +219,7 @@ async function fetchRates(providerKey: string) {
         })
         
         // Map backend rates to model (assuming rates array has wilayaCode and price)
-        rates.forEach(r => {
+        rates.forEach((r: any) => {
             if (r.wilayaCode) {
                  modelRates.value[r.wilayaCode] = Number(r.price)
             }
@@ -251,10 +252,9 @@ async function saveRates() {
         // Show success notification (optional, maybe simple alert for now)
     } catch (e) {
         console.error('Failed to save rates', e)
-        alert('Failed to save pricing')
+        alert(t('admin.pages.delivery.errors.saveFailed'))
     } finally {
         saving.value = false
     }
 }
 </script>
-

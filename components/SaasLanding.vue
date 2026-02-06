@@ -3,16 +3,18 @@ import { computed, ref, onMounted } from 'vue'
 import { Vue3Marquee } from 'vue3-marquee'
 import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
 
+const { t } = useI18n({ useScope: 'global' })
+
 useSeoMeta({
-  title: 'Swekly - The Future of Commerce',
-  description: 'The all-in-one platform to build, sell, and scale your B2B or B2C business with enterprise-grade tools.',
+  title: computed(() => t('saasLanding.seo.title')),
+  description: computed(() => t('saasLanding.seo.description'))
 })
 
 // --- Stats Data ---
 const stats = ref([
-  { label: 'Active Merchants', value: 0, target: 1200, suffix: '+' },
-  { label: 'Revenue Generated', value: 0, target: 50, suffix: 'M+' }, // Example: 50M+
-  { label: 'Uptime', value: 0, target: 99, suffix: '.9%' }
+  { labelKey: 'saasLanding.stats.activeMerchants', value: 0, target: 1200, suffix: '+' },
+  { labelKey: 'saasLanding.stats.revenueGenerated', value: 0, target: 50, suffix: 'M+' }, // Example: 50M+
+  { labelKey: 'saasLanding.stats.uptime', value: 0, target: 99, suffix: '.9%' }
 ])
 
 const statsSection = ref<HTMLElement | null>(null)
@@ -51,32 +53,32 @@ const startCounter = () => {
 // --- Features (Bento Grid) ---
 const features = [
   {
-    title: 'Store Builder',
-    description: 'Drag-and-drop editor to create stunning storefronts in minutes.',
+    titleKey: 'saasLanding.features.items.storeBuilder.title',
+    descriptionKey: 'saasLanding.features.items.storeBuilder.description',
     icon: 'lucide:layout-template',
     colSpan: 'md:col-span-2', // Wide tile
     bgClass: 'bg-gradient-to-br from-teal-500/10 to-teal-600/5',
     borderClass: 'border-teal-500/20'
   },
   {
-    title: 'Global Payments',
-    description: 'Accept payments from anywhere with integrated gateways.',
+    titleKey: 'saasLanding.features.items.globalPayments.title',
+    descriptionKey: 'saasLanding.features.items.globalPayments.description',
     icon: 'lucide:credit-card',
     colSpan: 'md:col-span-1',
     bgClass: 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/5',
     borderClass: 'border-emerald-500/20'
   },
   {
-    title: 'Analytics & Insights',
-    description: 'Real-time data to optimize your conversion rates.',
+    titleKey: 'saasLanding.features.items.analytics.title',
+    descriptionKey: 'saasLanding.features.items.analytics.description',
     icon: 'lucide:bar-chart-3',
     colSpan: 'md:col-span-1',
     bgClass: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5',
     borderClass: 'border-amber-500/20'
   },
   {
-    title: 'Automated Shipping',
-    description: 'Connect with Yalidine, Eckoz, and more for auto-dispatching.',
+    titleKey: 'saasLanding.features.items.automatedShipping.title',
+    descriptionKey: 'saasLanding.features.items.automatedShipping.description',
     icon: 'lucide:truck',
     colSpan: 'md:col-span-2',
     bgClass: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
@@ -89,13 +91,14 @@ const pricingPlans = computed(() => {
   return PRICING_PLANS.map((plan) => {
     const card = pricingPlanCardForUi(plan, 'month')
     return {
-      name: card.name,
+      code: plan.code,
+      name: t(`pricing.plans.${plan.code}.name`),
       price: card.priceText,
       currency: card.currency,
-      period: card.periodText,
-      description: card.description,
-      features: card.features.map((f) => f.text),
-      cta: card.cta,
+      period: t('pricing.period.perMonth'),
+      description: t(`pricing.plans.${plan.code}.description`),
+      features: [t('pricing.features.ordersPerMonth', { count: plan.ordersPerMonth })],
+      cta: t(`pricing.plans.${plan.code}.cta`),
       popular: card.popular
     }
   })
@@ -104,19 +107,19 @@ const pricingPlans = computed(() => {
 // --- FAQ ---
 const activeFaq = ref<number | null>(null)
 const faqs = [
-  { question: 'Do I need a credit card to start?', answer: 'No. You can start right away and upgrade/downgrade later.' },
-  { question: 'Can I change my plan later?', answer: 'Yes. You can change your plan anytime from the admin Billing page.' },
-  { question: 'What changes between plans right now?', answer: 'For now (testing), plans only differ by the number of orders allowed per month.' }
+  { questionKey: 'saasLanding.faq.items.noCard.question', answerKey: 'saasLanding.faq.items.noCard.answer' },
+  { questionKey: 'saasLanding.faq.items.changePlan.question', answerKey: 'saasLanding.faq.items.changePlan.answer' },
+  { questionKey: 'saasLanding.faq.items.planDifferences.question', answerKey: 'saasLanding.faq.items.planDifferences.answer' }
 ]
 
 
 const testimonials = [
-  { text: "I switched from Shopify and never looked back. The page load speeds are instant and my conversion rate went up 40% overnight.", name: "Sarah Jenkins", role: "CEO, FashionNova", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d" },
-  { text: "The analytics dashboard is beautiful. Whatever data I need is just one click away. It feels like this tool was made for 2026.", name: "Karim Ziad", role: "Founder, TechShop", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d" },
-  { text: "Finally, a platform that doesn't charge ridiculous transaction fees. The custom domain support is seamless.", name: "Emily Chen", role: "CTO, GreenEarth", avatar: "https://i.pravatar.cc/150?u=a04258114e29026302d" },
-  { text: "The best decision we made for our business. Support is incredible and the features are exactly what we needed.", name: "Michael Ross", role: "COO, GearUp", avatar: "https://i.pravatar.cc/150?u=4" },
-  { text: "Scaling to 10k orders a month was a breeze. No downtime, no issues. Highly recommended.", name: "Lisa Wong", role: "Owner, Kicks", avatar: "https://i.pravatar.cc/150?u=5" },
-  { text: "The drag and drop builder is actually usable. I built my store in an afternoon.", name: "David Miller", role: "Founder, ArtSpace", avatar: "https://i.pravatar.cc/150?u=6" }
+  { textKey: 'saasLanding.testimonials.items.sarah.text', name: 'Sarah Jenkins', roleKey: 'saasLanding.testimonials.items.sarah.role', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d' },
+  { textKey: 'saasLanding.testimonials.items.karim.text', name: 'Karim Ziad', roleKey: 'saasLanding.testimonials.items.karim.role', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+  { textKey: 'saasLanding.testimonials.items.emily.text', name: 'Emily Chen', roleKey: 'saasLanding.testimonials.items.emily.role', avatar: 'https://i.pravatar.cc/150?u=a04258114e29026302d' },
+  { textKey: 'saasLanding.testimonials.items.michael.text', name: 'Michael Ross', roleKey: 'saasLanding.testimonials.items.michael.role', avatar: 'https://i.pravatar.cc/150?u=4' },
+  { textKey: 'saasLanding.testimonials.items.lisa.text', name: 'Lisa Wong', roleKey: 'saasLanding.testimonials.items.lisa.role', avatar: 'https://i.pravatar.cc/150?u=5' },
+  { textKey: 'saasLanding.testimonials.items.david.text', name: 'David Miller', roleKey: 'saasLanding.testimonials.items.david.role', avatar: 'https://i.pravatar.cc/150?u=6' }
 ]
 
 onMounted(() => {
@@ -158,9 +161,9 @@ onMounted(() => {
           v-motion-slide-visible-once-bottom
           class="mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-400 leading-[1.1]"
         >
-          Build. Sell. <br class="md:hidden" />
+          {{ t('saasLanding.hero.title.buildSell') }} <br class="md:hidden" />
           <span class="text-teal-400 inline-block relative">
-            Scale.
+            {{ t('saasLanding.hero.title.scale') }}
             <svg class="absolute w-full h-3 -bottom-1 left-0 text-teal-500 opacity-60" viewBox="0 0 200 9" fill="none"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
           </span>
         </h1>
@@ -171,7 +174,7 @@ onMounted(() => {
           :delay="200"
           class="max-w-2xl text-lg md:text-xl text-slate-400 mb-10 leading-relaxed"
         >
-          The all-in-one platform engineered for modern commerce. Focus on your product, we handle the infrastructure, payments, and logistics.
+          {{ t('saasLanding.hero.subtitle') }}
         </p>
 
         <!-- CTA Buttons -->
@@ -183,13 +186,13 @@ onMounted(() => {
           <NuxtLink to="/register" class="group relative px-8 py-4 bg-teal-600 rounded-xl font-bold text-white shadow-xl shadow-teal-600/20 overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-teal-600/40">
             <div class="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-100 group-hover:opacity-90 transition-opacity" />
             <span class="relative flex items-center justify-center gap-2">
-              Start Building Free
+              {{ t('saasLanding.hero.ctaPrimary') }}
               <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </span>
           </NuxtLink>
           
           <button class="px-8 py-4 rounded-xl font-bold text-slate-300 bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white transition-all hover:-translate-y-1">
-            Watch Demo
+            {{ t('saasLanding.hero.ctaSecondary') }}
           </button>
         </div>
 
@@ -232,14 +235,17 @@ onMounted(() => {
             v-motion-slide-visible-once-bottom
             class="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight"
           >
-            Everything you need to <span class="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">dominate</span>
+            {{ t('saasLanding.features.title.prefix') }}
+            <span class="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+              {{ t('saasLanding.features.title.accent') }}
+            </span>
           </h2>
           <p 
             v-motion-slide-visible-once-bottom
             :delay="100"
             class="text-lg text-slate-500 max-w-2xl mx-auto"
           >
-            Powerful tools designed for growth, packaged in a beautiful interface.
+            {{ t('saasLanding.features.subtitle') }}
           </p>
         </div>
 
@@ -260,8 +266,8 @@ onMounted(() => {
               <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 text-teal-600">
                 <Icon :name="feature.icon" class="w-6 h-6" />
               </div>
-              <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ feature.title }}</h3>
-              <p class="text-slate-600 font-medium leading-relaxed">{{ feature.description }}</p>
+              <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ t(feature.titleKey) }}</h3>
+              <p class="text-slate-600 font-medium leading-relaxed">{{ t(feature.descriptionKey) }}</p>
             </div>
           </div>
         </div>
@@ -276,7 +282,7 @@ onMounted(() => {
            <div class="text-5xl lg:text-6xl font-black mb-2 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent tracking-tighter">
              {{ stat.value.toLocaleString() }}<span class="text-teal-400 text-4xl align-top">{{ stat.suffix }}</span>
            </div>
-           <div class="text-slate-400 font-medium uppercase tracking-wider text-sm">{{ stat.label }}</div>
+           <div class="text-slate-400 font-medium uppercase tracking-wider text-sm">{{ t(stat.labelKey) }}</div>
          </div>
        </div>
     </section>
@@ -285,8 +291,8 @@ onMounted(() => {
     <section class="py-24 bg-white relative">
        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
          <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-slate-900 mb-4">Transparent Pricing</h2>
-            <p class="text-slate-500">No hidden fees. Scale as you grow.</p>
+            <h2 class="text-4xl font-bold text-slate-900 mb-4">{{ t('pricing.section.title') }}</h2>
+            <p class="text-slate-500">{{ t('pricing.section.subtitle') }}</p>
          </div>
 
          <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -297,7 +303,7 @@ onMounted(() => {
              :class="plan.popular ? 'bg-slate-900 text-white border-slate-900 ring-4 ring-teal-500/20' : 'bg-white text-slate-900 border-slate-200 hover:border-teal-100'"
            >
              <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-teal-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-               Most Popular
+               {{ t('pricing.badges.mostPopular') }}
              </div>
 
              <h3 class="text-xl font-bold mb-2">{{ plan.name }}</h3>
@@ -333,17 +339,17 @@ onMounted(() => {
         <!-- Left Side: Heading -->
         <div class="text-center lg:text-left mb-12 lg:mb-0">
            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
-             Loved by <br>
-             <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">Founders</span> like you.
+             {{ t('saasLanding.testimonials.heading.prefix') }} <br>
+             <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">{{ t('saasLanding.testimonials.heading.accent') }}</span> {{ t('saasLanding.testimonials.heading.suffix') }}
            </h2>
            <p class="text-lg text-slate-500 max-w-md mx-auto lg:mx-0 mb-8">
-             Join thousands of merchants who have switched to a platform built for growth, speed, and reliability.
+             {{ t('saasLanding.testimonials.subtitle') }}
            </p>
            <div class="flex items-center justify-center lg:justify-start gap-2">
               <div class="flex -space-x-4">
-                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=1" alt="Avatar">
-                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=2" alt="Avatar">
-                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=3" alt="Avatar">
+                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=1" :alt="t('saasLanding.testimonials.avatarAlt')">
+                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=2" :alt="t('saasLanding.testimonials.avatarAlt')">
+                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=3" :alt="t('saasLanding.testimonials.avatarAlt')">
                  <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">+500</div>
               </div>
            </div>
@@ -360,14 +366,14 @@ onMounted(() => {
                   <div class="flex gap-1 text-amber-400 mb-4">
                     <span v-for="n in 5" :key="n" class="w-3 h-3">★</span>
                   </div>
-                  <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ testi.text }}"</p>
+                  <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ t(testi.textKey) }}"</p>
                   <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
-                      <img :src="testi.avatar" alt="User" class="w-full h-full object-cover">
+                      <img :src="testi.avatar" :alt="t('saasLanding.testimonials.userAvatarAlt')" class="w-full h-full object-cover">
                     </div>
                     <div>
                       <div class="font-bold text-slate-900 text-sm">{{ testi.name }}</div>
-                      <div class="text-xs text-slate-500 font-bold uppercase">{{ testi.role }}</div>
+                      <div class="text-xs text-slate-500 font-bold uppercase">{{ t(testi.roleKey) }}</div>
                     </div>
                   </div>
                </div>
@@ -384,15 +390,15 @@ onMounted(() => {
                     <div class="flex gap-1 text-amber-400 mb-4">
                       <span v-for="n in 5" :key="n" class="w-3 h-3">★</span>
                     </div>
-                    <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ testi.text }}"</p>
+                    <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ t(testi.textKey) }}"</p>
                   </div>
                   <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
-                      <img :src="testi.avatar" alt="User" class="w-full h-full object-cover">
+                      <img :src="testi.avatar" :alt="t('saasLanding.testimonials.userAvatarAlt')" class="w-full h-full object-cover">
                     </div>
                     <div>
                       <div class="font-bold text-slate-900 text-sm">{{ testi.name }}</div>
-                      <div class="text-xs text-slate-500 font-bold uppercase">{{ testi.role }}</div>
+                      <div class="text-xs text-slate-500 font-bold uppercase">{{ t(testi.roleKey) }}</div>
                     </div>
                   </div>
                </div>
@@ -406,8 +412,8 @@ onMounted(() => {
     <section class="py-24 bg-white">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-3xl font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
-          <p class="text-slate-500">Everything you need to know about the product and billing.</p>
+          <h2 class="text-3xl font-bold text-slate-900 mb-4">{{ t('saasLanding.faq.title') }}</h2>
+          <p class="text-slate-500">{{ t('saasLanding.faq.subtitle') }}</p>
         </div>
         
         <div class="space-y-4">
@@ -420,7 +426,7 @@ onMounted(() => {
               @click="activeFaq = activeFaq === idx ? null : idx" 
               class="w-full flex items-center justify-between p-6 text-left focus:outline-none"
             >
-              <span class="text-lg font-semibold text-slate-800">{{ faq.question }}</span>
+              <span class="text-lg font-semibold text-slate-800">{{ t(faq.questionKey) }}</span>
               <span 
                 class="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 transition-transform duration-300"
                 :class="{'rotate-180 bg-teal-50 text-teal-600 border-teal-100': activeFaq === idx}"
@@ -432,7 +438,7 @@ onMounted(() => {
               v-show="activeFaq === idx" 
               class="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-100 pt-4 animate-fadeIn"
             >
-              {{ faq.answer }}
+              {{ t(faq.answerKey) }}
             </div>
           </div>
         </div>
@@ -442,10 +448,10 @@ onMounted(() => {
     <!-- FINAL CTA -->
     <section class="py-32 bg-slate-900 relative overflow-hidden text-center px-4">
       <div class="relative z-10 max-w-4xl mx-auto">
-        <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight">Ready to launch?</h2>
-        <p class="text-xl text-teal-200 mb-10">Join the platform that grows with you.</p>
+        <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight">{{ t('saasLanding.finalCta.title') }}</h2>
+        <p class="text-xl text-teal-200 mb-10">{{ t('saasLanding.finalCta.subtitle') }}</p>
         <NuxtLink to="/register" class="inline-flex px-10 py-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-full text-lg shadow-lg shadow-teal-900/20 transition-all hover:scale-105">
-          Get Started Now
+          {{ t('saasLanding.finalCta.cta') }}
         </NuxtLink>
       </div>
       <!-- Decorative BG -->

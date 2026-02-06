@@ -22,6 +22,7 @@ defineEmits(['quick-view'])
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const { currencyCode } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
     if (props.product.images && props.product.images.length > 0) {
@@ -65,8 +66,10 @@ function handleAddToCart() {
     title: props.product.title,
     slug: props.product.slug,
     price: Number(props.product.price),
+    bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
-    image: mainImage.value
+    image: mainImage.value,
+    metaPixelIds: (props.product as any)?.metaPixelIds
   })
   triggerSuccessToast('Added to cart', 'Product added to your cart')
 }
@@ -139,7 +142,7 @@ function handleAddToCart() {
           v-if="storeSettings?.cartEnabled !== false"
           :disabled="isOutOfStock || !product.isActive"
           class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-700 hover:bg-brand-600 hover:text-white shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Add to Cart"
+          :title="storefrontContent.actions.addToCart"
           @click.prevent="handleAddToCart"
         >
           <Icon name="lucide:handbag" class="w-4 h-4" />
@@ -214,7 +217,7 @@ function handleAddToCart() {
              class="px-5 py-2 rounded-full bg-slate-900 text-white text-sm font-medium hover:bg-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
              @click.prevent="handleAddToCart"
           >
-             Add to Cart
+             {{ storefrontContent.actions.addToCart }}
           </button>
        </div>
     </div>

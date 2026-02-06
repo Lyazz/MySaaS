@@ -45,7 +45,7 @@ class Product {
         [];
 
     return Product(
-      id: json['id'] ?? '',
+      id: json['id']?.toString() ?? '',
       title: json['title'] ?? '',
       slug: json['slug'] ?? '',
       miniDescription: json['miniDescription'],
@@ -62,7 +62,11 @@ class Product {
       category: json['category'] != null
           ? Category.fromJson(json['category'])
           : null,
-      categoryId: json['categoryId'],
+      categoryId:
+          json['categoryId']?.toString() ??
+          (json['category'] is Map
+              ? json['category']['id']?.toString()
+              : (json['category'] is String ? json['category'] : null)),
       options: options,
       variants: ProductVariant.resolveAllOptionReferences(
         variants: variants,
@@ -130,11 +134,16 @@ class ProductImage {
 class Category {
   final String id;
   final String title;
+  final String? imageUrl;
 
-  Category({required this.id, required this.title});
+  Category({required this.id, required this.title, this.imageUrl});
 
   factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(id: json['id'] ?? '', title: json['title'] ?? '');
+    return Category(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      imageUrl: json['imageUrl'],
+    );
   }
 }
 
@@ -273,27 +282,23 @@ class ProductVariant {
     return variants.map((variant) {
       if (variant.optionValues.isEmpty) return variant;
 
-      final resolvedOptionValues =
-          variant.optionValues
-              .map((ov) {
-                final resolvedOption = ov.option ?? optionById[ov.optionId];
-                final resolvedValue =
-                    ov.optionValue ??
-                    valueByOptionAndValueId[ov.optionId]?[ov.optionValueId];
+      final resolvedOptionValues = variant.optionValues.map((ov) {
+        final resolvedOption = ov.option ?? optionById[ov.optionId];
+        final resolvedValue =
+            ov.optionValue ??
+            valueByOptionAndValueId[ov.optionId]?[ov.optionValueId];
 
-                if (resolvedOption == ov.option &&
-                    resolvedValue == ov.optionValue) {
-                  return ov;
-                }
+        if (resolvedOption == ov.option && resolvedValue == ov.optionValue) {
+          return ov;
+        }
 
-                return ProductVariantOptionValue(
-                  optionId: ov.optionId,
-                  optionValueId: ov.optionValueId,
-                  option: resolvedOption,
-                  optionValue: resolvedValue,
-                );
-              })
-              .toList();
+        return ProductVariantOptionValue(
+          optionId: ov.optionId,
+          optionValueId: ov.optionValueId,
+          option: resolvedOption,
+          optionValue: resolvedValue,
+        );
+      }).toList();
 
       resolvedOptionValues.sort((a, b) {
         final aPos = optionPositionById[a.optionId] ?? 999999;

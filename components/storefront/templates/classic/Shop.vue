@@ -13,6 +13,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 })
 
 const { currencyCode, format: formatCurrency } = useCurrency()
+const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
 const filters = computed(() => ({
@@ -22,7 +23,7 @@ const filters = computed(() => ({
 // Filtering Logic
 const selectedCategories = ref<string[]>([])
 const searchQuery = ref('')
-const sortOption = ref('Relevance')
+const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
@@ -33,6 +34,7 @@ const maxPriceInput = ref(200000)
 // Quick View State
 const isQuickViewOpen = ref(false)
 const quickViewProduct = ref<any>(null)
+const sidebarProducts = computed(() => props.products.slice(0, 2))
 
 const filteredProducts = computed(() => {
     let result = [...props.products]
@@ -56,24 +58,25 @@ const filteredProducts = computed(() => {
     })
 
     // Sort
-    if (sortOption.value === 'Price: Low to High') {
+    if (sortOption.value === 'priceAsc') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'Price: High to Low') {
-        result.sort((a, b) => Number(a.price) - Number(a.price))
+    } else if (sortOption.value === 'priceDesc') {
+        result.sort((a, b) => Number(b.price) - Number(a.price))
     }
 
     return result
 })
 
 const pageTitle = computed(() => {
+    const content = storefrontContent.value
     if (selectedCategories.value.length === 1) {
         const cat = filters.value.categories.find(c => c.id === selectedCategories.value[0])
-        return cat ? cat.title : 'Full Catalog'
+        return cat ? cat.title : content.shop.catalogTitle
     }
     if (selectedCategories.value.length > 1) {
-        return 'Filtered Products'
+        return content.shop.filteredTitle
     }
-    return 'Full Catalog'
+    return content.shop.catalogTitle
 })
 
 const isFilterDrawerOpen = ref(false)
@@ -94,7 +97,7 @@ const removeCategory = (catId: string) => {
 const resetFilters = () => {
     selectedCategories.value = []
     searchQuery.value = ''
-    sortOption.value = 'Relevance'
+    sortOption.value = 'relevance'
     minPriceInput.value = 0
     maxPriceInput.value = 200000
 }
@@ -143,7 +146,7 @@ const closeQuickView = () => {
       >
         <div class="flex items-center justify-between mb-8">
           <h3 class="font-serif text-slate-900 text-xl font-bold">
-            Filters
+            {{ storefrontContent.actions.filters }}
           </h3>
           <button
             class="p-2 -mr-2 text-slate-500 hover:text-slate-900"
@@ -157,7 +160,7 @@ const closeQuickView = () => {
           <!-- Categories -->
           <div>
             <h4 class="font-bold text-slate-900 mb-4 text-xs uppercase tracking-widest">
-              Categories
+              {{ storefrontContent.shop.categories }}
             </h4>
             <div class="space-y-3">
               <label
@@ -184,7 +187,7 @@ const closeQuickView = () => {
               class="w-full py-4 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest active:bg-slate-800 transition-colors"
               @click="isFilterDrawerOpen = false"
             >
-              Show Results ({{ filteredProducts.length }})
+              {{ storefrontContent.shop.showResults(filteredProducts.length) }}
             </button>
           </div>
         </div>
@@ -204,7 +207,7 @@ const closeQuickView = () => {
             :class="selectedCategories.length === 0 ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600'"
             @click="resetFilters"
           >
-            All Products
+            {{ storefrontContent.shop.allProducts }}
           </button>
           <!-- Add other tabs if needed -->
         </div>
@@ -216,20 +219,20 @@ const closeQuickView = () => {
           <!-- Filter Header -->
           <div class="flex items-center justify-between border-b border-slate-200 pb-2">
             <h3 class="font-bold text-slate-900 text-xs uppercase tracking-widest">
-              Filters
+              {{ storefrontContent.actions.filters }}
             </h3>
             <button
               class="text-xs font-medium text-slate-400 hover:text-slate-900 uppercase tracking-wider transition-colors"
               @click="resetFilters"
             >
-              Reset
+              {{ storefrontContent.actions.reset }}
             </button>
           </div>
 
           <!-- Categories -->
           <div>
             <h4 class="font-serif text-slate-900 mb-4 text-lg">
-              Category
+              {{ storefrontContent.shop.categories }}
             </h4>
             <div class="space-y-3">
               <label
@@ -253,26 +256,26 @@ const closeQuickView = () => {
           <!-- Price Filter -->
           <div>
             <h4 class="font-serif text-slate-900 mb-4 text-lg">
-              Price
+              {{ storefrontContent.shop.priceRange.label }}
             </h4>
             <div class="flex items-center gap-4">
                <div class="relative w-full">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">{{ currencyCode }}</span>
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
                   <input 
                     v-model.number="minPriceInput"
                     type="number" 
-                    placeholder="Min"
-                    class="w-full bg-white border border-slate-200 rounded-none py-2 pl-8 pr-2 text-sm focus:border-slate-900 focus:ring-0 text-slate-700"
+                    :placeholder="storefrontContent.shop.priceRange.min"
+                    class="w-full bg-white border border-slate-200 rounded-none py-2 pl-8 rtl:pl-2 rtl:pr-8 pr-2 text-sm focus:border-slate-900 focus:ring-0 text-slate-700"
                   >
                </div>
                <span class="text-slate-400">-</span>
                <div class="relative w-full">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">{{ currencyCode }}</span>
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
                   <input 
                     v-model.number="maxPriceInput"
                     type="number"
-                    placeholder="Max" 
-                    class="w-full bg-white border border-slate-200 rounded-none py-2 pl-8 pr-2 text-sm focus:border-slate-900 focus:ring-0 text-slate-700"
+                    :placeholder="storefrontContent.shop.priceRange.max" 
+                    class="w-full bg-white border border-slate-200 rounded-none py-2 pl-8 rtl:pl-2 rtl:pr-8 pr-2 text-sm focus:border-slate-900 focus:ring-0 text-slate-700"
                   >
                </div>
             </div>
@@ -280,30 +283,31 @@ const closeQuickView = () => {
 
           <!-- Best Sellers Widget -->
           <div class="pt-8 border-t border-slate-200">
-             <h4 class="font-bold text-slate-900 mb-6 text-xs uppercase tracking-widest">
-               Best Sellers
-             </h4>
-             <div class="space-y-6">
-                 <!-- Mock Widget Items -->
-                 <div class="flex gap-4 group cursor-pointer">
-                     <div class="w-16 h-20 bg-slate-100 overflow-hidden flex-shrink-0">
-                         <img src="https://placehold.co/100x125" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300">
-                     </div>
-                      <div class="py-1">
-                          <h5 class="text-sm font-serif text-slate-900 line-clamp-2 group-hover:underline decoration-1 underline-offset-4 transition-all">Premium Headphones</h5>
-                          <span class="text-xs font-bold text-slate-500 mt-1 block">{{ formatCurrency(299) }}</span>
-                      </div>
-                 </div>
-                 <div class="flex gap-4 group cursor-pointer">
-                     <div class="w-16 h-20 bg-slate-100 overflow-hidden flex-shrink-0">
-                         <img src="https://placehold.co/100x125" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300">
-                     </div>
-                      <div class="py-1">
-                          <h5 class="text-sm font-serif text-slate-900 line-clamp-2 group-hover:underline decoration-1 underline-offset-4 transition-all">Ergonomic Chair</h5>
-                          <span class="text-xs font-bold text-slate-500 mt-1 block">{{ formatCurrency(549) }}</span>
-                      </div>
-                 </div>
-             </div>
+            <h4 class="font-bold text-slate-900 mb-6 text-xs uppercase tracking-widest">
+              {{ storefrontContent.shop.sidebar.bestSellers }}
+            </h4>
+            <div class="space-y-6">
+              <NuxtLink
+                v-for="p in sidebarProducts"
+                :key="p.id"
+                :to="`/p/${p.slug}`"
+                class="flex gap-4 group"
+              >
+                <div class="w-16 h-20 bg-slate-100 overflow-hidden flex-shrink-0">
+                  <img
+                    :src="p.images && p.images[0] ? p.images[0] : 'https://placehold.co/100x125'"
+                    class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
+                    :alt="p.title"
+                  >
+                </div>
+                <div class="py-1">
+                  <h5 class="text-sm font-serif text-slate-900 line-clamp-2 group-hover:underline decoration-1 underline-offset-4 transition-all">
+                    {{ p.title }}
+                  </h5>
+                  <span class="text-xs font-bold text-slate-500 mt-1 block">{{ formatCurrency(p.price) }}</span>
+                </div>
+              </NuxtLink>
+            </div>
           </div>
         </aside>
 
@@ -316,13 +320,13 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-3 py-1 bg-slate-100 text-slate-900 text-xs uppercase tracking-wider font-bold"
               >
-                  <span>{{ filters.categories.find(c => c.id === catId)?.title || 'Category' }}</span>
+                  <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
                   <button @click="removeCategory(catId)" class="hover:text-slate-600">
                       <Icon name="lucide:x" class="w-3 h-3" />
                   </button>
               </div>
               <button @click="resetFilters" class="text-xs text-slate-500 hover:text-slate-900 uppercase tracking-wider underline underline-offset-2">
-                  Clear all
+                  {{ storefrontContent.actions.clearAll }}
               </button>
           </div>
           <!-- Toolbar -->
@@ -333,7 +337,7 @@ const closeQuickView = () => {
               @click="isFilterDrawerOpen = true"
             >
               <Icon name="lucide:sliders-horizontal" class="w-4 h-4" />
-              Filters & Sort
+              {{ storefrontContent.shop.filtersAndSort }}
             </button>
 
             <!-- Search in results -->
@@ -341,7 +345,7 @@ const closeQuickView = () => {
               <input 
                 v-model="searchQuery" 
                 type="text"
-                placeholder="Search..." 
+                :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
                 class="w-full bg-transparent border-b border-slate-300 text-slate-900 text-sm focus:border-slate-900 focus:ring-0 block px-0 py-2 placeholder-slate-400" 
               >
               <div class="absolute inset-y-0 right-0 flex items-center pointer-events-none">
@@ -356,9 +360,9 @@ const closeQuickView = () => {
                     v-model="sortOption"
                     class="appearance-none bg-transparent border-none text-sm py-2 pr-6 pl-0 focus:ring-0 cursor-pointer text-slate-700 font-medium hover:text-slate-900 transition-colors"
                   >
-                    <option>Relevance</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
+                    <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
+                    <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
+                    <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                   </select>
                   <div class="absolute inset-y-0 right-0 flex items-center pointer-events-none">
                     <Icon name="lucide:chevron-down" class="w-3 h-3 text-slate-500" />
@@ -371,7 +375,7 @@ const closeQuickView = () => {
                         class="p-2 transition-all"
                         :class="viewMode === 'grid' ? 'text-slate-900' : 'text-slate-300 hover:text-slate-500'"
                         @click="viewMode = 'grid'"
-                        title="Grid View"
+                        :title="storefrontContent.shop.view.gridTitle"
                     >
                         <Icon name="lucide:layout-grid" class="w-5 h-5" />
                     </button>
@@ -379,7 +383,7 @@ const closeQuickView = () => {
                         class="p-2 transition-all"
                         :class="viewMode === 'list' ? 'text-slate-900' : 'text-slate-300 hover:text-slate-500'"
                         @click="viewMode = 'list'"
-                        title="List View"
+                        :title="storefrontContent.shop.view.listTitle"
                     >
                         <Icon name="lucide:list" class="w-5 h-5" />
                     </button>
@@ -394,16 +398,16 @@ const closeQuickView = () => {
           >
             <Icon name="lucide:package-open" class="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <h3 class="text-lg font-serif text-slate-900">
-              No products found
+              {{ storefrontContent.shop.results.noResults }}
             </h3>
             <p class="text-slate-500 mt-2 text-sm">
-              Try clearing filters or search for something else.
+              {{ storefrontContent.shop.results.noResultsHint }}
             </p>
             <button
               class="mt-6 px-8 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors"
               @click="resetFilters"
             >
-              Clear All
+              {{ storefrontContent.actions.clearAll }}
             </button>
           </div>
 
@@ -488,22 +492,22 @@ const closeQuickView = () => {
               </div>
               <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center">
                   <div>
-                    <span class="inline-block px-3 py-1 bg-slate-100 text-slate-900 text-[10px] font-bold uppercase tracking-widest mb-6">In Stock</span>
+                    <span class="inline-block px-3 py-1 bg-slate-100 text-slate-900 text-[10px] font-bold uppercase tracking-widest mb-6">{{ storefrontContent.product.inStock }}</span>
                     <h2 class="text-3xl md:text-4xl font-serif text-slate-900 mb-4">{{ quickViewProduct.title }}</h2>
                     <div class="text-2xl text-slate-900 mb-8 font-light">
                         {{ formatCurrency(quickViewProduct.price) }}
                     </div>
                     <p class="text-slate-600 leading-relaxed mb-10 font-light">
-                        {{ quickViewProduct.description || 'Experience the perfect blend of style and functionality. Crafted with premium materials for lasting durability.' }}
+                        {{ quickViewProduct.description || storefrontContent.product.descriptionFallback }}
                     </p>
                   </div>
 
                   <div class="mt-auto space-y-4 max-w-sm">
                       <button class="w-full py-4 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors">
-                        Add to Cart
+                        {{ storefrontContent.actions.addToCart }}
                       </button>
                       <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 border border-slate-200 text-slate-900 text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-colors text-center" @click="closeQuickView">
-                        View Full Details
+                        {{ storefrontContent.product.viewFullDetails }}
                       </NuxtLink>
                   </div>
               </div>

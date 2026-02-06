@@ -5,14 +5,14 @@
       <div>
         <div class="flex items-center gap-2 mb-2">
           <NuxtLink to="/admin/purchases" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-            Purchases
+            {{ t('admin.nav.purchases') }}
           </NuxtLink>
           <Icon name="lucide:chevron-right" class="w-4 h-4 text-slate-400" />
-          <span class="text-sm font-medium text-slate-900">Order #{{ purchaseId.slice(0, 8) }}</span>
+          <span class="text-sm font-medium text-slate-900">{{ t('admin.pages.purchases.detail.breadcrumb', { id: purchaseId.slice(0, 8) }) }}</span>
         </div>
         <div class="flex items-center gap-3">
           <h2 class="text-2xl font-bold text-slate-900">
-            Purchase Order
+            {{ t('admin.pages.purchases.detail.title') }}
           </h2>
           <span :class="getStatusClass(order?.status || '')">
             {{ order?.status }}
@@ -28,7 +28,7 @@
           @click="fetchOrder"
         >
           <Icon name="lucide:refresh-cw" class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
-          Refresh
+          {{ t('admin.common.refresh') }}
         </button>
         <button
           type="button"
@@ -36,7 +36,7 @@
           @click="showVariantModal = true"
         >
           <Icon name="lucide:plus" class="h-4 w-4" />
-          Add Products
+          {{ t('admin.pages.purchases.detail.addProducts') }}
         </button>
       </div>
     </div>
@@ -51,7 +51,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Supplier Info -->
       <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Supplier</h3>
+        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">{{ t('admin.pages.purchases.detail.cards.supplier') }}</h3>
         <div v-if="order?.supplier" class="space-y-2">
           <div class="text-lg font-medium text-slate-900">{{ order.supplier.name }}</div>
           <div class="text-sm text-slate-600 flex items-center gap-2" v-if="order.supplier.email">
@@ -62,24 +62,24 @@
           </div>
         </div>
         <div v-else class="text-sm text-slate-500 italic">
-          No supplier assigned
+          {{ t('admin.pages.purchases.detail.cards.noSupplier') }}
         </div>
       </div>
       
       <!-- Order Summary -->
        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Summary</h3>
+        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">{{ t('admin.pages.purchases.detail.cards.summary') }}</h3>
         <div class="space-y-2">
              <div class="flex justify-between text-sm">
-                <span class="text-slate-600">Items Ordered:</span>
+                <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.itemsOrdered') }}:</span>
                 <span class="font-medium text-slate-900">{{ totalOrdered }}</span>
              </div>
              <div class="flex justify-between text-sm">
-                <span class="text-slate-600">Items Received:</span>
+                <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.itemsReceived') }}:</span>
                 <span class="font-medium" :class="totalReceived === totalOrdered ? 'text-green-600' : 'text-orange-600'">{{ totalReceived }}</span>
              </div>
              <div class="flex justify-between text-sm pt-2 border-t border-slate-100">
-                <span class="text-slate-600">Estimated Total Cost:</span>
+                <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.estimatedTotal') }}:</span>
                 <span class="font-medium text-slate-900">{{ formatCurrency(totalCost) }}</span>
              </div>
         </div>
@@ -88,7 +88,7 @@
        <!-- Actions/Notes (Placeholder for future) -->
        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-center items-center text-center">
             <Icon name="lucide:file-text" class="w-8 h-8 text-slate-300 mb-2" />
-            <p class="text-sm text-slate-500">Notes & attachments coming soon</p>
+            <p class="text-sm text-slate-500">{{ t('admin.pages.purchases.detail.cards.notesPlaceholder') }}</p>
       </div>
     </div>
 
@@ -96,45 +96,45 @@
     <!-- Order Items -->
     <div class="bg-white rounded-lg shadow overflow-hidden border border-slate-200">
       <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-          <h3 class="font-medium text-slate-900">Order Items</h3>
-          <span class="text-sm text-slate-500">{{ order?.items?.length || 0 }} items</span>
+          <h3 class="font-medium text-slate-900">{{ t('admin.pages.purchases.detail.items.title') }}</h3>
+          <span class="text-sm text-slate-500">{{ t('admin.pages.purchases.detail.items.count', { count: order?.items?.length || 0 }) }}</span>
       </div>
 
-      <div v-if="loading && !order" class="p-12 text-center text-sm text-slate-600">Loading order items...</div>
+      <div v-if="loading && !order" class="p-12 text-center text-sm text-slate-600">{{ t('admin.pages.purchases.detail.items.loading') }}</div>
       <div v-else-if="!order?.items || order.items.length === 0" class="p-12 text-center">
         <Icon name="lucide:shopping-cart" class="mx-auto h-12 w-12 text-slate-300 mb-3" />
-        <h3 class="text-slate-900 font-medium mb-1">No items yet</h3>
-        <p class="text-slate-500 text-sm mb-4">Add products to this purchase order.</p>
+        <h3 class="text-slate-900 font-medium mb-1">{{ t('admin.pages.purchases.detail.items.empty.title') }}</h3>
+        <p class="text-slate-500 text-sm mb-4">{{ t('admin.pages.purchases.detail.items.empty.hint') }}</p>
         <button
           type="button"
           class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-teal-700"
           @click="showVariantModal = true"
         >
           <Icon name="lucide:plus" class="h-4 w-4" />
-          Add Products
+          {{ t('admin.pages.purchases.detail.addProducts') }}
         </button>
       </div>
       <div v-else class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200">
           <thead class="bg-slate-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Product</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">Ordered</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">Unit Cost</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">Received</th>
-               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-48">Receive Now</th>
-              <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Total</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">{{ t('admin.pages.purchases.detail.items.table.product') }}</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">{{ t('admin.pages.purchases.detail.items.table.ordered') }}</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">{{ t('admin.pages.purchases.detail.items.table.unitCost') }}</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">{{ t('admin.pages.purchases.detail.items.table.received') }}</th>
+               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-48">{{ t('admin.pages.purchases.detail.items.table.receiveNow') }}</th>
+              <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">{{ t('admin.pages.purchases.detail.items.table.total') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-200 bg-white">
             <tr v-for="item in order.items" :key="item.id" class="hover:bg-slate-50">
-              <td class="px-6 py-4">
-                <div>
-                    <div class="font-medium text-slate-900">{{ item.variant?.product?.title || 'Unknown Product' }}</div>
-                    <div class="text-sm text-slate-500">{{ getVariantLabel(item.variant) }}</div>
-                    <div class="text-xs text-slate-400 mt-0.5">SKU: {{ item.variant?.sku || '—' }}</div>
-                </div>
-              </td>
+	              <td class="px-6 py-4">
+	                <div>
+	                    <div class="font-medium text-slate-900">{{ item.variant?.product?.title || t('admin.pages.purchases.detail.items.unknownProduct') }}</div>
+	                    <div class="text-sm text-slate-500">{{ getVariantLabel(item.variant) }}</div>
+	                    <div class="text-xs text-slate-400 mt-0.5">{{ t('admin.pages.purchases.detail.items.sku') }}: {{ item.variant?.sku || '—' }}</div>
+	                </div>
+	              </td>
               <td class="px-6 py-4">
                  <div class="flex items-center">
                      <input
@@ -175,41 +175,41 @@
               </td>
                <td class="px-6 py-4">
                    <div class="flex items-center gap-2">
-                        <input
-                            type="number"
-                            min="0"
-                            :max="Math.max(0, item.quantityOrdered - item.quantityReceived)"
-                            v-model.number="receiveQtyByItem[item.id]"
-                            class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                            placeholder="Qty"
-                            :disabled="item.quantityReceived >= item.quantityOrdered"
-                        />
-                        <button
-                            type="button"
-                            class="p-2 rounded-md bg-teal-50 text-teal-700 hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Receive Stock"
-                            :disabled="receiving || item.quantityReceived >= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id] <= 0"
-                            @click="receiveItem(item)"
-                        >
+	                        <input
+	                            type="number"
+	                            min="0"
+	                            :max="Math.max(0, item.quantityOrdered - item.quantityReceived)"
+	                            v-model.number="receiveQtyByItem[item.id]"
+	                            class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
+	                            :placeholder="t('admin.pages.purchases.detail.items.table.qtyPlaceholder')"
+	                            :disabled="item.quantityReceived >= item.quantityOrdered"
+	                        />
+	                        <button
+	                            type="button"
+	                            class="p-2 rounded-md bg-teal-50 text-teal-700 hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed"
+	                            :title="t('admin.pages.purchases.detail.items.table.receiveStock')"
+	                            :disabled="receiving || item.quantityReceived >= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id] <= 0"
+	                            @click="receiveItem(item)"
+	                        >
                             <Icon name="lucide:check" class="w-4 h-4" />
                         </button>
                    </div>
-                   <div class="mt-1">
-                      <select v-model="salePriceMode" class="text-xs text-slate-500 border-none bg-transparent p-0 focus:ring-0 cursor-pointer hover:text-slate-700">
-                          <option value="replace">Update Sell Price</option>
-                          <option value="weighted">Avg Cost</option>
-                      </select>
-                   </div>
+	                   <div class="mt-1">
+	                      <select v-model="salePriceMode" class="text-xs text-slate-500 border-none bg-transparent p-0 focus:ring-0 cursor-pointer hover:text-slate-700">
+	                          <option value="replace">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.replace') }}</option>
+	                          <option value="weighted">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.weighted') }}</option>
+	                      </select>
+	                   </div>
               </td>
               <td class="px-6 py-4 text-right text-sm font-medium text-slate-900">
                  <div class="flex items-center justify-end gap-3">
-                    <span>{{ formatCurrency((editingItems[item.id]?.unitCost || 0) * (editingItems[item.id]?.quantityOrdered || item.quantityOrdered)) }}</span>
-                    <button
-                        v-if="item.quantityReceived === 0"
-                        @click="removeItem(item)"
-                        class="text-red-400 hover:text-red-600 transition-colors"
-                        title="Remove Item"
-                    >
+	                    <span>{{ formatCurrency(Number(editingItems[item.id]?.unitCost || 0) * (editingItems[item.id]?.quantityOrdered || item.quantityOrdered)) }}</span>
+	                    <button
+	                        v-if="item.quantityReceived === 0"
+	                        @click="removeItem(item)"
+	                        class="text-red-400 hover:text-red-600 transition-colors"
+	                        :title="t('admin.pages.purchases.detail.items.table.removeItem')"
+	                    >
                         <Icon name="lucide:trash" class="w-4 h-4" />
                     </button>
                  </div>
@@ -218,34 +218,34 @@
           </tbody>
            <tfoot class="bg-slate-50 font-semibold text-slate-900">
             <tr>
-              <td colspan="5" class="px-6 py-3 text-right">Total Order Value</td>
-              <td class="px-6 py-3 text-right">{{ formatCurrency(totalCost) }}</td>
-            </tr>
-          </tfoot>
+	              <td colspan="5" class="px-6 py-3 text-right">{{ t('admin.pages.purchases.detail.items.table.totalOrderValue') }}</td>
+	              <td class="px-6 py-3 text-right">{{ formatCurrency(totalCost) }}</td>
+	            </tr>
+	          </tfoot>
         </table>
       </div>
     </div>
 
     <!-- Actions/Notes -->
-    <AdminConfirmModal
-      v-model="showDeleteOrderModal"
-      title="Delete Purchase Order"
-      message="Are you sure you want to delete this purchase order? This action cannot be undone."
-      confirm-text="Delete Order"
-      cancel-text="Cancel"
-      @confirm="deleteOrder"
-    />
+	    <AdminConfirmModal
+	      v-model="showDeleteOrderModal"
+	      :title="t('admin.pages.purchases.detail.deleteModal.title')"
+	      :message="t('admin.pages.purchases.detail.deleteModal.message')"
+	      :confirm-text="t('admin.pages.purchases.detail.deleteModal.confirm')"
+	      :cancel-text="t('admin.common.cancel')"
+	      @confirm="deleteOrder"
+	    />
 
     <div class="flex justify-end mt-8">
         <button
             type="button"
             class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors"
-            @click="showDeleteOrderModal = true"
-        >
-            <Icon name="lucide:trash-2" class="h-4 w-4" />
-            Delete Order
-        </button>
-    </div>
+	            @click="showDeleteOrderModal = true"
+	        >
+	            <Icon name="lucide:trash-2" class="h-4 w-4" />
+	            {{ t('admin.pages.purchases.detail.deleteModal.confirm') }}
+	        </button>
+	    </div>
 
     <!-- Variant Selector Modal -->
     <VariantSelectorModal
@@ -262,13 +262,14 @@ import VariantSelectorModal from '~/components/admin/VariantSelectorModal.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Purchase Order'
+  titleKey: 'admin.pages.purchases.detail.metaTitle'
 })
 
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 const purchaseId = route.params.id as string
+const { t } = useI18n({ useScope: 'global' })
 
 const order = ref<any>(null)
 const loading = ref(false)
@@ -311,7 +312,7 @@ const fetchOrder = async () => {
     })
 
   } catch (e: any) {
-    errorMessage.value = e?.data?.statusMessage || 'Failed to load purchase'
+    errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.loadFailed')
   } finally {
     loading.value = false
   }
@@ -336,7 +337,7 @@ const addVariants = async (variants: any[]) => {
       await fetchOrder()
       
   } catch (e: any) {
-    errorMessage.value = 'Failed to add items. Some items may have been skipped.'
+    errorMessage.value = t('admin.pages.purchases.detail.errors.addItemsFailed')
     console.error(e)
   }
 }
@@ -360,7 +361,7 @@ const receiveItem = async (item: any) => {
         
         await fetchOrder()
     } catch (e: any) {
-        errorMessage.value = e?.data?.statusMessage || 'Failed to receive stock'
+        errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.receiveFailed')
     } finally {
         receiving.value = false
     }
@@ -385,12 +386,12 @@ const updateItem = async (item: any) => {
         // Refresh to ensure sync
         await fetchOrder()
     } catch (e: any) {
-        errorMessage.value = e?.data?.statusMessage || 'Failed to update item'
+        errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.updateItemFailed')
     }
 }
 
 const removeItem = async (item: any) => {
-    if (!confirm('Are you sure you want to remove this item?')) return
+    if (!confirm(t('admin.pages.purchases.detail.errors.removeConfirm'))) return
     
     try {
         await $fetch(`/api/admin/purchases/${purchaseId}/items/${item.id}`, {
@@ -399,7 +400,7 @@ const removeItem = async (item: any) => {
         })
         await fetchOrder()
     } catch (e: any) {
-         errorMessage.value = e?.data?.statusMessage || 'Failed to remove item'
+         errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.removeItemFailed')
     }
 }
 
@@ -411,13 +412,13 @@ const deleteOrder = async () => {
         })
         router.push('/admin/purchases')
     } catch (e: any) {
-         errorMessage.value = e?.data?.statusMessage || 'Failed to delete order'
+         errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.deleteFailed')
     }
 }
 
 const getVariantLabel = (variant: any) => {
   const vals = variant?.optionValues || []
-  if (!Array.isArray(vals) || vals.length === 0) return 'Default Variant'
+  if (!Array.isArray(vals) || vals.length === 0) return t('admin.pages.purchases.detail.items.defaultVariant')
   return vals.map((v: any) => v.optionValue?.label || '?').join(' / ')
 }
 

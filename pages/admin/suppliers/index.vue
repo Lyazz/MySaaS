@@ -4,10 +4,10 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-2xl font-bold text-gray-800">
-          Suppliers
+          {{ t('admin.nav.suppliers') }}
         </h2>
         <p class="text-gray-600 mt-1">
-          Manage your suppliers
+          {{ t('admin.pages.suppliers.index.subtitle') }}
         </p>
       </div>
       <NuxtLink
@@ -15,7 +15,7 @@
         class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
-        <span>Add Supplier</span>
+        <span>{{ t('admin.pages.suppliers.index.addSupplier') }}</span>
       </NuxtLink>
     </div>
 
@@ -23,16 +23,16 @@
     <div class="bg-white p-4 rounded-lg shadow mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.suppliers.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             type="text"
-            placeholder="Search suppliers..."
+            :placeholder="t('admin.pages.suppliers.index.filters.searchPlaceholder')"
           />
         </div>
         <div class="flex items-end">
           <p class="text-sm text-gray-500">
-             Sort by name, email or phone using the table headers.
+            {{ t('admin.pages.suppliers.index.filters.sortHint') }}
           </p>
         </div>
       </div>
@@ -45,7 +45,7 @@
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
-        Loading suppliers...
+        {{ t('admin.pages.suppliers.index.loading') }}
       </p>
     </div>
 
@@ -56,10 +56,10 @@
     >
       <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
-        No suppliers
+        {{ t('admin.pages.suppliers.index.empty.title') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500">
-        Get started by creating a new supplier.
+        {{ t('admin.pages.suppliers.index.empty.hint') }}
       </p>
       <div class="mt-6">
         <NuxtLink
@@ -67,7 +67,7 @@
           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
         >
           <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
-          New Supplier
+          {{ t('admin.pages.suppliers.index.empty.newSupplier') }}
         </NuxtLink>
       </div>
     </div>
@@ -79,7 +79,7 @@
     >
       <div class="px-4 py-3 bg-gray-50 flex flex-wrap items-center gap-3 justify-between">
         <div class="text-sm text-gray-700">
-          Sort by:
+          {{ t('admin.pages.suppliers.index.sort.sortBy') }}
         </div>
         <div class="flex flex-wrap gap-2">
           <button
@@ -93,7 +93,7 @@
             ]"
             @click="setSort(option.key)"
           >
-            <span>{{ option.label }}</span>
+            <span>{{ t(option.labelKey) }}</span>
             <Icon
               v-if="sortBy === option.key"
               :name="sortOrder === 'asc' ? 'lucide:chevron-up' : 'lucide:chevron-down'"
@@ -107,16 +107,16 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
+                {{ t('admin.pages.suppliers.index.table.name') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Info
+                {{ t('admin.pages.suppliers.index.table.info') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Address
+                {{ t('admin.pages.suppliers.index.table.address') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ t('admin.common.actions') }}
               </th>
             </tr>
           </thead>
@@ -159,14 +159,14 @@
                     class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
-                    <span>Edit</span>
+                    <span>{{ t('admin.common.edit') }}</span>
                   </NuxtLink>
                   <button
                     class="inline-flex items-center text-red-600 hover:text-red-900 transition-colors"
                     @click="confirmDelete(supplier)"
                   >
                     <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
-                    <span>Delete</span>
+                    <span>{{ t('admin.common.delete') }}</span>
                   </button>
                 </div>
               </td>
@@ -183,26 +183,24 @@
             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             @click="currentPage--"
           >
-            Previous
+            {{ t('admin.common.previous') }}
           </button>
           <button
             :disabled="currentPage === totalPages"
             class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             @click="currentPage++"
           >
-            Next
+            {{ t('admin.common.next') }}
           </button>
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
-              Showing
-              <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
-              to
-              <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredSuppliers.length) }}</span>
-              of
-              <span class="font-medium">{{ filteredSuppliers.length }}</span>
-              results
+              {{ t('admin.pages.suppliers.index.pagination.showing', {
+                from: (currentPage - 1) * itemsPerPage + 1,
+                to: Math.min(currentPage * itemsPerPage, filteredSuppliers.length),
+                total: filteredSuppliers.length
+              }) }}
             </p>
           </div>
           <div>
@@ -212,7 +210,7 @@
                 class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage--"
               >
-                Previous
+                {{ t('admin.common.previous') }}
               </button>
               <button
                 v-for="page in totalPages"
@@ -232,7 +230,7 @@
                 class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage++"
               >
-                Next
+                {{ t('admin.common.next') }}
               </button>
             </nav>
           </div>
@@ -243,10 +241,10 @@
     <!-- Delete Confirmation Modal -->
     <AdminConfirmModal
       v-model="showDeleteModal"
-      title="Delete Supplier"
+      :title="t('admin.pages.suppliers.index.deleteModal.title')"
       :message="deleteMessage"
-      confirm-text="Delete"
-      cancel-text="Cancel"
+      :confirm-text="t('admin.common.delete')"
+      :cancel-text="t('admin.common.cancel')"
       @confirm="handleDelete"
     />
   </div>
@@ -259,10 +257,11 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'Suppliers'
+  titleKey: 'admin.pages.suppliers.index.title'
 })
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 
 interface Supplier {
   id: string
@@ -284,14 +283,14 @@ const showDeleteModal = ref(false)
 const supplierToDelete = ref<Supplier | null>(null)
 
 const sortOptions = [
-  { key: 'name', label: 'Name' }
+  { key: 'name', labelKey: 'admin.pages.suppliers.index.sort.name' }
 ] as const
 
 const deleteMessage = computed(() => {
   if (supplierToDelete.value?.name) {
-    return `Are you sure you want to delete supplier \"${supplierToDelete.value.name}\"?`
+    return t('admin.pages.suppliers.index.deleteModal.messageWithName', { name: supplierToDelete.value.name })
   }
-  return 'Are you sure you want to delete this supplier?'
+  return t('admin.pages.suppliers.index.deleteModal.message')
 })
 
 const sortedSuppliers = computed(() => {
@@ -367,7 +366,7 @@ async function handleDelete() {
     supplierToDelete.value = null
   } catch (error) {
     console.error('Failed to delete supplier:', error)
-    alert('Failed to delete supplier. Please try again.')
+    alert(t('admin.pages.suppliers.index.deleteModal.error'))
   }
 }
 

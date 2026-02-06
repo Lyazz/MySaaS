@@ -56,3 +56,11 @@ export const DEFAULT_STOREFRONT_HOME_CONFIG: StorefrontHomeConfig = {
     }
 }
 
+export const isDefaultStorefrontHomeConfig = (value: StorefrontHomeConfig | null | undefined): boolean => {
+    if (!value) return true
+    try {
+        return JSON.stringify(value) === JSON.stringify(DEFAULT_STOREFRONT_HOME_CONFIG)
+    } catch {
+        return false
+    }
+}

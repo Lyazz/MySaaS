@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import ProductCard from './ProductCard.vue'
-import { DEFAULT_STOREFRONT_HOME_CONFIG, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const props = defineProps<{
   tenantName: string
@@ -13,13 +13,15 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 
-const defaultHeroSlides = DEFAULT_STOREFRONT_HOME_CONFIG.carousel
+const storefrontContent = useStorefrontContent()
+const homeDefaults = useStorefrontHomeDefaults()
+const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
-    const slides = props.homeConfig?.carousel
-    return Array.isArray(slides) && slides.length > 0 ? slides : defaultHeroSlides
+    const slides = isCustomHomeConfig.value ? props.homeConfig?.carousel : undefined
+    return Array.isArray(slides) && slides.length > 0 ? slides : homeDefaults.value.carousel
 })
 
-const sections = computed(() => props.homeConfig?.sections || DEFAULT_STOREFRONT_HOME_CONFIG.sections)
+const sections = computed(() => (isCustomHomeConfig.value ? props.homeConfig?.sections : undefined) || homeDefaults.value.sections)
 const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
@@ -112,7 +114,7 @@ const {
                 :to="slideTo(slide.buttonHref)"
                 class="inline-block px-10 py-4 bg-white text-slate-900 text-sm font-bold uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-colors duration-300 min-w-[200px]"
               >
-                {{ slide.buttonText || 'Shop Now' }}
+                {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
               </NuxtLink>
             </div>
           </div>
@@ -182,7 +184,7 @@ const {
                     {{ cat.title }}
                   </h3>
                   <p class="text-xs text-slate-500 uppercase tracking-wider font-medium group-hover:text-brand-600 transition-colors">
-                    {{ cat.itemCount }} Products
+                    {{ storefrontContent.common.productsCount(cat.itemCount) }}
                   </p>
                </div>
             </div>

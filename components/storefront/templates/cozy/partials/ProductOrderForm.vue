@@ -12,7 +12,9 @@ const props = defineProps<{
 
 const router = useRouter()
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
+const metaPixel = useMetaPixel()
 const { currencyCode, format: formatCurrency } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
@@ -70,6 +72,12 @@ const decrementQuantity = () => {
     }
 }
 
+const selectBundleQty = (qty: number) => {
+    if (!canPurchase.value) return
+    const cap = maxQuantity.value > 0 ? maxQuantity.value : qty
+    quantity.value = Math.max(1, Math.min(qty, cap))
+}
+
 const quickForm = reactive({
     fullName: '',
     phone: '',
@@ -124,17 +132,17 @@ const handleOrderSubmit = async () => {
     orderError.value = ''
 
     if (!canPurchase.value) {
-        orderError.value = 'This variant is out of stock.'
+        orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant
         return
     }
 
     if (codEnabled.value && !quickForm.fullName.trim()) {
-        orderError.value = 'Please fill in your full name.'
+        orderError.value = storefrontContent.value.checkout.errors.fullNameRequired
         return
     }
 
     if (codEnabled.value && !quickForm.phone.trim()) {
-        orderError.value = 'Phone number is required.'
+        orderError.value = storefrontContent.value.checkout.errors.phoneRequired
         return
     }
 
@@ -158,6 +166,21 @@ const handleOrderSubmit = async () => {
             ]
         }
 
+        const currency = storeSettings.value?.currencyCode || 'DZD'
+        metaPixel.initiateCheckout({
+            contents: [
+                {
+                    id: props.product.id,
+                    quantity: quantity.value,
+                    item_price: Number(props.currentPrice || 0)
+                }
+            ],
+            numItems: quantity.value,
+            value: totalPrice.value,
+            currency,
+            pixelIds: (props.product as any)?.metaPixelIds
+        })
+
         const response = await $fetch<{ orderId: string }>(useTenantApiUrl('/api/orders'), {
             method: 'POST',
             body: payload,
@@ -166,7 +189,10 @@ const handleOrderSubmit = async () => {
             }
         })
 
-        triggerSuccessToast('Order received!', 'We will contact you shortly.')
+        triggerSuccessToast(
+            storefrontContent.value.toasts.orderReceived.title,
+            storefrontContent.value.toasts.orderReceived.message
+        )
         cartStore.clearCart()
         quickForm.fullName = ''
         quickForm.phone = ''
@@ -180,7 +206,10 @@ const handleOrderSubmit = async () => {
         })
     } catch (error: any) {
         console.error('Quick order failed:', error)
-        orderError.value = error?.data?.statusMessage || error?.data?.message || 'Failed to place order. Please try again.'
+        orderError.value =
+            error?.data?.statusMessage ||
+            error?.data?.message ||
+            storefrontContent.value.checkout.errors.submitFailed
     } finally {
         orderSubmitting.value = false
     }
@@ -189,7 +218,10 @@ const handleOrderSubmit = async () => {
 const handleAddToCart = async () => {
     if (!props.product) return
     if (!canPurchase.value) {
-        triggerSuccessToast('Out of stock', 'Please select an in-stock option.')
+        triggerSuccessToast(
+            storefrontContent.value.actions.outOfStock,
+            storefrontContent.value.toasts.outOfStock.message
+        )
         return
     }
     addToCartSubmitting.value = true
@@ -202,12 +234,17 @@ const handleAddToCart = async () => {
         title: props.product.title + (variantLabel ? ` (${variantLabel})` : ''),
         slug: props.product.slug,
         price: props.currentPrice,
+        bundleDeals: props.product?.bundleDeals || [],
         stock: cartStockCap.value,
         image: props.activeImage,
-        quantity: quantity.value
+        quantity: quantity.value,
+        metaPixelIds: (props.product as any)?.metaPixelIds
     })
 
-    triggerSuccessToast('Added to basket', 'View your basket to checkout.')
+    triggerSuccessToast(
+        storefrontContent.value.toasts.addedToCart.title,
+        storefrontContent.value.toasts.addedToCart.message
+    )
     addToCartSubmitting.value = false
 }
 </script>
@@ -217,13 +254,13 @@ const handleAddToCart = async () => {
     <!-- Quantity Selector -->
     <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
       <div class="flex flex-col gap-0.5">
-        <span class="font-medium text-slate-700">Quantity</span>
-        <span v-if="product?.isActive === false" class="text-xs text-slate-400">Unavailable</span>
-        <span v-else-if="isOutOfStock" class="text-xs text-red-500 font-medium">Out of stock</span>
+        <span class="font-medium text-slate-700">{{ storefrontContent.productForm.quantity.label }}</span>
+        <span v-if="product?.isActive === false" class="text-xs text-slate-400">{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span v-else-if="isOutOfStock" class="text-xs text-red-500 font-medium">{{ storefrontContent.productForm.stock.outOfStock }}</span>
         <span v-else-if="isLowStock" class="text-xs text-amber-600 font-medium">
-          Only {{ maxQuantity }} left
+          {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
         </span>
-        <span v-else class="text-xs text-green-600 font-medium">In stock</span>
+        <span v-else class="text-xs text-green-600 font-medium">{{ storefrontContent.product.inStock }}</span>
       </div>
       <div class="flex items-center bg-white rounded-full border border-slate-200">
         <button 
@@ -246,6 +283,14 @@ const handleAddToCart = async () => {
       </div>
     </div>
 
+    <BundleDealsPicker
+      :bundle-deals="product?.bundleDeals || []"
+      :unit-price="currentPrice"
+      :max-quantity="maxQuantity"
+      :disabled="!canPurchase"
+      @select-qty="selectBundleQty"
+    />
+
     <!-- Quick COD Order Form -->
     <div
       v-if="codEnabled"
@@ -257,66 +302,66 @@ const handleAddToCart = async () => {
           <Icon name="lucide:banknote" class="w-5 h-5" />
         </div>
         <div>
-          <h3 class="font-bold text-slate-800">Quick Order</h3>
-          <span class="text-xs text-slate-400">Cash on Delivery</span>
+          <h3 class="font-bold text-slate-800">{{ storefrontContent.productForm.cod.title }}</h3>
+          <span class="text-xs text-slate-400">{{ storefrontContent.productForm.cod.badge }}</span>
         </div>
       </div>
       
       <form class="space-y-4" @submit.prevent="handleOrderSubmit">
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-2">Full Name</label>
+          <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.fullName.label }}</label>
           <input 
             v-model="quickForm.fullName"
             type="text" 
-            placeholder="John Doe" 
+            :placeholder="storefrontContent.checkout.form.fullName.placeholder" 
             class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all"
           >
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-2">Phone Number</label>
+          <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.phone.label }}</label>
           <input
             v-model="quickForm.phone"
             type="tel"
-            placeholder="0XXXXXXXXX"
+            :placeholder="storefrontContent.checkout.form.phone.placeholder"
             class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all"
           >
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-slate-600 mb-2">Wilaya</label>
+            <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.wilaya.label }}</label>
             <div class="relative">
               <select
                 v-model="quickForm.wilaya"
                 class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none appearance-none cursor-pointer"
               >
-                <option value="">Select...</option>
-                <option value="16">Algiers</option>
-                <option value="31">Oran</option>
+                <option value="" disabled>{{ storefrontContent.common.selectPlaceholder }}</option>
+                <option value="16">{{ storefrontContent.algeria.wilayas[16] }}</option>
+                <option value="31">{{ storefrontContent.algeria.wilayas[31] }}</option>
               </select>
-              <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <Icon name="lucide:chevron-down" class="w-4 h-4" />
+              <div class="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <Icon name="lucide:chevron-down" class="w-4 h-4 rtl:rotate-180" />
               </div>
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-600 mb-2">Commune</label>
+            <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.commune.label }}</label>
             <input
               v-model="quickForm.commune"
               type="text"
-              placeholder="Bab Ezzouar"
+              :placeholder="storefrontContent.checkout.form.commune.placeholder"
               class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all"
             >
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-2">Address (Optional)</label>
+          <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.address.label }}</label>
           <input
             v-model="quickForm.address"
             type="text"
-            placeholder="Street, building, apartment"
+            :placeholder="storefrontContent.checkout.form.address.placeholder"
             class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all"
           >
         </div>
@@ -330,7 +375,7 @@ const handleAddToCart = async () => {
 
         <!-- Total Price Display -->
         <div class="flex items-center justify-between p-4 bg-brand-50 rounded-xl">
-          <span class="text-slate-600 font-medium">Total Price:</span>
+          <span class="text-slate-600 font-medium">{{ storefrontContent.productForm.totalPrice }}</span>
           <span class="font-bold text-xl text-brand-500">{{ formatCurrency(totalPrice) }}</span>
         </div>
 
@@ -340,7 +385,7 @@ const handleAddToCart = async () => {
           class="w-full bg-brand-500 text-white font-bold py-4 rounded-full shadow-lg shadow-brand-200 hover:bg-brand-600 hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <Icon v-if="orderSubmitting" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
-          <span>{{ orderSubmitting ? 'Processing...' : 'Confirm Order' }}</span>
+          <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
         </button>
       </form>
     </div>
@@ -354,7 +399,7 @@ const handleAddToCart = async () => {
         @click="handleAddToCart"
       >
         <Icon name="lucide:handbag" class="w-5 h-5" />
-        <span>{{ addToCartSubmitting ? 'Adding...' : 'Add to Basket' }}</span>
+        <span>{{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}</span>
       </button>
     </div>
     

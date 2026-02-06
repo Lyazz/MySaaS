@@ -24,7 +24,12 @@ class OrdersNotifier extends Notifier<OrdersState> {
     return OrdersState();
   }
 
-  Future<void> fetchOrders({String? search, String? status}) async {
+  Future<void> fetchOrders({
+    String? search,
+    String? status,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
@@ -35,6 +40,12 @@ class OrdersNotifier extends Notifier<OrdersState> {
       }
       if (status != null && status.isNotEmpty) {
         queryParameters['status'] = status;
+      }
+      if (startDate != null) {
+        queryParameters['startDate'] = startDate.toIso8601String();
+      }
+      if (endDate != null) {
+        queryParameters['endDate'] = endDate.toIso8601String();
       }
 
       final response = await apiService.client.get(

@@ -61,6 +61,12 @@ The platform is designed to start with **~100 tenants** and scale safely.
   - French
   - English
 
+### 🌍 Language Switching (i18n)
+- **Admin**: use the `FR / AR / EN` switcher in the admin top bar.
+- **Storefront**: use the same switcher (when available) or rely on the store’s default language.
+- **Persistence**: selection is saved in the `i18n_redirected` cookie.
+- **Store default language**: Admin → Settings → Functional → Default Language (used when the cookie is not set).
+
 ### 🔐 Admin & SaaS Management
 - Tenant admin dashboard:
   - products
