@@ -8,9 +8,13 @@ export class ProductsController {
         try {
             const tenant = req.tenant!
             const categoryId = req.query.categoryId as string | undefined
-            const sortBy = req.query.sortBy as string | undefined
-            const sortOrder = req.query.sortOrder as 'asc' | 'desc' | undefined
-            const products = await productsService.listProducts(tenant.id, categoryId, sortBy, sortOrder)
+            console.log(`[DEBUG] listProducts: Tenant=${tenant.name} (${tenant.id}) Category=${categoryId}`);
+
+            // Debug count
+            const count = await productsService.listProducts(tenant.id, categoryId)
+            console.log(`[DEBUG] listProducts: Found ${count.length} products`);
+
+            const products = await productsService.listProducts(tenant.id, categoryId, req.query.sortBy as string, req.query.sortOrder as any)
             res.json(products)
         } catch (error) {
             console.error('List products error:', error)

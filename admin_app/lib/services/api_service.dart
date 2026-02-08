@@ -1,12 +1,22 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final apiProvider = Provider<ApiService>((ref) => ApiService());
 
 class ApiService {
+  static String _resolveBaseUrl() {
+    if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+      return 'http://localhost:3000/api';
+    }
+
+    return 'http://192.168.1.4:3000/api';
+  }
+
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://localhost:3000/api', // Update with your API URL
+      baseUrl: _resolveBaseUrl(),
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {

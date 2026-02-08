@@ -5,6 +5,7 @@ class CartItem {
   final String? variantTitle;
   final double price;
   final int quantity;
+  final String? imageUrl;
 
   CartItem({
     required this.productId,
@@ -13,6 +14,7 @@ class CartItem {
     this.variantTitle,
     required this.price,
     this.quantity = 1,
+    this.imageUrl,
   });
 
   CartItem copyWith({
@@ -22,6 +24,7 @@ class CartItem {
     String? variantTitle,
     double? price,
     int? quantity,
+    String? imageUrl,
   }) {
     return CartItem(
       productId: productId ?? this.productId,
@@ -30,6 +33,7 @@ class CartItem {
       variantTitle: variantTitle ?? this.variantTitle,
       price: price ?? this.price,
       quantity: quantity ?? this.quantity,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

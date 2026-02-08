@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../providers/auth_provider.dart';
+import '../providers/sidebar_provider.dart';
 import 'responsive_layout.dart';
 import 'sidebar.dart';
 
@@ -52,7 +54,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     return Scaffold(
       body: Row(
         children: [
-          const SizedBox(width: 280, child: Sidebar()),
+          const Sidebar(),
           Expanded(
             child: Column(
               children: [
@@ -84,7 +86,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                 children: [
                   IconButton(
                     icon: const Icon(LucideIcons.menu, color: Colors.grey),
-                    onPressed: () {},
+                    onPressed: () {
+                      ref.read(sidebarProvider.notifier).toggle();
+                    },
                   ),
                   const SizedBox(width: 16),
                   Text(
@@ -110,6 +114,10 @@ class _AppShellState extends ConsumerState<AppShell> {
                     LucideIcons.logOut,
                     'Logout',
                     color: Colors.red,
+                    onPressed: () {
+                      ref.read(authProvider.notifier).logout();
+                      context.go('/login');
+                    },
                   ),
                 ],
               ),
@@ -120,9 +128,14 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  Widget _buildHeaderAction(IconData icon, String label, {Color? color}) {
+  Widget _buildHeaderAction(
+    IconData icon,
+    String label, {
+    Color? color,
+    VoidCallback? onPressed,
+  }) {
     return TextButton.icon(
-      onPressed: () {},
+      onPressed: onPressed ?? () {},
       icon: Icon(icon, size: 16, color: color ?? Colors.grey[600]),
       label: Text(
         label,
@@ -139,62 +152,27 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   String _getPageTitle(BuildContext context) {
-    if (GoRouterState.of(context).uri.toString() == '/') return 'Dashboard';
-    if (GoRouterState.of(context).uri.toString() == '/products') {
-      return 'Products';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/products/create') {
-      return 'Add Product';
-    }
-    if (GoRouterState.of(context).uri.toString().startsWith('/products/')) {
-      return 'Edit Product';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/orders') return 'Orders';
-    if (GoRouterState.of(context).uri.toString() == '/inventory') {
-      return 'Inventory';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/sales') {
-      return 'Sales';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/purchases') {
-      return 'Purchases';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/purchases/create') {
-      return 'Add Purchase';
-    }
-    if (GoRouterState.of(context).uri.toString().startsWith('/purchases/')) {
-      return 'Purchase Details';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/pos') {
-      return 'POS';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/delivery') {
-      return 'Delivery Settings';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/billing') {
-      return 'Billing & Subscription';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/categories') {
-      return 'Categories';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/suppliers') {
-      return 'Suppliers';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/suppliers/create') {
-      return 'Add Supplier';
-    }
-    if (GoRouterState.of(context).uri.toString().startsWith('/suppliers/')) {
-      return 'Supplier Details';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/customers') {
-      return 'Customers';
-    }
-    if (GoRouterState.of(context).uri.toString().startsWith('/customers/')) {
-      return 'Customer Details';
-    }
-    if (GoRouterState.of(context).uri.toString() == '/settings') {
-      return 'Settings';
-    }
+    final String location = GoRouterState.of(context).uri.toString();
+    if (location == '/') return 'Dashboard';
+    if (location == '/products') return 'Products';
+    if (location == '/products/create') return 'Add Product';
+    if (location.startsWith('/products/')) return 'Edit Product';
+    if (location == '/orders') return 'Orders';
+    if (location == '/inventory') return 'Inventory';
+    if (location == '/sales') return 'Sales';
+    if (location == '/purchases') return 'Purchases';
+    if (location == '/purchases/create') return 'Add Purchase';
+    if (location.startsWith('/purchases/')) return 'Purchase Details';
+    if (location == '/pos') return 'POS';
+    if (location == '/delivery') return 'Delivery Settings';
+    if (location == '/billing') return 'Billing & Subscription';
+    if (location == '/categories') return 'Categories';
+    if (location == '/suppliers') return 'Suppliers';
+    if (location == '/suppliers/create') return 'Add Supplier';
+    if (location.startsWith('/suppliers/')) return 'Supplier Details';
+    if (location == '/customers') return 'Customers';
+    if (location.startsWith('/customers/')) return 'Customer Details';
+    if (location == '/settings') return 'Settings';
     return 'Admin Dashboard';
   }
 }

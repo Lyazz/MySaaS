@@ -2,6 +2,13 @@
 
 A new Flutter project.
 
+## API base URL (Android + iOS)
+
+`admin_app` currently uses:
+
+- Mobile (Android/iOS): `http://192.168.1.4:3000/api`
+- Desktop (macOS/Windows/Linux): `http://localhost:3000/api`
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

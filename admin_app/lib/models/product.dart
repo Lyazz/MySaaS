@@ -59,7 +59,7 @@ class Product {
               ?.map((e) => ProductImage.fromJson(e))
               .toList() ??
           [],
-      category: json['category'] != null
+      category: json['category'] is Map
           ? Category.fromJson(json['category'])
           : null,
       categoryId:

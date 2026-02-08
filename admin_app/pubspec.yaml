@@ -45,6 +45,7 @@ dependencies:
   image_picker: ^1.2.1
   flutter_quill_delta_from_html: ^1.5.3
   flutter_quill_extensions: ^10.8.5
+  shared_preferences: ^2.2.2
   # quill_html_converter removed
 
 dev_dependencies:

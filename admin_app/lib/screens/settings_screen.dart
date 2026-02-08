@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -160,6 +162,41 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          _buildSectionHeader('Account'),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey[200]!),
+            ),
+            child: ListTile(
+              title: const Text(
+                'Log Out',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.red,
+                ),
+              ),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  LucideIcons.logOut,
+                  color: Colors.red,
+                  size: 20,
+                ),
+              ),
+              onTap: () {
+                ref.read(authProvider.notifier).logout();
+                context.go('/login');
+              },
             ),
           ),
         ],
