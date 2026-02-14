@@ -107,7 +107,7 @@ class Sidebar extends ConsumerWidget {
                     items: [
                       _NavItem(
                         route: '/settings',
-                        label: 'Appearance',
+                        label: 'App Settings',
                         icon: LucideIcons.palette,
                       ),
                       _NavItem(
@@ -302,6 +302,11 @@ class Sidebar extends ConsumerWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
+          // Close the drawer if it's open (mobile layout)
+          if (Scaffold.of(context).hasDrawer &&
+              Scaffold.of(context).isDrawerOpen) {
+            Navigator.of(context).pop();
+          }
           context.go(item.route);
         },
         hoverColor: Colors.white.withValues(alpha: 0.05), // hover:bg-white/5

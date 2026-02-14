@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/supplier.dart';
+import '../services/api_service.dart';
 
 class SuppliersState {
   final List<Supplier> suppliers;
@@ -28,76 +29,73 @@ class SuppliersState {
 class SuppliersNotifier extends Notifier<SuppliersState> {
   @override
   SuppliersState build() {
-    // Mock data
-    return SuppliersState(
-      suppliers: [
-        Supplier(
-          id: '1',
-          name: 'Acme Corp',
-          email: 'contact@acme.com',
-          phone: '(555) 123-4567',
-          address: '123 Industrial Way',
-        ),
-        Supplier(
-          id: '2',
-          name: 'Global Supplies Inc',
-          email: 'sales@globalsupplies.com',
-          phone: '(555) 987-6543',
-          address: '456 Commerce Blvd',
-        ),
-      ],
-    );
+    return SuppliersState();
   }
 
   Future<void> fetchSuppliers() async {
     state = state.copyWith(isLoading: true, error: null);
-    await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(isLoading: false);
+    try {
+      final apiService = ref.read(apiProvider);
+      final response = await apiService.client.get('/admin/suppliers');
+      final List<dynamic> data = response.data;
+      final suppliers = data.map((e) => Supplier.fromJson(e)).toList();
+      state = state.copyWith(isLoading: false, suppliers: suppliers);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
   }
 
   Future<Supplier?> fetchSupplier(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
     try {
-      return state.suppliers.firstWhere((s) => s.id == id);
-    } catch (_) {
+      final apiService = ref.read(apiProvider);
+      final response = await apiService.client.get('/admin/suppliers/$id');
+      return Supplier.fromJson(response.data);
+    } catch (e) {
       return null;
     }
   }
 
   Future<void> addSupplier(Supplier supplier) async {
     state = state.copyWith(isLoading: true, error: null);
-    await Future.delayed(const Duration(milliseconds: 500));
-    final newSupplier = Supplier(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: supplier.name,
-      email: supplier.email,
-      phone: supplier.phone,
-      address: supplier.address,
-      notes: supplier.notes,
-    );
-    state = state.copyWith(
-      isLoading: false,
-      suppliers: [...state.suppliers, newSupplier],
-    );
+    try {
+      final apiService = ref.read(apiProvider);
+      final data = supplier.toJson()..remove('id');
+      await apiService.client.post('/admin/suppliers', data: data);
+      await fetchSuppliers();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
   }
 
   Future<void> updateSupplier(Supplier supplier) async {
     state = state.copyWith(isLoading: true, error: null);
-    await Future.delayed(const Duration(milliseconds: 500));
-    final updatedSuppliers = state.suppliers.map((s) {
-      if (s.id == supplier.id) {
-        return supplier;
-      }
-      return s;
-    }).toList();
-    state = state.copyWith(isLoading: false, suppliers: updatedSuppliers);
+    try {
+      final apiService = ref.read(apiProvider);
+      await apiService.client.put(
+        '/admin/suppliers/${supplier.id}',
+        data: supplier.toJson(),
+      );
+      await fetchSuppliers();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
   }
 
   Future<void> deleteSupplier(String id) async {
     state = state.copyWith(isLoading: true, error: null);
-    await Future.delayed(const Duration(milliseconds: 500));
-    final updatedSuppliers = state.suppliers.where((s) => s.id != id).toList();
-    state = state.copyWith(isLoading: false, suppliers: updatedSuppliers);
+    try {
+      final apiService = ref.read(apiProvider);
+      await apiService.client.delete('/admin/suppliers/$id');
+      final updatedSuppliers = state.suppliers
+          .where((s) => s.id != id)
+          .toList();
+      state = state.copyWith(isLoading: false, suppliers: updatedSuppliers);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
   }
 }
 

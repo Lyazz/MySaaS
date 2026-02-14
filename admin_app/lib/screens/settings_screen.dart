@@ -20,21 +20,33 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           const Text(
             'App Settings',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
+              color: Color(0xFF0F172A),
+            ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             'Manage your application preferences',
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
           const SizedBox(height: 32),
-          _buildSectionHeader('Appearance'),
+          _buildSectionHeader('App Settings'),
           const SizedBox(height: 16),
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey[200]!),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -47,8 +59,8 @@ class SettingsScreen extends ConsumerWidget {
                   secondary: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFFFAE8FF), // Purple 50
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       LucideIcons.moon,
@@ -67,11 +79,18 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 32),
           _buildSectionHeader('Notifications'),
           const SizedBox(height: 16),
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey[200]!),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -86,8 +105,8 @@ class SettingsScreen extends ConsumerWidget {
                   secondary: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFFFEE2E2), // Red 50
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       LucideIcons.bell,
@@ -106,11 +125,18 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 32),
           _buildSectionHeader('General'),
           const SizedBox(height: 16),
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey[200]!),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -123,8 +149,8 @@ class SettingsScreen extends ConsumerWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFFDCFCE7), // Green 50
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       LucideIcons.dollarSign,
@@ -140,6 +166,30 @@ class SettingsScreen extends ConsumerWidget {
                 const Divider(height: 1),
                 ListTile(
                   title: const Text(
+                    'Printers',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: const Text('Manage receipt printers'),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEDD5), // Orange 50
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      LucideIcons.printer,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                  ),
+                  trailing: const Icon(LucideIcons.chevronRight, size: 20),
+                  onTap: () {
+                    context.go('/settings/printers');
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  title: const Text(
                     'Language',
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
@@ -147,8 +197,8 @@ class SettingsScreen extends ConsumerWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFFDBEAFE), // Blue 50
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       LucideIcons.languages,
@@ -167,11 +217,18 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 32),
           _buildSectionHeader('Account'),
           const SizedBox(height: 16),
-          Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey[200]!),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[200]!),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: ListTile(
               title: const Text(
@@ -184,8 +241,8 @@ class SettingsScreen extends ConsumerWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xFFFEE2E2), // Red 50
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   LucideIcons.logOut,

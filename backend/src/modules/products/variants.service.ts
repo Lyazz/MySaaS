@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma'
 import { InventoryService } from '../inventory/inventory.service'
+import { syncProductStockForProducts } from '../inventory/product-stock.service'
 
 export class VariantsService {
     private inventory = new InventoryService()
@@ -22,6 +23,13 @@ export class VariantsService {
             throw err
         }
 
+        if (body?.stock !== undefined || body?.reserved !== undefined) {
+            const err = new Error('stock/reserved are system-managed and cannot be edited') as any
+            err.statusCode = 403
+            err.statusMessage = 'stock/reserved are system-managed and cannot be edited'
+            throw err
+        }
+
         const updateInfoResult = await prisma.productVariant.updateMany({
             where: { id: variantId, tenantId },
             data: {
@@ -40,8 +48,6 @@ export class VariantsService {
         }
 
         const wantsInventoryUpdate =
-            body?.stock !== undefined ||
-            body?.reserved !== undefined ||
             body?.safetyStock !== undefined ||
             body?.trackInventory !== undefined
 
@@ -50,8 +56,6 @@ export class VariantsService {
                 tenantId,
                 variantId,
                 {
-                    stock: body?.stock,
-                    reserved: body?.reserved,
                     safetyStock: body?.safetyStock,
                     trackInventory: body?.trackInventory,
                     reason: 'variant_update',
@@ -59,6 +63,10 @@ export class VariantsService {
                 },
                 actor
             )
+        }
+
+        if (body?.isActive !== undefined) {
+            await syncProductStockForProducts(prisma as any, tenantId, [variant.productId])
         }
 
         return prisma.productVariant.findFirst({ where: { id: variantId, tenantId } })
@@ -150,7 +158,7 @@ export class VariantsService {
     async deleteVariant(tenantId: string, variantId: string) {
         const variant = await prisma.productVariant.findFirst({
             where: { id: variantId, tenantId },
-            select: { id: true }
+            select: { id: true, productId: true }
         })
         if (!variant) {
             const err = new Error('Variant not found') as any
@@ -160,7 +168,7 @@ export class VariantsService {
         }
 
         await prisma.productVariant.delete({ where: { id: variantId } })
+        await syncProductStockForProducts(prisma as any, tenantId, [variant.productId])
         return { success: true }
     }
 }
-

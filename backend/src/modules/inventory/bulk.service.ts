@@ -102,13 +102,11 @@ export class BulkInventoryService {
 
                 const sku = parsed.header.includes('sku') ? (record.sku ?? '').trim() : ''
 
-                if (stock !== null || reserved !== null || safetyStock !== null || trackInventory !== null) {
+                if (safetyStock !== null || trackInventory !== null) {
                     await this.inventory.updateVariantInventory(
                         tenantId,
                         id,
                         {
-                            stock: stock === null ? undefined : stock,
-                            reserved: reserved === null ? undefined : reserved,
                             safetyStock: safetyStock === null ? undefined : safetyStock,
                             trackInventory: trackInventory === null ? undefined : trackInventory,
                             reason: 'bulk_import',
@@ -178,6 +176,8 @@ export class BulkInventoryService {
                 if (u.reserved !== undefined && reserved === null) throw new Error('Invalid reserved')
                 if (u.safetyStock !== undefined && safetyStock === null) throw new Error('Invalid safetyStock')
                 if (u.trackInventory !== undefined && trackInventory === null) throw new Error('Invalid trackInventory')
+                if (stock !== null) throw new Error('stock is system-managed and cannot be edited')
+                if (reserved !== null) throw new Error('reserved is system-managed and cannot be edited')
 
                 const price = u.price === undefined ? null : typeof u.price === 'number' ? String(u.price) : typeof u.price === 'string' ? u.price : null
                 if (u.price !== undefined && (price === null || !price.trim())) throw new Error('Invalid price')
@@ -185,13 +185,11 @@ export class BulkInventoryService {
                 const sku = u.sku === undefined ? null : typeof u.sku === 'string' ? u.sku.trim() : null
                 if (u.sku !== undefined && sku === null) throw new Error('Invalid sku')
 
-                if (stock !== null || reserved !== null || safetyStock !== null || trackInventory !== null) {
+                if (safetyStock !== null || trackInventory !== null) {
                     await this.inventory.updateVariantInventory(
                         tenantId,
                         id,
                         {
-                            stock: stock === null ? undefined : stock,
-                            reserved: reserved === null ? undefined : reserved,
                             safetyStock: safetyStock === null ? undefined : safetyStock,
                             trackInventory: trackInventory === null ? undefined : trackInventory,
                             reason,
@@ -220,4 +218,3 @@ export class BulkInventoryService {
         return { updated, errors }
     }
 }
-

@@ -58,7 +58,7 @@ describe('Admin inventory bulk ops', () => {
     it('imports variants CSV and creates inventory movement', async () => {
         const csv = [
             'id,stock,reserved,safetyStock,trackInventory,price,sku',
-            `${variantId},8,1,0,true,12.5,SKU-001`
+            `${variantId},8,1,2,true,12.5,SKU-001`
         ].join('\n')
 
         const res = await request(app)
@@ -71,8 +71,9 @@ describe('Admin inventory bulk ops', () => {
         expect(res.body.updated).toBe(1)
 
         const refreshed = await prisma.productVariant.findFirst({ where: { tenantId, id: variantId } })
-        expect(refreshed?.stock).toBe(8)
-        expect(refreshed?.reserved).toBe(1)
+        expect(refreshed?.stock).toBe(5)
+        expect(refreshed?.reserved).toBe(0)
+        expect(refreshed?.safetyStock).toBe(2)
         expect(String(refreshed?.price)).toBe('12.5')
         expect(refreshed?.sku).toBe('SKU-001')
 
@@ -83,7 +84,7 @@ describe('Admin inventory bulk ops', () => {
         expect(move).toBeTruthy()
     })
 
-    it('bulk patches variants', async () => {
+    it('blocks bulk patch updates to stock/reserved', async () => {
         const res = await request(app)
             .patch('/api/admin/inventory/variants/bulk')
             .set('X-Forwarded-Host', host)
@@ -94,11 +95,7 @@ describe('Admin inventory bulk ops', () => {
             })
 
         expect(res.status).toBe(200)
-        expect(res.body.updated).toBe(1)
-
-        const refreshed = await prisma.productVariant.findFirst({ where: { tenantId, id: variantId } })
-        expect(refreshed?.stock).toBe(9)
-        expect(refreshed?.reserved).toBe(0)
+        expect(res.body.updated).toBe(0)
+        expect(res.body.errors?.[0]?.message).toMatch(/system-managed/i)
     })
 })
-

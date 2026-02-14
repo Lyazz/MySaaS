@@ -17,6 +17,9 @@ model Tenant {
 
   users          User[]
   customers      Customer[]
+  cashboxes      Cashbox[]
+  cashSessions   CashSession[]
+  cashTransactions CashTransaction[]
   subscription   TenantSubscription?
   payments       BillingPayment[]
   products       Product[]
@@ -45,6 +48,117 @@ model Tenant {
   integrations   TenantIntegration[]
   metaPixels     TenantMetaPixel[]
   productMetaPixels ProductMetaPixel[]
+}
+
+model Cashbox {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name     String
+  isActive Boolean @default(true)
+
+  sessions     CashSession[]
+  transactions CashTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+}
+
+model CashSession {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  cashboxId String
+  cashbox   Cashbox @relation(fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: Cascade)
+
+  status String @default("OPEN") // OPEN | CLOSED
+
+  openingFloat Decimal @default(0)
+  closingCount Decimal?
+  expectedClosing Decimal?
+  difference     Decimal?
+
+  note String?
+
+  openedAt DateTime @default(now())
+  closedAt DateTime?
+
+  openedByUserId String?
+  openedBy       User? @relation("CashSessionOpenedBy", fields: [tenantId, openedByUserId], references: [tenantId, id])
+
+  closedByUserId String?
+  closedBy       User? @relation("CashSessionClosedBy", fields: [tenantId, closedByUserId], references: [tenantId, id])
+
+  transactions CashTransaction[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, cashboxId])
+  @@index([tenantId, cashboxId, status])
+  @@index([tenantId, openedAt])
+}
+
+model CashTransaction {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  cashboxId String
+  cashbox   Cashbox @relation(fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: Cascade)
+
+  sessionId String
+  session   CashSession @relation(fields: [tenantId, sessionId], references: [tenantId, id], onDelete: Cascade)
+
+  direction String // IN | OUT
+  type      String // SALE_PAYMENT | CUSTOMER_PAYMENT | SUPPLIER_PAYMENT | EXPENSE | CHARGE | TRANSFER
+
+  amount   Decimal
+  currency String @default("DZD")
+  method   String @default("CASH") // CASH | CARD | TRANSFER | OTHER
+
+  customerId String?
+  customer   Customer? @relation("CashTxCustomer", fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
+
+  supplierId String?
+  supplier   Supplier? @relation("CashTxSupplier", fields: [tenantId, supplierId], references: [tenantId, id], onDelete: SetNull)
+
+  saleId String?
+  sale   Sale? @relation("CashTxSale", fields: [tenantId, saleId], references: [tenantId, id], onDelete: SetNull)
+
+  orderId String?
+  order   Order? @relation("CashTxOrder", fields: [tenantId, orderId], references: [tenantId, id], onDelete: SetNull)
+
+  purchaseOrderId String?
+  purchaseOrder   PurchaseOrder? @relation("CashTxPurchaseOrder", fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: SetNull)
+
+  expenseCategory String?
+
+  transferGroupId String?
+
+  reference String?
+  note      String?
+
+  createdByUserId String?
+  createdBy       User? @relation("CashTransactionCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, cashboxId, createdAt])
+  @@index([tenantId, sessionId, createdAt])
+  @@index([tenantId, customerId])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, saleId])
+  @@index([tenantId, orderId])
+  @@index([tenantId, purchaseOrderId])
+  @@index([tenantId, transferGroupId])
 }
 
 model TenantSubscription {
@@ -190,6 +304,9 @@ model User {
   inventoryMovements InventoryMovement[]
   purchaseOrdersCreated PurchaseOrder[] @relation("PurchaseOrderCreatedBy")
   salesCreated Sale[] @relation("SaleCreatedBy")
+  cashSessionsOpened CashSession[] @relation("CashSessionOpenedBy")
+  cashSessionsClosed CashSession[] @relation("CashSessionClosedBy")
+  cashTransactionsCreated CashTransaction[] @relation("CashTransactionCreatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
@@ -502,6 +619,7 @@ model Sale {
 
   items     SaleItem[]
   movements InventoryMovement[]
+  cashTransactions CashTransaction[] @relation("CashTxSale")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -544,6 +662,7 @@ model Supplier {
   notes   String?
 
   purchaseOrders PurchaseOrder[]
+  cashTransactions CashTransaction[] @relation("CashTxSupplier")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -573,6 +692,7 @@ model PurchaseOrder {
   receivedAt DateTime?
 
   items PurchaseOrderItem[]
+  cashTransactions CashTransaction[] @relation("CashTxPurchaseOrder")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -638,6 +758,7 @@ model Order {
   items     OrderItem[]
   shipments Shipment[]
   inventoryMovements InventoryMovement[]
+  cashTransactions CashTransaction[] @relation("CashTxOrder")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -662,6 +783,7 @@ model Customer {
 
   orders Order[]
   sales  Sale[]
+  cashTransactions CashTransaction[] @relation("CashTxCustomer")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

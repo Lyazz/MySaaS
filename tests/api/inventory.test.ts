@@ -230,6 +230,47 @@ describe('Inventory management + movements', () => {
         expect(move?.type).toBe('SAFETY_STOCK_CHANGE')
         expect(move?.safetyStockDelta).toBe(-1)
         expect(move?.note).toBe('Lower safety stock')
+
+        const variantNow = await prisma.productVariant.findFirst({
+            where: { tenantId: tenantAId, id: variantAId },
+            select: { stock: true, reserved: true, safetyStock: true, trackInventory: true }
+        })
+        const productAfter = await prisma.product.findFirst({
+            where: { tenantId: tenantAId, id: productAId },
+            select: { stock: true }
+        })
+        const expectedAvailable =
+            variantNow?.trackInventory === false
+                ? 999999
+                : Math.max((variantNow?.stock ?? 0) - (variantNow?.reserved ?? 0) - (variantNow?.safetyStock ?? 0), 0)
+        expect(productAfter?.stock).toBe(expectedAvailable)
+    })
+
+    it('blocks tenant admin from editing stock/reserved directly', async () => {
+        const before = await prisma.productVariant.findFirst({
+            where: { tenantId: tenantAId, id: variantAId },
+            select: { stock: true, reserved: true, safetyStock: true }
+        })
+
+        const stockRes = await request(app)
+            .patch(`/api/admin/inventory/variants/${variantAId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ stock: 999 })
+        expect(stockRes.status).toBe(403)
+
+        const reservedRes = await request(app)
+            .patch(`/api/admin/inventory/variants/${variantAId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ reserved: 999 })
+        expect(reservedRes.status).toBe(403)
+
+        const after = await prisma.productVariant.findFirst({
+            where: { tenantId: tenantAId, id: variantAId },
+            select: { stock: true, reserved: true, safetyStock: true }
+        })
+        expect(after).toEqual(before)
     })
 
     it('blocks cross-tenant inventory access by scoping queries to tenantId', async () => {

@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../providers/sales_provider.dart';
 import '../models/sale.dart';
+import '../utils/debouncer.dart';
 
 class SalesScreen extends ConsumerStatefulWidget {
   const SalesScreen({super.key});
@@ -15,9 +16,11 @@ class SalesScreen extends ConsumerStatefulWidget {
 
 class _SalesScreenState extends ConsumerState<SalesScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -26,6 +29,15 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   Widget build(BuildContext context) {
     final salesState = ref.watch(salesProvider);
     final sales = salesState.sales;
+    final query = _searchController.text.trim().toLowerCase();
+    final filteredSales = query.isEmpty
+        ? sales
+        : sales.where((sale) {
+            return sale.id.toLowerCase().contains(query) ||
+                sale.customerName.toLowerCase().contains(query) ||
+                sale.status.toLowerCase().contains(query) ||
+                sale.type.toLowerCase().contains(query);
+          }).toList();
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -62,6 +74,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
+                  onChanged: (value) =>
+                      _searchDebouncer.run(() => setState(() {})),
                 ),
               ),
             ],
@@ -70,7 +84,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
           Expanded(
             child: salesState.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _buildSalesTable(sales),
+                : _buildSalesTable(filteredSales),
           ),
         ],
       ),

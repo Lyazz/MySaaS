@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { syncProductStockForProducts } from './product-stock.service'
 
 export class InventoryValidationError extends Error {
     statusCode: number
@@ -170,6 +171,13 @@ export class InventoryService {
         })
         if (!current) throw new InventoryValidationError(404, 'Variant not found')
 
+        if (stock !== null && stock !== current.stock) {
+            throw new InventoryValidationError(403, 'stock is system-managed and cannot be edited')
+        }
+        if (reserved !== null && reserved !== current.reserved) {
+            throw new InventoryValidationError(403, 'reserved is system-managed and cannot be edited')
+        }
+
         const next = {
             stock: stock ?? current.stock,
             reserved: reserved ?? current.reserved,
@@ -217,8 +225,6 @@ export class InventoryService {
                     trackInventory: current.trackInventory
                 },
                 data: {
-                    stock: stock === null ? undefined : next.stock,
-                    reserved: reserved === null ? undefined : next.reserved,
                     safetyStock: safetyStock === null ? undefined : next.safetyStock,
                     trackInventory: trackInventory === null ? undefined : next.trackInventory
                 }
@@ -250,18 +256,7 @@ export class InventoryService {
                 }
             })
 
-            // If this is a default (no-options) variant, keep Product.stock mirrored for legacy/admin displays.
-            const isDefaultVariant = (await tx.productVariantOptionValue.count({ where: { tenantId, variantId } })) === 0
-            if (isDefaultVariant && stock !== null) {
-                const hasOptions =
-                    (await tx.productOption.count({ where: { tenantId, productId: current.productId } })) > 0
-                if (!hasOptions) {
-                    await tx.product.updateMany({
-                        where: { tenantId, id: current.productId },
-                        data: { stock: refreshed?.stock ?? next.stock }
-                    })
-                }
-            }
+            await syncProductStockForProducts(tx as any, tenantId, [current.productId])
 
             return tx.productVariant.findFirst({
                 where: { id: variantId, tenantId }

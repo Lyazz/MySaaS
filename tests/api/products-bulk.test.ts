@@ -48,6 +48,19 @@ describe('Admin products bulk ops', () => {
         })
         productAId = product.id
 
+        await prisma.productVariant.create({
+            data: {
+                tenantId: tenantAId,
+                productId: productAId,
+                price: 100,
+                stock: 1,
+                reserved: 0,
+                safetyStock: 0,
+                trackInventory: true,
+                isActive: true
+            }
+        })
+
         const tenantB = await prisma.tenant.create({ data: { name: 'Bulk B', slug: slugB } })
         tenantBId = tenantB.id
         const adminB = await prisma.user.create({
@@ -110,7 +123,7 @@ describe('Admin products bulk ops', () => {
         expect(res.status).toBe(403)
     })
 
-    it('imports CSV and updates default-variant stock via movements', async () => {
+    it('imports CSV but ignores stock updates after creation', async () => {
         const csv = [
             'id,slug,title,price,stock,isActive,categoryId',
             `${productAId},,Bulk Product Updated,150,7,true,${categoryAId}`
@@ -124,6 +137,7 @@ describe('Admin products bulk ops', () => {
 
         expect(res.status).toBe(200)
         expect(res.body.updated).toBe(1)
+        expect(res.body.warnings?.[0]?.message).toMatch(/stock is system-managed/i)
 
         const refreshed = await prisma.product.findFirst({ where: { tenantId: tenantAId, id: productAId } })
         expect(refreshed?.title).toBe('Bulk Product Updated')
@@ -132,13 +146,13 @@ describe('Admin products bulk ops', () => {
         const variant = await prisma.productVariant.findFirst({
             where: { tenantId: tenantAId, productId: productAId, optionValues: { none: {} } }
         })
-        expect(variant?.stock).toBe(7)
+        expect(variant?.stock).toBe(1)
 
         const move = await prisma.inventoryMovement.findFirst({
             where: { tenantId: tenantAId, variantId: variant!.id, reason: 'bulk_import' },
             orderBy: { createdAt: 'desc' }
         })
-        expect(move).toBeTruthy()
+        expect(move).toBeNull()
     })
 
     it('bulk patches products and duplicates selected product', async () => {
@@ -169,5 +183,18 @@ describe('Admin products bulk ops', () => {
         const newVariants = await prisma.productVariant.findMany({ where: { tenantId: tenantAId, productId: dup.body.id } })
         expect(newVariants.length).toBeGreaterThan(0)
     })
-})
 
+    it('blocks bulk patch stock updates', async () => {
+        const res = await request(app)
+            .patch('/api/admin/products/bulk')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .send({
+                ids: [productAId],
+                data: { stock: 9 }
+            })
+
+        expect(res.status).toBe(400)
+        expect(res.body?.statusMessage).toMatch(/system-managed/i)
+    })
+})

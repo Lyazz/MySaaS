@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../services/api_service.dart';
 import '../models/customer.dart';
 import '../models/product.dart';
 import '../models/pos_models.dart';
+import '../utils/pos_payment.dart';
+import '../utils/debouncer.dart';
+import '../utils/barcode_scanner.dart';
 import '../providers/pos_provider.dart';
 import '../providers/customers_provider.dart';
 import '../widgets/numpad_widget.dart';
 import '../widgets/shimmer_skeleton.dart';
+import '../widgets/smart_cash_suggestions.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -20,10 +26,22 @@ class PosScreen extends ConsumerStatefulWidget {
 
 class _PosScreenState extends ConsumerState<PosScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
+  late final BarcodeScannerBuffer _barcodeBuffer;
+  bool _barcodeHandlerAttached = false;
+  String? _lastHandledBarcode;
+  DateTime? _lastHandledBarcodeAt;
 
   @override
   void initState() {
     super.initState();
+    _barcodeBuffer = BarcodeScannerBuffer(
+      interKeyTimeout: const Duration(milliseconds: 80),
+      maxScanDuration: const Duration(milliseconds: 900),
+      minLength: 3,
+    );
+    HardwareKeyboard.instance.addHandler(_handleBarcodeKeyEvent);
+    _barcodeHandlerAttached = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(posProvider.notifier).loadSettings();
       ref.read(posProvider.notifier).fetchCategories();
@@ -33,8 +51,93 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
   @override
   void dispose() {
+    if (_barcodeHandlerAttached) {
+      HardwareKeyboard.instance.removeHandler(_handleBarcodeKeyEvent);
+      _barcodeHandlerAttached = false;
+    }
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  bool _handleBarcodeKeyEvent(KeyEvent event) {
+    if (!mounted) return false;
+    if (event is! KeyDownEvent) return false;
+
+    if (HardwareKeyboard.instance.isAltPressed ||
+        HardwareKeyboard.instance.isControlPressed ||
+        HardwareKeyboard.instance.isMetaPressed) {
+      return false;
+    }
+
+    final now = DateTime.now();
+
+    if (isEnterKeyEvent(event)) {
+      final code = _barcodeBuffer.submit(now);
+      if (code == null) return false;
+
+      final normalized = code.trim();
+      if (normalized.isEmpty) return true;
+
+      final lastAt = _lastHandledBarcodeAt;
+      if (_lastHandledBarcode == normalized &&
+          lastAt != null &&
+          now.difference(lastAt) < const Duration(milliseconds: 350)) {
+        return true;
+      }
+
+      _lastHandledBarcode = normalized;
+      _lastHandledBarcodeAt = now;
+      _onBarcodeScanned(normalized);
+      return true;
+    }
+
+    final ch = printableCharacterFromKeyEvent(event);
+    if (ch == null) return false;
+
+    final shouldConsume = _barcodeBuffer.addCharacter(ch, now);
+    return shouldConsume;
+  }
+
+  Future<void> _onBarcodeScanned(String code) async {
+    try {
+      final item = await ref.read(posProvider.notifier).addByCode(code);
+      if (!mounted) return;
+
+      if (item == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Product not found for SKU: $code'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+
+      final label = [
+        item.title,
+        if (item.variantLabel != null && item.variantLabel!.trim().isNotEmpty)
+          item.variantLabel!.trim(),
+      ].join(' • ');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added 1x $label'),
+          backgroundColor: const Color(0xFF0D9488),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Barcode lookup failed: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _showNumpadDialog({int? itemIndex}) {
@@ -43,9 +146,32 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       builder: (context) {
         String value = '';
         final isQuantityUpdate = itemIndex != null;
+        final allowDecimal = !isQuantityUpdate;
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            void appendToken(String token) {
+              setDialogState(() {
+                if (value.length >= 18) return;
+
+                if (token == '.') {
+                  if (!allowDecimal) return;
+                  if (value.contains('.')) return;
+                  value = value.isEmpty ? '0.' : '$value.';
+                  return;
+                }
+
+                value += token;
+              });
+            }
+
+            void backspace() {
+              setDialogState(() {
+                if (value.isEmpty) return;
+                value = value.substring(0, value.length - 1);
+              });
+            }
+
             return Dialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -100,18 +226,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     SizedBox(
                       height: 380,
                       child: NumpadWidget(
-                        onNumberTap: (number) {
-                          setDialogState(() {
-                            if (value.length < 9) {
-                              value += number;
-                            }
-                          });
-                        },
+                        allowDecimal: allowDecimal,
+                        onNumberTap: appendToken,
                         onClear: () {
                           setDialogState(() {
                             value = '';
                           });
                         },
+                        onBackspace: backspace,
                         onEnter: () {
                           if (value.isEmpty) return;
 
@@ -136,6 +258,696 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   ],
                 ),
               ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showBarcodeScanner() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Scan Barcode'),
+            backgroundColor: const Color(0xFF0D9488),
+            foregroundColor: Colors.white,
+          ),
+          body: MobileScanner(
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              if (barcodes.isNotEmpty) {
+                final String? code = barcodes.first.rawValue;
+                if (code != null) {
+                  Navigator.of(context).pop();
+                  _onBarcodeScanned(code);
+                }
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDiscountDialog() {
+    // TODO: Implement discount logic
+    // - Allow percentage or fixed amount discount
+    // - Apply to entire cart or individual items
+    // - Require authorization for large discounts
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Apply Discount'),
+        content: const Text(
+          'TODO: Implement discount functionality\n\n'
+          'Features to add:\n'
+          '• Percentage discount\n'
+          '• Fixed amount discount\n'
+          '• Per-item or cart-wide\n'
+          '• Authorization requirements',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showPaymentSheet(PosState posState) async {
+    if (posState.cart.isEmpty) return;
+
+    final total = posState.total;
+    final currency = NumberFormat.simpleCurrency();
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        var method = PosPaymentMethod.cash;
+        var cashText = ''; // Start empty for easier typing
+
+        double parseAmount(String input) {
+          final trimmed = input.trim();
+          if (trimmed.isEmpty) return 0;
+          return double.tryParse(trimmed) ?? 0;
+        }
+
+        String applyToken(String current, String token) {
+          if (token == '.') {
+            if (current.contains('.')) return current;
+            return current.isEmpty ? '0.' : '$current.';
+          }
+          // Prevent too many decimals? standard double parsing handles it, but let's be clean
+          // Limit to 2 decimal places for currency
+          if (current.contains('.')) {
+            final parts = current.split('.');
+            if (parts.length > 1 && parts[1].length >= 2) return current;
+          }
+          return '$current$token';
+        }
+
+        String backspace(String current) {
+          if (current.isEmpty) return current;
+          return current.substring(0, current.length - 1);
+        }
+
+        return Consumer(
+          builder: (context, ref, _) {
+            final posState = ref.watch(posProvider);
+            return StatefulBuilder(
+              builder: (dialogContext, setDialogState) {
+                final cardAmount = method == PosPaymentMethod.card
+                    ? total
+                    : 0.0;
+                // If cashText is empty, we assume 0 for calculations,
+                // BUT if it's empty we might want to show "0" placeholder UI.
+                final cashReceived = method == PosPaymentMethod.cash
+                    ? parseAmount(cashText)
+                    : 0.0;
+
+                final breakdown = PosPaymentBreakdown(
+                  total: total,
+                  cardAmount: cardAmount,
+                  cashReceived: cashReceived,
+                );
+
+                void append(String text) {
+                  setDialogState(() {
+                    if (method != PosPaymentMethod.cash) {
+                      method = PosPaymentMethod.cash;
+                      cashText = '';
+                    }
+                    cashText = applyToken(cashText, text);
+                  });
+                }
+
+                void clear() {
+                  setDialogState(() {
+                    cashText = '';
+                  });
+                }
+
+                void doBackspace() {
+                  setDialogState(() {
+                    if (cashText.isNotEmpty) {
+                      cashText = backspace(cashText);
+                    }
+                  });
+                }
+
+                Future<void> confirm() async {
+                  if (posState.isLoading) return;
+
+                  if (!breakdown.isValid) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      const SnackBar(
+                        content: Text('Invalid payment amounts'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (!breakdown.isSettled) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Remaining: ${currency.format(breakdown.remaining)}',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
+                  // Proceed with checkout
+                  final ok = await ref
+                      .read(posProvider.notifier)
+                      .checkout(
+                        payment: PosPaymentRequest(
+                          cashReceived: breakdown.cashReceived,
+                          cardAmount: breakdown.cardAmount,
+                        ),
+                      );
+
+                  if (ok) {
+                    if (dialogContext.mounted) {
+                      Navigator.pop(dialogContext);
+                    }
+                    if (mounted) {
+                      _showCheckoutSuccessAnimation();
+                    }
+                  } else {
+                    final error = ref.read(posProvider).error;
+                    if (dialogContext.mounted) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        SnackBar(
+                          content: Text(error ?? 'Checkout failed'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                }
+
+                void handleKeyEvent(KeyEvent event) {
+                  if (event is KeyDownEvent) {
+                    final logical = event.logicalKey;
+                    if (logical == LogicalKeyboardKey.escape) {
+                      Navigator.pop(dialogContext);
+                    } else if (logical == LogicalKeyboardKey.enter ||
+                        logical == LogicalKeyboardKey.numpadEnter) {
+                      confirm();
+                    } else if (logical == LogicalKeyboardKey.backspace) {
+                      doBackspace();
+                    } else {
+                      String? char;
+                      if (logical == LogicalKeyboardKey.digit0 ||
+                          logical == LogicalKeyboardKey.numpad0) {
+                        char = '0';
+                      } else if (logical == LogicalKeyboardKey.digit1 ||
+                          logical == LogicalKeyboardKey.numpad1) {
+                        char = '1';
+                      } else if (logical == LogicalKeyboardKey.digit2 ||
+                          logical == LogicalKeyboardKey.numpad2) {
+                        char = '2';
+                      } else if (logical == LogicalKeyboardKey.digit3 ||
+                          logical == LogicalKeyboardKey.numpad3) {
+                        char = '3';
+                      } else if (logical == LogicalKeyboardKey.digit4 ||
+                          logical == LogicalKeyboardKey.numpad4) {
+                        char = '4';
+                      } else if (logical == LogicalKeyboardKey.digit5 ||
+                          logical == LogicalKeyboardKey.numpad5) {
+                        char = '5';
+                      } else if (logical == LogicalKeyboardKey.digit6 ||
+                          logical == LogicalKeyboardKey.numpad6) {
+                        char = '6';
+                      } else if (logical == LogicalKeyboardKey.digit7 ||
+                          logical == LogicalKeyboardKey.numpad7) {
+                        char = '7';
+                      } else if (logical == LogicalKeyboardKey.digit8 ||
+                          logical == LogicalKeyboardKey.numpad8) {
+                        char = '8';
+                      } else if (logical == LogicalKeyboardKey.digit9 ||
+                          logical == LogicalKeyboardKey.numpad9) {
+                        char = '9';
+                      } else if (logical == LogicalKeyboardKey.period ||
+                          logical == LogicalKeyboardKey.numpadDecimal) {
+                        char = '.';
+                      }
+
+                      if (char != null) {
+                        append(char);
+                      }
+                    }
+                  }
+                }
+
+                return Focus(
+                  autofocus: true,
+                  onKeyEvent: (node, event) {
+                    handleKeyEvent(event);
+                    return KeyEventResult.handled;
+                  },
+                  child: Dialog(
+                    backgroundColor: Colors.transparent,
+                    insetPadding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 24,
+                    ),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width > 900
+                          ? 900
+                          : 500, // Wider on desktop
+                      constraints: const BoxConstraints(maxHeight: 700),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Header
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Checkout',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Spacer(),
+                                // Desktop Numpad Toggle
+                                if (MediaQuery.of(context).size.width > 900)
+                                  IconButton(
+                                    onPressed: () {
+                                      ref
+                                          .read(posProvider.notifier)
+                                          .toggleNumpadVisibility();
+                                    },
+                                    icon: Icon(
+                                      posState.showNumpadOnDesktop
+                                          ? LucideIcons.panelRightClose
+                                          : LucideIcons.panelRightOpen,
+                                      color: Colors.grey[600],
+                                    ),
+                                    tooltip: posState.showNumpadOnDesktop
+                                        ? 'Hide Numpad'
+                                        : 'Show Numpad',
+                                  ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                  icon: const Icon(LucideIcons.x),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Divider(height: 1),
+
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Main Payment Content
+                                Expanded(
+                                  flex: 5,
+                                  child: SingleChildScrollView(
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        // Total Display
+                                        Center(
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                'Total to Pay',
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                currency.format(total),
+                                                style: const TextStyle(
+                                                  fontSize: 40,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: Color(0xFF0F172A),
+                                                  letterSpacing: -1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 32),
+                                        // Payment Methods
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 40,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: _PaymentMethodButton(
+                                                  title: 'Cash',
+                                                  icon: LucideIcons.banknote,
+                                                  isSelected:
+                                                      method ==
+                                                      PosPaymentMethod.cash,
+                                                  onTap: () => setDialogState(
+                                                    () => method =
+                                                        PosPaymentMethod.cash,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                child: _PaymentMethodButton(
+                                                  title: 'Card',
+                                                  icon: LucideIcons.creditCard,
+                                                  isSelected:
+                                                      method ==
+                                                      PosPaymentMethod.card,
+                                                  onTap: () => setDialogState(
+                                                    () => method =
+                                                        PosPaymentMethod.card,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 32),
+
+                                        if (method ==
+                                            PosPaymentMethod.cash) ...[
+                                          // Received Amount Input
+                                          Text(
+                                            'Cash Received',
+                                            style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 12,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: const Color(0xFFE2E8F0),
+                                                width: 2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  LucideIcons.banknote,
+                                                  color: Colors.grey,
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    cashText.isEmpty
+                                                        ? 'Enter amount...'
+                                                        : cashText,
+                                                    style: TextStyle(
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: cashText.isEmpty
+                                                          ? Colors.grey[400]
+                                                          : const Color(
+                                                              0xFF0F172A,
+                                                            ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                if (cashText.isNotEmpty)
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      LucideIcons.delete,
+                                                      color: Colors.grey,
+                                                    ),
+                                                    onPressed: doBackspace,
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          // Smart Suggestions
+                                          SmartCashSuggestions(
+                                            total: total,
+                                            currency: currency,
+                                            onAmountSelected: (val) {
+                                              setDialogState(() {
+                                                method = PosPaymentMethod.cash;
+                                                cashText = val.toStringAsFixed(
+                                                  2,
+                                                );
+                                                // Clean up .00
+                                                if (cashText.endsWith('.00')) {
+                                                  cashText = cashText.substring(
+                                                    0,
+                                                    cashText.length - 3,
+                                                  );
+                                                }
+                                              });
+                                            },
+                                          ),
+                                          const SizedBox(height: 24),
+                                          // Change Display
+                                          Container(
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: breakdown.isSettled
+                                                  ? const Color(0xFFECFDF5)
+                                                  : const Color(0xFFFFF7ED),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: breakdown.isSettled
+                                                    ? const Color(0xFF10B981)
+                                                    : const Color(
+                                                        0xFFF97316,
+                                                      ).withOpacity(0.3),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  breakdown.isSettled
+                                                      ? 'Change to Return'
+                                                      : 'Remaining Due',
+                                                  style: TextStyle(
+                                                    color: breakdown.isSettled
+                                                        ? const Color(
+                                                            0xFF047857,
+                                                          )
+                                                        : const Color(
+                                                            0xFFC2410C,
+                                                          ),
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  currency.format(
+                                                    breakdown.isSettled
+                                                        ? breakdown.change
+                                                        : breakdown.remaining,
+                                                  ),
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: breakdown.isSettled
+                                                        ? const Color(
+                                                            0xFF047857,
+                                                          )
+                                                        : const Color(
+                                                            0xFFC2410C,
+                                                          ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          // Numpad for Touch (Mobile Only)
+                                          if (MediaQuery.of(
+                                                context,
+                                              ).size.width <
+                                              900) ...[
+                                            const SizedBox(height: 20),
+                                            ExpansionTile(
+                                              title: const Text(
+                                                'Show Numpad',
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                              initiallyExpanded: false,
+                                              tilePadding: EdgeInsets.zero,
+                                              children: [
+                                                SizedBox(
+                                                  height: 300,
+                                                  child: NumpadWidget(
+                                                    label: '',
+                                                    allowDecimal: true,
+                                                    onNumberTap: append,
+                                                    onClear: clear,
+                                                    onBackspace: doBackspace,
+                                                    onEnter: confirm,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ] else ...[
+                                          Container(
+                                            height: 200,
+                                            alignment: Alignment.center,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  LucideIcons.creditCard,
+                                                  size: 48,
+                                                  color: Colors.grey[400],
+                                                ),
+                                                const SizedBox(height: 16),
+                                                Text(
+                                                  'Charge ${currency.format(total)} to Card',
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                const Text(
+                                                  'Waiting for terminal...',
+                                                  style: TextStyle(
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // Desktop Right Panel (Numpad)
+                                if (MediaQuery.of(context).size.width >= 900 &&
+                                    posState.showNumpadOnDesktop) ...[
+                                  Container(width: 1, color: Colors.grey[200]),
+                                  Expanded(
+                                    flex: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                      ), // Added Horizontal Padding
+                                      child: Column(
+                                        children: [
+                                          const SizedBox(height: 24),
+                                          const Text(
+                                            'Keypad',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: NumpadWidget(
+                                              label: '',
+                                              allowDecimal: true,
+                                              onNumberTap: append,
+                                              onClear: clear,
+                                              onBackspace: doBackspace,
+                                              onEnter: confirm,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 24),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+
+                          const Divider(height: 1),
+
+                          // Footer Button
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                top: BorderSide(color: Color(0xFFE2E8F0)),
+                              ),
+                            ),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed:
+                                    (breakdown.isSettled && !posState.isLoading)
+                                    ? confirm
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0F172A),
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.grey[200],
+                                  disabledForegroundColor: Colors.grey[400],
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: posState.isLoading
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Confirm Payment (Enter)',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
@@ -272,7 +1084,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     ),
                     child: TextField(
                       controller: _searchController,
-                      onChanged: (value) => setState(() {}),
+                      onChanged: (value) =>
+                          _searchDebouncer.run(() => setState(() {})),
                       decoration: InputDecoration(
                         hintText: 'Search products...',
                         prefixIcon: const Icon(
@@ -303,104 +1116,252 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 const SizedBox(width: 12),
               ],
 
-              // Custom Item Button
-              _buildActionButton(
+              // Action Buttons - Responsive Layout
+              if (isMobile) ...[
+                // Mobile: Compact dropdown menu
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(
+                      LucideIcons.moreVertical,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                    tooltip: 'More Actions',
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'scan':
+                          _showBarcodeScanner();
+                          break;
+                        case 'discount':
+                          _showDiscountDialog();
+                          break;
+                        case 'print':
+                          if (posState.lastOrderItems.isNotEmpty) {
+                            notifier.printLastOrder();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Reprinting last order...'),
+                                backgroundColor: Color(0xFF0D9488),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('No last order to print'),
+                                backgroundColor: Colors.grey,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'scan',
+                        child: Row(
+                          children: [
+                            Icon(
+                              LucideIcons.scan,
+                              size: 18,
+                              color: Color(0xFF64748B),
+                            ),
+                            SizedBox(width: 12),
+                            Text('Scan Barcode'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'discount',
+                        child: Row(
+                          children: [
+                            Icon(
+                              LucideIcons.percent,
+                              size: 18,
+                              color: Color(0xFF64748B),
+                            ),
+                            SizedBox(width: 12),
+                            Text('Apply Discount'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'print',
+                        child: Row(
+                          children: [
+                            Icon(
+                              LucideIcons.printer,
+                              size: 18,
+                              color: Color(0xFF64748B),
+                            ),
+                            SizedBox(width: 12),
+                            Text('Print Last Order'),
+                          ],
+                        ),
+                      ),
+                    ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ] else ...[
+                // Desktop: Icon + Text buttons for clarity (Scan removed - useless on desktop)
+                _buildLabeledActionButton(
+                  icon: LucideIcons.percent,
+                  label: 'Discount',
+                  onTap: _showDiscountDialog,
+                ),
+                const SizedBox(width: 8),
+                _buildLabeledActionButton(
+                  icon: LucideIcons.printer,
+                  label: 'Reprint',
+                  onTap: () {
+                    if (posState.lastOrderItems.isNotEmpty) {
+                      notifier.printLastOrder();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Reprinting last order...'),
+                          backgroundColor: Color(0xFF0D9488),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No last order to print'),
+                          backgroundColor: Colors.grey,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+              ],
+              // Quick Charge - Always prominent
+              _buildLabeledActionButton(
                 icon: LucideIcons.zap,
+                label: isMobile ? null : 'Quick Charge',
                 onTap: () => _showNumpadDialog(itemIndex: null),
-                tooltip: 'Quick Charge',
                 isPrimary: true,
               ),
-              if (!isMobile) ...[
+              // Product Controls (Desktop only)
+              if (!isMobile && selectedCategoryId != null) ...[
+                const SizedBox(width: 12),
+                // Sort
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: PopupMenuButton<ProductSortType>(
+                    icon: const Icon(
+                      LucideIcons.arrowUpDown,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                    tooltip: 'Sort',
+                    onSelected: (value) => notifier.setSortType(value),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: ProductSortType.name,
+                        child: Text('Name (A-Z)'),
+                      ),
+                      const PopupMenuItem(
+                        value: ProductSortType.priceAsc,
+                        child: Text('Price (Low-High)'),
+                      ),
+                      const PopupMenuItem(
+                        value: ProductSortType.priceDesc,
+                        child: Text('Price (High-Low)'),
+                      ),
+                      const PopupMenuItem(
+                        value: ProductSortType.recent,
+                        child: Text('Recently Added'),
+                      ),
+                    ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                // Sort Button
-                if (selectedCategoryId != null)
-                  Container(
+                // Grid Columns
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: PopupMenuButton<int>(
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            LucideIcons.layoutGrid,
+                            color: Color(0xFF64748B),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${posState.crossAxisCount}',
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    tooltip: 'Grid Columns (${posState.crossAxisCount})',
+                    onSelected: (value) => notifier.setCrossAxisCount(value),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(value: 3, child: Text('3 Columns')),
+                      const PopupMenuItem(value: 4, child: Text('4 Columns')),
+                      const PopupMenuItem(value: 5, child: Text('5 Columns')),
+                      const PopupMenuItem(value: 6, child: Text('6 Columns')),
+                    ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Grid/List Toggle
+                InkWell(
+                  onTap: () => notifier.toggleProductView(),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: const Color(0xFFE2E8F0)),
                     ),
-                    child: PopupMenuButton<ProductSortType>(
-                      icon: const Icon(
-                        LucideIcons.arrowUpDown,
-                        color: Color(0xFF64748B),
-                        size: 20,
-                      ),
-                      tooltip: 'Sort Products',
-                      onSelected: (value) => notifier.setSortType(value),
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: ProductSortType.name,
-                          child: Text('Name (A-Z)'),
-                        ),
-                        const PopupMenuItem(
-                          value: ProductSortType.priceAsc,
-                          child: Text('Price (Low-High)'),
-                        ),
-                        const PopupMenuItem(
-                          value: ProductSortType.priceDesc,
-                          child: Text('Price (High-Low)'),
-                        ),
-                        const PopupMenuItem(
-                          value: ProductSortType.recent,
-                          child: Text('Recently Added'),
-                        ),
-                      ],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                    child: Icon(
+                      posState.isProductListView
+                          ? LucideIcons.layoutGrid
+                          : LucideIcons.list,
+                      color: const Color(0xFF64748B),
+                      size: 20,
                     ),
                   ),
-                const SizedBox(width: 8),
-                // Grid Density Control
-                if (selectedCategoryId !=
-                    null) // Only show density when viewing products
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: PopupMenuButton<int>(
-                      icon: const Icon(
-                        LucideIcons.layoutGrid,
-                        color: Color(0xFF64748B),
-                        size: 20,
-                      ),
-                      tooltip: 'Grid Columns',
-                      onSelected: (value) => notifier.setCrossAxisCount(value),
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(value: 3, child: Text('3 Columns')),
-                        const PopupMenuItem(value: 4, child: Text('4 Columns')),
-                        const PopupMenuItem(value: 5, child: Text('5 Columns')),
-                        const PopupMenuItem(value: 6, child: Text('6 Columns')),
-                      ],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-
-                const SizedBox(width: 8),
-                // List/Grid View Toggle (only show when viewing products)
-                if (selectedCategoryId != null)
-                  _buildActionButton(
-                    icon: posState.isProductListView
-                        ? LucideIcons.layoutGrid
-                        : LucideIcons.list,
-                    onTap: () => notifier.toggleProductView(),
-                    tooltip: posState.isProductListView
-                        ? 'Grid View'
-                        : 'List View',
-                  ),
-                if (selectedCategoryId != null) const SizedBox(width: 8),
-                // Cart View Toggle
-                _buildActionButton(
-                  icon: posState.isCartSimpleView
-                      ? LucideIcons.image
-                      : LucideIcons.alignJustify,
-                  onTap: () => notifier.toggleCartView(),
-                  tooltip: 'Toggle Cart View',
                 ),
               ],
             ],
@@ -413,28 +1374,53 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
   // Removed _buildCategoryPill
 
-  Widget _buildActionButton({
+  Widget _buildLabeledActionButton({
     required IconData icon,
+    String? label,
     required VoidCallback onTap,
-    required String tooltip,
     bool isPrimary = false,
   }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        width: 48,
         height: 48,
+        padding: label != null
+            ? const EdgeInsets.symmetric(horizontal: 16)
+            : null,
+        constraints: label != null ? null : const BoxConstraints(minWidth: 48),
         decoration: BoxDecoration(
           color: isPrimary ? const Color(0xFF0D9488) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: isPrimary ? null : Border.all(color: const Color(0xFFE2E8F0)),
         ),
-        child: Icon(
-          icon,
-          color: isPrimary ? Colors.white : const Color(0xFF64748B),
-          size: 20,
-        ),
+        child: label != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    color: isPrimary ? Colors.white : const Color(0xFF64748B),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: isPrimary ? Colors.white : const Color(0xFF0F172A),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              )
+            : Center(
+                child: Icon(
+                  icon,
+                  color: isPrimary ? Colors.white : const Color(0xFF64748B),
+                  size: 20,
+                ),
+              ),
       ),
     );
   }
@@ -472,9 +1458,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           selectedCategoryId == null ||
           p.categoryId == selectedCategoryId ||
           p.category?.id == selectedCategoryId;
+      final q = searchQuery.toLowerCase();
       final matchesSearch =
           searchQuery.isEmpty ||
-          p.title.toLowerCase().contains(searchQuery.toLowerCase());
+          p.title.toLowerCase().contains(q) ||
+          p.slug.toLowerCase().contains(q) ||
+          p.variants.any((v) => (v.sku ?? '').toLowerCase().contains(q));
       return matchesCategory && matchesSearch;
     }).toList();
 
@@ -691,7 +1680,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   top: Radius.circular(16),
                 ),
                 child: imageUrl != null && imageUrl.isNotEmpty
-                    ? Image.network(imageUrl, fit: BoxFit.cover)
+                    ? Container(
+                        color: Colors.white, // Background for PNG transparency
+                        child: Image.network(imageUrl, fit: BoxFit.cover),
+                      )
                     : Container(
                         color: const Color(0xFFCCFBF1), // Teal 50
                         child: Center(
@@ -781,28 +1773,16 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             color: product.stock <= 0 ? Colors.red : Colors.grey[600],
           ),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              NumberFormat.simpleCurrency().format(product.price),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Color(0xFF0F172A),
-              ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(
-                LucideIcons.plusCircle,
-                color: Color(0xFF0D9488),
-              ),
-              onPressed: () => _handleProductTap(product),
-            ),
-          ],
+        trailing: Text(
+          NumberFormat.simpleCurrency().format(product.price),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Color(0xFF0F172A),
+          ),
         ),
         onTap: () => _handleProductTap(product),
+        onLongPress: () => _handleProductLongPress(product),
       ),
     );
   }
@@ -814,6 +1794,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     return _HoverableProductCard(
       onTap: () => _handleProductTap(product),
+      onLongPress: () => _handleProductLongPress(product),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -882,44 +1863,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        NumberFormat.simpleCurrency().format(product.price),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Color(
-                            0xFF4F46E5,
-                          ), // Indigo 600 - More prominent
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0D9488), // Teal 600
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(
-                              0xFF0D9488,
-                            ).withValues(alpha: 0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        LucideIcons.plus,
-                        size: 20,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+                Text(
+                  NumberFormat.simpleCurrency().format(product.price),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Color(0xFF4F46E5), // Indigo 600
+                  ),
                 ),
               ],
             ),
@@ -986,6 +1936,28 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             children: [
               Expanded(child: _buildClientSelector(posState)),
               const SizedBox(width: 8),
+              // Cart View Toggle
+              InkWell(
+                onTap: () => notifier.toggleCartView(),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Icon(
+                    posState.isCartSimpleView
+                        ? LucideIcons.image
+                        : LucideIcons.alignJustify,
+                    color: const Color(0xFF64748B),
+                    size: 18,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
               IconButton(
                 onPressed: () => notifier.clearCart(),
                 icon: const Icon(LucideIcons.trash2, color: Colors.red),
@@ -1387,14 +2359,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 child: SizedBox(
                   height: 56,
                   child: OutlinedButton(
-                    onPressed: () {
-                      // Placeholder for Print Last Receipt
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Printing last receipt...'),
-                        ),
-                      );
-                    },
+                    onPressed: posState.cart.isEmpty
+                        ? null
+                        : () => _showPaymentSheet(posState),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF64748B),
                       side: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -1405,11 +2372,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(LucideIcons.printer, size: 20),
+                        Icon(LucideIcons.creditCard, size: 20),
                         SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            'Last Receipt',
+                            'Payment',
                             style: TextStyle(fontWeight: FontWeight.bold),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1428,13 +2395,25 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     onPressed: posState.cart.isEmpty
                         ? null
                         : () async {
-                            await ref.read(posProvider.notifier).checkout();
-                            if (context.mounted) {
+                            final ok = await ref
+                                .read(posProvider.notifier)
+                                .checkoutFast();
+                            if (!context.mounted) return;
+
+                            if (ok) {
                               _showCheckoutSuccessAnimation();
-                              if (Navigator.canPop(context)) {
-                                Navigator.pop(context);
-                              }
+                              final route = ModalRoute.of(context);
+                              if (route is PopupRoute) Navigator.pop(context);
+                              return;
                             }
+
+                            final error = ref.read(posProvider).error;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(error ?? 'Checkout failed'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4F46E5),
@@ -1628,8 +2607,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     // Auto dismiss after animation completes
     Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted && Navigator.canPop(context)) {
-        Navigator.pop(context);
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
       }
     });
   }
@@ -1657,6 +2636,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (selected == null) return;
 
     notifier.addToCart(detailed, variant: selected);
+  }
+
+  void _handleProductLongPress(Product product) {
+    HapticFeedback.selectionClick();
+    // TODO: Add product quick actions on long-press (e.g., add quantity, note,
+    // price override, or view details) instead of duplicating the tap behavior.
   }
 
   Future<ProductVariant?> _showVariantSelectorSheet(Product product) {
@@ -2011,8 +2996,13 @@ class _CheckoutSuccessAnimationState extends State<_CheckoutSuccessAnimation>
 class _HoverableProductCard extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
-  const _HoverableProductCard({required this.child, required this.onTap});
+  const _HoverableProductCard({
+    required this.child,
+    required this.onTap,
+    this.onLongPress,
+  });
 
   @override
   State<_HoverableProductCard> createState() => _HoverableProductCardState();
@@ -2029,6 +3019,7 @@ class _HoverableProductCardState extends State<_HoverableProductCard> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
@@ -2047,6 +3038,72 @@ class _HoverableProductCardState extends State<_HoverableProductCard> {
             ],
           ),
           child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentMethodButton extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _PaymentMethodButton({
+    required this.title,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 64, // Bigger tap target
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF0F172A) : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? const Color(0xFF0F172A)
+                  : const Color(0xFF64748B),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: isSelected
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFF64748B),
+              ),
+            ),
+          ],
         ),
       ),
     );

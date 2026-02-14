@@ -147,8 +147,8 @@ describe('Suppliers + Purchases', () => {
             where: { tenantId: tenantAId, id: productAId },
             select: { stock: true, price: true }
         })
-        // Default variant mirrors product stock/price for no-options products.
-        expect(productAfter?.stock).toBe(7)
+        // When trackInventory=false, product is treated as always sellable.
+        expect(productAfter?.stock).toBe(999999)
         expect(String(productAfter?.price)).toBe('120')
 
         const movement = await prisma.inventoryMovement.findFirst({

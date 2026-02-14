@@ -134,16 +134,35 @@ class ProductImage {
 class Category {
   final String id;
   final String title;
+  final String slug;
   final String? imageUrl;
+  final DateTime? createdAt;
+  final int productCount;
 
-  Category({required this.id, required this.title, this.imageUrl});
+  Category({
+    required this.id,
+    required this.title,
+    required this.slug,
+    this.imageUrl,
+    this.createdAt,
+    this.productCount = 0,
+  });
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? '',
+      slug: json['slug'] ?? '',
       imageUrl: json['imageUrl'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+      productCount: json['_count']?['products'] ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'title': title, 'slug': slug, 'imageUrl': imageUrl};
   }
 }
 

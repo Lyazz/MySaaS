@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+
 import '../providers/suppliers_provider.dart';
 import '../models/supplier.dart';
+import '../widgets/form/admin_form_shell.dart';
+import '../widgets/form/form_input.dart';
 
 class SupplierFormScreen extends ConsumerStatefulWidget {
   final String? supplierId;
@@ -22,6 +24,7 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
   late TextEditingController _addressController;
   late TextEditingController _notesController;
   bool _isLoading = false;
+  String? _error;
 
   @override
   void initState() {
@@ -39,17 +42,22 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
 
   Future<void> _loadSupplier() async {
     setState(() => _isLoading = true);
-    final supplier = await ref
-        .read(suppliersProvider.notifier)
-        .fetchSupplier(widget.supplierId!);
-    if (supplier != null) {
-      _nameController.text = supplier.name;
-      _emailController.text = supplier.email ?? '';
-      _phoneController.text = supplier.phone ?? '';
-      _addressController.text = supplier.address ?? '';
-      _notesController.text = supplier.notes ?? '';
+    try {
+      final supplier = await ref
+          .read(suppliersProvider.notifier)
+          .fetchSupplier(widget.supplierId!);
+      if (supplier != null) {
+        _nameController.text = supplier.name;
+        _emailController.text = supplier.email ?? '';
+        _phoneController.text = supplier.phone ?? '';
+        _addressController.text = supplier.address ?? '';
+        _notesController.text = supplier.notes ?? '';
+      }
+    } catch (e) {
+      setState(() => _error = 'Failed to load supplier: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
-    setState(() => _isLoading = false);
   }
 
   @override
@@ -64,6 +72,11 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
 
   Future<void> _saveSupplier() async {
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
     final supplier = Supplier(
       id: widget.supplierId ?? '',
@@ -80,101 +93,196 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
       } else {
         await ref.read(suppliersProvider.notifier).addSupplier(supplier);
       }
-      if (mounted) context.pop();
+      if (mounted) context.go('/suppliers');
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving: $e')));
-      }
+      setState(() => _error = 'Error saving: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.supplierId != null ? 'Edit Supplier' : 'Add Supplier',
-        ),
-        leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    _buildTextField(
-                      controller: _nameController,
-                      label: 'Supplier Name',
-                      validator: (v) => v!.isEmpty ? 'Name is required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _emailController,
-                      label: 'Email',
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _phoneController,
-                      label: 'Phone',
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _addressController,
-                      label: 'Address',
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _notesController,
-                      label: 'Notes',
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: _saveSupplier,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F172A), // Slate-900
-                          foregroundColor: Colors.white,
+    if (_isLoading &&
+        widget.supplierId != null &&
+        _nameController.text.isEmpty) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return AdminFormShell(
+      title: widget.supplierId != null ? 'Edit Supplier' : 'Create Supplier',
+      subtitle: widget.supplierId != null
+          ? 'Update supplier information'
+          : 'Add a new supplier to your list',
+      backPath: '/suppliers',
+      backLabel: 'Suppliers',
+      error: _error,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isDesktop = constraints.maxWidth > 800;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (isDesktop)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: FormInput(
+                                  controller: _nameController,
+                                  label: 'Supplier Name',
+                                  hint: 'Enter supplier name',
+                                  validator: (v) =>
+                                      v!.isEmpty ? 'Name is required' : null,
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              Expanded(
+                                child: FormInput(
+                                  controller: _phoneController,
+                                  label: 'Phone',
+                                  hint: 'Enter phone number',
+                                  keyboardType: TextInputType.phone,
+                                ),
+                              ),
+                            ],
+                          )
+                        else ...[
+                          FormInput(
+                            controller: _nameController,
+                            label: 'Supplier Name',
+                            hint: 'Enter supplier name',
+                            validator: (v) =>
+                                v!.isEmpty ? 'Name is required' : null,
+                          ),
+                          const SizedBox(height: 24),
+                          FormInput(
+                            controller: _phoneController,
+                            label: 'Phone',
+                            hint: 'Enter phone number',
+                            keyboardType: TextInputType.phone,
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        if (isDesktop)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: FormInput(
+                                  controller: _emailController,
+                                  label: 'Email',
+                                  hint: 'Enter email address',
+                                  keyboardType: TextInputType.emailAddress,
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              Expanded(
+                                child: FormInput(
+                                  controller: _addressController,
+                                  label: 'Address',
+                                  hint: 'Enter full address',
+                                ),
+                              ),
+                            ],
+                          )
+                        else ...[
+                          FormInput(
+                            controller: _emailController,
+                            label: 'Email',
+                            hint: 'Enter email address',
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          const SizedBox(height: 24),
+                          FormInput(
+                            controller: _addressController,
+                            label: 'Address',
+                            hint: 'Enter full address',
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        FormInput(
+                          controller: _notesController,
+                          label: 'Notes',
+                          hint: 'Additional notes about the supplier...',
+                          maxLines: 3,
                         ),
-                        child: const Text('Save Supplier'),
-                      ),
-                    ),
-                  ],
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => context.go('/suppliers'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF374151), // Gray-700
+                      side: const BorderSide(
+                        color: Color(0xFFD1D5DB),
+                      ), // Gray-300
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _saveSupplier,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0D9488), // Teal-600
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            widget.supplierId != null
+                                ? 'Update Supplier'
+                                : 'Create Supplier',
+                          ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      validator: validator,
     );
   }
 }

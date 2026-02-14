@@ -24,7 +24,7 @@
           :disabled="loading"
           @click="exportProductsCsv"
         >
-          <Icon name="lucide:download" class="w-5 h-5" />
+          <Icon name="lucide:upload" class="w-5 h-5" />
           <span>{{ t('admin.pages.products.index.bulk.export') }}</span>
         </button>
 
@@ -34,7 +34,7 @@
           :disabled="loading"
           @click="openImportModal"
         >
-          <Icon name="lucide:upload" class="w-5 h-5" />
+          <Icon name="lucide:download" class="w-5 h-5" />
           <span>{{ t('admin.pages.products.index.bulk.import') }}</span>
         </button>
 
@@ -507,12 +507,14 @@
 	            :placeholder="t('admin.pages.products.index.bulk.fields.pricePlaceholder')"
 	          />
 
-	          <BaseInput
-	            v-model="bulkStock"
-	            type="number"
-	            :label="t('admin.pages.products.index.bulk.fields.stock')"
-	            :placeholder="t('admin.pages.products.index.bulk.fields.stockPlaceholder')"
-	          />
+		          <BaseInput
+		            v-model="bulkStock"
+		            type="number"
+		            :label="t('admin.pages.products.index.bulk.fields.stock')"
+		            :placeholder="t('admin.pages.products.index.bulk.fields.stockPlaceholder')"
+		            disabled
+		            hint="Stock is system-managed (set only at creation)."
+		          />
 
 	          <BaseSelect
 	            v-model="bulkIsActive"
@@ -875,13 +877,12 @@ async function submitBulkUpdate() {
   bulkError.value = null
 
   try {
-    const data: any = {}
-    if (bulkPrice.value.trim()) data.price = bulkPrice.value.trim()
-    if (bulkStock.value !== '') data.stock = Number(bulkStock.value)
-    if (bulkIsActive.value === 'true') data.isActive = true
-    if (bulkIsActive.value === 'false') data.isActive = false
-    if (bulkCategoryId.value === '__clear__') data.categoryId = null
-    if (bulkCategoryId.value && bulkCategoryId.value !== '__clear__') data.categoryId = bulkCategoryId.value
+	    const data: any = {}
+	    if (bulkPrice.value.trim()) data.price = bulkPrice.value.trim()
+	    if (bulkIsActive.value === 'true') data.isActive = true
+	    if (bulkIsActive.value === 'false') data.isActive = false
+	    if (bulkCategoryId.value === '__clear__') data.categoryId = null
+	    if (bulkCategoryId.value && bulkCategoryId.value !== '__clear__') data.categoryId = bulkCategoryId.value
 
     if (Object.keys(data).length === 0) {
       bulkError.value = t('admin.pages.products.index.bulk.noChanges')

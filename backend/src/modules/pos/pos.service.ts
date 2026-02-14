@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
+import { syncProductStockForProducts } from '../inventory/product-stock.service'
 
 export class PosValidationError extends Error {
     statusCode: number
@@ -219,16 +220,8 @@ export class PosService {
             }
         })
 
-        const adjustInventoryForDefaultVariant = async (tx: any, variantId: string, productId: string, nextStock: number | null) => {
-            if (nextStock === null) return
-            const isDefaultVariant = (await tx.productVariantOptionValue.count({ where: { tenantId, variantId } })) === 0
-            if (!isDefaultVariant) return
-            const hasOptions = (await tx.productOption.count({ where: { tenantId, productId } })) > 0
-            if (hasOptions) return
-            await tx.product.updateMany({ where: { tenantId, id: productId }, data: { stock: nextStock } })
-        }
-
         const sale = await prisma.$transaction(async (tx) => {
+            const touchedProductIds = new Set<string>()
             const createdSale = await tx.sale.create({
                 data: {
                     tenantId,
@@ -279,6 +272,7 @@ export class PosService {
                     data: { stock: { decrement: item.quantity } }
                 })
                 if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry')
+                touchedProductIds.add(variantBefore.productId)
 
                 const after = await tx.productVariant.findFirst({
                     where: { tenantId, id: item.variantId },
@@ -303,11 +297,9 @@ export class PosService {
                         createdByUserId: actor?.userId ?? null
                     }
                 })
-
-                if (item.isDefaultVariant) {
-                    await adjustInventoryForDefaultVariant(tx, item.variantId, variantBefore.productId, after?.stock ?? null)
-                }
             }
+
+            await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
 
             return createdSale
         })

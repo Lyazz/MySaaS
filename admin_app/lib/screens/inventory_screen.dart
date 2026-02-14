@@ -4,6 +4,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../services/api_service.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
+import '../widgets/responsive_paginated_table.dart';
+import '../widgets/responsive_filter_bar.dart';
+import '../utils/debouncer.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -14,6 +17,7 @@ class InventoryScreen extends ConsumerStatefulWidget {
 
 class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
 
   @override
   void initState() {
@@ -23,6 +27,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -39,8 +44,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           (product.sku?.toLowerCase().contains(query) ?? false);
     }).toList();
 
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -57,82 +64,40 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildHeader() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search products by name or SKU...',
-              prefixIcon: const Icon(LucideIcons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            onChanged: (value) => setState(() {}),
+    return ResponsiveFilterBar(
+      searchField: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search products by name or SKU...',
+          prefixIcon: const Icon(LucideIcons.search, size: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          filled: true,
+          fillColor: Colors.white,
         ),
-        const SizedBox(width: 16),
-        OutlinedButton.icon(
-          onPressed: () {
-            // Implement filter logic if needed
-          },
-          icon: const Icon(LucideIcons.filter),
-          label: const Text('Filter'),
-        ),
-      ],
+        onChanged: (value) => _searchDebouncer.run(() => setState(() {})),
+      ),
+      filters: const [],
+      onClearFilters: () {
+        setState(() {
+          _searchController.clear();
+        });
+      },
     );
   }
 
   Widget _buildInventoryTable(List<Product> products) {
-    if (products.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(LucideIcons.packageOpen, size: 64, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              'No products found',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey[200]!),
-      ),
-      child: ListView.separated(
-        itemCount: products.length + 1, // +1 for header
-        separatorBuilder: (context, index) =>
-            const Divider(height: 1, color: Color(0xFFE2E8F0)),
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return _buildTableHeader();
-          }
-          final product = products[index - 1];
-          return _buildTableRow(product);
-        },
-      ),
-    );
-  }
-
-  Widget _buildTableHeader() {
-    return Container(
-      color: Colors.grey[50],
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      child: const Row(
+    return ResponsivePaginatedTable<Product>(
+      items: products,
+      minWidth: 900,
+      header: const Row(
         children: [
           Expanded(
             flex: 3,
@@ -165,119 +130,125 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           SizedBox(width: 48), // Actions space
         ],
       ),
-    );
-  }
+      rowBuilder: (context, product, index) {
+        // Check if any variant is low stock (mock logic: < 10)
+        final isLowStock = product.stock < 10;
+        final rawImageUrl = product.mainImageUrl;
+        final imageUrl = rawImageUrl == null
+            ? null
+            : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
 
-  Widget _buildTableRow(Product product) {
-    // Check if any variant is low stock (mock logic: < 10)
-    final isLowStock = product.stock < 10;
-    final rawImageUrl = product.mainImageUrl;
-    final imageUrl =
-        rawImageUrl == null ? null : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(6),
-                    image: imageUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: imageUrl == null
-                      ? const Icon(
-                          LucideIcons.image,
-                          size: 20,
-                          color: Colors.grey,
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    product.title,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width < 800 ? 12 : 24,
+            vertical: MediaQuery.of(context).size.width < 800 ? 12 : 16,
           ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              product.variants.isNotEmpty
-                  ? 'Multiple'
-                  : (product.slug), // Using slug as dummy SKU if none
-              style: TextStyle(color: Colors.grey[600], fontSize: 13),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                Text(
-                  '${product.stock}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isLowStock ? Colors.orange : Colors.black,
-                  ),
-                ),
-                if (isLowStock)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Icon(
-                      LucideIcons.alertTriangle,
-                      size: 14,
-                      color: Colors.orange,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(6),
+                        image: imageUrl != null
+                            ? DecorationImage(
+                                image: NetworkImage(imageUrl),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
+                      child: imageUrl == null
+                          ? const Icon(
+                              LucideIcons.image,
+                              size: 20,
+                              color: Colors.grey,
+                            )
+                          : null,
                     ),
-                  ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: product.isActive
-                    ? Colors.green.withValues(alpha: 0.1)
-                    : Colors.grey.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(99),
-              ),
-              child: Text(
-                product.isActive ? 'Active' : 'Draft',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: product.isActive ? Colors.green : Colors.grey[600],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        product.title,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  product.variants.isNotEmpty
+                      ? 'Multiple'
+                      : (product.slug), // Using slug as dummy SKU if none
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Text(
+                      '${product.stock}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isLowStock ? Colors.orange : Colors.black,
+                      ),
+                    ),
+                    if (isLowStock)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4),
+                        child: Icon(
+                          LucideIcons.alertTriangle,
+                          size: 14,
+                          color: Colors.orange,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: product.isActive
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  child: Text(
+                    product.isActive ? 'Active' : 'Draft',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: product.isActive ? Colors.green : Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  // Open quick edit dialog
+                },
+                icon: const Icon(LucideIcons.pencil, size: 16),
+                color: Colors.grey[600],
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: () {
-              // Open quick edit dialog
-            },
-            icon: const Icon(LucideIcons.pencil, size: 16),
-            color: Colors.grey[600],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

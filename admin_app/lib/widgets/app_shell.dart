@@ -32,9 +32,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text(
-          'Admin Dashboard',
-          style: TextStyle(fontWeight: FontWeight.w600),
+        title: Text(
+          _getPageTitle(context),
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
@@ -172,7 +172,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (location.startsWith('/suppliers/')) return 'Supplier Details';
     if (location == '/customers') return 'Customers';
     if (location.startsWith('/customers/')) return 'Customer Details';
-    if (location == '/settings') return 'Settings';
+    if (location == '/settings') return 'App Settings';
+    if (location == '/settings/printers') return 'Printer Settings';
     return 'Admin Dashboard';
   }
 }

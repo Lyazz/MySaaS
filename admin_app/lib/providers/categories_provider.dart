@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
+import '../services/api_service.dart';
+import '../providers/auth_provider.dart';
 
 class CategoriesState {
   final List<Category> categories;
@@ -28,67 +30,112 @@ class CategoriesState {
 class CategoriesNotifier extends Notifier<CategoriesState> {
   @override
   CategoriesState build() {
-    // Return mock data initially
-    return CategoriesState(
-      categories: [
-        Category(id: '1', title: 'Electronics'),
-        Category(id: '2', title: 'Clothing'),
-        Category(id: '3', title: 'Home & Garden'),
-        Category(id: '4', title: 'Books'),
-      ],
-    );
+    return CategoriesState();
   }
 
-  Future<void> fetchCategories() async {
-    // Mock fetch - assume data is already loaded or simulate delay
-    state = state.copyWith(isLoading: true, error: null);
-    await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(isLoading: false);
-  }
-
-  Future<void> addCategory(String title) async {
+  Future<void> fetchCategories({String? sortBy, String? sortOrder}) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await Future.delayed(const Duration(milliseconds: 500)); // Simulate API
-      final newCategory = Category(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        title: title,
+      final api = ref.read(apiProvider);
+      final authState = ref.read(authProvider);
+
+      if (authState.token == null) {
+        state = state.copyWith(isLoading: false, error: 'Not authenticated');
+        return;
+      }
+
+      final queryParams = <String, dynamic>{};
+      if (sortBy != null) queryParams['sortBy'] = sortBy;
+      if (sortOrder != null) queryParams['sortOrder'] = sortOrder;
+
+      final response = await api.client.get(
+        '/admin/categories',
+        queryParameters: queryParams,
       );
+
+      final categoriesList = (response.data as List)
+          .map((json) => Category.fromJson(json))
+          .toList();
+
+      state = state.copyWith(isLoading: false, categories: categoriesList);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<bool> createCategory({
+    required String title,
+    required String slug,
+    String? imageUrl,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final api = ref.read(apiProvider);
+
+      final response = await api.client.post(
+        '/admin/categories',
+        data: {'title': title, 'slug': slug, 'imageUrl': imageUrl},
+      );
+
+      final newCategory = Category.fromJson(response.data);
       state = state.copyWith(
         isLoading: false,
         categories: [...state.categories, newCategory],
       );
+      return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 
-  Future<void> updateCategory(String id, String title) async {
+  Future<bool> updateCategory({
+    required String id,
+    required String title,
+    required String slug,
+    String? imageUrl,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      final api = ref.read(apiProvider);
+
+      final response = await api.client.put(
+        '/admin/categories/$id',
+        data: {'title': title, 'slug': slug, 'imageUrl': imageUrl},
+      );
+
+      final updatedCategory = Category.fromJson(response.data);
       final updatedCategories = state.categories.map((c) {
         if (c.id == id) {
-          return Category(id: id, title: title);
+          return updatedCategory;
         }
         return c;
       }).toList();
+
       state = state.copyWith(isLoading: false, categories: updatedCategories);
+      return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 
-  Future<void> deleteCategory(String id) async {
+  Future<bool> deleteCategory(String id) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
+      final api = ref.read(apiProvider);
+
+      await api.client.delete('/admin/categories/$id');
+
       final updatedCategories = state.categories
           .where((c) => c.id != id)
           .toList();
+
       state = state.copyWith(isLoading: false, categories: updatedCategories);
+      return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 }

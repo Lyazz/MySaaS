@@ -86,6 +86,8 @@
               min="0"
               required
               placeholder="0"
+              :disabled="stockLocked"
+              :hint="stockLocked ? 'Stock is system-managed (set only at creation).' : undefined"
             />
         </div>
 
@@ -226,6 +228,7 @@ const props = defineProps<{
   showVariants?: boolean
   showDescription?: boolean
   autoSlug?: boolean
+  stockLocked?: boolean
   primaryLabel?: string
   submittingLabel?: string
   cancelTo?: string
@@ -251,6 +254,7 @@ const submittingLabel = computed(() => props.submittingLabel || 'Saving...')
 const errorMessage = computed(() => props.errorMessage || '')
 const showDescription = computed(() => props.showDescription !== false)
 const showVariants = computed(() => props.showVariants === true)
+const stockLocked = computed(() => props.stockLocked === true)
 
 const lastAutoSlug = ref('')
 

@@ -29,6 +29,7 @@ import contactInfosRouter from './modules/contact-infos/routes'
 import integrationsRouter from './modules/integrations/routes'
 import metaPixelsRouter from './modules/meta-pixels/routes'
 import integrationsPublicRouter from './modules/integrations/public.routes'
+import cashRouter from './modules/cash/routes'
 
 const router = Router()
 
@@ -56,6 +57,7 @@ router.use('/admin/sales', salesRouter)
 router.use('/admin/customers', customersRouter)
 router.use('/admin/contact-infos', contactInfosRouter)
 router.use('/admin/pos', posRouter)
+router.use('/admin', cashRouter)
 router.use('/admin/dashboard', dashboardRouter)
 router.use('/admin/inventory', inventoryRouter)
 router.use('/admin/suppliers', suppliersRouter)

@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/admin_stat_card.dart';
+import '../providers/orders_provider.dart';
+import '../models/order.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(ordersProvider.notifier).fetchOrders());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +69,9 @@ class DashboardScreen extends StatelessWidget {
         Row(
           children: [
             OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                ref.read(ordersProvider.notifier).fetchOrders();
+              },
               icon: const Icon(LucideIcons.refreshCw, size: 16),
               label: const Text('Refresh'),
               style: OutlinedButton.styleFrom(
@@ -171,7 +189,7 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => context.go('/orders'),
                   icon: const Icon(LucideIcons.arrowRight, size: 16),
                   label: const Text('View all'),
                   style: OutlinedButton.styleFrom(
@@ -193,13 +211,35 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildOrdersTable(BuildContext context) {
+    final ordersState = ref.watch(ordersProvider);
+    final orders = ordersState.orders.take(5).toList();
+
+    if (ordersState.isLoading && orders.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (orders.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text('No orders found'),
+        ),
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: 5,
+      itemCount: orders.length,
       separatorBuilder: (context, index) =>
           const Divider(height: 1, color: Color(0xFFE2E8F0)),
       itemBuilder: (context, index) {
+        final order = orders[index];
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
@@ -210,7 +250,7 @@ class DashboardScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '#ORD-${1000 + index}',
+                      '#${order.id.length > 8 ? order.id.substring(0, 8) : order.id}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
@@ -225,15 +265,11 @@ class DashboardScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Customer ${index + 1}',
+                      'Customer', // Ideally order.customerName if available
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
-                    ),
-                    Text(
-                      'customer${index + 1}@example.com',
-                      style: TextStyle(fontSize: 13, color: Colors.grey[500]),
                     ),
                   ],
                 ),
@@ -241,7 +277,7 @@ class DashboardScreen extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: Text(
-                  '\$${(index + 1) * 150}.00',
+                  NumberFormat.simpleCurrency().format(order.totalAmount),
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -263,9 +299,9 @@ class DashboardScreen extends StatelessWidget {
                         color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Paid',
-                        style: TextStyle(
+                      child: Text(
+                        order.status,
+                        style: const TextStyle(
                           color: Colors.green,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -279,14 +315,14 @@ class DashboardScreen extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    'Oct ${10 + index}, 2023',
+                    DateFormat.yMd().format(order.createdAt),
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ),
               const SizedBox(width: 8),
               if (MediaQuery.of(context).size.width > 400)
                 TextButton.icon(
-                  onPressed: () {},
+                  onPressed: () => context.go('/orders/${order.id}'),
                   icon: const Icon(
                     LucideIcons.eye,
                     size: 16,

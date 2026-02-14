@@ -259,39 +259,10 @@ export class BulkProductsService {
                 }
 
                 if (stock !== null) {
-                    const optionsCount = await prisma.productOption.count({ where: { tenantId, productId: existing.id } })
-                    if (optionsCount > 0) {
-                        summary.warnings.push({
-                            row: rowNumber,
-                            message: 'stock column ignored for products with variants; use inventory CSV for per-variant stock'
-                        })
-                    } else {
-                        const defaultVariant =
-                            (await prisma.productVariant.findFirst({
-                                where: { tenantId, productId: existing.id, optionValues: { none: {} } },
-                                select: { id: true }
-                            })) ??
-                            (await prisma.productVariant.create({
-                                data: {
-                                    tenantId,
-                                    productId: existing.id,
-                                    price: price ?? 0,
-                                    stock: 0,
-                                    isActive: true,
-                                    trackInventory: true,
-                                    reserved: 0,
-                                    safetyStock: 0
-                                },
-                                select: { id: true }
-                            }))
-
-                        await this.inventory.updateVariantInventory(
-                            tenantId,
-                            defaultVariant.id,
-                            { stock, reason: 'bulk_import', note: 'CSV product import' },
-                            { userId: opts?.actorUserId ?? null }
-                        )
-                    }
+                    summary.warnings.push({
+                        row: rowNumber,
+                        message: 'stock is system-managed and cannot be updated after creation; column ignored'
+                    })
                 }
 
                 summary.updated++
@@ -343,6 +314,7 @@ export class BulkProductsService {
         const stock = data.stock === undefined ? null : typeof data.stock === 'number' ? Math.trunc(data.stock) : typeof data.stock === 'string' ? toInt(data.stock) : null
         if (data.stock !== undefined && stock === null) throw new Error('stock must be an integer')
         if (stock !== null && stock < 0) throw new Error('stock must be >= 0')
+        if (stock !== null) throw new Error('stock is system-managed and cannot be edited')
 
         await prisma.product.updateMany({ where: { tenantId, id: { in: ids } }, data: patch })
 
@@ -351,39 +323,6 @@ export class BulkProductsService {
                 where: { tenantId, productId: { in: ids }, isActive: true },
                 data: { price }
             })
-        }
-
-        if (stock !== null) {
-            for (const productId of ids) {
-                const optionsCount = await prisma.productOption.count({ where: { tenantId, productId } })
-                if (optionsCount > 0) continue
-
-                const defaultVariant =
-                    (await prisma.productVariant.findFirst({
-                        where: { tenantId, productId, optionValues: { none: {} } },
-                        select: { id: true }
-                    })) ??
-                    (await prisma.productVariant.create({
-                        data: {
-                            tenantId,
-                            productId,
-                            price: price ?? 0,
-                            stock: 0,
-                            isActive: true,
-                            trackInventory: true,
-                            reserved: 0,
-                            safetyStock: 0
-                        },
-                        select: { id: true }
-                    }))
-
-                await this.inventory.updateVariantInventory(
-                    tenantId,
-                    defaultVariant.id,
-                    { stock, reason: 'bulk_patch', note: 'Bulk product stock update' },
-                    { userId: input.actorUserId ?? null }
-                )
-            }
         }
 
         return { success: true }

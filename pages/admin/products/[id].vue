@@ -207,6 +207,8 @@
               min="0"
               required
               :placeholder="t('admin.forms.product.stock.placeholder')"
+              disabled
+              hint="Stock is system-managed (set only at creation)."
             />
             </div>
 
@@ -774,16 +776,15 @@ async function handleSubmit() {
 
   try {
     // First update basic product info
-    const payload: any = {
-      title: form.value.title,
-      slug: form.value.slug,
-      miniDescription: form.value.miniDescription || null,
-      description: form.value.description || null,
-      price: form.value.price,
-      stock: form.value.stock,
-      isActive: form.value.isActive,
-      images: productImages.value.map(img => img.url) // Keep legacy images in sync
-    }
+	    const payload: any = {
+	      title: form.value.title,
+	      slug: form.value.slug,
+	      miniDescription: form.value.miniDescription || null,
+	      description: form.value.description || null,
+	      price: form.value.price,
+	      isActive: form.value.isActive,
+	      images: productImages.value.map(img => img.url) // Keep legacy images in sync
+	    }
 
     if (form.value.categoryId) {
       payload.categoryId = form.value.categoryId

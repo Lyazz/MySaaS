@@ -13,6 +13,15 @@ All requests must be tenant-scoped by resolved tenant (server-side).
 
 ## Tenant Admin (auth required)
 - GET /api/admin/me
+- GET /api/admin/cashboxes
+- POST /api/admin/cashboxes
+- PATCH /api/admin/cashboxes/:id
+- GET /api/admin/cash-sessions?cashboxId=&status=&startDate=&endDate=
+- POST /api/admin/cashboxes/:id/sessions/open
+- POST /api/admin/cash-sessions/:id/close
+- GET /api/admin/cash-transactions?cashboxId=&sessionId=&type=&direction=&startDate=&endDate=
+- POST /api/admin/cash-transactions
+- POST /api/admin/cash-transfers
 - GET /api/admin/products
 - POST /api/admin/products
 - PATCH /api/admin/products/:id

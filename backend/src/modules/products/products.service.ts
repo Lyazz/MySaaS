@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma'
 import { InventoryService } from '../inventory/inventory.service'
+import { syncProductStockForProducts } from '../inventory/product-stock.service'
 
 const normalizeImages = (images: unknown): string[] | undefined => {
     if (images === undefined) return undefined
@@ -264,6 +265,13 @@ export class ProductsService {
             throw new Error('Product not found')
         }
 
+        if (data?.stock !== undefined) {
+            const err = new Error('Stock is system-managed and cannot be edited') as any
+            err.statusCode = 403
+            err.statusMessage = 'Stock is system-managed and cannot be edited'
+            throw err
+        }
+
         if (data.categoryId) {
             const category = await prisma.category.findFirst({
                 where: { id: data.categoryId, tenantId }
@@ -283,7 +291,6 @@ export class ProductsService {
                 description: data.description,
                 miniDescription: data.miniDescription,
                 price: data.price !== undefined ? String(data.price) : undefined,
-                stock: data.stock !== undefined ? Number(data.stock) : undefined,
                 isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
                 categoryId: data.categoryId,
                 images: images
@@ -305,15 +312,6 @@ export class ProductsService {
                     where: { tenantId, id: ensured.id },
                     data: { price: data.price }
                 })
-            }
-
-            if (data.stock !== undefined) {
-                await this.inventory.updateVariantInventory(
-                    tenantId,
-                    ensured.id,
-                    { stock: Number(data.stock), reason: 'product_update' },
-                    { userId: actor?.userId ?? null }
-                )
             }
         }
 
@@ -487,11 +485,7 @@ export class ProductsService {
                 data: { isActive: false }
             })
 
-            // Mirror Product.stock to default variant stock for legacy/admin displays.
-            await prisma.product.updateMany({
-                where: { tenantId, id: productId },
-                data: { stock: ensured.stock }
-            })
+            await syncProductStockForProducts(prisma as any, tenantId, [productId])
 
             return prisma.productVariant.findMany({
                 where: { productId, tenantId, isActive: true },
@@ -634,6 +628,8 @@ export class ProductsService {
                     })
                 }
             }
+
+            await syncProductStockForProducts(tx as any, tenantId, [productId])
         })
 
         // Return refreshed variants with relations

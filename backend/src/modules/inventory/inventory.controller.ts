@@ -48,12 +48,14 @@ export class InventoryController {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Variant ID is required' })
             }
 
+            if (req.body?.stock !== undefined || req.body?.reserved !== undefined) {
+                return res.status(403).json({ statusCode: 403, statusMessage: 'stock/reserved are system-managed and cannot be edited' })
+            }
+
             const updated = await service.updateVariantInventory(
                 tenant.id,
                 id,
                 {
-                    stock: req.body?.stock,
-                    reserved: req.body?.reserved,
                     safetyStock: req.body?.safetyStock,
                     trackInventory: req.body?.trackInventory,
                     reason: req.body?.reason,
@@ -72,4 +74,3 @@ export class InventoryController {
         }
     }
 }
-

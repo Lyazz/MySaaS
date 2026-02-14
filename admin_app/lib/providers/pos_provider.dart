@@ -1,11 +1,47 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/pos_models.dart';
 import '../models/customer.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
+import '../services/print_service.dart'; // NEW
+import '../providers/printer_profiles_provider.dart'; // NEW - Assuming this path
+import '../utils/pos_payment.dart';
 
 enum ProductSortType { name, priceAsc, priceDesc, recent }
+
+class PosLookupItem {
+  final String productId;
+  final String? variantId;
+  final String title;
+  final String? variantLabel;
+  final String? sku;
+  final double price;
+  final String? imageUrl;
+
+  const PosLookupItem({
+    required this.productId,
+    required this.variantId,
+    required this.title,
+    required this.variantLabel,
+    required this.sku,
+    required this.price,
+    required this.imageUrl,
+  });
+
+  factory PosLookupItem.fromJson(Map<String, dynamic> json) {
+    return PosLookupItem(
+      productId: json['productId']?.toString() ?? '',
+      variantId: json['variantId']?.toString(),
+      sku: json['sku']?.toString(),
+      title: json['title']?.toString() ?? '',
+      variantLabel: json['variantLabel']?.toString(),
+      price: (json['price'] is num) ? (json['price'] as num).toDouble() : 0.0,
+      imageUrl: json['imageUrl']?.toString(),
+    );
+  }
+}
 
 class PosSession {
   final List<CartItem> cart;
@@ -58,6 +94,13 @@ class PosState {
   final String? selectedCategoryId;
   final ProductSortType sortType; // Product sorting
   final String? debugInfo; // Debugging field
+  final String? lastSaleId;
+  final bool showNumpadOnDesktop; // New Persistent Setting
+
+  // Last Order Details for Reprinting
+  final List<CartItem> lastOrderItems;
+  final Customer? lastOrderCustomer;
+  final double lastOrderTotal;
 
   // Helper getters for active session
   PosSession get currentSession => sessions[currentSessionIndex];
@@ -79,6 +122,11 @@ class PosState {
     this.selectedCategoryId,
     this.sortType = ProductSortType.name, // Default to name sort
     this.debugInfo,
+    this.lastSaleId,
+    this.showNumpadOnDesktop = true,
+    this.lastOrderItems = const [],
+    this.lastOrderCustomer,
+    this.lastOrderTotal = 0.0,
   }) {
     // print('Debug: PosState created. Products: ${products.length}');
   }
@@ -96,6 +144,11 @@ class PosState {
     ProductSortType? sortType,
     Object? selectedCategoryId = _unset,
     String? debugInfo,
+    Object? lastSaleId = _unset,
+    bool? showNumpadOnDesktop,
+    List<CartItem>? lastOrderItems,
+    Customer? lastOrderCustomer,
+    double? lastOrderTotal,
   }) {
     return PosState(
       categories: categories ?? this.categories,
@@ -112,6 +165,13 @@ class PosState {
           ? this.selectedCategoryId
           : selectedCategoryId as String?,
       debugInfo: debugInfo ?? this.debugInfo,
+      lastSaleId: identical(lastSaleId, _unset)
+          ? this.lastSaleId
+          : lastSaleId as String?,
+      showNumpadOnDesktop: showNumpadOnDesktop ?? this.showNumpadOnDesktop,
+      lastOrderItems: lastOrderItems ?? this.lastOrderItems,
+      lastOrderCustomer: lastOrderCustomer ?? this.lastOrderCustomer,
+      lastOrderTotal: lastOrderTotal ?? this.lastOrderTotal,
     );
   }
 }
@@ -141,23 +201,17 @@ class PosNotifier extends Notifier<PosState> {
   }
 
   Future<void> fetchProducts() async {
-    print('Debug: fetchProducts called');
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      print('Debug: making API call to /admin/products');
       final response = await apiService.client.get('/admin/products');
 
-      print('Debug: API Response status: ${response.statusCode}');
       final List<dynamic> data = response.data;
-      print('Debug: API Data length: ${data.length}');
 
       final products = data
           .map((e) => Product.fromJson(e))
           // .where((p) => p.isActive) // Temporarily disabled for debugging
           .toList();
-
-      print('Debug: Parsed products count: ${products.length}');
 
       state = state.copyWith(
         products: products,
@@ -165,12 +219,7 @@ class PosNotifier extends Notifier<PosState> {
         debugInfo:
             'Success. API returned ${data.length} items. Parsed ${products.length} products.',
       );
-      print(
-        'Debug: State updated with products. Count: ${state.products.length}',
-      );
     } catch (e, stack) {
-      print('Debug: Error fetching products: $e');
-      print(stack);
       state = state.copyWith(
         error: 'Failed to load products: $e',
         isLoading: false,
@@ -199,6 +248,63 @@ class PosNotifier extends Notifier<PosState> {
     }
   }
 
+  Future<PosLookupItem?> lookupByCode(String code) async {
+    final normalized = code.trim();
+    if (normalized.isEmpty) return null;
+
+    try {
+      final apiService = ref.read(apiProvider);
+      final response = await apiService.client.get(
+        '/admin/pos/lookup',
+        queryParameters: {'code': normalized},
+      );
+      return PosLookupItem.fromJson(Map<String, dynamic>.from(response.data));
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      throw Exception('POS lookup failed: ${e.message}');
+    } catch (e) {
+      throw Exception('POS lookup failed: $e');
+    }
+  }
+
+  Future<PosLookupItem?> addByCode(String code, {int quantity = 1}) async {
+    final item = await lookupByCode(code);
+    if (item == null) return null;
+
+    final current = state.currentSession;
+    final existingIndex = current.cart.indexWhere(
+      (ci) =>
+          ci.productId == item.productId &&
+          ci.variantId == item.variantId &&
+          ci.price == item.price,
+    );
+
+    List<CartItem> newCart;
+    if (existingIndex >= 0) {
+      final existingItem = current.cart[existingIndex];
+      newCart = [...current.cart];
+      newCart[existingIndex] = existingItem.copyWith(
+        quantity: existingItem.quantity + quantity,
+      );
+    } else {
+      newCart = [
+        ...current.cart,
+        CartItem(
+          productId: item.productId,
+          variantId: item.variantId,
+          name: item.title,
+          variantTitle: item.variantLabel,
+          price: item.price,
+          quantity: quantity,
+          imageUrl: item.imageUrl,
+        ),
+      ];
+    }
+
+    _updateCurrentSession(current.copyWith(cart: newCart));
+    return item;
+  }
+
   void switchSession(int index) {
     if (index >= 0 && index < state.sessions.length) {
       state = state.copyWith(currentSessionIndex: index);
@@ -219,6 +325,11 @@ class PosNotifier extends Notifier<PosState> {
       state = state.copyWith(crossAxisCount: count);
       saveSettings();
     }
+  }
+
+  void toggleNumpadVisibility() {
+    state = state.copyWith(showNumpadOnDesktop: !state.showNumpadOnDesktop);
+    saveSettings();
   }
 
   void selectCategory(String? categoryId) {
@@ -349,13 +460,29 @@ class PosNotifier extends Notifier<PosState> {
     _updateCurrentSession(current.copyWith(cart: []));
   }
 
-  Future<void> checkout() async {
-    if (state.cart.isEmpty) return;
+  Future<bool> checkout({PosPaymentRequest? payment}) async {
+    if (state.cart.isEmpty) return false;
 
     state = state.copyWith(isLoading: true);
     try {
       final apiService = ref.read(apiProvider);
       final current = state.currentSession;
+      final total = current.total;
+
+      final paymentBreakdown = payment?.breakdown(total);
+      if (paymentBreakdown != null) {
+        if (!paymentBreakdown.isValid) {
+          state = state.copyWith(isLoading: false, error: 'Invalid payment');
+          return false;
+        }
+        if (!paymentBreakdown.isSettled) {
+          state = state.copyWith(
+            isLoading: false,
+            error: 'Payment not settled',
+          );
+          return false;
+        }
+      }
 
       final payload = {
         'items': current.cart
@@ -369,20 +496,96 @@ class PosNotifier extends Notifier<PosState> {
             )
             .toList(),
         'customerId': current.selectedCustomerId,
+        if (paymentBreakdown != null)
+          'payment': {
+            'total': total,
+            'cardAmount': paymentBreakdown.cardAmount,
+            'cashReceived': paymentBreakdown.cashReceived,
+            'change': paymentBreakdown.change,
+            'lines': paymentBreakdown.lines.map((l) => l.toJson()).toList(),
+          },
       };
 
-      await apiService.client.post('/admin/pos/sales', data: payload);
+      final res = await apiService.client.post(
+        '/admin/pos/sales',
+        data: payload,
+      );
+      final saleId = res.data is Map ? res.data['saleId']?.toString() : null;
+
+      // Store cart details before clearing for potential printing
+      final List<CartItem> itemsToPrint = List.from(current.cart);
+      final Customer? customerToPrint = current.selectedCustomer;
+      final double orderTotal = total;
 
       // Clear the current session after successful checkout
       _updateCurrentSession(PosSession());
 
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(
+        isLoading: false,
+        lastSaleId: saleId,
+        // Update last order details
+        lastOrderItems: itemsToPrint,
+        lastOrderCustomer: customerToPrint,
+        lastOrderTotal: orderTotal,
+      );
+
+      // Auto-print receipt (Fire and forget to avoid delaying UI)
+      final profilesState = ref.read(printerProfilesProvider);
+      if (profilesState.defaultProfile != null) {
+        final printService = ref.read(printServiceProvider);
+        // Don't await printing, let it run in background
+        printService
+            .printReceipt(
+              profile: profilesState.defaultProfile!,
+              items: itemsToPrint,
+              total: itemsToPrint.fold(
+                0,
+                (sum, item) => sum + (item.price * item.quantity),
+              ),
+              customer: customerToPrint,
+              orderId: saleId,
+              layout: profilesState.receiptLayout,
+            )
+            .catchError((e) {
+              print('Error auto-printing receipt: $e');
+            });
+      }
+      return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to create sale: $e',
       );
+      return false;
     }
+  }
+
+  Future<void> printLastOrder() async {
+    if (state.lastOrderItems.isEmpty) return;
+
+    final profilesState = ref.read(printerProfilesProvider);
+    if (profilesState.defaultProfile == null) {
+      state = state.copyWith(error: 'No default printer profile selected');
+      return;
+    }
+
+    try {
+      final printService = ref.read(printServiceProvider);
+      await printService.printReceipt(
+        profile: profilesState.defaultProfile!,
+        items: state.lastOrderItems,
+        total: state.lastOrderTotal,
+        customer: state.lastOrderCustomer,
+        orderId: state.lastSaleId,
+        layout: profilesState.receiptLayout,
+      );
+    } catch (e) {
+      state = state.copyWith(error: 'Failed to print last order: $e');
+    }
+  }
+
+  Future<bool> checkoutFast() {
+    return checkout(payment: PosPaymentRequest.fastCash(state.total));
   }
 
   // Persistence methods
@@ -403,10 +606,15 @@ class PosNotifier extends Notifier<PosState> {
       final isCartSimpleView =
           prefs.getBool('pos_is_cart_simple_view') ?? false;
 
+      // Load numpad preference
+      final showNumpadOnDesktop =
+          prefs.getBool('pos_show_numpad_desktop') ?? true;
+
       state = state.copyWith(
         sortType: sortType,
         crossAxisCount: crossAxisCount,
         isCartSimpleView: isCartSimpleView,
+        showNumpadOnDesktop: showNumpadOnDesktop,
       );
     } catch (e) {
       print('Error loading POS settings: $e');
@@ -418,7 +626,9 @@ class PosNotifier extends Notifier<PosState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('pos_sort_type', state.sortType.index);
       await prefs.setInt('pos_cross_axis_count', state.crossAxisCount);
+      await prefs.setInt('pos_cross_axis_count', state.crossAxisCount);
       await prefs.setBool('pos_is_cart_simple_view', state.isCartSimpleView);
+      await prefs.setBool('pos_show_numpad_desktop', state.showNumpadOnDesktop);
     } catch (e) {
       print('Error saving POS settings: $e');
     }

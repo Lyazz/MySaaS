@@ -107,14 +107,9 @@
               >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <input
-                v-model.number="variant.stock"
-                type="number"
-                min="0"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
-                :disabled="savingInventoryIds.has(variant.id)"
-                @change="updateVariantInventory(variant, { stock: Number(variant.stock) })"
-              >
+              <span class="font-mono text-gray-700">
+                {{ Number(variant.stock || 0) }}
+              </span>
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
               {{ Number(variant.reserved || 0) }}

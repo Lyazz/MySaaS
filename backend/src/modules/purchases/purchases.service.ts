@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
+import { syncProductStockForProducts } from '../inventory/product-stock.service'
 
 export class PurchaseValidationError extends Error {
     statusCode: number
@@ -176,6 +177,7 @@ export class PurchasesService {
         }
 
         await prisma.$transaction(async (tx) => {
+            const touchedProductIds = new Set<string>()
             for (const row of receiveItems) {
                 const item = itemById.get(row.itemId)!
                 const qty = row.quantityReceived!
@@ -254,7 +256,9 @@ export class PurchasesService {
                     }
                 })
 
-                // Keep Product.stock and Product.price mirrored for default variant products without options.
+                touchedProductIds.add(variantBefore.productId)
+
+                // Keep Product.price mirrored for default-variant products without options.
                 const isDefaultVariant = (await tx.productVariantOptionValue.count({ where: { tenantId, variantId: item.variantId } })) === 0
                 if (isDefaultVariant) {
                     const hasOptions = (await tx.productOption.count({ where: { tenantId, productId: variantBefore.productId } })) > 0
@@ -262,13 +266,14 @@ export class PurchasesService {
                         await tx.product.updateMany({
                             where: { tenantId, id: variantBefore.productId },
                             data: {
-                                stock: variantAfter?.stock ?? undefined,
                                 price: priceUpdate.price
                             }
                         })
                     }
                 }
             }
+
+            await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
 
             const allItems = await tx.purchaseOrderItem.findMany({
                 where: { tenantId, purchaseOrderId },

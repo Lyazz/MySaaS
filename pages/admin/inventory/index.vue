@@ -168,24 +168,14 @@
                 >
               </td>
               <td class="px-5 py-4">
-                <input
-                  v-model.number="v.stock"
-                  type="number"
-                  min="0"
-                  class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                  :disabled="savingIds.has(v.id)"
-                  @change="patchVariant(v.id, { stock: v.stock })"
-                >
+                <span class="text-sm font-mono text-slate-700">
+                  {{ v.stock }}
+                </span>
               </td>
               <td class="px-5 py-4 text-sm text-slate-700">
-                <input
-                  v-model.number="v.reserved"
-                  type="number"
-                  min="0"
-                  class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                  :disabled="savingIds.has(v.id)"
-                  @change="patchVariant(v.id, { reserved: v.reserved })"
-                >
+                <span class="text-sm font-mono text-slate-700">
+                  {{ v.reserved }}
+                </span>
               </td>
               <td class="px-5 py-4">
                 <input
@@ -498,27 +488,25 @@ const fetchVariants = async () => {
 	  }
 	}
 
-const patchVariant = async (variantId: string, patch: Partial<Pick<Variant, 'stock' | 'reserved' | 'safetyStock' | 'trackInventory'>>) => {
+const patchVariant = async (variantId: string, patch: Partial<Pick<Variant, 'safetyStock' | 'trackInventory'>>) => {
   const v = variants.value.find((x) => x.id === variantId)
   if (!v) return
 
   savingIds.value.add(variantId)
   errorMessage.value = null
   try {
-    const updated = await $fetch<Variant & Record<string, any>>(`/api/admin/inventory/variants/${variantId}`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${authStore.token}` },
-      body: {
-        ...patch,
-        reason: 'admin_ui'
-      }
-    })
+	    const updated = await $fetch<Variant & Record<string, any>>(`/api/admin/inventory/variants/${variantId}`, {
+	      method: 'PATCH',
+	      headers: { Authorization: `Bearer ${authStore.token}` },
+	      body: {
+	        ...patch,
+	        reason: 'admin_ui'
+	      }
+	    })
 
-    if (typeof updated?.stock === 'number') v.stock = updated.stock
-    if (typeof updated?.reserved === 'number') v.reserved = updated.reserved
-    if (typeof updated?.safetyStock === 'number') v.safetyStock = updated.safetyStock
-    if (typeof updated?.trackInventory === 'boolean') v.trackInventory = updated.trackInventory
-    recomputeAvailable(v)
+	    if (typeof updated?.safetyStock === 'number') v.safetyStock = updated.safetyStock
+	    if (typeof updated?.trackInventory === 'boolean') v.trackInventory = updated.trackInventory
+	    recomputeAvailable(v)
   } catch (e: any) {
     errorMessage.value = e?.data?.statusMessage || t('admin.pages.inventory.errors.updateFailed')
     await fetchVariants()

@@ -91,6 +91,9 @@ export class ProductsController {
                 const product = await productsService.updateProduct(tenant.id, id, body, { userId: user?.id ?? null })
                 res.json(product)
             } catch (e: any) {
+                if (typeof e?.statusCode === 'number') {
+                    return res.status(e.statusCode).json({ statusCode: e.statusCode, statusMessage: e.statusMessage || e.message })
+                }
                 if (e.message === 'Product not found') {
                     return res.status(404).json({ statusCode: 404, statusMessage: e.message })
                 }

@@ -2,6 +2,7 @@ import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
 import { TelegramService } from '../integrations/telegram.service'
+import { syncProductStockForProducts } from '../inventory/product-stock.service'
 
 const telegramService = new TelegramService()
 
@@ -171,26 +172,8 @@ export class OrdersService {
         const toStatus = status
         if (fromStatus === toStatus) return prisma.order.findFirst({ where: { id, tenantId } })
 
-        const adjustInventoryForDefaultVariant = async (
-            tx: any,
-            tenantIdArg: string,
-            variantId: string,
-            productId: string,
-            nextStock: number | null
-        ) => {
-            if (nextStock === null) return
-            const isDefaultVariant =
-                (await tx.productVariantOptionValue.count({ where: { tenantId: tenantIdArg, variantId } })) === 0
-            if (!isDefaultVariant) return
-            const hasOptions = (await tx.productOption.count({ where: { tenantId: tenantIdArg, productId } })) > 0
-            if (hasOptions) return
-            await tx.product.updateMany({
-                where: { tenantId: tenantIdArg, id: productId },
-                data: { stock: nextStock }
-            })
-        }
-
         await prisma.$transaction(async (tx) => {
+            const touchedProductIds = new Set<string>()
             const items = existing.items
 
             const legacyAlreadyDecremented =
@@ -244,6 +227,7 @@ export class OrdersService {
                         data: { reserved: { increment: qty } }
                     })
                     if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
                         where: { tenantId, id: item.variantId },
@@ -278,6 +262,7 @@ export class OrdersService {
                                 where: { tenantId, id: item.variantId, reserved: variantBefore.reserved },
                                 data: { reserved: { decrement: qty } }
                             })
+                            touchedProductIds.add(variantBefore.productId)
                         }
                         continue
                     }
@@ -299,6 +284,7 @@ export class OrdersService {
                         data: { stock: { decrement: qty }, reserved: { decrement: qty } }
                     })
                     if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
                         where: { tenantId, id: item.variantId },
@@ -322,12 +308,10 @@ export class OrdersService {
                             createdByUserId: null
                         }
                     })
-
-                    await adjustInventoryForDefaultVariant(tx, tenantId, item.variantId, variantBefore.productId, after?.stock ?? null)
                 }
 
                 // CONFIRMED -> CANCELLED : release reserved.
-                if (fromStatus === 'CONFIRMED' && toStatus === 'CANCELLED') {
+                    if (fromStatus === 'CONFIRMED' && toStatus === 'CANCELLED') {
                     if (variantBefore.reserved < qty) throw new OrderValidationError(409, 'Insufficient reserved stock')
 
                     const result = await tx.productVariant.updateMany({
@@ -341,6 +325,7 @@ export class OrdersService {
                         data: { reserved: { decrement: qty } }
                     })
                     if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
                         where: { tenantId, id: item.variantId },
@@ -374,6 +359,7 @@ export class OrdersService {
                             data: { reserved: { decrement: qty } }
                         })
                         if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                        touchedProductIds.add(variantBefore.productId)
 
                         const after = await tx.productVariant.findFirst({
                             where: { tenantId, id: item.variantId },
@@ -405,6 +391,7 @@ export class OrdersService {
                             data: { stock: { increment: qty } }
                         })
                         if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                        touchedProductIds.add(variantBefore.productId)
 
                         const after = await tx.productVariant.findFirst({
                             where: { tenantId, id: item.variantId },
@@ -428,8 +415,6 @@ export class OrdersService {
                                 createdByUserId: null
                             }
                         })
-
-                        await adjustInventoryForDefaultVariant(tx, tenantId, item.variantId, variantBefore.productId, after?.stock ?? null)
                     }
                 }
 
@@ -440,6 +425,7 @@ export class OrdersService {
                         data: { stock: { increment: qty } }
                     })
                     if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
                         where: { tenantId, id: item.variantId },
@@ -463,10 +449,10 @@ export class OrdersService {
                             createdByUserId: null
                         }
                     })
-
-                    await adjustInventoryForDefaultVariant(tx, tenantId, item.variantId, variantBefore.productId, after?.stock ?? null)
                 }
             }
+
+            await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
 
             const updated = await tx.order.updateMany({ where: { tenantId, id }, data: { status: toStatus } })
             if (updated.count !== 1) throw new OrderValidationError(404, 'Order not found')

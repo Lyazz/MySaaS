@@ -25,7 +25,8 @@ class Order {
       customerName: json['customerName'] ?? '',
       customerPhone: json['customerPhone'] ?? '',
       customerAddress: json['customerAddress'] ?? '',
-      totalAmount: (json['totalAmount'] ?? 0).toDouble(),
+      totalAmount:
+          double.tryParse(json['totalAmount']?.toString() ?? '0') ?? 0.0,
       status: json['status'] ?? 'PENDING',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
@@ -57,7 +58,7 @@ class OrderItem {
       id: json['id'] ?? '',
       productId: json['productId'] ?? '',
       quantity: json['quantity'] ?? 0,
-      price: (json['price'] ?? 0).toDouble(),
+      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
     );
   }
 }

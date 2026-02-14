@@ -78,7 +78,6 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
       await ref
           .read(productsProvider.notifier)
           .updateVariantInventory(widget.variant.id, {
-            'stock': int.tryParse(_stockController.text) ?? 0,
             'safetyStock': int.tryParse(_safetyStockController.text) ?? 0,
             'trackInventory': _trackInventory,
           });
@@ -173,6 +172,8 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                               border: OutlineInputBorder(),
                             ),
                             keyboardType: TextInputType.number,
+                            readOnly: true,
+                            enabled: false,
                           ),
                         ),
                         const SizedBox(width: 16),
