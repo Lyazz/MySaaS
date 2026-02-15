@@ -1,5 +1,13 @@
 <template>
   <div class="max-w-4xl mx-auto">
+    <DeliveryPaymentModal
+      v-model="deliveryModalOpen"
+      :cashboxes="cashboxes"
+      :amount="order?.totalAmount ?? 0"
+      :loading="updating"
+      @confirm="confirmDelivered"
+    />
+
     <!-- Breadcrumb -->
     <nav
       class="flex mb-6"
@@ -45,7 +53,17 @@
           <h2 class="text-lg font-semibold text-gray-900">
             {{ t('admin.pages.orders.detail.sections.orderInfo') }}
           </h2>
-          <AdminOrderStatusBadge :status="order.status" />
+          <div class="flex items-center gap-3">
+            <NuxtLink
+              v-if="order.status === 'DELIVERED'"
+              :to="`/admin/sales/${order.id}`"
+              class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-teal-50 text-teal-700 hover:bg-teal-100"
+            >
+              <Icon name="lucide:badge-dollar-sign" class="w-4 h-4 mr-2" />
+              {{ t('admin.pages.orders.detail.viewSale') }}
+            </NuxtLink>
+            <AdminOrderStatusBadge :status="order.status" />
+          </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -183,6 +201,7 @@
             <BaseSelect
               id="status"
               v-model="newStatus"
+              :disabled="order.status === 'DELIVERED'"
             >
               <option
                 v-for="s in selectableStatuses"
@@ -221,7 +240,7 @@
             </NuxtLink>
             <button
               type="submit"
-              :disabled="updating || newStatus === order.status"
+              :disabled="updating || newStatus === order.status || order.status === 'DELIVERED'"
               class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
@@ -259,6 +278,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import DeliveryPaymentModal from '~/components/cash/DeliveryPaymentModal.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -301,6 +321,8 @@ const order = ref<Order | null>(null)
 const newStatus = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
+const deliveryModalOpen = ref(false)
+const cashboxes = ref<any[]>([])
 
 const statusLabelKeyByCode: Record<string, string> = {
   PENDING: 'admin.orderStatus.pending',
@@ -324,7 +346,6 @@ const selectableStatuses = computed(() => {
     if (current === 'PENDING') return ['CONFIRMED', 'CANCELLED']
     if (current === 'CONFIRMED') return ['SHIPPED', 'CANCELLED']
     if (current === 'SHIPPED') return ['DELIVERED', 'RETURNED']
-    if (current === 'DELIVERED') return ['RETURNED']
     return []
   })()
 
@@ -352,6 +373,23 @@ async function fetchOrder() {
 
 async function handleStatusUpdate() {
   if (!order.value) return
+  if (newStatus.value === 'DELIVERED') {
+    errorMessage.value = ''
+    successMessage.value = ''
+
+    try {
+      cashboxes.value = await $fetch<any[]>('/api/admin/cashboxes', {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      })
+    } catch (e) {
+      console.error('Failed to load cashboxes:', e)
+      errorMessage.value = t('admin.pages.orders.detail.statusUpdate.errors.loadCashboxesFailed')
+      return
+    }
+
+    deliveryModalOpen.value = true
+    return
+  }
   
   errorMessage.value = ''
   successMessage.value = ''
@@ -377,6 +415,41 @@ async function handleStatusUpdate() {
     }, 3000)
   } catch (error: any) {
     console.error('Failed to update order:', error)
+    errorMessage.value = error.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')
+  } finally {
+    updating.value = false
+  }
+}
+
+async function confirmDelivered(payload: { cashboxId: string; method: string; reference: string | null; note: string | null }) {
+  if (!order.value) return
+  errorMessage.value = ''
+  successMessage.value = ''
+  updating.value = true
+
+  try {
+    const updated = await $fetch<Order>(`/api/admin/orders/${orderId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      body: {
+        status: 'DELIVERED',
+        cashboxId: payload.cashboxId,
+        method: payload.method,
+        reference: payload.reference,
+        note: payload.note
+      }
+    })
+
+    order.value = updated
+    newStatus.value = updated.status
+    successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 3000)
+  } catch (error: any) {
+    console.error('Failed to mark delivered:', error)
     errorMessage.value = error.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')
   } finally {
     updating.value = false

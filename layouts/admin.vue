@@ -345,6 +345,11 @@ const navGroups = ref([
     collapsed: false,
     items: [
       {
+        path: '/admin/cash',
+        labelKey: 'admin.nav.cash',
+        icon: 'lucide:wallet'
+      },
+      {
         path: '/admin/billing',
         labelKey: 'admin.nav.billing',
         icon: 'lucide:credit-card'

@@ -1,6 +1,7 @@
 {
   "common": {
-    "view": "Voir"
+    "view": "Voir",
+    "details": "Détails"
   },
   "i18n": {
     "switcher": {
@@ -205,7 +206,7 @@
         "orContinueWith": "Ou continuer avec",
         "email": {
           "label": "Adresse e-mail",
-          "placeholder": "name@company.com"
+          "placeholder": "name{'@'}company.com"
         },
         "password": {
           "label": "Mot de passe",
@@ -250,7 +251,7 @@
         },
         "email": {
           "label": "E-mail professionnel",
-          "placeholder": "name@company.com"
+          "placeholder": "name{'@'}company.com"
         },
         "password": {
           "label": "Mot de passe"
@@ -904,23 +905,74 @@
         "deleteFailed": "Impossible de supprimer l’info de contact."
       },
       "kinds": {
-        "phone": { "label": "Téléphone", "placeholder": "0550 00 00 00" },
-        "email": { "label": "E-mail", "placeholder": "contact@store.com" },
-        "address": { "label": "Adresse", "placeholder": "Alger, Hydra…" },
-        "map": { "label": "Lien de carte", "placeholder": "https://maps.app.goo.gl/..." },
-        "website": { "label": "Site web", "placeholder": "https://example.com" },
-        "whatsapp": { "label": "WhatsApp", "placeholder": "+213550000000" },
-        "facebook": { "label": "Facebook", "placeholder": "https://facebook.com/yourpage" },
-        "instagram": { "label": "Instagram", "placeholder": "@yourstore" },
-        "tiktok": { "label": "TikTok", "placeholder": "@yourstore" },
-        "youtube": { "label": "YouTube", "placeholder": "https://youtube.com/@yourstore" },
-        "x": { "label": "X (Twitter)", "placeholder": "@yourstore" },
-        "linkedin": { "label": "LinkedIn", "placeholder": "https://linkedin.com/company/yourstore" },
-        "snapchat": { "label": "Snapchat", "placeholder": "@yourstore" },
-        "telegram": { "label": "Telegram", "placeholder": "https://t.me/yourstore" },
-        "viber": { "label": "Viber", "placeholder": "+213550000000" },
-        "pinterest": { "label": "Pinterest", "placeholder": "https://pinterest.com/yourstore" },
-        "threads": { "label": "Threads", "placeholder": "@yourstore" }
+        "phone": {
+          "label": "Téléphone",
+          "placeholder": "0550 00 00 00"
+        },
+        "email": {
+          "label": "E-mail",
+          "placeholder": "contact{'@'}store.com"
+        },
+        "address": {
+          "label": "Adresse",
+          "placeholder": "Alger, Hydra…"
+        },
+        "map": {
+          "label": "Lien de carte",
+          "placeholder": "https://maps.app.goo.gl/..."
+        },
+        "website": {
+          "label": "Site web",
+          "placeholder": "https://example.com"
+        },
+        "whatsapp": {
+          "label": "WhatsApp",
+          "placeholder": "+213550000000"
+        },
+        "facebook": {
+          "label": "Facebook",
+          "placeholder": "https://facebook.com/yourpage"
+        },
+        "instagram": {
+          "label": "Instagram",
+          "placeholder": "{'@'}yourstore"
+        },
+        "tiktok": {
+          "label": "TikTok",
+          "placeholder": "{'@'}yourstore"
+        },
+        "youtube": {
+          "label": "YouTube",
+          "placeholder": "https://youtube.com/{'@'}yourstore"
+        },
+        "x": {
+          "label": "X (Twitter)",
+          "placeholder": "{'@'}yourstore"
+        },
+        "linkedin": {
+          "label": "LinkedIn",
+          "placeholder": "https://linkedin.com/company/yourstore"
+        },
+        "snapchat": {
+          "label": "Snapchat",
+          "placeholder": "{'@'}yourstore"
+        },
+        "telegram": {
+          "label": "Telegram",
+          "placeholder": "https://t.me/yourstore"
+        },
+        "viber": {
+          "label": "Viber",
+          "placeholder": "+213550000000"
+        },
+        "pinterest": {
+          "label": "Pinterest",
+          "placeholder": "https://pinterest.com/yourstore"
+        },
+        "threads": {
+          "label": "Threads",
+          "placeholder": "{'@'}yourstore"
+        }
       }
     },
     "imageUploader": {
@@ -1080,14 +1132,38 @@
         "title": "Modèle de boutique",
         "subtitle": "Choisissez la mise en page qui correspond le mieux à votre marque.",
         "options": {
-          "classic": { "label": "Classique", "description": "Élégance intemporelle avec typographie serif." },
-          "modern": { "label": "Minimal moderne", "description": "Esthétique épurée avec accents marqués." },
-          "street": { "label": "Urbain", "description": "Style énergique à fort contraste." },
-          "cozy": { "label": "Chaleureux", "description": "Verts doux et formes arrondies." },
-          "cyber": { "label": "Cyber futur", "description": "Mode sombre avec accents néon." },
-          "stationnery": { "label": "Papeterie", "description": "Structure raffinée pour les professionnels." },
-          "food": { "label": "Marché food", "description": "Vibrant et appétissant." },
-          "wellness": { "label": "Bien-être", "description": "Organique, calme et naturel." }
+          "classic": {
+            "label": "Classique",
+            "description": "Élégance intemporelle avec typographie serif."
+          },
+          "modern": {
+            "label": "Minimal moderne",
+            "description": "Esthétique épurée avec accents marqués."
+          },
+          "street": {
+            "label": "Urbain",
+            "description": "Style énergique à fort contraste."
+          },
+          "cozy": {
+            "label": "Chaleureux",
+            "description": "Verts doux et formes arrondies."
+          },
+          "cyber": {
+            "label": "Cyber futur",
+            "description": "Mode sombre avec accents néon."
+          },
+          "stationnery": {
+            "label": "Papeterie",
+            "description": "Structure raffinée pour les professionnels."
+          },
+          "food": {
+            "label": "Marché food",
+            "description": "Vibrant et appétissant."
+          },
+          "wellness": {
+            "label": "Bien-être",
+            "description": "Organique, calme et naturel."
+          }
         }
       },
       "preview": {
@@ -1112,7 +1188,6 @@
       "catalog": "Catalogue",
       "purchasing": "Achats",
       "sales": "Ventes",
-      "delivery": "Livraison",
       "delivery": "Livraison",
       "finance": "Finance",
       "cash": "Caisse",
@@ -1243,6 +1318,135 @@
       "cash": {
         "title": "Gestion des caisses",
         "subtitle": "Gérez vos fonds de caisse, sessions et transactions.",
+        "actions": {
+          "newCustomerPayment": "Versement client",
+          "newSupplierPayment": "Versement fournisseur",
+          "newExpense": "Nouvelle dépense",
+          "newCharge": "Nouvelle charge",
+          "transfer": "Transfert"
+        },
+        "cashboxes": {
+          "title": "Caisses",
+          "status": "Statut",
+          "openSession": "Session ouverte #{id}",
+          "closed": "Aucune session ouverte",
+          "open": "Ouvrir",
+          "close": "Fermer",
+          "empty": "Aucune caisse",
+          "emptyHint": "Créez une caisse pour commencer."
+        },
+        "cashbox": {
+          "titleFallback": "Caisse",
+          "transactionsHint": "Transactions de cette caisse."
+        },
+        "methods": {
+          "CASH": "Espèces",
+          "CARD": "Carte",
+          "TRANSFER": "Virement",
+          "OTHER": "Autre"
+        },
+        "directions": {
+          "in": "Entrée",
+          "out": "Sortie"
+        },
+        "modals": {
+          "openSession": {
+            "title": "Ouvrir une session",
+            "subtitle": "Définissez le fond de caisse d’ouverture.",
+            "openingFloatLabel": "Fond de caisse",
+            "noteLabel": "Note",
+            "notePlaceholder": "Ex: Début de journée",
+            "confirm": "Ouvrir"
+          },
+          "closeSession": {
+            "title": "Fermer la session",
+            "subtitle": "Saisissez le montant réel dans la caisse.",
+            "closingCountLabel": "Montant réel",
+            "noteLabel": "Note",
+            "notePlaceholder": "Ex: Fin de journée",
+            "confirm": "Fermer"
+          },
+          "expense": {
+            "title": "Nouvelle dépense",
+            "subtitle": "Enregistrez une sortie d’argent.",
+            "cashboxLabel": "Caisse",
+            "cashboxPlaceholder": "Choisir une caisse",
+            "amountLabel": "Montant",
+            "categoryLabel": "Catégorie",
+            "categoryPlaceholder": "Ex: Loyer, Transport…",
+            "methodLabel": "Méthode",
+            "referenceLabel": "Référence",
+            "referencePlaceholder": "Optionnel",
+            "noteLabel": "Note",
+            "notePlaceholder": "Optionnel",
+            "confirm": "Enregistrer"
+          },
+          "charge": {
+            "title": "Nouvelle charge"
+          },
+          "transfer": {
+            "title": "Transfert entre caisses",
+            "subtitle": "Transférez des fonds d’une caisse à une autre.",
+            "fromLabel": "De",
+            "fromPlaceholder": "Caisse source",
+            "toLabel": "Vers",
+            "toPlaceholder": "Caisse destination",
+            "amountLabel": "Montant",
+            "referenceLabel": "Référence",
+            "referencePlaceholder": "Optionnel",
+            "noteLabel": "Note",
+            "notePlaceholder": "Optionnel",
+            "confirm": "Transférer"
+          },
+          "delivery": {
+            "title": "Encaissement à la livraison",
+            "subtitle": "Le paiement est toujours le total de la vente.",
+            "confirm": "Valider",
+            "amountLabel": "Montant",
+            "cashboxLabel": "Caisse",
+            "cashboxPlaceholder": "Choisir une caisse",
+            "noOpenSession": "Aucune session",
+            "cashboxHint": "La caisse doit avoir une session ouverte.",
+            "methodLabel": "Méthode",
+            "referenceLabel": "Référence",
+            "referencePlaceholder": "Optionnel",
+            "noteLabel": "Note",
+            "notePlaceholder": "Optionnel"
+          },
+          "customerPayment": {
+            "title": "Versement client",
+            "subtitle": "Enregistrez un versement client (acompte, solde ou versement libre).",
+            "cashboxLabel": "Caisse",
+            "cashboxPlaceholder": "Choisir une caisse",
+            "customerLabel": "Client",
+            "customerSearchPlaceholder": "Rechercher un client par nom ou téléphone…",
+            "customerPlaceholder": "Choisir un client",
+            "loadingCustomers": "Chargement des clients…",
+            "amountLabel": "Montant",
+            "methodLabel": "Méthode",
+            "referenceLabel": "Référence",
+            "referencePlaceholder": "Optionnel",
+            "noteLabel": "Note",
+            "notePlaceholder": "Optionnel",
+            "confirm": "Enregistrer"
+          },
+          "supplierPayment": {
+            "title": "Versement fournisseur",
+            "subtitle": "Enregistrez un paiement fournisseur (avance, retard, ou paiement libre).",
+            "cashboxLabel": "Caisse",
+            "cashboxPlaceholder": "Choisir une caisse",
+            "supplierLabel": "Fournisseur",
+            "supplierSearchPlaceholder": "Rechercher un fournisseur par nom ou téléphone…",
+            "supplierPlaceholder": "Choisir un fournisseur",
+            "amountLabel": "Montant",
+            "methodLabel": "Méthode",
+            "referenceLabel": "Référence",
+            "referencePlaceholder": "Optionnel",
+            "noteLabel": "Note",
+            "notePlaceholder": "Optionnel",
+            "confirm": "Enregistrer"
+          }
+        },
         "create": "Nouvelle caisse",
         "edit": "Modifier la caisse",
         "openSession": "Ouvrir la session",
@@ -1258,6 +1462,23 @@
         "transfer": "Virement interne",
         "toCashbox": "Vers caisse",
         "transactions": {
+          "title": "Transactions",
+          "subtitle": "Toutes les opérations d’argent enregistrées.",
+          "loading": "Chargement…",
+          "empty": "Aucune transaction",
+          "emptyHint": "Les encaissements, dépenses et transferts apparaîtront ici.",
+          "filters": {
+            "allCashboxes": "Toutes les caisses",
+            "allTypes": "Tous les types",
+            "allDirections": "Entrées + sorties"
+          },
+          "table": {
+            "date": "Date",
+            "cashbox": "Caisse",
+            "type": "Type",
+            "method": "Méthode",
+            "amount": "Montant"
+          },
           "type": "Type",
           "amount": "Montant",
           "date": "Date",
@@ -1269,8 +1490,34 @@
             "EXPENSE": "Dépense",
             "CHARGE": "Charge",
             "SALE_PAYMENT": "Encaissement vente",
+            "TRANSFER": "Transfert",
             "TRANSFER_IN": "Transfert (Reçu)",
             "TRANSFER_OUT": "Transfert (Envoyé)"
+          }
+        },
+        "sessions": {
+          "title": "Sessions de caisse",
+          "subtitle": "Fond de caisse, fermeture et historique par caisse.",
+          "loading": "Chargement…",
+          "empty": "Aucune session",
+          "emptyHint": "Ouvrez une session pour commencer à enregistrer.",
+          "filters": {
+            "allCashboxes": "Toutes les caisses",
+            "allStatuses": "Tous les statuts"
+          },
+          "table": {
+            "cashbox": "Caisse",
+            "status": "Statut",
+            "openedAt": "Ouverte",
+            "closedAt": "Fermée",
+            "openingFloat": "Fond de caisse",
+            "expectedClosing": "Attendu",
+            "closingCount": "Réel",
+            "difference": "Écart"
+          },
+          "expected": {
+            "loading": "Calcul du montant attendu…",
+            "unavailable": "Montant attendu indisponible."
           }
         },
         "status": {
@@ -1640,6 +1887,7 @@
             "submit": "Mettre à jour",
             "success": "Statut de la commande mis à jour !",
             "errors": {
+              "loadCashboxesFailed": "Impossible de charger les caisses. Ouvrez d’abord une session de caisse.",
               "updateFailed": "Impossible de mettre à jour le statut"
             }
           },
@@ -1669,7 +1917,7 @@
       "customers": {
         "index": {
           "title": "Clients",
-          "subtitle": "Dérivé de l’historique des commandes",
+          "subtitle": "Dérivé de l’historique des ventes",
           "addCustomer": "Ajouter un client",
           "count": "{count} clients",
           "loadingInline": "Chargement…",
@@ -1681,7 +1929,7 @@
           "loading": "Chargement des clients…",
           "empty": {
             "title": "Aucun client trouvé",
-            "hint": "Les clients apparaîtront ici une fois des commandes passées",
+            "hint": "Les clients apparaîtront ici une fois des ventes enregistrées",
             "hintFiltered": "Essayez d’ajuster votre recherche",
             "newCustomer": "Nouveau client"
           },
@@ -1689,7 +1937,7 @@
             "sortBy": "Trier par :",
             "lastOrder": "Dernière commande",
             "name": "Nom",
-            "orders": "Commandes",
+            "orders": "Ventes",
             "totalSpent": "Total dépensé"
           },
           "pagination": {
@@ -1702,7 +1950,7 @@
           "table": {
             "customer": "Client",
             "phone": "Téléphone",
-            "orders": "Commandes",
+            "orders": "Ventes",
             "totalSpent": "Total dépensé",
             "lastOrder": "Dernière commande",
             "actions": "Actions"
@@ -1736,8 +1984,15 @@
           "fallbackTitle": "Client",
           "loading": "Chargement du client…",
           "stats": {
-            "orders": "Commandes",
-            "totalSpent": "Total dépensé"
+            "orders": "Ventes",
+            "totalSpent": "Total dépensé",
+            "totalPaid": "Total payé",
+            "currentBalance": "Solde",
+            "openingBalance": "Solde initial",
+            "openingBalanceHint": "Permet d'initialiser la dette/crédit du client.",
+            "payments": "Versements",
+            "method": "Méthode",
+            "reference": "Référence"
           },
           "errors": {
             "title": "Impossible de charger le client",
@@ -1748,11 +2003,11 @@
             "hint": "Ce client n’existe peut-être pas ou vous n’avez pas l’autorisation de le voir."
           },
           "empty": {
-            "title": "Aucune commande",
-            "hint": "Ce client n’a pas encore de commandes."
+            "title": "Aucune vente",
+            "hint": "Ce client n’a pas encore de ventes."
           },
           "table": {
-            "order": "Commande",
+            "order": "Vente",
             "total": "Total",
             "status": "Statut",
             "date": "Date",
@@ -2154,7 +2409,7 @@
       "form": {
         "email": {
           "label": "Adresse e-mail",
-          "placeholder": "superadmin@example.com"
+          "placeholder": "superadmin{'@'}example.com"
         },
         "password": {
           "label": "Mot de passe"
@@ -2254,7 +2509,7 @@
           },
           "ownerEmail": {
             "label": "E-mail du propriétaire",
-            "placeholder": "admin@acme.com"
+            "placeholder": "admin{'@'}acme.com"
           },
           "ownerPassword": {
             "label": "Mot de passe du propriétaire"

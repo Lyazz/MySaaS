@@ -150,7 +150,6 @@ describe('Express Admin API', () => {
                 title: 'Test Product',
                 slug: 'test-product',
                 price: 100,
-                stock: 10,
                 images
             })
 

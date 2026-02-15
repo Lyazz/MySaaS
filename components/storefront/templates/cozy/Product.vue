@@ -10,6 +10,7 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 
 // Option Selection Logic
 const selectedOptions = ref<SelectedOptions>({})
@@ -86,9 +87,9 @@ watch([() => props.product, selectedOptions], ([product]) => {
   <div v-if="product" class="max-w-6xl mx-auto px-4 py-8">
     <!-- Breadcrumbs -->
     <nav class="flex gap-2 text-sm text-slate-400 mb-8">
-      <NuxtLink to="/" class="hover:text-brand-500 transition-colors">Home</NuxtLink>
+      <NuxtLink to="/" class="hover:text-brand-500 transition-colors">{{ storefrontContent.nav.home }}</NuxtLink>
       <span>/</span>
-      <NuxtLink to="/products" class="hover:text-brand-500 transition-colors">Shop</NuxtLink>
+      <NuxtLink to="/products" class="hover:text-brand-500 transition-colors">{{ storefrontContent.nav.shop }}</NuxtLink>
       <span>/</span>
       <span class="text-slate-700 font-medium">{{ product.title }}</span>
     </nav>
@@ -118,7 +119,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
 
     <!-- Full Description -->
     <div class="mt-16 pt-8 border-t border-slate-100">
-      <h2 class="font-cozy font-bold text-2xl text-slate-800 mb-6">Product Details</h2>
+      <h2 class="font-cozy font-bold text-2xl text-slate-800 mb-6">{{ storefrontContent.product.detailsTitle }}</h2>
       <div 
         v-if="product?.description" 
         class="prose prose-lg prose-headings:font-cozy max-w-none bg-white p-8 rounded-[2rem] shadow-soft"
@@ -128,7 +129,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
         v-else
         class="prose prose-lg max-w-none bg-white p-8 rounded-[2rem] shadow-soft"
       >
-        <p class="text-slate-500">Experience comfort and quality with our carefully crafted product. Designed with attention to detail and made from premium materials.</p>
+        <p class="text-slate-500">{{ storefrontContent.product.descriptionFallback }}</p>
       </div>
     </div>
   </div>

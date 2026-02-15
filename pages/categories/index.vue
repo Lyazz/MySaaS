@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const categoriesUrl = useTenantApiUrl('/api/categories')
+const { t } = useI18n({ useScope: 'global' })
 
 type Category = {
   id: string
@@ -13,12 +14,12 @@ const { data: categories, error } = await useFetch<Category[]>(categoriesUrl, {
 })
 
 if (error.value) {
-  throw createError({ statusCode: 500, statusMessage: 'Failed to load categories' })
+  throw createError({ statusCode: 500, statusMessage: t('storefront.pages.categories.errors.loadFailed') })
 }
 
 useTenantSeo({
-  title: 'All Categories',
-  description: 'Browse all categories in our store.'
+  title: t('storefront.pages.categories.seo.title'),
+  description: t('storefront.pages.categories.seo.description')
 })
 
 definePageMeta({
@@ -33,10 +34,10 @@ definePageMeta({
       <!-- Header -->
       <div class="mb-12">
         <h1 class="text-3xl font-bold text-gray-900 tracking-tight sm:text-4xl font-sans">
-          Collections
+          {{ t('storefront.pages.categories.title') }}
         </h1>
         <p class="mt-4 text-lg text-gray-500 font-sans">
-          Browse our curated categories to find exactly what you need.
+          {{ t('storefront.pages.categories.subtitle') }}
         </p>
       </div>
 
@@ -69,7 +70,7 @@ definePageMeta({
                   {{ category.title }}
                 </h3>
                 <div class="mt-3 inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-white/90 text-brand-700 shadow-sm">
-                  View Collection
+                  {{ t('storefront.pages.categories.card.viewCollection') }}
                   <span class="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
                 </div>
               </div>
@@ -84,10 +85,10 @@ definePageMeta({
         class="text-center py-24 bg-white rounded-xl border border-dashed border-gray-300"
       >
         <h3 class="mt-2 text-sm font-medium text-gray-900 font-sans">
-          No categories found
+          {{ t('storefront.pages.categories.empty.title') }}
         </h3>
         <p class="mt-1 text-sm text-gray-500 font-sans">
-          Please check back later.
+          {{ t('storefront.pages.categories.empty.subtitle') }}
         </p>
       </div>
     </div>

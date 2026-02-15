@@ -12,6 +12,7 @@ router.post('/cashboxes', controller.createCashbox.bind(controller))
 router.patch('/cashboxes/:id', controller.updateCashbox.bind(controller))
 
 router.get('/cash-sessions', controller.listSessions.bind(controller))
+router.get('/cash-sessions/:id/expected', controller.getSessionExpectedClosing.bind(controller))
 router.post('/cashboxes/:id/sessions/open', controller.openSession.bind(controller))
 router.post('/cash-sessions/:id/close', controller.closeSession.bind(controller))
 
@@ -21,4 +22,3 @@ router.post('/cash-transactions', controller.createTransaction.bind(controller))
 router.post('/cash-transfers', controller.transfer.bind(controller))
 
 export default router
-

@@ -6,6 +6,14 @@ import ProductDetails from '../../components/storefront/templates/modern/partial
 import ProductGallery from '../../components/storefront/templates/modern/partials/ProductGallery.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { useState } from '#imports'
+import { computed } from 'vue'
+
+vi.mock('vue-i18n', () => ({
+    useI18n: () => ({
+        t: (key: string) => key,
+        locale: computed(() => 'en')
+    })
+}))
 
 describe('ModernProduct', () => {
     const mockProduct = {

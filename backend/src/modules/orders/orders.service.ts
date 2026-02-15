@@ -1,8 +1,10 @@
 import prisma from '../../lib/prisma'
+import { Prisma } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
 import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
+import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
 
 const telegramService = new TelegramService()
 
@@ -53,6 +55,51 @@ const addUtcYears = (date: Date, years: number) =>
     new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
 
 export class OrdersService {
+    private async ensureDeliveredOrderSale(
+        tx: any,
+        tenantId: string,
+        order: { id: string; tenantId: string; totalAmount: number; customerId: string | null; customerName: string; customerPhone: string; customerAddress: string | null; items: Array<{ productId: string; variantId: string | null; quantity: number; price: number }> },
+        actor?: { userId?: string | null }
+    ) {
+        const existingSale = await tx.sale.findFirst({
+            where: { tenantId, id: order.id },
+            select: { id: true }
+        })
+        if (existingSale) return existingSale
+
+        const created = await tx.sale.create({
+            data: {
+                id: order.id,
+                tenantId,
+                source: 'ORDER',
+                orderId: order.id,
+                status: 'COMPLETED',
+                totalAmount: order.totalAmount,
+                customerId: order.customerId,
+                customerName: order.customerName,
+                customerPhone: order.customerPhone,
+                customerAddress: order.customerAddress,
+                notes: 'Converted from delivered order',
+                createdByUserId: actor?.userId ?? null
+            }
+        })
+
+        if (Array.isArray(order.items) && order.items.length > 0) {
+            await tx.saleItem.createMany({
+                data: order.items.map((i) => ({
+                    tenantId,
+                    saleId: created.id,
+                    productId: i.productId,
+                    variantId: i.variantId,
+                    quantity: i.quantity,
+                    price: i.price
+                }))
+            })
+        }
+
+        return created
+    }
+
     async list(tenantId: string, filters: { status?: string; search?: string; startDate?: string; endDate?: string }) {
         const where: any = { tenantId }
 
@@ -157,7 +204,13 @@ export class OrdersService {
         }
     }
 
-    async updateStatus(tenantId: string, id: string, status: string) {
+    async updateStatus(
+        tenantId: string,
+        id: string,
+        status: string,
+        actor?: { userId?: string | null },
+        opts?: { cashboxId?: string | null; method?: string | null; reference?: string | null; note?: string | null }
+    ) {
         if (!status || !ORDER_STATUSES.includes(status as any)) {
             throw new OrderValidationError(400, 'Invalid status value')
         }
@@ -171,6 +224,11 @@ export class OrdersService {
         const fromStatus = existing.status
         const toStatus = status
         if (fromStatus === toStatus) return prisma.order.findFirst({ where: { id, tenantId } })
+
+        if (fromStatus === 'SHIPPED' && toStatus === 'DELIVERED') {
+            const cashboxId = typeof opts?.cashboxId === 'string' ? opts.cashboxId.trim() : ''
+            if (!cashboxId) throw new OrderValidationError(400, 'cashboxId is required to mark an order DELIVERED')
+        }
 
         await prisma.$transaction(async (tx) => {
             const touchedProductIds = new Set<string>()
@@ -186,7 +244,6 @@ export class OrdersService {
                 if (fromStatus === 'PENDING') return toStatus === 'CONFIRMED' || toStatus === 'CANCELLED'
                 if (fromStatus === 'CONFIRMED') return toStatus === 'SHIPPED' || toStatus === 'CANCELLED'
                 if (fromStatus === 'SHIPPED') return toStatus === 'DELIVERED' || toStatus === 'RETURNED'
-                if (fromStatus === 'DELIVERED') return toStatus === 'RETURNED'
                 return false
             })()
             if (!isTransitionAllowed) {
@@ -418,8 +475,8 @@ export class OrdersService {
                     }
                 }
 
-                // SHIPPED/DELIVERED -> RETURNED : restock.
-                if ((fromStatus === 'SHIPPED' || fromStatus === 'DELIVERED') && toStatus === 'RETURNED') {
+                // SHIPPED -> RETURNED : restock.
+                if (fromStatus === 'SHIPPED' && toStatus === 'RETURNED') {
                     const result = await tx.productVariant.updateMany({
                         where: { tenantId, id: item.variantId, stock: variantBefore.stock },
                         data: { stock: { increment: qty } }
@@ -453,6 +510,73 @@ export class OrdersService {
             }
 
             await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
+
+            if (fromStatus === 'SHIPPED' && toStatus === 'DELIVERED') {
+                const sale = await this.ensureDeliveredOrderSale(
+                    tx,
+                    tenantId,
+                    {
+                        id: existing.id,
+                        tenantId: existing.tenantId,
+                        totalAmount: existing.totalAmount,
+                        customerId: existing.customerId ?? null,
+                        customerName: existing.customerName,
+                        customerPhone: existing.customerPhone,
+                        customerAddress: existing.customerAddress ?? null,
+                        items: items.map((i: any) => ({
+                            productId: i.productId,
+                            variantId: i.variantId ?? null,
+                            quantity: i.quantity,
+                            price: i.price
+                        }))
+                    },
+                    actor
+                )
+
+                const cashboxId = typeof opts?.cashboxId === 'string' ? opts.cashboxId.trim() : ''
+                if (!cashboxId) throw new OrderValidationError(400, 'cashboxId is required to mark an order DELIVERED')
+
+                const openSession = await tx.cashSession.findFirst({
+                    where: { tenantId, cashboxId, status: 'OPEN' },
+                    orderBy: { openedAt: 'desc' },
+                    select: { id: true }
+                })
+                if (!openSession) throw new OrderValidationError(409, 'Cashbox has no open session')
+
+                const storeSettings = await tx.storeSettings.findUnique({
+                    where: { tenantId },
+                    select: { currencyCode: true }
+                })
+                const currency = (storeSettings?.currencyCode || 'DZD').toUpperCase()
+
+                const method = typeof opts?.method === 'string' && opts.method.trim() ? opts.method.trim().toUpperCase() : 'CASH'
+                const reference = typeof opts?.reference === 'string' && opts.reference.trim() ? opts.reference.trim().slice(0, 64) : null
+                const note = typeof opts?.note === 'string' && opts.note.trim() ? opts.note.trim().slice(0, 500) : 'Order delivered payment'
+
+                const amount = new Prisma.Decimal(String(existing.totalAmount || 0))
+                if (!amount.isFinite() || amount.lte(0)) throw new OrderValidationError(400, 'Order totalAmount must be > 0')
+
+                const cashTx = await tx.cashTransaction.create({
+                    data: {
+                        tenantId,
+                        cashboxId,
+                        sessionId: openSession.id,
+                        direction: 'IN',
+                        type: 'SALE_PAYMENT',
+                        amount,
+                        currency,
+                        method,
+                        customerId: existing.customerId ?? null,
+                        saleId: sale.id,
+                        orderId: existing.id,
+                        reference,
+                        note,
+                        createdByUserId: actor?.userId ?? null
+                    }
+                })
+
+                await mirrorCashTransactionToPayments(tx, tenantId, cashTx)
+            }
 
             const updated = await tx.order.updateMany({ where: { tenantId, id }, data: { status: toStatus } })
             if (updated.count !== 1) throw new OrderValidationError(404, 'Order not found')

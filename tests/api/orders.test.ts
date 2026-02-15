@@ -18,6 +18,8 @@ describe('Public checkout order flow', () => {
     let bundleProductId: string
     let bundleVariantId: string
     let productPixel: any
+    let cashboxId: string
+    let cashSessionId: string
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
@@ -110,11 +112,28 @@ describe('Public checkout order flow', () => {
         await prisma.productMetaPixel.create({
             data: { tenantId, productId, metaPixelId: productPixel.id }
         })
+
+        const cashbox = await prisma.cashbox.create({
+            data: { tenantId, name: 'Main Cashbox', isActive: true }
+        })
+        cashboxId = cashbox.id
+
+        const session = await prisma.cashSession.create({
+            data: { tenantId, cashboxId, status: 'OPEN', openingFloat: 0 }
+        })
+        cashSessionId = session.id
     })
 
     afterAll(async () => {
+        await prisma.customerPayment.deleteMany({ where: { tenantId } })
+        await prisma.supplierPayment.deleteMany({ where: { tenantId } })
+        await prisma.cashTransaction.deleteMany({ where: { tenantId } })
+        await prisma.cashSession.deleteMany({ where: { tenantId } })
+        await prisma.cashbox.deleteMany({ where: { tenantId } })
         await prisma.productMetaPixel.deleteMany({ where: { tenantId } })
         await prisma.tenantMetaPixel.deleteMany({ where: { tenantId } })
+        await prisma.saleItem.deleteMany({ where: { sale: { tenantId } } })
+        await prisma.sale.deleteMany({ where: { tenantId } })
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.productBundleDeal.deleteMany({ where: { tenantId } })
@@ -291,6 +310,63 @@ describe('Public checkout order flow', () => {
             orderBy: { createdAt: 'desc' }
         })
         expect(returnMove?.delta).toBe(2)
+    })
+
+    it('creates a Sale when marking an order DELIVERED, and the status becomes final', async () => {
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Delivered Buyer',
+                customerPhone: '0550888000',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(created.status).toBe(201)
+        const orderId = created.body.orderId as string
+
+        const confirm = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'CONFIRMED' })
+        expect(confirm.status).toBe(200)
+
+        const ship = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'SHIPPED' })
+        expect(ship.status).toBe(200)
+
+        const delivered = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'DELIVERED', cashboxId, method: 'CASH' })
+        expect(delivered.status).toBe(200)
+
+        const sale = await prisma.sale.findUnique({
+            where: { tenantId_id: { tenantId, id: orderId } },
+            include: { items: true }
+        })
+        expect(sale?.id).toBe(orderId)
+        expect(sale?.orderId).toBe(orderId)
+        expect(sale?.source).toBe('ORDER')
+        expect(sale?.status).toBe('COMPLETED')
+        expect(sale?.items.length).toBe(1)
+
+        const cashTx = await prisma.cashTransaction.findFirst({
+            where: { tenantId, orderId, saleId: orderId, type: 'SALE_PAYMENT', direction: 'IN', cashboxId, sessionId: cashSessionId }
+        })
+        expect(cashTx?.amount).toBeDefined()
+
+        const blocked = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'RETURNED' })
+        expect(blocked.status).toBe(400)
     })
 
     it('rejects checkout when phone is missing', async () => {

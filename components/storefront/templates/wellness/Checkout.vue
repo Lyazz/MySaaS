@@ -179,7 +179,7 @@ async function handleSubmit() {
       <!-- Loading State -->
       <div v-if="submitting" class="fixed inset-0 bg-stone-50/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
          <div class="w-16 h-16 border-4 border-stone-200 border-t-brand-600 rounded-full animate-spin mb-4"></div>
-         <p class="text-stone-600 font-wellness text-lg animate-pulse">Processing your order...</p>
+         <p class="text-stone-600 font-wellness text-lg animate-pulse">{{ storefrontContent.checkout.actions.placingOrder }}</p>
       </div>
 
       <!-- Header -->
@@ -188,7 +188,7 @@ async function handleSubmit() {
           {{ storefrontContent.checkout.title }}
         </h1>
         <p class="text-stone-500">
-          Complete your purchase securely
+          {{ storefrontContent.checkout.secureTransaction }}
         </p>
         <div
           v-if="!cartEnabled"
@@ -245,7 +245,7 @@ async function handleSubmit() {
                     </div>
                  </div>
                  <div class="col-span-2 md:col-span-1 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ml-1">Commune</label>
+                    <label class="block text-sm font-medium text-stone-700 ml-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                     <div class="relative">
                       <select
                         v-model="form.commune"
@@ -351,7 +351,7 @@ async function handleSubmit() {
             </button>
             <p class="text-center text-xs text-stone-400 mt-2 flex items-center justify-center gap-1">
                <Icon name="lucide:lock" class="w-3 h-3" />
-               Secure encrypted payment
+               {{ storefrontContent.checkout.secureTransaction }}
             </p>
           </form>
         </section>
@@ -359,9 +359,9 @@ async function handleSubmit() {
         <!-- Order Summary Sidebar -->
         <section class="mt-16 bg-white rounded-[2.5rem] shadow-lg border border-stone-100 px-8 py-10 lg:col-span-5 lg:mt-0 lg:sticky lg:top-8">
            <div class="flex items-center justify-between mb-8 pb-6 border-b border-stone-100">
-             <h2 class="text-2xl font-wellness text-stone-900">Order Summary</h2>
+             <h2 class="text-2xl font-wellness text-stone-900">{{ storefrontContent.checkout.orderSummaryTitle }}</h2>
              <span class="bg-brand-50 text-brand-700 px-3 py-1 rounded-full text-sm font-bold">
-               {{ cartStore.itemCount }} items
+               {{ storefrontContent.checkout.itemsInCart(cartStore.itemCount) }}
              </span>
            </div>
 
@@ -376,10 +376,10 @@ async function handleSubmit() {
                           <h3 class="line-clamp-1 mr-2 px-1">{{ item.title }}</h3>
                           <p class="font-wellness text-sm">{{ formatCurrency(item.price) }}</p>
                        </div>
-                       <p class="mt-1 text-sm text-stone-500">{{ item.variantName || 'Standard' }}</p>
+                       <p class="mt-1 text-sm text-stone-500">{{ item.variantName || storefrontContent.cart.item.standardItem }}</p>
                     </div>
                     <div class="flex flex-1 items-end justify-between text-sm">
-                       <p class="text-stone-500">Qty {{ item.quantity }}</p>
+                       <p class="text-stone-500">{{ storefrontContent.checkout.summary.quantityShort }} {{ item.quantity }}</p>
                     </div>
                  </div>
               </li>

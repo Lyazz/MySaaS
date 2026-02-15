@@ -10,6 +10,7 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 
 // Option Selection Logic
 const selectedOptions = ref<SelectedOptions>({})
@@ -153,7 +154,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
             <div class="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur"></div>
             <div class="relative bg-[#1a0a2e]/90 rounded-2xl border border-purple-500/30 p-8 backdrop-blur-sm">
               <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400 mb-6">
-                Product Details
+                {{ storefrontContent.product.detailsTitle }}
               </h2>
               <div 
                 v-if="product?.description" 
@@ -164,7 +165,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
                 v-else
                 class="text-purple-200/70 leading-relaxed"
               >
-                <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+                <p>{{ storefrontContent.product.descriptionFallback }}</p>
               </div>
             </div>
           </div>

@@ -39,6 +39,27 @@ export class SalesController {
         }
     }
 
+    async getById(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Sale ID is required' })
+            }
+
+            const sale = await service.getById(tenant.id, id)
+            if (!sale) {
+                return res.status(404).json({ statusCode: 404, statusMessage: 'Sale not found' })
+            }
+
+            res.json(sale)
+        } catch (error) {
+            console.error('Get sale error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async getPosSaleById(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
@@ -56,6 +77,40 @@ export class SalesController {
             res.json(sale)
         } catch (error) {
             console.error('Get sale error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async createPosSale(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+
+            const sale = await service.createPosSale(
+                tenant.id,
+                {
+                    customerId: req.body?.customerId ?? null,
+                    items: req.body?.items ?? [],
+                    cashboxId: req.body?.cashboxId ?? null,
+                    payment: req.body?.payment ?? null
+                },
+                req.subscription
+                    ? {
+                          planCode: req.subscription.planCode,
+                          interval: req.subscription.interval,
+                          currentPeriodStart: req.subscription.currentPeriodStart,
+                          currentPeriodEnd: req.subscription.currentPeriodEnd
+                      }
+                    : null,
+                { userId: user?.id ?? null }
+            )
+
+            res.status(201).json({ success: true, saleId: (sale as any)?.id, sale })
+        } catch (error: any) {
+            if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Create sale error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

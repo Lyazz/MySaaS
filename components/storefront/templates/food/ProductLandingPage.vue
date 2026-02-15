@@ -9,6 +9,7 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
 const { currencyCode, format: formatPrice } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
@@ -126,7 +127,7 @@ const cartImage = computed(() => images.value[0])
       class="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-stone-100 md:hidden z-40 flex items-center justify-between shadow-[0_-5px_15px_rgba(0,0,0,0.05)]"
     >
       <div class="flex flex-col">
-        <span class="text-xs text-stone-500 font-medium">Total</span>
+        <span class="text-xs text-stone-500 font-medium">{{ storefrontContent.productForm.totalPrice }}</span>
         <span class="font-bold text-brand-600 text-lg">{{ formatPrice(Number(product?.price || 0)) }}</span>
       </div>
       <!-- Scroll to Form or Add to Cart? For simplicity, scroll to top or just have a CTA -->
@@ -134,7 +135,7 @@ const cartImage = computed(() => images.value[0])
         onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
         class="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/20"
       >
-        Order Now
+        {{ storefrontContent.actions.orderNow }}
       </button>
     </div>
 

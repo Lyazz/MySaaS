@@ -332,7 +332,7 @@ async function handleSubmit() {
                 <input
                   v-model="couponCode"
                   type="text"
-                  placeholder="Enter code"
+                  :placeholder="storefrontContent.checkout.coupon.placeholder"
                   class="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-200 outline-none"
                 >
                 <button class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-brand-500 transition-colors">
@@ -343,7 +343,7 @@ async function handleSubmit() {
             
             <dl class="space-y-3 text-sm mb-8">
               <div v-if="selectedDelivery" class="flex justify-between text-slate-500">
-                <dt>Delivery</dt>
+                <dt>{{ storefrontContent.checkout.summary.deliveryOption }}</dt>
                 <dd>{{ selectedDelivery.providerLabel }} - {{ selectedDelivery.modeLabel }}</dd>
               </div>
               <div class="flex justify-between text-slate-500">
@@ -351,7 +351,7 @@ async function handleSubmit() {
                 <dd class="font-medium text-slate-700">{{ formatCurrency(cartStore.total) }}</dd>
               </div>
               <div v-if="selectedDelivery" class="flex justify-between text-slate-500">
-                <dt>Shipping</dt>
+                <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
                 <dd>{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</dd>
               </div>
               <div class="flex justify-between text-lg font-bold pt-4 border-t border-slate-100">

@@ -8,7 +8,9 @@ const controller = new CustomersController()
 router.use(requireTenantAdmin)
 
 router.get('/', controller.list.bind(controller))
+router.post('/', controller.create.bind(controller))
 router.get('/by-phone/:phone', controller.getByPhone.bind(controller))
 router.get('/:id', controller.getById.bind(controller))
+router.patch('/:id', controller.update.bind(controller))
 
 export default router

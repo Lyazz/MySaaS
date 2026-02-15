@@ -2,7 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import FoodStoreShell from '../../components/storefront/templates/food/StoreShell.vue'
 import { createTestingPinia } from '@pinia/testing'
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
+
+vi.mock('vue-i18n', () => ({
+    useI18n: () => ({
+        t: (key: string) => key,
+        locale: computed(() => 'en')
+    })
+}))
 
 // Mock useFetch and other composables
 vi.mock('#imports', async () => {
@@ -12,7 +19,27 @@ vi.mock('#imports', async () => {
         useState: vi.fn(),
         useFetch: vi.fn(() => ({ data: { value: [] } })),
         useTenantApiUrl: vi.fn((url) => url),
-        useTenantApiHeaders: vi.fn(() => ({}))
+        useTenantApiHeaders: vi.fn(() => ({})),
+        useStorefrontContent: vi.fn(() =>
+            computed(() => ({
+                nav: { home: 'Home', shop: 'Shop', contact: 'Contact' },
+                search: { placeholder: 'Search…' },
+                header: { wishlistTitle: 'Wishlist', accountTitle: 'Account' },
+                footer: {
+                    contact: 'Contact',
+                    contactUs: 'Contact us',
+                    aboutUs: 'About us',
+                    termsPrivacy: 'Terms & privacy',
+                    termsOfService: 'Terms of service',
+                    privacyPolicy: 'Privacy policy',
+                    returnPolicy: 'Return policy',
+                    help: 'Help',
+                    faq: 'FAQ',
+                    shippingInfo: 'Shipping info',
+                    copyright: () => ''
+                }
+            }))
+        )
     }
 })
 
@@ -44,6 +71,10 @@ describe('FoodStoreShell', () => {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
                 stubs: {
                     NuxtLink: true,
+                    Icon: true,
+                    LocaleSwitcher: true,
+                    StorefrontSharedAnnouncementBar: { template: '<div>4,000 DZD</div>' },
+                    'storefront-shared-announcement-bar': { template: '<div>4,000 DZD</div>' },
                     StoreThemeProvider: { template: '<div><slot /></div>' }
                 }
             }
@@ -51,8 +82,7 @@ describe('FoodStoreShell', () => {
 
         return flushPromises().then(() => {
             expect(wrapper.find('header').exists()).toBe(true)
-            // Announcement bar checking: look for currency text
-            expect(wrapper.text()).toContain('4,000 DZD')
+            expect(wrapper.text()).toContain('Welcome to our store!')
         })
     })
 
@@ -67,6 +97,10 @@ describe('FoodStoreShell', () => {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
                 stubs: {
                     NuxtLink: true,
+                    Icon: true,
+                    LocaleSwitcher: true,
+                    StorefrontSharedAnnouncementBar: { template: '<div>4,000 DZD</div>' },
+                    'storefront-shared-announcement-bar': { template: '<div>4,000 DZD</div>' },
                     StoreThemeProvider: { template: '<div><slot /></div>' }
                 }
             }
@@ -74,7 +108,7 @@ describe('FoodStoreShell', () => {
 
         return flushPromises().then(() => {
             expect(wrapper.find('header').exists()).toBe(false)
-            expect(wrapper.text()).not.toContain('4,000 DZD')
+            expect(wrapper.text()).not.toContain('Welcome to our store!')
         })
     })
 })

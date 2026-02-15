@@ -10,6 +10,7 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
 const { format: formatPrice } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
@@ -120,14 +121,14 @@ watch([() => props.product, selectedOptions], ([product]) => {
       class="fixed bottom-0 left-0 w-full p-4 bg-white/95 backdrop-blur-lg border-t border-amber-100 md:hidden z-40 flex items-center justify-between shadow-2xl"
     >
       <div class="flex flex-col">
-        <span class="text-xs text-slate-400">Total</span>
+        <span class="text-xs text-slate-400">{{ storefrontContent.productForm.totalPrice }}</span>
         <span class="font-cozy font-bold text-xl text-slate-800">{{ formatPrice(currentPrice) }}</span>
       </div>
       <button
         onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
         class="bg-brand-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-brand-200 hover:bg-brand-600 transition-all"
       >
-        Order Now
+        {{ storefrontContent.actions.orderNow }}
       </button>
     </div>
   </div>

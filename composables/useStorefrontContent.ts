@@ -16,6 +16,7 @@ export function useStorefrontContent() {
     },
     common: {
       productsCount: (count: number) => i18n.t('storefront.common.productsCount', { count }),
+      collection: i18n.t('storefront.common.collection'),
       selectPlaceholder: i18n.t('storefront.common.selectPlaceholder')
     },
     actions: {
@@ -27,6 +28,7 @@ export function useStorefrontContent() {
       checkout: i18n.t('storefront.actions.checkout'),
       continueShopping: i18n.t('storefront.actions.continueShopping'),
       startBrowsing: i18n.t('storefront.actions.startBrowsing'),
+      orderNow: i18n.t('storefront.actions.orderNow'),
       apply: i18n.t('storefront.actions.apply'),
       reset: i18n.t('storefront.actions.reset'),
       clearAll: i18n.t('storefront.actions.clearAll'),
@@ -73,6 +75,7 @@ export function useStorefrontContent() {
     },
     checkout: {
       title: i18n.t('storefront.checkout.title'),
+      orderSummaryTitle: i18n.t('storefront.checkout.orderSummaryTitle'),
       disabled: i18n.t('storefront.checkout.disabled'),
       disabledShort: i18n.t('storefront.checkout.disabledShort'),
       required: i18n.t('storefront.checkout.required'),
@@ -207,6 +210,8 @@ export function useStorefrontContent() {
       addedToCart: (title: string) => i18n.t('storefront.product.addedToCart', { title }),
       inStock: i18n.t('storefront.product.inStock'),
       perUnit: i18n.t('storefront.product.perUnit'),
+      detailsTitle: i18n.t('storefront.product.detailsTitle'),
+      descriptionTitle: i18n.t('storefront.product.descriptionTitle'),
       descriptionFallback: i18n.t('storefront.product.descriptionFallback'),
       viewFullDetails: i18n.t('storefront.product.viewFullDetails')
     },

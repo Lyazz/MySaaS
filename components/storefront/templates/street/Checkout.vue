@@ -222,21 +222,21 @@ async function handleSubmit() {
                         </div>
                     </div>
                     <div>
-                        <label class="block font-street text-xl uppercase mb-1">Commune</label>
+                        <label class="block font-street text-xl uppercase mb-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                         <input
                             v-model="form.commune"
                             type="text"
                             class="w-full bg-gray-100 border-2 border-black p-3 font-mono focus:shadow-[4px_4px_0_0_var(--brand)] outline-none"
-                            placeholder="Bab Ezzouar"
+                            :placeholder="storefrontContent.checkout.form.commune.placeholder"
                         >
                     </div>
                     <div class="col-span-2">
-                        <label class="block font-street text-xl uppercase mb-1">Address (Optional)</label>
+                        <label class="block font-street text-xl uppercase mb-1">{{ storefrontContent.checkout.form.address.label }}</label>
                         <input
                             v-model="form.address"
                             type="text"
                             class="w-full bg-gray-100 border-2 border-black p-3 font-mono focus:shadow-[4px_4px_0_0_var(--brand)] outline-none"
-                            placeholder="Street, building, apartment"
+                            :placeholder="storefrontContent.checkout.form.address.placeholder"
                         >
                     </div>
                 </div>

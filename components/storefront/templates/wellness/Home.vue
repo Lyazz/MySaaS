@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const cartStore = useCartStore()
 
+const { t } = useI18n({ useScope: 'global' })
 const storefrontContent = useStorefrontContent()
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
@@ -203,7 +204,7 @@ const displayedProducts = computed(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
           <div class="max-w-xl">
-             <span class="text-brand-700 text-sm font-bold uppercase tracking-widest mb-2 block">Curated Selection</span>
+             <span class="text-brand-700 text-sm font-bold uppercase tracking-widest mb-2 block">{{ t('storefront.templates.wellness.home.curatedSelection') }}</span>
              <h2 class="font-wellness text-3xl md:text-4xl text-stone-900 leading-tight">
                {{ sections.newArrivals.title }}
              </h2>
@@ -213,7 +214,7 @@ const displayedProducts = computed(() => {
             to="/products"
             class="hidden md:inline-flex items-center gap-2 text-stone-500 hover:text-brand-700 transition-colors border-b border-transparent hover:border-brand-700 pb-0.5"
           >
-            Shop Collection <Icon name="lucide:arrow-right" class="w-4 h-4" />
+            {{ t('storefront.templates.wellness.home.shopCollection') }} <Icon name="lucide:arrow-right" class="w-4 h-4" />
           </NuxtLink>
         </div>
 

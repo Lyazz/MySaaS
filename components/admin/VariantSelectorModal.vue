@@ -3,7 +3,7 @@
     <div class="w-full max-w-4xl bg-white rounded-lg shadow-xl flex flex-col max-h-[90vh]">
       <!-- Header -->
       <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-gray-900">Select Products</h3>
+        <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.components.variantSelectorModal.title') }}</h3>
         <button @click="close" class="text-gray-400 hover:text-gray-500 transition-colors">
           <Icon name="lucide:x" class="w-6 h-6" />
         </button>
@@ -19,7 +19,7 @@
             v-model="searchQuery"
             type="text"
             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-            placeholder="Search by product name, SKU, or variant..."
+            :placeholder="t('admin.components.variantSelectorModal.search.placeholder')"
             @input="handleSearch"
           />
         </div>
@@ -29,10 +29,10 @@
       <div class="flex-1 overflow-y-auto">
         <div v-if="loading" class="p-8 text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-          <p class="mt-2 text-gray-500">Loading variants...</p>
+          <p class="mt-2 text-gray-500">{{ t('admin.components.variantSelectorModal.loading') }}</p>
         </div>
         <div v-else-if="variants.length === 0" class="p-8 text-center text-gray-500">
-          No variants found. Try a different search.
+          {{ t('admin.components.variantSelectorModal.empty') }}
         </div>
         <table v-else class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50 sticky top-0">
@@ -46,13 +46,13 @@
                 />
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Product / Variant
+                {{ t('admin.components.variantSelectorModal.table.productVariant') }}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                SKU
+                {{ t('admin.components.variantSelectorModal.table.sku') }}
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Current Stock
+                {{ t('admin.components.variantSelectorModal.table.currentStock') }}
               </th>
             </tr>
           </thead>
@@ -89,21 +89,21 @@
       <!-- Footer -->
       <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center bg-gray-50 rounded-b-lg">
         <div class="text-sm text-gray-700">
-          <span class="font-medium">{{ selectedVariants.length }}</span> variants selected
+          {{ t('admin.components.variantSelectorModal.selectedCount', { count: selectedVariants.length }) }}
         </div>
         <div class="flex space-x-3">
           <button
             @click="close"
             class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
           >
-            Cancel
+            {{ t('admin.common.cancel') }}
           </button>
           <button
             @click="confirm"
             :disabled="selectedVariants.length === 0"
             class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Add Selected
+            {{ t('admin.components.variantSelectorModal.actions.addSelected') }}
           </button>
         </div>
       </div>
@@ -124,6 +124,7 @@ const emit = defineEmits<{
 }>()
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 const searchQuery = ref('')
 const variants = ref<any[]>([])
 const loading = ref(false)

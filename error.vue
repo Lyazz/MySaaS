@@ -5,6 +5,8 @@ const props = defineProps({
   error: Object as () => NuxtError
 })
 
+const { t } = useI18n({ useScope: 'global' })
+
 const handleError = () => clearError({ redirect: '/' })
 </script>
 
@@ -21,11 +23,15 @@ const handleError = () => clearError({ redirect: '/' })
         </div>
       </div>
 
-      <h1 class="text-6xl font-bold text-slate-900 mb-2 tracking-tight">404</h1>
-      <h2 class="text-2xl font-bold text-slate-800 mb-4">Page Not Found</h2>
+      <h1 class="text-6xl font-bold text-slate-900 mb-2 tracking-tight">
+        {{ error?.statusCode || 404 }}
+      </h1>
+      <h2 class="text-2xl font-bold text-slate-800 mb-4">
+        {{ error?.statusCode === 404 ? t('common.errorPage.notFound.title') : t('common.errorPage.generic.title') }}
+      </h2>
       
       <p class="text-slate-500 mb-8 leading-relaxed">
-        Oops! The page you're looking for doesn't exist or has been moved. Let's get you back on track.
+        {{ error?.statusCode === 404 ? t('common.errorPage.notFound.message') : t('common.errorPage.generic.message') }}
       </p>
       
       <button 
@@ -33,12 +39,12 @@ const handleError = () => clearError({ redirect: '/' })
         class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200 gap-2"
       >
         <Icon name="lucide:arrow-left" class="w-4 h-4" />
-        Go to Home Screen
+        {{ t('common.errorPage.actions.backHome') }}
       </button>
       
       <div v-if="error?.statusCode !== 404" class="mt-8 p-4 bg-red-50 rounded-lg border border-red-100 text-left">
           <p class="text-xs font-mono text-red-600 break-all">
-              Error details: {{ error?.message }}
+              {{ t('common.errorPage.details') }}: {{ error?.message }}
           </p>
       </div>
 

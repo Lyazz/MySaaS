@@ -1,6 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ProductOptionsEditor from '../../components/admin/ProductOptionsEditor.vue'
+import { computed } from 'vue'
+
+vi.mock('vue-i18n', () => ({
+    useI18n: () => ({
+        t: (key: string) => key,
+        locale: computed(() => 'en')
+    })
+}))
 
 vi.mock('~/stores/auth', () => ({
     useAuthStore: () => ({ token: 'test-token' })
@@ -79,4 +87,3 @@ describe('ProductOptionsEditor preview', () => {
         expect(preview.text()).toContain('Blue')
     })
 })
-

@@ -112,7 +112,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex items-center justify-end">
                   <NuxtLink
-                    :to="sale.type === 'POS' ? `/admin/sales/${sale.id}` : `/admin/orders/${sale.id}`"
+                    :to="`/admin/sales/${sale.id}`"
                     class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />

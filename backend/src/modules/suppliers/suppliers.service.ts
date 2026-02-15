@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export class SupplierValidationError extends Error {
     statusCode: number
@@ -19,9 +20,19 @@ export class SuppliersService {
         })
     }
 
+    private toMoneyString(value: unknown): string | null {
+        if (value === undefined || value === null) return null
+        if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+        if (typeof value === 'string' && value.trim()) return value.trim()
+        return null
+    }
+
     async create(tenantId: string, input: any) {
         const name = typeof input?.name === 'string' ? input.name.trim() : ''
         if (!name) throw new SupplierValidationError(400, 'Supplier name is required')
+
+        const openingBalanceStr = this.toMoneyString(input?.openingBalance)
+        const openingBalance = openingBalanceStr ? new Prisma.Decimal(openingBalanceStr) : new Prisma.Decimal(0)
 
         try {
             return await prisma.supplier.create({
@@ -31,7 +42,8 @@ export class SuppliersService {
                     phone: typeof input?.phone === 'string' ? input.phone.trim() || null : null,
                     email: typeof input?.email === 'string' ? input.email.trim() || null : null,
                     address: typeof input?.address === 'string' ? input.address.trim() || null : null,
-                    notes: typeof input?.notes === 'string' ? input.notes.trim() || null : null
+                    notes: typeof input?.notes === 'string' ? input.notes.trim() || null : null,
+                    openingBalance
                 }
             })
         } catch (e: any) {
@@ -43,9 +55,56 @@ export class SuppliersService {
     }
 
     async getById(tenantId: string, supplierId: string) {
-        return prisma.supplier.findFirst({
+        const supplier = await prisma.supplier.findFirst({
             where: { tenantId, id: supplierId }
         })
+
+        if (!supplier) return null
+
+        const receivedRows = await prisma.$queryRaw<Array<{ totalReceived: any }>>`
+            SELECT COALESCE(SUM(("PurchaseOrderItem"."quantityReceived"::numeric) * "PurchaseOrderItem"."unitCost"), 0) AS "totalReceived"
+            FROM "PurchaseOrderItem"
+            JOIN "PurchaseOrder"
+              ON "PurchaseOrder"."tenantId" = "PurchaseOrderItem"."tenantId"
+             AND "PurchaseOrder"."id" = "PurchaseOrderItem"."purchaseOrderId"
+            WHERE "PurchaseOrderItem"."tenantId" = ${tenantId}
+              AND "PurchaseOrder"."supplierId" = ${supplierId}
+        `
+        const totalReceived = new Prisma.Decimal(receivedRows[0]?.totalReceived ?? 0)
+
+        const paidAgg = await prisma.supplierPayment.aggregate({
+            where: { tenantId, supplierId },
+            _sum: { amount: true }
+        })
+        const totalPaid = new Prisma.Decimal(paidAgg._sum.amount ?? 0)
+
+        const opening = new Prisma.Decimal(supplier.openingBalance ?? 0)
+        const currentBalance = opening.add(totalReceived).sub(totalPaid)
+
+        const payments = await prisma.supplierPayment.findMany({
+            where: { tenantId, supplierId },
+            orderBy: { createdAt: 'desc' },
+            take: 100,
+            select: {
+                id: true,
+                amount: true,
+                currency: true,
+                method: true,
+                reference: true,
+                note: true,
+                purchaseOrderId: true,
+                createdAt: true
+            }
+        })
+
+        return {
+            ...supplier,
+            openingBalance: supplier.openingBalance,
+            totalReceived,
+            totalPaid,
+            currentBalance,
+            payments
+        }
     }
 
     async update(tenantId: string, supplierId: string, input: any) {
@@ -55,6 +114,9 @@ export class SuppliersService {
         const name = input?.name !== undefined ? (typeof input.name === 'string' ? input.name.trim() : '') : undefined
         if (name !== undefined && !name) throw new SupplierValidationError(400, 'Supplier name is required')
 
+        const openingBalanceStr = input?.openingBalance !== undefined ? this.toMoneyString(input?.openingBalance) : undefined
+        const openingBalance = openingBalanceStr !== undefined ? new Prisma.Decimal(openingBalanceStr || '0') : undefined
+
         try {
             await prisma.supplier.updateMany({
                 where: { tenantId, id: supplierId },
@@ -63,7 +125,8 @@ export class SuppliersService {
                     phone: input?.phone !== undefined ? (typeof input.phone === 'string' ? input.phone.trim() || null : null) : undefined,
                     email: input?.email !== undefined ? (typeof input.email === 'string' ? input.email.trim() || null : null) : undefined,
                     address: input?.address !== undefined ? (typeof input.address === 'string' ? input.address.trim() || null : null) : undefined,
-                    notes: input?.notes !== undefined ? (typeof input.notes === 'string' ? input.notes.trim() || null : null) : undefined
+                    notes: input?.notes !== undefined ? (typeof input.notes === 'string' ? input.notes.trim() || null : null) : undefined,
+                    openingBalance
                 }
             })
         } catch (e: any) {
@@ -84,4 +147,3 @@ export class SuppliersService {
         return { success: true }
     }
 }
-

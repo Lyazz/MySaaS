@@ -10,6 +10,7 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 
 // Option Selection Logic
 const selectedOptions = ref<SelectedOptions>({})
@@ -86,9 +87,9 @@ watch([() => props.product, selectedOptions], ([product]) => {
   <div v-if="product" class="max-w-7xl mx-auto px-4 py-8">
     <!-- Breadcrumbs -->
     <nav class="flex gap-2 font-mono text-xs text-gray-400 mb-8 uppercase">
-        <NuxtLink to="/" class="hover:text-brand transition-colors">Home</NuxtLink>
+        <NuxtLink to="/" class="hover:text-brand transition-colors">{{ storefrontContent.nav.home }}</NuxtLink>
         <span>/</span>
-        <NuxtLink to="/products" class="hover:text-brand transition-colors">Shop</NuxtLink>
+        <NuxtLink to="/products" class="hover:text-brand transition-colors">{{ storefrontContent.nav.shop }}</NuxtLink>
         <span>/</span>
         <span class="text-black font-bold">{{ product.title }}</span>
     </nav>
@@ -118,7 +119,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
 
     <!-- Full Description -->
     <div class="mt-16 border-t-4 border-black pt-8">
-        <h2 class="font-street text-3xl uppercase mb-6">Product Details</h2>
+        <h2 class="font-street text-3xl uppercase mb-6">{{ storefrontContent.product.detailsTitle }}</h2>
         <div 
           v-if="product?.description" 
           class="prose prose-lg prose-headings:font-street prose-headings:uppercase max-w-none font-mono bg-white border-4 border-black p-8"
@@ -128,7 +129,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
           v-else
           class="prose prose-lg max-w-none font-mono bg-white border-4 border-black p-8"
         >
-          <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+          <p>{{ storefrontContent.product.descriptionFallback }}</p>
         </div>
     </div>
   </div>

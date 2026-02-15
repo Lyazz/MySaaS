@@ -71,7 +71,7 @@ function handleAddToCart() {
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(storefrontContent.value.toasts.addedToCart.title, storefrontContent.value.product.addedToCart(props.product.title))
 }
 </script>
 
@@ -113,7 +113,7 @@ function handleAddToCart() {
         <span
           v-if="isNew"
           class="px-3 py-1 bg-white/90 backdrop-blur text-emerald-700 text-xs font-bold rounded-full shadow-sm"
-        >New</span>
+        >{{ storefrontContent.badges.new }}</span>
         <span
           v-if="discount > 0"
           class="px-3 py-1 bg-white/90 backdrop-blur text-orange-600 text-xs font-bold rounded-full shadow-sm"
@@ -129,7 +129,7 @@ function handleAddToCart() {
       >
         <button
            class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-stone-700 hover:bg-brand-500 hover:text-white shadow-lg transition-all transform hover:scale-110" 
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-5 h-5" />
@@ -182,16 +182,16 @@ function handleAddToCart() {
       </div>
 
       <p v-if="viewMode === 'list'" class="text-sm text-stone-500 mb-4 line-clamp-2 mt-2">
-        {{ product.description || 'No description available for this product.' }}
+        {{ product.description || storefrontContent.product.descriptionFallback }}
       </p>
 
       <!-- Grid View: Description/Meta (Optional, keep minimal) -->
       <div v-if="viewMode !== 'list'" class="mt-1 flex items-center gap-2">
          <span v-if="isOutOfStock" class="text-xs font-bold text-red-500 flex items-center gap-1">
-             <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Out of Stock
+             <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> {{ storefrontContent.actions.outOfStock }}
          </span>
          <span v-else class="text-xs font-medium text-stone-400">
-            {{ product.stock <= 5 ? `Only ${product.stock} left` : 'In Stock' }}
+            {{ product.stock <= 5 ? storefrontContent.productForm.stock.lowStock(product.stock) : storefrontContent.product.inStock }}
          </span>
       </div>
 

@@ -4,21 +4,21 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 text-sm text-slate-500">
-            <NuxtLink to="/super-admin/tenants" class="hover:text-teal-700 hover:underline">Tenants</NuxtLink>
+            <NuxtLink to="/super-admin/tenants" class="hover:text-teal-700 hover:underline">{{ t('superAdmin.nav.tenants') }}</NuxtLink>
             <span>/</span>
             <span class="text-slate-700 font-semibold">{{ tenantLabel }}</span>
             <span>/</span>
-            <span class="text-slate-700 font-semibold">Payments</span>
+            <span class="text-slate-700 font-semibold">{{ t('superAdmin.tenants.actions.payments') }}</span>
           </div>
-          <h1 class="text-2xl font-bold text-slate-800 mt-2">Payment Proofs & History</h1>
-          <p class="text-slate-600 mt-1">Import payment proofs for history and optionally renew the subscription.</p>
+          <h1 class="text-2xl font-bold text-slate-800 mt-2">{{ t('superAdmin.paymentsPage.title') }}</h1>
+          <p class="text-slate-600 mt-1">{{ t('superAdmin.paymentsPage.subtitle') }}</p>
         </div>
         <button
           class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-700 transition-colors"
           @click="refreshAll"
         >
           <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block mr-2" />
-          Refresh
+          {{ t('superAdmin.paymentsPage.actions.refresh') }}
         </button>
       </div>
 
@@ -29,46 +29,46 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Import form -->
         <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-          <h2 class="text-lg font-bold text-slate-900 mb-4">Import Payment Proof</h2>
+          <h2 class="text-lg font-bold text-slate-900 mb-4">{{ t('superAdmin.paymentsPage.import.title') }}</h2>
 
           <form class="space-y-4" @submit.prevent="submitImport">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Plan</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.plan') }}</label>
               <BaseSelect v-model="form.planCode" :options="planOptions" required />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Interval</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.interval') }}</label>
               <BaseSelect v-model="form.interval" :options="intervalOptions" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Proof URL</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.proofUrl') }}</label>
               <input
                 v-model="form.proofUrl"
                 type="url"
-                placeholder="https://drive.google.com/..."
+                :placeholder="t('superAdmin.paymentsPage.import.fields.proofUrlPlaceholder')"
                 class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
               />
-              <p class="text-xs text-slate-500 mt-1">Link to screenshot/receipt (Drive, Dropbox, etc).</p>
+              <p class="text-xs text-slate-500 mt-1">{{ t('superAdmin.paymentsPage.import.fields.proofUrlHint') }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">External reference</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.externalReference') }}</label>
               <input
                 v-model="form.externalReference"
                 type="text"
-                placeholder="CCP-TRX-123"
+                :placeholder="t('superAdmin.paymentsPage.import.fields.externalReferencePlaceholder')"
                 class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">Notes</label>
+              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.notes') }}</label>
               <textarea
                 v-model="form.notes"
                 rows="3"
-                placeholder="Paid via CCP transfer…"
+                :placeholder="t('superAdmin.paymentsPage.import.fields.notesPlaceholder')"
                 class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
               />
             </div>
@@ -76,8 +76,8 @@
             <label class="flex items-start gap-3 text-sm text-slate-700">
               <input v-model="form.applySubscription" type="checkbox" class="mt-1 h-4 w-4 accent-teal-600" />
               <span>
-                Apply subscription renewal now
-                <span class="block text-xs text-slate-500 mt-1">If checked, the tenant is renewed immediately.</span>
+                {{ t('superAdmin.paymentsPage.import.applySubscription.label') }}
+                <span class="block text-xs text-slate-500 mt-1">{{ t('superAdmin.paymentsPage.import.applySubscription.hint') }}</span>
               </span>
             </label>
 
@@ -87,7 +87,7 @@
               class="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Icon v-if="submitting" name="lucide:loader-2" class="h-4 w-4 inline-block mr-2 animate-spin" />
-              {{ submitting ? 'Importing…' : 'Import Proof' }}
+              {{ submitting ? t('superAdmin.paymentsPage.import.actions.importing') : t('superAdmin.paymentsPage.import.actions.importProof') }}
             </button>
           </form>
         </div>
@@ -95,22 +95,22 @@
         <!-- History -->
         <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
           <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
-            <h2 class="text-lg font-bold text-slate-900">History</h2>
-            <div class="text-xs text-slate-500">Last {{ payments.length }} entries</div>
+            <h2 class="text-lg font-bold text-slate-900">{{ t('superAdmin.paymentsPage.history.title') }}</h2>
+            <div class="text-xs text-slate-500">{{ t('superAdmin.paymentsPage.history.lastEntries', { count: payments.length }) }}</div>
           </div>
 
-          <div v-if="loading" class="p-8 text-center text-slate-500">Loading…</div>
-          <div v-else-if="payments.length === 0" class="p-8 text-center text-slate-500">No payments yet.</div>
+          <div v-if="loading" class="p-8 text-center text-slate-500">{{ t('superAdmin.paymentsPage.history.loading') }}</div>
+          <div v-else-if="payments.length === 0" class="p-8 text-center text-slate-500">{{ t('superAdmin.paymentsPage.history.empty') }}</div>
           <div v-else class="overflow-x-auto">
             <table class="w-full">
               <thead class="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">Date</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">Plan</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">Amount</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">Method</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">Proof</th>
+                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.date') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.plan') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.amount') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.method') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.status') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.proof') }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
@@ -138,7 +138,7 @@
                       rel="noreferrer"
                       class="text-teal-700 hover:text-teal-800 hover:underline font-semibold"
                     >
-                      Open
+                      {{ t('superAdmin.paymentsPage.history.proof.open') }}
                     </a>
                     <span v-else class="text-slate-400">—</span>
                   </td>
@@ -161,6 +161,7 @@ definePageMeta({
   middleware: 'super-admin'
 })
 
+const { t, locale } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
 const route = useRoute()
 
@@ -179,14 +180,14 @@ const tenantLabel = computed(() => {
 const planOptions = computed(() =>
   PRICING_PLANS.map((p) => ({
     value: p.code,
-    label: `${p.name} (${p.ordersPerMonth} orders/mo)`
+    label: `${t(`pricing.plans.${p.code}.name`)} (${t('superAdmin.paymentsPage.planOption.ordersPerMonth', { count: p.ordersPerMonth })})`
   }))
 )
 
-const intervalOptions = [
-  { value: 'month', label: 'Monthly' },
-  { value: 'year', label: 'Yearly' }
-]
+const intervalOptions = computed(() => [
+  { value: 'month', label: t('superAdmin.paymentsPage.interval.monthly') },
+  { value: 'year', label: t('superAdmin.paymentsPage.interval.yearly') }
+])
 
 const form = ref({
   planCode: PRICING_PLANS[0]?.code || 'basic',
@@ -198,9 +199,9 @@ const form = ref({
 })
 
 const formatDateTime = (date: string) =>
-  new Date(date).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  new Date(date).toLocaleString(locale.value, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
-const formatMoney = (amount: number, currency: string) => `${Number(amount || 0).toLocaleString('fr-DZ')} ${currency || 'DA'}`
+const formatMoney = (amount: number, currency: string) => `${Number(amount || 0).toLocaleString(locale.value)} ${currency || 'DA'}`
 
 async function loadTenants() {
   const res = await $fetch<any[]>('/api/super-admin/tenants', {
@@ -222,7 +223,7 @@ async function refreshAll() {
   try {
     await Promise.all([loadTenants(), loadPayments()])
   } catch (e: any) {
-    error.value = e?.data?.statusMessage || e?.message || 'Failed to load payments'
+    error.value = e?.data?.statusMessage || e?.message || t('superAdmin.paymentsPage.errors.loadFailed')
   } finally {
     loading.value = false
   }
@@ -250,7 +251,7 @@ async function submitImport() {
     form.value.notes = ''
     await loadPayments()
   } catch (e: any) {
-    error.value = e?.data?.statusMessage || e?.message || 'Failed to import proof'
+    error.value = e?.data?.statusMessage || e?.message || t('superAdmin.paymentsPage.errors.importFailed')
   } finally {
     submitting.value = false
   }
@@ -260,4 +261,3 @@ onMounted(() => {
   refreshAll()
 })
 </script>
-

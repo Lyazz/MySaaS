@@ -113,7 +113,7 @@ function handleAddToCart() {
         <span
           v-if="isNew"
           class="px-3 py-1 bg-white/90 backdrop-blur text-emerald-800 text-xs font-medium uppercase tracking-wider rounded-full shadow-sm"
-        >New</span>
+        >{{ storefrontContent.badges.new }}</span>
         <span
           v-if="discount > 0"
           class="px-3 py-1 bg-white/90 backdrop-blur text-stone-600 text-xs font-medium uppercase tracking-wider rounded-full shadow-sm"
@@ -127,7 +127,7 @@ function handleAddToCart() {
       >
          <button
             class="pointer-events-auto h-11 w-11 bg-white rounded-full flex items-center justify-center text-stone-700 hover:text-brand-700 hover:bg-stone-50 shadow-soft transition-colors" 
-            title="Quick View"
+            :title="storefrontContent.actions.quickView"
             @click.prevent="$emit('quick-view', product)"
          >
              <Icon name="lucide:eye" class="w-5 h-5" />
@@ -154,7 +154,7 @@ function handleAddToCart() {
       ]"
     >
       <div v-if="viewMode === 'list'" class="mb-2">
-         <span class="text-xs font-bold tracking-widest text-stone-400 uppercase">Collection</span>
+         <span class="text-xs font-bold tracking-widest text-stone-400 uppercase">{{ storefrontContent.common.collection }}</span>
       </div>
 
       <NuxtLink
@@ -170,7 +170,7 @@ function handleAddToCart() {
       </NuxtLink>
 
       <p v-if="viewMode === 'list'" class="text-stone-500 mb-6 max-w-2xl leading-relaxed font-light">
-        {{ product.description || 'Experience natural wellness with our curated selection alongside premium ingredients.' }}
+        {{ product.description || storefrontContent.product.descriptionFallback }}
       </p>
 
       <div 

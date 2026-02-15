@@ -10,6 +10,8 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const { t } = useI18n({ useScope: 'global' })
+const storefrontContent = useStorefrontContent()
 
 // Option Selection Logic
 const selectedOptions = ref<SelectedOptions>({})
@@ -124,15 +126,15 @@ watch([() => props.product, selectedOptions], ([product]) => {
             <!-- Accordions/Extras Placeholder -->
             <div class="space-y-4 border-t border-stone-200 pt-6">
                  <div class="group cursor-pointer flex justify-between items-center py-2">
-                    <span class="font-wellness text-stone-900 text-lg">Key Benefits</span>
+                    <span class="font-wellness text-stone-900 text-lg">{{ t('storefront.templates.wellness.product.sections.keyBenefits') }}</span>
                     <Icon name="lucide:plus" class="w-4 h-4 text-stone-400 group-hover:text-brand-700" />
                  </div>
                  <div class="group cursor-pointer flex justify-between items-center py-2 border-t border-stone-200">
-                    <span class="font-wellness text-stone-900 text-lg">Ingredients</span>
+                    <span class="font-wellness text-stone-900 text-lg">{{ t('storefront.templates.wellness.product.sections.ingredients') }}</span>
                     <Icon name="lucide:plus" class="w-4 h-4 text-stone-400 group-hover:text-brand-700" />
                  </div>
                  <div class="group cursor-pointer flex justify-between items-center py-2 border-t border-stone-200">
-                    <span class="font-wellness text-stone-900 text-lg">How to Use</span>
+                    <span class="font-wellness text-stone-900 text-lg">{{ t('storefront.templates.wellness.product.sections.howToUse') }}</span>
                     <Icon name="lucide:plus" class="w-4 h-4 text-stone-400 group-hover:text-brand-700" />
                  </div>
             </div>
@@ -145,7 +147,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
         >
             <div class="text-center mb-10">
                 <h2 class="font-wellness text-3xl md:text-4xl text-stone-900 mb-4">
-                About the Ritual
+                {{ t('storefront.templates.wellness.product.aboutTitle') }}
                 </h2>
                 <div class="w-16 h-px bg-brand-600 mx-auto opacity-50"></div>
             </div>
@@ -159,7 +161,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
             v-else
             class="prose prose-stone prose-lg text-stone-600 max-w-none leading-relaxed bg-white/50 backdrop-blur rounded-[3rem] p-10 md:p-16 shadow-sm border border-stone-100 text-center italic"
             >
-            <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+            <p>{{ storefrontContent.product.descriptionFallback }}</p>
             </div>
         </div>
         </div>

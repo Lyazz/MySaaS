@@ -40,8 +40,9 @@ export class OrdersController {
     async updateStatus(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
+            const user = req.user
             const { id } = req.params
-            const { status } = req.body ?? {}
+            const { status, cashboxId, method, reference, note } = req.body ?? {}
 
             if (!id || Array.isArray(id)) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
@@ -52,7 +53,13 @@ export class OrdersController {
             }
 
             try {
-                const updated = await service.updateStatus(tenant.id, id, status)
+                const updated = await service.updateStatus(
+                    tenant.id,
+                    id,
+                    status,
+                    { userId: user?.id ?? null },
+                    { cashboxId, method, reference, note }
+                )
                 res.json(updated)
             } catch (err) {
                 if (err instanceof OrderValidationError) {

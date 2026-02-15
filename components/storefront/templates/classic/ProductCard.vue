@@ -31,7 +31,6 @@ const mainImage = computed(() => {
     return 'https://placehold.co/400x550'
 })
 
-// TODO: Replace with real discount logic when available in backend
 const discount = 0 
 const oldPrice = computed(() => {
     return null
@@ -71,7 +70,7 @@ function handleAddToCart() {
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(storefrontContent.value.toasts.addedToCart.title, storefrontContent.value.product.addedToCart(props.product.title))
 }
 </script>
 
@@ -110,7 +109,7 @@ function handleAddToCart() {
         <span
           v-if="isNew"
           class="px-2 py-0.5 bg-white text-slate-900 text-[10px] font-bold uppercase tracking-wider border border-slate-200"
-        >New</span>
+        >{{ storefrontContent.badges.new }}</span>
         <span
           v-if="discount > 0"
           class="px-2 py-0.5 bg-brand-600 text-white text-[10px] font-bold uppercase tracking-wider"
@@ -127,7 +126,7 @@ function handleAddToCart() {
         <!-- Quick View -->
         <button
            class="w-8 h-8 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-900 hover:text-white transition-colors" 
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4" />
@@ -152,7 +151,7 @@ function handleAddToCart() {
         <span
           v-if="isLowStock"
           class="px-2 py-0.5 bg-amber-50 text-amber-900 text-[10px] font-bold uppercase tracking-wider border border-amber-200"
-        >Low Stock</span>
+        >{{ storefrontContent.productForm.stock.lowStock(product.stock) }}</span>
       </div>
 
       <div
@@ -160,7 +159,7 @@ function handleAddToCart() {
         class="absolute bottom-0 left-0 w-full bg-white/90 py-2 text-center"
       >
         <span class="text-slate-900 text-xs font-bold uppercase tracking-widest">
-          Out of Stock
+          {{ storefrontContent.actions.outOfStock }}
         </span>
       </div>
     </div>
@@ -186,7 +185,7 @@ function handleAddToCart() {
       </NuxtLink>
 
       <p v-if="viewMode === 'list'" class="text-sm text-slate-500 mb-4 line-clamp-2">
-        {{ product.description || 'No description available for this product.' }}
+        {{ product.description || storefrontContent.product.descriptionFallback }}
       </p>
 
       <div 

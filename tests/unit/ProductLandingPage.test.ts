@@ -4,6 +4,14 @@ import ProductLandingPage from '../../components/storefront/templates/modern/Pro
 import ProductOrderForm from '../../components/storefront/templates/modern/partials/ProductOrderForm.vue'
 import { createTestingPinia } from '@pinia/testing'
 import { useState } from '#imports'
+import { computed } from 'vue'
+
+vi.mock('vue-i18n', () => ({
+    useI18n: () => ({
+        t: (key: string) => key,
+        locale: computed(() => 'en')
+    })
+}))
 
 describe('ProductLandingPage', () => {
     const mockProduct = {

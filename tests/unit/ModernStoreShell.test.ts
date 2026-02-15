@@ -2,7 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import ModernStoreShell from '../../components/storefront/templates/modern/StoreShell.vue'
 import { createTestingPinia } from '@pinia/testing'
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
+
+vi.mock('vue-i18n', () => ({
+    useI18n: () => ({
+        t: (key: string) => key,
+        locale: computed(() => 'en')
+    })
+}))
 
 // Mock useFetch and other composables
 vi.mock('#imports', async () => {
@@ -12,7 +19,27 @@ vi.mock('#imports', async () => {
         useState: vi.fn(),
         useFetch: vi.fn(() => ({ data: { value: [] } })),
         useTenantApiUrl: vi.fn((url) => url),
-        useTenantApiHeaders: vi.fn(() => ({}))
+        useTenantApiHeaders: vi.fn(() => ({})),
+        useStorefrontContent: vi.fn(() =>
+            computed(() => ({
+                nav: { home: 'Home', shop: 'Shop', contact: 'Contact' },
+                search: { placeholder: 'Search…' },
+                header: { wishlistTitle: 'Wishlist', accountTitle: 'Account' },
+                footer: {
+                    contact: 'Contact',
+                    contactUs: 'Contact us',
+                    aboutUs: 'About us',
+                    termsPrivacy: 'Terms & privacy',
+                    termsOfService: 'Terms of service',
+                    privacyPolicy: 'Privacy policy',
+                    returnPolicy: 'Return policy',
+                    help: 'Help',
+                    faq: 'FAQ',
+                    shippingInfo: 'Shipping info',
+                    copyright: () => ''
+                }
+            }))
+        )
     }
 })
 
@@ -44,6 +71,9 @@ describe('ModernStoreShell', () => {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
                 stubs: {
                     NuxtLink: true,
+                    Icon: true,
+                    LocaleSwitcher: true,
+                    StorefrontSharedAnnouncementBar: { template: '<div>Welcome to our store!</div>' },
                     StoreThemeProvider: { template: '<div><slot /></div>' }
                 }
             }
@@ -67,6 +97,9 @@ describe('ModernStoreShell', () => {
                 plugins: [createTestingPinia({ createSpy: vi.fn })],
                 stubs: {
                     NuxtLink: true,
+                    Icon: true,
+                    LocaleSwitcher: true,
+                    StorefrontSharedAnnouncementBar: { template: '<div>Welcome to our store!</div>' },
                     StoreThemeProvider: { template: '<div><slot /></div>' }
                 }
             }

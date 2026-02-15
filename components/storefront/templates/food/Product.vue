@@ -10,6 +10,8 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const { t } = useI18n({ useScope: 'global' })
+const storefrontContent = useStorefrontContent()
 
 // Option Selection Logic
 const selectedOptions = ref<SelectedOptions>({})
@@ -91,7 +93,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
           to="/products"
           class="hover:text-brand-600 transition-colors"
         >
-          Shop
+          {{ storefrontContent.nav.shop }}
         </NuxtLink>
         <span class="mx-3 text-stone-300">/</span>
         <span class="text-stone-900 border-b-2 border-brand-200 pb-0.5">{{ product?.title }}</span>
@@ -109,15 +111,15 @@ watch([() => props.product, selectedOptions], ([product]) => {
              <div class="flex justify-center gap-8 mt-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                  <div class="flex items-center gap-2">
                      <Icon name="lucide:leaf" class="w-5 h-5 text-green-600" />
-                     <span class="text-xs font-bold uppercase tracking-widest text-stone-600">Organic</span>
+                     <span class="text-xs font-bold uppercase tracking-widest text-stone-600">{{ t('storefront.templates.food.badges.organic') }}</span>
                  </div>
                  <div class="flex items-center gap-2">
                      <Icon name="lucide:truck" class="w-5 h-5 text-stone-900" />
-                     <span class="text-xs font-bold uppercase tracking-widest text-stone-600">Fast Delivery</span>
+                     <span class="text-xs font-bold uppercase tracking-widest text-stone-600">{{ t('storefront.templates.food.badges.fastDelivery') }}</span>
                  </div>
                  <div class="flex items-center gap-2">
                      <Icon name="lucide:award" class="w-5 h-5 text-yellow-600" />
-                     <span class="text-xs font-bold uppercase tracking-widest text-stone-600">Premium</span>
+                     <span class="text-xs font-bold uppercase tracking-widest text-stone-600">{{ t('storefront.templates.food.badges.premium') }}</span>
                  </div>
              </div>
         </div>
@@ -134,7 +136,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
                 </h1>
                 
                 <div class="w-full h-px bg-stone-200 my-6 flex items-center justify-center">
-                    <span class="bg-white px-4 text-stone-400 text-xs uppercase tracking-widest font-bold">Details</span>
+                    <span class="bg-white px-4 text-stone-400 text-xs uppercase tracking-widest font-bold">{{ storefrontContent.product.detailsTitle }}</span>
                 </div>
 
                 <ProductDetails 
@@ -158,7 +160,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
             <div class="bg-white rounded-3xl p-8 border border-stone-200">
                 <h2 class="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
                     <Icon name="lucide:file-text" class="w-5 h-5 text-brand-600" />
-                    Description
+                    {{ storefrontContent.product.descriptionTitle }}
                 </h2>
                 <div 
                 v-if="product?.description" 
@@ -169,7 +171,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
                 v-else
                 class="prose prose-stone prose-sm text-stone-600 max-w-none leading-relaxed"
                 >
-                <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+                <p>{{ storefrontContent.product.descriptionFallback }}</p>
                 </div>
             </div>
         </div>

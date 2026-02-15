@@ -3,65 +3,65 @@
     <div class="space-y-6">
       <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-800">
-          Audit Logs
+          {{ t('superAdmin.auditLogs.title') }}
         </h1>
         <button
           class="px-4 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-lg text-teal-700 transition-colors"
           @click="loadLogs"
         >
           <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block mr-2" />
-          Refresh
+          {{ t('superAdmin.auditLogs.actions.refresh') }}
         </button>
       </div>
 
       <!-- Filters -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('superAdmin.auditLogs.filters.search.label') }}</label>
           <BaseInput
             v-model="searchQuery"
             type="text"
-            placeholder="Search logs..."
+            :placeholder="t('superAdmin.auditLogs.filters.search.placeholder')"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Action Type</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('superAdmin.auditLogs.filters.actionType') }}</label>
           <BaseSelect
             v-model="filterAction"
           >
             <option value="">
-              All Actions
+              {{ t('superAdmin.auditLogs.filters.allActions') }}
             </option>
             <option value="CREATE_TENANT">
-              Create Tenant
+              {{ t('superAdmin.audit.actions.createTenant') }}
             </option>
             <option value="UPDATE_TENANT">
-              Update Tenant
+              {{ t('superAdmin.audit.actions.updateTenant') }}
             </option>
             <option value="DELETE_TENANT">
-              Delete Tenant
+              {{ t('superAdmin.audit.actions.deleteTenant') }}
             </option>
             <option value="SUSPEND_TENANT">
-              Suspend Tenant
+              {{ t('superAdmin.audit.actions.suspendTenant') }}
             </option>
             <option value="UNSUSPEND_TENANT">
-              Unsuspend Tenant
+              {{ t('superAdmin.audit.actions.unsuspendTenant') }}
             </option>
             <option value="IMPERSONATE_USER">
-              Impersonate User
+              {{ t('superAdmin.audit.actions.impersonateUser') }}
             </option>
           </BaseSelect>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('superAdmin.auditLogs.filters.sortBy') }}</label>
           <BaseSelect
             v-model="sortOrder"
           >
             <option value="desc">
-              Newest First
+              {{ t('superAdmin.auditLogs.filters.sort.newestFirst') }}
             </option>
             <option value="asc">
-              Oldest First
+              {{ t('superAdmin.auditLogs.filters.sort.oldestFirst') }}
             </option>
           </BaseSelect>
         </div>
@@ -73,13 +73,13 @@
           v-if="loading"
           class="p-8 text-center text-gray-500"
         >
-          Loading logs...
+          {{ t('superAdmin.auditLogs.loading') }}
         </div>
         <div
           v-else-if="filteredLogs.length === 0"
           class="p-8 text-center text-gray-500"
         >
-          No logs found
+          {{ t('superAdmin.auditLogs.empty') }}
         </div>
         <div
           v-else
@@ -89,19 +89,19 @@
             <thead class="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Timestamp
+                  {{ t('superAdmin.auditLogs.table.timestamp') }}
                 </th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Action
+                  {{ t('superAdmin.auditLogs.table.action') }}
                 </th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Details
+                  {{ t('superAdmin.auditLogs.table.details') }}
                 </th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  User ID
+                  {{ t('superAdmin.auditLogs.table.userId') }}
                 </th>
                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                  Target
+                  {{ t('superAdmin.auditLogs.table.target') }}
                 </th>
               </tr>
             </thead>
@@ -119,7 +119,7 @@
                     class="px-2 py-1 rounded-full text-xs font-medium"
                     :class="getActionBadgeClass(log.action)"
                   >
-                    {{ getActionIcon(log.action) }} {{ log.action.replace(/_/g, ' ') }}
+                    {{ getActionIcon(log.action) }} {{ getActionLabel(log.action) }}
                   </span>
                 </td>
                 <td class="px-6 py-4 text-gray-600 text-sm">
@@ -142,7 +142,7 @@
           class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50"
         >
           <p class="text-sm text-gray-500">
-            Showing {{ (currentPage - 1) * perPage + 1 }} to {{ Math.min(currentPage * perPage, filteredLogs.length) }} of {{ filteredLogs.length }} logs
+            {{ t('superAdmin.auditLogs.pagination.showing', { from: (currentPage - 1) * perPage + 1, to: Math.min(currentPage * perPage, filteredLogs.length), total: filteredLogs.length }) }}
           </p>
           <div class="flex space-x-2">
             <button
@@ -150,14 +150,14 @@
               class="px-3 py-1 bg-white border border-slate-300 hover:bg-slate-50 rounded text-gray-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
               @click="currentPage--"
             >
-              Previous
+              {{ t('superAdmin.auditLogs.pagination.previous') }}
             </button>
             <button
               :disabled="currentPage >= totalPages"
               class="px-3 py-1 bg-white border border-slate-300 hover:bg-slate-50 rounded text-gray-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
               @click="currentPage++"
             >
-              Next
+              {{ t('superAdmin.auditLogs.pagination.next') }}
             </button>
           </div>
         </div>
@@ -167,13 +167,16 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
+
 definePageMeta({
   middleware: 'super-admin'
 })
 
+const { t, locale } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
-import BaseInput from '~/components/ui/BaseInput.vue'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
 const loading = ref(true)
 const logs = ref<any[]>([])
 const searchQuery = ref('')
@@ -246,6 +249,18 @@ const getActionIcon = (action: string) => {
   return icons[action] || '📝'
 }
 
+const getActionLabel = (action: string) => {
+  const map: Record<string, string> = {
+    'CREATE_TENANT': t('superAdmin.audit.actions.createTenant'),
+    'UPDATE_TENANT': t('superAdmin.audit.actions.updateTenant'),
+    'DELETE_TENANT': t('superAdmin.audit.actions.deleteTenant'),
+    'SUSPEND_TENANT': t('superAdmin.audit.actions.suspendTenant'),
+    'UNSUSPEND_TENANT': t('superAdmin.audit.actions.unsuspendTenant'),
+    'IMPERSONATE_USER': t('superAdmin.audit.actions.impersonateUser')
+  }
+  return map[action] || action.replace(/_/g, ' ')
+}
+
 const getActionBadgeClass = (action: string) => {
   const classes: Record<string, string> = {
     'CREATE_TENANT': 'bg-green-500/20 border border-green-500/50 text-green-300',
@@ -259,7 +274,7 @@ const getActionBadgeClass = (action: string) => {
 }
 
 const formatDateTime = (date: string) => {
-  return new Date(date).toLocaleString('en-US', {
+  return new Date(date).toLocaleString(locale.value, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

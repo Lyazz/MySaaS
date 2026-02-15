@@ -10,6 +10,7 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 
 // Option Selection Logic
 const selectedOptions = ref<SelectedOptions>({})
@@ -125,7 +126,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
                 style="animation-delay: 0.2s"
             >
                 <h2 class="text-sm font-bold uppercase tracking-widest text-slate-900 mb-6">
-                Details
+                {{ storefrontContent.product.detailsTitle }}
                 </h2>
                 <div 
                 v-if="product?.description" 
@@ -136,7 +137,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
                 v-else
                 class="prose prose-slate prose-sm text-slate-600 max-w-none leading-relaxed font-light"
                 >
-                <p>Experience premium quality with our latest collection. Designed for modern living, this product combines style and functionality seamlessly.</p>
+                <p>{{ storefrontContent.product.descriptionFallback }}</p>
                 </div>
             </div>
         </div>

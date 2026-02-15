@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { randomUUID } from 'node:crypto'
 import prisma from '../../lib/prisma'
+import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
 
 export class CashValidationError extends Error {
     statusCode: number
@@ -276,6 +277,17 @@ export class CashService {
         }
     }
 
+    async getSessionExpectedClosing(tenantId: string, sessionId: string) {
+        const computed = await this.computeSessionExpectedClosing(tenantId, sessionId)
+        return {
+            sessionId,
+            openingFloat: computed.openingFloat,
+            inSum: computed.inSum,
+            outSum: computed.outSum,
+            expectedClosing: computed.expectedClosing
+        }
+    }
+
     async closeSession(tenantId: string, sessionId: string, input: any, actor?: { userId?: string | null }) {
         const session = await prisma.cashSession.findFirst({
             where: { tenantId, id: sessionId },
@@ -445,26 +457,31 @@ export class CashService {
         const reference = toTrimmedString(input?.reference)?.slice(0, 64) ?? null
         const note = toTrimmedString(input?.note)?.slice(0, 500) ?? null
 
-        return prisma.cashTransaction.create({
-            data: {
-                tenantId,
-                cashboxId,
-                sessionId: session.id,
-                direction,
-                type,
-                amount,
-                currency,
-                method,
-                customerId,
-                supplierId,
-                saleId,
-                orderId,
-                purchaseOrderId,
-                expenseCategory,
-                reference,
-                note,
-                createdByUserId: actor?.userId ?? null
-            }
+        return prisma.$transaction(async (tx) => {
+            const created = await tx.cashTransaction.create({
+                data: {
+                    tenantId,
+                    cashboxId,
+                    sessionId: session.id,
+                    direction,
+                    type,
+                    amount,
+                    currency,
+                    method,
+                    customerId,
+                    supplierId,
+                    saleId,
+                    orderId,
+                    purchaseOrderId,
+                    expenseCategory,
+                    reference,
+                    note,
+                    createdByUserId: actor?.userId ?? null
+                }
+            })
+
+            await mirrorCashTransactionToPayments(tx, tenantId, created)
+            return created
         })
     }
 

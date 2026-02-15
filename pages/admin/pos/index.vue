@@ -1,381 +1,615 @@
 <template>
-  <div class="max-w-7xl mx-auto">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-10rem)] lg:overflow-hidden">
-      <!-- Catalog -->
-      <section class="lg:col-span-7 flex flex-col min-h-0">
-        <div class="bg-white rounded-lg shadow p-4 mb-4">
-          <div class="flex flex-col md:flex-row md:items-end gap-4">
-            <div class="flex-1 min-w-0">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Search (name / SKU / barcode)</label>
-              <BaseInput v-model="productSearch" placeholder="Search by name, SKU, barcode..." />
-            </div>
-            <div class="md:w-64">
-              <BaseSelect v-model="selectedCategoryId" label="Category">
-                <option value="">All Categories</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                  {{ cat.title }}
-                </option>
-              </BaseSelect>
-            </div>
-            <div class="flex md:justify-end">
-              <div class="flex items-center gap-2">
-                <button
-                  v-if="productsView === 'grid'"
-                  class="h-10 px-3 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium"
-                  title="Products per row"
-                  @click="cycleProductsPerRow"
-                >
-                  {{ productsPerRow }}/row
-                </button>
-                <div class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white p-1">
-                <button
-                  class="h-10 w-10 rounded-md grid place-items-center"
-                  :class="productsView === 'list' ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50'"
-                  title="List view"
-                  @click="productsView = 'list'"
-                >
-                  <Icon name="lucide:list" class="w-4 h-4" />
-                </button>
-                <button
-                  class="h-10 w-10 rounded-md grid place-items-center"
-                  :class="productsView === 'grid' ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50'"
-                  title="Grid view"
-                  @click="productsView = 'grid'"
-                >
-                  <Icon name="lucide:grid-2x2" class="w-4 h-4" />
-                </button>
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="h-[calc(100vh-4rem)] relative flex overflow-hidden bg-slate-100">
+    <!-- Mobile Cart Overlay -->
+    <div 
+      v-if="showCart" 
+      class="fixed inset-0 bg-black/50 z-20 lg:hidden"
+      @click="showCart = false"
+    />
 
-        <div class="flex-1 min-h-0 overflow-y-auto pr-1">
-          <div v-if="loadingProducts" class="bg-white rounded-lg shadow p-12 text-center">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-            <p class="mt-2 text-gray-600">Loading products...</p>
-          </div>
+    <!-- Left: Catalog (flex-1) -->
+    <div class="flex-1 flex flex-col min-w-0 bg-slate-100 transition-all duration-300">
+      
+      <!-- Top Bar -->
+      <header class="bg-white border-b border-slate-200 p-3 md:p-4 flex items-center gap-3 md:gap-4 shrink-0 shadow-sm z-10">
+        <!-- Title & Search (Merged for space) -->
+        <h1 class="text-xl font-bold text-slate-800 hidden md:block">
+          {{ selectedCategory?.title || t('admin.pages.pos.catalog.title') }}
+        </h1>
 
-          <div v-else-if="filteredProducts.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
-            <Icon name="lucide:package-search" class="mx-auto h-12 w-12 text-gray-400" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No products found</h3>
-            <p class="mt-1 text-sm text-gray-500">Try adjusting your filters.</p>
-          </div>
-
-          <div
-            v-else-if="productsView === 'grid'"
-            class="grid grid-cols-2 sm:grid-cols-3 gap-4"
-            :class="productsPerRow === 3 ? 'lg:grid-cols-3' : productsPerRow === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-5'"
+        <!-- Search -->
+        <div class="flex-1 max-w-md mx-auto relative group">
+          <Icon
+            name="lucide:search"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-600 transition-colors w-5 h-5"
+          />
+          <input
+            v-model="productSearch"
+            type="text"
+            :placeholder="t('admin.pages.pos.catalog.searchPlaceholder')"
+            class="w-full pl-10 pr-10 py-2 bg-slate-50 border border-transparent rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 transition-all text-sm font-medium placeholder:text-slate-400"
           >
-            <button
-              v-for="product in filteredProducts"
-              :key="product.id"
-              class="text-left bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-transparent hover:border-teal-200"
-              @click="handleAddProduct(product)"
-            >
-              <div class="p-3">
-                <div class="aspect-square w-full bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
-                  <img
-                    v-if="getProductMainImage(product)"
-                    :src="getProductMainImage(product)"
-                    :alt="product.title"
-                    class="h-full w-full object-cover"
-                  >
-                  <Icon v-else name="lucide:image" class="w-8 h-8 text-gray-400" />
-                </div>
-                <div class="mt-3">
-                  <div class="text-sm font-semibold text-gray-900 truncate" :title="product.title">
-                    {{ product.title }}
-                  </div>
-                  <div class="mt-2 flex items-center justify-between gap-2">
-                    <div class="text-sm font-semibold text-gray-900">
-                      {{ formatCurrency(product.price) }}
-                    </div>
-                    <span
-                      class="text-xs px-2 py-0.5 rounded-full"
-                      :class="product.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'"
-                    >
-                      {{ product.isActive ? 'Active' : 'Inactive' }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          <div v-else class="bg-white rounded-lg shadow divide-y divide-gray-100">
-            <button
-              v-for="product in filteredProducts"
-              :key="product.id"
-              class="w-full text-left p-3 flex items-center gap-3 hover:bg-gray-50"
-              @click="handleAddProduct(product)"
-            >
-              <div class="h-12 w-12 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center shrink-0">
-                <img
-                  v-if="getProductMainImage(product)"
-                  :src="getProductMainImage(product)"
-                  :alt="product.title"
-                  class="h-full w-full object-cover"
-                >
-                <Icon v-else name="lucide:image" class="w-6 h-6 text-gray-400" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="text-sm font-semibold text-gray-900 truncate" :title="product.title">
-                  {{ product.title }}
-                </div>
-                <div class="text-xs text-gray-600 mt-0.5">
-                  {{ formatCurrency(product.price) }}
-                </div>
-              </div>
-            </button>
-          </div>
+          <button
+            v-if="productSearch"
+            class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600"
+            @click="productSearch = ''"
+          >
+            <Icon
+              name="lucide:x"
+              class="w-4 h-4"
+            />
+          </button>
         </div>
-      </section>
 
-      <!-- Cart / Checkout -->
-      <aside class="lg:col-span-5 flex flex-col min-h-0">
-        <div class="bg-white rounded-lg shadow p-3 flex flex-col min-h-0">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <h3 class="text-lg font-semibold text-gray-900">Cart</h3>
-              <span class="text-sm text-gray-500">{{ cartCount }} items</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white p-1">
-                <button
-                  class="h-8 w-8 rounded-md grid place-items-center"
-                  :class="cartView === 'compact' ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50'"
-                  title="Compact"
-                  @click="cartView = 'compact'"
-                >
-                  <Icon name="lucide:align-left" class="w-4 h-4" />
-                </button>
-                <button
-                  class="h-8 w-8 rounded-md grid place-items-center"
-                  :class="cartView === 'detailed' ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50'"
-                  title="Detailed"
-                  @click="cartView = 'detailed'"
-                >
-                  <Icon name="lucide:layout-template" class="w-4 h-4" />
-                </button>
-              </div>
+        <!-- Desktop Actions -->
+        <div class="hidden lg:flex items-center gap-3">
+          <button
+            class="h-10 px-4 rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2"
+            :title="t('admin.pages.pos.catalog.actions.discount')"
+            @click="openExampleDialog(t('admin.pages.pos.catalog.actions.discount'))"
+          >
+            <Icon
+              name="lucide:percent"
+              class="w-4 h-4"
+            />
+            <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.discount') }}</span>
+          </button>
+          <button
+             class="h-10 px-4 rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2"
+             :title="t('admin.pages.pos.catalog.actions.reprintLastOrder')"
+             @click="printLastSale"
+          >
+             <Icon
+               name="lucide:printer"
+               class="w-4 h-4"
+             />
+             <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.reprint') }}</span>
+          </button>
+          <button
+            class="h-10 px-4 rounded-lg bg-teal-600 text-white font-medium hover:bg-teal-700 shadow-sm transition-all flex items-center gap-2 border border-transparent"
+            :title="t('admin.pages.pos.catalog.actions.quickCharge')"
+            @click="openExampleDialog(t('admin.pages.pos.catalog.actions.quickCharge'))"
+          >
+            <Icon
+              name="lucide:zap"
+              class="w-4 h-4"
+            />
+            <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.quickCharge') }}</span>
+          </button>
+
+          <div class="h-8 w-px bg-slate-200 mx-1" />
+
+          <!-- Product View Controls -->
+          <div class="flex items-center gap-2">
+            <button
+              class="p-2.5 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              :title="t('admin.pages.pos.catalog.actions.sort')"
+            >
+              <Icon
+                name="lucide:arrow-up-down"
+                class="w-4 h-4"
+              />
+            </button>
+            <button
+              class="h-10 px-3 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-700 hover:bg-slate-50 text-sm font-medium flex items-center gap-1"
+              :title="t('admin.pages.pos.catalog.actions.columns')"
+              @click="cycleProductsPerRow"
+            >
+              <Icon
+                name="lucide:grid-3x3"
+                class="w-4 h-4"
+              />
+              <span>{{ productsPerRow }}</span>
+            </button>
+            <div class="flex bg-slate-100 p-1 rounded-lg">
               <button
-                class="h-9 w-9 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 grid place-items-center"
-                :disabled="cartItems.length === 0"
-                title="Clear cart"
-                @click="clearCart"
+                v-for="view in ['grid', 'list']"
+                :key="view"
+                class="p-1.5 rounded-md transition-all shadow-sm"
+                :class="productsView === view ? 'bg-white text-teal-600' : 'text-slate-400 hover:text-slate-600'"
+                @click="productsView = view as 'grid' | 'list'"
               >
-                <Icon name="lucide:trash" class="w-4 h-4" />
+                <Icon
+                  :name="view === 'grid' ? 'lucide:layout-grid' : 'lucide:list'"
+                  class="w-4 h-4"
+                />
               </button>
             </div>
           </div>
-
-          <div class="flex-1 min-h-0">
-            <div v-if="cartItems.length === 0" class="border border-dashed border-gray-200 rounded-lg p-4 text-center">
-              <Icon name="lucide:shopping-basket" class="mx-auto h-10 w-10 text-gray-400" />
-              <p class="mt-2 text-sm text-gray-600">Add products to start a sale.</p>
-            </div>
-
-            <div v-else class="min-h-0 overflow-auto pr-1">
-              <div v-if="cartView === 'compact'" class="space-y-2">
-                <div
-                  v-for="item in cartItems"
-                  :key="item.key"
-                  class="border border-gray-100 rounded-lg px-3 py-2"
-                >
-                  <div class="flex items-center gap-2">
-                    <div class="min-w-0 flex-1">
-                      <div class="text-sm font-semibold text-gray-900 truncate" :title="item.variantLabel ? `${item.title} — ${item.variantLabel}` : item.title">
-                        {{ item.title }}
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-1 shrink-0">
-                      <button
-                        class="h-7 w-7 rounded-md border border-gray-200 bg-white hover:bg-gray-50"
-                        @click="decrementQty(item.key)"
-                      >
-                        <Icon name="lucide:minus" class="w-4 h-4 mx-auto" />
-                      </button>
-                      <div class="w-8 text-center text-sm font-medium text-gray-900">
-                        {{ item.quantity }}
-                      </div>
-                      <button
-                        class="h-7 w-7 rounded-md border border-gray-200 bg-white hover:bg-gray-50"
-                        @click="incrementQty(item.key)"
-                      >
-                        <Icon name="lucide:plus" class="w-4 h-4 mx-auto" />
-                      </button>
-                    </div>
-                    <div class="text-sm font-semibold text-gray-900 w-20 text-right shrink-0">
-                      {{ formatCurrency(item.price * item.quantity) }}
-                    </div>
-                    <button class="text-gray-400 hover:text-red-600 shrink-0" title="Remove" @click="removeFromCart(item.key)">
-                      <Icon name="lucide:trash-2" class="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div v-else class="space-y-3">
-                <div
-                  v-for="item in cartItems"
-                  :key="item.key"
-                  class="border border-gray-100 rounded-lg p-3"
-                >
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                      <div class="h-10 w-10 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center shrink-0">
-                        <img
-                          v-if="item.imageUrl"
-                          :src="item.imageUrl"
-                          :alt="item.title"
-                          class="h-full w-full object-cover"
-                        >
-                        <Icon v-else name="lucide:image" class="w-6 h-6 text-gray-400" />
-                      </div>
-                      <div class="min-w-0">
-                        <div class="text-sm font-medium text-gray-900 truncate" :title="item.title">{{ item.title }}</div>
-                        <div v-if="item.variantLabel" class="text-xs text-gray-500 truncate" :title="item.variantLabel">{{ item.variantLabel }}</div>
-                        <div class="text-sm font-semibold text-gray-900 mt-1">{{ formatCurrency(item.price) }}</div>
-                      </div>
-                    </div>
-                    <button class="text-gray-400 hover:text-red-600" title="Remove" @click="removeFromCart(item.key)">
-                      <Icon name="lucide:trash-2" class="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div class="mt-3 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                      <button
-                        class="h-8 w-8 rounded-md border border-gray-200 bg-white hover:bg-gray-50"
-                        @click="decrementQty(item.key)"
-                      >
-                        <Icon name="lucide:minus" class="w-4 h-4 mx-auto" />
-                      </button>
-                      <div class="w-10 text-center text-sm font-medium text-gray-900">
-                        {{ item.quantity }}
-                      </div>
-                      <button
-                        class="h-8 w-8 rounded-md border border-gray-200 bg-white hover:bg-gray-50"
-                        @click="incrementQty(item.key)"
-                      >
-                        <Icon name="lucide:plus" class="w-4 h-4 mx-auto" />
-                      </button>
-                    </div>
-                    <div class="text-sm font-semibold text-gray-900">
-                      {{ formatCurrency(item.price * item.quantity) }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-3 border-t border-gray-100 pt-3">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-gray-900">Total</span>
-              <span class="text-lg font-bold text-gray-900">{{ formatCurrency(cartSubtotal) }}</span>
-            </div>
-          </div>
-
-          <div class="mt-3 border-t border-gray-100 pt-3 flex items-center gap-2">
-            <span class="text-sm font-semibold text-gray-900 shrink-0">Client</span>
-            <div class="flex-1 min-w-0">
-              <BaseSelect v-model="selectedCustomerId" class="py-1.5 text-sm">
-                <option value="">Guest</option>
-                <option v-for="c in customers" :key="c.id" :value="c.id">
-                  {{ c.name }} — {{ c.phone }}
-                </option>
-              </BaseSelect>
-              <div v-if="loadingCustomers" class="text-xs text-gray-500 mt-1">Loading…</div>
-            </div>
-          </div>
-
-          <div v-if="errorMessage" class="mt-4 text-sm text-red-600">
-            {{ errorMessage }}
-          </div>
-
-          <div class="mt-3 flex items-center gap-2">
-            <button
-              class="flex-1 px-4 py-2.5 rounded-md border border-gray-200 bg-white text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="!lastSaleId"
-              @click="printLastSale"
-            >
-              Print last sale
-            </button>
-            <button
-              class="flex-1 px-4 py-2.5 rounded-md text-white font-semibold transition-colors"
-              :class="canCreateSale ? 'bg-teal-600 hover:bg-teal-700' : 'bg-gray-300 cursor-not-allowed'"
-              :disabled="!canCreateSale || placingSale"
-              @click="createSale"
-            >
-              <span v-if="placingSale">Creating…</span>
-              <span v-else>Create sale</span>
-            </button>
-          </div>
         </div>
-      </aside>
-    </div>
 
-    <!-- Variant Picker Modal -->
-    <div v-if="variantModal.open" class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="absolute inset-0 bg-black/40" @click="closeVariantModal"></div>
-      <div class="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-4">
-        <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-          <div>
-            <div class="text-sm text-gray-500">Select variant</div>
-            <div class="text-base font-semibold text-gray-900">{{ variantModal.productTitle }}</div>
-          </div>
-          <button class="p-2 rounded-md hover:bg-gray-50" @click="closeVariantModal">
-            <Icon name="lucide:x" class="w-5 h-5 text-gray-600" />
+        <!-- Mobile Menu Toggle -->
+        <button class="lg:hidden p-2 text-slate-600">
+           <Icon name="lucide:more-vertical" class="w-6 h-6" />
+        </button>
+      </header>
+  
+      <!-- Main Content Area: Sidebar + Grid -->
+      <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Category Sidebar -->
+        <div class="w-20 md:w-24 lg:w-40 bg-white border-r border-slate-200 overflow-y-auto shrink-0 flex flex-col no-scrollbar">
+          <button
+            class="p-2 md:p-3 border-b border-slate-100 hover:bg-slate-50 transition-colors flex flex-col items-center gap-2 text-center group"
+            :class="!selectedCategoryId ? 'bg-teal-50 border-r-4 border-r-teal-500' : 'text-slate-500'"
+            @click="selectCategory(null)"
+          >
+            <div 
+              class="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+              :class="!selectedCategoryId ? 'bg-teal-100 text-teal-600' : 'bg-slate-100 group-hover:bg-slate-200 text-slate-400'"
+            >
+              <Icon name="lucide:layout-grid" class="w-5 h-5" />
+            </div>
+            <span 
+              class="text-[10px] md:text-xs font-semibold leading-tight line-clamp-2"
+              :class="!selectedCategoryId ? 'text-teal-700' : 'text-slate-600'"
+            >
+              {{ t('admin.pages.pos.catalog.allProducts') }}
+            </span>
+          </button>
+
+          <button
+            v-for="cat in categories"
+            :key="cat.id"
+            class="p-2 md:p-3 border-b border-slate-100 hover:bg-slate-50 transition-colors flex flex-col items-center gap-2 text-center group"
+            :class="selectedCategoryId === cat.id ? 'bg-teal-50 border-r-4 border-r-teal-500' : 'text-slate-500'"
+            @click="selectCategory(cat.id)"
+          >
+             <div 
+              class="w-10 h-10 rounded-full overflow-hidden bg-slate-100 relative group-hover:ring-2 group-hover:ring-offset-1 group-hover:ring-slate-200 transition-all"
+             >
+               <img
+                  v-if="cat.imageUrl"
+                  :src="cat.imageUrl"
+                  :alt="cat.title"
+                  class="w-full h-full object-cover"
+                >
+                <div v-else class="w-full h-full flex items-center justify-center text-slate-300">
+                  <Icon name="lucide:image" class="w-5 h-5" />
+                </div>
+             </div>
+             <span 
+               class="text-[10px] md:text-xs font-semibold leading-tight line-clamp-2"
+               :class="selectedCategoryId === cat.id ? 'text-teal-700' : 'text-slate-600'"
+             >
+               {{ cat.title }}
+             </span>
           </button>
         </div>
-        <div class="p-4">
-          <div v-if="variantModal.loading" class="p-6 text-center text-sm text-gray-600">
-            Loading variants…
-          </div>
-          <div v-else class="space-y-2 max-h-[60vh] overflow-auto pr-1">
-            <button
-              v-for="v in variantModal.variants"
-              :key="v.id"
-              class="w-full text-left p-3 rounded-lg border border-gray-100 hover:border-teal-200 hover:bg-teal-50/30"
-              @click="addVariantToCart(variantModal.productId, variantModal.productTitle, v)"
+
+        <!-- Products Area -->
+        <div class="flex-1 overflow-y-auto p-3 md:p-6 bg-slate-50/50 pb-24 lg:pb-6">
+           <!-- Loading State -->
+           <div v-if="loadingProducts" class="flex justify-center items-center h-full">
+             <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin text-teal-600" />
+           </div>
+
+           <!-- Empty State -->
+           <div v-else-if="filteredProducts.length === 0" class="flex flex-col items-center justify-center h-full text-slate-400 gap-4">
+             <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center">
+               <Icon name="lucide:package-search" class="w-10 h-10 text-slate-300" />
+             </div>
+             <p class="font-medium text-lg">{{ t('admin.pages.pos.catalog.noProducts') }}</p>
+             <button 
+                v-if="selectedCategoryId"
+                class="text-teal-600 font-semibold hover:underline"
+                @click="selectCategory(null)"
+             >
+               {{ t('admin.pages.pos.catalog.clearFilter') }}
+             </button>
+           </div>
+           
+           <!-- Product Grid/List -->
+           <div
+             v-else
+             class="grid gap-3 md:gap-4 md:gap-6 content-start"
+             :class="productsView === 'list' ? 'grid-cols-1' : ''"
+             :style="productsView === 'grid' ? { gridTemplateColumns: `repeat(${productsPerRow}, minmax(0, 1fr))` } : {}"
+           >
+             <!-- Back Card (Grid View Only) -->
+             <button
+               v-if="selectedCategoryId && productsView === 'grid'"
+               class="aspect-[3/4] rounded-xl bg-white shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-4 group"
+               @click="selectCategory(null)"
+             >
+               <div class="w-14 h-14 rounded-full bg-teal-50 flex items-center justify-center group-hover:bg-teal-100 transition-colors">
+                 <Icon
+                   name="lucide:arrow-left"
+                   class="w-6 h-6 text-teal-600"
+                 />
+               </div>
+               <span class="font-bold text-teal-600">{{ t('admin.pages.pos.catalog.back') }}</span>
+             </button>
+
+             <!-- Back Item (List View Only) -->
+             <button
+               v-if="selectedCategoryId && productsView === 'list'"
+               class="p-4 rounded-xl bg-white shadow-sm hover:shadow-md flex items-center gap-4 text-teal-700 font-bold transition-all"
+               @click="selectCategory(null)"
+             >
+               <div class="p-2 rounded-full bg-teal-50">
+                 <Icon
+                   name="lucide:arrow-left"
+                   class="w-5 h-5"
+                 />
+               </div>
+               {{ t('admin.pages.pos.catalog.backToCategories') }}
+             </button>
+
+             <!-- Products -->
+             <button
+               v-for="product in filteredProducts"
+               :key="product.id"
+               class="relative group bg-white rounded-xl shadow-sm hover:shadow-md transition-all text-left overflow-hidden flex"
+               :class="productsView === 'grid' ? 'flex-col aspect-[3/4]' : 'flex-row items-center p-2 min-h-[80px]'"
+               @click="handleAddProduct(product)"
+             >
+               <!-- Badge -->
+               <div
+                 v-if="product.stock <= 5"
+                 class="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
+                 :class="product.stock <= 0 ? 'bg-red-500' : 'bg-orange-500'"
+               >
+                 {{ product.stock <= 0 ? t('admin.pages.pos.catalog.badges.outOfStock') : t('admin.pages.pos.catalog.badges.lowStock', { count: product.stock }) }}
+               </div>
+  
+               <!-- Image -->
+               <div
+                 class="bg-white overflow-hidden shrink-0 relative"
+                 :class="productsView === 'grid' ? 'w-full aspect-square p-2 md:p-4' : 'w-16 h-16 rounded-xl'"
+               >
+                 <div class="w-full h-full rounded-lg overflow-hidden bg-slate-50 relative">
+                   <img
+                     v-if="getProductMainImage(product)"
+                     :src="getProductMainImage(product)"
+                     :alt="product.title"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                   >
+                   <div
+                     v-else
+                     class="w-full h-full flex items-center justify-center text-slate-300"
+                   >
+                     <Icon
+                       name="lucide:image"
+                       class="w-8 h-8"
+                     />
+                   </div>
+                 </div>
+               </div>
+  
+               <!-- Info -->
+               <div class="flex-1 flex flex-col justify-between px-3 pb-3 md:px-4 md:pb-4 pt-0 min-w-0" :class="productsView === 'list' ? 'py-0 px-0' : ''">
+                 <div class="mb-1 md:mb-2">
+                   <h3
+                     class="font-semibold text-slate-800 leading-snug"
+                     :class="productsView === 'grid' ? 'line-clamp-2 text-xs md:text-sm' : 'truncate text-base'"
+                   >
+                     {{ product.title }}
+                   </h3>
+                   <p v-if="productsView === 'list'" class="text-xs text-slate-400 truncate">{{ product.sku }}</p>
+                 </div>
+                 <div class="font-bold text-indigo-600 text-sm md:text-lg">
+                   {{ formatCurrency(product.price) }}
+                 </div>
+               </div>
+             </button>
+           </div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Bar -->
+      <div v-if="cartTotal >= 0" class="lg:hidden p-4 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex items-center justify-between gap-4 z-30">
+        <div class="flex-1">
+          <div class="text-xs text-slate-500 font-medium uppercase">{{ cartItems.length }} {{ t('admin.pages.pos.cart.itemsCount', { count: '' }) }}</div>
+          <div class="text-xl font-bold text-indigo-600">{{ formatCurrency(cartTotal) }}</div>
+        </div>
+        <button 
+          class="h-12 px-6 rounded-xl bg-teal-600 text-white font-bold shadow-lg shadow-teal-500/30 flex items-center gap-2"
+          @click="showCart = true"
+        >
+          <Icon name="lucide:shopping-bag" class="w-5 h-5" />
+          <span>{{ t('admin.pages.pos.actions.viewCart') }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Cart & Checkout (Desktop + Mobile Drawer) -->
+    <div 
+      class="fixed inset-y-0 right-0 z-30 w-full sm:w-[400px] bg-white border-l border-slate-200 flex flex-col shadow-2xl lg:shadow-xl transform transition-transform duration-300 lg:relative lg:transform-none lg:w-[400px] lg:block"
+      :class="showCart ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
+    >
+      <!-- Mobile Close Button -->
+      <button 
+        class="lg:hidden absolute top-4 left-4 p-2 bg-slate-100 rounded-full text-slate-500 z-50"
+        @click="showCart = false"
+      >
+        <Icon name="lucide:x" class="w-5 h-5" />
+      </button>
+
+      <!-- Session Tabs -->
+      <div class="flex border-b border-slate-100 lg:pt-0 pt-16">
+        <button
+          v-for="i in 3"
+          :key="i"
+          class="flex-1 py-4 text-sm font-semibold border-b-2 transition-colors relative"
+          :class="activeSession === i - 1 ? 'border-teal-600 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'"
+          @click="activeSession = i - 1"
+        >
+          {{ t('admin.pages.pos.sessions.order', { index: i }) }}
+          <span
+            v-if="getSessionCount(i - 1) > 0"
+            class="absolute top-3 right-3 w-1.5 h-1.5 rounded-full bg-teal-500"
+          />
+        </button>
+      </div>
+
+      <!-- Customer & Scan -->
+      <div class="p-4 border-b border-slate-100 space-y-3">
+        <div class="flex gap-2">
+          <div class="flex-1 relative">
+            <BaseSelect
+              v-model="selectedCustomerId"
+              class="w-full text-sm pl-9 bg-slate-50 border-slate-100 hover:bg-slate-100 transition-colors"
             >
-              <div class="flex items-center justify-between gap-3">
-                <div class="min-w-0">
-                  <div class="text-sm font-medium text-gray-900 truncate">{{ v.label }}</div>
-                  <div class="text-xs text-gray-500">{{ v.trackInventory ? `Stock: ${v.availableStock}` : 'Inventory not tracked' }}</div>
+              <option value="">
+                {{ t('admin.pages.pos.customer.addClient') }}
+              </option>
+              <option
+                v-for="c in customers"
+                :key="c.id"
+                :value="c.id"
+              >
+                {{ c.name }}
+              </option>
+            </BaseSelect>
+            <Icon
+              name="lucide:user"
+              class="absolute left-3 top-3 w-4 h-4 text-slate-400"
+            />
+          </div>
+          <button
+            class="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+            :title="t('admin.pages.pos.actions.imageMode')"
+          >
+             <Icon
+               name="lucide:image"
+               class="w-5 h-5"
+             />
+          </button>
+          <button
+            class="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors"
+            :title="t('admin.pages.pos.cart.actions.clearCart')"
+            @click="clearCart"
+          >
+            <Icon
+              name="lucide:trash-2"
+              class="w-5 h-5"
+            />
+          </button>
+        </div>
+      </div>
+
+      <!-- Cart Items -->
+      <div class="flex-1 overflow-y-auto p-4 content-start">
+        <div
+          v-if="cartItems.length === 0"
+          class="h-full flex flex-col items-center justify-center text-slate-300 space-y-4"
+        >
+          <Icon
+            name="lucide:shopping-bag"
+            class="w-12 h-12 stroke-1"
+          />
+          <p class="font-medium">
+            {{ t('admin.pages.pos.cart.empty') }}
+          </p>
+        </div>
+        <div
+          v-else
+          class="space-y-3"
+        >
+          <div
+            v-for="item in cartItems"
+            :key="item.key"
+            class="group bg-white border border-slate-100 rounded-xl p-3 flex items-center gap-3 shadow-sm hover:border-teal-100 transition-all"
+          >
+             <!-- No Image in Compact View for Screenshot parity -->
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-slate-900 text-sm leading-tight truncate">
+                {{ item.title }}
+              </h4>
+              <p
+                v-if="item.variantLabel"
+                class="text-xs text-slate-500 mt-0.5"
+              >
+                {{ item.variantLabel }}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="flex items-center h-8 bg-slate-50 rounded-lg border border-slate-200">
+                <button
+                  class="w-8 h-full flex items-center justify-center text-slate-500 hover:text-teal-600 hover:bg-white rounded-l-lg transition-colors"
+                  @click="decrementQty(item.key)"
+                >
+                  <Icon
+                    name="lucide:minus"
+                    class="w-3 h-3"
+                  />
+                </button>
+                <div class="w-8 text-center text-sm font-bold text-slate-900">
+                  {{ item.quantity }}
                 </div>
-                <div class="text-sm font-semibold text-gray-900">
-                  {{ formatCurrency(v.price) }}
-                </div>
+                <button
+                  class="w-8 h-full flex items-center justify-center text-slate-500 hover:text-teal-600 hover:bg-white rounded-r-lg transition-colors"
+                  @click="incrementQty(item.key)"
+                >
+                  <Icon
+                    name="lucide:plus"
+                    class="w-3 h-3"
+                  />
+                </button>
               </div>
-            </button>
+              
+              <button
+                class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 transition-colors"
+                @click="removeFromCart(item.key)"
+              >
+                <Icon
+                  name="lucide:x"
+                  class="w-4 h-4"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Footer -->
+      <div class="bg-white border-t border-slate-200 p-6 space-y-6 z-20">
+        <div class="flex items-end justify-between">
+          <span class="text-slate-500 font-medium text-lg mb-1">{{ t('admin.pages.pos.cart.total') }}</span>
+          <span class="text-3xl font-bold text-indigo-600 tracking-tight leading-none">{{ formatCurrency(cartSubtotal) }}</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <button
+            class="h-12 rounded-xl font-semibold border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center justify-center gap-2"
+            :title="t('admin.pages.pos.cart.actions.paymentOptions')"
+            disabled
+          >
+            <Icon
+              name="lucide:credit-card"
+              class="w-5 h-5"
+            />
+            {{ t('admin.pages.pos.cart.actions.payment') }}
+          </button>
+          <button
+            class="h-12 rounded-xl font-bold text-white shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2"
+            :class="canCreateSale ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-slate-200 cursor-not-allowed text-slate-400 shadow-none'"
+            :disabled="!canCreateSale"
+            @click="showPaymentModal = true"
+          >
+            {{ t('admin.pages.pos.cart.actions.checkout') }}
+          </button>
+        </div>
+      </div>
     </div>
+
+    <!-- Modals -->
+    <PosPaymentModal
+      v-if="showPaymentModal"
+      :total="cartSubtotal"
+      :loading="placingSale"
+      @close="showPaymentModal = false"
+      @confirm="handlePaymentConfirm"
+    />
+
+    <!-- Variant Picker Modal -->
+    <TransitionRoot
+      appear
+      :show="variantModal.open"
+      as="template"
+    >
+      <Dialog
+        as="div"
+        class="relative z-50"
+        @close="closeVariantModal"
+      >
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle
+                  as="h3"
+                  class="text-lg font-bold leading-6 text-slate-900 flex justify-between items-center"
+                >
+                  {{ variantModal.productTitle }}
+                  <button
+                    class="p-1 rounded-full hover:bg-slate-100 text-slate-400"
+                    @click="closeVariantModal"
+                  >
+                    <Icon
+                      name="lucide:x"
+                      class="w-5 h-5"
+                    />
+                  </button>
+                </DialogTitle>
+                <div class="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
+                  <div
+                    v-if="variantModal.loading"
+                    class="py-8 text-center text-slate-500"
+                  >
+                    {{ t('admin.pages.pos.variants.loading') }}
+                  </div>
+                  <button
+                    v-for="v in variantModal.variants"
+                    :key="v.id"
+                    class="w-full p-4 rounded-xl border border-slate-100 hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group"
+                    @click="addVariantToCart(variantModal.productId, variantModal.productTitle, v)"
+                  >
+                    <div class="text-left">
+                      <div class="font-semibold text-slate-900 group-hover:text-teal-800">
+                        {{ v.label }}
+                      </div>
+                      <div class="text-xs text-slate-500 mt-0.5">
+                        {{ v.trackInventory ? t('admin.pages.pos.variants.inStockCount', { count: v.availableStock }) : t('admin.pages.pos.variants.inStock') }}
+                      </div>
+                    </div>
+                    <div class="font-bold text-teal-600">
+                      {{ formatCurrency(v.price) }}
+                    </div>
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import BaseInput from '~/components/ui/BaseInput.vue'
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import PosPaymentModal from '~/components/pos/PosPaymentModal.vue'
 
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
-  title: 'POS'
+  titleKey: 'admin.nav.pos'
 })
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
-const router = useRouter()
 
+// Interfaces
 interface Category {
   id: string
   title: string
+  imageUrl?: string
 }
 
 interface ProductListRow {
@@ -385,20 +619,16 @@ interface ProductListRow {
   price: number
   stock: number
   isActive: boolean
-  options?: Array<any>
+  sku?: string
+  categoryId?: string
+  category?: { id: string }
+  options?: Array<{ id: string; name: string; values: any[] }>
   variants?: Array<{ id: string; sku?: string | null }>
   images?: string[]
-  productImages?: Array<{ id: string; url: string; isMain: boolean; position: number }>
-  category?: { id: string; title: string }
+  productImages?: Array<{ id: string; url: string; isMain: boolean }>
 }
 
-type CustomerSummary = {
-  id: string
-  name: string
-  phone: string
-}
-
-type CartItem = {
+interface CartItem {
   key: string
   productId: string
   variantId?: string | null
@@ -409,38 +639,95 @@ type CartItem = {
   quantity: number
 }
 
+// State
 const categories = ref<Category[]>([])
 const products = ref<ProductListRow[]>([])
 const loadingProducts = ref(true)
 
 const productSearch = ref('')
-const selectedCategoryId = ref('')
+const selectedCategoryId = ref<string | null>(null)
+const productsView = ref<'list' | 'grid'>('grid')
+const productsPerRow = ref(5)
 
-const cart = ref<Record<string, CartItem>>({})
+// Session Management
+interface CartSession {
+  items: Record<string, CartItem>
+  customerId: string | null
+  discount: number
+}
+
+const activeSession = ref(0)
+const cartSessions = ref<CartSession[]>([
+  { items: {}, customerId: null, discount: 0 },
+  { items: {}, customerId: null, discount: 0 },
+  { items: {}, customerId: null, discount: 0 }
+])
+
+const currentSession = computed(() => cartSessions.value[activeSession.value])
+const cart = computed(() => currentSession.value.items)
+const cartItems = computed(() => Object.values(cart.value))
+const cartSubtotal = computed(() => cartItems.value.reduce((sum, i) => sum + i.price * i.quantity, 0))
+const cartTotal = computed(() => {
+  const sub = cartSubtotal.value
+  const disc = currentSession.value.discount || 0
+  return Math.max(0, sub - disc)
+})
+
+// Modals & UI State
+const showPaymentModal = ref(false)
+const showCart = ref(false)
 const placingSale = ref(false)
-const errorMessage = ref<string | null>(null)
-const lastSaleId = ref<string | null>(null)
-const scanning = ref(false)
-
-const productsView = ref<'list' | 'grid'>('list')
-const cartView = ref<'compact' | 'detailed'>('compact')
-const productsPerRow = ref<3 | 4 | 5>(4)
-
-const customers = ref<CustomerSummary[]>([])
-const loadingCustomers = ref(false)
 const selectedCustomerId = ref('')
+const customers = ref<any[]>([]) // Placeholder for customers
 
 const variantModal = reactive({
   open: false,
   loading: false,
-  productId: '' as string,
-  productTitle: '' as string,
-  variants: [] as Array<{ id: string; label: string; price: number; trackInventory: boolean; availableStock: number }>,
-  productPriceFallback: 0,
-  productImageFallback: '' as string
+  productId: '',
+  productTitle: '',
+  variants: [] as any[],
 })
 
-const getProductMainImage = (product: ProductListRow): string | undefined => {
+// Computed Helpers
+const selectedCategory = computed(() => categories.value.find(c => c.id === selectedCategoryId.value))
+
+const sortedProducts = computed(() => {
+  return [...products.value].sort((a, b) => a.title.localeCompare(b.title))
+})
+
+const filteredProducts = computed(() => {
+  const q = productSearch.value.trim().toLowerCase()
+  return sortedProducts.value.filter(p => {
+    // 1. Filter by Category
+    if (selectedCategoryId.value && p.categoryId !== selectedCategoryId.value && p.category?.id !== selectedCategoryId.value) {
+      return false
+    }
+    // 2. Filter by Search
+    if (!q) return true
+    
+    return (
+      p.title.toLowerCase().includes(q) ||
+      p.slug.toLowerCase().includes(q) ||
+      (p.sku || '').toLowerCase().includes(q)
+    )
+  })
+})
+
+const canCreateSale = computed(() => cartItems.value.length > 0)
+
+// Methods
+function selectCategory(id: string | null) {
+  selectedCategoryId.value = id
+  productSearch.value = '' // Clear search on cat change
+}
+
+function cycleProductsPerRow() {
+  if (productsPerRow.value === 3) productsPerRow.value = 4
+  else if (productsPerRow.value === 4) productsPerRow.value = 5
+  else productsPerRow.value = 3
+}
+
+function getProductMainImage(product: ProductListRow): string | undefined {
   if (product.productImages && product.productImages.length > 0) {
     const main = product.productImages.find(i => i.isMain)
     return main ? main.url : product.productImages[0].url
@@ -449,337 +736,170 @@ const getProductMainImage = (product: ProductListRow): string | undefined => {
   return undefined
 }
 
-const filteredProducts = computed(() => {
-  const q = productSearch.value.trim().toLowerCase()
-  return products.value
-    .filter(p => p.isActive)
-    .filter(p => (selectedCategoryId.value ? p.category?.id === selectedCategoryId.value : true))
-    .filter(p => {
-      if (!q) return true
-      const byName = p.title.toLowerCase().includes(q)
-      const bySlug = p.slug.toLowerCase().includes(q)
-      const bySku = Array.isArray(p.variants) ? p.variants.some(v => (v?.sku || '').toLowerCase().includes(q)) : false
-      return byName || bySlug || bySku
+function getSessionCount(index: number) {
+  return Object.keys(cartSessions.value[index].items).length
+}
+
+// Cart Ops
+function handleAddProduct(product: ProductListRow) {
+  if (product.options && product.options.length > 0) {
+    openVariantModal(product)
+  } else {
+    addToCart({
+      key: product.id,
+      productId: product.id,
+      title: product.title,
+      price: product.price,
+      quantity: 1,
+      imageUrl: getProductMainImage(product)
     })
-})
-
-const cartItems = computed(() => Object.values(cart.value))
-const cartSubtotal = computed(() => cartItems.value.reduce((sum, i) => sum + i.price * i.quantity, 0))
-const cartCount = computed(() => cartItems.value.reduce((sum, i) => sum + i.quantity, 0))
-
-const canCreateSale = computed(() => cartItems.value.length > 0)
-
-async function fetchCategories() {
-  try {
-    categories.value = await $fetch<Category[]>('/api/admin/categories', {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    })
-  } catch (e) {
-    console.error('Failed to fetch categories', e)
   }
 }
 
-async function fetchProducts() {
-  loadingProducts.value = true
-  try {
-    products.value = await $fetch<ProductListRow[]>('/api/admin/products', {
-      headers: { Authorization: `Bearer ${authStore.token}` },
-      query: { sortBy: 'createdAt', sortOrder: 'desc' }
-    })
-  } catch (e) {
-    console.error('Failed to fetch products', e)
-  } finally {
-    loadingProducts.value = false
+function addToCart(item: CartItem) {
+  const session = cartSessions.value[activeSession.value]
+  if (session.items[item.key]) {
+    session.items[item.key].quantity++
+  } else {
+    session.items[item.key] = item
   }
-}
-
-async function fetchCustomers() {
-  loadingCustomers.value = true
-  try {
-    customers.value = await $fetch<any[]>('/api/admin/customers', {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    })
-  } catch (e) {
-    console.error('Failed to fetch customers', e)
-    customers.value = []
-  } finally {
-    loadingCustomers.value = false
-  }
-}
-
-function cycleProductsPerRow() {
-  productsPerRow.value = productsPerRow.value === 3 ? 4 : productsPerRow.value === 4 ? 5 : 3
-}
-
-async function lookupAndAddByCode(code: string) {
-  const normalized = String(code || '').trim()
-  if (!normalized) return
-  if (scanning.value) return
-  scanning.value = true
-  errorMessage.value = null
-
-  try {
-    const found = await $fetch<any>('/api/admin/pos/lookup', {
-      headers: { Authorization: `Bearer ${authStore.token}` },
-      query: { code: normalized }
-    })
-
-    const key = `${found.productId}:${found.variantId}`
-    upsertCartItem(
-      {
-        key,
-        productId: found.productId,
-        variantId: found.variantId,
-        title: found.title,
-        variantLabel: found.variantLabel || undefined,
-        imageUrl: found.imageUrl || undefined,
-        price: Number(found.price || 0)
-      },
-      1
-    )
-  } catch (e: any) {
-    const status = e?.status || e?.response?.status
-    if (status === 404) {
-      errorMessage.value = `No product found for: ${normalized}`
-    } else {
-      const msg = e?.data?.statusMessage || e?.data?.message || e?.message || 'Lookup failed'
-      errorMessage.value = String(msg)
-    }
-  } finally {
-    scanning.value = false
-  }
-}
-
-function upsertCartItem(next: Omit<CartItem, 'quantity'>, quantityDelta: number) {
-  const existing = cart.value[next.key]
-  if (!existing) {
-    cart.value[next.key] = { ...next, quantity: Math.max(1, quantityDelta) }
-    return
-  }
-  const nextQty = existing.quantity + quantityDelta
-  if (nextQty <= 0) {
-    delete cart.value[next.key]
-    return
-  }
-  cart.value[next.key] = { ...existing, quantity: nextQty }
 }
 
 function incrementQty(key: string) {
-  const item = cart.value[key]
-  if (!item) return
-  cart.value[key] = { ...item, quantity: item.quantity + 1 }
+  if (currentSession.value.items[key]) currentSession.value.items[key].quantity++
 }
 
 function decrementQty(key: string) {
-  const item = cart.value[key]
-  if (!item) return
-  const nextQty = item.quantity - 1
-  if (nextQty <= 0) delete cart.value[key]
-  else cart.value[key] = { ...item, quantity: nextQty }
+  const items = currentSession.value.items
+  if (items[key]) {
+    if (items[key].quantity > 1) {
+      items[key].quantity--
+    } else {
+      delete items[key]
+    }
+  }
 }
 
 function removeFromCart(key: string) {
-  delete cart.value[key]
+  delete currentSession.value.items[key]
 }
 
 function clearCart() {
-  cart.value = {}
-  errorMessage.value = null
+  currentSession.value.items = {}
+  currentSession.value.discount = 0
+  currentSession.value.customerId = null
 }
 
-async function handleAddProduct(product: ProductListRow) {
-  errorMessage.value = null
-
-  if ((product.options?.length ?? 0) > 0) {
-    await openVariantModal(product)
-    return
-  }
-
-  const key = `${product.id}:default`
-  upsertCartItem(
-    {
-      key,
-      productId: product.id,
-      variantId: null,
-      title: product.title,
-      variantLabel: undefined,
-      imageUrl: getProductMainImage(product),
-      price: Number(product.price || 0)
-    },
-    1
-  )
-}
-
-function closeVariantModal() {
-  variantModal.open = false
-  variantModal.loading = false
-  variantModal.productId = ''
-  variantModal.productTitle = ''
-  variantModal.variants = []
-  variantModal.productPriceFallback = 0
-}
-
-async function openVariantModal(product: ProductListRow) {
-  variantModal.open = true
-  variantModal.loading = true
+const openVariantModal = async (product: ProductListRow) => {
   variantModal.productId = product.id
   variantModal.productTitle = product.title
-  variantModal.productPriceFallback = Number(product.price || 0)
-  variantModal.productImageFallback = getProductMainImage(product) || ''
+  variantModal.loading = true
+  variantModal.open = true
   variantModal.variants = []
 
   try {
-    const full = await $fetch<any>(`/api/admin/products/${product.id}`, {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    })
-
-    const variants = (full?.variants ?? []).filter((v: any) => v?.isActive !== false)
-    variantModal.variants = variants.map((v: any) => {
-      const labels = Array.isArray(v?.optionValues)
-        ? v.optionValues.map((ov: any) => ov?.optionValue?.label).filter(Boolean)
-        : []
-      const label = labels.length > 0 ? labels.join(' / ') : 'Default'
-      const stock = Number(v?.stock ?? 0)
-      const reserved = Number(v?.reserved ?? 0)
-      const safety = Number(v?.safetyStock ?? 0)
-      const trackInventory = v?.trackInventory !== false
-      const availableStock = trackInventory ? Math.max(stock - reserved - safety, 0) : Number.POSITIVE_INFINITY
+     const response = await $fetch(`/api/admin/products/${product.id}`, {
+       headers: { Authorization: `Bearer ${authStore.token}` }
+    }) as any
+    
+    variantModal.variants = (response.variants || []).map((v: any) => {
+      const label = v.optionValues
+        ? v.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ')
+        : 'Default'
       return {
-        id: v.id,
+        ...v,
         label,
-        price: Number(v?.price ?? variantModal.productPriceFallback),
-        trackInventory,
-        availableStock
+        availableStock: v.stock - (v.reserved || 0)
       }
     })
   } catch (e) {
-    console.error('Failed to load product variants', e)
-    variantModal.variants = []
+    console.error(e)
   } finally {
     variantModal.loading = false
   }
 }
 
-function addVariantToCart(productId: string, productTitle: string, variant: { id: string; label: string; price: number }) {
-  const key = `${productId}:${variant.id}`
-  upsertCartItem(
-    {
-      key,
-      productId,
-      variantId: variant.id,
-      title: productTitle,
-      variantLabel: variant.label,
-      imageUrl: variantModal.productImageFallback || undefined,
-      price: Number(variant.price || 0)
-    },
-    1
-  )
+function closeVariantModal() {
+  variantModal.open = false
+}
+
+function addVariantToCart(productId: string, productTitle: string, variant: any) {
+  const key = `${productId}-${variant.id}`
+  addToCart({
+    key,
+    productId,
+    variantId: variant.id,
+    title: productTitle,
+    variantLabel: variant.label,
+    price: variant.price,
+    quantity: 1
+  })
   closeVariantModal()
 }
 
-async function createSale() {
-  if (!canCreateSale.value) return
+// Checkout
+async function handlePaymentConfirm(payment: any) {
   placingSale.value = true
-  errorMessage.value = null
-
   try {
-    const payload: any = {
+    const payload = {
+      customerId: selectedCustomerId.value || null,
       items: cartItems.value.map(i => ({
         productId: i.productId,
-        variantId: i.variantId ?? null,
-        quantity: i.quantity
+        variantId: i.variantId,
+        quantity: i.quantity,
+        price: i.price
       })),
-      customerId: selectedCustomerId.value || null
+      payment: {
+        method: payment.method,
+        cashReceived: payment.cashReceived,
+        cardAmount: payment.cardAmount
+      }
     }
 
-    const res = await $fetch<{ saleId: string } & any>('/api/admin/pos/sales', {
+    await $fetch('/api/admin/sales', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${authStore.token}` },
-      body: payload
+      body: payload,
+      headers: { Authorization: `Bearer ${authStore.token}` }
     })
 
     clearCart()
-    selectedCustomerId.value = ''
-
-    if (res?.saleId) {
-      lastSaleId.value = res.saleId
-      if (process.client) {
-        try { localStorage.setItem('pos:lastSaleId', res.saleId) } catch {}
-      }
-      await router.push(`/admin/sales/${res.saleId}`)
-    }
+    showPaymentModal.value = false
+    alert(t('admin.pages.pos.alerts.saleCreated'))
   } catch (e: any) {
-    const msg = e?.data?.statusMessage || e?.data?.message || e?.message || 'Failed to create sale'
-    errorMessage.value = String(msg)
+    console.error('Sale failed', e)
+    alert(t('admin.pages.pos.alerts.saleFailed', { message: e.message || t('admin.pages.pos.alerts.unknownError') }))
   } finally {
     placingSale.value = false
   }
 }
 
-function printLastSale() {
-  const id = lastSaleId.value
-  if (!id) return
-  if (process.client) {
-    window.open(`/admin/sales/${id}?print=1`, '_blank', 'noopener,noreferrer')
-  }
+function openExampleDialog(name: string) {
+  alert(t('admin.pages.pos.alerts.featureComingSoon', { feature: name }))
 }
 
-let barcodeKeydownHandler: ((e: KeyboardEvent) => void) | null = null
+function printLastSale() {
+  alert(t('admin.pages.pos.alerts.reprintNotImplemented'))
+}
 
+// Initial Load
 onMounted(async () => {
-  await Promise.all([fetchCategories(), fetchProducts(), fetchCustomers()])
-
-  if (process.client) {
-    try {
-      lastSaleId.value = localStorage.getItem('pos:lastSaleId')
-    } catch {}
+  try {
+    const [cats, prods, custs] = await Promise.all([
+      $fetch('/api/admin/categories', { headers: { Authorization: `Bearer ${authStore.token}` } }) as Promise<Category[]>,
+      $fetch('/api/admin/products', { 
+        headers: { Authorization: `Bearer ${authStore.token}` },
+        query: { limit: 1000 }
+      }) as Promise<ProductListRow[]>,
+      $fetch('/api/admin/customers', { headers: { Authorization: `Bearer ${authStore.token}` } }) as Promise<any[]>
+    ])
+    
+    categories.value = cats
+    products.value = prods
+    customers.value = custs
+  } catch (e) {
+    console.error('Populate failed', e)
+  } finally {
+    loadingProducts.value = false
   }
-
-  let buffer = ''
-  let lastAt = 0
-  let startAt = 0
-
-  barcodeKeydownHandler = (e: KeyboardEvent) => {
-    if (e.ctrlKey || e.metaKey || e.altKey) return
-    if (e.key === 'Shift' || e.key === 'CapsLock' || e.key === 'Tab') return
-
-    const now = Date.now()
-    if (!lastAt || now - lastAt > 120) {
-      buffer = ''
-      startAt = now
-    }
-    lastAt = now
-
-    if (e.key === 'Enter') {
-      const duration = now - startAt
-      const code = buffer.trim()
-      buffer = ''
-      startAt = now
-
-      if (code.length >= 4 && duration <= 1200) {
-        e.preventDefault()
-        const el = document.activeElement as any
-        if (el && typeof el.value === 'string' && el.value === code) {
-          el.value = ''
-          el.dispatchEvent(new Event('input', { bubbles: true }))
-        }
-        lookupAndAddByCode(code)
-      }
-      return
-    }
-
-    if (e.key.length === 1) {
-      buffer += e.key
-    }
-  }
-
-  window.addEventListener('keydown', barcodeKeydownHandler)
-})
-
-onUnmounted(() => {
-  if (!process.client) return
-  if (!barcodeKeydownHandler) return
-  window.removeEventListener('keydown', barcodeKeydownHandler)
-  barcodeKeydownHandler = null
 })
 </script>

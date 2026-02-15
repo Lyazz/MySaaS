@@ -99,6 +99,23 @@ export class CashController {
         }
     }
 
+    async getSessionExpectedClosing(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+            if (!id || Array.isArray(id)) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+
+            const result = await service.getSessionExpectedClosing(tenant.id, id)
+            res.json(result)
+        } catch (error: any) {
+            if (error instanceof CashValidationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get expected closing error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async listTransactions(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
@@ -148,4 +165,3 @@ export class CashController {
         }
     }
 }
-

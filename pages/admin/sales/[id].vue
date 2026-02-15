@@ -153,7 +153,7 @@ function formatDate(dateString: string) {
 async function fetchSale() {
   loading.value = true
   try {
-    sale.value = await $fetch<Sale>(`/api/admin/sales/pos/${saleId}`, {
+    sale.value = await $fetch<Sale>(`/api/admin/sales/${saleId}`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
     if (process.client && shouldPrint.value && sale.value) {

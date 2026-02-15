@@ -59,6 +59,8 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
     })
 
     afterAll(async () => {
+        await prisma.customerPayment.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
+        await prisma.supplierPayment.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.cashTransaction.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.cashSession.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.cashbox.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
@@ -103,6 +105,12 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
         expect(customerPayRes.status).toBe(201)
         expect(customerPayRes.body.customerId).toBe(customerAId)
 
+        const mirroredCustomer = await prisma.customerPayment.findFirst({
+            where: { tenantId: tenantAId, cashTransactionId: customerPayRes.body.id }
+        })
+        expect(mirroredCustomer?.customerId).toBe(customerAId)
+        expect(String(mirroredCustomer?.amount)).toBe('500')
+
         const supplierPayRes = await request(app)
             .post('/api/admin/cash-transactions')
             .set('X-Forwarded-Host', hostA)
@@ -119,6 +127,12 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
         expect(supplierPayRes.status).toBe(201)
         expect(supplierPayRes.body.supplierId).toBe(supplierAId)
 
+        const mirroredSupplier = await prisma.supplierPayment.findFirst({
+            where: { tenantId: tenantAId, cashTransactionId: supplierPayRes.body.id }
+        })
+        expect(mirroredSupplier?.supplierId).toBe(supplierAId)
+        expect(String(mirroredSupplier?.amount)).toBe('200')
+
         const expenseRes = await request(app)
             .post('/api/admin/cash-transactions')
             .set('X-Forwarded-Host', hostA)
@@ -133,6 +147,14 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
 
         expect(expenseRes.status).toBe(201)
         expect(expenseRes.body.expenseCategory).toBe('Transport')
+
+        const expectedRes = await request(app)
+            .get(`/api/admin/cash-sessions/${sessionAId}/expected`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+
+        expect(expectedRes.status).toBe(200)
+        expect(String(expectedRes.body.expectedClosing)).toBe('1250')
 
         // expectedClosing = openingFloat (1000) + IN (500) - OUT (200+50) = 1250
         const closeRes = await request(app)
@@ -191,4 +213,3 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
         expect(res.status).toBe(404)
     })
 })
-

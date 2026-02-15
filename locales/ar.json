@@ -1,6 +1,7 @@
 {
   "common": {
-    "view": "عرض"
+    "view": "عرض",
+    "details": "تفاصيل"
   },
   "i18n": {
     "switcher": {
@@ -205,7 +206,7 @@
         "orContinueWith": "أو تابع باستخدام",
         "email": {
           "label": "البريد الإلكتروني",
-          "placeholder": "name@company.com"
+          "placeholder": "name{'@'}company.com"
         },
         "password": {
           "label": "كلمة المرور",
@@ -250,7 +251,7 @@
         },
         "email": {
           "label": "البريد المهني",
-          "placeholder": "name@company.com"
+          "placeholder": "name{'@'}company.com"
         },
         "password": {
           "label": "كلمة المرور"
@@ -904,23 +905,74 @@
         "deleteFailed": "فشل حذف معلومات التواصل."
       },
       "kinds": {
-        "phone": { "label": "هاتف", "placeholder": "0550 00 00 00" },
-        "email": { "label": "بريد إلكتروني", "placeholder": "contact@store.com" },
-        "address": { "label": "العنوان", "placeholder": "الجزائر، حيدرة…" },
-        "map": { "label": "رابط الخريطة", "placeholder": "https://maps.app.goo.gl/..." },
-        "website": { "label": "الموقع", "placeholder": "https://example.com" },
-        "whatsapp": { "label": "واتساب", "placeholder": "+213550000000" },
-        "facebook": { "label": "فيسبوك", "placeholder": "https://facebook.com/yourpage" },
-        "instagram": { "label": "إنستغرام", "placeholder": "@yourstore" },
-        "tiktok": { "label": "تيك توك", "placeholder": "@yourstore" },
-        "youtube": { "label": "يوتيوب", "placeholder": "https://youtube.com/@yourstore" },
-        "x": { "label": "X (تويتر)", "placeholder": "@yourstore" },
-        "linkedin": { "label": "لينكدإن", "placeholder": "https://linkedin.com/company/yourstore" },
-        "snapchat": { "label": "سناب شات", "placeholder": "@yourstore" },
-        "telegram": { "label": "تيليغرام", "placeholder": "https://t.me/yourstore" },
-        "viber": { "label": "فايبر", "placeholder": "+213550000000" },
-        "pinterest": { "label": "بنترست", "placeholder": "https://pinterest.com/yourstore" },
-        "threads": { "label": "ثريدز", "placeholder": "@yourstore" }
+        "phone": {
+          "label": "هاتف",
+          "placeholder": "0550 00 00 00"
+        },
+        "email": {
+          "label": "بريد إلكتروني",
+          "placeholder": "contact{'@'}store.com"
+        },
+        "address": {
+          "label": "العنوان",
+          "placeholder": "الجزائر، حيدرة…"
+        },
+        "map": {
+          "label": "رابط الخريطة",
+          "placeholder": "https://maps.app.goo.gl/..."
+        },
+        "website": {
+          "label": "الموقع",
+          "placeholder": "https://example.com"
+        },
+        "whatsapp": {
+          "label": "واتساب",
+          "placeholder": "+213550000000"
+        },
+        "facebook": {
+          "label": "فيسبوك",
+          "placeholder": "https://facebook.com/yourpage"
+        },
+        "instagram": {
+          "label": "إنستغرام",
+          "placeholder": "{'@'}yourstore"
+        },
+        "tiktok": {
+          "label": "تيك توك",
+          "placeholder": "{'@'}yourstore"
+        },
+        "youtube": {
+          "label": "يوتيوب",
+          "placeholder": "https://youtube.com/{'@'}yourstore"
+        },
+        "x": {
+          "label": "X (تويتر)",
+          "placeholder": "{'@'}yourstore"
+        },
+        "linkedin": {
+          "label": "لينكدإن",
+          "placeholder": "https://linkedin.com/company/yourstore"
+        },
+        "snapchat": {
+          "label": "سناب شات",
+          "placeholder": "{'@'}yourstore"
+        },
+        "telegram": {
+          "label": "تيليغرام",
+          "placeholder": "https://t.me/yourstore"
+        },
+        "viber": {
+          "label": "فايبر",
+          "placeholder": "+213550000000"
+        },
+        "pinterest": {
+          "label": "بنترست",
+          "placeholder": "https://pinterest.com/yourstore"
+        },
+        "threads": {
+          "label": "ثريدز",
+          "placeholder": "{'@'}yourstore"
+        }
       }
     },
     "imageUploader": {
@@ -1080,14 +1132,38 @@
         "title": "قالب المتجر",
         "subtitle": "اختر التخطيط الأنسب لعلامتك.",
         "options": {
-          "classic": { "label": "كلاسيكي", "description": "أناقة كلاسيكية بخط serif." },
-          "modern": { "label": "حديث بسيط", "description": "تصميم نظيف مع لمسات جريئة." },
-          "street": { "label": "شارع", "description": "أسلوب عالي التباين وحيوي." },
-          "cozy": { "label": "دافئ", "description": "ألوان ناعمة وتفاصيل مستديرة." },
-          "cyber": { "label": "سايبَر", "description": "وضع داكن مع لمسات نيون." },
-          "stationnery": { "label": "قرطاسية", "description": "هيكلة أنيقة للمحترفين." },
-          "food": { "label": "طعام", "description": "ألوان نابضة وشهية." },
-          "wellness": { "label": "عافية", "description": "طبيعي وهادئ." }
+          "classic": {
+            "label": "كلاسيكي",
+            "description": "أناقة كلاسيكية بخط serif."
+          },
+          "modern": {
+            "label": "حديث بسيط",
+            "description": "تصميم نظيف مع لمسات جريئة."
+          },
+          "street": {
+            "label": "شارع",
+            "description": "أسلوب عالي التباين وحيوي."
+          },
+          "cozy": {
+            "label": "دافئ",
+            "description": "ألوان ناعمة وتفاصيل مستديرة."
+          },
+          "cyber": {
+            "label": "سايبَر",
+            "description": "وضع داكن مع لمسات نيون."
+          },
+          "stationnery": {
+            "label": "قرطاسية",
+            "description": "هيكلة أنيقة للمحترفين."
+          },
+          "food": {
+            "label": "طعام",
+            "description": "ألوان نابضة وشهية."
+          },
+          "wellness": {
+            "label": "عافية",
+            "description": "طبيعي وهادئ."
+          }
         }
       },
       "preview": {
@@ -1242,6 +1318,135 @@
       "cash": {
         "title": "إدارة الصناديق",
         "subtitle": "إدارة الأموال والجلسات والمعاملات.",
+        "actions": {
+          "newCustomerPayment": "دفعة عميل",
+          "newSupplierPayment": "دفعة لمورد",
+          "newExpense": "مصروف جديد",
+          "newCharge": "تكلفة جديدة",
+          "transfer": "تحويل"
+        },
+        "cashboxes": {
+          "title": "الصناديق",
+          "status": "الحالة",
+          "openSession": "جلسة مفتوحة #{id}",
+          "closed": "لا توجد جلسة مفتوحة",
+          "open": "فتح",
+          "close": "إغلاق",
+          "empty": "لا توجد صناديق",
+          "emptyHint": "أنشئ صندوقاً للبدء."
+        },
+        "cashbox": {
+          "titleFallback": "صندوق",
+          "transactionsHint": "معاملات هذا الصندوق."
+        },
+        "methods": {
+          "CASH": "نقداً",
+          "CARD": "بطاقة",
+          "TRANSFER": "تحويل",
+          "OTHER": "أخرى"
+        },
+        "directions": {
+          "in": "وارد",
+          "out": "صادر"
+        },
+        "modals": {
+          "openSession": {
+            "title": "فتح جلسة",
+            "subtitle": "حدد رصيد الافتتاح.",
+            "openingFloatLabel": "رصيد الافتتاح",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "مثال: بداية اليوم",
+            "confirm": "فتح"
+          },
+          "closeSession": {
+            "title": "إغلاق الجلسة",
+            "subtitle": "أدخل المبلغ المعدود فعلياً.",
+            "closingCountLabel": "المبلغ المعدود",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "مثال: نهاية اليوم",
+            "confirm": "إغلاق"
+          },
+          "expense": {
+            "title": "مصروف جديد",
+            "subtitle": "سجّل خروجاً نقدياً.",
+            "cashboxLabel": "الصندوق",
+            "cashboxPlaceholder": "اختر صندوقاً",
+            "amountLabel": "المبلغ",
+            "categoryLabel": "الفئة",
+            "categoryPlaceholder": "مثال: إيجار، نقل…",
+            "methodLabel": "الطريقة",
+            "referenceLabel": "مرجع",
+            "referencePlaceholder": "اختياري",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "اختياري",
+            "confirm": "حفظ"
+          },
+          "charge": {
+            "title": "تكلفة جديدة"
+          },
+          "transfer": {
+            "title": "تحويل بين الصناديق",
+            "subtitle": "نقل الأموال من صندوق إلى آخر.",
+            "fromLabel": "من",
+            "fromPlaceholder": "صندوق المصدر",
+            "toLabel": "إلى",
+            "toPlaceholder": "صندوق الوجهة",
+            "amountLabel": "المبلغ",
+            "referenceLabel": "مرجع",
+            "referencePlaceholder": "اختياري",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "اختياري",
+            "confirm": "تحويل"
+          },
+          "delivery": {
+            "title": "دفع عند التسليم",
+            "subtitle": "الدفع دائماً كامل المبلغ.",
+            "confirm": "تأكيد",
+            "amountLabel": "المبلغ",
+            "cashboxLabel": "الصندوق",
+            "cashboxPlaceholder": "اختر صندوقاً",
+            "noOpenSession": "لا توجد جلسة",
+            "cashboxHint": "يجب أن يكون للصندوق جلسة مفتوحة.",
+            "methodLabel": "الطريقة",
+            "referenceLabel": "مرجع",
+            "referencePlaceholder": "اختياري",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "اختياري"
+          },
+          "customerPayment": {
+            "title": "دفعة عميل",
+            "subtitle": "سجّل دفعة من عميل (عربون، تسوية، أو دفعة حرة).",
+            "cashboxLabel": "الصندوق",
+            "cashboxPlaceholder": "اختر صندوقاً",
+            "customerLabel": "العميل",
+            "customerSearchPlaceholder": "ابحث بالاسم أو الهاتف…",
+            "customerPlaceholder": "اختر عميلاً",
+            "loadingCustomers": "جارٍ تحميل العملاء…",
+            "amountLabel": "المبلغ",
+            "methodLabel": "الطريقة",
+            "referenceLabel": "مرجع",
+            "referencePlaceholder": "اختياري",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "اختياري",
+            "confirm": "حفظ"
+          },
+          "supplierPayment": {
+            "title": "دفعة لمورد",
+            "subtitle": "سجّل دفعة لمورد (سلفة، متأخرات، أو دفعة حرة).",
+            "cashboxLabel": "الصندوق",
+            "cashboxPlaceholder": "اختر صندوقاً",
+            "supplierLabel": "المورّد",
+            "supplierSearchPlaceholder": "ابحث بالاسم أو الهاتف…",
+            "supplierPlaceholder": "اختر مورّداً",
+            "amountLabel": "المبلغ",
+            "methodLabel": "الطريقة",
+            "referenceLabel": "مرجع",
+            "referencePlaceholder": "اختياري",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "اختياري",
+            "confirm": "حفظ"
+          }
+        },
         "create": "صندوق جديد",
         "edit": "تعديل الصندوق",
         "openSession": "فتح الجلسة",
@@ -1257,6 +1462,23 @@
         "transfer": "تحويل بين الصناديق",
         "toCashbox": "إلى الصندوق",
         "transactions": {
+          "title": "المعاملات",
+          "subtitle": "كل عمليات المال المسجلة هنا.",
+          "loading": "جارٍ التحميل…",
+          "empty": "لا توجد معاملات",
+          "emptyHint": "ستظهر تحصيلات البيع والمصاريف والتحويلات هنا.",
+          "filters": {
+            "allCashboxes": "كل الصناديق",
+            "allTypes": "كل الأنواع",
+            "allDirections": "وارد + صادر"
+          },
+          "table": {
+            "date": "التاريخ",
+            "cashbox": "الصندوق",
+            "type": "النوع",
+            "method": "الطريقة",
+            "amount": "المبلغ"
+          },
           "type": "النوع",
           "amount": "المبلغ",
           "date": "التاريخ",
@@ -1268,8 +1490,34 @@
             "EXPENSE": "مصروف",
             "CHARGE": "تكلفة",
             "SALE_PAYMENT": "تحصيل بيع",
+            "TRANSFER": "تحويل",
             "TRANSFER_IN": "تحويل (وارد)",
             "TRANSFER_OUT": "تحويل (صادر)"
+          }
+        },
+        "sessions": {
+          "title": "جلسات الصندوق",
+          "subtitle": "رصيد الافتتاح والإغلاق والسجل لكل صندوق.",
+          "loading": "جارٍ التحميل…",
+          "empty": "لا توجد جلسات",
+          "emptyHint": "افتح جلسة لبدء تسجيل المعاملات.",
+          "filters": {
+            "allCashboxes": "كل الصناديق",
+            "allStatuses": "كل الحالات"
+          },
+          "table": {
+            "cashbox": "الصندوق",
+            "status": "الحالة",
+            "openedAt": "فتح",
+            "closedAt": "إغلاق",
+            "openingFloat": "رصيد الافتتاح",
+            "expectedClosing": "المتوقع",
+            "closingCount": "المعدود",
+            "difference": "الفرق"
+          },
+          "expected": {
+            "loading": "جارٍ حساب المبلغ المتوقع…",
+            "unavailable": "المبلغ المتوقع غير متاح."
           }
         },
         "status": {
@@ -1639,6 +1887,7 @@
             "submit": "تحديث الحالة",
             "success": "تم تحديث حالة الطلب بنجاح!",
             "errors": {
+              "loadCashboxesFailed": "تعذر تحميل الصناديق. افتح جلسة صندوق أولاً.",
               "updateFailed": "تعذر تحديث حالة الطلب"
             }
           },
@@ -1668,7 +1917,7 @@
       "customers": {
         "index": {
           "title": "العملاء",
-          "subtitle": "مستخرج من سجل الطلبات",
+          "subtitle": "مستخرج من سجل المبيعات",
           "addCustomer": "إضافة عميل",
           "count": "{count} عميل",
           "loadingInline": "جارٍ التحميل…",
@@ -1680,7 +1929,7 @@
           "loading": "جارٍ تحميل العملاء…",
           "empty": {
             "title": "لا يوجد عملاء",
-            "hint": "سيظهر العملاء هنا بعد إنشاء طلبات",
+            "hint": "سيظهر العملاء هنا بعد تسجيل المبيعات",
             "hintFiltered": "جرّب تعديل البحث",
             "newCustomer": "عميل جديد"
           },
@@ -1688,7 +1937,7 @@
             "sortBy": "ترتيب حسب:",
             "lastOrder": "آخر طلب",
             "name": "الاسم",
-            "orders": "الطلبات",
+            "orders": "المبيعات",
             "totalSpent": "إجمالي الإنفاق"
           },
           "pagination": {
@@ -1701,7 +1950,7 @@
           "table": {
             "customer": "العميل",
             "phone": "الهاتف",
-            "orders": "الطلبات",
+            "orders": "المبيعات",
             "totalSpent": "إجمالي الإنفاق",
             "lastOrder": "آخر طلب",
             "actions": "الإجراءات"
@@ -1735,8 +1984,15 @@
           "fallbackTitle": "عميل",
           "loading": "جارٍ تحميل العميل…",
           "stats": {
-            "orders": "الطلبات",
-            "totalSpent": "إجمالي الإنفاق"
+            "orders": "المبيعات",
+            "totalSpent": "إجمالي الإنفاق",
+            "totalPaid": "إجمالي المدفوع",
+            "currentBalance": "الرصيد",
+            "openingBalance": "الرصيد الافتتاحي",
+            "openingBalanceHint": "يُستخدم لتهيئة دين/رصيد العميل.",
+            "payments": "الدفعات",
+            "method": "الطريقة",
+            "reference": "المرجع"
           },
           "errors": {
             "title": "تعذر تحميل العميل",
@@ -1747,11 +2003,11 @@
             "hint": "قد يكون هذا العميل غير موجود أو ليس لديك صلاحية لعرضه."
           },
           "empty": {
-            "title": "لا توجد طلبات",
-            "hint": "هذا العميل لا يملك طلبات بعد."
+            "title": "لا توجد مبيعات",
+            "hint": "هذا العميل لا يملك مبيعات بعد."
           },
           "table": {
-            "order": "الطلب",
+            "order": "عملية بيع",
             "total": "الإجمالي",
             "status": "الحالة",
             "date": "التاريخ",

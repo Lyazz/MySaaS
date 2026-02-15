@@ -17,6 +17,7 @@ model Tenant {
 
   users          User[]
   customers      Customer[]
+  customerPayments CustomerPayment[]
   cashboxes      Cashbox[]
   cashSessions   CashSession[]
   cashTransactions CashTransaction[]
@@ -32,6 +33,7 @@ model Tenant {
   variantImages  ProductVariantImage[]
   inventoryMoves InventoryMovement[]
   suppliers      Supplier[]
+  supplierPayments SupplierPayment[]
   purchaseOrders PurchaseOrder[]
   purchaseOrderItems PurchaseOrderItem[]
   categories     Category[]
@@ -148,6 +150,9 @@ model CashTransaction {
   createdBy       User? @relation("CashTransactionCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
 
   createdAt DateTime @default(now())
+
+  customerPayment CustomerPayment? @relation("CashTxCustomerPayment")
+  supplierPayment SupplierPayment? @relation("CashTxSupplierPayment")
 
   @@unique([tenantId, id])
   @@index([tenantId])
@@ -304,6 +309,8 @@ model User {
   inventoryMovements InventoryMovement[]
   purchaseOrdersCreated PurchaseOrder[] @relation("PurchaseOrderCreatedBy")
   salesCreated Sale[] @relation("SaleCreatedBy")
+  customerPaymentsCreated CustomerPayment[] @relation("CustomerPaymentCreatedBy")
+  supplierPaymentsCreated SupplierPayment[] @relation("SupplierPaymentCreatedBy")
   cashSessionsOpened CashSession[] @relation("CashSessionOpenedBy")
   cashSessionsClosed CashSession[] @relation("CashSessionClosedBy")
   cashTransactionsCreated CashTransaction[] @relation("CashTransactionCreatedBy")
@@ -602,6 +609,10 @@ model Sale {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  source  String @default("POS") // POS | ORDER
+  orderId String?
+  order   Order?  @relation("SaleOrder", fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+
   totalAmount Float
   status      String @default("COMPLETED") // COMPLETED | REFUNDED (future)
 
@@ -620,11 +631,13 @@ model Sale {
   items     SaleItem[]
   movements InventoryMovement[]
   cashTransactions CashTransaction[] @relation("CashTxSale")
+  customerPayments CustomerPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, id])
+  @@unique([tenantId, orderId])
   @@index([tenantId])
   @@index([tenantId, customerId])
 }
@@ -660,8 +673,10 @@ model Supplier {
   email   String?
   address String?
   notes   String?
+  openingBalance Decimal @default(0)
 
   purchaseOrders PurchaseOrder[]
+  payments SupplierPayment[]
   cashTransactions CashTransaction[] @relation("CashTxSupplier")
 
   createdAt DateTime @default(now())
@@ -693,6 +708,7 @@ model PurchaseOrder {
 
   items PurchaseOrderItem[]
   cashTransactions CashTransaction[] @relation("CashTxPurchaseOrder")
+  supplierPayments SupplierPayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -759,6 +775,7 @@ model Order {
   shipments Shipment[]
   inventoryMovements InventoryMovement[]
   cashTransactions CashTransaction[] @relation("CashTxOrder")
+  sale      Sale? @relation("SaleOrder")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -777,12 +794,14 @@ model Customer {
   phone   String
   email   String?
   address String?
+  openingBalance Decimal @default(0)
 
   // For future customer-auth/customer-space. Not used in MVP flows yet.
   passwordHash String?
 
   orders Order[]
   sales  Sale[]
+  payments CustomerPayment[]
   cashTransactions CashTransaction[] @relation("CashTxCustomer")
 
   createdAt DateTime @default(now())
@@ -793,6 +812,70 @@ model Customer {
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, createdAt])
+}
+
+model CustomerPayment {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+
+  saleId String?
+  sale   Sale? @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Restrict)
+
+  cashTransactionId String
+  cashTransaction   CashTransaction @relation("CashTxCustomerPayment", fields: [tenantId, cashTransactionId], references: [tenantId, id], onDelete: Restrict)
+
+  amount    Decimal
+  currency  String @default("DZD")
+  method    String @default("CASH")
+  reference String?
+  note      String?
+
+  createdByUserId String?
+  createdBy       User? @relation("CustomerPaymentCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, cashTransactionId])
+  @@index([tenantId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, saleId])
+}
+
+model SupplierPayment {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  supplierId String
+  supplier   Supplier @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: Restrict)
+
+  purchaseOrderId String?
+  purchaseOrder   PurchaseOrder? @relation(fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: Restrict)
+
+  cashTransactionId String
+  cashTransaction   CashTransaction @relation("CashTxSupplierPayment", fields: [tenantId, cashTransactionId], references: [tenantId, id], onDelete: Restrict)
+
+  amount    Decimal
+  currency  String @default("DZD")
+  method    String @default("CASH")
+  reference String?
+  note      String?
+
+  createdByUserId String?
+  createdBy       User? @relation("SupplierPaymentCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, cashTransactionId])
+  @@index([tenantId])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, purchaseOrderId])
 }
 
 enum ShipmentProvider {
