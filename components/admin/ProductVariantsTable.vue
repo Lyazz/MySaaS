@@ -2,10 +2,10 @@
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-medium text-gray-900">
-        Variants
+        {{ t('admin.variantsTable.title') }}
       </h3>
       <p class="text-sm text-gray-500">
-        Variants stay in sync with your options automatically.
+        {{ t('admin.variantsTable.subtitle') }}
       </p>
     </div>
 
@@ -17,67 +17,67 @@
               scope="col"
               class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
             >
-              Variant
+              {{ t('admin.variantsTable.columns.variant') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Price
+              {{ t('admin.variantsTable.columns.price') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Track
+              {{ t('admin.variantsTable.columns.track') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              On-hand
+              {{ t('admin.variantsTable.columns.onHand') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Reserved
+              {{ t('admin.variantsTable.columns.reserved') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Safety
+              {{ t('admin.variantsTable.columns.safety') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Available
+              {{ t('admin.variantsTable.columns.available') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              SKU
+              {{ t('admin.variantsTable.columns.sku') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Active
+              {{ t('admin.variantsTable.columns.active') }}
             </th>
             <th
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
-              Images
+              {{ t('admin.variantsTable.columns.images') }}
             </th>
             <th
               scope="col"
               class="relative py-3.5 pl-3 pr-4 sm:pr-6"
             >
-              <span class="sr-only">Actions</span>
+              <span class="sr-only">{{ t('admin.common.actions') }}</span>
             </th>
           </tr>
         </thead>
@@ -152,7 +152,7 @@
                 class="text-teal-600 hover:text-teal-900 font-medium"
                 @click="openImageEditor(variant)"
               >
-                Manage ({{ variant.images?.length || 0 }})
+                {{ t('admin.variantsTable.actions.manageImages', { count: variant.images?.length || 0 }) }}
               </button>
             </td>
             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
@@ -161,7 +161,7 @@
                 class="text-gray-600 hover:text-gray-900"
                 @click="openMovements(variant)"
               >
-                Movements
+                {{ t('admin.variantsTable.actions.movements') }}
               </button>
             </td>
           </tr>
@@ -178,10 +178,10 @@
         <div class="flex items-start justify-between">
           <div class="min-w-0">
             <h4 class="text-lg font-semibold text-gray-900 truncate">
-              Inventory movements — {{ getVariantTitle(movementsVariant) }}
+              {{ t('admin.variantsTable.movements.title') }} — {{ getVariantTitle(movementsVariant) }}
             </h4>
             <p class="text-sm text-gray-500">
-              Latest 50 movements for this variant.
+              {{ t('admin.variantsTable.movements.subtitle') }}
             </p>
           </div>
           <button
@@ -197,14 +197,14 @@
           v-if="movementsLoading"
           class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
         >
-          Loading movements…
+          {{ t('admin.variantsTable.movements.loading') }}
         </div>
 
         <div
           v-else-if="movements.length === 0"
           class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
         >
-          No movements recorded yet.
+          {{ t('admin.variantsTable.movements.empty') }}
         </div>
 
         <div
@@ -214,13 +214,13 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Δ stock</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Δ reserved</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Δ safety</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">After</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">By</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.date') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.type') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.deltaStock') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.deltaReserved') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.deltaSafety') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.after') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.by') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
@@ -229,7 +229,7 @@
                 <td class="px-3 py-2 text-sm text-gray-700">
                   <div class="min-w-0">
                     <p class="truncate font-medium">{{ m.type }}</p>
-                    <p v-if="m.orderId" class="truncate text-xs text-gray-500">Order: {{ m.orderId }}</p>
+                    <p v-if="m.orderId" class="truncate text-xs text-gray-500">{{ t('admin.variantsTable.movements.order', { id: m.orderId }) }}</p>
                   </div>
                 </td>
                 <td class="px-3 py-2 text-sm text-gray-700">{{ m.delta }}</td>
@@ -242,7 +242,7 @@
                   <span class="text-gray-400"> · </span>
                   <span v-if="m.safetyStockAfter !== null">SS={{ m.safetyStockAfter }}</span><span v-else>—</span>
                 </td>
-                <td class="px-3 py-2 text-sm text-gray-700">{{ m.createdBy?.email || 'system' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-700">{{ m.createdBy?.email || t('admin.variantsTable.movements.system') }}</td>
               </tr>
             </tbody>
           </table>
@@ -254,7 +254,7 @@
             class="px-4 py-2 rounded-md border text-sm"
             @click="closeMovements"
           >
-            Close
+            {{ t('admin.common.close') }}
           </button>
         </div>
       </div>
@@ -269,10 +269,10 @@
         <div class="flex items-start justify-between">
           <div>
             <h4 class="text-lg font-semibold text-gray-900">
-              Select images for this variant
+              {{ t('admin.variantsTable.imagePicker.title') }}
             </h4>
             <p class="text-sm text-gray-500">
-              Images come from the product gallery. Check to attach.
+              {{ t('admin.variantsTable.imagePicker.subtitle') }}
             </p>
           </div>
           <button
@@ -288,7 +288,7 @@
           v-if="availableImages.length === 0"
           class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
         >
-          No product images available. Upload images to the product first, then attach them here.
+          {{ t('admin.variantsTable.imagePicker.empty') }}
         </div>
 
         <div
@@ -304,11 +304,11 @@
               <img
                 :src="img.url"
                 class="w-full h-full object-cover"
-                :alt="img.label || 'Image'"
+                :alt="img.label || t('admin.variantsTable.imagePicker.imageFallback')"
               >
             </div>
             <div class="flex items-center justify-between text-sm">
-              <span class="truncate text-gray-700">{{ img.label || 'Image' }}</span>
+              <span class="truncate text-gray-700">{{ img.label || t('admin.variantsTable.imagePicker.imageFallback') }}</span>
               <input
                 type="checkbox"
                 class="h-4 w-4 text-teal-600 border-gray-300 rounded"
@@ -325,7 +325,7 @@
             class="px-4 py-2 rounded-md border text-sm"
             @click="closeImageEditor"
           >
-            Cancel
+            {{ t('admin.common.cancel') }}
           </button>
           <button
             type="button"
@@ -333,7 +333,7 @@
             class="px-4 py-2 bg-teal-600 text-white rounded-md text-sm hover:bg-teal-700 disabled:opacity-50"
             @click="saveVariantImages"
           >
-            {{ savingImages ? 'Saving...' : 'Save images' }}
+            {{ savingImages ? t('admin.common.saving') : t('admin.variantsTable.imagePicker.save') }}
           </button>
         </div>
       </div>
@@ -343,6 +343,8 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const props = defineProps<{
     productId: string
@@ -356,7 +358,7 @@ const emit = defineEmits(['refresh'])
 const authStore = useAuthStore()
 
 function getVariantTitle(variant: any) {
-    if (!variant.optionValues || variant.optionValues.length === 0) return 'Default'
+    if (!variant.optionValues || variant.optionValues.length === 0) return t('admin.variantsTable.defaultVariant')
     
     // If we have options metadata, sort values by option position
     let values = [...variant.optionValues]
@@ -395,7 +397,7 @@ async function updateVariantInfo(variant: any) {
         })
     } catch (e) {
         console.error(e)
-        alert('Failed to update variant')
+        alert(t('admin.variantsTable.errors.updateVariantFailed'))
     }
 }
 
@@ -421,7 +423,7 @@ async function updateVariantInventory(variant: any, patch: any) {
         }
     } catch (e) {
         console.error(e)
-        alert('Failed to update inventory')
+        alert(t('admin.variantsTable.errors.updateInventoryFailed'))
         emit('refresh')
     } finally {
         savingInventoryIds.value.delete(variant.id)
@@ -486,7 +488,7 @@ const availableImages = computed(() => {
             list.push({
                 id: img.id ?? null,
                 url: img.url,
-                label: img.alt || img.label || `Image ${idx + 1}`
+                label: img.alt || img.label || t('admin.variantsTable.imagePicker.imageWithIndex', { index: idx + 1 })
             })
         })
     }
@@ -497,7 +499,7 @@ const availableImages = computed(() => {
             list.push({
                 id: null,
                 url,
-                label: `Image ${idx + 1}`
+                label: t('admin.variantsTable.imagePicker.imageWithIndex', { index: idx + 1 })
             })
         })
     }
@@ -546,7 +548,7 @@ async function saveVariantImages() {
         emit('refresh')
     } catch (e) {
         console.error('Failed to save variant images', e)
-        const message = (e as any)?.data?.statusMessage || (e as any)?.message || 'Failed to save images'
+        const message = (e as any)?.data?.statusMessage || (e as any)?.message || t('admin.variantsTable.errors.saveImagesFailed')
         alert(message)
     } finally {
         savingImages.value = false

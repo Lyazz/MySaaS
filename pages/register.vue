@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 
+const { t } = useI18n({ useScope: 'global' })
+const year = new Date().getFullYear()
+
 definePageMeta({
   middleware: 'saas-only',
   layout: 'marketing',
@@ -40,7 +43,7 @@ async function register() {
     })
     successData.value = data
   } catch (e: any) {
-    error.value = e.data?.statusMessage || 'An error occurred during registration.'
+    error.value = e.data?.statusMessage || t('auth.register.errors.generic')
   } finally {
     loading.value = false
   }
@@ -63,11 +66,11 @@ async function register() {
 
       <div class="relative z-10 max-w-lg">
         <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
-          Launch your <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Empire</span> today.
+          {{ t('auth.register.hero.launchYour') }} <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">{{ t('auth.register.hero.empire') }}</span> {{ t('auth.register.hero.today') }}
         </h2>
         <p class="text-lg text-slate-400 mb-8 leading-relaxed">
-          Join thousands of merchants building the next generation of commerce. 
-          Scalable, secure, and ready for growth.
+          {{ t('auth.register.hero.subtitle') }}
         </p>
 
         <!-- Mini Testimonial -->
@@ -75,19 +78,19 @@ async function register() {
           <div class="flex gap-1 text-amber-400 mb-3">
             <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
           </div>
-          <p class="text-slate-300 italic mb-4">"Moving to Swekly was the best decision we made. Our revenue doubled in 3 months."</p>
+          <p class="text-slate-300 italic mb-4">"{{ t('auth.register.hero.testimonial.quote') }}"</p>
           <div class="flex items-center gap-3">
              <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">JD</div>
              <div class="text-sm">
-               <div class="font-bold text-white">John Doe</div>
-               <div class="text-slate-500">CEO, FashionNova</div>
+               <div class="font-bold text-white">{{ t('auth.register.hero.testimonial.name') }}</div>
+               <div class="text-slate-500">{{ t('auth.register.hero.testimonial.role') }}</div>
              </div>
           </div>
         </div>
       </div>
 
       <div class="relative z-10 text-xs text-slate-500">
-        © 2026 Swekly Inc.
+        {{ t('auth.register.hero.copyright', { year }) }}
       </div>
     </div>
 
@@ -97,8 +100,8 @@ async function register() {
         
         <div class="text-center lg:text-left">
 
-          <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Create your account</h2>
-          <p class="mt-2 text-slate-500">Start your 14-day free trial. No credit card required.</p>
+          <h2 class="text-3xl font-bold text-slate-900 tracking-tight">{{ t('auth.register.form.title') }}</h2>
+          <p class="mt-2 text-slate-500">{{ t('auth.register.form.subtitle') }}</p>
         </div>
 
         <div v-if="successData" class="rounded-2xl bg-green-50 p-6 border border-green-100 animate-fadeIn">
@@ -107,12 +110,12 @@ async function register() {
               <Icon name="lucide:check-circle" class="h-6 w-6 text-green-500" />
             </div>
             <div class="ml-4">
-              <h3 class="text-lg font-bold text-green-800">You're in!</h3>
+              <h3 class="text-lg font-bold text-green-800">{{ t('auth.register.success.title') }}</h3>
               <div class="mt-2 text-green-700">
-                <p>Your workspace <strong>{{ successData.tenant.name }}</strong> has been created.</p>
+                <p>{{ t('auth.register.success.message', { name: successData.tenant.name }) }}</p>
                 <div class="mt-4">
                   <a :href="successData.tenant.url" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 shadow-sm transition-colors">
-                    Go to Dashboard &rarr;
+                    {{ t('auth.register.success.cta') }} &rarr;
                   </a>
                 </div>
               </div>
@@ -125,7 +128,7 @@ async function register() {
             
             <!-- Company Name -->
             <div>
-              <label for="company-name" class="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+              <label for="company-name" class="block text-sm font-medium text-slate-700 mb-1">{{ t('auth.register.form.companyName.label') }}</label>
               <input 
                 id="company-name" 
                 v-model="form.name" 
@@ -133,13 +136,13 @@ async function register() {
                 type="text" 
                 required 
                 class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
-                placeholder="Ex. Acme Corp"
+                :placeholder="t('auth.register.form.companyName.placeholder')"
               >
             </div>
 
             <!-- Slug -->
             <div>
-              <label for="slug" class="block text-sm font-medium text-slate-700 mb-1">Store URL</label>
+              <label for="slug" class="block text-sm font-medium text-slate-700 mb-1">{{ t('auth.register.form.slug.label') }}</label>
               <div class="flex rounded-xl shadow-sm">
                 <input 
                   id="slug" 
@@ -148,20 +151,20 @@ async function register() {
                   type="text" 
                   required 
                   class="flex-1 min-w-0 block w-full px-4 py-3 rounded-none rounded-l-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all"
-                  placeholder="acme"
+                  :placeholder="t('auth.register.form.slug.placeholder')"
                 >
                 <span class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-sm font-medium">
                   .swekly.com
                 </span>
               </div>
               <p v-if="form.slug" class="mt-1 text-xs text-teal-500 font-medium">
-                Your store will be at: {{ form.slug }}.swekly.com
+                {{ t('auth.register.form.slug.preview', { slug: form.slug }) }}
               </p>
             </div>
 
             <!-- Email -->
             <div>
-              <label for="email-address" class="block text-sm font-medium text-slate-700 mb-1">Work Email</label>
+              <label for="email-address" class="block text-sm font-medium text-slate-700 mb-1">{{ t('auth.register.form.email.label') }}</label>
               <input 
                 id="email-address" 
                 v-model="form.email" 
@@ -170,13 +173,13 @@ async function register() {
                 autocomplete="email" 
                 required 
                 class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
-                placeholder="name@company.com"
+                :placeholder="t('auth.register.form.email.placeholder')"
               >
             </div>
 
             <!-- Password -->
             <div>
-              <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <label for="password" class="block text-sm font-medium text-slate-700 mb-1">{{ t('auth.register.form.password.label') }}</label>
               <input 
                 id="password" 
                 v-model="form.password" 
@@ -203,14 +206,15 @@ async function register() {
             >
               <span v-if="loading" class="flex items-center gap-2">
                 <Icon name="lucide:loader-2" class="animate-spin h-5 w-5 text-white" />
-                Creating Account...
+                {{ t('auth.register.form.submit.creating') }}
               </span>
-              <span v-else>Register & Create Tenant</span>
+              <span v-else>{{ t('auth.register.form.submit.register') }}</span>
             </button>
           </div>
           
           <div class="text-center text-sm text-slate-500">
-            Already have an account? <NuxtLink to="/login" class="font-medium text-teal-600 hover:text-teal-500 hover:underline">Log in</NuxtLink>
+            {{ t('auth.register.form.haveAccount') }}
+            <NuxtLink to="/login" class="font-medium text-teal-600 hover:text-teal-500 hover:underline">{{ t('auth.register.form.logIn') }}</NuxtLink>
           </div>
         </form>
       </div>

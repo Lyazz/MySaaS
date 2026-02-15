@@ -6,10 +6,10 @@
           <Icon name="lucide:shield-check" class="h-8 w-8 text-white" />
         </div>
         <h1 class="text-3xl font-bold text-slate-800 mb-2">
-          Super Admin
+          {{ t('superAdmin.login.title') }}
         </h1>
         <p class="text-slate-500">
-          Sign in to access the platform dashboard
+          {{ t('superAdmin.login.subtitle') }}
         </p>
       </div>
 
@@ -30,21 +30,21 @@
           @submit.prevent="handleLogin"
         >
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('superAdmin.login.form.email.label') }}</label>
             <div class="relative">
               <input
                 v-model="email"
                 type="email"
                 required
                 class="w-full px-4 py-3 pl-10 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
-                placeholder="superadmin@example.com"
+                :placeholder="t('superAdmin.login.form.email.placeholder')"
               >
               <Icon name="lucide:mail" class="h-5 w-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('superAdmin.login.form.password.label') }}</label>
             <div class="relative">
               <input
                 v-model="password"
@@ -63,7 +63,7 @@
             class="w-full px-4 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
           >
             <Icon v-if="loading" name="lucide:loader-2" class="h-5 w-5 animate-spin" />
-            <span>{{ loading ? 'Signing in...' : 'Sign In' }}</span>
+            <span>{{ loading ? t('superAdmin.login.form.submit.signingIn') : t('superAdmin.login.form.submit.signIn') }}</span>
           </button>
         </form>
 
@@ -73,7 +73,7 @@
             class="inline-flex items-center text-sm text-slate-500 hover:text-teal-600 font-medium transition-colors"
           >
             <Icon name="lucide:arrow-left" class="h-4 w-4 mr-1.5" />
-            Back to main site
+            {{ t('superAdmin.login.backToSite') }}
           </NuxtLink>
         </div>
       </div>
@@ -91,6 +91,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const router = useRouter()
+const { t } = useI18n({ useScope: 'global' })
 
 const email = ref('')
 const password = ref('')
@@ -119,14 +120,14 @@ const handleLogin = async () => {
 
     // Check if user is super admin
     if (!response.user?.isSuperAdmin) {
-      error.value = 'Access denied: Super admin privileges required'
+      error.value = t('superAdmin.login.errors.superAdminRequired')
       return
     }
 
     authStore.setAuth(response.token, response.user, response.tenant)
     await router.push('/super-admin')
   } catch (err: any) {
-    error.value = err.data?.statusMessage || err.message || 'Login failed'
+    error.value = err.data?.statusMessage || err.message || t('superAdmin.login.errors.loginFailed')
   } finally {
     loading.value = false
   }

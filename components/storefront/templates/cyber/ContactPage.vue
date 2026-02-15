@@ -1,10 +1,11 @@
 <script setup lang="ts">
 const tenant = useState<any>('tenant')
-const tenantName = computed(() => tenant.value?.name || 'Store')
+const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
 
 useTenantSeo({
-  title: `Contact - ${tenantName.value}`,
-  description: `Contact ${tenantName.value}.`
+  title: t('storefront.pages.contact.seo.title', { tenant: tenantName.value }),
+  description: t('storefront.pages.contact.seo.description', { tenant: tenantName.value })
 })
 </script>
 
@@ -18,11 +19,10 @@ useTenantSeo({
 
     <div class="relative z-10 max-w-5xl mx-auto px-4">
       <h1 class="text-4xl font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400 mb-4">
-        Contact {{ tenantName }}
+        {{ t('storefront.pages.contact.heading', { tenant: tenantName }) }}
       </h1>
       <p class="text-purple-200/70 leading-relaxed">
-        This is the store contact page. Add your phone/email/address from the store settings wizard to replace this
-        placeholder content.
+        {{ t('storefront.pages.contact.placeholder') }}
       </p>
     </div>
   </div>

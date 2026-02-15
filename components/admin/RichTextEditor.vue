@@ -6,7 +6,7 @@
         v-model:content="content"
         content-type="html"
         :options="editorOptions"
-        :placeholder="placeholder || 'Start writing your product description...'"
+        :placeholder="placeholder || t('admin.components.richTextEditor.placeholder')"
         @update:content="onContentUpdate"
         @ready="onEditorReady"
       />
@@ -26,6 +26,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 const { showToast } = useToast()
+const { t } = useI18n({ useScope: 'global' })
 
 const quillRef = ref<any>(null)
 const content = ref(props.modelValue || '')
@@ -84,13 +85,13 @@ const handleImageUpload = async (quill: any) => {
     // Validate file type client-side
     const allowedTypes = ['image/png', 'image/jpeg', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
-      showToast('Only PNG, JPEG, and WebP images are allowed', 'error')
+      showToast(t('admin.components.richTextEditor.errors.invalidType'), 'error')
       return
     }
     
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be less than 5MB', 'error')
+      showToast(t('admin.components.richTextEditor.errors.tooLarge'), 'error')
       return
     }
     
@@ -111,7 +112,7 @@ const handleImageUpload = async (quill: any) => {
       const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.error || 'Upload failed')
+        throw new Error(data.error || t('admin.components.richTextEditor.errors.uploadFailed'))
       }
       
       // Insert the image at current cursor position
@@ -120,7 +121,7 @@ const handleImageUpload = async (quill: any) => {
       quill.setSelection(range.index + 1)
       
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to upload image'
+      const message = error instanceof Error ? error.message : t('admin.components.richTextEditor.errors.uploadFailed')
       showToast(message, 'error')
     } finally {
       isUploading.value = false

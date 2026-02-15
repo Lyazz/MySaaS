@@ -2,10 +2,10 @@
   <div>
     <div class="mb-6">
       <h2 class="text-2xl font-bold text-gray-800">
-        Platform Overview
+        {{ t('superAdmin.dashboard.overview.title') }}
       </h2>
       <p class="text-gray-600 mt-1">
-        Manage your multi-tenant SaaS platform
+        {{ t('superAdmin.dashboard.overview.subtitle') }}
       </p>
     </div>
 
@@ -15,7 +15,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Total Tenants
+              {{ t('superAdmin.dashboard.stats.tenants') }}
             </p>
             <p class="text-3xl font-bold text-gray-800 mt-1">
               {{ platformStats?.tenants || 0 }}
@@ -31,7 +31,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Total Users
+              {{ t('superAdmin.dashboard.stats.users') }}
             </p>
             <p class="text-3xl font-bold text-gray-800 mt-1">
               {{ platformStats?.users || 0 }}
@@ -47,7 +47,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Total Products
+              {{ t('superAdmin.dashboard.stats.products') }}
             </p>
             <p class="text-3xl font-bold text-gray-800 mt-1">
               {{ platformStats?.products || 0 }}
@@ -63,7 +63,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-500">
-              Total Revenue
+              {{ t('superAdmin.dashboard.stats.revenue') }}
             </p>
              <p class="text-2xl font-bold text-gray-800 mt-1"> <!-- Smaller text for currency -->
               ${{ revenueStats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0' }}
@@ -81,13 +81,13 @@
       <div class="bg-white rounded-lg shadow border border-slate-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h3 class="text-lg font-semibold text-gray-800">
-            Recent Activity
+            {{ t('superAdmin.dashboard.recentActivity.title') }}
           </h3>
           <NuxtLink
             to="/super-admin/audit-logs"
             class="text-sm font-medium text-teal-600 hover:text-teal-700 hover:underline"
           >
-            View All
+            {{ t('superAdmin.dashboard.recentActivity.viewAll') }}
           </NuxtLink>
         </div>
         
@@ -96,13 +96,13 @@
             v-if="loading"
             class="p-8 text-center text-gray-400"
           >
-            Loading...
+            {{ t('admin.common.loading') }}
           </div>
           <div
             v-else-if="recentLogs.length === 0"
             class="p-8 text-center text-gray-400"
           >
-            No recent activity
+            {{ t('superAdmin.dashboard.recentActivity.empty') }}
           </div>
           <div
             v-else
@@ -132,7 +132,7 @@
       <div class="bg-white rounded-lg shadow border border-slate-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
           <h3 class="text-lg font-semibold text-gray-800">
-            Quick Actions
+            {{ t('superAdmin.dashboard.quickActions.title') }}
           </h3>
         </div>
         <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -144,8 +144,8 @@
               <Icon name="lucide:plus" class="w-6 h-6" />
             </div>
             <div class="ml-4">
-              <p class="font-medium text-gray-900">Create Tenant</p>
-              <p class="text-xs text-gray-500 mt-0.5">Add a new store</p>
+              <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.createTenant.title') }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.createTenant.subtitle') }}</p>
             </div>
           </NuxtLink>
 
@@ -157,8 +157,8 @@
               <Icon name="lucide:building" class="w-6 h-6" />
             </div>
             <div class="ml-4">
-              <p class="font-medium text-gray-900">Manage Tenants</p>
-              <p class="text-xs text-gray-500 mt-0.5">View all stores</p>
+              <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.manageTenants.title') }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.manageTenants.subtitle') }}</p>
             </div>
           </NuxtLink>
 
@@ -170,8 +170,8 @@
               <Icon name="lucide:bar-chart-2" class="w-6 h-6" />
             </div>
             <div class="ml-4">
-              <p class="font-medium text-gray-900">View Analytics</p>
-              <p class="text-xs text-gray-500 mt-0.5">Platform insights</p>
+              <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.viewAnalytics.title') }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.viewAnalytics.subtitle') }}</p>
             </div>
           </NuxtLink>
         </div>
@@ -182,6 +182,8 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+
+const { t, locale } = useI18n({ useScope: 'global' })
 
 definePageMeta({
   middleware: 'super-admin',
@@ -235,11 +237,27 @@ const getActionIcon = (action: string) => {
 }
 
 const formatAction = (action: string) => {
-  return action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+  switch (action) {
+    case 'CREATE_TENANT':
+      return t('superAdmin.audit.actions.createTenant')
+    case 'UPDATE_TENANT':
+      return t('superAdmin.audit.actions.updateTenant')
+    case 'DELETE_TENANT':
+      return t('superAdmin.audit.actions.deleteTenant')
+    case 'SUSPEND_TENANT':
+      return t('superAdmin.audit.actions.suspendTenant')
+    case 'UNSUSPEND_TENANT':
+      return t('superAdmin.audit.actions.unsuspendTenant')
+    case 'IMPERSONATE_USER':
+      return t('superAdmin.audit.actions.impersonateUser')
+    default:
+      return action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+  }
 }
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleString('en-US', {
+  const iso = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return new Date(date).toLocaleString(iso, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',

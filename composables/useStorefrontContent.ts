@@ -22,6 +22,7 @@ export function useStorefrontContent() {
       addToCart: i18n.t('storefront.actions.addToCart'),
       adding: i18n.t('storefront.actions.adding'),
       outOfStock: i18n.t('storefront.actions.outOfStock'),
+      quickView: i18n.t('storefront.actions.quickView'),
       viewCart: i18n.t('storefront.actions.viewCart'),
       checkout: i18n.t('storefront.actions.checkout'),
       continueShopping: i18n.t('storefront.actions.continueShopping'),
@@ -31,6 +32,9 @@ export function useStorefrontContent() {
       clearAll: i18n.t('storefront.actions.clearAll'),
       filters: i18n.t('storefront.actions.filters'),
       search: i18n.t('storefront.actions.search')
+    },
+    badges: {
+      new: i18n.t('storefront.badges.new')
     },
     nav: {
       home: i18n.t('storefront.nav.home'),

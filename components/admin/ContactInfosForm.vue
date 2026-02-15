@@ -3,9 +3,9 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="p-6 md:p-8 flex items-start justify-between gap-6">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Store Contact Info</h2>
+          <h2 class="text-xl font-bold text-slate-900">{{ t('admin.contactInfosForm.title') }}</h2>
           <p class="text-slate-600 mt-2 max-w-2xl">
-            Add phone numbers, emails, address and social media links. Active items are shown in your storefront footer.
+            {{ t('admin.contactInfosForm.subtitle') }}
           </p>
         </div>
 
@@ -16,7 +16,7 @@
           @click="addDraft"
         >
           <Icon name="lucide:plus" class="w-4 h-4" />
-          Add
+          {{ t('admin.common.create') }}
         </button>
       </div>
     </div>
@@ -33,19 +33,19 @@
               <Icon :name="kindDef(draft.kind).iconName" class="w-5 h-5 text-slate-700" />
             </div>
             <div>
-              <div class="text-sm font-semibold text-slate-900">New contact item</div>
-              <div class="text-xs text-slate-500">Choose a type and value, then create.</div>
+              <div class="text-sm font-semibold text-slate-900">{{ t('admin.contactInfosForm.draft.title') }}</div>
+              <div class="text-xs text-slate-500">{{ t('admin.contactInfosForm.draft.subtitle') }}</div>
             </div>
           </div>
 
           <button type="button" class="text-sm text-slate-500 hover:text-slate-700" @click="draft = null">
-            Cancel
+            {{ t('admin.common.cancel') }}
           </button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
           <div class="md:col-span-4">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Type</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.contactInfosForm.fields.type') }}</label>
             <select
               v-model="draft.kind"
               class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -55,17 +55,17 @@
           </div>
 
           <div class="md:col-span-4">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Label (optional)</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.contactInfosForm.fields.labelOptional') }}</label>
             <input
               v-model="draft.label"
               type="text"
               class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="e.g. Support, Sales…"
+              :placeholder="t('admin.contactInfosForm.fields.labelPlaceholder')"
             >
           </div>
 
           <div class="md:col-span-4">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Value</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.contactInfosForm.fields.value') }}</label>
             <input
               v-model="draft.value"
               type="text"
@@ -77,7 +77,7 @@
 
         <div class="flex items-center justify-between gap-4">
           <div class="text-xs text-slate-500">
-            Preview link:
+            {{ t('admin.contactInfosForm.previewLink') }}
             <span class="font-mono text-slate-700">{{ buildHref(draft.kind, draft.value || '') || '—' }}</span>
           </div>
           <button
@@ -87,7 +87,7 @@
             @click="createDraft"
           >
             <Icon v-if="creating" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-            Create
+            {{ creating ? t('admin.common.creating') : t('admin.common.create') }}
           </button>
         </div>
       </div>
@@ -96,11 +96,11 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="p-6 md:p-8">
         <div class="flex items-center justify-between gap-4 mb-6">
-          <h3 class="text-lg font-semibold text-slate-900">Items</h3>
-          <div class="text-sm text-slate-500">{{ items.length }} total</div>
+          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.contactInfosForm.items.title') }}</h3>
+          <div class="text-sm text-slate-500">{{ t('admin.contactInfosForm.items.total', { count: items.length }) }}</div>
         </div>
 
-        <div v-if="loading" class="text-sm text-slate-500">Loading…</div>
+        <div v-if="loading" class="text-sm text-slate-500">{{ t('admin.common.loading') }}</div>
 
         <div v-else class="space-y-4">
           <div
@@ -130,7 +130,7 @@
                         class="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                         @change="saveItem(item)"
                       >
-                      Active
+                      {{ t('admin.common.active') }}
                     </label>
                   </div>
 
@@ -139,7 +139,7 @@
                       v-model="item.label"
                       type="text"
                       class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      placeholder="Label (optional)"
+                      :placeholder="t('admin.contactInfosForm.fields.labelOptional')"
                       @blur="saveItem(item)"
                     >
                     <input
@@ -152,7 +152,7 @@
                   </div>
 
                   <div class="mt-2 text-xs text-slate-500">
-                    Preview link:
+                    {{ t('admin.contactInfosForm.previewLink') }}
                     <span class="font-mono text-slate-700">{{ buildHref(item.kind, item.value || '') || '—' }}</span>
                   </div>
                 </div>
@@ -162,7 +162,7 @@
                 <button
                   type="button"
                   class="h-10 w-10 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 disabled:opacity-50"
-                  title="Move up"
+                  :title="t('admin.contactInfosForm.actions.moveUp')"
                   :disabled="index === 0"
                   @click="moveItem(index, -1)"
                 >
@@ -171,7 +171,7 @@
                 <button
                   type="button"
                   class="h-10 w-10 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 disabled:opacity-50"
-                  title="Move down"
+                  :title="t('admin.contactInfosForm.actions.moveDown')"
                   :disabled="index === items.length - 1"
                   @click="moveItem(index, 1)"
                 >
@@ -180,7 +180,7 @@
                 <button
                   type="button"
                   class="h-10 w-10 rounded-lg border border-red-200 hover:bg-red-50 text-red-700 disabled:opacity-50"
-                  title="Delete"
+                  :title="t('admin.common.delete')"
                   :disabled="savingIds.has(item.id)"
                   @click="deleteItem(item)"
                 >
@@ -191,7 +191,7 @@
           </div>
 
           <div v-if="items.length === 0" class="text-sm text-slate-500">
-            No contact infos yet. Click “Add” to create your first one.
+            {{ t('admin.contactInfosForm.items.empty') }}
           </div>
         </div>
       </div>
@@ -219,14 +219,24 @@ type ContactInfoItem = {
 }
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 const loading = ref(false)
 const creating = ref(false)
 const errorMessage = ref('')
 const items = ref<ContactInfoItem[]>([])
 const savingIds = ref(new Set<string>())
 
-const kindDefs = CONTACT_INFO_KIND_DEFS
-const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
+const kindDefs = computed(() => {
+  return CONTACT_INFO_KIND_DEFS.map((d) => ({
+    ...d,
+    label: t(`admin.contactInfosForm.kinds.${d.kind}.label`),
+    placeholder: t(`admin.contactInfosForm.kinds.${d.kind}.placeholder`)
+  }))
+})
+
+const kindDef = (kind: ContactInfoKind) => {
+  return kindDefs.value.find((d) => d.kind === kind) || CONTACT_INFO_DEF_BY_KIND[kind]
+}
 const buildHref = (kind: ContactInfoKind, value: string) => buildContactInfoHref(kind, value)
 
 const draft = ref<{ kind: ContactInfoKind; label: string; value: string } | null>(null)
@@ -241,7 +251,7 @@ const fetchItems = async () => {
     items.value = (res.items || []).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
   } catch (e: any) {
     console.error('Failed to load contact infos', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to load contact infos.'
+    errorMessage.value = e.data?.statusMessage || t('admin.contactInfosForm.messages.loadFailed')
   } finally {
     loading.value = false
   }
@@ -270,7 +280,7 @@ const createDraft = async () => {
     draft.value = null
   } catch (e: any) {
     console.error('Failed to create contact info', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to create contact info.'
+    errorMessage.value = e.data?.statusMessage || t('admin.contactInfosForm.messages.createFailed')
   } finally {
     creating.value = false
   }
@@ -297,7 +307,7 @@ const saveItem = async (item: ContactInfoItem) => {
     useState<any[]>('contactInfos', () => []).value = items.value.filter((i) => i.isActive)
   } catch (e: any) {
     console.error('Failed to update contact info', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to update contact info.'
+    errorMessage.value = e.data?.statusMessage || t('admin.contactInfosForm.messages.updateFailed')
   } finally {
     savingIds.value.delete(item.id)
   }
@@ -318,7 +328,7 @@ const moveItem = async (index: number, direction: -1 | 1) => {
 }
 
 const deleteItem = async (item: ContactInfoItem) => {
-  if (!confirm('Delete this contact item?')) return
+  if (!confirm(t('admin.contactInfosForm.confirm.delete'))) return
   savingIds.value.add(item.id)
   errorMessage.value = ''
   try {
@@ -330,7 +340,7 @@ const deleteItem = async (item: ContactInfoItem) => {
     useState<any[]>('contactInfos', () => []).value = items.value.filter((i) => i.isActive)
   } catch (e: any) {
     console.error('Failed to delete contact info', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to delete contact info.'
+    errorMessage.value = e.data?.statusMessage || t('admin.contactInfosForm.messages.deleteFailed')
   } finally {
     savingIds.value.delete(item.id)
   }
@@ -340,4 +350,3 @@ onMounted(() => {
   fetchItems()
 })
 </script>
-

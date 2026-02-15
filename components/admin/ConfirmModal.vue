@@ -20,12 +20,12 @@
 
         <!-- Title -->
         <h3 class="text-lg font-medium text-gray-900 text-center mb-2">
-          {{ title }}
+          {{ resolvedTitle }}
         </h3>
 
         <!-- Message -->
         <p class="text-sm text-gray-500 text-center mb-6">
-          {{ message }}
+          {{ resolvedMessage }}
         </p>
 
         <!-- Actions -->
@@ -35,14 +35,14 @@
             class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
             @click="handleCancel"
           >
-            {{ cancelText }}
+            {{ resolvedCancelText }}
           </button>
           <button
             type="button"
             class="flex-1 px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             @click="handleConfirm"
           >
-            {{ confirmText }}
+            {{ resolvedConfirmText }}
           </button>
         </div>
       </div>
@@ -59,12 +59,13 @@ interface Props {
   cancelText?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  title: 'Are you sure?',
-  message: 'This action cannot be undone.',
-  confirmText: 'Confirm',
-  cancelText: 'Cancel'
-})
+const props = defineProps<Props>()
+const { t } = useI18n({ useScope: 'global' })
+
+const resolvedTitle = computed(() => props.title ?? t('admin.confirmModal.defaults.title'))
+const resolvedMessage = computed(() => props.message ?? t('admin.confirmModal.defaults.message'))
+const resolvedConfirmText = computed(() => props.confirmText ?? t('admin.confirmModal.defaults.confirm'))
+const resolvedCancelText = computed(() => props.cancelText ?? t('admin.common.cancel'))
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]

@@ -3,14 +3,14 @@
     <div class="space-y-6">
       <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-800">
-          Tenant Management
+          {{ t('superAdmin.tenants.title') }}
         </h1>
         <button
           class="px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-medium transition-colors flex items-center space-x-2" 
           @click="showCreateModal = true"
         >
           <Icon name="lucide:plus" class="h-5 w-5" />
-          <span>Create Tenant</span>
+          <span>{{ t('superAdmin.tenants.actions.createTenant') }}</span>
         </button>
       </div>
 
@@ -19,7 +19,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Search tenants..."
+          :placeholder="t('superAdmin.tenants.search.placeholder')"
           class="w-full px-4 py-3 pl-10 bg-white border border-slate-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
         >
         <Icon name="lucide:search" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -31,13 +31,13 @@
           v-if="loading"
           class="p-8 text-center text-gray-500"
         >
-          Loading tenants...
+          {{ t('superAdmin.tenants.loading') }}
         </div>
         <div
           v-else-if="filteredTenants.length === 0"
           class="p-8 text-center text-gray-500"
         >
-          No tenants found
+          {{ t('superAdmin.tenants.empty') }}
         </div>
         <table
           v-else
@@ -46,28 +46,28 @@
           <thead class="bg-slate-50 border-b border-slate-200">
             <tr>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                Name
+                {{ t('superAdmin.tenants.table.name') }}
               </th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                Slug
+                {{ t('superAdmin.tenants.table.slug') }}
               </th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                Status
+                {{ t('superAdmin.tenants.table.status') }}
               </th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                Users
+                {{ t('superAdmin.tenants.table.users') }}
               </th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                Products
+                {{ t('superAdmin.tenants.table.products') }}
               </th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                Orders
+                {{ t('superAdmin.tenants.table.orders') }}
               </th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                Created
+                {{ t('superAdmin.tenants.table.created') }}
               </th>
               <th class="px-6 py-4 text-right text-sm font-semibold text-gray-600">
-                Actions
+                {{ t('superAdmin.tenants.table.actions') }}
               </th>
             </tr>
           </thead>
@@ -88,13 +88,13 @@
                   v-if="tenant.isSuspended" 
                   class="px-2 py-1 bg-red-100 border border-red-200 rounded-full text-red-700 text-xs font-medium"
                 >
-                  Suspended
+                  {{ t('superAdmin.tenants.status.suspended') }}
                 </span>
                 <span
                   v-else 
                   class="px-2 py-1 bg-green-100 border border-green-200 rounded-full text-green-700 text-xs font-medium"
                 >
-                  Active
+                  {{ t('superAdmin.tenants.status.active') }}
                 </span>
               </td>
               <td class="px-6 py-4 text-gray-600">
@@ -113,7 +113,7 @@
                 <div class="flex justify-end space-x-2">
                   <button
                     class="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-600 transition-colors" 
-                    title="Edit"
+                    :title="t('admin.common.edit')"
                     @click="editTenant(tenant)"
                   >
                     <Icon name="lucide:pencil" class="h-4 w-4" />
@@ -121,7 +121,7 @@
                   <button
                     type="button"
                     class="p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 transition-colors inline-flex items-center justify-center"
-                    title="Payments"
+                    :title="t('superAdmin.tenants.actions.payments')"
                     @click.stop="openPayments(tenant)"
                   >
                     <Icon name="lucide:receipt" class="h-4 w-4" />
@@ -129,7 +129,7 @@
                   <button
                     v-if="!tenant.isSuspended"
                     class="p-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded text-orange-600 transition-colors" 
-                    title="Suspend"
+                    :title="t('superAdmin.tenants.actions.suspend')"
                     @click="suspendTenant(tenant)"
                   >
                     <Icon name="lucide:pause-circle" class="h-4 w-4" />
@@ -137,14 +137,14 @@
                   <button
                     v-else
                     class="p-2 bg-green-50 hover:bg-green-100 border border-green-200 rounded text-green-600 transition-colors" 
-                    title="Activate"
+                    :title="t('superAdmin.tenants.actions.activate')"
                     @click="unsuspendTenant(tenant)"
                   >
                     <Icon name="lucide:play-circle" class="h-4 w-4" />
                   </button>
                   <button
                     class="p-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded text-red-600 transition-colors" 
-                    title="Delete"
+                    :title="t('admin.common.delete')"
                     @click="deleteTenant(tenant)"
                   >
                     <Icon name="lucide:trash" class="h-4 w-4" />
@@ -165,7 +165,7 @@
     >
       <div class="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md shadow-xl">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">
-          {{ showEditModal ? 'Edit Tenant' : 'Create New Tenant' }}
+          {{ showEditModal ? t('superAdmin.tenants.modal.editTitle') : t('superAdmin.tenants.modal.createTitle') }}
         </h2>
         
         <div
@@ -180,44 +180,44 @@
           @submit.prevent="handleSubmit"
         >
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Tenant Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('superAdmin.tenants.modal.fields.name.label') }}</label>
             <input
               v-model="formData.name"
               type="text"
               required
               class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="Acme Corp"
+              :placeholder="t('superAdmin.tenants.modal.fields.name.placeholder')"
             >
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Slug (subdomain)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('superAdmin.tenants.modal.fields.slug.label') }}</label>
             <input
               v-model="formData.slug"
               type="text"
               required
               :disabled="!!showEditModal"
               class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 disabled:bg-gray-100"
-              placeholder="acme"
+              :placeholder="t('superAdmin.tenants.modal.fields.slug.placeholder')"
             >
             <p class="text-xs text-gray-500 mt-1">
-              Will be accessible at {{ formData.slug || 'slug' }}.localhost:3000
+              {{ t('superAdmin.tenants.modal.fields.slug.hint', { slug: formData.slug || t('superAdmin.tenants.modal.fields.slug.slugFallback') }) }}
             </p>
           </div>
 
           <div v-if="!showEditModal">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Owner Email</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('superAdmin.tenants.modal.fields.ownerEmail.label') }}</label>
             <input
               v-model="formData.ownerEmail"
               type="email"
               required
               class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              placeholder="admin@acme.com"
+              :placeholder="t('superAdmin.tenants.modal.fields.ownerEmail.placeholder')"
             >
           </div>
 
           <div v-if="!showEditModal">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Owner Password</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('superAdmin.tenants.modal.fields.ownerPassword.label') }}</label>
             <input
               v-model="formData.ownerPassword"
               type="password"
@@ -234,14 +234,14 @@
               class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-gray-700 transition-colors"
               @click="closeModal"
             >
-              Cancel
+              {{ t('admin.common.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="submitting"
               class="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg text-white transition-colors disabled:opacity-50"
             >
-              {{ submitting ? 'Saving...' : (showEditModal ? 'Update' : 'Create') }}
+              {{ submitting ? t('admin.common.saving') : (showEditModal ? t('admin.common.update') : t('admin.common.create')) }}
             </button>
           </div>
         </form>
@@ -257,6 +257,7 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const { t, locale } = useI18n({ useScope: 'global' })
 const loading = ref(true)
 const tenants = ref<any[]>([])
 const searchQuery = ref('')
@@ -341,14 +342,14 @@ const handleSubmit = async () => {
     closeModal()
     await loadTenants()
   } catch (err: any) {
-    error.value = err.data?.statusMessage || err.message || 'An error occurred'
+    error.value = err.data?.statusMessage || err.message || t('superAdmin.tenants.errors.generic')
   } finally {
     submitting.value = false
   }
 }
 
 const suspendTenant = async (tenant: any) => {
-  if (!confirm(`Are you sure you want to suspend ${tenant.name}?`)) return
+  if (!confirm(t('superAdmin.tenants.confirm.suspend', { name: tenant.name }))) return
   
   try {
     await $fetch(`/api/super-admin/tenants/${tenant.id}/suspend`, {
@@ -360,7 +361,7 @@ const suspendTenant = async (tenant: any) => {
     await loadTenants()
   } catch (err) {
     console.error('Failed to suspend tenant:', err)
-    alert('Failed to suspend tenant')
+    alert(t('superAdmin.tenants.errors.suspendFailed'))
   }
 }
 
@@ -375,12 +376,12 @@ const unsuspendTenant = async (tenant: any) => {
     await loadTenants()
   } catch (err) {
     console.error('Failed to unsuspend tenant:', err)
-    alert('Failed to unsuspend tenant')
+    alert(t('superAdmin.tenants.errors.activateFailed'))
   }
 }
 
 const deleteTenant = async (tenant: any) => {
-  if (!confirm(`Are you sure you want to DELETE ${tenant.name}? This action cannot be undone!`)) return
+  if (!confirm(t('superAdmin.tenants.confirm.delete', { name: tenant.name }))) return
   
   try {
     await $fetch(`/api/super-admin/tenants/${tenant.id}`, {
@@ -392,7 +393,7 @@ const deleteTenant = async (tenant: any) => {
     await loadTenants()
   } catch (err) {
     console.error('Failed to delete tenant:', err)
-    alert('Failed to delete tenant')
+    alert(t('superAdmin.tenants.errors.deleteFailed'))
   }
 }
 
@@ -410,7 +411,8 @@ const closeModal = () => {
 }
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('en-US', {
+  const iso = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
+  return new Date(date).toLocaleDateString(iso, {
     month: 'short',
     day: 'numeric',
     year: 'numeric'

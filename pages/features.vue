@@ -1,54 +1,56 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'global' })
+
 definePageMeta({
   layout: 'marketing',
   title: 'Features - Swekly'
 })
 
-const features = [
+const features = computed(() => [
   {
-    title: 'Drag & Drop Store Builder',
-    description: 'Create professional, responsive storefronts without writing a single line of code. Our intuitive builder lets you customize every pixel.',
+    title: t('marketing.featuresPage.items.builder.title'),
+    description: t('marketing.featuresPage.items.builder.description'),
     icon: 'lucide:layout-template',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&ixlib=rb-4.0.3',
     colSpan: 'lg:col-span-2 row-span-2',
     color: 'teal'
   },
   {
-    title: 'Global Payments',
-    description: 'Accept payments from anywhere with integrated gateways including Stripe, PayPal, and local providers.',
+    title: t('marketing.featuresPage.items.payments.title'),
+    description: t('marketing.featuresPage.items.payments.description'),
     icon: 'lucide:credit-card',
     colSpan: 'lg:col-span-1',
     color: 'emerald'
   },
   {
-    title: 'Advanced Analytics',
-    description: 'Track real-time sales, visitor behavior, and conversion funnels.',
+    title: t('marketing.featuresPage.items.analytics.title'),
+    description: t('marketing.featuresPage.items.analytics.description'),
     icon: 'lucide:bar-chart-3',
     colSpan: 'lg:col-span-1',
     color: 'amber'
   },
   {
-    title: 'Marketing Automation',
-    description: 'Recover abandoned carts and engage customers with SMS and Email workflows.',
+    title: t('marketing.featuresPage.items.automation.title'),
+    description: t('marketing.featuresPage.items.automation.description'),
     icon: 'lucide:mail',
     colSpan: 'lg:col-span-1',
     color: 'violet'
   },
   {
-    title: 'Logistics Network',
-    description: 'Auto-dispatch orders to Yalidine, Eckoz, and 50+ other carriers.',
+    title: t('marketing.featuresPage.items.logistics.title'),
+    description: t('marketing.featuresPage.items.logistics.description'),
     icon: 'lucide:truck',
     colSpan: 'lg:col-span-2',
     color: 'blue'
   },
-    {
-    title: 'Custom Domains',
-    description: 'Connect your own domain name for a fully branded experience.',
+  {
+    title: t('marketing.featuresPage.items.domains.title'),
+    description: t('marketing.featuresPage.items.domains.description'),
     icon: 'lucide:globe',
     colSpan: 'lg:col-span-1',
     color: 'rose'
   }
-]
+])
 </script>
 
 <template>
@@ -59,8 +61,11 @@ const features = [
        <div class="absolute -top-40 -right-40 w-96 h-96 bg-teal-600/30 rounded-full blur-[100px]"></div>
        
        <div class="relative z-10 max-w-3xl mx-auto">
-         <h1 class="text-4xl md:text-5xl font-black mb-6">Everything you need to <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Scale</span></h1>
-         <p class="text-slate-400 text-lg">Swekly is more than just a store builder. It's an entire operating system for your commerce business.</p>
+         <h1 class="text-4xl md:text-5xl font-black mb-6">
+           {{ t('marketing.featuresPage.hero.title.prefix') }}
+           <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">{{ t('marketing.featuresPage.hero.title.accent') }}</span>
+         </h1>
+         <p class="text-slate-400 text-lg">{{ t('marketing.featuresPage.hero.subtitle') }}</p>
        </div>
     </div>
 
@@ -118,9 +123,9 @@ const features = [
     <!-- CTA -->
     <section class="py-24 text-center">
        <div class="max-w-2xl mx-auto px-4">
-         <h2 class="text-3xl font-bold text-slate-900 mb-6">Ready to get started?</h2>
+         <h2 class="text-3xl font-bold text-slate-900 mb-6">{{ t('marketing.featuresPage.cta.title') }}</h2>
          <NuxtLink to="/register" class="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white font-bold rounded-xl shadow-xl hover:bg-slate-800 transition-all hover:scale-105">
-           Start Your Free Trial
+           {{ t('marketing.featuresPage.cta.button') }}
             <Icon name="lucide:arrow-right" class="w-4 h-4" />
          </NuxtLink>
        </div>

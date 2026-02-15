@@ -16,7 +16,7 @@
         v-if="uploading"
         class="text-xs text-teal-600 font-medium"
       >
-        Uploading...
+        {{ t('admin.common.uploading') }}
       </div>
     </div>
 
@@ -25,7 +25,7 @@
         <template v-if="modelValue">
           <img
             :src="modelValue"
-            alt="Category image"
+            :alt="t('admin.components.singleImageUploader.previewAlt')"
             class="w-full h-full object-cover"
           >
           <button
@@ -39,7 +39,7 @@
         <template v-else>
           <label class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
             <Icon name="lucide:upload" class="w-10 h-10 text-gray-400" />
-            <span class="mt-2 text-xs text-gray-500">Upload image</span>
+            <span class="mt-2 text-xs text-gray-500">{{ t('admin.components.singleImageUploader.uploadCta') }}</span>
             <input
               type="file"
               class="hidden"
@@ -70,6 +70,7 @@ const emit = defineEmits<{
 }>()
 
 const uploading = ref(false)
+const { t } = useI18n({ useScope: 'global' })
 
 const handleFileSelect = async (event: Event) => {
   const input = event.target as HTMLInputElement
@@ -77,7 +78,7 @@ const handleFileSelect = async (event: Event) => {
 
   const [file] = input.files
   if (file.type !== 'image/png') {
-    alert('Please upload a PNG image.')
+    alert(t('admin.components.singleImageUploader.errors.pngOnly'))
     input.value = ''
     return
   }
@@ -89,7 +90,7 @@ const handleFileSelect = async (event: Event) => {
   img.onload = async () => {
     URL.revokeObjectURL(objectUrl)
     if (img.width !== img.height) {
-      alert(`Image must be square (current: ${img.width}x${img.height}px).`)
+      alert(t('admin.components.singleImageUploader.errors.squareOnly', { w: img.width, h: img.height }))
       input.value = ''
       return
     }
@@ -109,14 +110,14 @@ const handleFileSelect = async (event: Event) => {
       })
 
       if (!response.ok) {
-        throw new Error('Upload failed')
+        throw new Error(t('admin.components.singleImageUploader.errors.uploadFailed'))
       }
 
       const data = await response.json()
       emit('update:modelValue', data.url)
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Failed to upload image')
+      alert(t('admin.components.singleImageUploader.errors.uploadFailed'))
     } finally {
       uploading.value = false
       input.value = ''
@@ -125,7 +126,7 @@ const handleFileSelect = async (event: Event) => {
 
   img.onerror = () => {
     URL.revokeObjectURL(objectUrl)
-    alert('Failed to read image dimensions.')
+    alert(t('admin.components.singleImageUploader.errors.readDimensionsFailed'))
     input.value = ''
   }
   

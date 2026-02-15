@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import en from '~/locales/en.json'
-import fr from '~/locales/fr.json'
-import ar from '~/locales/ar.json'
-
 type BundleDeal = {
   id?: string
   bundleQty: number
@@ -22,22 +18,7 @@ const emit = defineEmits<{
 }>()
 
 const { format: formatCurrency } = useCurrency()
-const storeSettings = useState<any>('storeSettings')
-const language = computed(() => String(storeSettings.value?.language || 'fr').toLowerCase())
-
-const dict = computed(() => {
-  const base = language.value.split('-')[0]
-  if (base === 'ar') return ar as any
-  if (base === 'en') return en as any
-  return fr as any
-})
-
-const t = (path: string): string => {
-  const parts = path.split('.')
-  let cur: any = dict.value
-  for (const p of parts) cur = cur?.[p]
-  return typeof cur === 'string' ? cur : path
-}
+const { t } = useI18n({ useScope: 'global' })
 
 const tagLabel = (tag: string | null | undefined): string | null => {
   if (!tag) return null
@@ -77,7 +58,7 @@ const onPick = (qty: number) => {
 
 <template>
   <div v-if="offers.length" class="mt-4">
-    <div class="text-xs font-medium text-slate-500 mb-2">Bundle deals</div>
+    <div class="text-xs font-medium text-slate-500 mb-2">{{ t('storefront.bundleDeals.title') }}</div>
     <div class="flex flex-wrap gap-2">
       <button
         v-for="o in offers"
@@ -88,7 +69,7 @@ const onPick = (qty: number) => {
         @click="onPick(o.bundleQty)"
       >
         <div class="flex items-center justify-between gap-2">
-          <div class="text-sm font-semibold text-slate-800">Buy {{ o.bundleQty }}</div>
+          <div class="text-sm font-semibold text-slate-800">{{ t('storefront.bundleDeals.buy', { qty: o.bundleQty }) }}</div>
           <span
             v-if="o.tag"
             class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-brand-600 text-white"
@@ -98,7 +79,7 @@ const onPick = (qty: number) => {
         </div>
         <div class="text-xs text-slate-600">
           {{ formatCurrency(o.bundlePrice) }}
-          <span class="text-emerald-700 font-medium">· Save {{ formatCurrency(o.savings) }}</span>
+          <span class="text-emerald-700 font-medium">· {{ t('storefront.bundleDeals.save', { amount: formatCurrency(o.savings) }) }}</span>
         </div>
       </button>
     </div>

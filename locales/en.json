@@ -132,6 +132,45 @@
       "login": "Log in",
       "getStarted": "Get Started"
     },
+    "featuresPage": {
+      "hero": {
+        "title": {
+          "prefix": "Everything you need to ",
+          "accent": "Scale"
+        },
+        "subtitle": "Swekly is more than just a store builder. It's an entire operating system for your commerce business."
+      },
+      "items": {
+        "builder": {
+          "title": "Drag & Drop Store Builder",
+          "description": "Create professional, responsive storefronts without writing a single line of code. Our intuitive builder lets you customize every pixel."
+        },
+        "payments": {
+          "title": "Global Payments",
+          "description": "Accept payments from anywhere with integrated gateways including Stripe, PayPal, and local providers."
+        },
+        "analytics": {
+          "title": "Advanced Analytics",
+          "description": "Track real-time sales, visitor behavior, and conversion funnels."
+        },
+        "automation": {
+          "title": "Marketing Automation",
+          "description": "Recover abandoned carts and engage customers with SMS and Email workflows."
+        },
+        "logistics": {
+          "title": "Logistics Network",
+          "description": "Auto-dispatch orders to Yalidine, Eckoz, and 50+ other carriers."
+        },
+        "domains": {
+          "title": "Custom Domains",
+          "description": "Connect your own domain name for a fully branded experience."
+        }
+      },
+      "cta": {
+        "title": "Ready to get started?",
+        "button": "Start Your Free Trial"
+      }
+    },
     "footer": {
       "tagline": "Empowering businesses with cutting-edge tools and a premium experience. Built for scale, designed for you.",
       "product": {
@@ -145,6 +184,92 @@
         "contact": "Contact"
       },
       "copyright": "© {year} Swekly Platform. All rights reserved."
+    }
+  },
+  "auth": {
+    "login": {
+      "hero": {
+        "welcomeBack": "Welcome back,",
+        "builder": "Builder",
+        "builderSuffix": ".",
+        "subtitle": "Your dashboard is ready. Continue managing your orders, products, and analytics from one central hub.",
+        "feature": {
+          "title": "Revenue Tracking",
+          "description": "Real-time insights into your store's performance at a glance."
+        },
+        "copyright": "© {year} Swekly Inc."
+      },
+      "form": {
+        "title": "Log in to your account",
+        "subtitle": "Access your tenant workspace.",
+        "orContinueWith": "Or continue with",
+        "email": {
+          "label": "Email Address",
+          "placeholder": "name@company.com"
+        },
+        "password": {
+          "label": "Password",
+          "forgot": "Forgot password?"
+        },
+        "submit": {
+          "signingIn": "Signing in...",
+          "signIn": "Sign in"
+        },
+        "noAccount": "Don't have an account?",
+        "startFree": "Start for free"
+      },
+      "errors": {
+        "invalidCredentials": "Invalid email or password",
+        "generic": "An error occurred. Please try again."
+      }
+    },
+    "register": {
+      "hero": {
+        "launchYour": "Launch your",
+        "empire": "Empire",
+        "today": "today.",
+        "subtitle": "Join thousands of merchants building the next generation of commerce. Scalable, secure, and ready for growth.",
+        "testimonial": {
+          "quote": "Moving to Swekly was the best decision we made. Our revenue doubled in 3 months.",
+          "name": "John Doe",
+          "role": "CEO, FashionNova"
+        },
+        "copyright": "© {year} Swekly Inc."
+      },
+      "form": {
+        "title": "Create your account",
+        "subtitle": "Start your 14-day free trial. No credit card required.",
+        "companyName": {
+          "label": "Company Name",
+          "placeholder": "Ex. Acme Corp"
+        },
+        "slug": {
+          "label": "Store URL",
+          "placeholder": "acme",
+          "preview": "Your store will be at: {slug}.swekly.com"
+        },
+        "email": {
+          "label": "Work Email",
+          "placeholder": "name@company.com"
+        },
+        "password": {
+          "label": "Password"
+        },
+        "submit": {
+          "creating": "Creating Account...",
+          "register": "Register & Create Tenant"
+        },
+        "haveAccount": "Already have an account?",
+        "logIn": "Log in"
+      },
+      "success": {
+        "title": "You're in!",
+        "message": "Your workspace {name} has been created.",
+        "cta": "Go to Dashboard"
+      },
+      "errors": {
+        "generic": "An error occurred during registration."
+      }
     }
   },
   "pricing": {
@@ -207,12 +332,14 @@
     },
     "common": {
       "productsCount": "{count} Products",
-      "selectPlaceholder": "Select…"
+      "selectPlaceholder": "Select…",
+      "storeFallback": "Store"
     },
     "actions": {
       "addToCart": "Add to cart",
       "adding": "Adding…",
       "outOfStock": "Out of stock",
+      "quickView": "Quick view",
       "viewCart": "View cart",
       "checkout": "Checkout",
       "continueShopping": "Continue shopping",
@@ -222,6 +349,33 @@
       "clearAll": "Clear all",
       "filters": "Filters",
       "search": "Search"
+    },
+    "badges": {
+      "new": "New"
+    },
+    "bundleDeals": {
+      "title": "Bundle deals",
+      "buy": "Buy {qty}",
+      "save": "Save {amount}"
+    },
+    "pages": {
+      "contact": {
+        "seo": {
+          "title": "Contact - {tenant}",
+          "description": "Contact {tenant}."
+        },
+        "heading": "Contact {tenant}",
+        "placeholder": "This is the store contact page. Add your phone/email/address from the store settings wizard to replace this placeholder content.",
+        "classic": {
+          "heading": "Get in Touch"
+        },
+        "sections": {
+          "callUs": "Call Us",
+          "emailUs": "Email Us",
+          "visitUs": "Visit Us"
+        },
+        "addressPlaceholder": "123 Store St, City, Country"
+      }
     },
     "home": {
       "welcomeTo": "Welcome to {tenant}",
@@ -501,15 +655,19 @@
       "logout": "Logout"
     },
     "common": {
+      "name": "Name",
+      "category": "Category",
       "actions": "Actions",
       "active": "Active",
       "inactive": "Inactive",
       "search": "Search",
       "searchAction": "Search",
       "clear": "Clear",
+      "reset": "Reset",
       "startDate": "Start date",
       "endDate": "End date",
       "loading": "Loading…",
+      "uploading": "Uploading…",
       "refresh": "Refresh",
       "back": "Back",
       "next": "Next",
@@ -527,6 +685,428 @@
       "edit": "Edit",
       "delete": "Delete"
     },
+    "confirmModal": {
+      "defaults": {
+        "title": "Are you sure?",
+        "message": "This action cannot be undone.",
+        "confirm": "Confirm"
+      }
+    },
+    "components": {
+      "singleImageUploader": {
+        "previewAlt": "Uploaded image preview",
+        "uploadCta": "Upload image",
+        "errors": {
+          "pngOnly": "Please upload a PNG image.",
+          "squareOnly": "Image must be square (current: {w}x{h}px).",
+          "uploadFailed": "Upload failed",
+          "readDimensionsFailed": "Failed to read image dimensions."
+        }
+      },
+      "richTextEditor": {
+        "placeholder": "Start writing your product description...",
+        "errors": {
+          "invalidType": "Only PNG, JPEG, and WebP images are allowed",
+          "tooLarge": "Image must be less than 5MB",
+          "uploadFailed": "Upload failed"
+        }
+      }
+    },
+    "storeSettingsForm": {
+      "title": "Store appearance & settings",
+      "subtitle": "Customize how your store looks and manages core commerce features.",
+      "brandLogo": {
+        "title": "Brand logo",
+        "subtitle": "This logo will appear on your storefront header and invoices.",
+        "inputLabel": "Store logo",
+        "hint": "Recommended size: 200x60px. PNG or SVG preferred."
+      },
+      "brandColors": {
+        "title": "Brand colors",
+        "subtitle": "Choose a primary color for buttons, links, and highlights.",
+        "primaryLabel": "Primary color",
+        "previewTitle": "Live preview",
+        "previewPrimary": "Button",
+        "previewOutline": "Outline"
+      },
+      "features": {
+        "title": "Store features",
+        "subtitle": "Toggle core commerce flows for your storefront.",
+        "cart": {
+          "title": "Cart & checkout",
+          "subtitle": "Allow customers to add items to cart and complete checkout."
+        },
+        "cod": {
+          "title": "COD on product page",
+          "subtitle": "Show the one-click cash-on-delivery form directly on product landing pages."
+        }
+      },
+      "currency": {
+        "title": "Store currency",
+        "subtitle": "Choose the currency shown on product prices. Symbols and formatting will follow this choice.",
+        "inputLabel": "Currency"
+      },
+      "template": {
+        "title": "Store template",
+        "subtitle": "Select the layout structure for your storefront.",
+        "select": "Select",
+        "selected": "Selected",
+        "options": {
+          "classic": {
+            "label": "Classic shop",
+            "description": "Traditional e-commerce layout with a focus on products."
+          },
+          "modern": {
+            "label": "Modern minimal",
+            "description": "Clean, spacious design with bold typography and large images."
+          }
+        }
+      },
+      "localization": {
+        "title": "Localization",
+        "subtitle": "Set the default language for your store.",
+        "inputLabel": "Default language",
+        "rtlNote": "Note: Selecting Arabic will enable Right-to-Left (RTL) layout automatically."
+      },
+      "messages": {
+        "saved": "Store settings saved successfully!",
+        "saveFailed": "Failed to save settings. Please try again."
+      },
+      "confirm": {
+        "reset": "Are you sure you want to discard your changes and reload saved settings?"
+      }
+    },
+    "homepageSettingsForm": {
+      "subtitle": "Control what appears on your storefront home page: hero carousel, browse-by-category, new arrivals, and best sellers.",
+      "carousel": {
+        "title": "Hero carousel",
+        "subtitle": "Add slides with an image, text, and an optional button.",
+        "slideLabel": "Slide {index}",
+        "slideHint": "Image + text + button",
+        "slidePreviewAlt": "Slide preview",
+        "noImage": "No image",
+        "uploadImage": "Upload image",
+        "addSlide": "Add slide",
+        "defaults": {
+          "title": "New slide"
+        }
+      },
+      "fields": {
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "buttonText": "Button text",
+        "buttonLink": "Button link",
+        "buttonLinkHint": "Use internal paths like \"/products\" or \"/c/shoes\".",
+        "imageUrl": "Image URL",
+        "imageUrlHint": "Or paste a URL if you already have one.",
+        "eyebrow": "Eyebrow",
+        "limit": "Limit"
+      },
+      "sections": {
+        "title": "Homepage sections",
+        "subtitle": "Enable/disable sections and adjust titles.",
+        "browseByCategory": {
+          "title": "Browse by category",
+          "subtitle": "Show your categories on the homepage.",
+          "toggle": "Toggle browse by category"
+        },
+        "newArrivals": {
+          "title": "New arrivals",
+          "subtitle": "Show latest products (by created date).",
+          "toggle": "Toggle new arrivals"
+        },
+        "bestSellers": {
+          "title": "Best sellers",
+          "subtitle": "Show products with the highest sales (non-cancelled orders).",
+          "toggle": "Toggle best sellers"
+        }
+      },
+      "messages": {
+        "loadFailed": "Failed to load homepage settings.",
+        "uploadFailed": "Failed to upload image.",
+        "saved": "Homepage settings saved successfully!",
+        "saveFailed": "Failed to save changes."
+      }
+    },
+    "functionalSettingsForm": {
+      "features": {
+        "title": "Store features",
+        "subtitle": "Enable or disable core functionality for your storefront.",
+        "cart": {
+          "title": "Cart & checkout",
+          "subtitle": "Allow customers to add multiple items to a cart and proceed to checkout.",
+          "toggle": "Enable shopping cart"
+        },
+        "cod": {
+          "title": "Cash on delivery (COD)",
+          "subtitle": "Show a 'Buy Now with COD' form directly on product pages for faster conversion.",
+          "toggle": "Enable COD form"
+        }
+      },
+      "currency": {
+        "title": "Store currency",
+        "subtitle": "Set the primary currency for your product prices and transactions.",
+        "selectLabel": "Select currency",
+        "loadingCurrencies": "Loading currencies...",
+        "note": "Note: Changing currency may not automatically convert existing product prices."
+      },
+      "localization": {
+        "title": "Localization",
+        "subtitle": "Choose the default language for your storefront.",
+        "defaultLanguage": "Default language",
+        "rtl": {
+          "title": "RTL support enabled",
+          "subtitle": "Your storefront will automatically switch to Right-to-Left layout for Arabic."
+        }
+      },
+      "actions": {
+        "discardChanges": "Discard changes"
+      },
+      "messages": {
+        "loadFailed": "Failed to load settings.",
+        "saved": "Functional settings saved successfully!",
+        "saveFailed": "Failed to save changes. Please try again."
+      },
+      "confirm": {
+        "discard": "Are you sure you want to discard your unsaved changes?"
+      }
+    },
+    "contactInfosForm": {
+      "title": "Store contact info",
+      "subtitle": "Add phone numbers, emails, address and social media links. Active items are shown in your storefront footer.",
+      "draft": {
+        "title": "New contact item",
+        "subtitle": "Choose a type and value, then create."
+      },
+      "fields": {
+        "type": "Type",
+        "labelOptional": "Label (optional)",
+        "labelPlaceholder": "e.g. Support, Sales…",
+        "value": "Value"
+      },
+      "previewLink": "Preview link:",
+      "items": {
+        "title": "Items",
+        "total": "{count} total",
+        "empty": "No contact infos yet. Click “Add” to create your first one."
+      },
+      "actions": {
+        "moveUp": "Move up",
+        "moveDown": "Move down"
+      },
+      "confirm": {
+        "delete": "Delete this contact item?"
+      },
+      "messages": {
+        "loadFailed": "Failed to load contact infos.",
+        "createFailed": "Failed to create contact info.",
+        "updateFailed": "Failed to update contact info.",
+        "deleteFailed": "Failed to delete contact info."
+      },
+      "kinds": {
+        "phone": { "label": "Phone", "placeholder": "0550 00 00 00" },
+        "email": { "label": "Email", "placeholder": "contact@store.com" },
+        "address": { "label": "Location / address", "placeholder": "Alger, Hydra…" },
+        "map": { "label": "Map link", "placeholder": "https://maps.app.goo.gl/..." },
+        "website": { "label": "Website", "placeholder": "https://example.com" },
+        "whatsapp": { "label": "WhatsApp", "placeholder": "+213550000000" },
+        "facebook": { "label": "Facebook", "placeholder": "https://facebook.com/yourpage" },
+        "instagram": { "label": "Instagram", "placeholder": "@yourstore" },
+        "tiktok": { "label": "TikTok", "placeholder": "@yourstore" },
+        "youtube": { "label": "YouTube", "placeholder": "https://youtube.com/@yourstore" },
+        "x": { "label": "X (Twitter)", "placeholder": "@yourstore" },
+        "linkedin": { "label": "LinkedIn", "placeholder": "https://linkedin.com/company/yourstore" },
+        "snapchat": { "label": "Snapchat", "placeholder": "@yourstore" },
+        "telegram": { "label": "Telegram", "placeholder": "https://t.me/yourstore" },
+        "viber": { "label": "Viber", "placeholder": "+213550000000" },
+        "pinterest": { "label": "Pinterest", "placeholder": "https://pinterest.com/yourstore" },
+        "threads": { "label": "Threads", "placeholder": "@yourstore" }
+      }
+    },
+    "imageUploader": {
+      "title": "Product images",
+      "imageAlt": "Product image",
+      "mainBadge": "Main",
+      "actions": {
+        "setAsMain": "Set as main image",
+        "remove": "Remove image",
+        "addImage": "Add image"
+      },
+      "tip": {
+        "title": "Tip:",
+        "body": "Drag and drop to reorder images. Click the star icon to set an image as the main product image."
+      },
+      "errors": {
+        "uploadFailed": "Failed to upload image"
+      }
+    },
+    "variantsTable": {
+      "title": "Variants",
+      "subtitle": "Variants stay in sync with your options automatically.",
+      "columns": {
+        "variant": "Variant",
+        "price": "Price",
+        "track": "Track",
+        "onHand": "On-hand",
+        "reserved": "Reserved",
+        "safety": "Safety",
+        "available": "Available",
+        "sku": "SKU",
+        "active": "Active",
+        "images": "Images"
+      },
+      "actions": {
+        "manageImages": "Manage ({count})",
+        "movements": "Movements"
+      },
+      "defaultVariant": "Default",
+      "movements": {
+        "title": "Inventory movements",
+        "subtitle": "Latest 50 movements for this variant.",
+        "loading": "Loading movements…",
+        "empty": "No movements recorded yet.",
+        "columns": {
+          "date": "Date",
+          "type": "Type",
+          "deltaStock": "Δ stock",
+          "deltaReserved": "Δ reserved",
+          "deltaSafety": "Δ safety",
+          "after": "After",
+          "by": "By"
+        },
+        "order": "Order: {id}",
+        "system": "system"
+      },
+      "imagePicker": {
+        "title": "Select images for this variant",
+        "subtitle": "Images come from the product gallery. Check to attach.",
+        "empty": "No product images available. Upload images to the product first, then attach them here.",
+        "imageFallback": "Image",
+        "imageWithIndex": "Image {index}",
+        "save": "Save images"
+      },
+      "errors": {
+        "updateVariantFailed": "Failed to update variant",
+        "updateInventoryFailed": "Failed to update inventory",
+        "saveImagesFailed": "Failed to save images"
+      }
+    },
+    "productOptionsEditor": {
+      "title": "Options",
+      "fields": {
+        "optionName": "Option name",
+        "optionNamePlaceholder": "e.g. Size",
+        "newOptionNamePlaceholder": "e.g. Color",
+        "displayType": "Display type",
+        "optionValues": "Option values",
+        "optionValuesPlaceholder": "Separate values with comma (e.g. Red, Blue)",
+        "pressEnterToAdd": "Press Enter to add",
+        "addValuePlaceholder": "Add value..."
+      },
+      "displayTypes": {
+        "dropdown": "Dropdown",
+        "button": "Buttons / Tags",
+        "radio": "Radio buttons",
+        "color": "Color swatch",
+        "image": "Image with text"
+      },
+      "preview": {
+        "title": "Preview:",
+        "valueWithIndex": "Value {index}",
+        "imageFallbackShort": "Img"
+      },
+      "actions": {
+        "editMetadata": "Edit metadata",
+        "removeOption": "Remove option",
+        "addAnotherOption": "Add another option",
+        "done": "Done"
+      },
+      "maxOptions": "Maximum 3 options allowed.",
+      "deleteModal": {
+        "title": "Delete option",
+        "message": "Are you sure you want to delete this option? All variants using it will be removed."
+      },
+      "confirm": {
+        "removeValue": "Remove \"{label}\"?"
+      },
+      "metaModal": {
+        "title": "Edit {type} for \"{label}\"",
+        "types": {
+          "color": "Color",
+          "image": "Image"
+        },
+        "colorHex": "Color (Hex)",
+        "imageUrl": "Image URL",
+        "imageUrlHint": "Provide a direct URL to the image icon."
+      }
+    },
+    "appearanceSettingsForm": {
+      "identity": {
+        "title": "Store identity",
+        "subtitle": "Basic information about your store.",
+        "storeName": {
+          "label": "Store name",
+          "placeholder": "My Awesome Store"
+        },
+        "slug": {
+          "label": "URL slug",
+          "placeholder": "my-store",
+          "hint": "Only lowercase letters, numbers, and hyphens."
+        }
+      },
+      "brandAssets": {
+        "title": "Brand assets",
+        "subtitle": "Visual elements that define your brand.",
+        "logo": {
+          "label": "Brand logo",
+          "upload": "Upload logo",
+          "hint": "Square (1:1), PNG recommended."
+        },
+        "primaryColor": {
+          "label": "Primary color",
+          "hint": "Used for buttons, links, and highlights."
+        }
+      },
+      "announcement": {
+        "title": "Announcement bar",
+        "subtitle": "Top banner for promotions.",
+        "marquee": "Marquee mode",
+        "message": {
+          "label": "Message text",
+          "placeholder": "Free shipping on all orders over $50! ✨"
+        }
+      },
+      "templates": {
+        "title": "Store template",
+        "subtitle": "Choose the layout that best fits your brand.",
+        "options": {
+          "classic": { "label": "Classic Shop", "description": "Timeless elegance with serif typography." },
+          "modern": { "label": "Modern Minimal", "description": "Clean aesthetic with bold accents." },
+          "street": { "label": "Street Urban", "description": "Energetic, high-contrast style." },
+          "cozy": { "label": "Cozy Warm", "description": "Soft greens and rounded nuances." },
+          "cyber": { "label": "Cyber Future", "description": "Dark mode with neon accents." },
+          "stationnery": { "label": "Stationery", "description": "Refined structure for professionals." },
+          "food": { "label": "Food Market", "description": "Vibrant and appetizing." },
+          "wellness": { "label": "Wellness", "description": "Organic, calm, and natural." }
+        }
+      },
+      "preview": {
+        "title": "Live preview",
+        "mobile": "Mobile view",
+        "iframeTitle": "Store preview",
+        "loading": "Loading preview...",
+        "note": "Showing live preview of saved changes.",
+        "openNewTab": "Open in new tab"
+      },
+      "messages": {
+        "loadFailed": "Failed to load settings.",
+        "saved": "Store settings updated!",
+        "saveFailed": "Failed to save changes."
+      },
+      "confirm": {
+        "discard": "Discard unsaved changes?"
+      }
+    },
     "nav": {
       "overview": "Overview",
       "catalog": "Catalog",
@@ -534,6 +1114,7 @@
       "sales": "Sales",
       "delivery": "Delivery",
       "finance": "Finance",
+      "cash": "Cash",
       "settings": "Settings",
       "dashboard": "Dashboard",
       "products": "Products",
@@ -615,6 +1196,26 @@
           "hint": "Shown on storefront category tiles"
         }
       },
+      "customer": {
+        "name": {
+          "label": "Name",
+          "placeholder": "Customer name",
+          "required": "Name is required"
+        },
+        "phone": {
+          "label": "Phone",
+          "placeholder": "Phone number",
+          "required": "Phone is required"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "name[at]example.com"
+        },
+        "address": {
+          "label": "Address",
+          "placeholder": "Customer address"
+        }
+      },
       "supplier": {
         "name": {
           "label": "Name",
@@ -643,6 +1244,44 @@
       "connect": "Connect"
     },
     "pages": {
+      "cash": {
+        "title": "Cash Management",
+        "subtitle": "Manage your cash funds, sessions, and transactions.",
+        "create": "New Cashbox",
+        "edit": "Edit Cashbox",
+        "openSession": "Open Session",
+        "closeSession": "Close Session",
+        "sessionStatus": "Session Status",
+        "openingFloat": "Opening Float",
+        "closingCount": "Closing Count",
+        "expectedClosing": "Expected Count",
+        "difference": "Difference",
+        "note": "Note",
+        "history": "Transaction History",
+        "newOperation": "New Operation",
+        "transfer": "Transfer between Cashboxes",
+        "toCashbox": "To Cashbox",
+        "transactions": {
+          "type": "Type",
+          "amount": "Amount",
+          "date": "Date",
+          "reference": "Reference",
+          "types": {
+            "CUSTOMER_PAYMENT": "Customer Payment",
+            "SUPPLIER_PAYMENT": "Supplier Payment",
+            "PURCHASE_RECEIPT": "Purchase (Receipt)",
+            "EXPENSE": "Expense",
+            "CHARGE": "Charge",
+            "SALE_PAYMENT": "Sale Payment",
+            "TRANSFER_IN": "Transfer (In)",
+            "TRANSFER_OUT": "Transfer (Out)"
+          }
+        },
+        "status": {
+          "OPEN": "OPEN",
+          "CLOSED": "CLOSED"
+        }
+      },
       "integrations": {
         "title": "Apps & Integrations",
         "subtitle": "Connect your store with third-party tools and services."
@@ -1012,6 +1651,22 @@
               "updateFailed": "Failed to update order status"
             }
           },
+          "deliveredFinal": {
+            "message": "This order is delivered. Its status is final and can no longer be changed."
+          },
+          "viewSale": "View sale",
+          "missingPayment": {
+            "title": "Missing payment",
+            "hint": "This sale won’t appear in the cashbox until the payment is recorded.",
+            "cashboxLabel": "Cashbox",
+            "cashboxAuto": "Auto",
+            "methodLabel": "Method",
+            "multiCashboxHint": "If multiple cashboxes are open, select one to avoid conflicts.",
+            "recordButton": "Record payment",
+            "recordingButton": "Recording…",
+            "success": "Payment recorded.",
+            "error": "Failed to record payment."
+          },
           "backToOrders": "Back to orders",
           "notFound": {
             "title": "Order not found",
@@ -1023,15 +1678,34 @@
         "index": {
           "title": "Customers",
           "subtitle": "Derived from orders history",
+          "addCustomer": "Add customer",
+          "count": "{count} customers",
+          "loadingInline": "Loading…",
           "filters": {
             "searchLabel": "Search",
-            "searchPlaceholder": "Search by customer name or phone…"
+            "searchPlaceholder": "Search by customer name, phone, or email…",
+            "clear": "Clear"
           },
           "loading": "Loading customers…",
           "empty": {
             "title": "No customers found",
             "hint": "Customers will appear here once orders are placed",
-            "hintFiltered": "Try adjusting your search"
+            "hintFiltered": "Try adjusting your search",
+            "newCustomer": "New customer"
+          },
+          "sort": {
+            "sortBy": "Sort by:",
+            "lastOrder": "Last order",
+            "name": "Name",
+            "orders": "Orders",
+            "totalSpent": "Total spent"
+          },
+          "pagination": {
+            "showing": "Showing {from} to {to} of {total} results"
+          },
+          "errors": {
+            "title": "Customers couldn’t be loaded",
+            "loadFailed": "Failed to load customers. Please try again."
           },
           "table": {
             "customer": "Customer",
@@ -1042,6 +1716,29 @@
             "actions": "Actions"
           }
         },
+        "create": {
+          "metaTitle": "Create customer",
+          "breadcrumb": "Create customer",
+          "title": "Create new customer",
+          "subtitle": "Add a customer to your database",
+          "submit": "Create customer",
+          "errors": {
+            "createFailed": "Failed to create customer. Please try again."
+          }
+        },
+        "edit": {
+          "metaTitle": "Edit customer",
+          "breadcrumbCustomer": "Customer",
+          "breadcrumb": "Edit",
+          "title": "Edit customer",
+          "subtitle": "Update customer information",
+          "loading": "Loading customer…",
+          "errors": {
+            "notFound": "Customer not found",
+            "loadFailed": "Failed to load customer details.",
+            "updateFailed": "Failed to update customer. Please try again."
+          }
+        },
         "detail": {
           "metaTitle": "Customer",
           "fallbackTitle": "Customer",
@@ -1049,6 +1746,14 @@
           "stats": {
             "orders": "Orders",
             "totalSpent": "Total spent"
+          },
+          "errors": {
+            "title": "Customer couldn’t be loaded",
+            "loadFailed": "Failed to load customer. Please try again."
+          },
+          "notFound": {
+            "title": "Customer not found",
+            "hint": "This customer may not exist or you don't have permission to view it."
           },
           "empty": {
             "title": "No orders found",
@@ -1375,15 +2080,19 @@
           "title": "Suppliers",
           "subtitle": "Manage your suppliers",
           "addSupplier": "Add supplier",
+          "count": "{count} suppliers",
+          "loadingInline": "Loading…",
           "filters": {
             "searchLabel": "Search",
             "searchPlaceholder": "Search suppliers…",
-            "sortHint": "Sort by name, email or phone using the table headers."
+            "sortHint": "Use the sort buttons to order results.",
+            "clear": "Clear"
           },
           "loading": "Loading suppliers…",
           "empty": {
             "title": "No suppliers",
             "hint": "Get started by creating a new supplier.",
+            "hintFiltered": "No suppliers match your search.",
             "newSupplier": "New supplier"
           },
           "sort": {
@@ -1426,6 +2135,149 @@
             "updateFailed": "Failed to update supplier. Please try again."
           }
         }
+      }
+    }
+  },
+  "superAdmin": {
+    "layout": {
+      "brand": "Super Admin",
+      "role": "Super Admin",
+      "closeSidebar": "Close sidebar",
+      "toggleSidebar": "Toggle sidebar",
+      "defaultTitle": "Super Admin Dashboard"
+    },
+    "actions": {
+      "logout": "Logout"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "tenants": "Tenants",
+      "analytics": "Analytics",
+      "auditLogs": "Audit logs"
+    },
+    "login": {
+      "title": "Super Admin",
+      "subtitle": "Sign in to access the platform dashboard",
+      "backToSite": "Back to main site",
+      "form": {
+        "email": {
+          "label": "Email Address",
+          "placeholder": "superadmin@example.com"
+        },
+        "password": {
+          "label": "Password"
+        },
+        "submit": {
+          "signingIn": "Signing in...",
+          "signIn": "Sign In"
+        }
+      },
+      "errors": {
+        "superAdminRequired": "Access denied: Super admin privileges required",
+        "loginFailed": "Login failed"
+      }
+    },
+    "dashboard": {
+      "overview": {
+        "title": "Platform overview",
+        "subtitle": "Manage your multi-tenant SaaS platform"
+      },
+      "stats": {
+        "tenants": "Total tenants",
+        "users": "Total users",
+        "products": "Total products",
+        "revenue": "Total revenue"
+      },
+      "recentActivity": {
+        "title": "Recent activity",
+        "viewAll": "View all",
+        "empty": "No recent activity"
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "createTenant": {
+          "title": "Create tenant",
+          "subtitle": "Add a new store"
+        },
+        "manageTenants": {
+          "title": "Manage tenants",
+          "subtitle": "View all stores"
+        },
+        "viewAnalytics": {
+          "title": "View analytics",
+          "subtitle": "Platform insights"
+        }
+      }
+    },
+    "audit": {
+      "actions": {
+        "createTenant": "Create tenant",
+        "updateTenant": "Update tenant",
+        "deleteTenant": "Delete tenant",
+        "suspendTenant": "Suspend tenant",
+        "unsuspendTenant": "Activate tenant",
+        "impersonateUser": "Impersonate user"
+      }
+    },
+    "tenants": {
+      "title": "Tenant management",
+      "actions": {
+        "createTenant": "Create tenant",
+        "payments": "Payments",
+        "suspend": "Suspend",
+        "activate": "Activate"
+      },
+      "search": {
+        "placeholder": "Search tenants..."
+      },
+      "loading": "Loading tenants...",
+      "empty": "No tenants found",
+      "table": {
+        "name": "Name",
+        "slug": "Slug",
+        "status": "Status",
+        "users": "Users",
+        "products": "Products",
+        "orders": "Orders",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "modal": {
+        "createTitle": "Create new tenant",
+        "editTitle": "Edit tenant",
+        "fields": {
+          "name": {
+            "label": "Tenant name",
+            "placeholder": "Acme Corp"
+          },
+          "slug": {
+            "label": "Slug (subdomain)",
+            "placeholder": "acme",
+            "slugFallback": "slug",
+            "hint": "Will be accessible at {slug}.localhost:3000"
+          },
+          "ownerEmail": {
+            "label": "Owner email",
+            "placeholder": "admin@acme.com"
+          },
+          "ownerPassword": {
+            "label": "Owner password"
+          }
+        }
+      },
+      "errors": {
+        "generic": "An error occurred",
+        "suspendFailed": "Failed to suspend tenant",
+        "activateFailed": "Failed to activate tenant",
+        "deleteFailed": "Failed to delete tenant"
+      },
+      "confirm": {
+        "suspend": "Are you sure you want to suspend {name}?",
+        "delete": "Are you sure you want to DELETE {name}? This action cannot be undone!"
       }
     }
   }

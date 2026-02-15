@@ -31,7 +31,6 @@ const mainImage = computed(() => {
     return 'https://placehold.co/400x550'
 })
 
-// TODO: Replace with real discount logic when available in backend
 const discount = 0 
 const oldPrice = computed(() => {
     return null
@@ -71,7 +70,7 @@ function handleAddToCart() {
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(storefrontContent.value.toasts.addedToCart.title, storefrontContent.value.toasts.addedToCart.message)
 }
 </script>
 
@@ -113,7 +112,7 @@ function handleAddToCart() {
         <span
           v-if="isNew"
           class="px-2.5 py-1 bg-stone-900 text-white text-xs font-stationery italic"
-        >New</span>
+        >{{ storefrontContent.badges.new }}</span>
         <span
           v-if="discount > 0"
           class="px-2.5 py-1 bg-brand-700 text-white text-xs font-stationery italic"
@@ -132,7 +131,7 @@ function handleAddToCart() {
         <!-- Quick View -->
         <button
            class="w-9 h-9 bg-white flex items-center justify-center text-stone-600 hover:bg-white hover:text-brand-700 shadow-sm border border-stone-200 transition-colors" 
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4" />
@@ -157,11 +156,11 @@ function handleAddToCart() {
         <span
           v-if="isLowStock"
           class="px-2.5 py-1 bg-white border border-stone-300 text-stone-900 text-[10px] font-stationery uppercase tracking-widest"
-        >Low Stock</span>
+        >{{ storefrontContent.productForm.stock.lowStock(Number(product.stock ?? 0)) }}</span>
         <span
           v-else
           class="px-2.5 py-1 bg-white/90 backdrop-blur text-stone-600 text-[10px] font-stationery uppercase tracking-widest border border-stone-200"
-        >In Stock</span>
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
 
       <div
@@ -169,7 +168,7 @@ function handleAddToCart() {
         class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <span class="px-2.5 py-1 bg-stone-100 text-stone-500 text-[10px] font-stationery uppercase tracking-widest border border-stone-200">
-          Out of Stock
+          {{ storefrontContent.actions.outOfStock }}
         </span>
       </div>
     </div>
@@ -195,7 +194,7 @@ function handleAddToCart() {
       </NuxtLink>
 
       <p v-if="viewMode === 'list'" class="text-sm text-slate-500 mb-4 line-clamp-2">
-        {{ product.description || 'No description available for this product.' }}
+        {{ product.description || storefrontContent.product.descriptionFallback }}
       </p>
 
       <div 

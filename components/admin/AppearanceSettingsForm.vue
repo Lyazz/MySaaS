@@ -7,23 +7,23 @@
       <!-- Store Identity -->
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-1">Store Identity</h3>
-          <p class="text-sm text-slate-500 mb-6">Basic information about your store.</p>
+          <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.identity.title') }}</h3>
+          <p class="text-sm text-slate-500 mb-6">{{ t('admin.appearanceSettingsForm.identity.subtitle') }}</p>
           
           <div class="space-y-5">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1.5">Store Name</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.identity.storeName.label') }}</label>
               <input
                 v-model="form.name"
                 type="text"
                 required
                 class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-shadow"
-                placeholder="My Awesome Store"
+                :placeholder="t('admin.appearanceSettingsForm.identity.storeName.placeholder')"
               >
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1.5">URL Slug</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.identity.slug.label') }}</label>
               <div class="flex rounded-lg shadow-sm">
                 <input
                   v-model="form.slug"
@@ -31,7 +31,7 @@
                   required
                   pattern="^[a-z0-9-]+$"
                   class="flex-1 block w-full rounded-none rounded-l-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 sm:text-sm text-right"
-                  placeholder="my-store"
+                  :placeholder="t('admin.appearanceSettingsForm.identity.slug.placeholder')"
                   @input="handleSlugInput"
                 >
                 <span class="inline-flex items-center px-3 rounded-r-lg border border-l-0 border-slate-300 bg-slate-50 text-slate-500 sm:text-sm">
@@ -39,7 +39,7 @@
                 </span>
               </div>
               <p class="mt-1.5 text-xs text-slate-500">
-                Only lowercase letters, numbers, and hyphens.
+                {{ t('admin.appearanceSettingsForm.identity.slug.hint') }}
               </p>
             </div>
           </div>
@@ -49,24 +49,24 @@
       <!-- Brand Assets -->
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-1">Brand Assets</h3>
-          <p class="text-sm text-slate-500 mb-6">Visual elements that define your brand.</p>
+          <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.brandAssets.title') }}</h3>
+          <p class="text-sm text-slate-500 mb-6">{{ t('admin.appearanceSettingsForm.brandAssets.subtitle') }}</p>
 
           <div class="grid md:grid-cols-2 gap-8">
             <!-- Logo Upload -->
             <div>
-               <label class="block text-sm font-medium text-slate-700 mb-3">Brand Logo</label>
+               <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.logo.label') }}</label>
                <SingleImageUploader
                  v-model="form.logoUrl"
-                 label="Upload Logo"
-                 hint="Square (1:1), PNG recommended."
+                 :label="t('admin.appearanceSettingsForm.brandAssets.logo.upload')"
+                 :hint="t('admin.appearanceSettingsForm.brandAssets.logo.hint')"
                  class="w-full"
                />
             </div>
 
             <!-- Color Picker -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-3">Primary Color</label>
+              <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.label') }}</label>
               <div class="space-y-4">
                  <div class="flex items-center gap-4">
                     <div class="relative overflow-hidden rounded-xl border border-slate-200 shadow-sm w-16 h-16 shrink-0 group cursor-pointer">
@@ -89,7 +89,7 @@
                         placeholder="#0F766E"
                       >
                       <p class="mt-1.5 text-xs text-slate-500">
-                        Used for buttons, links, and highlights.
+                        {{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.hint') }}
                       </p>
                     </div>
                  </div>
@@ -116,25 +116,25 @@
         <div class="p-6">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <h3 class="text-lg font-semibold text-slate-900 mb-1">Announcement Bar</h3>
-              <p class="text-sm text-slate-500">Top banner for promotions.</p>
+              <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.announcement.title') }}</h3>
+              <p class="text-sm text-slate-500">{{ t('admin.appearanceSettingsForm.announcement.subtitle') }}</p>
             </div>
             <div class="flex items-center">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" v-model="form.announcementScrolling" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
-                <span class="ml-3 text-sm font-medium text-slate-700">Marquee Mode</span>
+                <span class="ml-3 text-sm font-medium text-slate-700">{{ t('admin.appearanceSettingsForm.announcement.marquee') }}</span>
               </label>
             </div>
           </div>
 
           <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1.5">Message Text</label>
+             <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.announcement.message.label') }}</label>
               <input
                 v-model="form.announcementText"
                 type="text"
                 class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                placeholder="Free shipping on all orders over $50! ✨"
+                :placeholder="t('admin.appearanceSettingsForm.announcement.message.placeholder')"
               >
           </div>
         </div>
@@ -143,21 +143,21 @@
       <!-- Template Selection -->
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6">
-           <h3 class="text-lg font-semibold text-slate-900 mb-1">Store Template</h3>
-           <p class="text-sm text-slate-500 mb-6">Choose the layout that best fits your brand.</p>
+           <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.templates.title') }}</h3>
+           <p class="text-sm text-slate-500 mb-6">{{ t('admin.appearanceSettingsForm.templates.subtitle') }}</p>
 
            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div
-                v-for="t in templates"
-                :key="t.key"
+                v-for="tpl in templates"
+                :key="tpl.key"
                 class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col h-full bg-white overflow-hidden"
-                :class="form.templateKey === t.key ? 'border-teal-600 ring-1 ring-teal-600' : 'border-slate-200 hover:border-teal-300 shadow-sm hover:shadow-md'"
-                @click="form.templateKey = t.key"
+                :class="form.templateKey === tpl.key ? 'border-teal-600 ring-1 ring-teal-600' : 'border-slate-200 hover:border-teal-300 shadow-sm hover:shadow-md'"
+                @click="form.templateKey = tpl.key"
               >
                  <!-- Template Screenshot -->
                  <div class="aspect-[16/10] w-full bg-slate-100 border-b border-slate-100 relative overflow-hidden">
                     <img 
-                      :src="`/templates/${t.key}.png`" 
+                      :src="`/templates/${tpl.key}.png`" 
                       class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"
                       onerror="this.style.display='none'"
@@ -169,17 +169,17 @@
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-2">
                            <div class="p-1.5 rounded-md bg-slate-50 border border-slate-100 text-slate-500">
-                              <Icon :name="t.icon" class="w-4 h-4" />
+                              <Icon :name="tpl.icon" class="w-4 h-4" />
                            </div>
-                           <span class="font-bold text-slate-900" :class="t.fontClass">{{ t.label }}</span>
+                           <span class="font-bold text-slate-900" :class="tpl.fontClass">{{ tpl.label }}</span>
                         </div>
-                        <div class="w-3 h-3 rounded-full border border-slate-200" :style="{ backgroundColor: t.color }"></div>
+                        <div class="w-3 h-3 rounded-full border border-slate-200" :style="{ backgroundColor: tpl.color }"></div>
                     </div>
                     
-                    <p class="text-xs text-slate-500 leading-relaxed mb-1">{{ t.description }}</p>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-1">{{ tpl.description }}</p>
                  </div>
                  
-                 <div v-if="form.templateKey === t.key" class="absolute top-3 right-3 text-teal-600 bg-white rounded-full shadow-sm z-10">
+                 <div v-if="form.templateKey === tpl.key" class="absolute top-3 right-3 text-teal-600 bg-white rounded-full shadow-sm z-10">
                     <Icon name="lucide:check-circle-2" class="w-6 h-6" />
                  </div>
               </div>
@@ -193,8 +193,8 @@
     <div class="hidden lg:block lg:col-span-5 xl:col-span-4 relative">
        <div class="sticky top-24 space-y-4">
           <div class="flex items-center justify-between">
-             <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Live Preview</h3>
-             <span class="text-xs px-2 py-1 bg-teal-100 text-teal-700 rounded font-medium">Mobile View</span>
+             <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">{{ t('admin.appearanceSettingsForm.preview.title') }}</h3>
+             <span class="text-xs px-2 py-1 bg-teal-100 text-teal-700 rounded font-medium">{{ t('admin.appearanceSettingsForm.preview.mobile') }}</span>
           </div>
 
           <!-- Phone/Browser Mockup Window -->
@@ -216,11 +216,11 @@
                   v-if="previewUrl"
                   :src="previewUrl"
                   class="w-full h-full border-none"
-                  title="Store Preview" 
+                  :title="t('admin.appearanceSettingsForm.preview.iframeTitle')" 
                 />
                 <div v-else class="flex flex-col items-center justify-center h-full text-slate-400 p-6 text-center">
                   <Icon name="lucide:loader" class="w-6 h-6 animate-spin mb-2" />
-                  <p class="text-xs">Loading preview...</p>
+                  <p class="text-xs">{{ t('admin.appearanceSettingsForm.preview.loading') }}</p>
                 </div>
              </div>
 
@@ -231,8 +231,8 @@
 
 
           <p class="text-xs text-center text-slate-400">
-             Showing live preview of saved changes.
-             <a v-if="previewUrl" :href="previewUrl" target="_blank" class="text-teal-600 hover:underline">Open in new tab</a>
+             {{ t('admin.appearanceSettingsForm.preview.note') }}
+             <a v-if="previewUrl" :href="previewUrl" target="_blank" class="text-teal-600 hover:underline">{{ t('admin.appearanceSettingsForm.preview.openNewTab') }}</a>
           </p>
        </div>
     </div>
@@ -255,10 +255,10 @@
            <button
              type="button"
              class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
-             :disabled="loading || saving"
-             @click="reset"
-           >
-             Discard
+           :disabled="loading || saving"
+           @click="reset"
+         >
+             {{ t('admin.common.cancel') }}
            </button>
            
            <button
@@ -268,7 +268,7 @@
              :disabled="loading || saving"
            >
              <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-             {{ saving ? 'Saving...' : 'Save Changes' }}
+             {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
            </button>
         </div>
      </div>
@@ -283,6 +283,7 @@ import SingleImageUploader from './SingleImageUploader.vue'
 
 // -- Types & Stores --
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 
 // -- State --
 const loading = ref(false)
@@ -321,8 +322,8 @@ const previewUrl = computed(() => {
 })
 
 const getSelectedTemplateFont = computed(() => {
-  const t = templates.find(t => t.key === form.templateKey)
-  return t ? t.fontClass : 'font-sans'
+  const tpl = templates.value.find((tpl) => tpl.key === form.templateKey)
+  return tpl ? tpl.fontClass : 'font-sans'
 })
 
 // -- Lifecycle --
@@ -344,72 +345,72 @@ onMounted(() => {
 })
 
 // -- Templates Data --
-const templates = [
+const templates = computed(() => [
   { 
     key: 'classic', 
-    label: 'Classic Shop', 
-    description: 'Timeless elegance with serif typography.',
+    label: t('admin.appearanceSettingsForm.templates.options.classic.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.classic.description'),
     icon: 'lucide:layout-grid',
     fontClass: 'font-serif',
     color: '#0f172a'
   },
   { 
     key: 'modern', 
-    label: 'Modern Minimal', 
-    description: 'Clean aesthetic with bold accents.',
+    label: t('admin.appearanceSettingsForm.templates.options.modern.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.modern.description'),
     icon: 'lucide:layout-template',
     fontClass: 'font-sans',
     color: '#0d9488'
   },
   { 
     key: 'street', 
-    label: 'Street Urban', 
-    description: 'Energetic, high-contrast style.',
+    label: t('admin.appearanceSettingsForm.templates.options.street.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.street.description'),
     icon: 'lucide:zap',
     fontClass: 'font-street',
     color: '#FACC15'
   },
   { 
     key: 'cozy', 
-    label: 'Cozy Warm', 
-    description: 'Soft greens and rounded nuances.',
+    label: t('admin.appearanceSettingsForm.templates.options.cozy.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.cozy.description'),
     icon: 'lucide:coffee',
     fontClass: 'font-cozy',
     color: '#A4C3B2'
   },
   { 
     key: 'cyber', 
-    label: 'Cyber Future', 
-    description: 'Dark mode with neon accents.',
+    label: t('admin.appearanceSettingsForm.templates.options.cyber.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.cyber.description'),
     icon: 'lucide:cpu',
     fontClass: 'font-cyber',
     color: '#F43F5E'
   },
   { 
     key: 'stationnery', 
-    label: 'Stationery', 
-    description: 'Refined structure for professionals.',
+    label: t('admin.appearanceSettingsForm.templates.options.stationnery.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.stationnery.description'),
     icon: 'lucide:pen-tool',
     fontClass: 'font-stationery',
     color: '#334155'
   },
   { 
     key: 'food', 
-    label: 'Food Market', 
-    description: 'Vibrant and appetizing.',
+    label: t('admin.appearanceSettingsForm.templates.options.food.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.food.description'),
     icon: 'lucide:utensils',
     fontClass: 'font-food',
     color: '#EA580C'
   },
   { 
     key: 'wellness', 
-    label: 'Wellness', 
-    description: 'Organic, calm, and natural.',
+    label: t('admin.appearanceSettingsForm.templates.options.wellness.label'), 
+    description: t('admin.appearanceSettingsForm.templates.options.wellness.description'),
     icon: 'lucide:flower-2',
     fontClass: 'font-wellness',
     color: '#8A9A5B'
   }
-]
+])
 
 // -- Methods --
 const handleSlugInput = (e: Event) => {
@@ -443,7 +444,7 @@ const fetchSettings = async () => {
     updateForm(data)
   } catch (e) {
     console.error('Failed to load settings', e)
-    showMessage('error', 'Failed to load settings.')
+    showMessage('error', t('admin.appearanceSettingsForm.messages.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -473,17 +474,17 @@ const save = async () => {
     // Update local form
     updateForm(updated)
     
-    showMessage('success', 'Store settings updated!')
+    showMessage('success', t('admin.appearanceSettingsForm.messages.saved'))
   } catch (e: any) {
     console.error('Failed to save settings', e)
-    showMessage('error', e.data?.statusMessage || 'Failed to save changes.')
+    showMessage('error', e.data?.statusMessage || t('admin.appearanceSettingsForm.messages.saveFailed'))
   } finally {
     saving.value = false
   }
 }
 
 const reset = () => {
-  if (confirm('Discard unsaved changes?')) {
+  if (confirm(t('admin.appearanceSettingsForm.confirm.discard'))) {
     fetchSettings()
   }
 }

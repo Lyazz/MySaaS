@@ -25,13 +25,13 @@
             class="font-sans font-semibold text-lg tracking-wide truncate transition-all duration-300"
             :class="sidebarOpen ? 'opacity-100' : 'opacity-0 lg:hidden'"
           >
-            Super Admin
+            {{ t('superAdmin.layout.brand') }}
           </span>
         </div>
         <button 
           @click="toggleSidebar" 
           class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors lg:hidden"
-          aria-label="Close sidebar"
+          :aria-label="t('superAdmin.layout.closeSidebar')"
         >
           <Icon name="lucide:x" class="w-5 h-5" />
         </button>
@@ -89,7 +89,7 @@
             :class="sidebarOpen ? 'w-auto opacity-100 ml-3' : 'w-0 opacity-0 ml-0'"
           >
             <p class="text-sm font-medium text-slate-200 truncate">{{ authStore.user?.email }}</p>
-            <p class="text-xs text-slate-500 truncate mt-0.5">Super Admin</p>
+            <p class="text-xs text-slate-500 truncate mt-0.5">{{ t('superAdmin.layout.role') }}</p>
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@
             <button 
               @click="toggleSidebar" 
               class="p-2 -ml-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label="Toggle sidebar"
+              :aria-label="t('superAdmin.layout.toggleSidebar')"
             >
               <Icon name="lucide:menu" class="w-6 h-6" />
             </button>
@@ -117,7 +117,7 @@
               class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
             >
               <Icon name="lucide:log-out" class="w-4 h-4" />
-              <span>Logout</span>
+              <span>{{ t('superAdmin.actions.logout') }}</span>
             </button>
           </div>
         </div>
@@ -139,6 +139,7 @@ import { useAuthStore } from '~/stores/auth'
 const authStore = useAuthStore()
 const route = useRoute()
 const sidebarOpen = ref(false)
+const { t } = useI18n({ useScope: 'global' })
 
 onMounted(() => {
   if (window.innerWidth >= 1024) {
@@ -150,31 +151,31 @@ const userInitial = computed(() => authStore.user?.email?.charAt(0).toUpperCase(
 
 const pageTitle = computed(() => {
   const meta = route.meta.title as string
-  return meta || 'Super Admin Dashboard'
+  return meta || t('superAdmin.layout.defaultTitle')
 })
 
-const navItems = [
+const navItems = computed(() => [
   {
     path: '/super-admin',
-    label: 'Dashboard',
+    label: t('superAdmin.nav.dashboard'),
     icon: 'lucide:layout-dashboard'
   },
   {
     path: '/super-admin/tenants',
-    label: 'Tenants',
+    label: t('superAdmin.nav.tenants'),
     icon: 'lucide:building'
   },
   {
     path: '/super-admin/analytics',
-    label: 'Analytics',
+    label: t('superAdmin.nav.analytics'),
     icon: 'lucide:bar-chart-2'
   },
   {
     path: '/super-admin/audit-logs',
-    label: 'Audit Logs',
+    label: t('superAdmin.nav.auditLogs'),
     icon: 'lucide:history'
   }
-]
+])
 
 function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value

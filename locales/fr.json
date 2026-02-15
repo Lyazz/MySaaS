@@ -132,6 +132,45 @@
       "login": "Se connecter",
       "getStarted": "Commencer"
     },
+    "featuresPage": {
+      "hero": {
+        "title": {
+          "prefix": "Tout ce qu’il vous faut pour ",
+          "accent": "passer à l’échelle"
+        },
+        "subtitle": "Swekly est bien plus qu’un créateur de boutique. C’est un véritable système d’exploitation pour votre activité e-commerce."
+      },
+      "items": {
+        "builder": {
+          "title": "Constructeur de boutique (drag & drop)",
+          "description": "Créez des vitrines professionnelles et responsive sans écrire une seule ligne de code. Personnalisez chaque détail en quelques minutes."
+        },
+        "payments": {
+          "title": "Paiements mondiaux",
+          "description": "Acceptez des paiements partout grâce à des passerelles intégrées comme Stripe, PayPal et des fournisseurs locaux."
+        },
+        "analytics": {
+          "title": "Analytique avancée",
+          "description": "Suivez les ventes en temps réel, le comportement des visiteurs et les entonnoirs de conversion."
+        },
+        "automation": {
+          "title": "Automatisation marketing",
+          "description": "Récupérez les paniers abandonnés et engagez vos clients avec des workflows SMS et e-mail."
+        },
+        "logistics": {
+          "title": "Réseau logistique",
+          "description": "Dispatch automatique des commandes vers Yalidine, Eckoz et plus de 50 transporteurs."
+        },
+        "domains": {
+          "title": "Domaines personnalisés",
+          "description": "Connectez votre propre nom de domaine pour une expérience entièrement personnalisée."
+        }
+      },
+      "cta": {
+        "title": "Prêt à commencer ?",
+        "button": "Démarrer l’essai gratuit"
+      }
+    },
     "footer": {
       "tagline": "Donnez plus de puissance à votre entreprise avec des outils modernes et une expérience premium. Conçu pour évoluer, pensé pour vous.",
       "product": {
@@ -145,6 +184,92 @@
         "contact": "Contact"
       },
       "copyright": "© {year} Plateforme Swekly. Tous droits réservés."
+    }
+  },
+  "auth": {
+    "login": {
+      "hero": {
+        "welcomeBack": "Bon retour,",
+        "builder": "Builder",
+        "builderSuffix": ".",
+        "subtitle": "Votre tableau de bord est prêt. Continuez à gérer vos commandes, produits et analyses depuis un seul endroit.",
+        "feature": {
+          "title": "Suivi du chiffre d’affaires",
+          "description": "Des insights en temps réel sur les performances de votre boutique."
+        },
+        "copyright": "© {year} Swekly Inc."
+      },
+      "form": {
+        "title": "Connectez-vous à votre compte",
+        "subtitle": "Accédez à votre espace tenant.",
+        "orContinueWith": "Ou continuer avec",
+        "email": {
+          "label": "Adresse e-mail",
+          "placeholder": "name@company.com"
+        },
+        "password": {
+          "label": "Mot de passe",
+          "forgot": "Mot de passe oublié ?"
+        },
+        "submit": {
+          "signingIn": "Connexion...",
+          "signIn": "Se connecter"
+        },
+        "noAccount": "Vous n’avez pas de compte ?",
+        "startFree": "Commencer gratuitement"
+      },
+      "errors": {
+        "invalidCredentials": "E-mail ou mot de passe incorrect",
+        "generic": "Une erreur est survenue. Veuillez réessayer."
+      }
+    },
+    "register": {
+      "hero": {
+        "launchYour": "Lancez votre",
+        "empire": "Empire",
+        "today": "aujourd’hui.",
+        "subtitle": "Rejoignez des milliers de marchands qui construisent la prochaine génération du commerce. Évolutif, sécurisé et prêt pour la croissance.",
+        "testimonial": {
+          "quote": "Passer sur Swekly a été la meilleure décision. Notre chiffre d’affaires a doublé en 3 mois.",
+          "name": "John Doe",
+          "role": "PDG, FashionNova"
+        },
+        "copyright": "© {year} Swekly Inc."
+      },
+      "form": {
+        "title": "Créez votre compte",
+        "subtitle": "Démarrez votre essai gratuit de 14 jours. Aucune carte de crédit requise.",
+        "companyName": {
+          "label": "Nom de l’entreprise",
+          "placeholder": "Ex. Acme Corp"
+        },
+        "slug": {
+          "label": "URL de la boutique",
+          "placeholder": "acme",
+          "preview": "Votre boutique sera à l’adresse : {slug}.swekly.com"
+        },
+        "email": {
+          "label": "E-mail professionnel",
+          "placeholder": "name@company.com"
+        },
+        "password": {
+          "label": "Mot de passe"
+        },
+        "submit": {
+          "creating": "Création du compte...",
+          "register": "S’inscrire et créer l’espace"
+        },
+        "haveAccount": "Vous avez déjà un compte ?",
+        "logIn": "Se connecter"
+      },
+      "success": {
+        "title": "C’est bon !",
+        "message": "Votre espace {name} a été créé.",
+        "cta": "Aller au tableau de bord"
+      },
+      "errors": {
+        "generic": "Une erreur est survenue lors de l’inscription."
+      }
     }
   },
   "pricing": {
@@ -207,12 +332,14 @@
     },
     "common": {
       "productsCount": "{count} produits",
-      "selectPlaceholder": "Sélectionner…"
+      "selectPlaceholder": "Sélectionner…",
+      "storeFallback": "Boutique"
     },
     "actions": {
       "addToCart": "Ajouter au panier",
       "adding": "Ajout…",
       "outOfStock": "Rupture de stock",
+      "quickView": "Aperçu rapide",
       "viewCart": "Voir le panier",
       "checkout": "Paiement",
       "continueShopping": "Continuer vos achats",
@@ -222,6 +349,33 @@
       "clearAll": "Tout effacer",
       "filters": "Filtres",
       "search": "Rechercher"
+    },
+    "badges": {
+      "new": "Nouveau"
+    },
+    "bundleDeals": {
+      "title": "Offres groupées",
+      "buy": "Acheter {qty}",
+      "save": "Économisez {amount}"
+    },
+    "pages": {
+      "contact": {
+        "seo": {
+          "title": "Contact - {tenant}",
+          "description": "Contacter {tenant}."
+        },
+        "heading": "Contact {tenant}",
+        "placeholder": "Ceci est la page de contact de la boutique. Ajoutez votre téléphone/e-mail/adresse dans l’assistant de paramètres pour remplacer ce contenu.",
+        "classic": {
+          "heading": "Contactez-nous"
+        },
+        "sections": {
+          "callUs": "Appelez-nous",
+          "emailUs": "Écrivez-nous",
+          "visitUs": "Rendez-nous visite"
+        },
+        "addressPlaceholder": "123 rue du Magasin, Ville, Pays"
+      }
     },
     "home": {
       "welcomeTo": "Bienvenue chez {tenant}",
@@ -329,11 +483,26 @@
         "placingOrder": "Commande en cours…"
       },
       "form": {
-        "fullName": { "label": "Nom complet", "placeholder": "ex : John Doe" },
-        "phone": { "label": "Téléphone", "placeholder": "0XXXXXXXX" },
-        "wilaya": { "label": "Wilaya", "placeholder": "Sélectionner une wilaya…" },
-        "commune": { "label": "Ville", "placeholder": "Sélectionner une commune…" },
-        "address": { "label": "Adresse (optionnel)", "placeholder": "Rue, immeuble, etc." }
+        "fullName": {
+          "label": "Nom complet",
+          "placeholder": "ex : John Doe"
+        },
+        "phone": {
+          "label": "Téléphone",
+          "placeholder": "0XXXXXXXX"
+        },
+        "wilaya": {
+          "label": "Wilaya",
+          "placeholder": "Sélectionner une wilaya…"
+        },
+        "commune": {
+          "label": "Ville",
+          "placeholder": "Sélectionner une commune…"
+        },
+        "address": {
+          "label": "Adresse (optionnel)",
+          "placeholder": "Rue, immeuble, etc."
+        }
       },
       "sections": {
         "customerInformation": "Informations client",
@@ -369,7 +538,9 @@
       "viewFullDetails": "Voir les détails"
     },
     "productForm": {
-      "quantity": { "label": "Quantité" },
+      "quantity": {
+        "label": "Quantité"
+      },
       "stock": {
         "unavailable": "Indisponible",
         "outOfStock": "Rupture de stock",
@@ -484,15 +655,19 @@
       "logout": "Se déconnecter"
     },
     "common": {
+      "name": "Nom",
+      "category": "Catégorie",
       "actions": "Actions",
       "active": "Actif",
       "inactive": "Inactif",
       "search": "Rechercher",
       "searchAction": "Rechercher",
       "clear": "Effacer",
+      "reset": "Réinitialiser",
       "startDate": "Date de début",
       "endDate": "Date de fin",
       "loading": "Chargement…",
+      "uploading": "Téléversement…",
       "refresh": "Actualiser",
       "back": "Retour",
       "next": "Suivant",
@@ -510,13 +685,437 @@
       "edit": "Modifier",
       "delete": "Supprimer"
     },
+    "confirmModal": {
+      "defaults": {
+        "title": "Êtes-vous sûr ?",
+        "message": "Cette action est irréversible.",
+        "confirm": "Confirmer"
+      }
+    },
+    "components": {
+      "singleImageUploader": {
+        "previewAlt": "Aperçu de l’image téléversée",
+        "uploadCta": "Téléverser une image",
+        "errors": {
+          "pngOnly": "Veuillez téléverser une image PNG.",
+          "squareOnly": "L’image doit être carrée (actuel : {w}x{h}px).",
+          "uploadFailed": "Échec du téléversement",
+          "readDimensionsFailed": "Impossible de lire les dimensions de l’image."
+        }
+      },
+      "richTextEditor": {
+        "placeholder": "Commencez à rédiger la description de votre produit...",
+        "errors": {
+          "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
+          "tooLarge": "L’image doit faire moins de 5 Mo",
+          "uploadFailed": "Échec du téléversement"
+        }
+      }
+    },
+    "storeSettingsForm": {
+      "title": "Apparence et paramètres de la boutique",
+      "subtitle": "Personnalisez l’apparence de votre boutique et ses fonctionnalités e-commerce principales.",
+      "brandLogo": {
+        "title": "Logo de la marque",
+        "subtitle": "Ce logo apparaîtra dans l’en-tête de votre boutique et sur les factures.",
+        "inputLabel": "Logo de la boutique",
+        "hint": "Taille recommandée : 200×60 px. PNG ou SVG de préférence."
+      },
+      "brandColors": {
+        "title": "Couleurs de la marque",
+        "subtitle": "Choisissez une couleur principale pour les boutons, liens et éléments d’accent.",
+        "primaryLabel": "Couleur principale",
+        "previewTitle": "Aperçu en direct",
+        "previewPrimary": "Bouton",
+        "previewOutline": "Contour"
+      },
+      "features": {
+        "title": "Fonctionnalités de la boutique",
+        "subtitle": "Activez ou désactivez les flux e-commerce principaux.",
+        "cart": {
+          "title": "Panier et paiement",
+          "subtitle": "Permettre aux clients d’ajouter des articles au panier et de finaliser la commande."
+        },
+        "cod": {
+          "title": "COD sur la page produit",
+          "subtitle": "Afficher le formulaire paiement à la livraison (COD) directement sur les pages produit."
+        }
+      },
+      "currency": {
+        "title": "Devise de la boutique",
+        "subtitle": "Choisissez la devise affichée sur les prix. Les symboles et le format suivront ce choix.",
+        "inputLabel": "Devise"
+      },
+      "template": {
+        "title": "Modèle de boutique",
+        "subtitle": "Sélectionnez la structure de mise en page de votre vitrine.",
+        "select": "Sélectionner",
+        "selected": "Sélectionné",
+        "options": {
+          "classic": {
+            "label": "Boutique classique",
+            "description": "Mise en page e-commerce traditionnelle centrée sur les produits."
+          },
+          "modern": {
+            "label": "Minimal moderne",
+            "description": "Design épuré avec grande typographie et images."
+          }
+        }
+      },
+      "localization": {
+        "title": "Localisation",
+        "subtitle": "Définissez la langue par défaut de votre boutique.",
+        "inputLabel": "Langue par défaut",
+        "rtlNote": "Note : choisir l’arabe activera automatiquement la mise en page de droite à gauche (RTL)."
+      },
+      "messages": {
+        "saved": "Paramètres de la boutique enregistrés !",
+        "saveFailed": "Impossible d’enregistrer les paramètres. Veuillez réessayer."
+      },
+      "confirm": {
+        "reset": "Voulez-vous vraiment annuler vos modifications et recharger les paramètres enregistrés ?"
+      }
+    },
+    "homepageSettingsForm": {
+      "subtitle": "Contrôlez ce qui apparaît sur la page d’accueil : carrousel hero, catégories, nouveautés et meilleures ventes.",
+      "carousel": {
+        "title": "Carrousel hero",
+        "subtitle": "Ajoutez des slides avec une image, du texte et un bouton optionnel.",
+        "slideLabel": "Diapositive {index}",
+        "slideHint": "Image + texte + bouton",
+        "slidePreviewAlt": "Aperçu de la diapositive",
+        "noImage": "Aucune image",
+        "uploadImage": "Téléverser une image",
+        "addSlide": "Ajouter une diapositive",
+        "defaults": {
+          "title": "Nouvelle diapositive"
+        }
+      },
+      "fields": {
+        "title": "Titre",
+        "subtitle": "Sous-titre",
+        "buttonText": "Texte du bouton",
+        "buttonLink": "Lien du bouton",
+        "buttonLinkHint": "Utilisez des chemins internes comme \"/products\" ou \"/c/shoes\".",
+        "imageUrl": "URL de l’image",
+        "imageUrlHint": "Ou collez une URL si vous en avez déjà une.",
+        "eyebrow": "Sur-titre",
+        "limit": "Limite"
+      },
+      "sections": {
+        "title": "Sections de la page d’accueil",
+        "subtitle": "Activez/désactivez les sections et ajustez les titres.",
+        "browseByCategory": {
+          "title": "Parcourir par catégorie",
+          "subtitle": "Afficher vos catégories sur la page d’accueil.",
+          "toggle": "Basculer les catégories"
+        },
+        "newArrivals": {
+          "title": "Nouveautés",
+          "subtitle": "Afficher les derniers produits (par date de création).",
+          "toggle": "Basculer les nouveautés"
+        },
+        "bestSellers": {
+          "title": "Meilleures ventes",
+          "subtitle": "Afficher les produits les plus vendus (commandes non annulées).",
+          "toggle": "Basculer les meilleures ventes"
+        }
+      },
+      "messages": {
+        "loadFailed": "Impossible de charger les paramètres de la page d’accueil.",
+        "uploadFailed": "Impossible de téléverser l’image.",
+        "saved": "Paramètres de la page d’accueil enregistrés !",
+        "saveFailed": "Impossible d’enregistrer les modifications."
+      }
+    },
+    "functionalSettingsForm": {
+      "features": {
+        "title": "Fonctionnalités de la boutique",
+        "subtitle": "Activez ou désactivez les fonctionnalités principales de votre vitrine.",
+        "cart": {
+          "title": "Panier et paiement",
+          "subtitle": "Permettre aux clients d’ajouter plusieurs articles au panier et de passer au paiement.",
+          "toggle": "Activer le panier"
+        },
+        "cod": {
+          "title": "Paiement à la livraison (COD)",
+          "subtitle": "Afficher un formulaire \"Acheter maintenant en COD\" sur les pages produit pour convertir plus vite.",
+          "toggle": "Activer le formulaire COD"
+        }
+      },
+      "currency": {
+        "title": "Devise de la boutique",
+        "subtitle": "Définissez la devise principale pour les prix et transactions.",
+        "selectLabel": "Choisir la devise",
+        "loadingCurrencies": "Chargement des devises...",
+        "note": "Note : changer de devise ne convertit pas automatiquement les prix existants."
+      },
+      "localization": {
+        "title": "Localisation",
+        "subtitle": "Choisissez la langue par défaut de votre vitrine.",
+        "defaultLanguage": "Langue par défaut",
+        "rtl": {
+          "title": "Support RTL activé",
+          "subtitle": "Votre vitrine passera automatiquement en mode droite à gauche pour l’arabe."
+        }
+      },
+      "actions": {
+        "discardChanges": "Annuler les modifications"
+      },
+      "messages": {
+        "loadFailed": "Impossible de charger les paramètres.",
+        "saved": "Paramètres fonctionnels enregistrés !",
+        "saveFailed": "Impossible d’enregistrer les modifications. Veuillez réessayer."
+      },
+      "confirm": {
+        "discard": "Voulez-vous vraiment annuler les modifications non enregistrées ?"
+      }
+    },
+    "contactInfosForm": {
+      "title": "Informations de contact",
+      "subtitle": "Ajoutez des numéros de téléphone, e-mails, adresses et liens sociaux. Les éléments actifs sont affichés dans le pied de page.",
+      "draft": {
+        "title": "Nouvel élément de contact",
+        "subtitle": "Choisissez un type et une valeur, puis créez."
+      },
+      "fields": {
+        "type": "Type",
+        "labelOptional": "Libellé (optionnel)",
+        "labelPlaceholder": "ex. Support, Ventes…",
+        "value": "Valeur"
+      },
+      "previewLink": "Lien aperçu :",
+      "items": {
+        "title": "Éléments",
+        "total": "{count} au total",
+        "empty": "Aucune info de contact. Cliquez sur « Ajouter » pour créer la première."
+      },
+      "actions": {
+        "moveUp": "Monter",
+        "moveDown": "Descendre"
+      },
+      "confirm": {
+        "delete": "Supprimer cet élément de contact ?"
+      },
+      "messages": {
+        "loadFailed": "Impossible de charger les infos de contact.",
+        "createFailed": "Impossible de créer l’info de contact.",
+        "updateFailed": "Impossible de mettre à jour l’info de contact.",
+        "deleteFailed": "Impossible de supprimer l’info de contact."
+      },
+      "kinds": {
+        "phone": { "label": "Téléphone", "placeholder": "0550 00 00 00" },
+        "email": { "label": "E-mail", "placeholder": "contact@store.com" },
+        "address": { "label": "Adresse", "placeholder": "Alger, Hydra…" },
+        "map": { "label": "Lien de carte", "placeholder": "https://maps.app.goo.gl/..." },
+        "website": { "label": "Site web", "placeholder": "https://example.com" },
+        "whatsapp": { "label": "WhatsApp", "placeholder": "+213550000000" },
+        "facebook": { "label": "Facebook", "placeholder": "https://facebook.com/yourpage" },
+        "instagram": { "label": "Instagram", "placeholder": "@yourstore" },
+        "tiktok": { "label": "TikTok", "placeholder": "@yourstore" },
+        "youtube": { "label": "YouTube", "placeholder": "https://youtube.com/@yourstore" },
+        "x": { "label": "X (Twitter)", "placeholder": "@yourstore" },
+        "linkedin": { "label": "LinkedIn", "placeholder": "https://linkedin.com/company/yourstore" },
+        "snapchat": { "label": "Snapchat", "placeholder": "@yourstore" },
+        "telegram": { "label": "Telegram", "placeholder": "https://t.me/yourstore" },
+        "viber": { "label": "Viber", "placeholder": "+213550000000" },
+        "pinterest": { "label": "Pinterest", "placeholder": "https://pinterest.com/yourstore" },
+        "threads": { "label": "Threads", "placeholder": "@yourstore" }
+      }
+    },
+    "imageUploader": {
+      "title": "Images du produit",
+      "imageAlt": "Image du produit",
+      "mainBadge": "Principale",
+      "actions": {
+        "setAsMain": "Définir comme image principale",
+        "remove": "Supprimer l’image",
+        "addImage": "Ajouter une image"
+      },
+      "tip": {
+        "title": "Astuce :",
+        "body": "Glissez-déposez pour réordonner. Cliquez sur l’étoile pour définir l’image principale."
+      },
+      "errors": {
+        "uploadFailed": "Impossible de téléverser l’image"
+      }
+    },
+    "variantsTable": {
+      "title": "Variantes",
+      "subtitle": "Les variantes restent synchronisées automatiquement avec vos options.",
+      "columns": {
+        "variant": "Variante",
+        "price": "Prix",
+        "track": "Suivi",
+        "onHand": "En stock",
+        "reserved": "Réservé",
+        "safety": "Sécurité",
+        "available": "Disponible",
+        "sku": "SKU",
+        "active": "Actif",
+        "images": "Images"
+      },
+      "actions": {
+        "manageImages": "Gérer ({count})",
+        "movements": "Mouvements"
+      },
+      "defaultVariant": "Par défaut",
+      "movements": {
+        "title": "Mouvements de stock",
+        "subtitle": "50 derniers mouvements pour cette variante.",
+        "loading": "Chargement des mouvements…",
+        "empty": "Aucun mouvement enregistré pour le moment.",
+        "columns": {
+          "date": "Date",
+          "type": "Type",
+          "deltaStock": "Δ stock",
+          "deltaReserved": "Δ réservé",
+          "deltaSafety": "Δ sécurité",
+          "after": "Après",
+          "by": "Par"
+        },
+        "order": "Commande : {id}",
+        "system": "système"
+      },
+      "imagePicker": {
+        "title": "Sélectionner des images pour cette variante",
+        "subtitle": "Les images proviennent de la galerie produit. Cochez pour attacher.",
+        "empty": "Aucune image produit disponible. Téléversez d’abord des images, puis attachez-les ici.",
+        "imageFallback": "Image",
+        "imageWithIndex": "Image {index}",
+        "save": "Enregistrer les images"
+      },
+      "errors": {
+        "updateVariantFailed": "Impossible de mettre à jour la variante",
+        "updateInventoryFailed": "Impossible de mettre à jour le stock",
+        "saveImagesFailed": "Impossible d’enregistrer les images"
+      }
+    },
+    "productOptionsEditor": {
+      "title": "Options",
+      "fields": {
+        "optionName": "Nom de l’option",
+        "optionNamePlaceholder": "ex. Taille",
+        "newOptionNamePlaceholder": "ex. Couleur",
+        "displayType": "Type d’affichage",
+        "optionValues": "Valeurs de l’option",
+        "optionValuesPlaceholder": "Séparez les valeurs par des virgules (ex. Rouge, Bleu)",
+        "pressEnterToAdd": "Appuyez sur Entrée pour ajouter",
+        "addValuePlaceholder": "Ajouter une valeur..."
+      },
+      "displayTypes": {
+        "dropdown": "Liste déroulante",
+        "button": "Boutons / Tags",
+        "radio": "Boutons radio",
+        "color": "Nuancier",
+        "image": "Image avec texte"
+      },
+      "preview": {
+        "title": "Aperçu :",
+        "valueWithIndex": "Valeur {index}",
+        "imageFallbackShort": "Img"
+      },
+      "actions": {
+        "editMetadata": "Modifier les métadonnées",
+        "removeOption": "Supprimer l’option",
+        "addAnotherOption": "Ajouter une autre option",
+        "done": "Terminer"
+      },
+      "maxOptions": "Maximum 3 options autorisées.",
+      "deleteModal": {
+        "title": "Supprimer l’option",
+        "message": "Voulez-vous vraiment supprimer cette option ? Toutes les variantes associées seront supprimées."
+      },
+      "confirm": {
+        "removeValue": "Supprimer « {label} » ?"
+      },
+      "metaModal": {
+        "title": "Modifier {type} pour « {label} »",
+        "types": {
+          "color": "Couleur",
+          "image": "Image"
+        },
+        "colorHex": "Couleur (Hex)",
+        "imageUrl": "URL de l’image",
+        "imageUrlHint": "Fournissez une URL directe vers l’icône de l’image."
+      }
+    },
+    "appearanceSettingsForm": {
+      "identity": {
+        "title": "Identité de la boutique",
+        "subtitle": "Informations de base sur votre boutique.",
+        "storeName": {
+          "label": "Nom de la boutique",
+          "placeholder": "Ma super boutique"
+        },
+        "slug": {
+          "label": "Slug d’URL",
+          "placeholder": "ma-boutique",
+          "hint": "Uniquement des lettres minuscules, chiffres et tirets."
+        }
+      },
+      "brandAssets": {
+        "title": "Ressources de marque",
+        "subtitle": "Éléments visuels qui définissent votre marque.",
+        "logo": {
+          "label": "Logo de la marque",
+          "upload": "Téléverser le logo",
+          "hint": "Carré (1:1), PNG recommandé."
+        },
+        "primaryColor": {
+          "label": "Couleur principale",
+          "hint": "Utilisée pour les boutons, liens et accents."
+        }
+      },
+      "announcement": {
+        "title": "Bandeau d’annonce",
+        "subtitle": "Bannière en haut pour les promotions.",
+        "marquee": "Mode défilant",
+        "message": {
+          "label": "Texte du message",
+          "placeholder": "Livraison gratuite dès 50€ d’achat ! ✨"
+        }
+      },
+      "templates": {
+        "title": "Modèle de boutique",
+        "subtitle": "Choisissez la mise en page qui correspond le mieux à votre marque.",
+        "options": {
+          "classic": { "label": "Classique", "description": "Élégance intemporelle avec typographie serif." },
+          "modern": { "label": "Minimal moderne", "description": "Esthétique épurée avec accents marqués." },
+          "street": { "label": "Urbain", "description": "Style énergique à fort contraste." },
+          "cozy": { "label": "Chaleureux", "description": "Verts doux et formes arrondies." },
+          "cyber": { "label": "Cyber futur", "description": "Mode sombre avec accents néon." },
+          "stationnery": { "label": "Papeterie", "description": "Structure raffinée pour les professionnels." },
+          "food": { "label": "Marché food", "description": "Vibrant et appétissant." },
+          "wellness": { "label": "Bien-être", "description": "Organique, calme et naturel." }
+        }
+      },
+      "preview": {
+        "title": "Aperçu en direct",
+        "mobile": "Vue mobile",
+        "iframeTitle": "Aperçu de la boutique",
+        "loading": "Chargement de l’aperçu...",
+        "note": "Affichage de l’aperçu des modifications enregistrées.",
+        "openNewTab": "Ouvrir dans un nouvel onglet"
+      },
+      "messages": {
+        "loadFailed": "Impossible de charger les paramètres.",
+        "saved": "Paramètres de la boutique mis à jour !",
+        "saveFailed": "Impossible d’enregistrer les modifications."
+      },
+      "confirm": {
+        "discard": "Annuler les modifications non enregistrées ?"
+      }
+    },
     "nav": {
       "overview": "Aperçu",
       "catalog": "Catalogue",
       "purchasing": "Achats",
       "sales": "Ventes",
       "delivery": "Livraison",
+      "delivery": "Livraison",
       "finance": "Finance",
+      "cash": "Caisse",
       "settings": "Paramètres",
       "dashboard": "Tableau de bord",
       "products": "Produits",
@@ -596,6 +1195,26 @@
           "hint": "Affichée sur les tuiles de catégories dans la boutique"
         }
       },
+      "customer": {
+        "name": {
+          "label": "Nom",
+          "placeholder": "Nom du client",
+          "required": "Le nom est requis"
+        },
+        "phone": {
+          "label": "Téléphone",
+          "placeholder": "Numéro de téléphone",
+          "required": "Le téléphone est requis"
+        },
+        "email": {
+          "label": "Email",
+          "placeholder": "nom[at]exemple.com"
+        },
+        "address": {
+          "label": "Adresse",
+          "placeholder": "Adresse du client"
+        }
+      },
       "supplier": {
         "name": {
           "label": "Nom",
@@ -621,6 +1240,44 @@
       }
     },
     "pages": {
+      "cash": {
+        "title": "Gestion des caisses",
+        "subtitle": "Gérez vos fonds de caisse, sessions et transactions.",
+        "create": "Nouvelle caisse",
+        "edit": "Modifier la caisse",
+        "openSession": "Ouvrir la session",
+        "closeSession": "Fermer la session",
+        "sessionStatus": "Statut de la session",
+        "openingFloat": "Fond de caisse (ouverture)",
+        "closingCount": "Montant réel (fermeture)",
+        "expectedClosing": "Montant attendu",
+        "difference": "Écart",
+        "note": "Note",
+        "history": "Historique des transactions",
+        "newOperation": "Nouvelle opération",
+        "transfer": "Virement interne",
+        "toCashbox": "Vers caisse",
+        "transactions": {
+          "type": "Type",
+          "amount": "Montant",
+          "date": "Date",
+          "reference": "Référence",
+          "types": {
+            "CUSTOMER_PAYMENT": "Paiement client",
+            "SUPPLIER_PAYMENT": "Paiement fournisseur",
+            "PURCHASE_RECEIPT": "Achat (Réception)",
+            "EXPENSE": "Dépense",
+            "CHARGE": "Charge",
+            "SALE_PAYMENT": "Encaissement vente",
+            "TRANSFER_IN": "Transfert (Reçu)",
+            "TRANSFER_OUT": "Transfert (Envoyé)"
+          }
+        },
+        "status": {
+          "OPEN": "OUVERTE",
+          "CLOSED": "FERMÉE"
+        }
+      },
       "dashboard": {
         "title": "Tableau de bord",
         "welcomeBack": "Bon retour, {tenant}",
@@ -746,41 +1403,41 @@
           "pagination": {
             "showing": "Affichage de {from} à {to} sur {total} résultats"
           },
-      "deleteModal": {
-        "title": "Supprimer le produit",
-        "message": "Voulez-vous vraiment supprimer « {title} » ? Cette action est irréversible.",
-        "error": "Impossible de supprimer le produit. Veuillez réessayer."
-      },
-      "bulk": {
-        "selected": "{count} sélectionné(s)",
-        "export": "Exporter CSV",
-        "import": "Importer CSV",
-        "update": "Modification en masse",
-        "duplicate": "Dupliquer",
-        "exportError": "Échec de l’export CSV. Veuillez réessayer.",
-        "importTitle": "Importer des produits (CSV)",
-        "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock, isActive, categoryId/categorySlug.",
-        "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez.",
-        "importResult": "Créés {created}, mis à jour {updated}, ignorés {skipped}.",
-        "importErrors": "{count} lignes contiennent des erreurs.",
-        "updateTitle": "Mise à jour en masse",
-        "updateHint": "Applique les changements aux produits sélectionnés.",
-        "updateError": "Échec de la mise à jour en masse. Veuillez réessayer.",
-        "duplicateError": "Échec de la duplication du produit. Veuillez réessayer.",
-        "noChanges": "Choisissez au moins un champ à modifier.",
-        "fields": {
-          "price": "Prix (définir)",
-          "pricePlaceholder": "ex. 1999",
-          "stock": "Stock (définir)",
-          "stockPlaceholder": "S'applique aux produits sans variantes",
-          "status": "Statut",
-          "category": "Catégorie",
-          "noChange": "Aucun changement",
-          "clearCategory": "Supprimer la catégorie",
-          "propagatePrice": "Mettre à jour aussi les prix des variantes"
-        }
-      }
-    },
+          "deleteModal": {
+            "title": "Supprimer le produit",
+            "message": "Voulez-vous vraiment supprimer « {title} » ? Cette action est irréversible.",
+            "error": "Impossible de supprimer le produit. Veuillez réessayer."
+          },
+          "bulk": {
+            "selected": "{count} sélectionné(s)",
+            "export": "Exporter CSV",
+            "import": "Importer CSV",
+            "update": "Modification en masse",
+            "duplicate": "Dupliquer",
+            "exportError": "Échec de l’export CSV. Veuillez réessayer.",
+            "importTitle": "Importer des produits (CSV)",
+            "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock, isActive, categoryId/categorySlug.",
+            "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez.",
+            "importResult": "Créés {created}, mis à jour {updated}, ignorés {skipped}.",
+            "importErrors": "{count} lignes contiennent des erreurs.",
+            "updateTitle": "Mise à jour en masse",
+            "updateHint": "Applique les changements aux produits sélectionnés.",
+            "updateError": "Échec de la mise à jour en masse. Veuillez réessayer.",
+            "duplicateError": "Échec de la duplication du produit. Veuillez réessayer.",
+            "noChanges": "Choisissez au moins un champ à modifier.",
+            "fields": {
+              "price": "Prix (définir)",
+              "pricePlaceholder": "ex. 1999",
+              "stock": "Stock (définir)",
+              "stockPlaceholder": "S'applique aux produits sans variantes",
+              "status": "Statut",
+              "category": "Catégorie",
+              "noChange": "Aucun changement",
+              "clearCategory": "Supprimer la catégorie",
+              "propagatePrice": "Mettre à jour aussi les prix des variantes"
+            }
+          }
+        },
         "create": {
           "metaTitle": "Créer un produit",
           "breadcrumb": "Créer un produit",
@@ -986,6 +1643,22 @@
               "updateFailed": "Impossible de mettre à jour le statut"
             }
           },
+          "deliveredFinal": {
+            "message": "Cette commande est livrée. Son statut est final et ne peut plus être modifié."
+          },
+          "viewSale": "Voir la vente",
+          "missingPayment": {
+            "title": "Encaissement manquant",
+            "hint": "Cette vente n'apparaît pas dans la caisse tant que l'encaissement n'est pas enregistré.",
+            "cashboxLabel": "Caisse",
+            "cashboxAuto": "Auto",
+            "methodLabel": "Méthode",
+            "multiCashboxHint": "Si plusieurs caisses sont ouvertes, sélectionne une caisse pour éviter les conflits.",
+            "recordButton": "Enregistrer encaissement",
+            "recordingButton": "Enregistrement…",
+            "success": "Encaissement enregistré.",
+            "error": "Erreur lors de l’enregistrement."
+          },
           "backToOrders": "Retour aux commandes",
           "notFound": {
             "title": "Commande introuvable",
@@ -997,15 +1670,34 @@
         "index": {
           "title": "Clients",
           "subtitle": "Dérivé de l’historique des commandes",
+          "addCustomer": "Ajouter un client",
+          "count": "{count} clients",
+          "loadingInline": "Chargement…",
           "filters": {
             "searchLabel": "Rechercher",
-            "searchPlaceholder": "Rechercher par nom ou téléphone…"
+            "searchPlaceholder": "Rechercher par nom, téléphone ou email…",
+            "clear": "Effacer"
           },
           "loading": "Chargement des clients…",
           "empty": {
             "title": "Aucun client trouvé",
             "hint": "Les clients apparaîtront ici une fois des commandes passées",
-            "hintFiltered": "Essayez d’ajuster votre recherche"
+            "hintFiltered": "Essayez d’ajuster votre recherche",
+            "newCustomer": "Nouveau client"
+          },
+          "sort": {
+            "sortBy": "Trier par :",
+            "lastOrder": "Dernière commande",
+            "name": "Nom",
+            "orders": "Commandes",
+            "totalSpent": "Total dépensé"
+          },
+          "pagination": {
+            "showing": "Affichage de {from} à {to} sur {total} résultats"
+          },
+          "errors": {
+            "title": "Impossible de charger les clients",
+            "loadFailed": "Impossible de charger les clients. Veuillez réessayer."
           },
           "table": {
             "customer": "Client",
@@ -1016,6 +1708,29 @@
             "actions": "Actions"
           }
         },
+        "create": {
+          "metaTitle": "Créer un client",
+          "breadcrumb": "Créer un client",
+          "title": "Créer un nouveau client",
+          "subtitle": "Ajouter un client à votre base",
+          "submit": "Créer le client",
+          "errors": {
+            "createFailed": "Impossible de créer le client. Veuillez réessayer."
+          }
+        },
+        "edit": {
+          "metaTitle": "Modifier un client",
+          "breadcrumbCustomer": "Client",
+          "breadcrumb": "Modifier",
+          "title": "Modifier le client",
+          "subtitle": "Mettre à jour les informations du client",
+          "loading": "Chargement du client…",
+          "errors": {
+            "notFound": "Client introuvable",
+            "loadFailed": "Impossible de charger les détails du client.",
+            "updateFailed": "Impossible de mettre à jour le client. Veuillez réessayer."
+          }
+        },
         "detail": {
           "metaTitle": "Client",
           "fallbackTitle": "Client",
@@ -1023,6 +1738,14 @@
           "stats": {
             "orders": "Commandes",
             "totalSpent": "Total dépensé"
+          },
+          "errors": {
+            "title": "Impossible de charger le client",
+            "loadFailed": "Impossible de charger le client. Veuillez réessayer."
+          },
+          "notFound": {
+            "title": "Client introuvable",
+            "hint": "Ce client n’existe peut-être pas ou vous n’avez pas l’autorisation de le voir."
           },
           "empty": {
             "title": "Aucune commande",
@@ -1072,17 +1795,17 @@
             "order": "Commande"
           }
         },
-      "errors": {
-        "loadFailed": "Impossible de charger le stock",
-        "updateFailed": "Impossible de mettre à jour le stock"
+        "errors": {
+          "loadFailed": "Impossible de charger le stock",
+          "updateFailed": "Impossible de mettre à jour le stock"
+        },
+        "bulk": {
+          "exportCsv": "Exporter CSV",
+          "importCsv": "Importer CSV",
+          "exportError": "Échec de l’export CSV.",
+          "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez."
+        }
       },
-      "bulk": {
-        "exportCsv": "Exporter CSV",
-        "importCsv": "Importer CSV",
-        "exportError": "Échec de l’export CSV.",
-        "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez."
-      }
-    },
       "delivery": {
         "metaTitle": "Entreprises de livraison",
         "title": "Entreprises de livraison",
@@ -1194,11 +1917,11 @@
             "showing": "Affichage de {from} à {to} sur {total} résultats"
           }
         },
-	        "create": {
-	          "metaTitle": "Nouvel achat",
-	          "breadcrumb": "Nouvel achat",
-	          "title": "Nouveau bon de commande",
-	          "subtitle": "Démarrez un nouvel achat auprès d’un fournisseur",
+        "create": {
+          "metaTitle": "Nouvel achat",
+          "breadcrumb": "Nouvel achat",
+          "title": "Nouveau bon de commande",
+          "subtitle": "Démarrez un nouvel achat auprès d’un fournisseur",
           "supplier": {
             "label": "Choisir un fournisseur",
             "placeholder": "Choisir un fournisseur…"
@@ -1206,69 +1929,69 @@
           "info": "Vous pourrez ajouter des produits et des détails après la création du brouillon.",
           "submit": "Créer un brouillon",
           "creatingDraft": "Création du brouillon…",
-	          "errors": {
-	            "suppliersLoadFailed": "Impossible de charger les fournisseurs.",
-	            "createFailed": "Impossible de créer l’achat. Veuillez réessayer."
-	          }
-	        },
-	        "detail": {
-	          "metaTitle": "Bon de commande",
-	          "breadcrumb": "Commande n°{id}",
-	          "title": "Bon de commande",
-	          "addProducts": "Ajouter des produits",
-	          "cards": {
-	            "supplier": "Fournisseur",
-	            "noSupplier": "Aucun fournisseur assigné",
-	            "summary": "Résumé",
-	            "itemsOrdered": "Articles commandés",
-	            "itemsReceived": "Articles reçus",
-	            "estimatedTotal": "Coût total estimé",
-	            "notesPlaceholder": "Notes et pièces jointes bientôt disponibles"
-	          },
-	          "items": {
-	            "title": "Articles de la commande",
-	            "count": "{count} articles",
-	            "loading": "Chargement des articles…",
-	            "unknownProduct": "Produit inconnu",
-	            "sku": "SKU",
-	            "defaultVariant": "Variante par défaut",
-	            "empty": {
-	              "title": "Aucun article",
-	              "hint": "Ajoutez des produits à ce bon de commande."
-	            },
-	            "table": {
-	              "product": "Produit",
-	              "ordered": "Commandé",
-	              "unitCost": "Coût unitaire",
-	              "received": "Reçu",
-	              "receiveNow": "Recevoir",
-	              "total": "Total",
-	              "qtyPlaceholder": "Qté",
-	              "receiveStock": "Réceptionner le stock",
-	              "removeItem": "Supprimer l’article",
-	              "totalOrderValue": "Valeur totale de la commande",
-	              "salePriceMode": {
-	                "replace": "Mettre à jour le prix de vente",
-	                "weighted": "Coût moyen"
-	              }
-	            }
-	          },
-	          "deleteModal": {
-	            "title": "Supprimer le bon de commande",
-	            "message": "Voulez-vous vraiment supprimer ce bon de commande ? Cette action est irréversible.",
-	            "confirm": "Supprimer la commande"
-	          },
-	          "errors": {
-	            "loadFailed": "Impossible de charger l’achat",
-	            "addItemsFailed": "Impossible d’ajouter des articles. Certains ont peut-être été ignorés.",
-	            "receiveFailed": "Impossible de réceptionner le stock",
-	            "updateItemFailed": "Impossible de mettre à jour l’article",
-	            "removeConfirm": "Voulez-vous vraiment supprimer cet article ?",
-	            "removeItemFailed": "Impossible de supprimer l’article",
-	            "deleteFailed": "Impossible de supprimer la commande"
-	          }
-	        }
-	      },
+          "errors": {
+            "suppliersLoadFailed": "Impossible de charger les fournisseurs.",
+            "createFailed": "Impossible de créer l’achat. Veuillez réessayer."
+          }
+        },
+        "detail": {
+          "metaTitle": "Bon de commande",
+          "breadcrumb": "Commande n°{id}",
+          "title": "Bon de commande",
+          "addProducts": "Ajouter des produits",
+          "cards": {
+            "supplier": "Fournisseur",
+            "noSupplier": "Aucun fournisseur assigné",
+            "summary": "Résumé",
+            "itemsOrdered": "Articles commandés",
+            "itemsReceived": "Articles reçus",
+            "estimatedTotal": "Coût total estimé",
+            "notesPlaceholder": "Notes et pièces jointes bientôt disponibles"
+          },
+          "items": {
+            "title": "Articles de la commande",
+            "count": "{count} articles",
+            "loading": "Chargement des articles…",
+            "unknownProduct": "Produit inconnu",
+            "sku": "SKU",
+            "defaultVariant": "Variante par défaut",
+            "empty": {
+              "title": "Aucun article",
+              "hint": "Ajoutez des produits à ce bon de commande."
+            },
+            "table": {
+              "product": "Produit",
+              "ordered": "Commandé",
+              "unitCost": "Coût unitaire",
+              "received": "Reçu",
+              "receiveNow": "Recevoir",
+              "total": "Total",
+              "qtyPlaceholder": "Qté",
+              "receiveStock": "Réceptionner le stock",
+              "removeItem": "Supprimer l’article",
+              "totalOrderValue": "Valeur totale de la commande",
+              "salePriceMode": {
+                "replace": "Mettre à jour le prix de vente",
+                "weighted": "Coût moyen"
+              }
+            }
+          },
+          "deleteModal": {
+            "title": "Supprimer le bon de commande",
+            "message": "Voulez-vous vraiment supprimer ce bon de commande ? Cette action est irréversible.",
+            "confirm": "Supprimer la commande"
+          },
+          "errors": {
+            "loadFailed": "Impossible de charger l’achat",
+            "addItemsFailed": "Impossible d’ajouter des articles. Certains ont peut-être été ignorés.",
+            "receiveFailed": "Impossible de réceptionner le stock",
+            "updateItemFailed": "Impossible de mettre à jour l’article",
+            "removeConfirm": "Voulez-vous vraiment supprimer cet article ?",
+            "removeItemFailed": "Impossible de supprimer l’article",
+            "deleteFailed": "Impossible de supprimer la commande"
+          }
+        }
+      },
       "sales": {
         "index": {
           "title": "Ventes",
@@ -1349,15 +2072,19 @@
           "title": "Fournisseurs",
           "subtitle": "Gérez vos fournisseurs",
           "addSupplier": "Ajouter un fournisseur",
+          "count": "{count} fournisseurs",
+          "loadingInline": "Chargement…",
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher des fournisseurs…",
-            "sortHint": "Triez par nom, email ou téléphone via les en-têtes du tableau."
+            "sortHint": "Utilisez les boutons de tri pour ordonner les résultats.",
+            "clear": "Effacer"
           },
           "loading": "Chargement des fournisseurs…",
           "empty": {
             "title": "Aucun fournisseur",
             "hint": "Commencez par créer un nouveau fournisseur.",
+            "hintFiltered": "Aucun fournisseur ne correspond à votre recherche.",
             "newSupplier": "Nouveau fournisseur"
           },
           "sort": {
@@ -1400,6 +2127,149 @@
             "updateFailed": "Impossible de mettre à jour le fournisseur. Veuillez réessayer."
           }
         }
+      }
+    }
+  },
+  "superAdmin": {
+    "layout": {
+      "brand": "Super Admin",
+      "role": "Super Admin",
+      "closeSidebar": "Fermer le menu",
+      "toggleSidebar": "Afficher/masquer le menu",
+      "defaultTitle": "Tableau de bord Super Admin"
+    },
+    "actions": {
+      "logout": "Se déconnecter"
+    },
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "tenants": "Tenants",
+      "analytics": "Analytique",
+      "auditLogs": "Journal d’audit"
+    },
+    "login": {
+      "title": "Super Admin",
+      "subtitle": "Connectez-vous pour accéder au tableau de bord de la plateforme",
+      "backToSite": "Retour au site principal",
+      "form": {
+        "email": {
+          "label": "Adresse e-mail",
+          "placeholder": "superadmin@example.com"
+        },
+        "password": {
+          "label": "Mot de passe"
+        },
+        "submit": {
+          "signingIn": "Connexion...",
+          "signIn": "Se connecter"
+        }
+      },
+      "errors": {
+        "superAdminRequired": "Accès refusé : privilèges super-admin requis",
+        "loginFailed": "Échec de la connexion"
+      }
+    },
+    "dashboard": {
+      "overview": {
+        "title": "Aperçu de la plateforme",
+        "subtitle": "Gérez votre plateforme SaaS multi-tenant"
+      },
+      "stats": {
+        "tenants": "Total des tenants",
+        "users": "Total des utilisateurs",
+        "products": "Total des produits",
+        "revenue": "Revenu total"
+      },
+      "recentActivity": {
+        "title": "Activité récente",
+        "viewAll": "Tout voir",
+        "empty": "Aucune activité récente"
+      },
+      "quickActions": {
+        "title": "Actions rapides",
+        "createTenant": {
+          "title": "Créer un tenant",
+          "subtitle": "Ajouter une nouvelle boutique"
+        },
+        "manageTenants": {
+          "title": "Gérer les tenants",
+          "subtitle": "Voir toutes les boutiques"
+        },
+        "viewAnalytics": {
+          "title": "Voir l’analytique",
+          "subtitle": "Insights plateforme"
+        }
+      }
+    },
+    "audit": {
+      "actions": {
+        "createTenant": "Créer un tenant",
+        "updateTenant": "Mettre à jour le tenant",
+        "deleteTenant": "Supprimer le tenant",
+        "suspendTenant": "Suspendre le tenant",
+        "unsuspendTenant": "Activer le tenant",
+        "impersonateUser": "Usurper un utilisateur"
+      }
+    },
+    "tenants": {
+      "title": "Gestion des tenants",
+      "actions": {
+        "createTenant": "Créer un tenant",
+        "payments": "Paiements",
+        "suspend": "Suspendre",
+        "activate": "Activer"
+      },
+      "search": {
+        "placeholder": "Rechercher des tenants..."
+      },
+      "loading": "Chargement des tenants...",
+      "empty": "Aucun tenant trouvé",
+      "table": {
+        "name": "Nom",
+        "slug": "Slug",
+        "status": "Statut",
+        "users": "Utilisateurs",
+        "products": "Produits",
+        "orders": "Commandes",
+        "created": "Créé le",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Actif",
+        "suspended": "Suspendu"
+      },
+      "modal": {
+        "createTitle": "Créer un nouveau tenant",
+        "editTitle": "Modifier le tenant",
+        "fields": {
+          "name": {
+            "label": "Nom du tenant",
+            "placeholder": "Acme Corp"
+          },
+          "slug": {
+            "label": "Slug (sous-domaine)",
+            "placeholder": "acme",
+            "slugFallback": "slug",
+            "hint": "Accessible à l’adresse {slug}.localhost:3000"
+          },
+          "ownerEmail": {
+            "label": "E-mail du propriétaire",
+            "placeholder": "admin@acme.com"
+          },
+          "ownerPassword": {
+            "label": "Mot de passe du propriétaire"
+          }
+        }
+      },
+      "errors": {
+        "generic": "Une erreur est survenue",
+        "suspendFailed": "Impossible de suspendre le tenant",
+        "activateFailed": "Impossible d’activer le tenant",
+        "deleteFailed": "Impossible de supprimer le tenant"
+      },
+      "confirm": {
+        "suspend": "Voulez-vous vraiment suspendre {name} ?",
+        "delete": "Voulez-vous vraiment SUPPRIMER {name} ? Cette action est irréversible !"
       }
     }
   }

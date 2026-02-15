@@ -4,6 +4,8 @@ import { ref } from 'vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
+const { t } = useI18n({ useScope: 'global' })
+const year = new Date().getFullYear()
 
 const email = ref('')
 const password = ref('')
@@ -27,10 +29,10 @@ async function handleLogin() {
       const safeNext = nextPath.startsWith('/') ? nextPath : '/admin'
       await navigateTo(safeNext)
     } else {
-      errorMessage.value = 'Invalid email or password'
+      errorMessage.value = t('auth.login.errors.invalidCredentials')
     }
   } catch (e) {
-    errorMessage.value = 'An error occurred. Please try again.'
+    errorMessage.value = t('auth.login.errors.generic')
   } finally {
     loading.value = false
   }
@@ -53,10 +55,11 @@ async function handleLogin() {
 
       <div class="relative z-10 max-w-lg">
         <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
-          Welcome back, <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Builder</span>.
+          {{ t('auth.login.hero.welcomeBack') }} <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">{{ t('auth.login.hero.builder') }}</span>{{ t('auth.login.hero.builderSuffix') }}
         </h2>
         <p class="text-lg text-slate-400 mb-8 leading-relaxed">
-          Your dashboard is ready. Continue managing your orders, products, and analytics from one central hub.
+          {{ t('auth.login.hero.subtitle') }}
         </p>
 
     <!-- Mini Feature Highlight -->
@@ -65,14 +68,14 @@ async function handleLogin() {
              <Icon name="lucide:trending-up" class="w-6 h-6" />
           </div>
           <div>
-            <h4 class="font-bold text-white mb-1">Revenue Tracking</h4>
-            <p class="text-sm text-slate-400">Real-time insights into your store's performance at a glance.</p>
+            <h4 class="font-bold text-white mb-1">{{ t('auth.login.hero.feature.title') }}</h4>
+            <p class="text-sm text-slate-400">{{ t('auth.login.hero.feature.description') }}</p>
           </div>
         </div>
       </div>
 
       <div class="relative z-10 text-xs text-slate-500">
-        © 2026 Swekly Inc.
+        {{ t('auth.login.hero.copyright', { year }) }}
       </div>
     </div>
 
@@ -82,8 +85,8 @@ async function handleLogin() {
         
         <div class="text-center lg:text-left">
 
-          <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Log in to your account</h2>
-          <p class="mt-2 text-slate-500">Access your tenant workspace.</p>
+          <h2 class="text-3xl font-bold text-slate-900 tracking-tight">{{ t('auth.login.form.title') }}</h2>
+          <p class="mt-2 text-slate-500">{{ t('auth.login.form.subtitle') }}</p>
         </div>
 
         <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
@@ -106,14 +109,14 @@ async function handleLogin() {
               <div class="w-full border-t border-slate-200"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white text-slate-500">Or continue with</span>
+              <span class="px-2 bg-white text-slate-500">{{ t('auth.login.form.orContinueWith') }}</span>
             </div>
           </div>
 
           <div class="space-y-5">
             <!-- Email -->
             <div>
-              <label for="email-address" class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+              <label for="email-address" class="block text-sm font-medium text-slate-700 mb-1">{{ t('auth.login.form.email.label') }}</label>
               <input 
                 id="email-address" 
                 v-model="email" 
@@ -122,15 +125,15 @@ async function handleLogin() {
                 autocomplete="email" 
                 required 
                 class="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition-all" 
-                placeholder="name@company.com"
+                :placeholder="t('auth.login.form.email.placeholder')"
               >
             </div>
 
             <!-- Password -->
             <div>
               <div class="flex items-center justify-between mb-1">
-                 <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
-                 <a href="#" class="text-sm font-medium text-teal-600 hover:text-teal-500">Forgot password?</a>
+                 <label for="password" class="block text-sm font-medium text-slate-700">{{ t('auth.login.form.password.label') }}</label>
+                 <a href="#" class="text-sm font-medium text-teal-600 hover:text-teal-500">{{ t('auth.login.form.password.forgot') }}</a>
               </div>
               <input 
                 id="password" 
@@ -158,14 +161,15 @@ async function handleLogin() {
             >
               <span v-if="loading" class="flex items-center gap-2">
                 <Icon name="lucide:loader-2" class="animate-spin h-5 w-5 text-white" />
-                Signing in...
+                {{ t('auth.login.form.submit.signingIn') }}
               </span>
-              <span v-else>Sign in</span>
+              <span v-else>{{ t('auth.login.form.submit.signIn') }}</span>
             </button>
           </div>
           
           <div class="text-center text-sm text-slate-500">
-            Don't have an account? <NuxtLink to="/register" class="font-medium text-teal-600 hover:text-teal-500 hover:underline">Start for free</NuxtLink>
+            {{ t('auth.login.form.noAccount') }}
+            <NuxtLink to="/register" class="font-medium text-teal-600 hover:text-teal-500 hover:underline">{{ t('auth.login.form.startFree') }}</NuxtLink>
           </div>
         </form>
       </div>

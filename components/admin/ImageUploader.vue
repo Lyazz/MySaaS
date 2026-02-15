@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <label class="block text-sm font-medium text-gray-700">Product Images</label>
+      <label class="block text-sm font-medium text-gray-700">{{ t('admin.imageUploader.title') }}</label>
       <div
         v-if="uploading"
         class="text-sm text-blue-600"
       >
-        Uploading...
+        {{ t('admin.common.uploading') }}
       </div>
     </div>
 
@@ -29,7 +29,7 @@
         <!-- Image -->
         <img
           :src="image.url"
-          :alt="image.alt || 'Product image'"
+          :alt="image.alt || t('admin.imageUploader.imageAlt')"
           class="w-full h-full object-cover"
         >
         
@@ -40,7 +40,7 @@
         >
           <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-teal-600 text-white shadow-sm">
             <Icon name="lucide:star" class="w-3 h-3 mr-1" />
-            Main
+            {{ t('admin.imageUploader.mainBadge') }}
           </span>
         </div>
 
@@ -57,7 +57,7 @@
           <button
             v-if="!image.isMain"
             type="button"
-            title="Set as main image"
+            :title="t('admin.imageUploader.actions.setAsMain')"
             class="bg-teal-600 hover:bg-teal-700 text-white rounded-full p-1.5 shadow-sm"
             @click.stop="setAsMain(index)"
           >
@@ -67,7 +67,7 @@
           <!-- Delete Button -->
           <button
             type="button"
-            title="Remove image"
+            :title="t('admin.imageUploader.actions.remove')"
             class="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm"
             @click.stop="removeImage(index)"
           >
@@ -87,7 +87,7 @@
       <label class="relative cursor-pointer aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 hover:border-teal-500 flex flex-col items-center justify-center transition-colors">
         <div class="text-center">
             <Icon name="lucide:plus" class="mx-auto h-8 w-8 text-gray-400" />
-          <span class="mt-2 block text-xs text-gray-500 font-medium">Add Image</span>
+          <span class="mt-2 block text-xs text-gray-500 font-medium">{{ t('admin.imageUploader.actions.addImage') }}</span>
         </div>
         <input 
           type="file" 
@@ -101,13 +101,15 @@
     </div>
 
     <p class="text-xs text-gray-500">
-      <strong>Tip:</strong> Drag and drop to reorder images. Click the star icon to set an image as the main product image.
+      <strong>{{ t('admin.imageUploader.tip.title') }}</strong> {{ t('admin.imageUploader.tip.body') }}
     </p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+
+const { t } = useI18n({ useScope: 'global' })
 
 interface ProductImage {
   id?: string | null
@@ -154,7 +156,7 @@ const handleFileSelect = async (event: Event) => {
         body: formData
       })
 
-      if (!response.ok) throw new Error('Upload failed')
+      if (!response.ok) throw new Error(t('admin.imageUploader.errors.uploadFailed'))
 
       const data = await response.json()
       
@@ -173,7 +175,7 @@ const handleFileSelect = async (event: Event) => {
     emit('update:modelValue', images.value)
   } catch (error) {
     console.error('Upload error:', error)
-    alert('Failed to upload image')
+    alert(t('admin.imageUploader.errors.uploadFailed'))
   } finally {
     uploading.value = false
     input.value = ''

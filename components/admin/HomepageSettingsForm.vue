@@ -2,9 +2,9 @@
   <div class="space-y-6">
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="p-6 md:p-8">
-        <h2 class="text-xl font-bold text-slate-900">Homepage</h2>
+        <h2 class="text-xl font-bold text-slate-900">{{ t('admin.pages.settings.homepage.metaTitle') }}</h2>
         <p class="text-slate-600 mt-2 max-w-2xl">
-          Control what appears on your storefront home page: hero carousel, browse-by-category, new arrivals, and best sellers.
+          {{ t('admin.homepageSettingsForm.subtitle') }}
         </p>
       </div>
     </div>
@@ -14,14 +14,14 @@
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">Hero Carousel</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.homepageSettingsForm.carousel.title') }}</h3>
             <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Add slides with an image, text, and an optional button.
+              {{ t('admin.homepageSettingsForm.carousel.subtitle') }}
             </p>
           </div>
 
           <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
-            <div v-if="loading" class="text-sm text-slate-500">Loading...</div>
+            <div v-if="loading" class="text-sm text-slate-500">{{ t('admin.common.loading') }}</div>
 
             <div v-else class="space-y-4">
               <div
@@ -31,8 +31,8 @@
               >
                 <div class="flex items-start justify-between gap-4">
                   <div class="flex-1">
-                    <p class="text-sm font-semibold text-slate-800">Slide {{ index + 1 }}</p>
-                    <p class="text-xs text-slate-500 mt-1">Image + text + button</p>
+                    <p class="text-sm font-semibold text-slate-800">{{ t('admin.homepageSettingsForm.carousel.slideLabel', { index: index + 1 }) }}</p>
+                    <p class="text-xs text-slate-500 mt-1">{{ t('admin.homepageSettingsForm.carousel.slideHint') }}</p>
                   </div>
                   <button
                     type="button"
@@ -40,7 +40,7 @@
                     :disabled="form.carousel.length <= 1 || saving"
                     @click="removeSlide(index)"
                   >
-                    Remove
+                    {{ t('admin.common.delete') }}
                   </button>
                 </div>
 
@@ -50,14 +50,14 @@
                       <img
                         v-if="slide.imageUrl"
                         :src="slide.imageUrl"
-                        alt="Slide preview"
+                        :alt="t('admin.homepageSettingsForm.carousel.slidePreviewAlt')"
                         class="w-full h-full object-cover"
                       >
-                      <div v-else class="text-xs text-slate-500">No image</div>
+                      <div v-else class="text-xs text-slate-500">{{ t('admin.homepageSettingsForm.carousel.noImage') }}</div>
                     </div>
 
                     <label class="block">
-                      <span class="text-xs font-medium text-slate-700">Upload image</span>
+                      <span class="text-xs font-medium text-slate-700">{{ t('admin.homepageSettingsForm.carousel.uploadImage') }}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -69,12 +69,12 @@
                   </div>
 
                   <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <BaseInput v-model="slide.title" label="Title" required />
-                    <BaseInput v-model="slide.subtitle" label="Subtitle" />
-                    <BaseInput v-model="slide.buttonText" label="Button text" />
-                    <BaseInput v-model="slide.buttonHref" label="Button link" hint='Use internal paths like "/products" or "/c/shoes".' />
+                    <BaseInput v-model="slide.title" :label="t('admin.homepageSettingsForm.fields.title')" required />
+                    <BaseInput v-model="slide.subtitle" :label="t('admin.homepageSettingsForm.fields.subtitle')" />
+                    <BaseInput v-model="slide.buttonText" :label="t('admin.homepageSettingsForm.fields.buttonText')" />
+                    <BaseInput v-model="slide.buttonHref" :label="t('admin.homepageSettingsForm.fields.buttonLink')" :hint="t('admin.homepageSettingsForm.fields.buttonLinkHint')" />
                     <div class="md:col-span-2">
-                      <BaseInput v-model="slide.imageUrl" label="Image URL" hint="Or paste a URL if you already have one." />
+                      <BaseInput v-model="slide.imageUrl" :label="t('admin.homepageSettingsForm.fields.imageUrl')" :hint="t('admin.homepageSettingsForm.fields.imageUrlHint')" />
                     </div>
                   </div>
                 </div>
@@ -87,7 +87,7 @@
                 @click="addSlide"
               >
                 <Icon name="lucide:plus" class="w-4 h-4" />
-                Add slide
+                {{ t('admin.homepageSettingsForm.carousel.addSlide') }}
               </button>
             </div>
           </div>
@@ -98,9 +98,9 @@
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">Homepage Sections</h3>
+            <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.homepageSettingsForm.sections.title') }}</h3>
             <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Enable/disable sections and adjust titles.
+              {{ t('admin.homepageSettingsForm.sections.subtitle') }}
             </p>
           </div>
 
@@ -109,15 +109,15 @@
             <div class="border border-slate-200 rounded-xl p-4">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm font-semibold text-slate-800">Browse by Category</p>
-                  <p class="text-xs text-slate-500 mt-1">Show your categories on the homepage.</p>
+                  <p class="text-sm font-semibold text-slate-800">{{ t('admin.homepageSettingsForm.sections.browseByCategory.title') }}</p>
+                  <p class="text-xs text-slate-500 mt-1">{{ t('admin.homepageSettingsForm.sections.browseByCategory.subtitle') }}</p>
                 </div>
-                <BaseToggle v-model="form.sections.browseByCategory.enabled" sr-label="Toggle browse by category" />
+                <BaseToggle v-model="form.sections.browseByCategory.enabled" :sr-label="t('admin.homepageSettingsForm.sections.browseByCategory.toggle')"/>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <BaseInput v-model="form.sections.browseByCategory.eyebrow" label="Eyebrow" />
-                <BaseInput v-model="form.sections.browseByCategory.title" label="Title" />
+                <BaseInput v-model="form.sections.browseByCategory.eyebrow" :label="t('admin.homepageSettingsForm.fields.eyebrow')" />
+                <BaseInput v-model="form.sections.browseByCategory.title" :label="t('admin.homepageSettingsForm.fields.title')" />
               </div>
             </div>
 
@@ -125,18 +125,18 @@
             <div class="border border-slate-200 rounded-xl p-4">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm font-semibold text-slate-800">New Arrivals</p>
-                  <p class="text-xs text-slate-500 mt-1">Show latest products (by created date).</p>
+                  <p class="text-sm font-semibold text-slate-800">{{ t('admin.homepageSettingsForm.sections.newArrivals.title') }}</p>
+                  <p class="text-xs text-slate-500 mt-1">{{ t('admin.homepageSettingsForm.sections.newArrivals.subtitle') }}</p>
                 </div>
-                <BaseToggle v-model="form.sections.newArrivals.enabled" sr-label="Toggle new arrivals" />
+                <BaseToggle v-model="form.sections.newArrivals.enabled" :sr-label="t('admin.homepageSettingsForm.sections.newArrivals.toggle')" />
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <BaseInput v-model="form.sections.newArrivals.eyebrow" label="Eyebrow" />
-                <BaseInput v-model="form.sections.newArrivals.title" label="Title" />
+                <BaseInput v-model="form.sections.newArrivals.eyebrow" :label="t('admin.homepageSettingsForm.fields.eyebrow')" />
+                <BaseInput v-model="form.sections.newArrivals.title" :label="t('admin.homepageSettingsForm.fields.title')" />
                 <BaseInput
                   v-model="newArrivalsLimitText"
-                  label="Limit"
+                  :label="t('admin.homepageSettingsForm.fields.limit')"
                   hint="1–24"
                   inputmode="numeric"
                 />
@@ -147,18 +147,18 @@
             <div class="border border-slate-200 rounded-xl p-4">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <p class="text-sm font-semibold text-slate-800">Best Sellers</p>
-                  <p class="text-xs text-slate-500 mt-1">Show products with the highest sales (non-cancelled orders).</p>
+                  <p class="text-sm font-semibold text-slate-800">{{ t('admin.homepageSettingsForm.sections.bestSellers.title') }}</p>
+                  <p class="text-xs text-slate-500 mt-1">{{ t('admin.homepageSettingsForm.sections.bestSellers.subtitle') }}</p>
                 </div>
-                <BaseToggle v-model="form.sections.bestSellers.enabled" sr-label="Toggle best sellers" />
+                <BaseToggle v-model="form.sections.bestSellers.enabled" :sr-label="t('admin.homepageSettingsForm.sections.bestSellers.toggle')" />
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <BaseInput v-model="form.sections.bestSellers.eyebrow" label="Eyebrow" />
-                <BaseInput v-model="form.sections.bestSellers.title" label="Title" />
+                <BaseInput v-model="form.sections.bestSellers.eyebrow" :label="t('admin.homepageSettingsForm.fields.eyebrow')" />
+                <BaseInput v-model="form.sections.bestSellers.title" :label="t('admin.homepageSettingsForm.fields.title')" />
                 <BaseInput
                   v-model="bestSellersLimitText"
-                  label="Limit"
+                  :label="t('admin.homepageSettingsForm.fields.limit')"
                   hint="1–24"
                   inputmode="numeric"
                 />
@@ -184,7 +184,7 @@
             :disabled="loading || saving"
           >
             <Icon v-if="saving" name="lucide:loader-2" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-            {{ saving ? 'Saving...' : 'Save Changes' }}
+            {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
           </button>
         </div>
       </div>
@@ -209,6 +209,7 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 import { DEFAULT_STOREFRONT_HOME_CONFIG, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 const loading = ref(false)
 const saving = ref(false)
 const successMessage = ref('')
@@ -249,7 +250,7 @@ const fetchHomepageSettings = async () => {
     applyLoaded(data.homeConfig)
   } catch (e) {
     console.error('Failed to load homepage settings', e)
-    errorMessage.value = 'Failed to load homepage settings.'
+    errorMessage.value = t('admin.homepageSettingsForm.messages.loadFailed')
     setTimeout(() => (errorMessage.value = ''), 4000)
   } finally {
     loading.value = false
@@ -260,9 +261,9 @@ await fetchHomepageSettings()
 
 const addSlide = () => {
   form.carousel.push({
-    title: 'New slide',
+    title: t('admin.homepageSettingsForm.carousel.defaults.title'),
     subtitle: '',
-    buttonText: 'Shop Now',
+    buttonText: t('storefront.home.cta.shopNow'),
     buttonHref: '/products',
     imageUrl: ''
   })
@@ -288,12 +289,12 @@ const onSlideFileChange = async (event: Event, index: number) => {
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: formData
     })
-    if (!response.ok) throw new Error('Upload failed')
+    if (!response.ok) throw new Error(t('admin.homepageSettingsForm.messages.uploadFailed'))
     const data = await response.json()
     form.carousel[index].imageUrl = data.url
   } catch (e) {
     console.error('Slide upload failed', e)
-    errorMessage.value = 'Failed to upload image.'
+    errorMessage.value = t('admin.homepageSettingsForm.messages.uploadFailed')
     setTimeout(() => (errorMessage.value = ''), 4000)
   } finally {
     uploadingIndex.value = null
@@ -312,15 +313,14 @@ const save = async () => {
       body: { homeConfig: form }
     })
     applyLoaded(updated.homeConfig)
-    successMessage.value = 'Homepage settings saved successfully!'
+    successMessage.value = t('admin.homepageSettingsForm.messages.saved')
     setTimeout(() => (successMessage.value = ''), 4000)
   } catch (e: any) {
     console.error('Failed to save homepage settings', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to save changes.'
+    errorMessage.value = e.data?.statusMessage || t('admin.homepageSettingsForm.messages.saveFailed')
     setTimeout(() => (errorMessage.value = ''), 4000)
   } finally {
     saving.value = false
   }
 }
 </script>
-

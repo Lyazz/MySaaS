@@ -2,10 +2,10 @@
   <div class="bg-white rounded-xl shadow-sm border border-slate-200">
     <div class="p-6 border-b border-slate-200">
       <h2 class="text-xl font-bold text-slate-800">
-        Store Appearance & Settings
+        {{ t('admin.storeSettingsForm.title') }}
       </h2>
       <p class="text-slate-600 mt-1">
-        Customize how your store looks and manages core commerce features.
+        {{ t('admin.storeSettingsForm.subtitle') }}
       </p>
     </div>
 
@@ -18,17 +18,17 @@
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
             <h3 class="text-lg font-medium leading-6 text-slate-900">
-              Brand Logo
+              {{ t('admin.storeSettingsForm.brandLogo.title') }}
             </h3>
             <p class="mt-1 text-sm text-slate-500">
-              This logo will appear on your storefront header and invoices.
+              {{ t('admin.storeSettingsForm.brandLogo.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2">
             <SingleImageUploader
               v-model="form.logoUrl"
-              label="Store Logo"
-              hint="Recommended size: 200x60px. PNG or SVG preferred."
+              :label="t('admin.storeSettingsForm.brandLogo.inputLabel')"
+              :hint="t('admin.storeSettingsForm.brandLogo.hint')"
             />
           </div>
         </div>
@@ -41,16 +41,16 @@
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
             <h3 class="text-lg font-medium leading-6 text-slate-900">
-              Brand Colors
+              {{ t('admin.storeSettingsForm.brandColors.title') }}
             </h3>
             <p class="mt-1 text-sm text-slate-500">
-              Choose a primary color for buttons, links, and highlights.
+              {{ t('admin.storeSettingsForm.brandColors.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2 space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Primary Color</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.storeSettingsForm.brandColors.primaryLabel') }}</label>
                 <div class="flex items-center gap-3">
                   <input
                     v-model="form.primaryColor"
@@ -69,21 +69,21 @@
             
             <!-- Preview -->
             <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <span class="text-xs font-medium text-slate-500 uppercase tracking-wider block mb-3">Live Preview</span>
+              <span class="text-xs font-medium text-slate-500 uppercase tracking-wider block mb-3">{{ t('admin.storeSettingsForm.brandColors.previewTitle') }}</span>
               <div class="flex gap-3">
                 <button
                   type="button"
                   class="px-4 py-2 rounded-lg text-white font-medium shadow-sm transition-opacity hover:opacity-90"
                   :style="{ backgroundColor: form.primaryColor }"
                 >
-                  Button
+                  {{ t('admin.storeSettingsForm.brandColors.previewPrimary') }}
                 </button>
                 <button
                   type="button"
                   class="px-4 py-2 rounded-lg border font-medium shadow-sm bg-white"
                   :style="{ borderColor: form.primaryColor, color: form.primaryColor }"
                 >
-                  Outline
+                  {{ t('admin.storeSettingsForm.brandColors.previewOutline') }}
                 </button>
               </div>
             </div>
@@ -98,10 +98,10 @@
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
             <h3 class="text-lg font-medium leading-6 text-slate-900">
-              Store Features
+              {{ t('admin.storeSettingsForm.features.title') }}
             </h3>
             <p class="mt-1 text-sm text-slate-500">
-              Toggle core commerce flows for your storefront.
+              {{ t('admin.storeSettingsForm.features.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2 space-y-3">
@@ -113,10 +113,10 @@
               </div>
               <div class="flex-1">
                 <p class="font-semibold text-slate-900">
-                  Cart & Checkout
+                  {{ t('admin.storeSettingsForm.features.cart.title') }}
                 </p>
                 <p class="text-sm text-slate-500">
-                  Allow customers to add items to cart and complete checkout.
+                  {{ t('admin.storeSettingsForm.features.cart.subtitle') }}
                 </p>
               </div>
               <button
@@ -141,10 +141,10 @@
               </div>
               <div class="flex-1">
                 <p class="font-semibold text-slate-900">
-                  COD on Product Page
+                  {{ t('admin.storeSettingsForm.features.cod.title') }}
                 </p>
                 <p class="text-sm text-slate-500">
-                  Show the one-click cash-on-delivery form directly on product landing pages.
+                  {{ t('admin.storeSettingsForm.features.cod.subtitle') }}
                 </p>
               </div>
               <button
@@ -171,16 +171,16 @@
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
             <h3 class="text-lg font-medium leading-6 text-slate-900">
-              Store Currency
+              {{ t('admin.storeSettingsForm.currency.title') }}
             </h3>
             <p class="mt-1 text-sm text-slate-500">
-              Choose the currency shown on product prices. Symbols and formatting will follow this choice.
+              {{ t('admin.storeSettingsForm.currency.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2 space-y-3">
             <BaseSelect
               v-model="form.currencyCode"
-              label="Currency"
+              :label="t('admin.storeSettingsForm.currency.inputLabel')"
               @change="onCurrencyChange"
             >
               <template #prefix>
@@ -208,36 +208,36 @@
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
             <h3 class="text-lg font-medium leading-6 text-slate-900">
-              Store Template
+              {{ t('admin.storeSettingsForm.template.title') }}
             </h3>
             <p class="mt-1 text-sm text-slate-500">
-              Select the layout structure for your storefront.
+              {{ t('admin.storeSettingsForm.template.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div
-                v-for="t in templates"
-                :key="t.key"
+                v-for="tpl in templates"
+                :key="tpl.key"
                 class="cursor-pointer relative rounded-xl border p-4 shadow-sm flex flex-col transition-all hover:border-teal-300"
-                :class="form.templateKey === t.key ? 'border-teal-500 ring-2 ring-teal-500 ring-opacity-50 bg-teal-50' : 'border-slate-200 bg-white'"
-                @click="form.templateKey = t.key"
+                :class="form.templateKey === tpl.key ? 'border-teal-500 ring-2 ring-teal-500 ring-opacity-50 bg-teal-50' : 'border-slate-200 bg-white'"
+                @click="form.templateKey = tpl.key"
               >
                 <div class="flex items-center justify-between mb-2">
-                  <span class="font-semibold text-slate-900">{{ t.label }}</span>
+                  <span class="font-semibold text-slate-900">{{ tpl.label }}</span>
                   <span
-                    v-if="form.templateKey === t.key"
+                    v-if="form.templateKey === tpl.key"
                     class="h-2 w-2 rounded-full bg-teal-600"
                   />
                 </div>
                 <p class="text-sm text-slate-500 mb-3">
-                  {{ t.description }}
+                  {{ tpl.description }}
                 </p>
                 <div
                   class="mt-auto pt-2 flex items-center text-xs font-medium"
-                  :class="form.templateKey === t.key ? 'text-teal-700' : 'text-slate-500'"
+                  :class="form.templateKey === tpl.key ? 'text-teal-700' : 'text-slate-500'"
                 >
-                  {{ form.templateKey === t.key ? 'Selected' : 'Select' }}
+                  {{ form.templateKey === tpl.key ? t('admin.storeSettingsForm.template.selected') : t('admin.storeSettingsForm.template.select') }}
                 </div>
               </div>
             </div>
@@ -252,17 +252,17 @@
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
             <h3 class="text-lg font-medium leading-6 text-slate-900">
-              Localization
+              {{ t('admin.storeSettingsForm.localization.title') }}
             </h3>
             <p class="mt-1 text-sm text-slate-500">
-              Set the default language for your store. Translations will be added later.
+              {{ t('admin.storeSettingsForm.localization.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2">
             <div class="max-w-xs">
               <BaseSelect
                 v-model="form.language"
-                label="Default Language"
+                :label="t('admin.storeSettingsForm.localization.inputLabel')"
               >
                 <option
                   v-for="l in languages"
@@ -276,7 +276,7 @@
                 v-if="form.language === 'ar'"
                 class="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200"
               >
-                Note: Selecting Arabic will enable Right-to-Left (RTL) layout automatically.
+                {{ t('admin.storeSettingsForm.localization.rtlNote') }}
               </p>
             </div>
           </div>
@@ -304,7 +304,7 @@
           :disabled="loading || saving"
           @click="reset"
         >
-          Reset
+          {{ t('admin.common.reset') }}
         </button>
         <button
           type="submit"
@@ -316,7 +316,7 @@
             name="lucide:loader-2"
             class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
           />
-          {{ saving ? 'Saving Changes...' : 'Save Changes' }}
+          {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
         </button>
       </div>
     </form>
@@ -328,6 +328,8 @@ import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import SingleImageUploader from './SingleImageUploader.vue'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const props = defineProps<{
   initialSettings?: any
@@ -350,16 +352,24 @@ const form = reactive({
   currencyCountry: 'DZ'
 })
 
-const templates = [
-  { key: 'classic', label: 'Classic Shop', description: 'Traditional e-commerce layout with a focus on products.' },
-  { key: 'modern', label: 'Modern Minimal', description: 'Clean, spacious design with bold typography and large images.' }
-]
+const templates = computed(() => [
+  {
+    key: 'classic',
+    label: t('admin.storeSettingsForm.template.options.classic.label'),
+    description: t('admin.storeSettingsForm.template.options.classic.description')
+  },
+  {
+    key: 'modern',
+    label: t('admin.storeSettingsForm.template.options.modern.label'),
+    description: t('admin.storeSettingsForm.template.options.modern.description')
+  }
+])
 
-const languages = [
-  { key: 'en', label: 'English (EN)' },
-  { key: 'fr', label: 'Français (FR)' },
-  { key: 'ar', label: 'العربية (AR)' }
-]
+const languages = computed(() => [
+  { key: 'en', label: `${t('i18n.locales.en')} (EN)` },
+  { key: 'fr', label: `${t('i18n.locales.fr')} (FR)` },
+  { key: 'ar', label: `${t('i18n.locales.ar')} (AR)` }
+])
 
 const currencies = [
   { code: 'DZD', country: 'DZ', flag: '🇩🇿', label: '🇩🇿 Algeria — DZD' },
@@ -422,19 +432,19 @@ const save = async () => {
     // Update global state if used
     useState<any>('storeSettings').value = updated
     
-    successMessage.value = 'Store settings saved successfully!'
+    successMessage.value = t('admin.storeSettingsForm.messages.saved')
     setTimeout(() => { successMessage.value = '' }, 3000)
     
   } catch (e: any) {
     console.error('Failed to save settings', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to save settings. Please try again.'
+    errorMessage.value = e.data?.statusMessage || t('admin.storeSettingsForm.messages.saveFailed')
   } finally {
     saving.value = false
   }
 }
 
 const reset = () => {
-  if (confirm('Are you sure you want to discard your changes and reload saved settings?')) {
+  if (confirm(t('admin.storeSettingsForm.confirm.reset'))) {
     fetchSettings()
   }
 }

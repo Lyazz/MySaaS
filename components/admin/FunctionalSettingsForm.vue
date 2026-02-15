@@ -4,10 +4,10 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="p-6 md:p-8">
         <h2 class="text-xl font-bold text-slate-900">
-          Functional Settings
+          {{ t('admin.pages.settings.functional.title') }}
         </h2>
         <p class="text-slate-600 mt-2 max-w-2xl">
-          Configure how your store behaves. Manage core features, checkout options, and localization preferences.
+          {{ t('admin.pages.settings.functional.subtitle') }}
         </p>
       </div>
     </div>
@@ -19,10 +19,10 @@
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
             <h3 class="text-lg font-semibold text-slate-900">
-              Store Features
+              {{ t('admin.functionalSettingsForm.features.title') }}
             </h3>
             <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Enable or disable core functionality for your storefront.
+              {{ t('admin.functionalSettingsForm.features.subtitle') }}
             </p>
           </div>
           
@@ -32,13 +32,13 @@
               <div class="flex-1 pr-4">
                 <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Icon name="lucide:handbag" class="w-4 h-4 text-teal-600" />
-                  Cart & Checkout
+                  {{ t('admin.functionalSettingsForm.features.cart.title') }}
                 </h4>
                 <p class="text-sm text-slate-500 mt-1">
-                  Allow customers to add multiple items to a cart and proceed to checkout.
+                  {{ t('admin.functionalSettingsForm.features.cart.subtitle') }}
                 </p>
               </div>
-              <BaseToggle v-model="form.cartEnabled" sr-label="Enable shopping cart" />
+              <BaseToggle v-model="form.cartEnabled" :sr-label="t('admin.functionalSettingsForm.features.cart.toggle')" />
             </div>
 
             <!-- COD Toggle -->
@@ -46,13 +46,13 @@
               <div class="flex-1 pr-4">
                 <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Icon name="lucide:banknote" class="w-4 h-4 text-teal-600" />
-                  Cash on Delivery (COD)
+                  {{ t('admin.functionalSettingsForm.features.cod.title') }}
                 </h4>
                 <p class="text-sm text-slate-500 mt-1">
-                  Show a 'Buy Now with COD' form directly on product pages for faster conversion.
+                  {{ t('admin.functionalSettingsForm.features.cod.subtitle') }}
                 </p>
               </div>
-              <BaseToggle v-model="form.codEnabled" sr-label="Enable COD form" />
+              <BaseToggle v-model="form.codEnabled" :sr-label="t('admin.functionalSettingsForm.features.cod.toggle')" />
             </div>
           </div>
         </div>
@@ -63,21 +63,21 @@
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
             <h3 class="text-lg font-semibold text-slate-900">
-              Store Currency
+              {{ t('admin.functionalSettingsForm.currency.title') }}
             </h3>
             <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Set the primary currency for your product prices and transactions.
+              {{ t('admin.functionalSettingsForm.currency.subtitle') }}
             </p>
           </div>
           
           <div class="mt-6 md:mt-0 md:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Select Currency</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.functionalSettingsForm.currency.selectLabel') }}</label>
             <BaseSelect
                 v-model="form.currencyCountry"
                 :disabled="loadingCurrencies"
                 @change="onCountryChange"
             >
-                <option v-if="loadingCurrencies" value="" disabled>Loading currencies...</option>
+                <option v-if="loadingCurrencies" value="" disabled>{{ t('admin.functionalSettingsForm.currency.loadingCurrencies') }}</option>
                 <option
                   v-for="c in currencies"
                   :key="c.country"
@@ -87,7 +87,7 @@
                 </option>
             </BaseSelect>
             <p class="mt-2 text-xs text-slate-500">
-              Note: Changing currency may not automatically convert existing product prices.
+              {{ t('admin.functionalSettingsForm.currency.note') }}
             </p>
           </div>
         </div>
@@ -98,15 +98,15 @@
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
             <h3 class="text-lg font-semibold text-slate-900">
-              Localization
+              {{ t('admin.functionalSettingsForm.localization.title') }}
             </h3>
             <p class="mt-2 text-sm text-slate-500 leading-relaxed">
-              Choose the default language for your storefront.
+              {{ t('admin.functionalSettingsForm.localization.subtitle') }}
             </p>
           </div>
           
           <div class="mt-6 md:mt-0 md:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Default Language</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.functionalSettingsForm.localization.defaultLanguage') }}</label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div 
                 v-for="l in languages" 
@@ -124,9 +124,9 @@
             <div v-if="form.language === 'ar'" class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-start gap-3">
                <Icon name="lucide:languages" class="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
                <div>
-                 <p class="text-sm font-medium text-amber-800">RTL Support Enabled</p>
+                 <p class="text-sm font-medium text-amber-800">{{ t('admin.functionalSettingsForm.localization.rtl.title') }}</p>
                  <p class="text-xs text-amber-700 mt-0.5">
-                   Your storefront will automatically switch to Right-to-Left layout for Arabic.
+                   {{ t('admin.functionalSettingsForm.localization.rtl.subtitle') }}
                  </p>
                </div>
             </div>
@@ -156,7 +156,7 @@
               :disabled="loading || saving"
               @click="reset"
             >
-              Discard Changes
+              {{ t('admin.functionalSettingsForm.actions.discardChanges') }}
             </button>
             
             <button
@@ -169,7 +169,7 @@
                 name="lucide:loader-2"
                 class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
               />
-              {{ saving ? 'Saving...' : 'Save Changes' }}
+              {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
             </button>
          </div>
       </div>
@@ -194,6 +194,7 @@ import BaseToggle from '~/components/ui/BaseToggle.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 const authStore = useAuthStore()
+const { t } = useI18n({ useScope: 'global' })
 const loading = ref(false)
 const saving = ref(false)
 const successMessage = ref('')
@@ -208,11 +209,11 @@ const form = reactive({
   language: 'en'
 })
 
-const languages = [
-  { key: 'en', label: 'English', flag: '🇬🇧' },
-  { key: 'fr', label: 'Français', flag: '🇫🇷' },
-  { key: 'ar', label: 'العربية', flag: '🇩🇿' }
-]
+const languages = computed(() => [
+  { key: 'en', label: t('i18n.locales.en'), flag: '🇬🇧' },
+  { key: 'fr', label: t('i18n.locales.fr'), flag: '🇫🇷' },
+  { key: 'ar', label: t('i18n.locales.ar'), flag: '🇩🇿' }
+])
 
 interface CurrencyOption {
   code: string
@@ -276,7 +277,7 @@ const fetchSettings = async () => {
     updateForm(data)
   } catch (e) {
     console.error('Failed to load settings', e)
-    errorMessage.value = 'Failed to load settings.'
+    errorMessage.value = t('admin.functionalSettingsForm.messages.loadFailed')
   } finally {
     loading.value = false
   }
@@ -299,11 +300,11 @@ const save = async () => {
       }
     })
     useState<any>('storeSettings').value = updated
-    successMessage.value = 'Functional settings saved successfully!'
+    successMessage.value = t('admin.functionalSettingsForm.messages.saved')
     setTimeout(() => (successMessage.value = ''), 4000)
   } catch (e: any) {
     console.error('Failed to save settings', e)
-    errorMessage.value = e.data?.statusMessage || 'Failed to save changes. Please try again.'
+    errorMessage.value = e.data?.statusMessage || t('admin.functionalSettingsForm.messages.saveFailed')
     setTimeout(() => (errorMessage.value = ''), 4000)
   } finally {
     saving.value = false
@@ -311,7 +312,7 @@ const save = async () => {
 }
 
 const reset = () => {
-  if (confirm('Are you sure you want to discard your unsaved changes?')) {
+  if (confirm(t('admin.functionalSettingsForm.confirm.discard'))) {
     fetchSettings()
   }
 }

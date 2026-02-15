@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-medium text-gray-900">
-        Options
+        {{ t('admin.productOptionsEditor.title') }}
       </h3>
     </div>
 
@@ -17,28 +17,28 @@
                 <!-- Option Name & Display Type -->
                 <div class="md:col-span-4 space-y-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Option Name</label>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionName') }}</label>
                         <input 
                             type="text" 
                             v-model="option.name"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border"
                             @change="updateOption(option)"
-                            placeholder="e.g. Size"
+                            :placeholder="t('admin.productOptionsEditor.fields.optionNamePlaceholder')"
                         >
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Display Type</label>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.displayType') }}</label>
                         <BaseSelect
                             v-model="option.displayType"
                             @change="updateOption(option)"
                         >
-                            <option value="dropdown">Dropdown</option>
-                            <option value="button">Buttons / Tags</option>
-                            <option value="radio">Radio Buttons</option>
-                            <option value="color">Color Swatch</option>
-                            <option value="image">Image with Text</option>
+                            <option value="dropdown">{{ t('admin.productOptionsEditor.displayTypes.dropdown') }}</option>
+                            <option value="button">{{ t('admin.productOptionsEditor.displayTypes.button') }}</option>
+                            <option value="radio">{{ t('admin.productOptionsEditor.displayTypes.radio') }}</option>
+                            <option value="color">{{ t('admin.productOptionsEditor.displayTypes.color') }}</option>
+                            <option value="image">{{ t('admin.productOptionsEditor.displayTypes.image') }}</option>
                         </BaseSelect>
-                        <p class="mt-2 text-xs font-medium text-gray-500">Preview:</p>
+                        <p class="mt-2 text-xs font-medium text-gray-500">{{ t('admin.productOptionsEditor.preview.title') }}</p>
                         <div
                             class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50"
                             :data-testid="`option-preview-${option.id}`"
@@ -121,7 +121,7 @@
                                 >
                                    <img v-if="v.meta" :src="v.meta" class="absolute inset-0 w-full h-full object-cover" />
                                    <div v-else class="absolute inset-0 flex items-center justify-center text-xs text-gray-500 font-medium">
-                                       {{ v.label?.[0]?.toUpperCase() || 'Img' }}
+                                       {{ v.label?.[0]?.toUpperCase() || t('admin.productOptionsEditor.preview.imageFallbackShort') }}
                                    </div>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@
 
                 <!-- Option Values (Chips) -->
                 <div class="md:col-span-8 overflow-hidden">
-                    <label class="block text-xs font-medium text-gray-500 mb-1">Option Values</label>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionValues') }}</label>
                     <div 
                         class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md bg-white min-h-[42px] focus-within:ring-1 focus-within:ring-teal-500 focus-within:border-teal-500"
                         @click="focusInput(index)"
@@ -162,7 +162,7 @@
                                 v-if="['color', 'image'].includes(option.displayType)"
                                 type="button"
                                 class="shrink-0 text-gray-400 hover:text-teal-600 focus:outline-none"
-                                title="Edit Metadata"
+                                :title="t('admin.productOptionsEditor.actions.editMetadata')"
                                 @click.stop="editValueMeta(option, value)"
                             >
                                 <Icon name="lucide:pencil" class="w-3.5 h-3.5" />
@@ -183,7 +183,7 @@
                             v-model="newValues[option.id]"
                             type="text"
                             class="flex-1 min-w-[120px] border-none p-0 focus:ring-0 text-sm h-7"
-                            placeholder="Add value..."
+                            :placeholder="t('admin.productOptionsEditor.fields.addValuePlaceholder')"
                             @keydown="handleValueKeydown($event, option)"
                             @blur="handleValueBlur(option)"
                         >
@@ -195,7 +195,7 @@
             <button 
                 type="button"
                 class="absolute top-4 right-4 text-gray-400 hover:text-red-600 p-1"
-                title="Remove Option"
+                :title="t('admin.productOptionsEditor.actions.removeOption')"
                 @click="requestDeleteOption(option)"
             >
                 <Icon name="lucide:trash" class="w-5 h-5" />
@@ -211,7 +211,7 @@
                 @click="startCreatingOption"
             >
                 <Icon name="lucide:plus" class="-ml-1 mr-2 h-5 w-5 text-gray-400" />
-                Add another option
+                {{ t('admin.productOptionsEditor.actions.addAnotherOption') }}
             </button>
 
             <!-- Inline Create form -->
@@ -219,28 +219,28 @@
                  <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     <div class="md:col-span-4 space-y-3">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Option Name</label>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionName') }}</label>
                             <input 
                                 ref="newOptionNameRef"
                                 type="text" 
                                 v-model="newOptionName"
                                 class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border"
-                                placeholder="e.g. Color"
+                                :placeholder="t('admin.productOptionsEditor.fields.newOptionNamePlaceholder')"
                                 @keydown.enter="focusNewValues"
                             >
                         </div>
                          <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Display Type</label>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.displayType') }}</label>
                             <BaseSelect
                                 v-model="newOptionType"
                             >
-                                <option value="dropdown">Dropdown</option>
-                                <option value="button">Buttons / Tags</option>
-                                <option value="radio">Radio Buttons</option>
-                                <option value="color">Color Swatch</option>
-                                <option value="image">Image with Text</option>
+                                <option value="dropdown">{{ t('admin.productOptionsEditor.displayTypes.dropdown') }}</option>
+                                <option value="button">{{ t('admin.productOptionsEditor.displayTypes.button') }}</option>
+                                <option value="radio">{{ t('admin.productOptionsEditor.displayTypes.radio') }}</option>
+                                <option value="color">{{ t('admin.productOptionsEditor.displayTypes.color') }}</option>
+                                <option value="image">{{ t('admin.productOptionsEditor.displayTypes.image') }}</option>
                             </BaseSelect>
-                            <p class="mt-1 text-xs font-medium text-gray-500">Preview:</p>
+                            <p class="mt-1 text-xs font-medium text-gray-500">{{ t('admin.productOptionsEditor.preview.title') }}</p>
                             <div class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50" data-testid="new-option-preview">
                                  <!-- Dropdown Preview -->
                                 <div v-if="newOptionType === 'dropdown'" class="relative max-w-xs">
@@ -316,7 +316,7 @@
                                         :title="v.label"
                                     >
                                         <div class="absolute inset-0 flex items-center justify-center text-[10px] text-gray-500 font-medium">
-                                            {{ v.label?.[0]?.toUpperCase() || 'Img' }}
+                                            {{ v.label?.[0]?.toUpperCase() || t('admin.productOptionsEditor.preview.imageFallbackShort') }}
                                         </div>
                                     </div>
                                 </div>
@@ -324,36 +324,36 @@
                         </div>
                     </div>
                     <div class="md:col-span-8">
-                         <label class="block text-xs font-medium text-gray-500 mb-1">Option Values</label>
+                         <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionValues') }}</label>
                          <input 
                             ref="newOptionValuesRef"
                             type="text" 
                             v-model="newOptionValues"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border"
-                            placeholder="Separate values with comma (e.g. Red, Blue)"
+                            :placeholder="t('admin.productOptionsEditor.fields.optionValuesPlaceholder')"
                             @keydown.enter="createOption"
                         >
-                        <p class="text-xs text-gray-400 mt-1">Press Enter to add</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ t('admin.productOptionsEditor.fields.pressEnterToAdd') }}</p>
                     </div>
                  </div>
                  <div class="flex justify-end mt-3 gap-2">
-                     <button type="button" class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1" @click="cancelCreatingOption">Cancel</button>
-                     <button type="button" class="text-xs bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700" @click="createOption">Done</button>
+                     <button type="button" class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1" @click="cancelCreatingOption">{{ t('admin.common.cancel') }}</button>
+                     <button type="button" class="text-xs bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700" @click="createOption">{{ t('admin.productOptionsEditor.actions.done') }}</button>
                  </div>
             </div>
         </div>
         <div v-else class="text-center py-2 text-sm text-gray-500">
-            Maximum 3 options allowed.
+            {{ t('admin.productOptionsEditor.maxOptions') }}
         </div>
     </div>
 
     <!-- Confirmation modal -->
     <AdminConfirmModal
       v-model="showOptionDeleteModal"
-      title="Delete Option"
-      message="Are you sure you want to delete this option? All variants using it will be removed."
-      confirm-text="Delete"
-      cancel-text="Cancel"
+      :title="t('admin.productOptionsEditor.deleteModal.title')"
+      :message="t('admin.productOptionsEditor.deleteModal.message')"
+      :confirm-text="t('admin.common.delete')"
+      :cancel-text="t('admin.common.cancel')"
       @confirm="deleteOptionConfirmed"
       @cancel="resetOptionDelete"
     />
@@ -393,12 +393,12 @@
                 as="h3"
                 class="text-lg font-medium leading-6 text-gray-900 mb-4"
               >
-                Edit {{ editingMetaType === 'color' ? 'Color' : 'Image' }} for "{{ editingValue?.label }}"
+                {{ t('admin.productOptionsEditor.metaModal.title', { type: editingMetaTypeLabel, label: editingValue?.label }) }}
               </DialogTitle>
               
               <div v-if="editingMetaType === 'color'" class="space-y-4">
                   <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Color (Hex)</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.productOptionsEditor.metaModal.colorHex') }}</label>
                       <div class="flex gap-2">
                         <input type="color" v-model="editingMetaValue" class="h-10 w-10 p-0 border-0 rounded overflow-hidden cursor-pointer" />
                         <input 
@@ -413,17 +413,17 @@
 
                <div v-if="editingMetaType === 'image'" class="space-y-4">
                   <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.productOptionsEditor.metaModal.imageUrl') }}</label>
                       <input 
                             type="text" 
                             v-model="editingMetaValue" 
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                             placeholder="https://example.com/image.jpg"
                         />
-                      <p class="text-xs text-gray-500 mt-1">Provide a direct URL to the image icon.</p>
+                      <p class="text-xs text-gray-500 mt-1">{{ t('admin.productOptionsEditor.metaModal.imageUrlHint') }}</p>
                   </div>
                   <div v-if="editingMetaValue" class="mt-2">
-                        <p class="text-xs font-medium text-gray-500 mb-1">Preview:</p>
+                        <p class="text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.preview.title') }}</p>
                         <img :src="editingMetaValue" class="w-16 h-16 object-cover rounded border border-gray-200" />
                   </div>
               </div>
@@ -434,14 +434,14 @@
                   class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
                   @click="closeMetaModal"
                 >
-                  Cancel
+                  {{ t('admin.common.cancel') }}
                 </button>
                 <button
                   type="button"
                   class="inline-flex justify-center rounded-md border border-transparent bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 focus:outline-none"
                   @click="saveMeta"
                 >
-                  Save
+                  {{ t('admin.common.save') }}
                 </button>
               </div>
             </DialogPanel>
@@ -465,16 +465,8 @@ import {
   DialogTitle,
 } from '@headlessui/vue'
 
-const getDisplayTypeHint = (type: string) => {
-    switch(type) {
-        case 'dropdown': return 'Customers will select from a dropdown list. Best for many options.'
-        case 'button': return 'Customers will see text buttons/tags. Best for few options.'
-        case 'radio': return 'Customers will see a list of radio options.'
-        case 'color': return 'Customers will see circular color swatches. You can assign colors to values.'
-        case 'image': return 'Customers will see image thumbnails. You can assign images to values.'
-        default: return ''
-    }
-}
+const { t } = useI18n({ useScope: 'global' })
+
 const props = defineProps<{
     productId: string
     options: any[]
@@ -508,8 +500,14 @@ const editingMetaValue = ref('')
 
 type PreviewValue = { id: string; label: string; meta?: string | null }
 
-const PREVIEW_FALLBACK_LABELS = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5', 'Value 6']
 const PREVIEW_FALLBACK_COLORS = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899']
+const previewFallbackLabel = (index: number) => t('admin.productOptionsEditor.preview.valueWithIndex', { index: index + 1 })
+
+const editingMetaTypeLabel = computed(() =>
+  editingMetaType.value === 'color'
+    ? t('admin.productOptionsEditor.metaModal.types.color')
+    : t('admin.productOptionsEditor.metaModal.types.image')
+)
 
 function previewValuesForOption(option: any, params: { max: number; min: number }): PreviewValue[] {
     const raw = Array.isArray(option?.values) ? option.values : []
@@ -517,7 +515,7 @@ function previewValuesForOption(option: any, params: { max: number; min: number 
         .slice(0, params.max)
         .map((v: any, i: number) => ({
             id: String(v?.id ?? `value-${i}`),
-            label: String(v?.label ?? PREVIEW_FALLBACK_LABELS[i] ?? `Value ${i + 1}`),
+            label: String(v?.label ?? previewFallbackLabel(i)),
             meta: v?.meta
         }))
 
@@ -525,7 +523,7 @@ function previewValuesForOption(option: any, params: { max: number; min: number 
         const i = normalized.length
         normalized.push({
             id: `placeholder-${i}`,
-            label: PREVIEW_FALLBACK_LABELS[i] ?? `Value ${i + 1}`
+            label: previewFallbackLabel(i)
         })
     }
 
@@ -549,7 +547,7 @@ const newOptionPreviewValues = computed<PreviewValue[]>(() => {
         const i = normalized.length
         normalized.push({
             id: `placeholder-new-${i}`,
-            label: PREVIEW_FALLBACK_LABELS[i] ?? `Value ${i + 1}`
+            label: previewFallbackLabel(i)
         })
     }
 
@@ -644,7 +642,7 @@ async function addValue(option: any, label: string) {
 }
 
 async function deleteValue(option: any, value: any) {
-    if (!confirm(`Remove "${value.label}"?`)) return // Simple confirm for values
+    if (!confirm(t('admin.productOptionsEditor.confirm.removeValue', { label: value.label }))) return
 
     try {
         await $fetch(`/api/admin/products/${props.productId}/options/${option.id}/values/${value.id}`, {
