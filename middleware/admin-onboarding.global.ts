@@ -7,6 +7,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const authStore = useAuthStore()
   if (!authStore.isAuthenticated || !authStore.token) return
+  if (authStore.user?.role === 'staff') return
 
   const cached = useState<any>('storeSettings')
 
@@ -24,4 +25,3 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // Let the normal page render; auth middleware / page logic will handle errors.
   }
 })
-

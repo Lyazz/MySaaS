@@ -684,7 +684,11 @@
       "update": "تحديث",
       "updating": "جارٍ التحديث…",
       "edit": "تعديل",
-      "delete": "حذف"
+      "delete": "حذف",
+      "selectAll": "تحديد الكل",
+      "deselectAll": "إلغاء تحديد الكل",
+      "fullAccess": "وصول كامل",
+      "viewOnly": "عرض فقط"
     },
     "confirmModal": {
       "defaults": {
@@ -998,17 +1002,22 @@
       "columns": {
         "variant": "النسخة",
         "price": "السعر",
+        "cost": "التكلفة",
         "track": "تتبع",
         "onHand": "المتوفر",
         "reserved": "محجوز",
         "safety": "أمان",
         "available": "متاح",
         "sku": "SKU",
+        "barcode": "الباركود",
         "active": "نشط",
         "images": "الصور"
       },
       "actions": {
         "manageImages": "إدارة ({count})",
+        "suggestSku": "اقتراح",
+        "lockSku": "قفل",
+        "skuLocked": "مقفل",
         "movements": "الحركات"
       },
       "defaultVariant": "افتراضي",
@@ -1040,6 +1049,10 @@
       "errors": {
         "updateVariantFailed": "فشل تحديث النسخة",
         "updateInventoryFailed": "فشل تحديث المخزون",
+        "updateStockFailed": "فشل تحديث المخزون",
+        "lockSkuFailed": "فشل قفل SKU",
+        "suggestSkuFailed": "فشل اقتراح SKU",
+        "suggestSkuUnavailable": "SKU المقترح غير متاح",
         "saveImagesFailed": "فشل حفظ الصور"
       }
     },
@@ -1207,7 +1220,13 @@
       "appearance": "المظهر",
       "homepage": "الصفحة الرئيسية",
       "contactInfo": "معلومات الاتصال",
-      "functional": "إعدادات التشغيل"
+      "functional": "إعدادات التشغيل",
+      "users": "المستخدمون"
+    },
+    "roles": {
+      "owner": "المالك",
+      "admin": "مشرف",
+      "staff": "موظف"
     },
     "orderStatus": {
       "pending": "قيد الانتظار",
@@ -1315,6 +1334,56 @@
       }
     },
     "pages": {
+      "pos": {
+        "catalog": {
+          "title": "نقطة البيع",
+          "searchPlaceholder": "بحث عن منتجات...",
+          "allProducts": "كل المنتجات",
+          "noProducts": "لا توجد منتجات",
+          "clearFilter": "مسح التصفية",
+          "back": "رجوع",
+          "backToCategories": "الرجوع للفئات",
+          "actions": {
+            "discount": "خصم",
+            "reprint": "إعادة طباعة",
+            "reprintLastOrder": "إعادة طباعة آخر طلب",
+            "quickCharge": "دفع سريع",
+            "sort": "ترتيب",
+            "columns": "أعمدة"
+          },
+          "badges": {
+            "outOfStock": "نفذت الكمية",
+            "lowStock": "كمية قليلة: {count}"
+          }
+        },
+        "cart": {
+          "itemsCount": "{count} عناصر",
+          "empty": "السلة فارغة",
+          "total": "المجموع",
+          "actions": {
+            "viewCart": "عرض السلة",
+            "clearCart": "إفراغ السلة",
+            "paymentOptions": "خيارات الدفع",
+            "payment": "دفع",
+            "checkout": "إتمام الطلب"
+          }
+        },
+        "actions": {
+          "viewCart": "عرض السلة",
+          "imageMode": "وضع الصور"
+        },
+        "sessions": {
+          "order": "طلب {index}"
+        },
+        "customer": {
+          "addClient": "إضافة عميل"
+        },
+        "variants": {
+          "loading": "جار تحميل المتغيرات...",
+          "inStockCount": "{count} متوفر",
+          "inStock": "متوفر"
+        }
+      },
       "cash": {
         "title": "إدارة الصناديق",
         "subtitle": "إدارة الأموال والجلسات والمعاملات.",
@@ -1525,6 +1594,91 @@
           "CLOSED": "مغلق"
         }
       },
+      "users": {
+        "subtitle": "إدارة مستخدمي المتجر وصلاحياتهم.",
+        "searchPlaceholder": "ابحث بالبريد أو المعرّف…",
+        "includeInactive": "عرض المستخدمين غير النشطين",
+        "tabs": {
+          "users": "المستخدمون",
+          "roles": "الأدوار (للموظفين)"
+        },
+        "empty": "لا يوجد مستخدمون.",
+        "columns": {
+          "email": "البريد الإلكتروني",
+          "role": "الدور",
+          "staffRole": "دور الموظف",
+          "status": "الحالة",
+          "createdAt": "تاريخ الإنشاء"
+        },
+        "actions": {
+          "add": "إضافة مستخدم",
+          "deactivate": "تعطيل",
+          "activate": "تفعيل"
+        },
+        "create": {
+          "title": "إنشاء مستخدم"
+        },
+        "edit": {
+          "title": "تعديل المستخدم"
+        },
+        "fields": {
+          "email": "البريد الإلكتروني",
+          "role": "الدور",
+          "staffRole": "دور الموظف",
+          "password": "كلمة المرور",
+          "newPassword": "كلمة مرور جديدة",
+          "confirmPassword": "تأكيد كلمة المرور",
+          "isActive": "نشط"
+        },
+        "hints": {
+          "passwordRequired": "8 أحرف على الأقل.",
+          "passwordOptional": "اتركه فارغًا للاحتفاظ بكلمة المرور الحالية.",
+          "deactivateHint": "تعطيل الوصول بدون حذف البيانات."
+        },
+        "validation": {
+          "invalidEmail": "بريد إلكتروني غير صالح.",
+          "invalidRole": "دور غير صالح.",
+          "staffRoleRequired": "اختر دور الموظف.",
+          "staffRoleInvalid": "دور الموظف غير صالح.",
+          "passwordTooShort": "8 أحرف على الأقل.",
+          "confirmPasswordRequired": "تأكيد كلمة المرور مطلوب.",
+          "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين."
+        },
+        "roles": {
+          "subtitle": "أنشئ أدوارًا لتحديد صلاحيات الموظفين (CRUD لكل وحدة).",
+          "empty": "لا توجد أدوار للموظفين.",
+          "unassigned": "غير مُعيّن",
+          "noPermissions": "لا توجد صلاحيات",
+          "createTitle": "إنشاء دور موظف",
+          "editTitle": "تعديل دور الموظف",
+          "columns": {
+            "name": "الاسم",
+            "permissions": "الصلاحيات"
+          },
+          "actions": {
+            "addRole": "إضافة دور",
+            "create": "إنشاء",
+            "read": "قراءة",
+            "update": "تعديل",
+            "delete": "حذف"
+          },
+          "fields": {
+            "name": "الاسم",
+            "permissions": "الصلاحيات"
+          },
+          "resources": {
+            "variants": "المنتجات المتغيرة",
+            "metaPixels": "بيكسلات ميتا"
+          },
+          "validation": {
+            "invalidName": "اسم غير صالح (حد أدنى حرفان).",
+            "permissionsRequired": "اختر صلاحية واحدة على الأقل."
+          }
+        },
+        "errors": {
+          "title": "تعذّر إكمال العملية."
+        }
+      },
       "dashboard": {
         "title": "لوحة التحكم",
         "welcomeBack": "مرحباً بعودتك، {tenant}",
@@ -1706,7 +1860,7 @@
           "tabs": {
             "general": "عام",
             "description": "وصف صفحة الهبوط",
-            "variants": "الخيارات والأنواع",
+            "variants": "الأنواع / المخزون",
             "bundles": "الباقات"
           },
           "links": {
@@ -1722,7 +1876,9 @@
             "title": "وصف صفحة الهبوط"
           },
           "variantsTab": {
-            "title": "الخيارات والأنواع"
+            "title": "الخيارات / الأنواع / المخزون",
+            "showArchived": "إظهار الأنواع المؤرشفة",
+            "archivedCount": "المؤرشفة: {count}"
           },
           "bundlesTab": {
             "title": "عروض الباقات",
@@ -2218,6 +2374,10 @@
               "product": "المنتج",
               "ordered": "المطلوب",
               "unitCost": "تكلفة الوحدة",
+              "salePrice": "سعر البيع",
+              "currentCost": "سعر الشراء الحالي",
+              "newCostPreview": "سعر الشراء الجديد",
+              "currentSalePrice": "سعر البيع الحالي",
               "received": "المستلم",
               "receiveNow": "استلام الآن",
               "total": "الإجمالي",
@@ -2225,9 +2385,13 @@
               "receiveStock": "استلام المخزون",
               "removeItem": "إزالة العنصر",
               "totalOrderValue": "القيمة الإجمالية للأمر",
+              "costMode": {
+                "replace": "استبدال تكلفة الشراء",
+                "weighted": "متوسط التكلفة"
+              },
               "salePriceMode": {
                 "replace": "تحديث سعر البيع",
-                "weighted": "متوسط التكلفة"
+                "weighted": "متوسط مرجّح"
               }
             }
           },

@@ -25,7 +25,7 @@
 
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
@@ -35,7 +35,7 @@
 
     <div
       v-else-if="customers.length === 0"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
@@ -48,72 +48,72 @@
 
     <div
       v-else
-      class="bg-white rounded-lg shadow overflow-hidden"
+      class="ui-card overflow-hidden"
     >
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="ui-table">
+          <thead class="ui-thead">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.customer') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.phone') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.orders') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.totalSpent') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.lastOrder') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th text-right">
                 {{ t('admin.pages.customers.index.table.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="ui-tbody">
             <tr
               v-for="c in customers"
               :key="c.id"
-              class="hover:bg-gray-50"
+              class="ui-tr"
             >
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="font-medium text-slate-900">
                   {{ c.name }}
                 </div>
                 <div
                   v-if="c.address"
-                  class="text-xs text-gray-500 truncate max-w-[28rem]"
+                  class="text-xs text-slate-500 truncate max-w-[28rem]"
                 >
                   {{ c.address }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap">
+                <div class="text-slate-600">
                   {{ c.phone }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="font-medium text-slate-900">
                   {{ c.ordersCount }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="font-medium text-slate-900">
                   {{ formatCurrency(c.totalSpent) }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-slate-600">
                 {{ formatDate(c.lastOrderAt) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
-                    class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
                     <span>{{ t('common.view') }}</span>

@@ -102,35 +102,34 @@
           <div v-if="loading" class="p-8 text-center text-slate-500">{{ t('superAdmin.paymentsPage.history.loading') }}</div>
           <div v-else-if="payments.length === 0" class="p-8 text-center text-slate-500">{{ t('superAdmin.paymentsPage.history.empty') }}</div>
           <div v-else class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-slate-50 border-b border-slate-200">
+            <table class="ui-table">
+              <thead class="ui-thead border-b border-slate-200">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.date') }}</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.plan') }}</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.amount') }}</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.method') }}</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.status') }}</th>
-                  <th class="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wide">{{ t('superAdmin.paymentsPage.history.table.proof') }}</th>
+                  <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.date') }}</th>
+                  <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.plan') }}</th>
+                  <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.amount') }}</th>
+                  <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.method') }}</th>
+                  <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.status') }}</th>
+                  <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.proof') }}</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr v-for="p in payments" :key="p.id" class="hover:bg-slate-50 transition-colors">
-                  <td class="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">{{ formatDateTime(p.createdAt) }}</td>
-                  <td class="px-6 py-4 text-sm text-slate-700">
+              <tbody class="ui-tbody">
+                <tr v-for="p in payments" :key="p.id" class="ui-tr transition-colors">
+                  <td class="ui-td text-sm text-slate-700 whitespace-nowrap">{{ formatDateTime(p.createdAt) }}</td>
+                  <td class="ui-td text-sm text-slate-700">
                     <div class="font-semibold">{{ p.planCode }}</div>
                     <div class="text-xs text-slate-500">{{ p.interval }}</div>
                   </td>
-                  <td class="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">
+                  <td class="ui-td text-sm text-slate-700 whitespace-nowrap">
                     {{ formatMoney(p.amountDzd, p.currency) }}
                   </td>
-                  <td class="px-6 py-4 text-xs font-semibold text-slate-700">{{ p.method }}</td>
-                  <td class="px-6 py-4">
-                    <span class="px-2 py-1 rounded-full text-xs font-semibold border"
-                      :class="p.status === 'PAID' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-700'">
+                  <td class="ui-td text-xs font-semibold text-slate-700">{{ p.method }}</td>
+                  <td class="ui-td">
+                    <span class="ui-badge" :class="p.status === 'PAID' ? 'ui-badge--emerald' : 'ui-badge--slate'">
                       {{ p.status }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-sm">
+                  <td class="ui-td text-sm">
                     <a
                       v-if="p.proofUrl"
                       :href="p.proofUrl"

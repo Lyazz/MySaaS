@@ -3,24 +3,24 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
           {{ t('admin.nav.products') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1 text-slate-600">
           {{ t('admin.pages.products.index.subtitle') }}
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-2 justify-end">
         <span
           v-if="selectedIds.length > 0"
-          class="text-sm text-gray-600"
+          class="text-sm text-slate-600"
         >
           {{ t('admin.pages.products.index.bulk.selected', { count: selectedIds.length }) }}
         </span>
 
         <button
           type="button"
-          class="px-3 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2"
+          class="ui-btn ui-btn--secondary ui-btn--md"
           :disabled="loading"
           @click="exportProductsCsv"
         >
@@ -30,7 +30,7 @@
 
         <button
           type="button"
-          class="px-3 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2"
+          class="ui-btn ui-btn--secondary ui-btn--md"
           :disabled="loading"
           @click="openImportModal"
         >
@@ -40,7 +40,7 @@
 
         <button
           type="button"
-          class="px-3 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-50"
+          class="ui-btn ui-btn--secondary ui-btn--md"
           :disabled="loading || selectedIds.length === 0"
           @click="openBulkUpdateModal"
         >
@@ -50,7 +50,7 @@
 
         <button
           type="button"
-          class="px-3 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 transition-colors flex items-center space-x-2 disabled:opacity-50"
+          class="ui-btn ui-btn--secondary ui-btn--md"
           :disabled="loading || selectedIds.length !== 1"
           @click="duplicateSelectedProduct"
         >
@@ -60,7 +60,7 @@
 
         <NuxtLink
           to="/admin/products/create"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
+          class="ui-btn ui-btn--primary ui-btn--md"
         >
           <Icon name="lucide:plus" class="w-5 h-5" />
           <span>{{ t('admin.pages.products.index.addProduct') }}</span>
@@ -69,7 +69,7 @@
     </div>
  
     <!-- Filters -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.products.index.filters.searchLabel') }}</label>
@@ -117,7 +117,7 @@
     <!-- Loading State -->
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
@@ -128,7 +128,7 @@
     <!-- Empty State -->
     <div
       v-else-if="filteredProducts.length === 0"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <Icon name="lucide:package" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
@@ -140,7 +140,7 @@
       <div class="mt-6">
         <NuxtLink
           to="/admin/products/create"
-          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
+          class="ui-btn ui-btn--primary ui-btn--md"
         >
           <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
           {{ t('admin.pages.products.index.empty.newProduct') }}
@@ -151,10 +151,10 @@
     <!-- Products Table -->
     <div
       v-else
-      class="bg-white rounded-lg shadow overflow-hidden"
+      class="ui-card overflow-hidden"
     >
-      <div class="px-4 py-3 bg-gray-50 flex flex-wrap items-center gap-3 justify-between">
-        <div class="text-sm text-gray-700">
+      <div class="ui-card-header bg-slate-50 flex flex-wrap items-center gap-3 justify-between">
+        <div class="text-sm text-slate-700">
           {{ t('admin.pages.products.index.sort.sortBy') }}
         </div>
         <div class="flex flex-wrap gap-2">
@@ -162,10 +162,10 @@
             v-for="option in sortOptions"
             :key="option.key"
             :class="[
-              'inline-flex items-center px-3 py-1 text-sm font-medium border rounded-md transition-colors',
+              'inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full transition-colors',
               sortBy === option.key
                 ? 'bg-teal-50 border-teal-500 text-teal-700'
-                : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
             ]"
             @click="setSort(option.key)"
           >
@@ -179,10 +179,10 @@
         </div>
       </div>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-	          <thead class="bg-gray-50">
+        <table class="ui-table">
+	          <thead class="ui-thead">
 	            <tr>
-	              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+	              <th class="ui-th w-10">
 	                <input
 	                  type="checkbox"
 	                  class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
@@ -191,36 +191,36 @@
 	                  @change="toggleSelectAllVisible"
 	                >
 	              </th>
-	              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+	              <th class="ui-th">
 	                {{ t('admin.pages.products.index.table.product') }}
 	              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.products.index.table.category') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.products.index.table.price') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.products.index.table.stock') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.products.index.table.status') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.products.index.table.links') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th text-right">
                 {{ t('admin.pages.products.index.table.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="ui-tbody">
 	            <tr
 	              v-for="product in paginatedProducts"
 	              :key="product.id"
-	              class="hover:bg-gray-50"
+	              class="ui-tr"
 	            >
-	              <td class="px-6 py-4 whitespace-nowrap">
+	              <td class="ui-td whitespace-nowrap">
 	                <input
 	                  v-model="selectedIds"
 	                  type="checkbox"
@@ -228,7 +228,7 @@
 	                  :value="product.id"
 	                >
 	              </td>
-	              <td class="px-6 py-4 whitespace-nowrap">
+	              <td class="ui-td whitespace-nowrap">
 	                <div class="flex items-center">
 	                  <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
                     <img 
@@ -244,58 +244,56 @@
                     />
                   </div>
                   <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">
+                    <div class="font-medium text-slate-900">
                       {{ product.title }}
                     </div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-slate-500">
                       {{ product.slug }}
                     </div>
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="ui-td whitespace-nowrap">
                 <span
                   v-if="product.category"
-                  class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                  class="ui-badge ui-badge--emerald"
                 >
                   {{ product.category.title }}
                 </span>
                 <span
                   v-else
-                  class="text-sm text-gray-400"
+                  class="text-sm text-slate-400"
                 >{{ t('admin.pages.products.index.table.uncategorized') }}</span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="ui-td whitespace-nowrap text-slate-900">
                 {{ formatCurrency(product.price) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="ui-td whitespace-nowrap text-slate-900">
                 {{ product.stock }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="ui-td whitespace-nowrap">
                 <span
-                  :class="[
-                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
-                    product.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                  ]"
+                  class="ui-badge"
+                  :class="product.isActive ? 'ui-badge--emerald' : 'ui-badge--slate'"
                 >
                   {{ product.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                 <div class="flex flex-col space-y-1">
                   <!-- Product Link -->
                   <div class="flex items-center space-x-2">
-                    <span class="text-xs text-gray-400 w-12">{{ t('admin.pages.products.index.links.product') }}:</span>
+                    <span class="text-xs text-slate-400 w-12">{{ t('admin.pages.products.index.links.product') }}:</span>
                     <a
                       :href="getProductUrl(product.slug)"
                       target="_blank"
-                      class="text-teal-600 hover:text-teal-900"
+                      class="text-teal-600 hover:text-teal-700"
                       :title="t('admin.pages.products.index.links.openProduct')"
                     >
                       <Icon name="lucide:external-link" class="w-4 h-4" />
                     </a>
                     <button
-                      class="text-gray-400 hover:text-gray-600"
+                      class="text-slate-400 hover:text-slate-600"
                       :title="t('admin.pages.products.index.links.copyProduct')"
                       @click="copyLink(`/p/${product.slug}`)"
                     >
@@ -304,17 +302,17 @@
                   </div>
                   <!-- Landing Link -->
                   <div class="flex items-center space-x-2">
-                    <span class="text-xs text-gray-400 w-12">{{ t('admin.pages.products.index.links.landing') }}:</span>
+                    <span class="text-xs text-slate-400 w-12">{{ t('admin.pages.products.index.links.landing') }}:</span>
                     <a
                       :href="getLandingUrl(product.slug)"
                       target="_blank"
-                      class="text-teal-600 hover:text-teal-900"
+                      class="text-teal-600 hover:text-teal-700"
                       :title="t('admin.pages.products.index.links.openLanding')"
                     >
                       <Icon name="lucide:external-link" class="w-4 h-4" />
                     </a>
                     <button
-                      class="text-gray-400 hover:text-gray-600"
+                      class="text-slate-400 hover:text-slate-600"
                       :title="t('admin.pages.products.index.links.copyLanding')"
                       @click="copyLink(`/p/${product.slug}?mode=landing`)"
                     >
@@ -323,17 +321,17 @@
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end space-x-3">
                   <NuxtLink
                     :to="`/admin/products/${product.id}`"
-                    class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
                     <span>{{ t('admin.common.edit') }}</span>
                   </NuxtLink>
                   <button
-                    class="inline-flex items-center text-red-600 hover:text-red-900 transition-colors"
+                    class="ui-btn ui-btn--danger ui-btn--sm"
                     @click="confirmDelete(product)"
                   >
                     <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
@@ -347,18 +345,18 @@
       </div>
  
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
         <div class="flex-1 flex justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            class="ui-btn ui-btn--secondary ui-btn--md"
             @click="currentPage--"
           >
             {{ t('admin.common.previous') }}
           </button>
           <button
             :disabled="currentPage === totalPages"
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            class="ui-btn ui-btn--secondary ui-btn--md ml-3"
             @click="currentPage++"
           >
             {{ t('admin.common.next') }}
@@ -366,7 +364,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-gray-700">
+            <p class="text-sm text-slate-700">
               {{ t('admin.pages.products.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredProducts.length),
@@ -419,12 +417,13 @@
 	    />
 
 	    <!-- Import CSV modal -->
+	    <Teleport to="body">
 	    <div
 	      v-if="showImportCsvModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl">
-	        <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4">
+	      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl flex flex-col max-h-[90vh]">
+	        <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4 shrink-0">
 	          <div class="min-w-0">
 	            <h3 class="truncate text-lg font-semibold text-gray-900">
 	              {{ t('admin.pages.products.index.bulk.importTitle') }}
@@ -441,7 +440,7 @@
 	            <Icon name="lucide:x" class="h-5 w-5" />
 	          </button>
 	        </div>
-	        <div class="px-6 py-5 space-y-4">
+	        <div class="px-6 py-5 space-y-4 overflow-y-auto">
 	          <input
 	            ref="importCsvInput"
 	            type="file"
@@ -475,14 +474,16 @@
 	        </div>
 	      </div>
 	    </div>
+	    </Teleport>
 
 	    <!-- Bulk update modal -->
+	    <Teleport to="body">
 	    <div
 	      v-if="showBulkUpdateModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl">
-	        <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4">
+	      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl flex flex-col max-h-[90vh]">
+	        <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4 shrink-0">
 	          <div class="min-w-0">
 	            <h3 class="truncate text-lg font-semibold text-gray-900">
 	              {{ t('admin.pages.products.index.bulk.updateTitle') }}
@@ -500,7 +501,8 @@
 	          </button>
 	        </div>
 
-	        <div class="px-6 py-5 space-y-4">
+
+	        <div class="px-6 py-5 space-y-4 overflow-y-auto">
 	          <BaseInput
 	            v-model="bulkPrice"
 	            :label="t('admin.pages.products.index.bulk.fields.price')"
@@ -587,6 +589,7 @@
 	        </div>
 	      </div>
 	    </div>
+	    </Teleport>
 	  </div>
 	</template>
  

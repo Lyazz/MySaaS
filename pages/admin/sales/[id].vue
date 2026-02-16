@@ -55,33 +55,33 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow p-6">
+      <div class="ui-card p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">{{ t('admin.pages.sales.detail.sections.items') }}</h2>
-          <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(sale.totalAmount) }}</div>
+          <h2 class="text-lg font-semibold text-slate-900">{{ t('admin.pages.sales.detail.sections.items') }}</h2>
+          <div class="text-sm font-semibold text-slate-900">{{ formatCurrency(sale.totalAmount) }}</div>
         </div>
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead>
+          <table class="ui-table">
+            <thead class="ui-thead">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.sales.detail.itemsTable.product') }}</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.sales.detail.itemsTable.variant') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.sales.detail.itemsTable.qty') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.sales.detail.itemsTable.price') }}</th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.sales.detail.itemsTable.total') }}</th>
+                <th class="ui-th">{{ t('admin.pages.sales.detail.itemsTable.product') }}</th>
+                <th class="ui-th">{{ t('admin.pages.sales.detail.itemsTable.variant') }}</th>
+                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.qty') }}</th>
+                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.price') }}</th>
+                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.total') }}</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr v-for="item in sale.items" :key="item.id" class="hover:bg-gray-50">
-                <td class="px-4 py-2 text-sm text-gray-900">
+            <tbody class="ui-tbody">
+              <tr v-for="item in sale.items" :key="item.id" class="ui-tr">
+                <td class="ui-td text-sm text-slate-900">
                   {{ item.product?.title || item.productId }}
                 </td>
-                <td class="px-4 py-2 text-sm text-gray-600">
+                <td class="ui-td text-sm text-slate-600">
                   {{ item.variantId ? item.variantId.substring(0, 8) : t('admin.pages.sales.detail.itemsTable.defaultVariant') }}
                 </td>
-                <td class="px-4 py-2 text-sm text-gray-900 text-right">{{ item.quantity }}</td>
-                <td class="px-4 py-2 text-sm text-gray-900 text-right">{{ formatCurrency(item.price) }}</td>
-                <td class="px-4 py-2 text-sm font-semibold text-gray-900 text-right">
+                <td class="ui-td text-sm text-slate-900 text-right">{{ item.quantity }}</td>
+                <td class="ui-td text-sm text-slate-900 text-right">{{ formatCurrency(item.price) }}</td>
+                <td class="ui-td text-sm font-semibold text-slate-900 text-right">
                   {{ formatCurrency(item.price * item.quantity) }}
                 </td>
               </tr>
@@ -91,7 +91,7 @@
       </div>
     </div>
 
-    <div v-else class="bg-white rounded-lg shadow p-12 text-center">
+    <div v-else class="ui-card p-12 text-center">
       <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">{{ t('admin.pages.sales.detail.notFound.title') }}</h3>
       <p class="mt-1 text-sm text-gray-500">{{ t('admin.pages.sales.detail.notFound.hint') }}</p>

@@ -317,7 +317,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               Tab(text: 'General'),
                               Tab(text: 'Description'),
                               Tab(text: 'Images'),
-                              Tab(text: 'Variants'),
+                              Tab(text: 'Variants / Stock'),
                             ],
                           ),
                           const Divider(height: 1, color: Color(0xFFE2E8F0)),
@@ -751,7 +751,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                     ),
                                                     const SizedBox(height: 32),
                                                     const Text(
-                                                      'Variants',
+                                                      'Variants / Stock',
                                                       style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.w600,
@@ -872,8 +872,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                                             ),
                                                                           ),
                                                                           Text(
-                                                                            variant.sku ??
-                                                                                'No SKU',
+                                                                            variant.sku.isNotEmpty
+                                                                                ? variant.sku
+                                                                                : 'No SKU',
                                                                             style: const TextStyle(
                                                                               fontSize: 12,
                                                                               color: Color(

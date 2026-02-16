@@ -3,6 +3,7 @@ import prisma from '../../lib/prisma'
 import { requireSuperAdmin } from '../../middleware/superadmin.middleware'
 import { logAction } from '../../lib/audit'
 import bcrypt from 'bcryptjs'
+import { seedStaffRolePresets } from '../staff-roles/presets'
 
 const router = Router()
 
@@ -36,9 +37,10 @@ router.get('/', async (req, res) => {
 // POST / - Create tenant
 router.post('/', async (req, res) => {
     const { name, slug, ownerEmail, ownerPassword } = req.body
+    const normalizedOwnerEmail = typeof ownerEmail === 'string' ? ownerEmail.trim().toLowerCase() : ''
     const user = req.user!
 
-    if (!name || !slug || !ownerEmail || !ownerPassword) {
+    if (!name || !slug || !normalizedOwnerEmail || !ownerPassword) {
         return res.status(400).json({
             statusCode: 400,
             statusMessage: 'Missing required fields: name, slug, ownerEmail, ownerPassword'
@@ -67,12 +69,14 @@ router.post('/', async (req, res) => {
 
             await tx.user.create({
                 data: {
-                    email: ownerEmail,
+                    email: normalizedOwnerEmail,
                     passwordHash,
                     role: 'owner',
                     tenantId: newTenant.id
                 }
             })
+
+            await seedStaffRolePresets(tx, newTenant.id)
 
             await tx.storeSettings.create({
                 data: {

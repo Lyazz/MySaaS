@@ -52,6 +52,7 @@ describe('Admin products bulk ops', () => {
             data: {
                 tenantId: tenantAId,
                 productId: productAId,
+                sku: `BULK-${Date.now()}`,
                 price: 100,
                 stock: 1,
                 reserved: 0,

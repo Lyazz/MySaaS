@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
+import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 
 export class PosValidationError extends Error {
     statusCode: number
@@ -124,7 +125,7 @@ export class PosService {
 
         const products = await prisma.product.findMany({
             where: { id: { in: productIds }, tenantId, isActive: true },
-            select: { id: true, price: true, title: true, stock: true }
+            select: { id: true, slug: true, price: true, title: true, stock: true }
         })
         if (products.length !== productIds.length) {
             throw new PosValidationError(400, 'Some products are invalid or unavailable')
@@ -177,6 +178,7 @@ export class PosService {
                     data: {
                         tenantId,
                         productId: pid,
+                        sku: suggestSkuFromProduct(product.slug, ''),
                         price: product.price,
                         stock: product.stock,
                         reserved: 0,
@@ -247,6 +249,11 @@ export class PosService {
                 }))
             })
 
+            await tx.productVariant.updateMany({
+                where: { tenantId, id: { in: validatedItems.map((i) => i.variantId) } },
+                data: { skuLocked: true }
+            })
+
             for (const item of validatedItems) {
                 if (item.trackInventory === false) continue
 
@@ -311,14 +318,14 @@ export class PosService {
     }
 
     async lookupByCode(tenantId: string, code: string) {
-        const normalized = String(code || '').trim()
+        const normalized = String(code || '').trim().toUpperCase()
         if (!normalized) return null
 
         const variant = await prisma.productVariant.findFirst({
             where: {
                 tenantId,
                 isActive: true,
-                OR: [{ sku: normalized }]
+                OR: [{ barcode: normalized }, { sku: normalized }]
             },
             include: {
                 product: {
@@ -350,7 +357,7 @@ export class PosService {
         return {
             productId: variant.productId,
             variantId: variant.id,
-            sku: variant.sku ?? null,
+            sku: variant.sku,
             title: variant.product?.title ?? '',
             variantLabel: labels.length > 0 ? labels.join(' / ') : null,
             price: Number((variant as any).price ?? variant.product?.price ?? 0),

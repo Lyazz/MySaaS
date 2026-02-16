@@ -9,9 +9,9 @@
       </p>
     </div>
 
-    <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-      <table class="min-w-full divide-y divide-gray-300">
-        <thead class="bg-gray-50">
+    <div class="overflow-x-auto ui-card">
+      <table class="ui-table">
+        <thead class="ui-thead">
           <tr>
             <th
               scope="col"
@@ -24,6 +24,12 @@
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
               {{ t('admin.variantsTable.columns.price') }}
+            </th>
+            <th
+              scope="col"
+              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+            >
+              {{ t('admin.variantsTable.columns.cost') }}
             </th>
             <th
               scope="col"
@@ -65,6 +71,12 @@
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
             >
+              {{ t('admin.variantsTable.columns.barcode') }}
+            </th>
+            <th
+              scope="col"
+              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+            >
               {{ t('admin.variantsTable.columns.active') }}
             </th>
             <th
@@ -81,10 +93,11 @@
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
+        <tbody class="ui-tbody">
           <tr
             v-for="variant in variants"
             :key="variant.id"
+            class="ui-tr"
           >
             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
               {{ getVariantTitle(variant) }}
@@ -99,6 +112,15 @@
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
               <input
+                v-model.number="variant.cost"
+                type="number"
+                min="0"
+                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
+                @change="updateVariantInfo(variant)"
+              >
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+              <input
                 v-model="variant.trackInventory"
                 type="checkbox"
                 class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
@@ -107,9 +129,14 @@
               >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <span class="font-mono text-gray-700">
-                {{ Number(variant.stock || 0) }}
-              </span>
+              <input
+                v-model.number="variant.stock"
+                type="number"
+                min="0"
+                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1 font-mono text-gray-700"
+                :disabled="savingStockIds.has(variant.id) || variant.trackInventory === false"
+                @change="setVariantStock(variant)"
+              >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
               {{ Number(variant.reserved || 0) }}
@@ -131,10 +158,45 @@
               <span v-else class="text-gray-400">∞</span>
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-              <input 
-                v-model="variant.sku" 
+              <div class="flex items-center gap-2">
+                <input 
+                  v-model="variant.sku" 
+                  type="text"
+                  class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
+                  :disabled="variant.skuLocked === true"
+                  @change="updateVariantInfo(variant)"
+                >
+                <button
+                  v-if="variant.skuLocked !== true"
+                  type="button"
+                  class="text-xs px-2 py-1 rounded border hover:bg-gray-50"
+                  :disabled="suggestingSkuIds.has(variant.id)"
+                  @click="suggestSku(variant)"
+                >
+                  {{ t('admin.variantsTable.actions.suggestSku') }}
+                </button>
+                <button
+                  v-if="variant.skuLocked !== true"
+                  type="button"
+                  class="text-xs px-2 py-1 rounded border hover:bg-gray-50"
+                  :disabled="lockingSkuIds.has(variant.id)"
+                  @click="lockSku(variant)"
+                >
+                  {{ t('admin.variantsTable.actions.lockSku') }}
+                </button>
+                <span
+                  v-else
+                  class="text-xs text-gray-400"
+                >
+                  {{ t('admin.variantsTable.actions.skuLocked') }}
+                </span>
+              </div>
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+              <input
+                v-model="variant.barcode"
                 type="text"
-                class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
+                class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
                 @change="updateVariantInfo(variant)"
               >
             </td>
@@ -211,8 +273,8 @@
           v-else
           class="overflow-x-auto"
         >
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="ui-table">
+            <thead class="ui-thead">
               <tr>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.date') }}</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.type') }}</th>
@@ -223,8 +285,8 @@
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.by') }}</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
-              <tr v-for="m in movements" :key="m.id">
+            <tbody class="ui-tbody">
+              <tr v-for="m in movements" :key="m.id" class="ui-tr">
                 <td class="px-3 py-2 text-sm text-gray-700">{{ formatDate(m.createdAt) }}</td>
                 <td class="px-3 py-2 text-sm text-gray-700">
                   <div class="min-w-0">
@@ -251,7 +313,7 @@
         <div class="flex justify-end gap-3 pt-2">
           <button
             type="button"
-            class="px-4 py-2 rounded-md border text-sm"
+            class="ui-btn ui-btn--secondary ui-btn--md"
             @click="closeMovements"
           >
             {{ t('admin.common.close') }}
@@ -390,7 +452,9 @@ async function updateVariantInfo(variant: any) {
             headers: { Authorization: `Bearer ${authStore.token}` },
             body: {
                 price: variant.price,
+                cost: variant.cost,
                 sku: variant.sku,
+                barcode: variant.barcode,
                 isActive: variant.isActive,
                 compareAtPrice: variant.compareAtPrice
             }
@@ -402,6 +466,9 @@ async function updateVariantInfo(variant: any) {
 }
 
 const savingInventoryIds = ref<Set<string>>(new Set())
+const savingStockIds = ref<Set<string>>(new Set())
+const lockingSkuIds = ref<Set<string>>(new Set())
+const suggestingSkuIds = ref<Set<string>>(new Set())
 
 async function updateVariantInventory(variant: any, patch: any) {
     savingInventoryIds.value.add(variant.id)
@@ -427,6 +494,90 @@ async function updateVariantInventory(variant: any, patch: any) {
         emit('refresh')
     } finally {
         savingInventoryIds.value.delete(variant.id)
+    }
+}
+
+async function setVariantStock(variant: any) {
+    const prev = Number(variant.stock || 0)
+    const next = Number(variant.stock || 0)
+
+    if (!Number.isFinite(next) || next < 0) {
+        variant.stock = prev
+        return alert(t('admin.variantsTable.errors.updateStockFailed'))
+    }
+
+    savingStockIds.value.add(variant.id)
+    try {
+        const updated = await $fetch(`/api/admin/inventory/variants/${variant.id}/stock/set`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${authStore.token}` },
+            body: {
+                stock: next,
+                reason: 'admin_product_variants_table'
+            }
+        })
+
+        if (updated && typeof updated === 'object') {
+            if (typeof (updated as any).stock === 'number') variant.stock = (updated as any).stock
+            if (typeof (updated as any).reserved === 'number') variant.reserved = (updated as any).reserved
+            if (typeof (updated as any).safetyStock === 'number') variant.safetyStock = (updated as any).safetyStock
+            if (typeof (updated as any).trackInventory === 'boolean') variant.trackInventory = (updated as any).trackInventory
+        }
+    } catch (e) {
+        console.error(e)
+        variant.stock = prev
+        alert(t('admin.variantsTable.errors.updateStockFailed'))
+        emit('refresh')
+    } finally {
+        savingStockIds.value.delete(variant.id)
+    }
+}
+
+async function lockSku(variant: any) {
+    lockingSkuIds.value.add(variant.id)
+    try {
+        const updated = await $fetch(`/api/admin/variants/${variant.id}/sku/lock`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${authStore.token}` }
+        })
+        if (updated && typeof updated === 'object' && typeof (updated as any).skuLocked === 'boolean') {
+            variant.skuLocked = (updated as any).skuLocked
+        } else {
+            variant.skuLocked = true
+        }
+    } catch (e) {
+        console.error(e)
+        alert(t('admin.variantsTable.errors.lockSkuFailed'))
+        emit('refresh')
+    } finally {
+        lockingSkuIds.value.delete(variant.id)
+    }
+}
+
+async function suggestSku(variant: any) {
+    suggestingSkuIds.value.add(variant.id)
+    try {
+        const result = await $fetch<{ sku: string; available: boolean }>(`/api/admin/variants/${variant.id}/sku/suggest`, {
+            headers: { Authorization: `Bearer ${authStore.token}` }
+        })
+
+        if (!result?.sku) {
+            alert(t('admin.variantsTable.errors.suggestSkuFailed'))
+            return
+        }
+
+        if (result.available !== true) {
+            alert(t('admin.variantsTable.errors.suggestSkuUnavailable'))
+            return
+        }
+
+        variant.sku = result.sku
+        await updateVariantInfo(variant)
+    } catch (e) {
+        console.error(e)
+        alert(t('admin.variantsTable.errors.suggestSkuFailed'))
+    } finally {
+        suggestingSkuIds.value.delete(variant.id)
     }
 }
 

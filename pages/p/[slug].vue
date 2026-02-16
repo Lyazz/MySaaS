@@ -16,6 +16,7 @@ type Product = {
   stock: number
   isActive: boolean
   images?: string[]
+  productImages?: { url: string; isMain?: boolean; position?: number }[]
   metaPixelIds?: string[]
 }
 
@@ -35,7 +36,14 @@ if (error.value || !product.value) {
     })
 }
 
-const mainImage = computed(() => product.value?.images?.[0] || 'https://placehold.co/600x400')
+const mainImage = computed(() => {
+  const productImages = (product.value as any)?.productImages
+  if (Array.isArray(productImages) && productImages.length > 0) {
+    const main = productImages.find((img: any) => img?.isMain)
+    return (main?.url || productImages[0]?.url) ?? 'https://placehold.co/600x400'
+  }
+  return product.value?.images?.[0] || 'https://placehold.co/600x400'
+})
 
 useTenantSeo({
   title: `${product.value?.title ?? slug}`,

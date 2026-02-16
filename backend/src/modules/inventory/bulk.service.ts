@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma'
 import { parseCsv, stringifyCsv } from '../../lib/csv'
 import { InventoryService } from './inventory.service'
+import { normalizeSkuInput } from '../../lib/variant-identifiers'
 
 type ImportSummary = {
     updated: number
@@ -100,7 +101,7 @@ export class BulkInventoryService {
                 const price = parsed.header.includes('price') ? toDecimalString(record.price ?? '') : null
                 if (parsed.header.includes('price') && price === null && (record.price ?? '').trim()) throw new Error('Invalid price')
 
-                const sku = parsed.header.includes('sku') ? (record.sku ?? '').trim() : ''
+                const sku = parsed.header.includes('sku') ? normalizeSkuInput(record.sku ?? '', 'sku') : null
 
                 if (safetyStock !== null || trackInventory !== null) {
                     await this.inventory.updateVariantInventory(
@@ -116,14 +117,32 @@ export class BulkInventoryService {
                     )
                 }
 
-                if (price !== null || parsed.header.includes('sku')) {
-                    await prisma.productVariant.updateMany({
-                        where: { tenantId, id },
-                        data: {
-                            ...(price !== null ? { price } : {}),
-                            ...(parsed.header.includes('sku') ? { sku: sku || null } : {})
+                if (price !== null || sku !== null) {
+                    if (sku !== null) {
+                        const conflict = await prisma.productVariant.findFirst({
+                            where: { tenantId, sku, id: { not: id } },
+                            select: { id: true }
+                        })
+                        if (conflict) throw new Error('SKU already exists')
+
+                        const updatedSku = await prisma.productVariant.updateMany({
+                            where: { tenantId, id, skuLocked: false },
+                            data: { sku }
+                        })
+                        if (updatedSku.count !== 1) {
+                            const existing = await prisma.productVariant.findFirst({ where: { tenantId, id }, select: { id: true, skuLocked: true } })
+                            if (!existing) throw new Error('Variant not found')
+                            if (existing.skuLocked) throw new Error('SKU is locked and cannot be changed')
+                            throw new Error('SKU update failed')
                         }
-                    })
+                    }
+
+                    if (price !== null) {
+                        await prisma.productVariant.updateMany({
+                            where: { tenantId, id },
+                            data: { price }
+                        })
+                    }
                 }
 
                 summary.updated++
@@ -182,8 +201,7 @@ export class BulkInventoryService {
                 const price = u.price === undefined ? null : typeof u.price === 'number' ? String(u.price) : typeof u.price === 'string' ? u.price : null
                 if (u.price !== undefined && (price === null || !price.trim())) throw new Error('Invalid price')
 
-                const sku = u.sku === undefined ? null : typeof u.sku === 'string' ? u.sku.trim() : null
-                if (u.sku !== undefined && sku === null) throw new Error('Invalid sku')
+                const sku = u.sku === undefined ? null : normalizeSkuInput(u.sku, 'sku')
 
                 if (safetyStock !== null || trackInventory !== null) {
                     await this.inventory.updateVariantInventory(
@@ -200,13 +218,31 @@ export class BulkInventoryService {
                 }
 
                 if (price !== null || sku !== null) {
-                    await prisma.productVariant.updateMany({
-                        where: { tenantId, id },
-                        data: {
-                            ...(price !== null ? { price } : {}),
-                            ...(sku !== null ? { sku: sku || null } : {})
+                    if (sku !== null) {
+                        const conflict = await prisma.productVariant.findFirst({
+                            where: { tenantId, sku, id: { not: id } },
+                            select: { id: true }
+                        })
+                        if (conflict) throw new Error('SKU already exists')
+
+                        const updatedSku = await prisma.productVariant.updateMany({
+                            where: { tenantId, id, skuLocked: false },
+                            data: { sku }
+                        })
+                        if (updatedSku.count !== 1) {
+                            const existing = await prisma.productVariant.findFirst({ where: { tenantId, id }, select: { id: true, skuLocked: true } })
+                            if (!existing) throw new Error('Variant not found')
+                            if (existing.skuLocked) throw new Error('SKU is locked and cannot be changed')
+                            throw new Error('SKU update failed')
                         }
-                    })
+                    }
+
+                    if (price !== null) {
+                        await prisma.productVariant.updateMany({
+                            where: { tenantId, id },
+                            data: { price }
+                        })
+                    }
                 }
 
                 updated++

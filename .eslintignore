@@ -1,0 +1,16 @@
+node_modules
+.nuxt
+.output
+dist
+playwright-report
+test-results
+
+# Generated bundles / native builds
+public/_nuxt
+android/**/build
+android/**/build/**
+android/**/intermediates
+android/**/intermediates/**
+android/app/src/main/assets
+android/app/src/main/assets/**
+

@@ -34,6 +34,17 @@ describe('Express Admin API', () => {
         expect(user).toBeTruthy()
         userId = user!.id
 
+        const roles = await prisma.tenantStaffRole.findMany({
+            where: { tenantId },
+            select: { name: true }
+        })
+        const names = roles.map((r) => r.name)
+        expect(names).toContain('Gestionnaire commandes')
+        expect(names).toContain('Approvisionnement')
+        expect(names).toContain('Gestionnaire catalogue')
+        expect(names).toContain('Caisse')
+        expect(names).toContain('Lecture seule')
+
         token = signAccessToken({ userId })
     })
 

@@ -39,6 +39,12 @@ All requests must be tenant-scoped by resolved tenant (server-side).
 - POST /api/admin/inventory/variants/import.csv (multipart form-data: file)
 - PATCH /api/admin/inventory/variants/bulk
 - PATCH /api/admin/inventory/variants/:id
+- POST /api/admin/inventory/variants/:id/stock/set
+- POST /api/admin/inventory/variants/:id/stock/adjust
+
+- PUT /api/admin/variants/:id
+- GET /api/admin/variants/:id/sku/suggest
+- POST /api/admin/variants/:id/sku/lock
 
 - GET /api/admin/settings/theme
 - PATCH /api/admin/settings/theme

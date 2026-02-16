@@ -123,60 +123,60 @@
         </div>
       </div>
 
-      <div v-if="sales.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.nav.salesItem') }}</h3>
+      <div v-if="sales.length > 0" class="ui-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.nav.salesItem') }}</h3>
         </div>
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="ui-table">
+            <thead class="ui-thead">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.order') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.total') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.status') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.date') }}
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th text-right">
                   {{ t('admin.pages.customers.detail.table.actions') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="ui-tbody">
               <tr
                 v-for="s in sales"
                 :key="s.id"
-                class="hover:bg-gray-50"
+                class="ui-tr"
               >
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">
+                <td class="ui-td whitespace-nowrap">
+                  <div class="font-medium text-slate-900">
                     #{{ s.id.substring(0, 8) }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">
+                <td class="ui-td whitespace-nowrap">
+                  <div class="font-medium text-slate-900">
                     {{ formatCurrency(s.totalAmount) }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                <td class="ui-td whitespace-nowrap">
+                  <span class="ui-badge ui-badge--slate">
                     {{ s.status }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                   {{ formatDate(s.createdAt) }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td class="ui-td whitespace-nowrap text-right">
                   <div class="flex items-center justify-end">
                     <NuxtLink
                       :to="`/admin/sales/${s.id}`"
-                      class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                      class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
                       <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
                       <span>{{ t('common.view') }}</span>
@@ -189,62 +189,62 @@
         </div>
       </div>
 
-      <div v-if="payments.length > 0" class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.pages.customers.detail.stats.payments') }}</h3>
+      <div v-if="payments.length > 0" class="ui-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.pages.customers.detail.stats.payments') }}</h3>
         </div>
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="ui-table">
+            <thead class="ui-thead">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.date') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.total') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.stats.method') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th">
                   {{ t('admin.pages.customers.detail.stats.reference') }}
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="ui-th text-right">
                   {{ t('admin.pages.customers.detail.table.actions') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="ui-tbody">
               <tr
                 v-for="p in payments"
                 :key="p.id"
-                class="hover:bg-gray-50"
+                class="ui-tr"
               >
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                   {{ formatDate(p.createdAt) }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-semibold text-gray-900">
+                <td class="ui-td whitespace-nowrap">
+                  <div class="text-sm font-semibold text-slate-900">
                     {{ formatCurrency(p.amount) }}
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td class="ui-td whitespace-nowrap text-sm text-slate-700">
                   {{ p.method }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                   {{ p.reference || '—' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td class="ui-td whitespace-nowrap text-right">
                   <div class="flex items-center justify-end">
                     <NuxtLink
                       v-if="p.saleId"
                       :to="`/admin/sales/${p.saleId}`"
-                      class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                      class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
                       <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
                       <span>{{ t('common.view') }}</span>
                     </NuxtLink>
-                    <span v-else class="text-gray-400">—</span>
+                    <span v-else class="text-slate-400">—</span>
                   </div>
                 </td>
               </tr>

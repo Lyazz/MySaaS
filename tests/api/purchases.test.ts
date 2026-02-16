@@ -71,6 +71,7 @@ describe('Suppliers + Purchases', () => {
             data: {
                 tenantId: tenantAId,
                 productId: productAId,
+                sku: `PO-${Date.now()}`,
                 price: 100,
                 cost: 0,
                 stock: 0,
@@ -217,6 +218,62 @@ describe('Suppliers + Purchases', () => {
             orderBy: { createdAt: 'desc' }
         })
         expect(String(movement?.note || '')).toContain('salePriceMode:weighted')
+    })
+
+    it('can update cost using weighted average when chosen', async () => {
+        const poRes = await request(app)
+            .post('/api/admin/purchases')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ supplierId: supplierAId, currency: 'DZD' })
+
+        expect(poRes.status).toBe(201)
+        const po3Id = poRes.body.id
+
+        const itemRes = await request(app)
+            .post(`/api/admin/purchases/${po3Id}/items`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({
+                variantId: defaultVariantAId,
+                quantityOrdered: 10,
+                unitCost: '100'
+            })
+
+        expect(itemRes.status).toBe(201)
+        const item3Id = itemRes.body.id
+
+        // After previous tests: stock=10, cost=60. Weighted with newQty=10, newCost=100 => (60*10 + 100*10) / 20 = 80
+        const receiveRes = await request(app)
+            .post(`/api/admin/purchases/${po3Id}/receive`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({
+                costMode: 'weighted',
+                items: [{ itemId: item3Id, quantityReceived: 10 }]
+            })
+
+        expect(receiveRes.status).toBe(200)
+
+        const variantAfter = await prisma.productVariant.findFirst({
+            where: { tenantId: tenantAId, id: defaultVariantAId },
+            select: { stock: true, cost: true, price: true }
+        })
+        expect(variantAfter?.stock).toBe(20)
+        expect(Number(variantAfter?.cost)).toBeCloseTo(80, 2)
+
+        // Sale price should remain unchanged when no salePrice is provided.
+        expect(Number(variantAfter?.price)).toBeCloseTo(144, 2)
+
+        const movement = await prisma.inventoryMovement.findFirst({
+            where: {
+                tenantId: tenantAId,
+                variantId: defaultVariantAId,
+                type: 'PURCHASE_RECEIPT'
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+        expect(String(movement?.note || '')).toContain('costMode:weighted')
     })
 
     it('blocks cross-tenant access with mismatched host/token', async () => {

@@ -32,7 +32,7 @@ export type VariantInventoryDto = {
     id: string
     productId: string
     productTitle: string
-    sku: string | null
+    sku: string
     isActive: boolean
     price: string
     trackInventory: boolean
@@ -51,6 +51,14 @@ const toInt = (value: unknown): number | null => {
 }
 
 export class InventoryService {
+    private normalizeReason(value: unknown, fallback: string) {
+        return typeof value === 'string' && value.trim() ? value.trim().slice(0, 64) : fallback
+    }
+
+    private normalizeNote(value: unknown) {
+        return typeof value === 'string' && value.trim() ? value.trim().slice(0, 500) : null
+    }
+
     async listVariants(tenantId: string, opts?: { search?: string | null; productId?: string | null }) {
         const where: any = { tenantId, isActive: true }
         if (opts?.productId) where.productId = opts.productId
@@ -133,6 +141,151 @@ export class InventoryService {
         }))
     }
 
+    async adjustVariantStock(
+        tenantId: string,
+        variantId: string,
+        input: { delta?: unknown; reason?: unknown; note?: unknown },
+        actor?: { userId?: string | null }
+    ) {
+        const delta = toInt(input.delta)
+        if (delta === null) throw new InventoryValidationError(400, 'delta must be an integer')
+        if (delta === 0) throw new InventoryValidationError(400, 'delta must be non-zero')
+
+        const reason = this.normalizeReason(input.reason, 'manual_adjustment')
+        const note = this.normalizeNote(input.note)
+
+        const current = await prisma.productVariant.findFirst({
+            where: { id: variantId, tenantId },
+            select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true }
+        })
+        if (!current) throw new InventoryValidationError(404, 'Variant not found')
+
+        const nextStock = current.stock + delta
+        if (nextStock < 0) throw new InventoryValidationError(400, 'stock must be >= 0')
+        if (nextStock < current.reserved + current.safetyStock) {
+            throw new InventoryValidationError(400, 'stock must be >= reserved + safetyStock')
+        }
+
+        const updated = await prisma.$transaction(async (tx) => {
+            const updateResult = await tx.productVariant.updateMany({
+                where: {
+                    id: variantId,
+                    tenantId,
+                    stock: current.stock,
+                    reserved: current.reserved,
+                    safetyStock: current.safetyStock
+                },
+                data: { stock: nextStock }
+            })
+
+            if (updateResult.count !== 1) {
+                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry')
+            }
+
+            const refreshed = await tx.productVariant.findFirst({
+                where: { id: variantId, tenantId },
+                select: { stock: true, reserved: true, safetyStock: true }
+            })
+
+            await tx.inventoryMovement.create({
+                data: {
+                    tenantId,
+                    variantId,
+                    type: 'MANUAL_ADJUSTMENT' as any,
+                    delta,
+                    reservedDelta: 0,
+                    safetyStockDelta: 0,
+                    reason,
+                    note,
+                    stockAfter: refreshed?.stock ?? nextStock,
+                    reservedAfter: refreshed?.reserved ?? current.reserved,
+                    safetyStockAfter: refreshed?.safetyStock ?? current.safetyStock,
+                    createdByUserId: actor?.userId ?? null
+                }
+            })
+
+            await syncProductStockForProducts(tx as any, tenantId, [current.productId])
+
+            return tx.productVariant.findFirst({ where: { id: variantId, tenantId } })
+        })
+
+        return updated
+    }
+
+    async setVariantStock(
+        tenantId: string,
+        variantId: string,
+        input: { stock?: unknown; reason?: unknown; note?: unknown },
+        actor?: { userId?: string | null }
+    ) {
+        const stock = toInt(input.stock)
+        if (stock === null) throw new InventoryValidationError(400, 'stock must be an integer')
+        if (stock < 0) throw new InventoryValidationError(400, 'stock must be >= 0')
+
+        const reason = this.normalizeReason(input.reason, 'manual_set')
+        const note = this.normalizeNote(input.note)
+
+        const current = await prisma.productVariant.findFirst({
+            where: { id: variantId, tenantId },
+            select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true }
+        })
+        if (!current) throw new InventoryValidationError(404, 'Variant not found')
+
+        if (stock < current.reserved + current.safetyStock) {
+            throw new InventoryValidationError(400, 'stock must be >= reserved + safetyStock')
+        }
+
+        const delta = stock - current.stock
+        if (delta === 0) {
+            return prisma.productVariant.findFirst({ where: { id: variantId, tenantId } })
+        }
+
+        const updated = await prisma.$transaction(async (tx) => {
+            const updateResult = await tx.productVariant.updateMany({
+                where: {
+                    id: variantId,
+                    tenantId,
+                    stock: current.stock,
+                    reserved: current.reserved,
+                    safetyStock: current.safetyStock
+                },
+                data: { stock }
+            })
+
+            if (updateResult.count !== 1) {
+                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry')
+            }
+
+            const refreshed = await tx.productVariant.findFirst({
+                where: { id: variantId, tenantId },
+                select: { stock: true, reserved: true, safetyStock: true }
+            })
+
+            await tx.inventoryMovement.create({
+                data: {
+                    tenantId,
+                    variantId,
+                    type: 'MANUAL_SET' as any,
+                    delta,
+                    reservedDelta: 0,
+                    safetyStockDelta: 0,
+                    reason,
+                    note,
+                    stockAfter: refreshed?.stock ?? stock,
+                    reservedAfter: refreshed?.reserved ?? current.reserved,
+                    safetyStockAfter: refreshed?.safetyStock ?? current.safetyStock,
+                    createdByUserId: actor?.userId ?? null
+                }
+            })
+
+            await syncProductStockForProducts(tx as any, tenantId, [current.productId])
+
+            return tx.productVariant.findFirst({ where: { id: variantId, tenantId } })
+        })
+
+        return updated
+    }
+
     async updateVariantInventory(
         tenantId: string,
         variantId: string,
@@ -151,8 +304,8 @@ export class InventoryService {
         const safetyStock = toInt(input.safetyStock)
         const trackInventory = typeof input.trackInventory === 'boolean' ? input.trackInventory : null
 
-        const reason = typeof input.reason === 'string' && input.reason.trim() ? input.reason.trim().slice(0, 64) : 'manual'
-        const note = typeof input.note === 'string' && input.note.trim() ? input.note.trim().slice(0, 500) : null
+        const reason = this.normalizeReason(input.reason, 'manual')
+        const note = this.normalizeNote(input.note)
 
         if (stock !== null && stock < 0) throw new InventoryValidationError(400, 'stock must be >= 0')
         if (reserved !== null && reserved < 0) throw new InventoryValidationError(400, 'reserved must be >= 0')

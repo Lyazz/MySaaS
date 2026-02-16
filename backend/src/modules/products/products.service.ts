@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma'
 import { InventoryService } from '../inventory/inventory.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
+import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 
 const normalizeImages = (images: unknown): string[] | undefined => {
     if (images === undefined) return undefined
@@ -23,17 +24,36 @@ export class ProductsService {
         return !variant?.optionValues || variant.optionValues.length === 0
     }
 
-    private async ensureDefaultVariant(tenantId: string, product: { id: string; price: any; stock: number }) {
+    private async ensureUniqueSku(tx: Pick<typeof prisma, 'productVariant'>, tenantId: string, skuCandidate: string) {
+        const base = skuCandidate.slice(0, 32)
+        for (let i = 0; i < 50; i++) {
+            const suffix = i === 0 ? '' : `-${i + 1}`
+            const sku = (base.slice(0, 32 - suffix.length) + suffix).slice(0, 32)
+
+            const exists = await tx.productVariant.findFirst({
+                where: { tenantId, sku },
+                select: { id: true }
+            })
+            if (!exists) return sku
+        }
+
+        // Fallback to a time-based suffix (still safe under tenant unique index in practice)
+        return (base.slice(0, 32 - 6) + '-' + String(Date.now()).slice(-5)).slice(0, 32)
+    }
+
+    private async ensureDefaultVariant(tenantId: string, product: { id: string; slug: string; price: any; stock: number }) {
         const existing = await prisma.productVariant.findFirst({
             where: { tenantId, productId: product.id, optionValues: { none: {} } }
         })
 
         if (existing) return existing
 
+        const sku = await this.ensureUniqueSku(prisma, tenantId, suggestSkuFromProduct(product.slug, ''))
         return prisma.productVariant.create({
             data: {
                 tenantId,
                 productId: product.id,
+                sku,
                 price: product.price,
                 stock: product.stock ?? 0,
                 isActive: true,
@@ -136,10 +156,12 @@ export class ProductsService {
             })
 
             // Always create a "default" variant for products without options (stock source of truth).
+            const sku = await this.ensureUniqueSku(tx, tenantId, suggestSkuFromProduct(product.slug, ''))
             await tx.productVariant.create({
                 data: {
                     tenantId,
                     productId: product.id,
+                    sku,
                     price: product.price,
                     stock: product.stock,
                     isActive: true,
@@ -205,7 +227,12 @@ export class ProductsService {
         })
 
         if (product && (!product.options || product.options.length === 0) && (!product.variants || product.variants.length === 0)) {
-            await this.ensureDefaultVariant(tenantId, product)
+            await this.ensureDefaultVariant(tenantId, {
+                id: product.id,
+                slug: product.slug,
+                price: product.price,
+                stock: product.stock
+            })
             return prisma.product.findFirst({
                 where: { id: productId, tenantId },
                 include: {
@@ -305,7 +332,14 @@ export class ProductsService {
         // Keep default variant in sync for no-options products (bidirectional sync handled in InventoryService too).
         if (!refreshed.options || refreshed.options.length === 0) {
             const defaultVariant = (refreshed.variants || []).find((v: any) => this.isDefaultVariant(v))
-            const ensured = defaultVariant ?? (await this.ensureDefaultVariant(tenantId, refreshed))
+            const ensured =
+                defaultVariant ??
+                (await this.ensureDefaultVariant(tenantId, {
+                    id: refreshed.id,
+                    slug: refreshed.slug,
+                    price: refreshed.price,
+                    stock: refreshed.stock
+                }))
 
             if (data.price !== undefined) {
                 await prisma.productVariant.updateMany({
@@ -554,10 +588,12 @@ export class ProductsService {
             // Create missing variants
             for (const sig of toCreate) {
                 const valueIds = sig.split('|').filter(Boolean)
+                const sku = await this.ensureUniqueSku(tx, tenantId, suggestSkuFromProduct(product.slug, sig))
                 await tx.productVariant.create({
                     data: {
                         tenantId,
                         productId,
+                        sku,
                         price: product.price,
                         stock: 0,
                         reserved: 0,

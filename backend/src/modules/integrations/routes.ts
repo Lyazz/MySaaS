@@ -1,11 +1,13 @@
 import { Router } from 'express'
-import { requireTenantAdmin } from '../../middleware/rbac.middleware'
+import { requireTenantMember } from '../../middleware/rbac.middleware'
+import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
 import { IntegrationsController } from './integrations.controller'
 
 const router = Router()
 const integrationsController = new IntegrationsController()
 
-router.use(requireTenantAdmin)
+router.use(requireTenantMember)
+router.use(requireStaffCrud('integrations'))
 
 router.get('/:provider', integrationsController.getIntegration.bind(integrationsController))
 router.post('/:provider', integrationsController.saveIntegration.bind(integrationsController))

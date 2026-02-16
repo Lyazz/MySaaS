@@ -41,7 +41,7 @@
     <!-- Loading State -->
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
@@ -52,7 +52,7 @@
     <!-- Empty State -->
     <div
       v-else-if="filteredSuppliers.length === 0"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
@@ -64,7 +64,7 @@
       <div class="mt-6">
         <NuxtLink
           to="/admin/suppliers/create"
-          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
+          class="ui-btn ui-btn--primary ui-btn--md"
         >
           <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
           {{ t('admin.pages.suppliers.index.empty.newSupplier') }}
@@ -75,10 +75,10 @@
     <!-- Suppliers Table -->
     <div
       v-else
-      class="bg-white rounded-lg shadow overflow-hidden"
+      class="ui-card overflow-hidden"
     >
-      <div class="px-4 py-3 bg-gray-50 flex flex-wrap items-center gap-3 justify-between">
-        <div class="text-sm text-gray-700">
+      <div class="ui-card-header bg-slate-50 flex flex-wrap items-center gap-3 justify-between">
+        <div class="text-sm text-slate-700">
           {{ t('admin.pages.suppliers.index.sort.sortBy') }}
         </div>
         <div class="flex flex-wrap gap-2">
@@ -86,10 +86,10 @@
             v-for="option in sortOptions"
             :key="option.key"
             :class="[
-              'inline-flex items-center px-3 py-1 text-sm font-medium border rounded-md transition-colors',
+              'inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full transition-colors',
               sortBy === option.key
                 ? 'bg-teal-50 border-teal-500 text-teal-700'
-                : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
             ]"
             @click="setSort(option.key)"
           >
@@ -103,43 +103,43 @@
         </div>
       </div>
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="ui-table">
+          <thead class="ui-thead">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.suppliers.index.table.name') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.suppliers.index.table.info') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.suppliers.index.table.address') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th text-right">
                 {{ t('admin.common.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="ui-tbody">
             <tr
               v-for="supplier in paginatedSuppliers"
               :key="supplier.id"
-              class="hover:bg-gray-50"
+              class="ui-tr"
             >
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center">
                   <div class="flex-shrink-0 h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold uppercase">
                      {{ supplier.name.charAt(0) }}
                   </div>
                   <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">
+                    <div class="font-medium text-slate-900">
                       {{ supplier.name }}
                     </div>
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex flex-col text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap">
+                <div class="flex flex-col text-sm text-slate-600">
                    <div v-if="supplier.email" class="flex items-center gap-1">
                      <Icon name="lucide:mail" class="w-3 h-3" /> {{ supplier.email }}
                    </div>
@@ -149,20 +149,20 @@
                    <span v-if="!supplier.email && !supplier.phone">—</span>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                  {{ supplier.address || '—' }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end space-x-3">
                   <NuxtLink
                     :to="`/admin/suppliers/${supplier.id}`"
-                    class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
                     <span>{{ t('admin.common.edit') }}</span>
                   </NuxtLink>
                   <button
-                    class="inline-flex items-center text-red-600 hover:text-red-900 transition-colors"
+                    class="ui-btn ui-btn--danger ui-btn--sm"
                     @click="confirmDelete(supplier)"
                   >
                     <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
@@ -176,18 +176,18 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
         <div class="flex-1 flex justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
-            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            class="ui-btn ui-btn--secondary ui-btn--md"
             @click="currentPage--"
           >
             {{ t('admin.common.previous') }}
           </button>
           <button
             :disabled="currentPage === totalPages"
-            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            class="ui-btn ui-btn--secondary ui-btn--md ml-3"
             @click="currentPage++"
           >
             {{ t('admin.common.next') }}
@@ -195,7 +195,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-gray-700">
+            <p class="text-sm text-slate-700">
               {{ t('admin.pages.suppliers.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredSuppliers.length),

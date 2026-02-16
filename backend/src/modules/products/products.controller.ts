@@ -4,6 +4,12 @@ import { ProductsService } from './products.service'
 const productsService = new ProductsService()
 
 export class ProductsController {
+    private parseBooleanQuery(value: unknown): boolean {
+        if (typeof value !== 'string') return false
+        const v = value.trim().toLowerCase()
+        return v === '1' || v === 'true' || v === 'yes' || v === 'on'
+    }
+
     async listProducts(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
@@ -62,10 +68,11 @@ export class ProductsController {
         try {
             const tenant = req.tenant!
             const id = req.params.id as string
+            const includeInactiveVariants = this.parseBooleanQuery(req.query.includeInactiveVariants)
 
             if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
 
-            const product = await productsService.getProduct(tenant.id, id)
+            const product = await productsService.getProduct(tenant.id, id, { includeInactiveVariants })
 
             if (!product) {
                 return res.status(404).json({ statusCode: 404, statusMessage: 'Product not found' })

@@ -114,7 +114,7 @@
           <div class="flex items-center gap-4">
             <button 
               @click="handleLogout" 
-              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+              class="ui-btn ui-btn--danger ui-btn--md"
             >
               <Icon name="lucide:log-out" class="w-4 h-4" />
               <span>{{ t('superAdmin.actions.logout') }}</span>

@@ -1,261 +1,129 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-3">
     <div class="flex items-center justify-between">
-      <label class="block text-sm font-medium text-gray-700">{{ t('admin.imageUploader.title') }}</label>
+      <div>
+        <p class="text-sm font-medium text-slate-700">
+          {{ label }}
+        </p>
+        <p
+          v-if="hint"
+          class="text-xs text-slate-500"
+        >
+          {{ hint }}
+        </p>
+      </div>
       <div
         v-if="uploading"
-        class="text-sm text-blue-600"
+        class="text-xs text-teal-600 font-medium flex items-center gap-1.5"
       >
+        <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
         {{ t('admin.common.uploading') }}
       </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <!-- Image Cards -->
-      <div
-        v-for="(image, index) in images"
-        :key="image.id || index"
-        draggable="true"
-        class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all cursor-move"
-        :class="[
-          image.isMain ? 'border-teal-500 ring-2 ring-teal-200' : 'border-gray-200 hover:border-gray-300',
-          dragging === index ? 'opacity-50' : ''
-        ]"
-        @dragstart="handleDragStart($event, index)"
-        @dragover.prevent="handleDragOver($event, index)"
-        @drop="handleDrop($event, index)"
-        @dragend="handleDragEnd"
-      >
-        <!-- Image -->
+    <div class="group relative bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-slate-400 transition-colors">
+      <!-- Preview -->
+      <div v-if="modelValue" class="relative group-hover:opacity-90 transition-opacity">
         <img
-          :src="image.url"
-          :alt="image.alt || t('admin.imageUploader.imageAlt')"
-          class="w-full h-full object-cover"
+          :src="modelValue"
+          alt="Preview"
+          class="w-full h-auto max-h-[300px] object-contain bg-slate-100"
         >
         
-        <!-- Main Image Badge -->
-        <div
-          v-if="image.isMain"
-          class="absolute top-2 left-2"
-        >
-          <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-teal-600 text-white shadow-sm">
-            <Icon name="lucide:star" class="w-3 h-3 mr-1" />
-            {{ t('admin.imageUploader.mainBadge') }}
-          </span>
-        </div>
-
-        <!-- Position Number -->
-        <div class="absolute bottom-2 left-2">
-          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-black bg-opacity-60 text-white text-xs font-semibold">
-            {{ index + 1 }}
-          </span>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <!-- Set as Main Button -->
-          <button
-            v-if="!image.isMain"
-            type="button"
-            :title="t('admin.imageUploader.actions.setAsMain')"
-            class="bg-teal-600 hover:bg-teal-700 text-white rounded-full p-1.5 shadow-sm"
-            @click.stop="setAsMain(index)"
-          >
-            <Icon name="lucide:star" class="w-3.5 h-3.5" />
-          </button>
-          
-          <!-- Delete Button -->
+        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
             type="button"
-            :title="t('admin.imageUploader.actions.remove')"
-            class="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm"
-            @click.stop="removeImage(index)"
+            class="p-2 bg-white text-slate-700 rounded-lg hover:text-red-600 transition-colors shadow-lg"
+            @click="removeImage"
+            :title="t('admin.common.remove')"
           >
-            <Icon name="lucide:trash" class="w-3.5 h-3.5" />
+            <Icon name="lucide:trash-2" class="w-5 h-5" />
           </button>
-        </div>
-
-        <!-- Drag Handle Indicator -->
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-          <div class="bg-black bg-opacity-40 rounded-lg px-3 py-2">
-            <Icon name="lucide:grip-vertical" class="w-6 h-6 text-white" />
-          </div>
         </div>
       </div>
 
-      <!-- Add Image Button -->
-      <label class="relative cursor-pointer aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 hover:border-teal-500 flex flex-col items-center justify-center transition-colors">
-        <div class="text-center">
-            <Icon name="lucide:plus" class="mx-auto h-8 w-8 text-gray-400" />
-          <span class="mt-2 block text-xs text-gray-500 font-medium">{{ t('admin.imageUploader.actions.addImage') }}</span>
+      <!-- Upload Placeholder -->
+      <label
+        v-else
+        class="flex flex-col items-center justify-center p-8 cursor-pointer hover:bg-slate-100/50 transition-colors"
+      >
+        <div class="p-3 bg-white rounded-full shadow-sm mb-3">
+           <Icon name="lucide:image-plus" class="w-6 h-6 text-teal-600" />
         </div>
-        <input 
-          type="file" 
-          class="hidden" 
-          accept="image/*" 
-          multiple 
-          :disabled="uploading" 
-          @change="handleFileSelect" 
+        <span class="text-sm font-medium text-slate-700">{{ t('admin.components.imageUploader.clickToUpload') }}</span>
+        <span class="mt-1 text-xs text-slate-500">{{ t('admin.components.imageUploader.dragDrop') }}</span>
+        <input
+          type="file"
+          class="hidden"
+          accept="image/*"
+          :disabled="uploading"
+          @change="handleFileSelect"
         >
       </label>
     </div>
-
-    <p class="text-xs text-gray-500">
-      <strong>{{ t('admin.imageUploader.tip.title') }}</strong> {{ t('admin.imageUploader.tip.body') }}
-    </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-
-const { t } = useI18n({ useScope: 'global' })
-
-interface ProductImage {
-  id?: string | null
-  url: string
-  alt?: string
-  position: number
-  isMain: boolean
-}
+import { ref } from 'vue'
 
 const props = defineProps<{
-  modelValue: ProductImage[]
+  modelValue: string | null
+  label?: string
+  hint?: string
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: ProductImage[]): void
+  (e: 'update:modelValue', value: string | null): void
 }>()
 
-const images = ref<ProductImage[]>([...props.modelValue])
 const uploading = ref(false)
-const dragging = ref<number | null>(null)
+const { t } = useI18n({ useScope: 'global' })
+const authStore = useAuthStore()
 
-// Watch for external changes to modelValue
-watch(() => props.modelValue, (newVal) => {
-  images.value = [...newVal]
-}, { deep: true })
-
-// Upload handler
 const handleFileSelect = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (!input.files?.length) return
 
+  const [file] = input.files
+  
+  // Basic validation
+  if (!file.type.startsWith('image/')) {
+    alert(t('admin.components.imageUploader.errors.imageOnly'))
+    input.value = ''
+    return
+  }
+
+  // Proceed with upload
   uploading.value = true
-
   try {
-    for (const file of Array.from(input.files)) {
-      const formData = new FormData()
-      formData.append('file', file)
+    const formData = new FormData()
+    formData.append('file', file)
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${useCookie('auth_token').value}`
-        },
-        body: formData
-      })
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      body: formData
+    })
 
-      if (!response.ok) throw new Error(t('admin.imageUploader.errors.uploadFailed'))
-
-      const data = await response.json()
-      
-      // Add new image with auto-incremented position
-      const newImage: ProductImage = {
-        id: null,
-        url: data.url,
-        alt: '',
-        position: images.value.length,
-        isMain: images.value.length === 0 // First image is main by default
-      }
-      
-      images.value.push(newImage)
+    if (!response.ok) {
+      throw new Error(t('admin.components.imageUploader.errors.uploadFailed'))
     }
 
-    emit('update:modelValue', images.value)
+    const data = await response.json()
+    emit('update:modelValue', data.url)
   } catch (error) {
     console.error('Upload error:', error)
-    alert(t('admin.imageUploader.errors.uploadFailed'))
+    alert(t('admin.components.imageUploader.errors.uploadFailed'))
   } finally {
     uploading.value = false
     input.value = ''
   }
 }
 
-// Remove image
-const removeImage = (index: number) => {
-  const removedImage = images.value[index]
-  images.value.splice(index, 1)
-  
-  // If removed image was main, set first image as main
-  if (removedImage.isMain && images.value.length > 0) {
-    images.value[0].isMain = true
-  }
-  
-  // Update positions
-  images.value.forEach((img, idx) => {
-    img.position = idx
-  })
-  
-  emit('update:modelValue', images.value)
-}
-
-// Set image as main and move to first position
-const setAsMain = (index: number) => {
-  // Remove the image from current position
-  const selectedImage = images.value[index]
-  images.value.splice(index, 1)
-  
-  // Mark it as main and unset others
-  selectedImage.isMain = true
-  images.value.forEach(img => {
-    img.isMain = false
-  })
-  
-  // Insert at beginning
-  images.value.unshift(selectedImage)
-  
-  // Update all positions
-  images.value.forEach((img, idx) => {
-    img.position = idx
-  })
-  
-  emit('update:modelValue', images.value)
-}
-
-// Drag and drop handlers
-const handleDragStart = (event: DragEvent, index: number) => {
-  dragging.value = index
-  if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = 'move'
-  }
-}
-
-const handleDragOver = (event: DragEvent, index: number) => {
-  event.preventDefault()
-  if (event.dataTransfer) {
-    event.dataTransfer.dropEffect = 'move'
-  }
-}
-
-const handleDrop = (event: DragEvent, dropIndex: number) => {
-  event.preventDefault()
-  
-  if (dragging.value === null || dragging.value === dropIndex) return
-  
-  const draggedImage = images.value[dragging.value]
-  images.value.splice(dragging.value, 1)
-  images.value.splice(dropIndex, 0, draggedImage)
-  
-  // Update positions
-  images.value.forEach((img, idx) => {
-    img.position = idx
-  })
-  
-  emit('update:modelValue', images.value)
-}
-
-const handleDragEnd = () => {
-  dragging.value = null
+const removeImage = () => {
+  emit('update:modelValue', null)
 }
 </script>

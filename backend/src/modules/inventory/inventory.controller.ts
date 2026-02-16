@@ -73,4 +73,64 @@ export class InventoryController {
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
+
+    async adjustVariantStock(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Variant ID is required' })
+            }
+            if (req.body?.stock !== undefined || req.body?.reserved !== undefined) {
+                return res.status(403).json({ statusCode: 403, statusMessage: 'Use delta/stockSet; stock/reserved cannot be edited directly' })
+            }
+
+            const updated = await service.adjustVariantStock(
+                tenant.id,
+                id,
+                { delta: req.body?.delta, reason: req.body?.reason, note: req.body?.note },
+                { userId: user?.id ?? null }
+            )
+
+            res.json(updated)
+        } catch (error: any) {
+            if (error instanceof InventoryValidationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Adjust variant stock error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async setVariantStock(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Variant ID is required' })
+            }
+            if (req.body?.reserved !== undefined) {
+                return res.status(403).json({ statusCode: 403, statusMessage: 'reserved is system-managed and cannot be edited' })
+            }
+
+            const updated = await service.setVariantStock(
+                tenant.id,
+                id,
+                { stock: req.body?.stock, reason: req.body?.reason, note: req.body?.note },
+                { userId: user?.id ?? null }
+            )
+
+            res.json(updated)
+        } catch (error: any) {
+            if (error instanceof InventoryValidationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Set variant stock error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
 }

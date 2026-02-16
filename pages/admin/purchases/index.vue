@@ -3,16 +3,16 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
           {{ t('admin.nav.purchases') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1 text-slate-600">
           {{ t('admin.pages.purchases.index.subtitle') }}
         </p>
       </div>
       <NuxtLink
         to="/admin/purchases/create"
-        class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
+        class="ui-btn ui-btn--primary ui-btn--md"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
         <span>{{ t('admin.pages.purchases.index.newPurchase') }}</span>
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
            <BaseSelect
@@ -49,7 +49,7 @@
     <!-- Loading State -->
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
@@ -60,7 +60,7 @@
     <!-- Empty State -->
     <div
       v-else-if="filteredOrders.length === 0"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <Icon name="lucide:shopping-bag" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
@@ -72,7 +72,7 @@
       <div class="mt-6">
         <NuxtLink
           to="/admin/purchases/create"
-          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
+          class="ui-btn ui-btn--primary ui-btn--md"
         >
           <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
           {{ t('admin.pages.purchases.index.newPurchase') }}
@@ -83,61 +83,61 @@
     <!-- Purchases Table -->
     <div
       v-else
-      class="bg-white rounded-lg shadow overflow-hidden"
+      class="ui-card overflow-hidden"
     >
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="ui-table">
+          <thead class="ui-thead">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.id') }}
               </th>
-               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+               <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.supplier') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.status') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.items') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.date') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th text-right">
                 {{ t('admin.pages.purchases.index.table.action') }}
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="ui-tbody">
             <tr
               v-for="order in paginatedOrders"
               :key="order.id"
-              class="hover:bg-gray-50"
+              class="ui-tr"
             >
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap font-medium text-slate-900">
                 #{{ order.id.slice(0, 8) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                 {{ order.supplier?.name || '—' }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="ui-td whitespace-nowrap">
                 <span :class="getStatusClass(order.status)">
                   {{ order.status }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                 {{ t('admin.pages.purchases.index.table.itemsCount', { count: order.items?.length || 0 }) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                 {{ formatDate(order.createdAt) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="ui-td whitespace-nowrap text-right">
                 <NuxtLink
                   :to="`/admin/purchases/${order.id}`"
-                  class="text-teal-600 hover:text-teal-900 flex items-center justify-end"
+                  class="ui-btn ui-btn--secondary ui-btn--sm"
                 >
-                  <span class="mr-1">{{ t('admin.pages.purchases.index.table.manage') }}</span>
+                  <span>{{ t('admin.pages.purchases.index.table.manage') }}</span>
                   <Icon name="lucide:arrow-right" class="w-4 h-4" />
                 </NuxtLink>
               </td>
@@ -147,10 +147,10 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-gray-700">
+            <p class="text-sm text-slate-700">
               {{ t('admin.pages.purchases.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredOrders.length),
@@ -270,18 +270,18 @@ const fetchOrders = async () => {
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString()
 
 const getStatusClass = (status: string) => {
-  const base = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full '
+  const base = 'ui-badge '
   switch (status.toLowerCase()) {
     case 'completed':
     case 'received':
-      return base + 'bg-green-100 text-green-800'
+      return base + 'ui-badge--emerald'
     case 'pending':
     case 'ordered':
-      return base + 'bg-yellow-100 text-yellow-800'
+      return base + 'ui-badge--amber'
     case 'cancelled':
-      return base + 'bg-red-100 text-red-800'
+      return base + 'ui-badge--red'
     default:
-      return base + 'bg-gray-100 text-gray-800'
+      return base + 'ui-badge--slate'
   }
 }
 

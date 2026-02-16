@@ -21,7 +21,9 @@ class VariantEditScreen extends ConsumerStatefulWidget {
 class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _priceController;
+  late TextEditingController _costController;
   late TextEditingController _skuController;
+  late TextEditingController _barcodeController;
   late TextEditingController _stockController;
   late TextEditingController _safetyStockController;
   late TextEditingController _reservedController;
@@ -35,7 +37,13 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
     _priceController = TextEditingController(
       text: widget.variant.price.toString(),
     );
-    _skuController = TextEditingController(text: widget.variant.sku ?? '');
+    _costController = TextEditingController(
+      text: widget.variant.cost.toString(),
+    );
+    _skuController = TextEditingController(text: widget.variant.sku);
+    _barcodeController = TextEditingController(
+      text: widget.variant.barcode ?? '',
+    );
     _stockController = TextEditingController(
       text: widget.variant.stock.toString(),
     );
@@ -52,7 +60,9 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
   @override
   void dispose() {
     _priceController.dispose();
+    _costController.dispose();
     _skuController.dispose();
+    _barcodeController.dispose();
     _stockController.dispose();
     _safetyStockController.dispose();
     _reservedController.dispose();
@@ -70,7 +80,9 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
           .read(productsProvider.notifier)
           .updateVariant(widget.variant.id, {
             'price': double.tryParse(_priceController.text) ?? 0.0,
+            'cost': double.tryParse(_costController.text) ?? 0.0,
             'sku': _skuController.text,
+            'barcode': _barcodeController.text,
             'isActive': _isActive,
           });
 
@@ -130,12 +142,111 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    controller: _skuController,
+                    controller: _costController,
                     decoration: const InputDecoration(
+                      labelText: 'Cost (Purchase price)',
+                      prefixText: '\$ ',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _skuController,
+                    decoration: InputDecoration(
                       labelText: 'SKU',
+                      border: OutlineInputBorder(),
+                      suffixIcon: widget.variant.skuLocked == true
+                          ? null
+                          : IconButton(
+                              tooltip: 'Suggest SKU',
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      final messenger = ScaffoldMessenger.of(
+                                        context,
+                                      );
+                                      try {
+                                        final suggested = await ref
+                                            .read(productsProvider.notifier)
+                                            .suggestVariantSku(
+                                              widget.variant.id,
+                                            );
+                                        if (!mounted) return;
+                                        if (suggested.trim().isEmpty) {
+                                          messenger.showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'No SKU suggestion',
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        setState(() {
+                                          _skuController.text = suggested;
+                                        });
+                                      } catch (e) {
+                                        if (!mounted) return;
+                                        messenger.showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Failed to suggest SKU: $e',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                              icon: const Icon(LucideIcons.wand2, size: 18),
+                            ),
+                    ),
+                    enabled: widget.variant.skuLocked != true,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _barcodeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Barcode',
                       border: OutlineInputBorder(),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  if (widget.variant.skuLocked != true)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                try {
+                                  await ref
+                                      .read(productsProvider.notifier)
+                                      .lockVariantSku(widget.variant.id);
+                                  if (!mounted) return;
+                                  messenger.showSnackBar(
+                                    const SnackBar(content: Text('SKU locked')),
+                                  );
+                                } catch (e) {
+                                  if (!mounted) return;
+                                  messenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text('Failed to lock SKU: $e'),
+                                    ),
+                                  );
+                                }
+                              },
+                        icon: const Icon(LucideIcons.lock, size: 16),
+                        label: const Text('Lock SKU'),
+                      ),
+                    )
+                  else
+                    const Text(
+                      'SKU is locked',
+                      style: TextStyle(color: Color(0xFF64748B)),
+                    ),
                   const SizedBox(height: 16),
                   SwitchListTile(
                     title: const Text('Active'),

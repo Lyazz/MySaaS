@@ -14,6 +14,7 @@ type Product = {
   stock: number
   isActive: boolean
   images?: string[]
+  productImages?: { url: string; isMain?: boolean; position?: number }[]
   categoryId?: string | null
 }
 

@@ -104,31 +104,31 @@
         </h2>
         
         <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="bg-slate-50 border-b border-slate-200">
+          <table class="ui-table">
+            <thead class="ui-thead border-b border-slate-200">
               <tr>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th class="ui-th">
                   Rank
                 </th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <th class="ui-th">
                   Tenant
                 </th>
-                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-600">
+                <th class="ui-th text-right">
                   Revenue
                 </th>
-                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-600">
+                <th class="ui-th text-right">
                   Orders
                 </th>
-                <th class="px-4 py-3 text-right text-sm font-semibold text-gray-600">
+                <th class="ui-th text-right">
                   Products
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="ui-tbody">
               <tr
                 v-for="(tenant, index) in topTenants"
                 :key="tenant.id"
-                class="hover:bg-slate-50 transition-colors"
+                class="ui-tr transition-colors"
               >
                 <td class="px-4 py-3 text-gray-800">
                   <span

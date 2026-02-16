@@ -9,6 +9,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const authStore = useAuthStore()
     if (!authStore.isAuthenticated) return
     if (authStore.user?.isSuperAdmin) return
+    if (authStore.user?.role === 'staff') return
 
     const token = (authStore as any).token?.value ?? (authStore as any).token
     if (!token || typeof token !== 'string') return
@@ -33,4 +34,3 @@ export default defineNuxtRouteMiddleware(async (to) => {
         // If billing endpoint fails, don't block navigation.
     }
 })
-

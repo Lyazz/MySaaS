@@ -1,15 +1,18 @@
 import type { Request, Response, NextFunction } from 'express'
 import prisma from '../lib/prisma'
 
-export const requireTenantAdmin = async (req: Request, res: Response, next: NextFunction) => {
+type TenantRole = 'owner' | 'admin' | 'staff'
+
+const ensureTenantContext = async (req: Request, res: Response): Promise<boolean> => {
     const user = req.user
     let tenant = req.tenant
 
     if (!user) {
-        return res.status(401).json({
+        res.status(401).json({
             statusCode: 401,
             statusMessage: 'Unauthorized'
         })
+        return false
     }
 
     // SaaS-host admin: derive tenant context from authenticated user.
@@ -18,33 +21,48 @@ export const requireTenantAdmin = async (req: Request, res: Response, next: Next
         try {
             const foundTenant = await prisma.tenant.findUnique({ where: { id: user.tenantId } })
             if (!foundTenant) {
-                return res.status(404).json({
+                res.status(404).json({
                     statusCode: 404,
                     statusMessage: 'Tenant not found'
                 })
+                return false
             }
             tenant = foundTenant
             req.tenant = foundTenant
         } catch (error) {
             console.error('RBAC tenant resolution error', error)
-            return res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+            return false
         }
     }
 
     if (user.tenantId !== tenant.id) {
-        return res.status(403).json({
+        res.status(403).json({
             statusCode: 403,
             statusMessage: 'Access denied: User belongs to a different tenant'
         })
+        return false
     }
 
-    // Check roles if needed
-    if (user.role !== 'owner' && user.role !== 'admin') {
-        return res.status(403).json({
-            statusCode: 403,
-            statusMessage: 'Access denied: Insufficient permissions'
-        })
-    }
-
-    next()
+    return true
 }
+
+export const requireTenantRoles =
+    (roles: TenantRole[]) => async (req: Request, res: Response, next: NextFunction) => {
+        const ok = await ensureTenantContext(req, res)
+        if (!ok) return
+
+        const user = req.user!
+        if (!roles.includes(user.role as TenantRole)) {
+            return res.status(403).json({
+                statusCode: 403,
+                statusMessage: 'Access denied: Insufficient permissions'
+            })
+        }
+
+        next()
+    }
+
+export const requireTenantAdmin = requireTenantRoles(['owner', 'admin'])
+
+export const requireTenantMember = requireTenantRoles(['owner', 'admin', 'staff'])

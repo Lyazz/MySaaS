@@ -60,16 +60,16 @@
 	    </div>
 
     <!-- Pricing Configuration -->
-	    <div v-if="selectedProvider" class="bg-white rounded-lg shadow">
-	        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+	    <div v-if="selectedProvider" class="ui-card">
+	        <div class="ui-card-header flex justify-between items-center">
 	            <div>
-	                <h3 class="text-lg font-medium text-gray-900">{{ t('admin.pages.delivery.pricing.title', { provider: selectedProvider.name }) }}</h3>
-	                <p class="text-sm text-gray-500">{{ t('admin.pages.delivery.pricing.hint') }}</p>
+	                <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.pages.delivery.pricing.title', { provider: selectedProvider.name }) }}</h3>
+	                <p class="text-sm text-slate-600">{{ t('admin.pages.delivery.pricing.hint') }}</p>
 	            </div>
 	            <button 
 	                @click="saveRates" 
 	                :disabled="saving"
-	                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50"
+	                class="ui-btn ui-btn--primary ui-btn--md"
 	            >
 	                {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
 	            </button>
@@ -77,31 +77,31 @@
         
 	        <div v-if="loadingRates" class="p-12 text-center">
 	             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-	             <p class="mt-2 text-gray-500">{{ t('admin.pages.delivery.pricing.loading') }}</p>
+	             <p class="mt-2 text-slate-500">{{ t('admin.pages.delivery.pricing.loading') }}</p>
 	        </div>
 
         <div v-else class="p-0">
-             <table class="min-w-full divide-y divide-gray-200">
-	                <thead class="bg-gray-50">
+             <table class="ui-table">
+	                <thead class="ui-thead">
 	                    <tr>
-	                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">{{ t('admin.pages.delivery.pricing.table.code') }}</th>
-	                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ t('admin.pages.delivery.pricing.table.wilaya') }}</th>
-	                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">{{ t('admin.pages.delivery.pricing.table.price') }}</th>
+	                        <th scope="col" class="ui-th w-24">{{ t('admin.pages.delivery.pricing.table.code') }}</th>
+	                        <th scope="col" class="ui-th">{{ t('admin.pages.delivery.pricing.table.wilaya') }}</th>
+	                        <th scope="col" class="ui-th w-48">{{ t('admin.pages.delivery.pricing.table.price') }}</th>
 	                    </tr>
 	                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="wilaya in wilayas" :key="wilaya.code" class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{{ wilaya.code }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ wilaya.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <tbody class="ui-tbody">
+                    <tr v-for="wilaya in wilayas" :key="wilaya.code" class="ui-tr">
+                        <td class="ui-td whitespace-nowrap text-sm text-slate-600 font-mono">{{ wilaya.code }}</td>
+                        <td class="ui-td whitespace-nowrap text-sm font-medium text-slate-900">{{ wilaya.name }}</td>
+                        <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                              <div class="relative rounded-md shadow-sm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 sm:text-sm">DZD</span>
+                                <span class="text-slate-500 sm:text-sm">DZD</span>
                                 </div>
                                 <input 
                                     type="number" 
                                     v-model.number="modelRates[wilaya.code]" 
-                                    class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-12 sm:text-sm border-gray-300 rounded-md" 
+                                    class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-12 sm:text-sm border-slate-300 rounded-md" 
                                     placeholder="0.00"
                                 >
                             </div>

@@ -1156,7 +1156,7 @@ class _VariantSelectorDialogState
                                     : variant.title,
                               ),
                               subtitle: Text(
-                                'SKU: ${variant.sku ?? "-"}  |  Stock: ${variant.stock}',
+                                'SKU: ${variant.sku.isNotEmpty ? variant.sku : "-"}  |  Stock: ${variant.stock}',
                               ),
                               trailing: ElevatedButton(
                                 style: ElevatedButton.styleFrom(

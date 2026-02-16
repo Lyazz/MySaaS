@@ -147,26 +147,26 @@
             <div v-if="metaPixels.length === 0" class="text-sm text-gray-600">
               {{ t('admin.pages.integrations.metaPixels.empty') }}
             </div>
-            <div v-else class="overflow-hidden rounded-lg border border-gray-200">
-              <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
+            <div v-else class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <table class="ui-table">
+                <thead class="ui-thead">
                   <tr>
-                    <th class="px-4 py-3 text-left font-medium text-gray-600">{{ t('admin.common.name') }}</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-600">{{ t('admin.pages.integrations.metaPixels.table.pixelId') }}</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-600">{{ t('admin.pages.integrations.metaPixels.table.global') }}</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-600">{{ t('admin.common.active') }}</th>
-                    <th class="px-4 py-3 text-right font-medium text-gray-600">{{ t('admin.common.actions') }}</th>
+                    <th class="ui-th">{{ t('admin.common.name') }}</th>
+                    <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.pixelId') }}</th>
+                    <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.global') }}</th>
+                    <th class="ui-th">{{ t('admin.common.active') }}</th>
+                    <th class="ui-th text-right">{{ t('admin.common.actions') }}</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                  <tr v-for="p in metaPixels" :key="p.id">
-                    <td class="px-4 py-3">
-                      <div class="font-medium text-gray-900">{{ p.name || '—' }}</div>
-                      <div class="text-xs text-gray-500">{{ t('admin.pages.integrations.metaPixels.table.productsCount', { count: p.productsCount || 0 }) }}</div>
+                <tbody class="ui-tbody">
+                  <tr v-for="p in metaPixels" :key="p.id" class="ui-tr">
+                    <td class="ui-td">
+                      <div class="font-medium text-slate-900">{{ p.name || '—' }}</div>
+                      <div class="text-xs text-slate-500">{{ t('admin.pages.integrations.metaPixels.table.productsCount', { count: p.productsCount || 0 }) }}</div>
                     </td>
-                    <td class="px-4 py-3 font-mono text-xs text-gray-700">{{ p.pixelId }}</td>
-                    <td class="px-4 py-3">
-                      <span v-if="p.isGlobal" class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
+                    <td class="ui-td font-mono text-xs text-slate-700">{{ p.pixelId }}</td>
+                    <td class="ui-td">
+                      <span v-if="p.isGlobal" class="ui-badge ui-badge--indigo">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
                       <button
                         v-else
                         class="text-xs font-medium text-blue-600 hover:text-blue-700"
@@ -176,7 +176,7 @@
                         {{ t('admin.pages.integrations.metaPixels.actions.setGlobal') }}
                       </button>
                     </td>
-                    <td class="px-4 py-3">
+                    <td class="ui-td">
                       <label class="inline-flex items-center gap-2">
                         <input
                           type="checkbox"
@@ -185,12 +185,12 @@
                           :disabled="metaPixelsSaving"
                           @change="togglePixelActive(p)"
                         >
-                        <span class="text-xs text-gray-700">{{ p.isActive ? t('admin.common.active') : t('admin.common.inactive') }}</span>
+                        <span class="text-xs text-slate-700">{{ p.isActive ? t('admin.common.active') : t('admin.common.inactive') }}</span>
                       </label>
                     </td>
-                    <td class="px-4 py-3 text-right">
+                    <td class="ui-td text-right">
                       <button
-                        class="text-xs font-medium text-red-600 hover:text-red-700"
+                        class="ui-btn ui-btn--danger ui-btn--sm"
                         :disabled="metaPixelsSaving"
                         @click="deletePixel(p.id)"
                       >

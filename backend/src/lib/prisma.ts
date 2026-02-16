@@ -64,6 +64,8 @@ export const getTenantPrisma = (tenant: { id: string }) => {
                         'StoreSettings',
                         'TenantDomain',
                         'TenantSubscription',
+                        'TenantStaffRole',
+                        'TenantStaffRolePermission',
                         'User'
                     ]
 

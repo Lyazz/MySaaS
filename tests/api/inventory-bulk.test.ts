@@ -27,7 +27,7 @@ describe('Admin inventory bulk ops', () => {
         productId = product.id
 
         const variant = await prisma.productVariant.create({
-            data: { tenantId, productId, price: 10, stock: 5, reserved: 0, safetyStock: 0, trackInventory: true }
+            data: { tenantId, productId, sku: `INV-${Date.now()}`, price: 10, stock: 5, reserved: 0, safetyStock: 0, trackInventory: true }
         })
         variantId = variant.id
     })

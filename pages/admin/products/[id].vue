@@ -231,7 +231,7 @@
             </BaseSelect>
 
             <!-- Product Images -->
-            <ImageUploader v-model="productImages" />
+            <ProductImagesUploader v-model="productImages" />
 
             <!-- Active Status -->
             <div class="flex items-center">
@@ -286,6 +286,20 @@
                 class="mb-8" 
                 @refresh="fetchProduct"
               />
+
+              <div class="flex items-center justify-between mb-3">
+                <label class="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    v-model="showArchivedVariants"
+                    type="checkbox"
+                    class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  >
+                  {{ t('admin.pages.products.edit.variantsTab.showArchived') }}
+                </label>
+                <span class="text-xs text-gray-500">
+                  {{ t('admin.pages.products.edit.variantsTab.archivedCount', { count: archivedVariantsCount }) }}
+                </span>
+              </div>
                         
               <ProductVariantsTable 
                 :product-id="productId" 
@@ -330,19 +344,19 @@
               </p>
             </div>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+            <div class="ui-card overflow-hidden">
               <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-white">
+                <table class="ui-table">
+                  <thead class="ui-thead">
                     <tr>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.qty') }}</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.price') }}</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.tag') }}</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.active') }}</th>
-                      <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ t('admin.pages.products.edit.bundlesTab.table.actions') }}</th>
+                      <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.qty') }}</th>
+                      <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.price') }}</th>
+                      <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.tag') }}</th>
+                      <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.active') }}</th>
+                      <th class="ui-th text-right">{{ t('admin.pages.products.edit.bundlesTab.table.actions') }}</th>
                     </tr>
                   </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
+                  <tbody class="ui-tbody">
                     <tr v-if="bundleDeals.length === 0">
                       <td colspan="5" class="px-4 py-6 text-sm text-gray-500">
                         {{ t('admin.pages.products.edit.bundlesTab.table.empty') }}
@@ -351,48 +365,49 @@
                     <tr
                       v-for="(deal, idx) in bundleDeals"
                       :key="deal.id || `new-${idx}`"
+                      class="ui-tr"
                     >
-                      <td class="px-4 py-3">
+                      <td class="ui-td">
                         <input
                           v-model.number="deal.bundleQty"
                           type="number"
                           min="2"
-                          class="w-24 px-3 py-2 border border-gray-300 rounded-md"
+                          class="w-24 px-3 py-2 border border-slate-300 rounded-lg"
                         >
                       </td>
-                      <td class="px-4 py-3">
+                      <td class="ui-td">
                         <input
                           v-model="deal.bundlePrice"
                           type="number"
                           min="0"
                           step="0.01"
-                          class="w-40 px-3 py-2 border border-gray-300 rounded-md"
+                          class="w-40 px-3 py-2 border border-slate-300 rounded-lg"
                         >
                       </td>
-                      <td class="px-4 py-3">
+                      <td class="ui-td">
                         <select
                           v-model="deal.tag"
-                          class="w-48 px-3 py-2 border border-gray-300 rounded-md bg-white"
+                          class="w-48 px-3 py-2 border border-slate-300 rounded-lg bg-white"
                         >
                           <option :value="null">{{ t('admin.pages.products.edit.bundlesTab.tags.none') }}</option>
                           <option value="MOST_POPULAR">{{ t('admin.pages.products.edit.bundlesTab.tags.mostPopular') }}</option>
                           <option value="BEST_VALUE">{{ t('admin.pages.products.edit.bundlesTab.tags.bestValue') }}</option>
                         </select>
                       </td>
-                      <td class="px-4 py-3">
+                      <td class="ui-td">
                         <label class="inline-flex items-center gap-2">
                           <input
                             v-model="deal.isActive"
                             type="checkbox"
                             class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
                           >
-                          <span class="text-sm text-gray-700">{{ t('admin.common.active') }}</span>
+                          <span class="text-sm text-slate-700">{{ t('admin.common.active') }}</span>
                         </label>
                       </td>
-                      <td class="px-4 py-3 text-right space-x-2">
+                      <td class="ui-td text-right space-x-2">
                         <button
                           type="button"
-                          class="px-3 py-2 text-sm rounded-md bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50"
+                          class="ui-btn ui-btn--primary ui-btn--sm"
                           :disabled="bundleDealsSubmitting"
                           @click="saveBundleDeal(deal)"
                         >
@@ -400,7 +415,7 @@
                         </button>
                         <button
                           type="button"
-                          class="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                          class="ui-btn ui-btn--danger ui-btn--sm"
                           :disabled="bundleDealsSubmitting"
                           @click="deleteBundleDeal(deal, idx)"
                         >
@@ -508,7 +523,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
-import ImageUploader from '~/components/admin/ImageUploader.vue'
+import ProductImagesUploader from '~/components/admin/ProductImagesUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 import ProductOptionsEditor from '~/components/admin/ProductOptionsEditor.vue'
 import ProductVariantsTable from '~/components/admin/ProductVariantsTable.vue'
@@ -565,7 +580,13 @@ const form = ref({
 })
 
 const options = ref<any[]>([])
-const variants = ref<any[]>([])
+const allVariants = ref<any[]>([])
+const showArchivedVariants = ref(false)
+const variants = computed(() => {
+  if (showArchivedVariants.value) return allVariants.value
+  return allVariants.value.filter((v) => v?.isActive !== false)
+})
+const archivedVariantsCount = computed(() => allVariants.value.filter((v) => v?.isActive === false).length)
 const productImages = ref<ProductImage[]>([])
 const bundleDeals = ref<BundleDeal[]>([])
 const bundleDealsSubmitting = ref(false)
@@ -597,6 +618,7 @@ async function fetchProduct() {
   loading.value = true
   try {
     const data = await $fetch<any>(`/api/admin/products/${productId}`, {
+      query: { includeInactiveVariants: '1' },
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
@@ -615,7 +637,7 @@ async function fetchProduct() {
     }
 
     options.value = data.options || []
-    variants.value = data.variants || []
+    allVariants.value = data.variants || []
     bundleDeals.value = (data.bundleDeals || []).map((d: any) => ({
       id: d.id,
       bundleQty: Number(d.bundleQty),

@@ -108,7 +108,7 @@
           </option>
         </BaseSelect>
 
-        <ImageUploader v-model="images" />
+        <ProductImagesUploader v-model="images" />
 
         <div class="flex items-center">
           <input
@@ -188,7 +188,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import AdminFormField from '~/components/admin/FormField.vue'
-import ImageUploader from '~/components/admin/ImageUploader.vue'
+import ProductImagesUploader from '~/components/admin/ProductImagesUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'

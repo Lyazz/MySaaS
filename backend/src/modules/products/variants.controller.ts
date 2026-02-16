@@ -69,5 +69,44 @@ export class VariantsController {
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
-}
 
+    async lockSku(req: Request, res: Response) {
+        const tenant = req.tenant!
+        const { id } = req.params
+
+        if (!id || Array.isArray(id)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+        }
+
+        try {
+            const result = await service.lockSku(tenant.id, id)
+            res.json(result)
+        } catch (error: any) {
+            if (typeof error?.statusCode === 'number') {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Lock SKU error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async suggestSku(req: Request, res: Response) {
+        const tenant = req.tenant!
+        const { id } = req.params
+
+        if (!id || Array.isArray(id)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+        }
+
+        try {
+            const result = await service.suggestSku(tenant.id, id)
+            res.json(result)
+        } catch (error: any) {
+            if (typeof error?.statusCode === 'number') {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Suggest SKU error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+}

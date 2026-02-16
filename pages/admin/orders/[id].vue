@@ -124,43 +124,44 @@
       </div>
 
       <!-- Order Items -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">
+      <div class="ui-card p-6">
+        <h2 class="text-lg font-semibold text-slate-900 mb-4">
           {{ t('admin.pages.orders.detail.sections.orderItems') }}
         </h2>
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead>
+          <table class="ui-table">
+            <thead class="ui-thead">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th class="ui-th">
                   {{ t('admin.pages.orders.detail.itemsTable.product') }}
                 </th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th class="ui-th">
                   {{ t('admin.pages.orders.detail.itemsTable.price') }}
                 </th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                <th class="ui-th">
                   {{ t('admin.pages.orders.detail.itemsTable.quantity') }}
                 </th>
-                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                <th class="ui-th text-right">
                   {{ t('admin.pages.orders.detail.itemsTable.subtotal') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
+            <tbody class="ui-tbody">
               <tr
                 v-for="item in order.items"
                 :key="item.id"
+                class="ui-tr"
               >
-                <td class="px-4 py-3 text-sm text-gray-900">
+                <td class="ui-td text-sm text-slate-900">
                   {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct') }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-900">
+                <td class="ui-td text-sm text-slate-900">
                   {{ formatCurrency(item.price) }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-900">
+                <td class="ui-td text-sm text-slate-900">
                   {{ item.quantity }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-900 text-right">
+                <td class="ui-td text-sm text-slate-900 text-right">
                   {{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}
                 </td>
               </tr>

@@ -5,6 +5,7 @@ import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../
 import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
+import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 
 const telegramService = new TelegramService()
 
@@ -669,7 +670,7 @@ export class OrdersService {
 
         const products = await prisma.product.findMany({
             where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, price: true, title: true, stock: true }
+            select: { id: true, slug: true, price: true, title: true, stock: true }
         })
 
         if (products.length !== productIds.length) {
@@ -725,6 +726,7 @@ export class OrdersService {
                     data: {
                         tenantId: input.tenantId,
                         productId: pid,
+                        sku: suggestSkuFromProduct(product.slug, ''),
                         price: product.price,
                         stock: product.stock,
                         reserved: 0,
@@ -848,6 +850,11 @@ export class OrdersService {
                     lineTotal: item.lineTotal,
                     pricingBreakdown: item.pricingBreakdown as any
                 }))
+            })
+
+            await tx.productVariant.updateMany({
+                where: { tenantId: input.tenantId, id: { in: validatedItems.map((i) => i.variantId) } },
+                data: { skuLocked: true }
             })
 
             for (const item of validatedItems) {

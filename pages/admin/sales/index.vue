@@ -2,16 +2,16 @@
   <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
           {{ t('admin.nav.salesItem') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1 text-slate-600">
           {{ t('admin.pages.sales.index.subtitle') }}
         </p>
       </div>
     </div>
 
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.sales.index.filters.searchLabel') }}</label>
@@ -31,7 +31,7 @@
 
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
@@ -41,7 +41,7 @@
 
     <div
       v-else-if="sales.length === 0"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
@@ -54,66 +54,66 @@
 
     <div
       v-else
-      class="bg-white rounded-lg shadow overflow-hidden"
+      class="ui-card overflow-hidden"
     >
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="ui-table">
+          <thead class="ui-thead">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.saleId') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.customer') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.phone') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.total') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.completed') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th text-right">
                 {{ t('admin.pages.sales.index.table.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="ui-tbody">
             <tr
               v-for="sale in sales"
               :key="sale.id"
-              class="hover:bg-gray-50"
+              class="ui-tr"
             >
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="font-medium text-slate-900">
                   #{{ sale.id.substring(0, 8) }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="text-slate-900">
                   {{ sale.customerName }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap">
+                <div class="text-slate-600">
                   {{ sale.customerPhone }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="font-medium text-slate-900">
                   {{ formatCurrency(sale.totalAmount) }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                 {{ formatDate(sale.updatedAt) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/sales/${sale.id}`"
-                    class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
                     <span>{{ t('common.view') }}</span>

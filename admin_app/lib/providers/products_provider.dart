@@ -227,6 +227,28 @@ class ProductsNotifier extends Notifier<ProductsState> {
     }
   }
 
+  Future<void> lockVariantSku(String variantId) async {
+    try {
+      final apiService = ref.read(apiProvider);
+      await apiService.client.post('/admin/variants/$variantId/sku/lock');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> suggestVariantSku(String variantId) async {
+    try {
+      final apiService = ref.read(apiProvider);
+      final res = await apiService.client.get(
+        '/admin/variants/$variantId/sku/suggest',
+      );
+      final sku = res.data?['sku']?.toString() ?? '';
+      return sku;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> updateVariantInventory(
     String variantId,
     Map<String, dynamic> data,

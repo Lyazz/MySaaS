@@ -1,114 +1,116 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="w-full max-w-4xl bg-white rounded-lg shadow-xl flex flex-col max-h-[90vh]">
-      <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.components.variantSelectorModal.title') }}</h3>
-        <button @click="close" class="text-gray-400 hover:text-gray-500 transition-colors">
-          <Icon name="lucide:x" class="w-6 h-6" />
-        </button>
-      </div>
+  <Teleport to="body">
+    <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.components.variantSelectorModal.title') }}</h3>
+          <button @click="close" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+            <Icon name="lucide:x" class="w-6 h-6" />
+          </button>
+        </div>
 
-      <!-- Search -->
-      <div class="p-4 border-b border-gray-200 bg-gray-50">
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Icon name="lucide:search" class="h-5 w-5 text-gray-400" />
+        <!-- Search -->
+        <div class="p-4 border-b border-slate-200 bg-slate-50">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Icon name="lucide:search" class="h-5 w-5 text-slate-400" />
+            </div>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+              :placeholder="t('admin.components.variantSelectorModal.search.placeholder')"
+              @input="handleSearch"
+            />
           </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-            :placeholder="t('admin.components.variantSelectorModal.search.placeholder')"
-            @input="handleSearch"
-          />
         </div>
-      </div>
 
-      <!-- List -->
-      <div class="flex-1 overflow-y-auto">
-        <div v-if="loading" class="p-8 text-center">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-          <p class="mt-2 text-gray-500">{{ t('admin.components.variantSelectorModal.loading') }}</p>
+        <!-- List -->
+        <div class="flex-1 overflow-y-auto">
+          <div v-if="loading" class="p-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+            <p class="mt-2 text-slate-500">{{ t('admin.components.variantSelectorModal.loading') }}</p>
+          </div>
+          <div v-else-if="variants.length === 0" class="p-8 text-center text-slate-500">
+            {{ t('admin.components.variantSelectorModal.empty') }}
+          </div>
+          <table v-else class="ui-table">
+            <thead class="ui-thead sticky top-0">
+              <tr>
+                <th scope="col" class="ui-th w-10">
+                  <input
+                    type="checkbox"
+                    :checked="allSelected"
+                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-slate-300 rounded"
+                    @change="toggleAll"
+                  />
+                </th>
+                <th scope="col" class="ui-th">
+                  {{ t('admin.components.variantSelectorModal.table.productVariant') }}
+                </th>
+                <th scope="col" class="ui-th">
+                  {{ t('admin.components.variantSelectorModal.table.sku') }}
+                </th>
+                <th scope="col" class="ui-th">
+                  {{ t('admin.components.variantSelectorModal.table.currentStock') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="ui-tbody">
+              <tr
+                v-for="variant in variants"
+                :key="variant.id"
+                class="ui-tr cursor-pointer"
+                @click="toggleSelection(variant)"
+              >
+                <td class="ui-td whitespace-nowrap" @click.stop>
+                  <input
+                    type="checkbox"
+                    :checked="isSelected(variant)"
+                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-slate-300 rounded"
+                    @change="toggleSelection(variant)"
+                  />
+                </td>
+                <td class="ui-td">
+                  <div class="text-sm font-medium text-slate-900">{{ variant.productTitle }}</div>
+                  <div class="text-sm text-slate-500">{{ variant.optionTitle }}</div>
+                </td>
+                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                  {{ variant.sku || '—' }}
+                </td>
+                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                  {{ variant.stock }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div v-else-if="variants.length === 0" class="p-8 text-center text-gray-500">
-          {{ t('admin.components.variantSelectorModal.empty') }}
-        </div>
-        <table v-else class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50 sticky top-0">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
-                <input
-                  type="checkbox"
-                  :checked="allSelected"
-                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                  @change="toggleAll"
-                />
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('admin.components.variantSelectorModal.table.productVariant') }}
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('admin.components.variantSelectorModal.table.sku') }}
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ t('admin.components.variantSelectorModal.table.currentStock') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-              v-for="variant in variants"
-              :key="variant.id"
-              class="hover:bg-gray-50 cursor-pointer"
-              @click="toggleSelection(variant)"
+
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-2xl">
+          <div class="text-sm text-slate-700">
+            {{ t('admin.components.variantSelectorModal.selectedCount', { count: selectedVariants.length }) }}
+          </div>
+          <div class="flex space-x-3">
+            <button
+              @click="close"
+              class="ui-btn ui-btn--secondary ui-btn--md"
             >
-              <td class="px-6 py-4 whitespace-nowrap" @click.stop>
-                <input
-                  type="checkbox"
-                  :checked="isSelected(variant)"
-                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                  @change="toggleSelection(variant)"
-                />
-              </td>
-              <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">{{ variant.productTitle }}</div>
-                <div class="text-sm text-gray-500">{{ variant.optionTitle }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ variant.sku || '—' }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ variant.stock }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Footer -->
-      <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center bg-gray-50 rounded-b-lg">
-        <div class="text-sm text-gray-700">
-          {{ t('admin.components.variantSelectorModal.selectedCount', { count: selectedVariants.length }) }}
-        </div>
-        <div class="flex space-x-3">
-          <button
-            @click="close"
-            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-          >
-            {{ t('admin.common.cancel') }}
-          </button>
-          <button
-            @click="confirm"
-            :disabled="selectedVariants.length === 0"
-            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ t('admin.components.variantSelectorModal.actions.addSelected') }}
-          </button>
+              {{ t('admin.common.cancel') }}
+            </button>
+            <button
+              @click="confirm"
+              :disabled="selectedVariants.length === 0"
+              class="ui-btn ui-btn--primary ui-btn--md"
+            >
+              {{ t('admin.components.variantSelectorModal.actions.addSelected') }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">

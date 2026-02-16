@@ -684,7 +684,11 @@
       "update": "Mettre à jour",
       "updating": "Mise à jour…",
       "edit": "Modifier",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "selectAll": "Tout sélectionner",
+      "deselectAll": "Tout désélectionner",
+      "fullAccess": "Accès complet",
+      "viewOnly": "Lecture seule"
     },
     "confirmModal": {
       "defaults": {
@@ -993,22 +997,27 @@
       }
     },
     "variantsTable": {
-      "title": "Variantes",
-      "subtitle": "Les variantes restent synchronisées automatiquement avec vos options.",
+      "title": "Variants",
+      "subtitle": "Les variants restent synchronisées automatiquement avec vos options.",
       "columns": {
         "variant": "Variante",
         "price": "Prix",
+        "cost": "Coût",
         "track": "Suivi",
         "onHand": "En stock",
         "reserved": "Réservé",
         "safety": "Sécurité",
         "available": "Disponible",
         "sku": "SKU",
+        "barcode": "Code-barres",
         "active": "Actif",
         "images": "Images"
       },
       "actions": {
         "manageImages": "Gérer ({count})",
+        "suggestSku": "Suggérer",
+        "lockSku": "Verrouiller",
+        "skuLocked": "Verrouillé",
         "movements": "Mouvements"
       },
       "defaultVariant": "Par défaut",
@@ -1040,6 +1049,10 @@
       "errors": {
         "updateVariantFailed": "Impossible de mettre à jour la variante",
         "updateInventoryFailed": "Impossible de mettre à jour le stock",
+        "updateStockFailed": "Impossible de mettre à jour la quantité en stock",
+        "lockSkuFailed": "Impossible de verrouiller le SKU",
+        "suggestSkuFailed": "Impossible de suggérer un SKU",
+        "suggestSkuUnavailable": "Le SKU suggéré n’est pas disponible",
         "saveImagesFailed": "Impossible d’enregistrer les images"
       }
     },
@@ -1076,7 +1089,7 @@
       "maxOptions": "Maximum 3 options autorisées.",
       "deleteModal": {
         "title": "Supprimer l’option",
-        "message": "Voulez-vous vraiment supprimer cette option ? Toutes les variantes associées seront supprimées."
+        "message": "Voulez-vous vraiment supprimer cette option ? Toutes les variants associées seront supprimées."
       },
       "confirm": {
         "removeValue": "Supprimer « {label} » ?"
@@ -1207,7 +1220,13 @@
       "appearance": "Apparence",
       "homepage": "Page d’accueil",
       "contactInfo": "Infos de contact",
-      "functional": "Fonctionnel"
+      "functional": "Fonctionnel",
+      "users": "Utilisateurs"
+    },
+    "roles": {
+      "owner": "Propriétaire",
+      "admin": "Admin",
+      "staff": "Staff"
     },
     "orderStatus": {
       "pending": "En attente",
@@ -1315,6 +1334,56 @@
       }
     },
     "pages": {
+      "pos": {
+        "catalog": {
+          "title": "Point de Vente",
+          "searchPlaceholder": "Rechercher des produits...",
+          "allProducts": "Tous les produits",
+          "noProducts": "Aucun produit trouvé",
+          "clearFilter": "Effacer filtre",
+          "back": "Retour",
+          "backToCategories": "Retour aux catégories",
+          "actions": {
+            "discount": "Remise",
+            "reprint": "Réimprimer",
+            "reprintLastOrder": "Réimprimer la dernière commande",
+            "quickCharge": "Encaissement rapide",
+            "sort": "Trier",
+            "columns": "Colonnes"
+          },
+          "badges": {
+            "outOfStock": "Rupture de stock",
+            "lowStock": "Stock faible: {count}"
+          }
+        },
+        "cart": {
+          "itemsCount": "{count} articles",
+          "empty": "Panier vide",
+          "total": "Total",
+          "actions": {
+            "viewCart": "Voir panier",
+            "clearCart": "Vider panier",
+            "paymentOptions": "Options de paiement",
+            "payment": "Paiement",
+            "checkout": "Commander"
+          }
+        },
+        "actions": {
+          "viewCart": "Voir panier",
+          "imageMode": "Mode image"
+        },
+        "sessions": {
+          "order": "Commande {index}"
+        },
+        "customer": {
+          "addClient": "Ajouter client"
+        },
+        "variants": {
+          "loading": "Chargement des variantes...",
+          "inStockCount": "{count} en stock",
+          "inStock": "En stock"
+        }
+      },
       "cash": {
         "title": "Gestion des caisses",
         "subtitle": "Gérez vos fonds de caisse, sessions et transactions.",
@@ -1525,6 +1594,91 @@
           "CLOSED": "FERMÉE"
         }
       },
+      "users": {
+        "subtitle": "Gérez les utilisateurs du tenant et leurs droits d’accès.",
+        "searchPlaceholder": "Rechercher par email ou ID…",
+        "includeInactive": "Afficher les utilisateurs inactifs",
+        "tabs": {
+          "users": "Utilisateurs",
+          "roles": "Rôles (staff)"
+        },
+        "empty": "Aucun utilisateur.",
+        "columns": {
+          "email": "Email",
+          "role": "Rôle",
+          "staffRole": "Rôle staff",
+          "status": "Statut",
+          "createdAt": "Créé le"
+        },
+        "actions": {
+          "add": "Ajouter un utilisateur",
+          "deactivate": "Désactiver",
+          "activate": "Activer"
+        },
+        "create": {
+          "title": "Créer un utilisateur"
+        },
+        "edit": {
+          "title": "Modifier l’utilisateur"
+        },
+        "fields": {
+          "email": "Email",
+          "role": "Rôle",
+          "staffRole": "Rôle staff",
+          "password": "Mot de passe",
+          "newPassword": "Nouveau mot de passe",
+          "confirmPassword": "Confirmer le mot de passe",
+          "isActive": "Actif"
+        },
+        "hints": {
+          "passwordRequired": "Minimum 8 caractères.",
+          "passwordOptional": "Laissez vide pour garder le mot de passe actuel.",
+          "deactivateHint": "Désactive l’accès sans supprimer les données."
+        },
+        "validation": {
+          "invalidEmail": "Email invalide.",
+          "invalidRole": "Rôle invalide.",
+          "staffRoleRequired": "Sélectionnez un rôle staff.",
+          "staffRoleInvalid": "Rôle staff invalide.",
+          "passwordTooShort": "Minimum 8 caractères.",
+          "confirmPasswordRequired": "La confirmation du mot de passe est requise.",
+          "passwordsDoNotMatch": "Les mots de passe ne correspondent pas."
+        },
+        "roles": {
+          "subtitle": "Créez des rôles pour limiter les accès des utilisateurs staff (CRUD par module).",
+          "empty": "Aucun rôle staff.",
+          "unassigned": "Non assigné",
+          "noPermissions": "Aucune permission",
+          "createTitle": "Créer un rôle staff",
+          "editTitle": "Modifier le rôle staff",
+          "columns": {
+            "name": "Nom",
+            "permissions": "Permissions"
+          },
+          "fields": {
+            "name": "Nom",
+            "permissions": "Permissions"
+          },
+          "actions": {
+            "addRole": "Ajouter un rôle",
+            "create": "Créer",
+            "read": "Lire",
+            "update": "Modifier",
+            "delete": "Supprimer"
+          },
+          "resources": {
+            "variants": "Variants",
+            "metaPixels": "Pixels Meta"
+          },
+          "validation": {
+            "invalidName": "Nom invalide (min 2 caractères).",
+            "permissionsRequired": "Sélectionnez au moins une permission."
+          }
+        },
+        "errors": {
+          "title": "Impossible de terminer l’opération."
+        }
+      },
       "dashboard": {
         "title": "Tableau de bord",
         "welcomeBack": "Bon retour, {tenant}",
@@ -1676,12 +1830,12 @@
               "price": "Prix (définir)",
               "pricePlaceholder": "ex. 1999",
               "stock": "Stock (définir)",
-              "stockPlaceholder": "S'applique aux produits sans variantes",
+              "stockPlaceholder": "S'applique aux produits sans variants",
               "status": "Statut",
               "category": "Catégorie",
               "noChange": "Aucun changement",
               "clearCategory": "Supprimer la catégorie",
-              "propagatePrice": "Mettre à jour aussi les prix des variantes"
+              "propagatePrice": "Mettre à jour aussi les prix des variants"
             }
           }
         },
@@ -1706,7 +1860,7 @@
           "tabs": {
             "general": "Général",
             "description": "Description de la landing page",
-            "variants": "Variantes",
+            "variants": "Variants / Stock",
             "bundles": "Bundles"
           },
           "links": {
@@ -1722,7 +1876,9 @@
             "title": "Description de la landing page"
           },
           "variantsTab": {
-            "title": "Options et variantes"
+            "title": "Options / Variants / Stock",
+            "showArchived": "Afficher les variants archivées",
+            "archivedCount": "Archivées : {count}"
           },
           "bundlesTab": {
             "title": "Offres en bundle",
@@ -2218,6 +2374,10 @@
               "product": "Produit",
               "ordered": "Commandé",
               "unitCost": "Coût unitaire",
+              "salePrice": "Prix de vente",
+              "currentCost": "Ancien prix d'achat",
+              "newCostPreview": "Nouveau prix d'achat",
+              "currentSalePrice": "Prix de vente actuel",
               "received": "Reçu",
               "receiveNow": "Recevoir",
               "total": "Total",
@@ -2225,9 +2385,13 @@
               "receiveStock": "Réceptionner le stock",
               "removeItem": "Supprimer l’article",
               "totalOrderValue": "Valeur totale de la commande",
+              "costMode": {
+                "replace": "Dernier prix d'achat",
+                "weighted": "Coût moyen"
+              },
               "salePriceMode": {
                 "replace": "Mettre à jour le prix de vente",
-                "weighted": "Coût moyen"
+                "weighted": "Moyenne pondérée"
               }
             }
           },

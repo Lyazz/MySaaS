@@ -86,6 +86,7 @@ describe('Inventory management + movements', () => {
                 data: {
                     tenantId: tenantAId,
                     productId: productAId,
+                    sku: `INV-A-${Date.now()}`,
                     price: 120,
                     stock: 5,
                     reserved: 1,
@@ -97,6 +98,7 @@ describe('Inventory management + movements', () => {
                 data: {
                     tenantId: tenantBId,
                     productId: productB.id,
+                    sku: `INV-B-${Date.now()}`,
                     price: 55,
                     stock: 10,
                     reserved: 0,
@@ -273,6 +275,79 @@ describe('Inventory management + movements', () => {
         expect(after).toEqual(before)
     })
 
+    it('lets tenant admin set and adjust stock via explicit endpoints and records movements', async () => {
+        const beforeSet = await prisma.productVariant.findFirst({
+            where: { tenantId: tenantAId, id: variantAId },
+            select: { stock: true, reserved: true, safetyStock: true }
+        })
+        expect(beforeSet).toBeTruthy()
+
+        const setRes = await request(app)
+            .post(`/api/admin/inventory/variants/${variantAId}/stock/set`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ stock: 8, reason: 'stocktake', note: 'Counted on shelf' })
+
+        expect(setRes.status).toBe(200)
+        expect(setRes.body?.stock).toBe(8)
+
+        const setMove = await prisma.inventoryMovement.findFirst({
+            where: { tenantId: tenantAId, variantId: variantAId, type: 'MANUAL_SET', createdByUserId: userAId },
+            orderBy: { createdAt: 'desc' }
+        })
+        expect(setMove?.delta).toBe(8 - (beforeSet?.stock ?? 0))
+        expect(setMove?.note).toBe('Counted on shelf')
+        expect(setMove?.stockAfter).toBe(8)
+
+        const productAfterSet = await prisma.product.findFirst({
+            where: { tenantId: tenantAId, id: productAId },
+            select: { stock: true }
+        })
+        expect(productAfterSet?.stock).toBe(Math.max(8 - (beforeSet?.reserved ?? 0) - (beforeSet?.safetyStock ?? 0), 0))
+
+        const adjustRes = await request(app)
+            .post(`/api/admin/inventory/variants/${variantAId}/stock/adjust`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ delta: -2, reason: 'damage', note: 'Broken item' })
+
+        expect(adjustRes.status).toBe(200)
+        expect(adjustRes.body?.stock).toBe(6) // 8 - 2
+
+        const adjustMove = await prisma.inventoryMovement.findFirst({
+            where: { tenantId: tenantAId, variantId: variantAId, type: 'MANUAL_ADJUSTMENT', createdByUserId: userAId },
+            orderBy: { createdAt: 'desc' }
+        })
+        expect(adjustMove?.delta).toBe(-2)
+        expect(adjustMove?.note).toBe('Broken item')
+        expect(adjustMove?.stockAfter).toBe(6)
+
+        const productAfterAdjust = await prisma.product.findFirst({
+            where: { tenantId: tenantAId, id: productAId },
+            select: { stock: true }
+        })
+        expect(productAfterAdjust?.stock).toBe(Math.max(6 - (beforeSet?.reserved ?? 0) - (beforeSet?.safetyStock ?? 0), 0))
+    })
+
+    it('blocks stock set below reserved + safetyStock', async () => {
+        const current = await prisma.productVariant.findFirst({
+            where: { tenantId: tenantAId, id: variantAId },
+            select: { reserved: true, safetyStock: true }
+        })
+        expect(current).toBeTruthy()
+        const minAllowed = (current?.reserved ?? 0) + (current?.safetyStock ?? 0)
+        expect(minAllowed).toBeGreaterThan(0)
+
+        const res = await request(app)
+            .post(`/api/admin/inventory/variants/${variantAId}/stock/set`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ stock: Math.max(minAllowed - 1, 0) })
+
+        expect(res.status).toBe(400)
+        expect(String(res.body?.statusMessage || '')).toMatch(/reserved \+ safetyStock/i)
+    })
+
     it('blocks cross-tenant inventory access by scoping queries to tenantId', async () => {
         const listA = await request(app)
             .get('/api/admin/inventory/variants')
@@ -297,5 +372,13 @@ describe('Inventory management + movements', () => {
 
         // HostB resolves tenantB, tokenB ok, but variantA belongs to tenantA => 404
         expect(movesAFromB.status).toBe(404)
+
+        const adjustCrossTenant = await request(app)
+            .post(`/api/admin/inventory/variants/${variantBId}/stock/adjust`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ delta: 1 })
+
+        expect(adjustCrossTenant.status).toBe(404)
     })
 })

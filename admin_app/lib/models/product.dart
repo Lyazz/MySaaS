@@ -223,8 +223,11 @@ class ProductVariant {
   final String id;
   final double price;
   final double? compareAtPrice;
+  final double cost;
   final int stock;
-  final String? sku;
+  final String sku;
+  final bool skuLocked;
+  final String? barcode;
   final bool isActive;
   final bool trackInventory;
   final int safetyStock;
@@ -236,8 +239,11 @@ class ProductVariant {
     required this.id,
     required this.price,
     this.compareAtPrice,
+    required this.cost,
     required this.stock,
-    this.sku,
+    required this.sku,
+    required this.skuLocked,
+    this.barcode,
     required this.isActive,
     required this.trackInventory,
     required this.safetyStock,
@@ -253,8 +259,11 @@ class ProductVariant {
       compareAtPrice: json['compareAtPrice'] != null
           ? _parseCheckDouble(json['compareAtPrice'])
           : null,
+      cost: _parseCheckDouble(json['cost']),
       stock: _parseCheckInt(json['stock']),
-      sku: json['sku'],
+      sku: json['sku']?.toString() ?? '',
+      skuLocked: json['skuLocked'] ?? false,
+      barcode: json['barcode']?.toString(),
       isActive: json['isActive'] ?? true,
       trackInventory: json['trackInventory'] ?? true,
       safetyStock: _parseCheckInt(json['safetyStock']),
@@ -262,8 +271,9 @@ class ProductVariant {
       images:
           (json['images'] as List?)?.map((e) {
             if (e is String) return e;
-            if (e is Map)
+            if (e is Map) {
               return e['url'] as String; // Handle nested image object if any
+            }
             return '';
           }).toList() ??
           [], // Simple list of strings for now
@@ -330,8 +340,11 @@ class ProductVariant {
         id: variant.id,
         price: variant.price,
         compareAtPrice: variant.compareAtPrice,
+        cost: variant.cost,
         stock: variant.stock,
         sku: variant.sku,
+        skuLocked: variant.skuLocked,
+        barcode: variant.barcode,
         isActive: variant.isActive,
         trackInventory: variant.trackInventory,
         safetyStock: variant.safetyStock,

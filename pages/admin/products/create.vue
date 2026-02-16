@@ -138,7 +138,7 @@
       </BaseSelect>
 
       <!-- Product Images -->
-      <ImageUploader v-model="productImages" />
+      <ProductImagesUploader v-model="productImages" />
 
       <!-- Active Status -->
       <div class="flex items-center">
@@ -188,7 +188,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import ImageUploader from '~/components/admin/ImageUploader.vue'
+import ProductImagesUploader from '~/components/admin/ProductImagesUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
@@ -282,13 +282,33 @@ async function handleSubmit() {
       payload.categoryId = form.value.categoryId
     }
 
-    await $fetch('/api/admin/products', {
+    const created = await $fetch<any>('/api/admin/products', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${authStore.token}`
       },
       body: payload
     })
+
+    if (created?.id && productImages.value.length > 0) {
+      try {
+        await $fetch(`/api/admin/products/${created.id}/images/sync`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${authStore.token}` },
+          body: {
+            images: productImages.value.map(img => ({
+              id: img.id,
+              url: img.url,
+              alt: img.alt || null,
+              position: img.position,
+              isMain: img.isMain
+            }))
+          }
+        })
+      } catch (imgError) {
+        console.error('Failed to sync product images:', imgError)
+      }
+    }
 
     // Redirect to products list
     router.push('/admin/products')

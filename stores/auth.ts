@@ -6,6 +6,7 @@ interface User {
     role: string
     isSuperAdmin?: boolean
     tenantId: string
+    staffRoleId?: string | null
     tenant?: {
         id: string
         name: string
@@ -13,9 +14,16 @@ interface User {
     }
 }
 
+interface StaffRoleInfo {
+    id: string
+    name: string
+}
+
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User | null>(null)
     const token = useCookie<string | null>('auth_token')
+    const staffRole = ref<StaffRoleInfo | null>(null)
+    const staffPermissions = ref<string[] | null>(null)
 
     const isAuthenticated = computed(() => !!token.value)
 
@@ -32,6 +40,8 @@ export const useAuthStore = defineStore('auth', () => {
             if (data && data.success) {
                 token.value = data.token
                 user.value = data.user
+                staffRole.value = data.staffRole ?? null
+                staffPermissions.value = data.staffPermissions ?? null
                 console.log('[Auth Store] Token set, returning true')
                 return true
             }
@@ -45,20 +55,26 @@ export const useAuthStore = defineStore('auth', () => {
     function logout() {
         token.value = null
         user.value = null
+        staffRole.value = null
+        staffPermissions.value = null
         navigateTo('/login')
     }
 
-    function setAuth(newToken: string, newUser: User, tenant?: any) {
+    function setAuth(newToken: string, newUser: User, tenant?: any, nextStaffRole?: StaffRoleInfo | null, nextStaffPermissions?: string[] | null) {
         token.value = newToken
         user.value = {
             ...newUser,
             tenant
         }
+        staffRole.value = nextStaffRole ?? null
+        staffPermissions.value = nextStaffPermissions ?? null
     }
 
     return {
         user,
         token,
+        staffRole,
+        staffPermissions,
         isAuthenticated,
         login,
         logout,

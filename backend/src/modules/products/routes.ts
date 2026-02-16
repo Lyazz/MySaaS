@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import multer from 'multer'
-import { requireTenantAdmin } from '../../middleware/rbac.middleware'
+import { requireTenantMember } from '../../middleware/rbac.middleware'
+import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
 import { ProductsController } from './products.controller'
 import { BundleDealsController } from './bundle-deals.controller'
 import imagesRoutes from './images.routes'
@@ -24,8 +25,9 @@ const csvUpload = multer({
     }
 })
 
-// Apply admin auth to all routes in this router
-router.use(requireTenantAdmin)
+// Auth + tenant context for this router (staff permissions enforced via middleware)
+router.use(requireTenantMember)
+router.use(requireStaffCrud('products'))
 
 // Bulk ops (must be defined before "/:id" routes)
 router.get('/export.csv', bulkController.exportCsv.bind(bulkController))

@@ -21,6 +21,100 @@
   }
 }
 
+@layer components {
+  .ui-card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .ui-card-header {
+    @apply border-b border-slate-200 p-4;
+  }
+
+  .ui-card-body {
+    @apply p-4;
+  }
+
+  .ui-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .ui-btn--sm {
+    @apply px-3 py-2 text-xs;
+  }
+
+  .ui-btn--md {
+    @apply px-4 py-2 text-sm;
+  }
+
+  .ui-btn--primary {
+    @apply bg-teal-600 text-white shadow-sm hover:opacity-95;
+  }
+
+  .ui-btn--secondary {
+    @apply border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50;
+  }
+
+  .ui-btn--danger {
+    @apply border border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100;
+  }
+
+  .ui-btn--success {
+    @apply border border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm hover:bg-emerald-100;
+  }
+
+  .ui-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+
+  .ui-badge--slate {
+    @apply bg-slate-100 text-slate-700;
+  }
+
+  .ui-badge--emerald {
+    @apply bg-emerald-50 text-emerald-700;
+  }
+
+  .ui-badge--indigo {
+    @apply bg-indigo-50 text-indigo-700;
+  }
+
+  .ui-badge--teal {
+    @apply bg-teal-50 text-teal-700;
+  }
+
+  .ui-badge--amber {
+    @apply bg-amber-50 text-amber-700;
+  }
+
+  .ui-badge--red {
+    @apply bg-red-50 text-red-700;
+  }
+
+  .ui-table {
+    @apply min-w-full divide-y divide-slate-200 text-sm;
+  }
+
+  .ui-thead {
+    @apply bg-slate-50 text-slate-600;
+  }
+
+  .ui-tbody {
+    @apply divide-y divide-slate-200 bg-white;
+  }
+
+  .ui-th {
+    @apply px-4 py-3 text-left font-medium;
+  }
+
+  .ui-td {
+    @apply px-4 py-3;
+  }
+
+  .ui-tr {
+    @apply hover:bg-slate-50/60;
+  }
+}
+
 @layer utilities {
   .bg-brand {
     background-color: var(--brand);

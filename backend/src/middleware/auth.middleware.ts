@@ -21,11 +21,15 @@ export const expressAuthMiddleware = async (req: Request, res: Response, next: N
     try {
         const decoded = verifyAccessToken(token) as any
 
-        if (decoded && decoded.userId) {
+        if (decoded && typeof decoded === 'object' && decoded.userId) {
             // Optional: Fetch full user if needed, or just trust token payload for speed
             // For strict correctness, check if user still exists/active
-            const user = await prisma.user.findUnique({
-                where: { id: decoded.userId }
+            const user = await prisma.user.findFirst({
+                where: {
+                    id: decoded.userId,
+                    ...(decoded.tenantId ? { tenantId: decoded.tenantId } : {}),
+                    isActive: true
+                }
             })
 
             if (user) {

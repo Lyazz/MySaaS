@@ -85,50 +85,50 @@
           v-else
           class="overflow-x-auto"
         >
-          <table class="w-full">
-            <thead class="bg-slate-50 border-b border-slate-200">
+          <table class="ui-table">
+            <thead class="ui-thead border-b border-slate-200">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                <th class="ui-th">
                   {{ t('superAdmin.auditLogs.table.timestamp') }}
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                <th class="ui-th">
                   {{ t('superAdmin.auditLogs.table.action') }}
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                <th class="ui-th">
                   {{ t('superAdmin.auditLogs.table.details') }}
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                <th class="ui-th">
                   {{ t('superAdmin.auditLogs.table.userId') }}
                 </th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                <th class="ui-th">
                   {{ t('superAdmin.auditLogs.table.target') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="ui-tbody">
               <tr
                 v-for="log in paginatedLogs"
                 :key="log.id"
-                class="hover:bg-slate-50 transition-colors"
+                class="ui-tr transition-colors"
                 >
-                <td class="px-6 py-4 text-gray-600 text-sm whitespace-nowrap">
+                <td class="ui-td text-slate-600 text-sm whitespace-nowrap">
                   {{ formatDateTime(log.createdAt) }}
                 </td>
-                <td class="px-6 py-4">
+                <td class="ui-td">
                   <span
-                    class="px-2 py-1 rounded-full text-xs font-medium"
+                    class="ui-badge"
                     :class="getActionBadgeClass(log.action)"
                   >
                     {{ getActionIcon(log.action) }} {{ getActionLabel(log.action) }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-gray-600 text-sm">
+                <td class="ui-td text-slate-600 text-sm">
                   {{ log.details || '-' }}
                 </td>
-                <td class="px-6 py-4 text-gray-500 font-mono text-xs">
+                <td class="ui-td text-slate-500 font-mono text-xs">
                   {{ log.userId ? log.userId.substring(0, 8) + '...' : '-' }}
                 </td>
-                <td class="px-6 py-4 text-gray-500 font-mono text-xs">
+                <td class="ui-td text-slate-500 font-mono text-xs">
                   {{ log.targetId ? log.targetId.substring(0, 8) + '...' : '-' }}
                 </td>
               </tr>
@@ -263,14 +263,14 @@ const getActionLabel = (action: string) => {
 
 const getActionBadgeClass = (action: string) => {
   const classes: Record<string, string> = {
-    'CREATE_TENANT': 'bg-green-500/20 border border-green-500/50 text-green-300',
-    'UPDATE_TENANT': 'bg-blue-500/20 border border-blue-500/50 text-blue-300',
-    'DELETE_TENANT': 'bg-red-500/20 border border-red-500/50 text-red-300',
-    'SUSPEND_TENANT': 'bg-orange-500/20 border border-orange-500/50 text-orange-300',
-    'UNSUSPEND_TENANT': 'bg-green-500/20 border border-green-500/50 text-green-300',
-    'IMPERSONATE_USER': 'bg-teal-500/20 border border-teal-500/50 text-teal-300'
+    'CREATE_TENANT': 'ui-badge--emerald',
+    'UPDATE_TENANT': 'ui-badge--indigo',
+    'DELETE_TENANT': 'ui-badge--red',
+    'SUSPEND_TENANT': 'ui-badge--amber',
+    'UNSUSPEND_TENANT': 'ui-badge--emerald',
+    'IMPERSONATE_USER': 'ui-badge--teal'
   }
-  return classes[action] || 'bg-gray-500/20 border border-gray-500/50 text-gray-300'
+  return classes[action] || 'ui-badge--slate'
 }
 
 const formatDateTime = (date: string) => {

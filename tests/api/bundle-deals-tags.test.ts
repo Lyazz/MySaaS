@@ -49,6 +49,7 @@ describe('Product bundle deal tags', () => {
             data: {
                 tenantId,
                 productId,
+                sku: `BUNDLE-TAGS-${Date.now()}`,
                 price: 1000,
                 stock: 100,
                 isActive: true
@@ -98,4 +99,3 @@ describe('Product bundle deal tags', () => {
         expect(String(res.body?.statusMessage || '')).toMatch(/tag/i)
     })
 })
-

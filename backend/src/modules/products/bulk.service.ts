@@ -2,6 +2,7 @@ import prisma from '../../lib/prisma'
 import { parseCsv, stringifyCsv } from '../../lib/csv'
 import { InventoryService } from '../inventory/inventory.service'
 import { ProductsService } from './products.service'
+import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 
 type ImportSummary = {
     created: number
@@ -244,6 +245,7 @@ export class BulkProductsService {
                                 data: {
                                     tenantId,
                                     productId: existing.id,
+                                    sku: suggestSkuFromProduct(existing.slug, ''),
                                     price,
                                     stock: 0,
                                     isActive: true,
@@ -425,10 +427,12 @@ export class BulkProductsService {
             const hasOptions = (product.options ?? []).length > 0
 
             if (!hasOptions) {
+                const sku = suggestSkuFromProduct(slug, '')
                 await tx.productVariant.create({
                     data: {
                         tenantId,
                         productId: createdProduct.id,
+                        sku,
                         price: product.price,
                         stock: copyInventory ? product.stock : 0,
                         reserved: 0,
@@ -447,6 +451,12 @@ export class BulkProductsService {
                         }
                         return { optionValueId: mapped }
                     })
+                    const signature = optionValuesToCreate
+                        .map((ov) => ov.optionValueId)
+                        .slice()
+                        .sort()
+                        .join('|')
+                    const sku = suggestSkuFromProduct(slug, signature)
 
                     const imagesToCreate = (v.images ?? [])
                         .map((img) => {
@@ -460,7 +470,7 @@ export class BulkProductsService {
                         data: {
                             tenantId,
                             productId: createdProduct.id,
-                            sku: null,
+                            sku,
                             price: v.price,
                             compareAtPrice: v.compareAtPrice,
                             cost: v.cost,

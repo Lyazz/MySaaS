@@ -1,11 +1,13 @@
 import { Router } from 'express'
-import { requireTenantAdmin } from '../../middleware/rbac.middleware'
+import { requireTenantMember } from '../../middleware/rbac.middleware'
+import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
 import { BillingController } from './billing.controller'
 
 const router = Router()
 const controller = new BillingController()
 
-router.use(requireTenantAdmin)
+router.use(requireTenantMember)
+router.use(requireStaffCrud('billing'))
 
 router.get('/plans', controller.listPlans.bind(controller))
 router.get('/subscription', controller.getSubscription.bind(controller))

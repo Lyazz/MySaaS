@@ -1,11 +1,13 @@
 import { Router } from 'express'
-import { requireTenantAdmin } from '../../middleware/rbac.middleware'
+import { requireTenantMember } from '../../middleware/rbac.middleware'
+import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
 import { CashController } from './cash.controller'
 
 const router = Router()
 const controller = new CashController()
 
-router.use(requireTenantAdmin)
+router.use(requireTenantMember)
+router.use(requireStaffCrud('cash'))
 
 router.get('/cashboxes', controller.listCashboxes.bind(controller))
 router.post('/cashboxes', controller.createCashbox.bind(controller))

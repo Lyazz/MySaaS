@@ -684,7 +684,11 @@
       "update": "Update",
       "updating": "Updating…",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "fullAccess": "Full Access",
+      "viewOnly": "View Only"
     },
     "confirmModal": {
       "defaults": {
@@ -998,17 +1002,22 @@
       "columns": {
         "variant": "Variant",
         "price": "Price",
+        "cost": "Cost",
         "track": "Track",
         "onHand": "On-hand",
         "reserved": "Reserved",
         "safety": "Safety",
         "available": "Available",
         "sku": "SKU",
+        "barcode": "Barcode",
         "active": "Active",
         "images": "Images"
       },
       "actions": {
         "manageImages": "Manage ({count})",
+        "suggestSku": "Suggest",
+        "lockSku": "Lock",
+        "skuLocked": "Locked",
         "movements": "Movements"
       },
       "defaultVariant": "Default",
@@ -1040,6 +1049,10 @@
       "errors": {
         "updateVariantFailed": "Failed to update variant",
         "updateInventoryFailed": "Failed to update inventory",
+        "updateStockFailed": "Failed to update stock",
+        "lockSkuFailed": "Failed to lock SKU",
+        "suggestSkuFailed": "Failed to suggest SKU",
+        "suggestSkuUnavailable": "Suggested SKU is not available",
         "saveImagesFailed": "Failed to save images"
       }
     },
@@ -1185,6 +1198,8 @@
     },
     "nav": {
       "overview": "Overview",
+      "marketing": "Marketing",
+      "landingPage": "Landing Pages",
       "catalog": "Catalog",
       "purchasing": "Purchasing",
       "sales": "Sales",
@@ -1209,7 +1224,13 @@
       "contactInfo": "Contact Info",
       "functional": "Functional",
       "apps": "Apps",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "users": "Users"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "staff": "Staff"
     },
     "orderStatus": {
       "pending": "Pending",
@@ -1320,6 +1341,56 @@
       "connect": "Connect"
     },
     "pages": {
+      "pos": {
+        "catalog": {
+          "title": "Point of Sale",
+          "searchPlaceholder": "Search products...",
+          "allProducts": "All Products",
+          "noProducts": "No products found",
+          "clearFilter": "Clear filter",
+          "back": "Back",
+          "backToCategories": "Back to categories",
+          "actions": {
+            "discount": "Discount",
+            "reprint": "Reprint Last",
+            "reprintLastOrder": "Reprint Last Order",
+            "quickCharge": "Quick Charge",
+            "sort": "Sort",
+            "columns": "Columns"
+          },
+          "badges": {
+            "outOfStock": "Out of Stock",
+            "lowStock": "Low Stock: {count}"
+          }
+        },
+        "cart": {
+          "itemsCount": "{count} items",
+          "empty": "Cart is empty",
+          "total": "Total",
+          "actions": {
+            "viewCart": "View Cart",
+            "clearCart": "Clear Cart",
+            "paymentOptions": "Payment Options",
+            "payment": "Payment",
+            "checkout": "Checkout"
+          }
+        },
+        "actions": {
+          "viewCart": "View Cart",
+          "imageMode": "Image Mode"
+        },
+        "sessions": {
+          "order": "Order {index}"
+        },
+        "customer": {
+          "addClient": "Add Client"
+        },
+        "variants": {
+          "loading": "Loading variants...",
+          "inStockCount": "{count} in stock",
+          "inStock": "In stock"
+        }
+      },
       "cash": {
         "title": "Cash Management",
         "subtitle": "Manage your cash funds, sessions, and transactions.",
@@ -1534,6 +1605,91 @@
         "title": "Apps & Integrations",
         "subtitle": "Connect your store with third-party tools and services."
       },
+      "users": {
+        "subtitle": "Manage tenant users and their access.",
+        "searchPlaceholder": "Search by email or ID…",
+        "includeInactive": "Show inactive users",
+        "tabs": {
+          "users": "Users",
+          "roles": "Roles (staff)"
+        },
+        "empty": "No users found.",
+        "columns": {
+          "email": "Email",
+          "role": "Role",
+          "staffRole": "Staff role",
+          "status": "Status",
+          "createdAt": "Created"
+        },
+        "actions": {
+          "add": "Add user",
+          "deactivate": "Deactivate",
+          "activate": "Activate"
+        },
+        "create": {
+          "title": "Create user"
+        },
+        "edit": {
+          "title": "Edit user"
+        },
+        "fields": {
+          "email": "Email",
+          "role": "Role",
+          "staffRole": "Staff role",
+          "password": "Password",
+          "newPassword": "New password",
+          "confirmPassword": "Confirm password",
+          "isActive": "Active"
+        },
+        "hints": {
+          "passwordRequired": "Minimum 8 characters.",
+          "passwordOptional": "Leave empty to keep the current password.",
+          "deactivateHint": "Disable access without deleting data."
+        },
+        "validation": {
+          "invalidEmail": "Invalid email.",
+          "invalidRole": "Invalid role.",
+          "staffRoleRequired": "Select a staff role.",
+          "staffRoleInvalid": "Invalid staff role.",
+          "passwordTooShort": "Minimum 8 characters.",
+          "confirmPasswordRequired": "Password confirmation is required.",
+          "passwordsDoNotMatch": "Passwords do not match."
+        },
+        "roles": {
+          "subtitle": "Create roles to limit staff users access (CRUD per module).",
+          "empty": "No staff roles.",
+          "unassigned": "Unassigned",
+          "noPermissions": "No permissions",
+          "createTitle": "Create staff role",
+          "editTitle": "Edit staff role",
+          "columns": {
+            "name": "Name",
+            "permissions": "Permissions"
+          },
+          "actions": {
+            "addRole": "Add role",
+            "create": "Create",
+            "read": "Read",
+            "update": "Update",
+            "delete": "Delete"
+          },
+          "fields": {
+            "name": "Name",
+            "permissions": "Permissions"
+          },
+          "resources": {
+            "variants": "Variants",
+            "metaPixels": "Meta pixels"
+          },
+          "validation": {
+            "invalidName": "Invalid name (min 2 characters).",
+            "permissionsRequired": "Select at least one permission."
+          }
+        },
+        "errors": {
+          "title": "Could not complete the operation."
+        }
+      },
       "dashboard": {
         "title": "Dashboard",
         "welcomeBack": "Welcome back, {tenant}",
@@ -1715,7 +1871,7 @@
           "tabs": {
             "general": "General",
             "description": "Landing page description",
-            "variants": "Variants",
+            "variants": "Variants / Stock",
             "bundles": "Bundles"
           },
           "links": {
@@ -1731,7 +1887,9 @@
             "title": "Landing page description"
           },
           "variantsTab": {
-            "title": "Options & Variants"
+            "title": "Options / Variants / Stock",
+            "showArchived": "Show archived variants",
+            "archivedCount": "Archived: {count}"
           },
           "bundlesTab": {
             "title": "Bundle deals",
@@ -2227,6 +2385,10 @@
               "product": "Product",
               "ordered": "Ordered",
               "unitCost": "Unit cost",
+              "salePrice": "Sell price",
+              "currentCost": "Current cost",
+              "newCostPreview": "New cost",
+              "currentSalePrice": "Current sell price",
               "received": "Received",
               "receiveNow": "Receive now",
               "total": "Total",
@@ -2234,9 +2396,13 @@
               "receiveStock": "Receive stock",
               "removeItem": "Remove item",
               "totalOrderValue": "Total order value",
-              "salePriceMode": {
-                "replace": "Update sell price",
+              "costMode": {
+                "replace": "Replace cost",
                 "weighted": "Avg cost"
+              },
+              "salePriceMode": {
+                "replace": "Replace sell price",
+                "weighted": "Weighted avg"
               }
             }
           },

@@ -1,11 +1,13 @@
 import { Router } from 'express'
-import { requireTenantAdmin } from '../../middleware/rbac.middleware'
+import { requireTenantMember } from '../../middleware/rbac.middleware'
+import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
 import { PurchasesController } from './purchases.controller'
 
 const router = Router()
 const controller = new PurchasesController()
 
-router.use(requireTenantAdmin)
+router.use(requireTenantMember)
+router.use(requireStaffCrud('purchases'))
 
 router.get('/', controller.list.bind(controller))
 router.post('/', controller.create.bind(controller))
@@ -17,4 +19,3 @@ router.post('/:id/receive', controller.receive.bind(controller))
 router.delete('/:id', controller.delete.bind(controller))
 
 export default router
-

@@ -35,6 +35,14 @@ const normalizeSalePriceMode = (value: unknown): SalePriceMode => {
     return 'replace'
 }
 
+type CostMode = 'replace' | 'weighted'
+
+const normalizeCostMode = (value: unknown): CostMode => {
+    const v = typeof value === 'string' ? value.trim().toLowerCase() : ''
+    if (v === 'weighted') return 'weighted'
+    return 'replace'
+}
+
 const toDecimal = (value: string) => new Prisma.Decimal(value)
 
 export class PurchasesService {
@@ -124,16 +132,25 @@ export class PurchasesService {
 
         const salePrice = toMoneyString(input?.salePrice)
 
-        return prisma.purchaseOrderItem.create({
-            data: {
-                tenantId,
-                purchaseOrderId,
-                variantId,
-                quantityOrdered,
-                unitCost,
-                salePrice
-            },
-            include: { variant: true }
+        return prisma.$transaction(async (tx) => {
+            const created = await tx.purchaseOrderItem.create({
+                data: {
+                    tenantId,
+                    purchaseOrderId,
+                    variantId,
+                    quantityOrdered,
+                    unitCost,
+                    salePrice
+                },
+                include: { variant: true }
+            })
+
+            await tx.productVariant.updateMany({
+                where: { tenantId, id: variantId },
+                data: { skuLocked: true }
+            })
+
+            return created
         })
     }
 
@@ -143,6 +160,7 @@ export class PurchasesService {
         input: any,
         actor?: { userId?: string | null }
     ) {
+        const costMode = normalizeCostMode(input?.costMode)
         const salePriceMode = normalizeSalePriceMode(input?.salePriceMode)
 
         const order = await prisma.purchaseOrder.findFirst({
@@ -197,9 +215,32 @@ export class PurchasesService {
                 // Policy A: receiving always increments variant.stock (even if trackInventory=false).
                 const variantBefore = await tx.productVariant.findFirst({
                     where: { tenantId, id: item.variantId },
-                    select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, price: true }
+                    select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, price: true, cost: true }
                 })
                 if (!variantBefore) throw new PurchaseValidationError(400, 'Variant not found')
+
+                const costUpdate = (() => {
+                    if (costMode === 'replace') {
+                        return { cost: newUnitCost, noteSuffix: `; costMode:replace; newCost:${newUnitCost}` }
+                    }
+
+                    const oldQty = variantBefore.stock
+                    const newQty = qty
+                    const oldCost = Prisma.Decimal.isDecimal(variantBefore.cost)
+                        ? (variantBefore.cost as any as Prisma.Decimal)
+                        : toDecimal(String(variantBefore.cost))
+                    const candidateNewCost = toDecimal(newUnitCost)
+                    const denom = oldQty + newQty
+                    const weighted =
+                        denom <= 0
+                            ? candidateNewCost
+                            : oldCost.mul(oldQty).add(candidateNewCost.mul(newQty)).div(denom).toDecimalPlaces(2)
+
+                    return {
+                        cost: weighted.toString(),
+                        noteSuffix: `; costMode:weighted; oldCost:${oldCost.toString()}; oldQty:${oldQty}; newCost:${newUnitCost}; newQty:${newQty}; result:${weighted.toString()}`
+                    }
+                })()
 
                 const priceUpdate = (() => {
                     if (!newSalePrice) return { price: undefined as string | undefined, noteSuffix: '' }
@@ -225,11 +266,11 @@ export class PurchasesService {
                     }
                 })()
 
-                await tx.productVariant.update({
-                    where: { id: item.variantId },
+                await tx.productVariant.updateMany({
+                    where: { tenantId, id: item.variantId },
                     data: {
                         stock: { increment: qty },
-                        cost: newUnitCost,
+                        cost: costUpdate.cost,
                         price: priceUpdate.price
                     }
                 })
@@ -248,7 +289,7 @@ export class PurchasesService {
                         reservedDelta: 0,
                         safetyStockDelta: 0,
                         reason: 'purchase',
-                        note: (`purchaseOrder:${purchaseOrderId}` + (priceUpdate.noteSuffix || '')).slice(0, 500),
+                        note: (`purchaseOrder:${purchaseOrderId}` + (costUpdate.noteSuffix || '') + (priceUpdate.noteSuffix || '')).slice(0, 500),
                         stockAfter: variantAfter?.stock ?? null,
                         reservedAfter: variantAfter?.reserved ?? null,
                         safetyStockAfter: variantAfter?.safetyStock ?? null,
@@ -329,6 +370,10 @@ export class PurchasesService {
         if (input.unitCost !== undefined) {
             const cost = toMoneyString(input.unitCost)
             if (cost !== null) data.unitCost = cost
+        }
+        if (input.salePrice !== undefined) {
+            const price = toMoneyString(input.salePrice)
+            data.salePrice = price
         }
 
         return prisma.purchaseOrderItem.update({

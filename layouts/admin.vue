@@ -50,29 +50,29 @@
 
       <!-- Navigation -->
       <nav class="flex-1 py-6 px-3 overflow-y-auto custom-scrollbar">
-        <div v-for="(group, index) in navGroups" :key="index" class="mb-6 last:mb-0">
+        <div v-for="entry in visibleNavGroups" :key="entry.originalIndex" class="mb-6 last:mb-0">
           <button 
-            v-if="group.titleKey" 
-            @click="toggleGroup(index)"
+            v-if="entry.group.titleKey" 
+            @click="toggleGroup(entry.originalIndex)"
             class="w-full flex items-center justify-between px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider transition-opacity duration-300 hover:text-slate-300 group/header"
             :class="sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'"
           >
-            <span>{{ t(group.titleKey) }}</span>
+            <span>{{ t(entry.group.titleKey) }}</span>
             <Icon 
               name="lucide:chevron-down" 
               class="w-3 h-3 transition-transform duration-200"
-              :class="group.collapsed ? '-rotate-90' : 'rotate-0'"
+              :class="entry.group.collapsed ? '-rotate-90' : 'rotate-0'"
             />
           </button>
           
           <div 
             class="space-y-1 transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden"
             :class="[
-              (!group.collapsed || !sidebarOpen) ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+              (!entry.group.collapsed || !sidebarOpen) ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
             ]"
           >
             <NuxtLink
-              v-for="item in group.items"
+              v-for="item in entry.items"
               :key="item.path"
               :to="item.path"
               class="group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden h-11"
@@ -148,7 +148,7 @@
           <div class="flex items-center gap-4">
             <a
               :href="storefrontUrl"
-              class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-teal-600 bg-slate-50 rounded-lg transition-all border border-slate-200 hover:border-teal-600"
+              class="hidden sm:flex ui-btn ui-btn--secondary ui-btn--md"
             >
               <Icon name="lucide:external-link" class="w-4 h-4" />
               <span>{{ t('admin.actions.viewStore') }}</span>
@@ -160,7 +160,7 @@
 
             <button 
               @click="handleLogout" 
-              class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+              class="ui-btn ui-btn--danger ui-btn--md"
             >
               <Icon name="lucide:log-out" class="w-4 h-4" />
               <span>{{ t('admin.actions.logout') }}</span>
@@ -253,8 +253,59 @@ const pageTitle = computed(() => {
   return metaTitle || t('admin.layout.defaultTitle')
 })
 
-// Navigation Groups
-const navGroups = ref([
+type AdminRole = 'owner' | 'admin' | 'staff'
+type NavAccess = 'admin' | 'member'
+type NavItem = { path: string; labelKey: string; icon: string; access?: NavAccess }
+type NavGroup = { titleKey?: string; collapsed: boolean; items: NavItem[] }
+
+const currentRole = computed<AdminRole>(() => {
+  const role = authStore.user?.role
+  if (role === 'owner' || role === 'admin' || role === 'staff') return role
+  return 'staff'
+})
+
+const staffPerms = computed<string[]>(() => authStore.staffPermissions || [])
+
+const pathToResource = (path: string): string | null => {
+  if (path === '/admin' || path.startsWith('/admin/dashboard')) return 'dashboard'
+  if (path.startsWith('/admin/products')) return 'products'
+  if (path.startsWith('/admin/inventory')) return 'inventory'
+  if (path.startsWith('/admin/categories')) return 'categories'
+  if (path.startsWith('/admin/suppliers')) return 'suppliers'
+  if (path.startsWith('/admin/purchases')) return 'purchases'
+  if (path.startsWith('/admin/orders')) return 'orders'
+  if (path.startsWith('/admin/sales')) return 'sales'
+  if (path.startsWith('/admin/pos')) return 'pos'
+  if (path.startsWith('/admin/customers')) return 'customers'
+  if (path.startsWith('/admin/delivery')) return 'delivery'
+  if (path.startsWith('/admin/cash')) return 'cash'
+  if (path.startsWith('/admin/billing')) return 'billing'
+  if (path.startsWith('/admin/settings/appearance')) return 'storeSettings'
+  if (path.startsWith('/admin/settings/homepage')) return 'homepageSettings'
+  if (path.startsWith('/admin/settings/contact')) return 'contactInfos'
+  if (path.startsWith('/admin/settings/functional')) return 'storeSettings'
+  if (path.startsWith('/admin/integrations')) return 'integrations'
+  if (path.startsWith('/admin/meta-pixels')) return 'metaPixels'
+  if (path.startsWith('/admin/users')) return 'users'
+  return null
+}
+
+const hasAccess = (item: NavItem, role: AdminRole): boolean => {
+  if (role === 'staff') {
+    if (staffPerms.value.length === 0) {
+      return item.path.startsWith('/admin/orders')
+    }
+    const resource = pathToResource(item.path)
+    if (!resource) return false
+    return staffPerms.value.includes(`${resource}:read`)
+  }
+
+  if (item.access === 'member') return true
+  return role === 'owner' || role === 'admin'
+}
+
+// Navigation Groups (base)
+const navGroups = ref<NavGroup[]>([
   {
     titleKey: 'admin.nav.overview',
     collapsed: false,
@@ -262,28 +313,45 @@ const navGroups = ref([
       {
         path: '/admin',
         labelKey: 'admin.nav.dashboard',
-        icon: 'lucide:layout-dashboard'
+        icon: 'lucide:layout-dashboard',
+        access: 'admin'
+      }
+    ]
+  },
+  {
+    titleKey: 'admin.nav.marketing',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/marketing/landing-page/new',
+        labelKey: 'admin.nav.landingPage',
+        icon: 'lucide:megaphone',
+        access: 'admin'
       }
     ]
   },
   {
     titleKey: 'admin.nav.catalog',
+
     collapsed: false,
     items: [
       {
         path: '/admin/products',
         labelKey: 'admin.nav.products',
-        icon: 'lucide:package'
+        icon: 'lucide:package',
+        access: 'admin'
       },
       {
         path: '/admin/inventory',
         labelKey: 'admin.nav.inventory',
-        icon: 'lucide:warehouse'
+        icon: 'lucide:warehouse',
+        access: 'admin'
       },
       {
         path: '/admin/categories',
         labelKey: 'admin.nav.categories',
-        icon: 'lucide:tags'
+        icon: 'lucide:tags',
+        access: 'admin'
       }
     ]
   },
@@ -294,12 +362,14 @@ const navGroups = ref([
       {
         path: '/admin/suppliers',
         labelKey: 'admin.nav.suppliers',
-        icon: 'lucide:truck'
+        icon: 'lucide:truck',
+        access: 'admin'
       },
       {
         path: '/admin/purchases',
         labelKey: 'admin.nav.purchases',
-        icon: 'lucide:shopping-cart'
+        icon: 'lucide:shopping-cart',
+        access: 'admin'
       }
     ]
   },
@@ -310,22 +380,26 @@ const navGroups = ref([
       {
         path: '/admin/orders',
         labelKey: 'admin.nav.orders',
-        icon: 'lucide:handbag'
+        icon: 'lucide:handbag',
+        access: 'member'
       },
       {
         path: '/admin/sales',
         labelKey: 'admin.nav.salesItem',
-        icon: 'lucide:badge-dollar-sign'
+        icon: 'lucide:badge-dollar-sign',
+        access: 'admin'
       },
       {
         path: '/admin/pos',
         labelKey: 'admin.nav.pos',
-        icon: 'lucide:monitor-smartphone'
+        icon: 'lucide:monitor-smartphone',
+        access: 'admin'
       },
       {
         path: '/admin/customers',
         labelKey: 'admin.nav.customers',
-        icon: 'lucide:users'
+        icon: 'lucide:users',
+        access: 'admin'
       }
     ]
   },
@@ -336,7 +410,8 @@ const navGroups = ref([
       {
         path: '/admin/delivery',
         labelKey: 'admin.nav.deliveryItem',
-        icon: 'lucide:truck'
+        icon: 'lucide:truck',
+        access: 'admin'
       }
     ]
   },
@@ -347,12 +422,14 @@ const navGroups = ref([
       {
         path: '/admin/cash',
         labelKey: 'admin.nav.cash',
-        icon: 'lucide:wallet'
+        icon: 'lucide:wallet',
+        access: 'admin'
       },
       {
         path: '/admin/billing',
         labelKey: 'admin.nav.billing',
-        icon: 'lucide:credit-card'
+        icon: 'lucide:credit-card',
+        access: 'admin'
       }
     ]
   },
@@ -364,31 +441,53 @@ const navGroups = ref([
       {
         path: '/admin/settings/appearance',
         labelKey: 'admin.nav.appearance',
-        icon: 'lucide:palette'
+        icon: 'lucide:palette',
+        access: 'admin'
       },
       {
         path: '/admin/settings/homepage',
         labelKey: 'admin.nav.homepage',
-        icon: 'lucide:home'
+        icon: 'lucide:home',
+        access: 'admin'
       },
       {
         path: '/admin/settings/contact',
         labelKey: 'admin.nav.contactInfo',
-        icon: 'lucide:phone'
+        icon: 'lucide:phone',
+        access: 'admin'
       },
       {
         path: '/admin/settings/functional',
         labelKey: 'admin.nav.functional',
-        icon: 'lucide:sliders'
+        icon: 'lucide:sliders',
+        access: 'admin'
       },
       {
         path: '/admin/integrations',
         labelKey: 'admin.nav.integrations',
-        icon: 'lucide:puzzle'
+        icon: 'lucide:puzzle',
+        access: 'admin'
+      },
+      {
+        path: '/admin/users',
+        labelKey: 'admin.nav.users',
+        icon: 'lucide:user-cog',
+        access: 'admin'
       }
     ]
   }
 ])
+
+const visibleNavGroups = computed(() => {
+  const role = currentRole.value
+  return navGroups.value
+    .map((group, originalIndex) => ({
+      group,
+      originalIndex,
+      items: group.items.filter((item) => hasAccess(item, role))
+    }))
+    .filter((entry) => entry.items.length > 0)
+})
 
 function toggleGroup(index: number) {
   navGroups.value[index].collapsed = !navGroups.value[index].collapsed

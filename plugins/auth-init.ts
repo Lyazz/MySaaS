@@ -16,10 +16,9 @@ export default defineNuxtPlugin(async () => {
     })
 
     if (res?.success && res.user) {
-      authStore.setAuth(token, res.user, res.tenant)
+      authStore.setAuth(token, res.user, res.tenant, res.staffRole ?? null, res.staffPermissions ?? null)
     }
   } catch {
     // Ignore: token might be expired/invalid; route middleware will handle redirect.
   }
 })
-

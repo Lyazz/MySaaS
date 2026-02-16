@@ -1,3 +1,5 @@
+import tailwindForms from '@tailwindcss/forms'
+
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
@@ -82,6 +84,7 @@ export default {
         },
     },
     plugins: [
+        tailwindForms,
         function ({ addUtilities, addVariant }: any) {
             addVariant('rtl', '[dir="rtl"] &')
             addVariant('ltr', '[dir="ltr"] &')

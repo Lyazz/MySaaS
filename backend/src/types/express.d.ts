@@ -6,6 +6,7 @@ declare global {
             tenant?: Tenant
             user?: User
             subscription?: TenantSubscription
+            staffPermissions?: Set<string>
         }
     }
 }

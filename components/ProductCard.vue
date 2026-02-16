@@ -76,6 +76,7 @@ interface Product {
   stock: number
   isActive: boolean
   images?: string[]
+  productImages?: { url: string; isMain?: boolean }[]
   bundleDeals?: { id?: string; bundleQty: number; bundlePrice: number | string }[]
   metaPixelIds?: string[]
 }
@@ -91,6 +92,11 @@ const storefrontContent = useStorefrontContent()
 const LOW_STOCK_THRESHOLD = 5
 
 const mainImage = computed(() => {
+  if ((props.product as any)?.productImages?.length > 0) {
+    const imgs = (props.product as any).productImages
+    const main = imgs.find((img: any) => img?.isMain)
+    return main?.url || imgs[0]?.url || null
+  }
   if (props.product.images && props.product.images.length > 0) {
     return props.product.images[0]
   }

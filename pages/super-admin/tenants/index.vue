@@ -2,11 +2,11 @@
   <NuxtLayout name="super-admin">
     <div class="space-y-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-800">
+        <h1 class="text-3xl font-bold text-slate-900">
           {{ t('superAdmin.tenants.title') }}
         </h1>
         <button
-          class="px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-medium transition-colors flex items-center space-x-2" 
+          class="ui-btn ui-btn--primary ui-btn--md"
           @click="showCreateModal = true"
         >
           <Icon name="lucide:plus" class="h-5 w-5" />
@@ -39,77 +39,74 @@
         >
           {{ t('superAdmin.tenants.empty') }}
         </div>
-        <table
-          v-else
-          class="w-full"
-        >
-          <thead class="bg-slate-50 border-b border-slate-200">
+        <table v-else class="ui-table">
+          <thead class="ui-thead border-b border-slate-200">
             <tr>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+              <th class="ui-th">
                 {{ t('superAdmin.tenants.table.name') }}
               </th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+              <th class="ui-th">
                 {{ t('superAdmin.tenants.table.slug') }}
               </th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+              <th class="ui-th">
                 {{ t('superAdmin.tenants.table.status') }}
               </th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+              <th class="ui-th">
                 {{ t('superAdmin.tenants.table.users') }}
               </th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+              <th class="ui-th">
                 {{ t('superAdmin.tenants.table.products') }}
               </th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+              <th class="ui-th">
                 {{ t('superAdmin.tenants.table.orders') }}
               </th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+              <th class="ui-th">
                 {{ t('superAdmin.tenants.table.created') }}
               </th>
-              <th class="px-6 py-4 text-right text-sm font-semibold text-gray-600">
+              <th class="ui-th text-right">
                 {{ t('superAdmin.tenants.table.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="ui-tbody">
             <tr
               v-for="tenant in filteredTenants"
               :key="tenant.id"
-              class="hover:bg-slate-50 transition-colors"
+              class="ui-tr transition-colors"
             >
-              <td class="px-6 py-4 text-gray-800 font-medium whitespace-nowrap">
+              <td class="ui-td text-slate-900 font-medium whitespace-nowrap">
                 {{ tenant.name }}
               </td>
-              <td class="px-6 py-4 text-gray-600">
+              <td class="ui-td text-slate-600">
                 <code class="px-2 py-1 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{{ tenant.slug }}</code>
               </td>
-              <td class="px-6 py-4">
+              <td class="ui-td">
                 <span
                   v-if="tenant.isSuspended" 
-                  class="px-2 py-1 bg-red-100 border border-red-200 rounded-full text-red-700 text-xs font-medium"
+                  class="ui-badge ui-badge--red"
                 >
                   {{ t('superAdmin.tenants.status.suspended') }}
                 </span>
                 <span
                   v-else 
-                  class="px-2 py-1 bg-green-100 border border-green-200 rounded-full text-green-700 text-xs font-medium"
+                  class="ui-badge ui-badge--emerald"
                 >
                   {{ t('superAdmin.tenants.status.active') }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-gray-600">
+              <td class="ui-td text-slate-600">
                 {{ tenant._count?.users || 0 }}
               </td>
-              <td class="px-6 py-4 text-gray-600">
+              <td class="ui-td text-slate-600">
                 {{ tenant._count?.products || 0 }}
               </td>
-              <td class="px-6 py-4 text-gray-600">
+              <td class="ui-td text-slate-600">
                 {{ tenant._count?.orders || 0 }}
               </td>
-              <td class="px-6 py-4 text-gray-600 text-sm whitespace-nowrap">
+              <td class="ui-td text-slate-600 text-sm whitespace-nowrap">
                 {{ formatDate(tenant.createdAt) }}
               </td>
-              <td class="px-6 py-4">
+              <td class="ui-td">
                 <div class="flex justify-end space-x-2">
                   <button
                     class="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-600 transition-colors" 

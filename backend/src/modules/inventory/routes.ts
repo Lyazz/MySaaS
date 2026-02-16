@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import multer from 'multer'
-import { requireTenantAdmin } from '../../middleware/rbac.middleware'
+import { requireTenantMember } from '../../middleware/rbac.middleware'
+import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
 import { InventoryController } from './inventory.controller'
 import { BulkInventoryController } from './bulk.controller'
 
@@ -21,7 +22,8 @@ const csvUpload = multer({
     }
 })
 
-router.use(requireTenantAdmin)
+router.use(requireTenantMember)
+router.use(requireStaffCrud('inventory'))
 
 router.get('/variants', controller.listVariants.bind(controller))
 router.get('/variants/export.csv', bulkController.exportVariantsCsv.bind(bulkController))
@@ -29,5 +31,7 @@ router.post('/variants/import.csv', csvUpload.single('file'), bulkController.imp
 router.patch('/variants/bulk', bulkController.bulkPatchVariants.bind(bulkController))
 router.get('/variants/:id/movements', controller.listMovements.bind(controller))
 router.patch('/variants/:id', controller.updateVariantInventory.bind(controller))
+router.post('/variants/:id/stock/adjust', controller.adjustVariantStock.bind(controller))
+router.post('/variants/:id/stock/set', controller.setVariantStock.bind(controller))
 
 export default router

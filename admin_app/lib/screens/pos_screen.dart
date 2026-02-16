@@ -1463,7 +1463,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           searchQuery.isEmpty ||
           p.title.toLowerCase().contains(q) ||
           p.slug.toLowerCase().contains(q) ||
-          p.variants.any((v) => (v.sku ?? '').toLowerCase().contains(q));
+          p.variants.any((v) => v.sku.toLowerCase().contains(q));
       return matchesCategory && matchesSearch;
     }).toList();
 

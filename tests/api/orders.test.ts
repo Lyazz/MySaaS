@@ -70,6 +70,7 @@ describe('Public checkout order flow', () => {
             data: {
                 tenantId,
                 productId,
+                sku: `COD-${Date.now()}`,
                 price: 175,
                 stock: 5
             }
@@ -93,6 +94,7 @@ describe('Public checkout order flow', () => {
             data: {
                 tenantId,
                 productId: bundleProductId,
+                sku: `BUNDLE-${Date.now()}`,
                 price: 1000,
                 stock: 100
             }

@@ -15,41 +15,43 @@ model Tenant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users          User[]
-  customers      Customer[]
-  customerPayments CustomerPayment[]
-  cashboxes      Cashbox[]
-  cashSessions   CashSession[]
-  cashTransactions CashTransaction[]
-  subscription   TenantSubscription?
-  payments       BillingPayment[]
-  products       Product[]
-  productBundleDeals ProductBundleDeal[]
-  productImages  ProductImage[]
-  productOptions ProductOption[]
-  optionValues   ProductOptionValue[]
-  variants       ProductVariant[]
-  variantValues  ProductVariantOptionValue[]
-  variantImages  ProductVariantImage[]
-  inventoryMoves InventoryMovement[]
-  suppliers      Supplier[]
-  supplierPayments SupplierPayment[]
-  purchaseOrders PurchaseOrder[]
-  purchaseOrderItems PurchaseOrderItem[]
-  categories     Category[]
-  orders         Order[]
-  orderItems     OrderItem[]
-  sales          Sale[]
-  saleItems      SaleItem[]
-  shipments      Shipment[]
-  deliveryRates  DeliveryRate[]
-  storeSettings  StoreSettings?
-  contactInfos   TenantContactInfo[]
-  domains        TenantDomain[]
-  shipmentEvents ShipmentEvent[]             @relation("TenantShipmentEvents")
-  integrations   TenantIntegration[]
-  metaPixels     TenantMetaPixel[]
-  productMetaPixels ProductMetaPixel[]
+  users                User[]
+  staffRoles           TenantStaffRole[]
+  staffRolePermissions TenantStaffRolePermission[]
+  customers            Customer[]
+  customerPayments     CustomerPayment[]
+  cashboxes            Cashbox[]
+  cashSessions         CashSession[]
+  cashTransactions     CashTransaction[]
+  subscription         TenantSubscription?
+  payments             BillingPayment[]
+  products             Product[]
+  productBundleDeals   ProductBundleDeal[]
+  productImages        ProductImage[]
+  productOptions       ProductOption[]
+  optionValues         ProductOptionValue[]
+  variants             ProductVariant[]
+  variantValues        ProductVariantOptionValue[]
+  variantImages        ProductVariantImage[]
+  inventoryMoves       InventoryMovement[]
+  suppliers            Supplier[]
+  supplierPayments     SupplierPayment[]
+  purchaseOrders       PurchaseOrder[]
+  purchaseOrderItems   PurchaseOrderItem[]
+  categories           Category[]
+  orders               Order[]
+  orderItems           OrderItem[]
+  sales                Sale[]
+  saleItems            SaleItem[]
+  shipments            Shipment[]
+  deliveryRates        DeliveryRate[]
+  storeSettings        StoreSettings?
+  contactInfos         TenantContactInfo[]
+  domains              TenantDomain[]
+  shipmentEvents       ShipmentEvent[]             @relation("TenantShipmentEvents")
+  integrations         TenantIntegration[]
+  metaPixels           TenantMetaPixel[]
+  productMetaPixels    ProductMetaPixel[]
 }
 
 model Cashbox {
@@ -81,21 +83,21 @@ model CashSession {
 
   status String @default("OPEN") // OPEN | CLOSED
 
-  openingFloat Decimal @default(0)
-  closingCount Decimal?
+  openingFloat    Decimal  @default(0)
+  closingCount    Decimal?
   expectedClosing Decimal?
-  difference     Decimal?
+  difference      Decimal?
 
   note String?
 
-  openedAt DateTime @default(now())
+  openedAt DateTime  @default(now())
   closedAt DateTime?
 
   openedByUserId String?
-  openedBy       User? @relation("CashSessionOpenedBy", fields: [tenantId, openedByUserId], references: [tenantId, id])
+  openedBy       User?   @relation("CashSessionOpenedBy", fields: [tenantId, openedByUserId], references: [tenantId, id])
 
   closedByUserId String?
-  closedBy       User? @relation("CashSessionClosedBy", fields: [tenantId, closedByUserId], references: [tenantId, id])
+  closedBy       User?   @relation("CashSessionClosedBy", fields: [tenantId, closedByUserId], references: [tenantId, id])
 
   transactions CashTransaction[]
 
@@ -121,8 +123,8 @@ model CashTransaction {
   type      String // SALE_PAYMENT | CUSTOMER_PAYMENT | SUPPLIER_PAYMENT | EXPENSE | CHARGE | TRANSFER
 
   amount   Decimal
-  currency String @default("DZD")
-  method   String @default("CASH") // CASH | CARD | TRANSFER | OTHER
+  currency String  @default("DZD")
+  method   String  @default("CASH") // CASH | CARD | TRANSFER | OTHER
 
   customerId String?
   customer   Customer? @relation("CashTxCustomer", fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
@@ -131,10 +133,10 @@ model CashTransaction {
   supplier   Supplier? @relation("CashTxSupplier", fields: [tenantId, supplierId], references: [tenantId, id], onDelete: SetNull)
 
   saleId String?
-  sale   Sale? @relation("CashTxSale", fields: [tenantId, saleId], references: [tenantId, id], onDelete: SetNull)
+  sale   Sale?   @relation("CashTxSale", fields: [tenantId, saleId], references: [tenantId, id], onDelete: SetNull)
 
   orderId String?
-  order   Order? @relation("CashTxOrder", fields: [tenantId, orderId], references: [tenantId, id], onDelete: SetNull)
+  order   Order?  @relation("CashTxOrder", fields: [tenantId, orderId], references: [tenantId, id], onDelete: SetNull)
 
   purchaseOrderId String?
   purchaseOrder   PurchaseOrder? @relation("CashTxPurchaseOrder", fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: SetNull)
@@ -147,7 +149,7 @@ model CashTransaction {
   note      String?
 
   createdByUserId String?
-  createdBy       User? @relation("CashTransactionCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
+  createdBy       User?   @relation("CashTransactionCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
 
   createdAt DateTime @default(now())
 
@@ -230,13 +232,13 @@ model TenantDomain {
 }
 
 model TenantIntegration {
-  id        String   @id @default(uuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  provider  String   // TELEGRAM, FACEBOOK, TIKTOK, WHATSAPP, etc.
-  config    Json?    // Stores provider-specific settings, e.g. { botToken, chatId }
-  isActive  Boolean  @default(false)
-  
+  id       String  @id @default(uuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider String // TELEGRAM, FACEBOOK, TIKTOK, WHATSAPP, etc.
+  config   Json? // Stores provider-specific settings, e.g. { botToken, chatId }
+  isActive Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -296,28 +298,70 @@ model TenantContactInfo {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String           @id @default(uuid())
   email        String
   passwordHash String?
-  role         String   @default("staff") // owner, admin, staff
-  isSuperAdmin Boolean  @default(false)
+  role         String           @default("staff") // owner, admin, staff
+  isSuperAdmin Boolean          @default(false)
+  isActive     Boolean          @default(true)
   tenantId     String
-  tenant       Tenant   @relation(fields: [tenantId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  tenant       Tenant           @relation(fields: [tenantId], references: [id])
+  staffRoleId  String?
+  staffRole    TenantStaffRole? @relation("StaffRoleUsers", fields: [tenantId, staffRoleId], references: [tenantId, id], onDelete: Restrict)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
-  inventoryMovements InventoryMovement[]
-  purchaseOrdersCreated PurchaseOrder[] @relation("PurchaseOrderCreatedBy")
-  salesCreated Sale[] @relation("SaleCreatedBy")
-  customerPaymentsCreated CustomerPayment[] @relation("CustomerPaymentCreatedBy")
-  supplierPaymentsCreated SupplierPayment[] @relation("SupplierPaymentCreatedBy")
-  cashSessionsOpened CashSession[] @relation("CashSessionOpenedBy")
-  cashSessionsClosed CashSession[] @relation("CashSessionClosedBy")
-  cashTransactionsCreated CashTransaction[] @relation("CashTransactionCreatedBy")
+  inventoryMovements      InventoryMovement[]
+  purchaseOrdersCreated   PurchaseOrder[]     @relation("PurchaseOrderCreatedBy")
+  salesCreated            Sale[]              @relation("SaleCreatedBy")
+  customerPaymentsCreated CustomerPayment[]   @relation("CustomerPaymentCreatedBy")
+  supplierPaymentsCreated SupplierPayment[]   @relation("SupplierPaymentCreatedBy")
+  cashSessionsOpened      CashSession[]       @relation("CashSessionOpenedBy")
+  cashSessionsClosed      CashSession[]       @relation("CashSessionClosedBy")
+  cashTransactionsCreated CashTransaction[]   @relation("CashTransactionCreatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
   @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@index([tenantId, staffRoleId])
+}
+
+model TenantStaffRole {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name String
+
+  permissions TenantStaffRolePermission[]
+  users       User[]                      @relation("StaffRoleUsers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+}
+
+model TenantStaffRolePermission {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  roleId String
+  role   TenantStaffRole @relation(fields: [tenantId, roleId], references: [tenantId, id], onDelete: Cascade)
+
+  resource String
+  action   String // create | read | update | delete
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, roleId, resource, action])
+  @@index([tenantId])
+  @@index([tenantId, roleId])
+  @@index([tenantId, resource])
 }
 
 model Category {
@@ -357,8 +401,8 @@ model Product {
   categoryId String?
   category   Category? @relation(fields: [tenantId, categoryId], references: [tenantId, id])
 
-  options  ProductOption[]
-  variants ProductVariant[]
+  options     ProductOption[]
+  variants    ProductVariant[]
   bundleDeals ProductBundleDeal[]
 
   orderItems OrderItem[]
@@ -379,8 +423,8 @@ model TenantMetaPixel {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  name     String?
-  pixelId  String
+  name    String?
+  pixelId String
 
   isActive Boolean @default(true)
   isGlobal Boolean @default(false)
@@ -396,12 +440,12 @@ model TenantMetaPixel {
 }
 
 model ProductMetaPixel {
-  id          String @id @default(uuid())
-  tenantId    String
-  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  productId   String
-  product     Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
 
   metaPixelId String
   metaPixel   TenantMetaPixel @relation(fields: [metaPixelId], references: [id], onDelete: Cascade)
@@ -415,19 +459,19 @@ model ProductMetaPixel {
 }
 
 model ProductBundleDeal {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  productId   String
-  product     Product  @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  tenantId  String
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
 
   bundleQty   Int
   bundlePrice Decimal @default(0)
   tag         String?
 
-  isActive  Boolean  @default(true)
-  startsAt  DateTime?
-  endsAt    DateTime?
+  isActive Boolean   @default(true)
+  startsAt DateTime?
+  endsAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -507,7 +551,9 @@ model ProductVariant {
   productId String
   product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
 
-  sku            String?
+  sku            String   @db.VarChar(32)
+  skuLocked      Boolean  @default(false)
+  barcode        String?  @db.VarChar(32)
   price          Decimal  @default(0)
   compareAtPrice Decimal?
   cost           Decimal  @default(0) // prix d'achat (latest unit cost)
@@ -519,16 +565,18 @@ model ProductVariant {
   reserved       Int     @default(0)
   safetyStock    Int     @default(0)
 
-  optionValues ProductVariantOptionValue[]
-  images       ProductVariantImage[]
-  movements    InventoryMovement[]
+  optionValues       ProductVariantOptionValue[]
+  images             ProductVariantImage[]
+  movements          InventoryMovement[]
   purchaseOrderItems PurchaseOrderItem[]
-  orderItems   OrderItem[]
-  saleItems    SaleItem[]
+  orderItems         OrderItem[]
+  saleItems          SaleItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([tenantId, sku])
+  @@unique([tenantId, barcode])
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, productId])
@@ -562,28 +610,28 @@ model ProductVariantImage {
 }
 
 model InventoryMovement {
-  id        String         @id @default(uuid())
-  tenantId  String
-  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  variantId String
-  variant   ProductVariant @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
-  type      InventoryMovementType @default(MANUAL_ADJUSTMENT)
-  delta     Int // stock delta
-  reservedDelta Int @default(0)
-  safetyStockDelta Int @default(0)
-  reason    String // e.g. "order", "restock", "correction"
-  note      String?
-  orderId   String?
-  order     Order? @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
-  saleId    String?
-  sale      Sale?  @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Cascade)
+  id               String                @id @default(uuid())
+  tenantId         String
+  tenant           Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variantId        String
+  variant          ProductVariant        @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
+  type             InventoryMovementType @default(MANUAL_ADJUSTMENT)
+  delta            Int // stock delta
+  reservedDelta    Int                   @default(0)
+  safetyStockDelta Int                   @default(0)
+  reason           String // e.g. "order", "restock", "correction"
+  note             String?
+  orderId          String?
+  order            Order?                @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+  saleId           String?
+  sale             Sale?                 @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Cascade)
 
   stockAfter       Int?
   reservedAfter    Int?
   safetyStockAfter Int?
 
   createdByUserId String?
-  createdBy       User? @relation(fields: [tenantId, createdByUserId], references: [tenantId, id])
+  createdBy       User?   @relation(fields: [tenantId, createdByUserId], references: [tenantId, id])
 
   createdAt DateTime @default(now())
 
@@ -609,7 +657,7 @@ model Sale {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  source  String @default("POS") // POS | ORDER
+  source  String  @default("POS") // POS | ORDER
   orderId String?
   order   Order?  @relation("SaleOrder", fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
 
@@ -626,11 +674,11 @@ model Sale {
   notes String?
 
   createdByUserId String?
-  createdBy       User? @relation("SaleCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
+  createdBy       User?   @relation("SaleCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
 
-  items     SaleItem[]
-  movements InventoryMovement[]
-  cashTransactions CashTransaction[] @relation("CashTxSale")
+  items            SaleItem[]
+  movements        InventoryMovement[]
+  cashTransactions CashTransaction[]   @relation("CashTxSale")
   customerPayments CustomerPayment[]
 
   createdAt DateTime @default(now())
@@ -648,7 +696,7 @@ model SaleItem {
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   saleId String
-  sale   Sale @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Cascade)
+  sale   Sale   @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Cascade)
 
   productId String
   product   Product @relation(fields: [tenantId, productId], references: [tenantId, id])
@@ -668,15 +716,15 @@ model Supplier {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  name    String
-  phone   String?
-  email   String?
-  address String?
-  notes   String?
+  name           String
+  phone          String?
+  email          String?
+  address        String?
+  notes          String?
   openingBalance Decimal @default(0)
 
-  purchaseOrders PurchaseOrder[]
-  payments SupplierPayment[]
+  purchaseOrders   PurchaseOrder[]
+  payments         SupplierPayment[]
   cashTransactions CashTransaction[] @relation("CashTxSupplier")
 
   createdAt DateTime @default(now())
@@ -695,19 +743,19 @@ model PurchaseOrder {
   supplierId String?
   supplier   Supplier? @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: Restrict)
 
-  status   String @default("DRAFT") // DRAFT | ORDERED | RECEIVED | CANCELLED
+  status    String  @default("DRAFT") // DRAFT | ORDERED | RECEIVED | CANCELLED
   reference String?
-  currency String @default("DZD")
-  notes    String?
+  currency  String  @default("DZD")
+  notes     String?
 
   createdByUserId String?
-  createdBy       User? @relation("PurchaseOrderCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
+  createdBy       User?   @relation("PurchaseOrderCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
 
   orderedAt  DateTime?
   receivedAt DateTime?
 
-  items PurchaseOrderItem[]
-  cashTransactions CashTransaction[] @relation("CashTxPurchaseOrder")
+  items            PurchaseOrderItem[]
+  cashTransactions CashTransaction[]   @relation("CashTxPurchaseOrder")
   supplierPayments SupplierPayment[]
 
   createdAt DateTime @default(now())
@@ -720,11 +768,11 @@ model PurchaseOrder {
 }
 
 model PurchaseOrderItem {
-  id             String @id @default(uuid())
-  tenantId       String
-  tenant         Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id              String        @id @default(uuid())
+  tenantId        String
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   purchaseOrderId String
-  purchaseOrder  PurchaseOrder @relation(fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: Cascade)
+  purchaseOrder   PurchaseOrder @relation(fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: Cascade)
 
   variantId String
   variant   ProductVariant @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
@@ -732,7 +780,7 @@ model PurchaseOrderItem {
   quantityOrdered  Int
   quantityReceived Int @default(0)
 
-  unitCost  Decimal @default(0) // prix d'achat
+  unitCost  Decimal  @default(0) // prix d'achat
   salePrice Decimal? // prix de vente (optional update)
 
   createdAt DateTime @default(now())
@@ -771,11 +819,11 @@ model Order {
   shippingEtaMinDays   Int?
   shippingEtaMaxDays   Int?
 
-  items     OrderItem[]
-  shipments Shipment[]
+  items              OrderItem[]
+  shipments          Shipment[]
   inventoryMovements InventoryMovement[]
-  cashTransactions CashTransaction[] @relation("CashTxOrder")
-  sale      Sale? @relation("SaleOrder")
+  cashTransactions   CashTransaction[]   @relation("CashTxOrder")
+  sale               Sale?               @relation("SaleOrder")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -790,18 +838,18 @@ model Customer {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  name    String
-  phone   String
-  email   String?
-  address String?
+  name           String
+  phone          String
+  email          String?
+  address        String?
   openingBalance Decimal @default(0)
 
   // For future customer-auth/customer-space. Not used in MVP flows yet.
   passwordHash String?
 
-  orders Order[]
-  sales  Sale[]
-  payments CustomerPayment[]
+  orders           Order[]
+  sales            Sale[]
+  payments         CustomerPayment[]
   cashTransactions CashTransaction[] @relation("CashTxCustomer")
 
   createdAt DateTime @default(now())
@@ -823,19 +871,19 @@ model CustomerPayment {
   customer   Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
 
   saleId String?
-  sale   Sale? @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Restrict)
+  sale   Sale?   @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: Restrict)
 
   cashTransactionId String
   cashTransaction   CashTransaction @relation("CashTxCustomerPayment", fields: [tenantId, cashTransactionId], references: [tenantId, id], onDelete: Restrict)
 
   amount    Decimal
-  currency  String @default("DZD")
-  method    String @default("CASH")
+  currency  String  @default("DZD")
+  method    String  @default("CASH")
   reference String?
   note      String?
 
   createdByUserId String?
-  createdBy       User? @relation("CustomerPaymentCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
+  createdBy       User?   @relation("CustomerPaymentCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
 
   createdAt DateTime @default(now())
 
@@ -861,13 +909,13 @@ model SupplierPayment {
   cashTransaction   CashTransaction @relation("CashTxSupplierPayment", fields: [tenantId, cashTransactionId], references: [tenantId, id], onDelete: Restrict)
 
   amount    Decimal
-  currency  String @default("DZD")
-  method    String @default("CASH")
+  currency  String  @default("DZD")
+  method    String  @default("CASH")
   reference String?
   note      String?
 
   createdByUserId String?
-  createdBy       User? @relation("SupplierPaymentCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
+  createdBy       User?   @relation("SupplierPaymentCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
 
   createdAt DateTime @default(now())
 
@@ -977,9 +1025,9 @@ model OrderItem {
   productId String
   product   Product @relation(fields: [tenantId, productId], references: [tenantId, id])
 
-  quantity Int
-  price    Float // Price at the time of order
-  lineTotal Float? // Total for this line after bundle pricing (if any)
+  quantity         Int
+  price            Float // Price at the time of order
+  lineTotal        Float? // Total for this line after bundle pricing (if any)
   pricingBreakdown Json?
 
   variantId String?

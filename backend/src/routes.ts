@@ -30,6 +30,9 @@ import integrationsRouter from './modules/integrations/routes'
 import metaPixelsRouter from './modules/meta-pixels/routes'
 import integrationsPublicRouter from './modules/integrations/public.routes'
 import cashRouter from './modules/cash/routes'
+import usersRouter from './modules/users/routes'
+import adminAuditLogsRouter from './modules/audit-logs/routes'
+import staffRolesRouter from './modules/staff-roles/routes'
 
 const router = Router()
 
@@ -69,6 +72,9 @@ router.use('/upload', uploadRouter)
 router.use('/', deliveryRouter)
 router.use('/admin/integrations', integrationsRouter)
 router.use('/admin/meta-pixels', metaPixelsRouter)
+router.use('/admin/users', usersRouter)
+router.use('/admin/staff-roles', staffRolesRouter)
+router.use('/admin/audit-logs', adminAuditLogsRouter)
 
 // Super Admin
 router.use('/super-admin', superAdminRouter)

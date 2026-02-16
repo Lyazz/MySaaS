@@ -62,7 +62,7 @@
     <!-- Loading State -->
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
       <p class="mt-2 text-gray-600">
@@ -73,7 +73,7 @@
     <!-- Empty State -->
     <div
       v-else-if="orders.length === 0"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-gray-400" />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
@@ -87,72 +87,72 @@
     <!-- Orders Table -->
     <div
       v-else
-      class="bg-white rounded-lg shadow overflow-hidden"
+      class="ui-card overflow-hidden"
     >
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="ui-table">
+          <thead class="ui-thead">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.orderId') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.customer') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.phone') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.total') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.status') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.date') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="ui-th text-right">
                 {{ t('admin.pages.orders.index.table.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="ui-tbody">
             <tr
               v-for="order in orders"
               :key="order.id"
-              class="hover:bg-gray-50"
+              class="ui-tr"
             >
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="font-medium text-slate-900">
                   #{{ order.id.substring(0, 8) }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="text-slate-900">
                   {{ order.customerName }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap">
+                <div class="text-slate-600">
                   {{ order.customerPhone }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
+              <td class="ui-td whitespace-nowrap">
+                <div class="font-medium text-slate-900">
                   {{ formatCurrency(order.totalAmount) }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="ui-td whitespace-nowrap">
                 <AdminOrderStatusBadge :status="order.status" />
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td class="ui-td whitespace-nowrap text-slate-600">
                 {{ formatDate(order.createdAt) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/orders/${order.id}`"
-                    class="inline-flex items-center text-teal-600 hover:text-teal-900 transition-colors"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
                     <span>{{ t('common.view') }}</span>
