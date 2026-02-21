@@ -96,6 +96,7 @@
               <th class="ui-th">{{ t('admin.pages.users.columns.email') }}</th>
               <th class="ui-th">{{ t('admin.pages.users.columns.role') }}</th>
               <th class="ui-th">{{ t('admin.pages.users.columns.staffRole') }}</th>
+              <th class="ui-th">{{ t('admin.pages.users.columns.cashbox') }}</th>
               <th class="ui-th">{{ t('admin.pages.users.columns.status') }}</th>
               <th class="ui-th">{{ t('admin.pages.users.columns.createdAt') }}</th>
               <th class="ui-th text-right">{{ t('admin.common.actions') }}</th>
@@ -103,14 +104,19 @@
           </thead>
           <tbody class="ui-tbody">
             <tr v-if="pending">
-              <td class="px-4 py-6 text-slate-500" colspan="6">{{ t('admin.common.loading') }}</td>
+              <td class="px-4 py-6 text-slate-500" colspan="7">{{ t('admin.common.loading') }}</td>
             </tr>
             <tr v-else-if="filteredUsers.length === 0">
-              <td class="px-4 py-6 text-slate-500" colspan="6">{{ t('admin.pages.users.empty') }}</td>
+              <td class="px-4 py-6 text-slate-500" colspan="7">{{ t('admin.pages.users.empty') }}</td>
             </tr>
-            <tr v-for="u in filteredUsers" :key="u.id" class="ui-tr">
+            <tr v-for="u in paginatedUsers" :key="u.id" class="ui-tr">
               <td class="ui-td">
-                <div class="font-medium text-slate-900">{{ u.email }}</div>
+                <a
+                  :href="`mailto:${u.email}`"
+                  class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                >
+                  {{ u.email }}
+                </a>
               </td>
               <td class="ui-td">
                 <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
@@ -124,6 +130,9 @@
                   {{ staffRoleName(u.staffRoleId) }}
                 </span>
                 <span v-else class="text-slate-400">—</span>
+              </td>
+              <td class="ui-td text-slate-600">
+                {{ cashboxName(u.cashboxId) }}
               </td>
               <td class="ui-td">
                 <span
@@ -170,6 +179,71 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="!pending && filteredUsers.length > 0" class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+        <div class="flex flex-1 items-center justify-between sm:hidden">
+          <button
+            :disabled="currentPage === 1"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage--"
+          >
+            <Icon name="lucide:chevron-left" class="w-4 h-4" />
+          </button>
+          <span class="text-sm text-slate-600">
+            {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
+          </span>
+          <button
+            :disabled="currentPage === totalPages"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage++"
+          >
+            <Icon name="lucide:chevron-right" class="w-4 h-4" />
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-slate-700">
+              {{ t('admin.common.showing', {
+                from: (currentPage - 1) * itemsPerPage + 1,
+                to: Math.min(currentPage * itemsPerPage, filteredUsers.length),
+                total: filteredUsers.length
+              }) }}
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                :disabled="currentPage === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                @click="currentPage--"
+              >
+                {{ t('admin.common.previous') }}
+              </button>
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                :class="[
+                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                  currentPage === page
+                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                ]"
+                @click="currentPage = page"
+              >
+                {{ page }}
+              </button>
+              <button
+                :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                @click="currentPage++"
+              >
+                {{ t('admin.common.next') }}
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -306,6 +380,19 @@
           >
             <option v-for="r in staffRoles" :key="r.id" :value="r.id">
               {{ r.name }}
+            </option>
+          </BaseSelect>
+
+          <BaseSelect
+            v-model="form.cashboxId"
+            :label="t('admin.pages.users.fields.cashbox')"
+            :disabled="cashboxesPending"
+          >
+            <option value="">
+              {{ t('admin.pages.users.cashbox.unassigned') }}
+            </option>
+            <option v-for="c in activeCashboxes" :key="c.id" :value="c.id">
+              {{ c.name }}
             </option>
           </BaseSelect>
 
@@ -500,6 +587,7 @@ type TenantUser = {
   role: 'owner' | 'admin' | 'staff'
   isActive: boolean
   staffRoleId?: string | null
+  cashboxId?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -510,6 +598,12 @@ type StaffRole = {
   permissions: Array<{ resource: string; actions: Array<'create' | 'read' | 'update' | 'delete'> }>
   createdAt: string
   updatedAt: string
+}
+
+type CashboxSummary = {
+  id: string
+  name: string
+  isActive: boolean
 }
 
 const authStore = useAuthStore()
@@ -553,6 +647,24 @@ const {
   { default: () => [] as StaffRole[] }
 )
 
+const {
+  data: cashboxes,
+  pending: cashboxesPending,
+  refresh: refreshCashboxes
+} = await useAsyncData(
+  'cashboxes',
+  async () => {
+    const res = await $fetch<CashboxSummary[]>('/api/admin/cashboxes', {
+      headers: { Authorization: `Bearer ${token.value}` }
+    })
+    return res
+  },
+  { default: () => [] as CashboxSummary[] }
+)
+
+const currentPage = ref(1)
+const itemsPerPage = 25
+
 const filteredUsers = computed(() => {
   const q = search.value.trim().toLowerCase()
   const list = users.value || []
@@ -562,6 +674,14 @@ const filteredUsers = computed(() => {
     (u: TenantUser) => u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q)
   )
 })
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / itemsPerPage)))
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredUsers.value.slice(start, start + itemsPerPage)
+})
+
+watch([search, includeInactive], () => { currentPage.value = 1 })
 
 const formatDate = (iso: string) => {
   const d = new Date(iso)
@@ -580,6 +700,7 @@ const saving = ref(false)
 const editing = ref(false)
 const editingUserId = ref<string | null>(null)
 const editingUserRole = ref<TenantUser['role'] | null>(null)
+const editingUserCashboxId = ref<string | null>(null)
 const passwordVisible = ref(false)
 const confirmPasswordVisible = ref(false)
 
@@ -593,6 +714,7 @@ const form = reactive({
   email: '',
   role: 'staff' as TenantUser['role'],
   staffRoleId: '',
+  cashboxId: '',
   password: '',
   confirmPassword: '',
   isActive: true
@@ -643,14 +765,17 @@ watch(
 const openCreate = () => {
   errorMessage.value = ''
   clearFieldErrors()
+  refreshCashboxes()
   editing.value = false
   editingUserId.value = null
   editingUserRole.value = null
+  editingUserCashboxId.value = null
   passwordVisible.value = false
   confirmPasswordVisible.value = false
   form.email = ''
   form.role = roleOptions.value[0] ?? 'staff'
   form.staffRoleId = staffRoles.value?.[0]?.id ?? ''
+  form.cashboxId = (cashboxes.value || []).find((c: CashboxSummary) => c.isActive)?.id ?? ''
   form.password = ''
   form.confirmPassword = ''
   form.isActive = true
@@ -660,14 +785,17 @@ const openCreate = () => {
 const openEdit = (u: TenantUser) => {
   errorMessage.value = ''
   clearFieldErrors()
+  refreshCashboxes()
   editing.value = true
   editingUserId.value = u.id
   editingUserRole.value = u.role
+  editingUserCashboxId.value = u.cashboxId ?? null
   passwordVisible.value = false
   confirmPasswordVisible.value = false
   form.email = u.email
   form.role = u.role
   form.staffRoleId = u.role === 'staff' ? (u.staffRoleId ?? '') : ''
+  form.cashboxId = u.cashboxId ?? ''
   form.password = ''
   form.confirmPassword = ''
   form.isActive = u.isActive
@@ -680,6 +808,7 @@ const closeModal = () => {
   editing.value = false
   editingUserId.value = null
   editingUserRole.value = null
+  editingUserCashboxId.value = null
   passwordVisible.value = false
   confirmPasswordVisible.value = false
   clearFieldErrors()
@@ -747,6 +876,7 @@ const submitModal = async () => {
           email: normalizeEmail(form.email),
           password: form.password,
           role: form.role,
+          cashboxId: form.cashboxId || null,
           ...(form.role === 'staff' ? { staffRoleId: form.staffRoleId } : {})
         }
       })
@@ -761,6 +891,9 @@ const submitModal = async () => {
       if (editingUserRole.value !== 'owner') patch.role = form.role
       if (form.role === 'staff') patch.staffRoleId = form.staffRoleId
       if (form.password.trim()) patch.password = form.password
+      if ((form.cashboxId || null) !== (editingUserCashboxId.value || null)) {
+        patch.cashboxId = form.cashboxId || null
+      }
 
       await $fetch(`/api/admin/users/${id}`, {
         method: 'PATCH',
@@ -821,6 +954,14 @@ const staffRoleName = (staffRoleId: string | null | undefined): string => {
   const found = (staffRoles.value || []).find((r) => r.id === staffRoleId)
   return found?.name ?? t('admin.pages.users.roles.unassigned')
 }
+
+const cashboxName = (cashboxId: string | null | undefined): string => {
+  if (!cashboxId) return t('admin.pages.users.cashbox.unassigned')
+  const found = (cashboxes.value || []).find((c: CashboxSummary) => c.id === cashboxId)
+  return found?.name ?? t('admin.pages.users.cashbox.unassigned')
+}
+
+const activeCashboxes = computed(() => (cashboxes.value || []).filter((c) => c.isActive))
 
 const getPermissionDisplay = (permissions: StaffRole['permissions']) => {
   if (!permissions || permissions.length === 0) return []

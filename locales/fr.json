@@ -1,7 +1,21 @@
 {
   "common": {
     "view": "Voir",
-    "details": "Détails"
+    "details": "Détails",
+    "errorPage": {
+      "notFound": {
+        "title": "Page introuvable",
+        "message": "La page que vous recherchez n'existe pas."
+      },
+      "generic": {
+        "title": "Une erreur s'est produite",
+        "message": "Quelque chose s'est mal passé. Veuillez réessayer plus tard."
+      },
+      "actions": {
+        "backHome": "Retour à l'accueil"
+      },
+      "details": "Détails de l'erreur"
+    }
   },
   "i18n": {
     "switcher": {
@@ -532,6 +546,7 @@
       }
     },
     "product": {
+      "detailsTitle": "Détails du produit",
       "addedToCart": "{title} ajouté au panier !",
       "inStock": "En stock",
       "perUnit": "par unité",
@@ -673,6 +688,8 @@
       "back": "Retour",
       "next": "Suivant",
       "previous": "Précédent",
+      "showing": "Affichage de {from} à {to} sur {total} résultats",
+      "page": "Page {page} sur {total}",
       "close": "Fermer",
       "copy": "Copier",
       "cancel": "Annuler",
@@ -688,7 +705,13 @@
       "selectAll": "Tout sélectionner",
       "deselectAll": "Tout désélectionner",
       "fullAccess": "Accès complet",
-      "viewOnly": "Lecture seule"
+      "viewOnly": "Lecture seule",
+      "view": "Voir",
+      "total": "Total",
+      "noneSelected": "-- Aucun --",
+      "processing": "Traitement en cours…",
+      "error": "Une erreur s'est produite. Veuillez réessayer.",
+      "saved": "Enregistré !"
     },
     "confirmModal": {
       "defaults": {
@@ -714,6 +737,23 @@
           "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
           "tooLarge": "L’image doit faire moins de 5 Mo",
           "uploadFailed": "Échec du téléversement"
+        }
+      },
+      "variantSelectorModal": {
+        "title": "Sélectionner des variantes",
+        "search": {
+          "placeholder": "Rechercher des variantes..."
+        },
+        "loading": "Chargement des variantes...",
+        "empty": "Aucune variante trouvée.",
+        "table": {
+          "productVariant": "Produit / Variante",
+          "sku": "SKU",
+          "currentStock": "Stock"
+        },
+        "selectedCount": "{count} variante(s) sélectionnée(s)",
+        "actions": {
+          "addSelected": "Ajouter la sélection"
         }
       }
     },
@@ -1198,13 +1238,15 @@
     },
     "nav": {
       "overview": "Aperçu",
-      "catalog": "Catalogue",
+      "marketing": "Marketing & CRM",
+      "landingPage": "Landing Pages",
+      "catalog": "Catalogue & Stock",
       "purchasing": "Achats",
-      "sales": "Ventes",
+      "sales": "Ventes & PDV",
       "delivery": "Livraison",
       "finance": "Finance",
       "cash": "Caisse",
-      "settings": "Paramètres",
+      "settings": "Administration",
       "dashboard": "Tableau de bord",
       "products": "Produits",
       "inventory": "Stock",
@@ -1307,6 +1349,12 @@
         "address": {
           "label": "Adresse",
           "placeholder": "Adresse du client"
+        },
+        "openingBalance": {
+          "label": "Solde initial",
+          "placeholder": "0.00",
+          "required": "Le solde initial est requis",
+          "hint": "Le solde initial ne peut plus être modifié après la création."
         }
       },
       "supplier": {
@@ -1326,12 +1374,12 @@
         "address": {
           "label": "Adresse",
           "placeholder": "Adresse du fournisseur"
-        },
-        "notes": {
-          "label": "Notes",
-          "placeholder": "Notes supplémentaires…"
         }
       }
+    },
+    "integrations": {
+      "connect": "Connecter",
+      "manage": "Gérer"
     },
     "pages": {
       "pos": {
@@ -1382,12 +1430,40 @@
           "loading": "Chargement des variantes...",
           "inStockCount": "{count} en stock",
           "inStock": "En stock"
+        },
+        "paymentModal": {
+          "title": "Finaliser le paiement",
+          "totalToPay": "Total à payer",
+          "methods": {
+            "cash": "Espèces",
+            "card": "Carte"
+          },
+          "cashReceived": "Espèces reçues",
+          "breakdown": {
+            "changeToReturn": "Monnaie à rendre",
+            "remainingDue": "Reste à payer"
+          },
+          "card": {
+            "chargeToCard": "Facturer {amount} par carte",
+            "waiting": "En attente du terminal de paiement..."
+          },
+          "keypad": "Pavé numérique",
+          "actions": {
+            "confirmPayment": "Confirmer le paiement"
+          }
         }
       },
       "cash": {
         "title": "Gestion des caisses",
         "subtitle": "Gérez vos fonds de caisse, sessions et transactions.",
+        "stats": {
+          "totalIn": "Total Entrées",
+          "totalOut": "Total Sorties",
+          "activeSessions": "Sessions Actives",
+          "netBalance": "Solde Net"
+        },
         "actions": {
+          "newAction": "Actions",
           "newCustomerPayment": "Versement client",
           "newSupplierPayment": "Versement fournisseur",
           "newExpense": "Nouvelle dépense",
@@ -1396,6 +1472,7 @@
         },
         "cashboxes": {
           "title": "Caisses",
+          "create": "Nouvelle caisse",
           "status": "Statut",
           "openSession": "Session ouverte #{id}",
           "closed": "Aucune session ouverte",
@@ -1403,6 +1480,9 @@
           "close": "Fermer",
           "empty": "Aucune caisse",
           "emptyHint": "Créez une caisse pour commencer."
+        },
+        "errors": {
+          "title": "Impossible de terminer l’opération."
         },
         "cashbox": {
           "titleFallback": "Caisse",
@@ -1419,6 +1499,14 @@
           "out": "Sortie"
         },
         "modals": {
+          "createCashbox": {
+            "title": "Nouvelle caisse",
+            "subtitle": "Créez une caisse pour enregistrer vos opérations.",
+            "nameLabel": "Nom",
+            "namePlaceholder": "Ex: Caisse principale",
+            "activeLabel": "Caisse active",
+            "confirm": "Créer"
+          },
           "openSession": {
             "title": "Ouvrir une session",
             "subtitle": "Définissez le fond de caisse d’ouverture.",
@@ -1537,13 +1625,17 @@
           "empty": "Aucune transaction",
           "emptyHint": "Les encaissements, dépenses et transferts apparaîtront ici.",
           "filters": {
+            "title": "Filtres",
             "allCashboxes": "Toutes les caisses",
             "allTypes": "Tous les types",
-            "allDirections": "Entrées + sorties"
+            "allDirections": "Entrées + sorties",
+            "allMethods": "Toutes les méthodes",
+            "allUsers": "Tous les utilisateurs"
           },
           "table": {
             "date": "Date",
             "cashbox": "Caisse",
+            "user": "Utilisateur",
             "type": "Type",
             "method": "Méthode",
             "amount": "Montant"
@@ -1571,12 +1663,15 @@
           "empty": "Aucune session",
           "emptyHint": "Ouvrez une session pour commencer à enregistrer.",
           "filters": {
+            "title": "Filtres",
             "allCashboxes": "Toutes les caisses",
-            "allStatuses": "Tous les statuts"
+            "allStatuses": "Tous les statuts",
+            "allUsers": "Tous les utilisateurs"
           },
           "table": {
             "cashbox": "Caisse",
             "status": "Statut",
+            "user": "Utilisateur",
             "openedAt": "Ouverte",
             "closedAt": "Fermée",
             "openingFloat": "Fond de caisse",
@@ -1594,6 +1689,81 @@
           "CLOSED": "FERMÉE"
         }
       },
+      "integrations": {
+        "title": "Apps et Intégrations",
+        "subtitle": "Connectez votre boutique avec des outils et services tiers.",
+        "facebook": {
+          "title": "Pixel Facebook",
+          "description": "Suivez les conversions et créez des audiences pour vos publicités Facebook."
+        },
+        "telegram": {
+          "title": "Notifications Telegram",
+          "description": "Recevez des notifications en temps réel pour vos nouvelles commandes directement sur Telegram.",
+          "modal": {
+            "title": "Configuration Telegram",
+            "fields": {
+              "botToken": {
+                "label": "Token du Bot",
+                "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                "hint": "Obtenez ceci via {'@'}BotFather sur Telegram."
+              },
+              "chatId": {
+                "label": "ID du Chat",
+                "placeholder": "-1001234567890",
+                "hint": "Votre ID de chat ou de groupe où les notifications seront envoyées."
+              },
+              "enableNotifications": "Activer les notifications Telegram"
+            },
+            "actions": {
+              "sendTestMessage": "Envoyer un message de test",
+              "sending": "Envoi en cours...",
+              "saveSettings": "Enregistrer les paramètres"
+            }
+          },
+          "test": {
+            "success": "Message de test envoyé avec succès !",
+            "failed": "Échec de l'envoi du message de test : {message}"
+          },
+          "errors": {
+            "saveFailed": "Échec de l'enregistrement des paramètres Telegram."
+          }
+        },
+        "metaPixels": {
+          "title": "Pixels Meta",
+          "subtitle": "Suivez les conversions et créez des audiences sur plusieurs pixels.",
+          "loading": "Chargement des pixels...",
+          "empty": "Aucun pixel ajouté pour le moment.",
+          "table": {
+            "pixelId": "ID du Pixel",
+            "global": "Global",
+            "productsCount": "{count} produits"
+          },
+          "actions": {
+            "setGlobal": "Définir comme global"
+          },
+          "confirm": {
+            "delete": "Êtes-vous sûr de vouloir supprimer ce pixel ?"
+          },
+          "errors": {
+            "loadFailed": "Échec du chargement des pixels.",
+            "createFailed": "Échec de la création du pixel.",
+            "updateFailed": "Échec de la mise à jour du pixel.",
+            "setGlobalFailed": "Échec de la définition du pixel global.",
+            "deleteFailed": "Échec de la suppression du pixel."
+          },
+          "addPixel": {
+            "title": "Ajouter un Nouveau Pixel",
+            "fields": {
+              "namePlaceholder": "Pixel Marketing",
+              "pixelIdHint": "L'ID de 15-16 chiffres de votre Gestionnaire d'Événements Meta.",
+              "setAsGlobal": "Appliquer à tous les produits par défaut"
+            },
+            "actions": {
+              "addPixel": "Ajouter le Pixel"
+            }
+          }
+        }
+      },
       "users": {
         "subtitle": "Gérez les utilisateurs du tenant et leurs droits d’accès.",
         "searchPlaceholder": "Rechercher par email ou ID…",
@@ -1607,6 +1777,7 @@
           "email": "Email",
           "role": "Rôle",
           "staffRole": "Rôle staff",
+          "cashbox": "Caisse",
           "status": "Statut",
           "createdAt": "Créé le"
         },
@@ -1625,10 +1796,14 @@
           "email": "Email",
           "role": "Rôle",
           "staffRole": "Rôle staff",
+          "cashbox": "Caisse",
           "password": "Mot de passe",
           "newPassword": "Nouveau mot de passe",
           "confirmPassword": "Confirmer le mot de passe",
           "isActive": "Actif"
+        },
+        "cashbox": {
+          "unassigned": "Non assignée"
         },
         "hints": {
           "passwordRequired": "Minimum 8 caractères.",
@@ -1688,6 +1863,7 @@
         "loadErrorTitle": "Les données du tableau de bord n’ont pas pu être chargées.",
         "loadErrorHint": "Essayez d’actualiser. Si cela continue, vérifiez votre connexion ou votre session.",
         "stats": {
+          "activeSessions": "Sessions actives",
           "orders7d": "Commandes (7 jours)",
           "revenue7d": "Chiffre d’affaires (7 jours)",
           "products": "Produits",
@@ -1722,7 +1898,10 @@
           "addProduct": "Ajouter un produit",
           "manageProducts": "Gérer les produits",
           "categories": "Catégories",
-          "appearance": "Apparence"
+          "appearance": "Apparence",
+          "pos": "Point de vente",
+          "cash": "Gestion de caisse",
+          "newLandingPage": "Nouvelle landing page"
         }
       },
       "billing": {
@@ -1988,9 +2167,33 @@
         }
       },
       "orders": {
+        "create": {
+          "title": "Créer une nouvelle commande",
+          "customerSection": "Détails du client",
+          "searchCustomer": "Rechercher un client existant",
+          "newCustomer": "Créer un nouveau client",
+          "customerName": "Nom du client",
+          "customerPhone": "Téléphone du client",
+          "shippingSection": "Détails de livraison",
+          "shippingProvider": "Prestataire de livraison",
+          "deliveryMode": "Mode de livraison",
+          "modes": {
+            "home": "Livraison à domicile",
+            "desk": "Bureau / Point relais"
+          },
+          "wilaya": "Wilaya",
+          "commune": "Commune",
+          "address": "Adresse",
+          "notes": "Notes",
+          "itemsSection": "Articles de la commande",
+          "emptyCart": "Le panier est vide",
+          "itemsTotal": "Total des articles",
+          "submit": "Créer la commande"
+        },
         "index": {
           "title": "Commandes",
           "subtitle": "Gérez les commandes clients",
+          "addBtn": "Nouvelle commande",
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher par nom ou téléphone…",
@@ -2020,15 +2223,25 @@
           "sections": {
             "orderInfo": "Informations de commande",
             "customerInfo": "Informations client",
-            "orderItems": "Articles de la commande"
+            "orderItems": "Articles de la commande",
+            "internalNotes": "Notes internes",
+            "securityAndFraud": "Sécurité & Fraude"
           },
           "fields": {
             "orderId": "ID commande",
             "orderDate": "Date",
             "customerName": "Nom",
             "customerPhone": "Téléphone",
-            "deliveryAddress": "Adresse de livraison"
+            "deliveryAddress": "Adresse de livraison",
+            "calledCustomer": "Client appelé ?",
+            "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande..."
           },
+          "actions": {
+            "blacklistCustomer": "Mettre le client sur liste noire",
+            "blacklistIp": "Mettre l'IP sur liste noire",
+            "blacklistPhone": "Mettre le téléphone sur liste noire"
+          },
+          "securityHelp": "Actions avancées pour gérer les comportements à risque.",
           "itemsTable": {
             "product": "Produit",
             "price": "Prix",
@@ -2105,7 +2318,8 @@
           },
           "table": {
             "customer": "Client",
-            "phone": "Téléphone",
+            "info": "Info",
+            "address": "Adresse",
             "orders": "Ventes",
             "totalSpent": "Total dépensé",
             "lastOrder": "Dernière commande",
@@ -2116,14 +2330,14 @@
           "metaTitle": "Créer un client",
           "breadcrumb": "Créer un client",
           "title": "Créer un nouveau client",
-          "subtitle": "Ajouter un client à votre base",
+          "subtitle": "Ajouter un client à votre base de données",
           "submit": "Créer le client",
           "errors": {
-            "createFailed": "Impossible de créer le client. Veuillez réessayer."
+            "createFailed": "Échec de la création du client. Veuillez réessayer."
           }
         },
         "edit": {
-          "metaTitle": "Modifier un client",
+          "metaTitle": "Modifier le client",
           "breadcrumbCustomer": "Client",
           "breadcrumb": "Modifier",
           "title": "Modifier le client",
@@ -2307,7 +2521,9 @@
           "newPurchase": "Nouvel achat",
           "filters": {
             "supplierLabel": "Filtrer par fournisseur",
-            "allSuppliers": "Tous les fournisseurs"
+            "allSuppliers": "Tous les fournisseurs",
+            "userLabel": "Filtrer par utilisateur",
+            "allUsers": "Tous les utilisateurs"
           },
           "loading": "Chargement des achats…",
           "empty": {
@@ -2317,8 +2533,10 @@
           "table": {
             "id": "ID",
             "supplier": "Fournisseur",
+            "total": "Total",
             "status": "Statut",
             "items": "Articles",
+            "user": "Utilisateur",
             "date": "Date",
             "action": "Action",
             "itemsCount": "{count} articles",
@@ -2383,6 +2601,7 @@
               "total": "Total",
               "qtyPlaceholder": "Qté",
               "receiveStock": "Réceptionner le stock",
+              "receiveAndPay": "Réceptionner & payer le fournisseur",
               "removeItem": "Supprimer l’article",
               "totalOrderValue": "Valeur totale de la commande",
               "costMode": {
@@ -2394,6 +2613,21 @@
                 "weighted": "Moyenne pondérée"
               }
             }
+          },
+          "paymentModal": {
+            "title": "Réceptionner & payer le fournisseur",
+            "subtitle": "Réceptionnez le stock et enregistrez un paiement fournisseur dans la caisse.",
+            "supplierRequired": "Ce bon de commande n’a pas de fournisseur. Assignez un fournisseur avant d’enregistrer un paiement fournisseur.",
+            "cashboxLabel": "Caisse",
+            "cashboxAuto": "Auto (caisse assignée/par défaut)",
+            "noOpenSession": "Aucune session ouverte",
+            "amountLabel": "Montant",
+            "methodLabel": "Méthode",
+            "referenceLabel": "Référence",
+            "referencePlaceholder": "N° facture, reçu, etc.",
+            "noteLabel": "Note",
+            "notePlaceholder": "Note optionnelle",
+            "confirm": "Réceptionner & payer"
           },
           "deleteModal": {
             "title": "Supprimer le bon de commande",
@@ -2417,7 +2651,9 @@
           "subtitle": "Commandes terminées (LIVRÉE)",
           "filters": {
             "searchLabel": "Rechercher",
-            "searchPlaceholder": "Rechercher par nom, téléphone ou ID…"
+            "searchPlaceholder": "Rechercher par nom, téléphone ou ID…",
+            "userLabel": "Filtrer par utilisateur",
+            "allUsers": "Tous les utilisateurs"
           },
           "loading": "Chargement des ventes…",
           "empty": {
@@ -2430,6 +2666,7 @@
             "customer": "Client",
             "phone": "Téléphone",
             "total": "Total",
+            "user": "Utilisateur",
             "completed": "Terminée",
             "actions": "Actions"
           }

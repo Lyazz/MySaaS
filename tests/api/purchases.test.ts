@@ -22,6 +22,8 @@ describe('Suppliers + Purchases', () => {
     let supplierAId: string
     let purchaseOrderId: string
     let purchaseItemId: string
+    let cashboxAId: string
+    let cashSessionAId: string
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await prisma.$transaction([
@@ -82,9 +84,33 @@ describe('Suppliers + Purchases', () => {
             }
         })
         defaultVariantAId = defVar.id
+
+        const cashbox = await prisma.cashbox.create({
+            data: {
+                tenantId: tenantAId,
+                name: `Main Cashbox ${Date.now()}`,
+                isActive: true
+            }
+        })
+        cashboxAId = cashbox.id
+
+        const session = await prisma.cashSession.create({
+            data: {
+                tenantId: tenantAId,
+                cashboxId: cashboxAId,
+                status: 'OPEN',
+                openingFloat: 0,
+                openedByUserId: userAId
+            }
+        })
+        cashSessionAId = session.id
     })
 
     afterAll(async () => {
+        await prisma.supplierPayment.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
+        await prisma.cashTransaction.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
+        await prisma.cashSession.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
+        await prisma.cashbox.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.inventoryMovement.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.purchaseOrderItem.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.purchaseOrder.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
@@ -274,6 +300,81 @@ describe('Suppliers + Purchases', () => {
             orderBy: { createdAt: 'desc' }
         })
         expect(String(movement?.note || '')).toContain('costMode:weighted')
+    })
+
+    it('can receive and record a supplier payment in cashbox', async () => {
+        const supplierRes = await request(app)
+            .post('/api/admin/suppliers')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ name: 'Paid Supplier', phone: '0551111111' })
+
+        expect(supplierRes.status).toBe(201)
+        const paidSupplierId = supplierRes.body.id
+
+        const poRes = await request(app)
+            .post('/api/admin/purchases')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({ supplierId: paidSupplierId, currency: 'DZD' })
+
+        expect(poRes.status).toBe(201)
+        const paidPoId = poRes.body.id
+
+        const itemRes = await request(app)
+            .post(`/api/admin/purchases/${paidPoId}/items`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({
+                variantId: defaultVariantAId,
+                quantityOrdered: 3,
+                unitCost: '50'
+            })
+
+        expect(itemRes.status).toBe(201)
+        const paidItemId = itemRes.body.id
+
+        const receiveRes = await request(app)
+            .post(`/api/admin/purchases/${paidPoId}/receive`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .send({
+                items: [{ itemId: paidItemId, quantityReceived: 3 }],
+                payment: {
+                    mode: 'partial',
+                    cashboxId: cashboxAId,
+                    amount: '150',
+                    method: 'CARD',
+                    reference: 'INV-1',
+                    note: 'Paid on receipt'
+                }
+            })
+
+        expect(receiveRes.status).toBe(200)
+
+        const cashTx = await prisma.cashTransaction.findFirst({
+            where: {
+                tenantId: tenantAId,
+                purchaseOrderId: paidPoId,
+                type: 'SUPPLIER_PAYMENT'
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+        expect(cashTx?.direction).toBe('OUT')
+        expect(cashTx?.cashboxId).toBe(cashboxAId)
+        expect(cashTx?.sessionId).toBe(cashSessionAId)
+        expect(cashTx?.supplierId).toBe(paidSupplierId)
+        expect(cashTx?.method).toBe('CARD')
+        expect(String(cashTx?.amount)).toBe('150')
+
+        const supplierPayment = cashTx?.id
+            ? await prisma.supplierPayment.findFirst({
+                where: { tenantId: tenantAId, cashTransactionId: cashTx.id }
+            })
+            : null
+        expect(supplierPayment?.supplierId).toBe(paidSupplierId)
+        expect(supplierPayment?.purchaseOrderId).toBe(paidPoId)
+        expect(String(supplierPayment?.amount)).toBe('150')
     })
 
     it('blocks cross-tenant access with mismatched host/token', async () => {

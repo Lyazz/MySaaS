@@ -617,7 +617,7 @@ const metaPixelsError = ref('')
 async function fetchProduct() {
   loading.value = true
   try {
-    const data = await $fetch<any>(`/api/admin/products/${productId}`, {
+    const data = await $fetch(`/api/admin/products/${productId}`, {
       query: { includeInactiveVariants: '1' },
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -680,12 +680,12 @@ async function fetchProduct() {
 
 async function fetchCategories() {
   try {
-    const data = await $fetch<Category[]>('/api/admin/categories', {
+    const data = await $fetch('/api/admin/categories', {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
     })
-    categories.value = data
+    categories.value = data as Category[]
   } catch (error) {
     console.error('Failed to fetch categories:', error)
   }
@@ -694,7 +694,7 @@ async function fetchCategories() {
 async function refreshBundleDeals() {
   bundleDealsError.value = ''
   try {
-    const data = await $fetch<any[]>(`/api/admin/products/${productId}/bundles`, {
+    const data = await $fetch(`/api/admin/products/${productId}/bundles`, {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
@@ -902,7 +902,7 @@ async function fetchMetaPixels() {
   metaPixelsLoading.value = true
   metaPixelsError.value = ''
   try {
-    const data = await $fetch<any[]>('/api/admin/meta-pixels', {
+    const data = await $fetch('/api/admin/meta-pixels', {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
     metaPixels.value = Array.isArray(data) ? data : []
@@ -917,9 +917,9 @@ async function fetchMetaPixels() {
 async function fetchProductMetaPixels() {
   metaPixelsError.value = ''
   try {
-    const data = await $fetch<{ metaPixelIds: string[] }>(`/api/admin/meta-pixels/products/${productId}`, {
+    const data = (await $fetch(`/api/admin/meta-pixels/products/${productId}`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    })) as { metaPixelIds: string[] }
     productMetaPixelIds.value = Array.isArray(data?.metaPixelIds) ? data.metaPixelIds : []
   } catch (error: any) {
     console.error('Failed to fetch product meta pixels:', error)
@@ -931,11 +931,11 @@ async function saveProductMetaPixels() {
   metaPixelsSaving.value = true
   metaPixelsError.value = ''
   try {
-    const data = await $fetch<{ metaPixelIds: string[] }>(`/api/admin/meta-pixels/products/${productId}`, {
+    const data = (await $fetch(`/api/admin/meta-pixels/products/${productId}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: { metaPixelIds: productMetaPixelIds.value }
-    })
+    })) as { metaPixelIds: string[] }
     productMetaPixelIds.value = Array.isArray(data?.metaPixelIds) ? data.metaPixelIds : productMetaPixelIds.value
   } catch (error: any) {
     console.error('Failed to save product meta pixels:', error)

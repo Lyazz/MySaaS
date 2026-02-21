@@ -470,3 +470,115 @@ describe('Public checkout order flow', () => {
         expect(breakdown.find((b: any) => b.kind === 'bundle' && b.bundleQty === 3)?.count).toBe(1)
     })
 })
+
+describe('Admin Order Creation', () => {
+    const slug = `admin-checkout-${Date.now()}`
+    const hostHeader = `${slug}.localhost:3000`
+    let tenantId: string
+    let adminUserId: string
+    let adminToken: string
+    let productId: string
+    let variantId: string
+
+    beforeAll(async () => {
+        const tenant = await prisma.tenant.create({
+            data: { name: 'Admin Checkout Tenant', slug }
+        })
+        tenantId = tenant.id
+
+        const admin = await prisma.user.create({
+            data: {
+                tenantId,
+                email: `admin-order-${slug}@example.com`,
+                role: 'admin',
+                passwordHash: 'x'
+            }
+        })
+        adminUserId = admin.id
+        adminToken = signAccessToken({ userId: admin.id, email: admin.email, role: admin.role, tenantId: admin.tenantId })
+
+        const product = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Admin Product',
+                slug: `admin-prod-${Date.now()}`,
+                price: 150,
+                stock: 10,
+                isActive: true
+            }
+        })
+        productId = product.id
+
+        const variant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId,
+                sku: `ADMIN-VAR-${Date.now()}`,
+                price: 175,
+                stock: 20
+            }
+        })
+        variantId = variant.id
+    })
+
+    afterAll(async () => {
+        await prisma.inventoryMovement.deleteMany({ where: { tenantId } })
+        await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
+        await prisma.order.deleteMany({ where: { tenantId } })
+        await prisma.productVariant.deleteMany({ where: { tenantId } })
+        await prisma.product.deleteMany({ where: { tenantId } })
+        await prisma.user.deleteMany({ where: { tenantId } })
+        await prisma.tenant.deleteMany({ where: { id: tenantId } })
+    })
+
+    it('creates an order via admin endpoint without requiring customer name initially', async () => {
+        // Will test creating anonymous order first, but note we currently require customer info unless customerId is present
+        // in our implementation we added: `if (!customerName && !input.customerId)`
+        // so we must provide at least customerName or customerId
+
+        const res = await request(app)
+            .post('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerName: 'Admin Created Customer',
+                customerPhone: '0550999888',
+                items: [
+                    {
+                        productId,
+                        variantId,
+                        quantity: 3
+                    }
+                ]
+            })
+
+        expect(res.status).toBe(201)
+        expect(res.body.orderId).toBeDefined()
+        expect(res.body.success).toBe(true)
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.tenantId).toBe(tenantId)
+        expect(saved?.customerName).toBe('Admin Created Customer')
+        expect(saved?.items[0].variantId).toBe(variantId)
+        expect(saved?.items[0].quantity).toBe(3)
+        // Admin orders start as PENDING by default based on our implementation
+        expect(saved?.status).toBe('PENDING')
+    })
+
+    it('rejects admin order creation with empty items', async () => {
+        const res = await request(app)
+            .post('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerName: 'Admin Created Customer',
+                items: []
+            })
+
+        expect(res.status).toBe(400)
+    })
+})

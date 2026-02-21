@@ -6,6 +6,7 @@ import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
+import { resolveCashboxId } from '../cash/cashbox-resolver'
 
 const telegramService = new TelegramService()
 
@@ -28,6 +29,21 @@ type PublicOrderItemInput = {
 
 export type PublicOrderInput = {
     tenantId: string
+    customerName?: string | null
+    customerPhone?: string | null
+    customerAddress?: string | null
+    shippingWilayaCode?: string | null
+    shippingCommuneCode?: string | null
+    shippingAddressLine1?: string | null
+    shippingNotes?: string | null
+    deliveryMode?: string | null
+    shippingProvider?: string | null
+    items: PublicOrderItemInput[]
+}
+
+export type AdminOrderInput = {
+    tenantId: string
+    customerId?: string | null
     customerName?: string | null
     customerPhone?: string | null
     customerAddress?: string | null
@@ -101,7 +117,7 @@ export class OrdersService {
         return created
     }
 
-    async list(tenantId: string, filters: { status?: string; search?: string; startDate?: string; endDate?: string }) {
+    async list(tenantId: string, filters: { status?: string; search?: string; startDate?: string; endDate?: string }, pagination: { page: number; limit: number } = { page: 1, limit: 25 }) {
         const where: any = { tenantId }
 
         if (filters.status) {
@@ -118,28 +134,46 @@ export class OrdersService {
         if (filters.startDate || filters.endDate) {
             where.createdAt = {}
             if (filters.startDate) {
-                // Parse start date and set time to beginning of day
                 const start = new Date(filters.startDate)
                 start.setHours(0, 0, 0, 0)
                 where.createdAt.gte = start
             }
             if (filters.endDate) {
-                // Parse end date and set time to end of day
                 const end = new Date(filters.endDate)
                 end.setHours(23, 59, 59, 999)
                 where.createdAt.lte = end
             }
         }
 
-        return prisma.order.findMany({
-            where,
-            include: {
-                items: {
-                    include: { product: true, variant: true }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        })
+        const { page, limit } = pagination
+        const skip = (page - 1) * limit
+
+        const [items, total] = await Promise.all([
+            prisma.order.findMany({
+                where,
+                select: {
+                    id: true,
+                    status: true,
+                    totalAmount: true,
+                    customerName: true,
+                    customerPhone: true,
+                    customerId: true,
+                    createdAt: true,
+                    updatedAt: true
+                },
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit
+            }),
+            prisma.order.count({ where })
+        ])
+
+        return {
+            items,
+            total,
+            page,
+            totalPages: Math.max(1, Math.ceil(total / limit))
+        }
     }
 
     async findById(tenantId: string, id: string) {
@@ -183,9 +217,9 @@ export class OrdersService {
         const productIds = Array.from(new Set(order.items.map((i) => i.productId).filter(Boolean)))
         const pixelRows = productIds.length
             ? await prisma.productMetaPixel.findMany({
-                  where: { tenantId, productId: { in: productIds }, metaPixel: { isActive: true } },
-                  select: { metaPixel: { select: { pixelId: true } } }
-              })
+                where: { tenantId, productId: { in: productIds }, metaPixel: { isActive: true } },
+                select: { metaPixel: { select: { pixelId: true } } }
+            })
             : []
         const pixelIds = Array.from(
             new Set(
@@ -208,11 +242,11 @@ export class OrdersService {
     async updateStatus(
         tenantId: string,
         id: string,
-        status: string,
+        status?: string,
         actor?: { userId?: string | null },
-        opts?: { cashboxId?: string | null; method?: string | null; reference?: string | null; note?: string | null }
+        opts?: { cashboxId?: string | null; method?: string | null; reference?: string | null; note?: string | null; calledCustomer?: boolean; internalNotes?: string | null }
     ) {
-        if (!status || !ORDER_STATUSES.includes(status as any)) {
+        if (status && !ORDER_STATUSES.includes(status as any)) {
             throw new OrderValidationError(400, 'Invalid status value')
         }
 
@@ -223,13 +257,22 @@ export class OrdersService {
         if (!existing) throw new OrderValidationError(404, 'Order not found')
 
         const fromStatus = existing.status
-        const toStatus = status
-        if (fromStatus === toStatus) return prisma.order.findFirst({ where: { id, tenantId } })
+        const toStatus = status ?? existing.status
+        const shouldUpdateStatus = status !== undefined && fromStatus !== toStatus
 
-        if (fromStatus === 'SHIPPED' && toStatus === 'DELIVERED') {
-            const cashboxId = typeof opts?.cashboxId === 'string' ? opts.cashboxId.trim() : ''
-            if (!cashboxId) throw new OrderValidationError(400, 'cashboxId is required to mark an order DELIVERED')
+        if (!shouldUpdateStatus) {
+            if (opts?.calledCustomer === undefined && opts?.internalNotes === undefined) {
+                return prisma.order.findFirst({ where: { id, tenantId } })
+            }
+            const updateData: any = {}
+            if (opts?.calledCustomer !== undefined) updateData.calledCustomer = opts.calledCustomer
+            if (opts?.internalNotes !== undefined) updateData.internalNotes = opts.internalNotes
+
+            await prisma.order.updateMany({ where: { tenantId, id }, data: updateData })
+            return prisma.order.findFirst({ where: { id, tenantId } })
         }
+
+        // cashboxId is resolved inside the DELIVERED transition when needed.
 
         await prisma.$transaction(async (tx) => {
             const touchedProductIds = new Set<string>()
@@ -369,7 +412,7 @@ export class OrdersService {
                 }
 
                 // CONFIRMED -> CANCELLED : release reserved.
-                    if (fromStatus === 'CONFIRMED' && toStatus === 'CANCELLED') {
+                if (fromStatus === 'CONFIRMED' && toStatus === 'CANCELLED') {
                     if (variantBefore.reserved < qty) throw new OrderValidationError(409, 'Insufficient reserved stock')
 
                     const result = await tx.productVariant.updateMany({
@@ -534,7 +577,7 @@ export class OrdersService {
                     actor
                 )
 
-                const cashboxId = typeof opts?.cashboxId === 'string' ? opts.cashboxId.trim() : ''
+                const cashboxId = await resolveCashboxId(tx, tenantId, opts?.cashboxId, actor?.userId ?? null)
                 if (!cashboxId) throw new OrderValidationError(400, 'cashboxId is required to mark an order DELIVERED')
 
                 const openSession = await tx.cashSession.findFirst({
@@ -579,7 +622,11 @@ export class OrdersService {
                 await mirrorCashTransactionToPayments(tx, tenantId, cashTx)
             }
 
-            const updated = await tx.order.updateMany({ where: { tenantId, id }, data: { status: toStatus } })
+            const updateData: any = { status: toStatus }
+            if (opts?.calledCustomer !== undefined) updateData.calledCustomer = opts.calledCustomer
+            if (opts?.internalNotes !== undefined) updateData.internalNotes = opts.internalNotes
+
+            const updated = await tx.order.updateMany({ where: { tenantId, id }, data: updateData })
             if (updated.count !== 1) throw new OrderValidationError(404, 'Order not found')
         })
 
@@ -876,6 +923,284 @@ export class OrdersService {
         })
 
         // Fire and forget notification
+        const finalOrder = await prisma.order.findFirst({
+            where: { id: order.id, tenantId: input.tenantId },
+            include: {
+                items: {
+                    include: { product: true, variant: true }
+                }
+            }
+        })
+
+        if (finalOrder) {
+            telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
+        }
+
+        return finalOrder
+    }
+
+    async createAdminOrder(tenantId: string, input: AdminOrderInput, actor?: { userId?: string | null }) {
+        // No subscription limit checks for admin order creation.
+
+        const customerName = (input.customerName || '').trim()
+        const customerPhone = (input.customerPhone || '').trim()
+        const deliveryMode = (input.deliveryMode || 'home').toLowerCase()
+
+        // For admin orders, we can make customer info optional if they just want to create a quick order,
+        // but typically an order has a customer. Let's enforce name if phone is missing, or vice versa,
+        // or just let them create empty ones if they really want, but let's stick to requiring name for now.
+        if (!customerName && !input.customerId) {
+            throw new OrderValidationError(400, 'Customer name or existing customer is required')
+        }
+
+        if (!Array.isArray(input.items) || input.items.length === 0) {
+            throw new OrderValidationError(400, 'At least one item is required')
+        }
+
+        const normalizedItems = input.items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId || undefined,
+            quantity: Number(item.quantity || 0)
+        }))
+
+        normalizedItems.forEach((item) => {
+            if (!item.productId) {
+                throw new OrderValidationError(400, 'Product ID is required for each item')
+            }
+            if (!Number.isFinite(item.quantity) || item.quantity < 1) {
+                throw new OrderValidationError(400, 'Quantity must be at least 1')
+            }
+        })
+
+        const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
+        const variantIds = Array.from(
+            new Set(
+                normalizedItems
+                    .map((item) => item.variantId)
+                    .filter((v): v is string => typeof v === 'string' && v.length > 0)
+            )
+        )
+        const productIdsWithoutVariant = Array.from(
+            new Set(normalizedItems.filter((item) => !item.variantId).map((item) => item.productId))
+        )
+
+        const products = await prisma.product.findMany({
+            where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
+            select: { id: true, slug: true, price: true, title: true, stock: true }
+        })
+
+        if (products.length !== productIds.length) {
+            throw new OrderValidationError(400, 'Some products are invalid or unavailable')
+        }
+
+        const productMap = new Map(products.map((p) => [p.id, p]))
+
+        const variantsById = variantIds.length
+            ? await prisma.productVariant.findMany({
+                where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
+                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+            })
+            : []
+
+        if (variantsById.length !== variantIds.length) {
+            throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
+        }
+
+        const defaultVariants = productIdsWithoutVariant.length
+            ? await prisma.productVariant.findMany({
+                where: {
+                    tenantId: input.tenantId,
+                    productId: { in: productIdsWithoutVariant },
+                    isActive: true,
+                    optionValues: { none: {} }
+                },
+                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+            })
+            : []
+
+        const variantMap = new Map(variantsById.map((v) => [v.id, v]))
+        const defaultVariantByProductId = new Map(defaultVariants.map((v) => [v.productId, v]))
+
+        if (productIdsWithoutVariant.length > 0) {
+            const optionRows = await prisma.productOption.findMany({
+                where: { tenantId: input.tenantId, productId: { in: productIdsWithoutVariant } },
+                select: { productId: true },
+                distinct: ['productId']
+            })
+            const productsWithOptions = new Set(optionRows.map((r) => r.productId))
+
+            for (const pid of productIdsWithoutVariant) {
+                if (defaultVariantByProductId.has(pid)) continue
+                if (productsWithOptions.has(pid)) continue
+
+                const product = productMap.get(pid)
+                if (!product) continue
+
+                const created = await prisma.productVariant.create({
+                    data: {
+                        tenantId: input.tenantId,
+                        productId: pid,
+                        sku: suggestSkuFromProduct(product.slug, ''),
+                        price: product.price,
+                        stock: product.stock,
+                        reserved: 0,
+                        safetyStock: 0,
+                        trackInventory: true,
+                        isActive: true
+                    }
+                })
+                defaultVariantByProductId.set(pid, created as any)
+            }
+        }
+
+        const now = new Date()
+        const activeBundleDeals = await prisma.productBundleDeal.findMany({
+            where: {
+                tenantId: input.tenantId,
+                productId: { in: productIds },
+                isActive: true,
+                AND: [
+                    { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+                    { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }
+                ]
+            },
+            select: { productId: true, bundleQty: true, bundlePrice: true }
+        })
+
+        const bundleDealsByProductId = new Map<string, { bundleQty: number; bundlePrice: number }[]>()
+        for (const d of activeBundleDeals) {
+            const arr = bundleDealsByProductId.get(d.productId) ?? []
+            arr.push({ bundleQty: d.bundleQty, bundlePrice: Number(d.bundlePrice) })
+            bundleDealsByProductId.set(d.productId, arr)
+        }
+
+        let totalCents = 0
+        const validatedItems = normalizedItems.map((item) => {
+            const product = productMap.get(item.productId)!
+            const variant =
+                item.variantId
+                    ? variantMap.get(item.variantId)
+                    : defaultVariantByProductId.get(product.id)
+
+            if (!variant || variant.productId !== product.id) {
+                throw new OrderValidationError(400, 'Variant selection is required for this product')
+            }
+
+            const price = Number(variant.price ?? product.price)
+            const availableStock = variant.trackInventory
+                ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
+                : Number.POSITIVE_INFINITY
+            const trackInventory = variant.trackInventory
+
+            // Note: Admins can force order creation even if stock is insufficient if they need to,
+            // but for now we follow the same strict inventory checks.
+            if (trackInventory && item.quantity > availableStock) {
+                throw new OrderValidationError(400, `Insufficient stock for ${product.title}`)
+            }
+
+            const unitPriceCents = moneyToCents(price)
+            const bundleDeals = bundleDealsByProductId.get(product.id) ?? []
+            const pricing = computeBestBundleTotal({
+                quantity: item.quantity,
+                unitPriceCents,
+                bundleDeals: bundleDeals.map((d) => ({
+                    bundleQty: d.bundleQty,
+                    bundlePriceCents: moneyToCents(d.bundlePrice)
+                }))
+            })
+            totalCents += pricing.bestTotalCents
+
+            return {
+                productId: product.id,
+                variantId: variant.id,
+                quantity: item.quantity,
+                price,
+                lineTotal: centsToMoney(pricing.bestTotalCents),
+                pricingBreakdown: pricing,
+                trackInventory,
+                reserved: variant.reserved,
+                safetyStock: variant.safetyStock,
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
+            }
+        })
+
+        let shippingProvider = null
+        if (input.shippingProvider) {
+            const providerUpper = input.shippingProvider.toUpperCase()
+            const validProviders = ['MAYSTRO', 'YALIDINE', 'ECOTRACK', 'ZR_EXPRESS', 'SELF']
+            if (validProviders.includes(providerUpper)) {
+                shippingProvider = providerUpper as any
+            }
+        }
+
+        let actualCustomerName = customerName
+        let actualCustomerPhone = customerPhone
+
+        // If customerId is provided, we should probably fetch the customer details
+        if (input.customerId && (!actualCustomerName || !actualCustomerPhone)) {
+            const customer = await prisma.customer.findFirst({
+                where: { id: input.customerId, tenantId }
+            })
+            if (customer) {
+                if (!actualCustomerName) actualCustomerName = customer.name
+                if (!actualCustomerPhone) actualCustomerPhone = customer.phone ?? ''
+            }
+        }
+
+        const order = await prisma.$transaction(async (tx) => {
+            const createdOrder = await tx.order.create({
+                data: {
+                    tenantId: input.tenantId,
+                    customerId: input.customerId || null,
+                    customerName: actualCustomerName,
+                    customerPhone: actualCustomerPhone,
+                    customerAddress: input.customerAddress || null,
+                    deliveryMode,
+                    shippingProvider,
+                    shippingWilayaCode: input.shippingWilayaCode || null,
+                    shippingCommuneCode: input.shippingCommuneCode || null,
+                    shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
+                    shippingNotes: input.shippingNotes || null,
+                    totalAmount: centsToMoney(totalCents),
+                    status: 'PENDING'
+                }
+            })
+
+            await tx.orderItem.createMany({
+                data: validatedItems.map((item) => ({
+                    tenantId: input.tenantId,
+                    orderId: createdOrder.id,
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                    price: item.price,
+                    lineTotal: item.lineTotal,
+                    pricingBreakdown: item.pricingBreakdown as any
+                }))
+            })
+
+            await tx.productVariant.updateMany({
+                where: { tenantId: input.tenantId, id: { in: validatedItems.map((i) => i.variantId) } },
+                data: { skuLocked: true }
+            })
+
+            for (const item of validatedItems) {
+                if (item.trackInventory !== false) {
+                    const current = await tx.productVariant.findFirst({
+                        where: { id: item.variantId, tenantId: input.tenantId },
+                        select: { stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    })
+                    if (!current) throw new OrderValidationError(409, 'Insufficient stock')
+                    if (current.trackInventory === false) continue
+                    if (current.stock < item.quantity + current.reserved + current.safetyStock) {
+                        throw new OrderValidationError(409, 'Insufficient stock')
+                    }
+                }
+            }
+
+            return createdOrder
+        })
+
         const finalOrder = await prisma.order.findFirst({
             where: { id: order.id, tenantId: input.tenantId },
             include: {

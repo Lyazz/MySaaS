@@ -348,11 +348,21 @@
         <div class="flex gap-2">
           <div class="flex-1 relative">
             <BaseSelect
-              v-model="selectedCustomerId"
+              :model-value="selectedCustomerId"
+              @update:model-value="(val) => {
+                if (val === 'NEW') {
+                  showCustomerModal = true;
+                } else {
+                  selectedCustomerId = val as string;
+                }
+              }"
               class="w-full text-sm pl-9 bg-slate-50 border-slate-100 hover:bg-slate-100 transition-colors"
             >
               <option value="">
-                {{ t('admin.pages.pos.customer.addClient') }}
+                Default Client
+              </option>
+              <option value="NEW" class="text-teal-600 font-bold">
+                + {{ t('admin.pages.pos.customer.addClient') }}
               </option>
               <option
                 v-for="c in customers"
@@ -504,6 +514,12 @@
       @confirm="handlePaymentConfirm"
     />
 
+    <PosCustomerModal
+      v-if="showCustomerModal"
+      @close="showCustomerModal = false"
+      @created="onCustomerCreated"
+    />
+
     <!-- Variant Picker Modal -->
     <TransitionRoot
       appear
@@ -594,6 +610,7 @@ import { useAuthStore } from '~/stores/auth'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import PosPaymentModal from '~/components/pos/PosPaymentModal.vue'
+import PosCustomerModal from '~/components/pos/PosCustomerModal.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -676,9 +693,16 @@ const cartTotal = computed(() => {
 // Modals & UI State
 const showPaymentModal = ref(false)
 const showCart = ref(false)
+const showCustomerModal = ref(false)
 const placingSale = ref(false)
 const selectedCustomerId = ref('')
 const customers = ref<any[]>([]) // Placeholder for customers
+
+function onCustomerCreated(customer: any) {
+  customers.value.push(customer)
+  selectedCustomerId.value = customer.id
+  showCustomerModal.value = false
+}
 
 const variantModal = reactive({
   open: false,
@@ -867,7 +891,8 @@ async function handlePaymentConfirm(payment: any) {
     alert(t('admin.pages.pos.alerts.saleCreated'))
   } catch (e: any) {
     console.error('Sale failed', e)
-    alert(t('admin.pages.pos.alerts.saleFailed', { message: e.message || t('admin.pages.pos.alerts.unknownError') }))
+    const errorMessage = e.data?.statusMessage || e.data?.message || e.message || t('admin.pages.pos.alerts.unknownError')
+    alert(t('admin.pages.pos.alerts.saleFailed', { message: errorMessage }))
   } finally {
     placingSale.value = false
   }

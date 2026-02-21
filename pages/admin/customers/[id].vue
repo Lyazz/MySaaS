@@ -9,9 +9,19 @@
           <Icon name="lucide:arrow-left" class="w-4 h-4 mr-1" />
           {{ t('admin.nav.customers') }}
         </NuxtLink>
-        <h2 class="text-2xl font-bold text-gray-800 mt-2">
-          {{ summary?.name || t('admin.pages.customers.detail.fallbackTitle') }}
-        </h2>
+        <div class="flex items-center gap-3 mt-2">
+          <h2 class="text-2xl font-bold text-gray-800">
+            {{ summary?.name || t('admin.pages.customers.detail.fallbackTitle') }}
+          </h2>
+          <NuxtLink
+            v-if="summary"
+            :to="`/admin/customers/edit/${summary.id}`"
+            class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+          >
+            <Icon name="lucide:pencil" class="w-4 h-4 mr-1.5" />
+            {{ t('admin.common.edit') }}
+          </NuxtLink>
+        </div>
         <p class="text-gray-600 mt-1">
           {{ summary?.phone || '' }}
           <span v-if="summary?.address"> · {{ summary?.address }}</span>
@@ -91,38 +101,6 @@
     </div>
 
     <div v-else class="space-y-6">
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">
-            {{ t('admin.pages.customers.detail.stats.openingBalance') }}
-          </h3>
-          <button
-            type="button"
-            class="px-3 py-1.5 rounded-md text-sm font-semibold bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50"
-            :disabled="savingOpeningBalance"
-            @click="saveOpeningBalance"
-          >
-            {{ savingOpeningBalance ? t('admin.common.saving') : t('admin.common.save') }}
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div class="md:col-span-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              {{ t('admin.pages.customers.detail.stats.openingBalance') }}
-            </label>
-            <BaseInput
-              v-model="openingBalanceInput"
-              type="number"
-              placeholder="0"
-            />
-          </div>
-          <div class="md:col-span-2 text-sm text-gray-500">
-            {{ t('admin.pages.customers.detail.stats.openingBalanceHint') }}
-          </div>
-        </div>
-      </div>
-
       <div v-if="sales.length > 0" class="ui-card overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200">
           <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.nav.salesItem') }}</h3>
@@ -179,7 +157,7 @@
                       class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
                       <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                      <span>{{ t('common.view') }}</span>
+                      <span>{{ t('admin.common.view') }}</span>
                     </NuxtLink>
                   </div>
                 </td>
@@ -242,7 +220,7 @@
                       class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
                       <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                      <span>{{ t('common.view') }}</span>
+                      <span>{{ t('admin.common.view') }}</span>
                     </NuxtLink>
                     <span v-else class="text-slate-400">—</span>
                   </div>
@@ -296,7 +274,6 @@ interface CustomerPayment {
 }
 
 const loading = ref(true)
-const savingOpeningBalance = ref(false)
 const summary = ref<{
   id: string
   phone: string
@@ -310,7 +287,6 @@ const summary = ref<{
 } | null>(null)
 const sales = ref<CustomerSale[]>([])
 const payments = ref<CustomerPayment[]>([])
-const openingBalanceInput = ref('0')
 
 const totalSpent = computed(() => sales.value.reduce((acc, o) => acc + (o.totalAmount || 0), 0))
 const totalPaid = computed(() => payments.value.reduce((acc, p) => acc + (Number(p.amount) || 0), 0))
@@ -319,7 +295,7 @@ const currentBalance = computed(() => summary.value?.currentBalance ?? (summary.
 async function fetchCustomer() {
   loading.value = true
   try {
-    const data = await $fetch<any>(`/api/admin/customers/${encodeURIComponent(customerId.value)}`, {
+    const data = await $fetch(`/api/admin/customers/${encodeURIComponent(customerId.value)}`, {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
@@ -328,28 +304,10 @@ async function fetchCustomer() {
     summary.value = data.summary
     sales.value = data.sales ?? []
     payments.value = data.payments ?? []
-    openingBalanceInput.value = summary.value ? String(summary.value.openingBalance ?? 0) : '0'
   } catch (error) {
     console.error('Failed to fetch customer:', error)
   } finally {
     loading.value = false
-  }
-}
-
-async function saveOpeningBalance() {
-  if (!summary.value) return
-  savingOpeningBalance.value = true
-  try {
-    await $fetch(`/api/admin/customers/${encodeURIComponent(customerId.value)}`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { openingBalance: openingBalanceInput.value }
-    })
-    await fetchCustomer()
-  } catch (error) {
-    console.error('Failed to update opening balance:', error)
-  } finally {
-    savingOpeningBalance.value = false
   }
 }
 

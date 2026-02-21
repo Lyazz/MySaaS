@@ -14,7 +14,9 @@ export class SalesController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { search, startDate, endDate } = req.query as { search?: string; startDate?: string; endDate?: string }
+            const { search, startDate, endDate, userId, page: pageStr, limit: limitStr } = req.query as {
+                search?: string; startDate?: string; endDate?: string; userId?: string; page?: string; limit?: string
+            }
 
             const start = parseOptionalDate(startDate)
             if (start === 'invalid') {
@@ -26,13 +28,21 @@ export class SalesController {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid "endDate"' })
             }
 
-            const sales = await service.list(tenant.id, {
-                search: typeof search === 'string' ? search : undefined,
-                startDate: start,
-                endDate: end
-            })
+            const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1)
+            const limit = Math.min(100, Math.max(1, parseInt(limitStr ?? '25', 10) || 25))
 
-            res.json(sales)
+            const result = await service.list(
+                tenant.id,
+                {
+                    search: typeof search === 'string' ? search : undefined,
+                    startDate: start,
+                    endDate: end,
+                    userId: typeof userId === 'string' ? userId : undefined
+                },
+                { page, limit }
+            )
+
+            res.json(result)
         } catch (error) {
             console.error('List sales error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -96,11 +106,11 @@ export class SalesController {
                 },
                 req.subscription
                     ? {
-                          planCode: req.subscription.planCode,
-                          interval: req.subscription.interval,
-                          currentPeriodStart: req.subscription.currentPeriodStart,
-                          currentPeriodEnd: req.subscription.currentPeriodEnd
-                      }
+                        planCode: req.subscription.planCode,
+                        interval: req.subscription.interval,
+                        currentPeriodStart: req.subscription.currentPeriodStart,
+                        currentPeriodEnd: req.subscription.currentPeriodEnd
+                    }
                     : null,
                 { userId: user?.id ?? null }
             )
@@ -108,7 +118,12 @@ export class SalesController {
             res.status(201).json({ success: true, saleId: (sale as any)?.id, sale })
         } catch (error: any) {
             if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: typeof error?.code === 'string' ? error.code : undefined,
+                    meta: error?.meta
+                })
             }
             console.error('Create sale error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

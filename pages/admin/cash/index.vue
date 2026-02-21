@@ -1,6 +1,7 @@
 <template>
-  <div class="max-w-7xl mx-auto space-y-6">
-    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+  <div class="max-w-7xl mx-auto space-y-6 pb-20 md:pb-6">
+    <!-- Header -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
           {{ t('admin.pages.cash.title') }}
@@ -10,208 +11,433 @@
         </p>
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-          @click="openCustomerPaymentModal"
+      <!-- Actions Menu -->
+      <Menu as="div" class="relative hidden md:block">
+        <MenuButton class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+          <Icon name="lucide:plus" class="h-4 w-4" />
+          {{ t('admin.pages.cash.actions.newAction') }}
+          <Icon name="lucide:chevron-down" class="h-4 w-4" />
+        </MenuButton>
+        <transition
+          enter-active-class="transition ease-out duration-100"
+          enter-from-class="transform opacity-0 scale-95"
+          enter-to-class="transform opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-75"
+          leave-from-class="transform opacity-100 scale-100"
+          leave-to-class="transform opacity-0 scale-95"
         >
-          <Icon name="lucide:user-round" class="h-4 w-4" />
-          {{ t('admin.pages.cash.actions.newCustomerPayment') }}
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-          @click="openSupplierPaymentModal"
-        >
-          <Icon name="lucide:truck" class="h-4 w-4" />
-          {{ t('admin.pages.cash.actions.newSupplierPayment') }}
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-          @click="openExpenseModal('EXPENSE')"
-        >
-          <Icon name="lucide:minus-circle" class="h-4 w-4" />
-          {{ t('admin.pages.cash.actions.newExpense') }}
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-          @click="openExpenseModal('CHARGE')"
-        >
-          <Icon name="lucide:receipt" class="h-4 w-4" />
-          {{ t('admin.pages.cash.actions.newCharge') }}
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
-          @click="transferOpen = true"
-        >
-          <Icon name="lucide:arrow-left-right" class="h-4 w-4" />
-          {{ t('admin.pages.cash.actions.transfer') }}
-        </button>
+          <MenuItems class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+            <div class="py-1">
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  @click="openCustomerPaymentModal"
+                >
+                  <Icon name="lucide:user-round" class="h-4 w-4 text-slate-400" />
+                  {{ t('admin.pages.cash.actions.newCustomerPayment') }}
+                </button>
+              </MenuItem>
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  @click="openSupplierPaymentModal"
+                >
+                  <Icon name="lucide:truck" class="h-4 w-4 text-slate-400" />
+                  {{ t('admin.pages.cash.actions.newSupplierPayment') }}
+                </button>
+              </MenuItem>
+              <div class="my-1 border-t border-slate-100" />
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  @click="openExpenseModal('EXPENSE')"
+                >
+                  <Icon name="lucide:minus-circle" class="h-4 w-4 text-slate-400" />
+                  {{ t('admin.pages.cash.actions.newExpense') }}
+                </button>
+              </MenuItem>
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  @click="openExpenseModal('CHARGE')"
+                >
+                  <Icon name="lucide:receipt" class="h-4 w-4 text-slate-400" />
+                  {{ t('admin.pages.cash.actions.newCharge') }}
+                </button>
+              </MenuItem>
+              <div class="my-1 border-t border-slate-100" />
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-teal-700']"
+                  @click="transferOpen = true"
+                >
+                  <Icon name="lucide:arrow-left-right" class="h-4 w-4 text-teal-600" />
+                  {{ t('admin.pages.cash.actions.transfer') }}
+                </button>
+              </MenuItem>
+            </div>
+          </MenuItems>
+        </transition>
+      </Menu>
+    </div>
+
+    <!-- Mobile FAB -->
+    <Menu as="div" class="fixed bottom-6 right-6 z-40 md:hidden">
+      <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full bg-teal-600 text-white shadow-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+        <Icon name="lucide:plus" class="h-6 w-6" />
+      </MenuButton>
+      <transition
+        enter-active-class="transition ease-out duration-100"
+        enter-from-class="transform opacity-0 scale-95"
+        enter-to-class="transform opacity-100 scale-100"
+        leave-active-class="transition ease-in duration-75"
+        leave-from-class="transform opacity-100 scale-100"
+        leave-to-class="transform opacity-0 scale-95"
+      >
+        <MenuItems class="absolute bottom-full right-0 mb-2 w-64 origin-bottom-right rounded-lg bg-white shadow-xl ring-1 ring-black/5 focus:outline-none">
+          <div class="py-1">
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                @click="openCustomerPaymentModal"
+              >
+                <Icon name="lucide:user-round" class="h-5 w-5 text-slate-400" />
+                {{ t('admin.pages.cash.actions.newCustomerPayment') }}
+              </button>
+            </MenuItem>
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                @click="openSupplierPaymentModal"
+              >
+                <Icon name="lucide:truck" class="h-5 w-5 text-slate-400" />
+                {{ t('admin.pages.cash.actions.newSupplierPayment') }}
+              </button>
+            </MenuItem>
+            <div class="my-1 border-t border-slate-100" />
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                @click="openExpenseModal('EXPENSE')"
+              >
+                <Icon name="lucide:minus-circle" class="h-5 w-5 text-slate-400" />
+                {{ t('admin.pages.cash.actions.newExpense') }}
+              </button>
+            </MenuItem>
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                @click="openExpenseModal('CHARGE')"
+              >
+                <Icon name="lucide:receipt" class="h-5 w-5 text-slate-400" />
+                {{ t('admin.pages.cash.actions.newCharge') }}
+              </button>
+            </MenuItem>
+            <div class="my-1 border-t border-slate-100" />
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-teal-700']"
+                @click="transferOpen = true"
+              >
+                <Icon name="lucide:arrow-left-right" class="h-5 w-5 text-teal-600" />
+                {{ t('admin.pages.cash.actions.transfer') }}
+              </button>
+            </MenuItem>
+          </div>
+        </MenuItems>
+      </transition>
+    </Menu>
+
+    <!-- Summary Statistics -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+            <Icon name="lucide:arrow-down-left" class="h-5 w-5" />
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.totalIn') || 'Total In (Today)' }}</p>
+            <p class="mt-0.5 text-lg font-bold text-emerald-600">{{ formatCurrency(todayStats.totalIn) }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
+            <Icon name="lucide:arrow-up-right" class="h-5 w-5" />
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.totalOut') || 'Total Out (Today)' }}</p>
+            <p class="mt-0.5 text-lg font-bold text-rose-600">{{ formatCurrency(todayStats.totalOut) }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <Icon name="lucide:wallet" class="h-5 w-5" />
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.activeSessions') || 'Active Sessions' }}</p>
+            <p class="mt-0.5 text-lg font-bold text-slate-900">{{ activeSessions }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+            <Icon name="lucide:trending-up" class="h-5 w-5" />
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.netBalance') || 'Net (Today)' }}</p>
+            <p class="mt-0.5 text-lg font-bold" :class="todayStats.net >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+              {{ formatCurrency(todayStats.net) }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <section class="lg:col-span-1 rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm h-fit">
-        <div class="flex items-center justify-between gap-3 mb-4">
-          <h3 class="font-semibold text-slate-900">
-            {{ t('admin.pages.cash.cashboxes.title') }}
-          </h3>
+    <!-- Error Message -->
+    <div v-if="errorMessage" class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+      <div class="flex items-start gap-3">
+        <Icon name="lucide:triangle-alert" class="mt-0.5 h-4 w-4" />
+        <div class="min-w-0">
+          <p class="font-medium">{{ t('admin.pages.cash.errors.title') }}</p>
+          <p class="mt-1 text-red-700/80 break-words">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cashboxes - Horizontal Scrollable -->
+    <section class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h3 class="font-semibold text-slate-900">
+          {{ t('admin.pages.cash.cashboxes.title') }}
+        </h3>
+        <div class="flex items-center gap-2">
           <button
             type="button"
-            class="text-sm font-medium text-teal-600 hover:text-teal-700"
+            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+            :disabled="loadingCashboxes"
+            @click="openCashboxCreate"
+          >
+            <Icon name="lucide:plus" class="h-3.5 w-3.5" />
+            {{ t('admin.pages.cash.cashboxes.create') }}
+          </button>
+          <button
+            type="button"
+            class="text-sm font-medium text-teal-600 hover:text-teal-700 disabled:opacity-50"
             :disabled="loadingCashboxes"
             @click="refreshAll"
           >
             {{ t('admin.common.refresh') }}
           </button>
         </div>
+      </div>
 
-        <div v-if="loadingCashboxes" class="space-y-3">
-          <div v-for="i in 3" :key="i" class="h-24 rounded-xl bg-slate-100 animate-pulse" />
+      <div v-if="loadingCashboxes" class="flex gap-3 overflow-x-auto pb-2">
+        <div v-for="i in 3" :key="i" class="min-w-[280px] h-32 rounded-xl bg-slate-100 animate-pulse" />
+      </div>
+
+      <div v-else-if="cashboxes.length === 0" class="rounded-xl border border-dashed border-slate-200 p-6 text-center">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+          <Icon name="lucide:inbox" class="h-5 w-5 text-slate-400" />
         </div>
+        <p class="mt-2 text-sm font-medium text-slate-900">
+          {{ t('admin.pages.cash.cashboxes.empty') }}
+        </p>
+        <p class="mt-1 text-xs text-slate-500">
+          {{ t('admin.pages.cash.cashboxes.emptyHint') }}
+        </p>
+        <button
+          type="button"
+          class="mt-4 inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-700"
+          @click="openCashboxCreate"
+        >
+          <Icon name="lucide:plus" class="h-3.5 w-3.5" />
+          {{ t('admin.pages.cash.cashboxes.create') }}
+        </button>
+      </div>
 
-        <div v-else class="space-y-3">
-          <div
-            v-for="c in cashboxes"
-            :key="c.id"
-            class="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-slate-300 hover:shadow-sm"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                   <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                      <Icon name="lucide:wallet" class="h-4 w-4" />
-                   </div>
-                   <p class="font-semibold text-slate-900 truncate">
-                      {{ c.name }}
-                   </p>
+      <div v-else class="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          v-for="c in cashboxes"
+          :key="c.id"
+          class="group relative min-w-[280px] overflow-hidden rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-slate-300 hover:shadow-sm"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                  <Icon name="lucide:wallet" class="h-4 w-4" />
                 </div>
-                
-                <div class="mt-3">
-                    <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {{ t('admin.pages.cash.cashboxes.status') }}
-                    </p>
-                    <div class="mt-1 flex items-center gap-2">
-                        <span 
-                          class="inline-flex h-2.5 w-2.5 rounded-full"
-                          :class="c.openSession ? 'bg-emerald-500' : 'bg-slate-300'"
-                        />
-                        <span class="text-sm font-medium" :class="c.openSession ? 'text-emerald-700' : 'text-slate-600'">
-                           <span v-if="c.openSession">
-                            {{ t('admin.pages.cash.cashboxes.openSession', { id: c.openSession.id.substring(0, 8) }) }}
-                          </span>
-                          <span v-else>
-                            {{ t('admin.pages.cash.cashboxes.closed') }}
-                          </span>
-                        </span>
-                    </div>
-                </div>
+                <p class="font-semibold text-slate-900 truncate">
+                  {{ c.name }}
+                </p>
               </div>
-
-              <NuxtLink
-                :to="`/admin/cash/${c.id}`"
-                class="absolute top-4 right-4 p-2 text-slate-400 opacity-0 transition-all hover:text-teal-600 group-hover:opacity-100"
-                :title="t('common.view')"
-              >
-                <Icon name="lucide:arrow-right" class="h-5 w-5" />
-              </NuxtLink>
-            </div>
-
-            <div class="mt-4 pt-4 border-t border-slate-100 flex gap-2">
-              <button
-                v-if="!c.openSession"
-                type="button"
-                class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-xs font-medium text-white hover:bg-teal-700"
-                @click="openOpenSession(c.id)"
-              >
-                <Icon name="lucide:play" class="h-3.5 w-3.5" />
-                {{ t('admin.pages.cash.cashboxes.open') }}
-              </button>
-
-              <button
-                v-else
-                type="button"
-                class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                @click="openCloseSession(c.openSession.id)"
-              >
-                <Icon name="lucide:lock" class="h-3.5 w-3.5" />
-                {{ t('admin.pages.cash.cashboxes.close') }}
-              </button>
-               <NuxtLink
-                :to="`/admin/cash/${c.id}`"
-                class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              >
-                {{ t('common.details') }}
-              </NuxtLink>
-            </div>
-          </div>
-
-          <div v-if="cashboxes.length === 0" class="rounded-xl border border-dashed border-slate-200 p-6 text-center">
-             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                <Icon name="lucide:inbox" class="h-5 w-5 text-slate-400" />
-             </div>
-            <p class="mt-2 text-sm font-medium text-slate-900">
-              {{ t('admin.pages.cash.cashboxes.empty') }}
-            </p>
-            <p class="mt-1 text-xs text-slate-500">
-              {{ t('admin.pages.cash.cashboxes.emptyHint') }}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="lg:col-span-2 rounded-2xl border border-slate-200/70 bg-white shadow-sm overflow-hidden h-fit">
-        <div class="border-b border-slate-200/70 p-5">
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h3 class="font-semibold text-slate-900">
-                {{ t('admin.pages.cash.transactions.title') }}
-              </h3>
-              <p class="mt-1 text-sm text-slate-500">
-                {{ t('admin.pages.cash.transactions.subtitle') }}
-              </p>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full sm:w-auto">
-              <div class="flex flex-wrap gap-2">
-                <div class="min-w-[160px]">
-                  <BaseSelect v-model="filters.cashboxId" class="!bg-slate-50 !border-slate-200 !text-sm">
-                    <option value="">{{ t('admin.pages.cash.transactions.filters.allCashboxes') }}</option>
-                    <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
-                  </BaseSelect>
-                </div>
-                <div class="min-w-[140px]">
-                  <BaseSelect v-model="filters.type" class="!bg-slate-50 !border-slate-200 !text-sm">
-                    <option value="">{{ t('admin.pages.cash.transactions.filters.allTypes') }}</option>
-                    <option value="SALE_PAYMENT">{{ t('admin.pages.cash.transactions.types.SALE_PAYMENT') }}</option>
-                    <option value="CUSTOMER_PAYMENT">{{ t('admin.pages.cash.transactions.types.CUSTOMER_PAYMENT') }}</option>
-                    <option value="SUPPLIER_PAYMENT">{{ t('admin.pages.cash.transactions.types.SUPPLIER_PAYMENT') }}</option>
-                    <option value="EXPENSE">{{ t('admin.pages.cash.transactions.types.EXPENSE') }}</option>
-                    <option value="CHARGE">{{ t('admin.pages.cash.transactions.types.CHARGE') }}</option>
-                    <option value="TRANSFER">{{ t('admin.pages.cash.transactions.types.TRANSFER') }}</option>
-                  </BaseSelect>
-                </div>
-                <div class="min-w-[110px]">
-                  <BaseSelect v-model="filters.direction" class="!bg-slate-50 !border-slate-200 !text-sm">
-                    <option value="">{{ t('admin.pages.cash.transactions.filters.allDirections') }}</option>
-                    <option value="IN">{{ t('admin.pages.cash.directions.in') }}</option>
-                    <option value="OUT">{{ t('admin.pages.cash.directions.out') }}</option>
-                  </BaseSelect>
-                </div>
-              </div>
-              <div class="w-full">
-                <DateFilter
-                  v-model:start-date="filters.startDate"
-                  v-model:end-date="filters.endDate"
+              
+              <div class="mt-2 flex items-center gap-2">
+                <span 
+                  class="inline-flex h-2 w-2 rounded-full"
+                  :class="c.openSession ? 'bg-emerald-500' : 'bg-slate-300'"
                 />
+                <span class="text-xs font-medium" :class="c.openSession ? 'text-emerald-700' : 'text-slate-600'">
+                  <span v-if="c.openSession">
+                    {{ t('admin.pages.cash.cashboxes.openSession', { id: c.openSession.id.substring(0, 8) }) }}
+                  </span>
+                  <span v-else>
+                    {{ t('admin.pages.cash.cashboxes.closed') }}
+                  </span>
+                </span>
               </div>
             </div>
+
+            <NuxtLink
+              :to="`/admin/cash/${c.id}`"
+              class="shrink-0 p-2 text-slate-400 opacity-0 transition-all hover:text-teal-600 group-hover:opacity-100"
+              :title="t('common.view')"
+            >
+              <Icon name="lucide:arrow-right" class="h-4 w-4" />
+            </NuxtLink>
+          </div>
+
+          <div class="mt-3 flex gap-2">
+            <button
+              v-if="!c.openSession"
+              type="button"
+              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700"
+              @click="openOpenSession(c.id)"
+            >
+              <Icon name="lucide:play" class="h-3 w-3" />
+              {{ t('admin.pages.cash.cashboxes.open') }}
+            </button>
+
+            <button
+              v-else
+              type="button"
+              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              @click="openCloseSession(c.openSession.id)"
+            >
+              <Icon name="lucide:lock" class="h-3 w-3" />
+              {{ t('admin.pages.cash.cashboxes.close') }}
+            </button>
+            <NuxtLink
+              :to="`/admin/cash/${c.id}`"
+              class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            >
+              {{ t('common.details') }}
+            </NuxtLink>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Main Content - Full Width -->
+    <!-- Transactions & Sessions Tabs - Full Width -->
+    <section>
+      <TabGroup @change="onTabChange">
+          <div class="rounded-2xl border border-slate-200/70 bg-white shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200/70">
+              <TabList class="flex gap-4 px-5 pt-5">
+                <Tab v-slot="{ selected }" as="template">
+                  <button
+                    :class="[
+                      'px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none',
+                      selected
+                        ? 'border-b-2 border-teal-600 text-teal-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    ]"
+                  >
+                    {{ t('admin.pages.cash.transactions.title') }}
+                  </button>
+                </Tab>
+                <Tab v-slot="{ selected }" as="template">
+                  <button
+                    :class="[
+                      'px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none',
+                      selected
+                        ? 'border-b-2 border-teal-600 text-teal-600'
+                        : 'text-slate-600 hover:text-slate-900'
+                    ]"
+                  >
+                    {{ t('admin.pages.cash.sessions.title') }}
+                  </button>
+                </Tab>
+              </TabList>
+            </div>
+
+            <TabPanels>
+              <!-- Transactions Tab -->
+              <TabPanel>
+                <!-- Collapsible Filters -->
+                <Disclosure v-slot="{ open }" defaultOpen>
+                  <div class="border-b border-slate-200/70 px-5 py-4">
+                    <DisclosureButton class="flex w-full items-center justify-between text-left">
+                      <div class="flex items-center gap-2">
+                        <h3 class="font-semibold text-slate-900">{{ t('admin.pages.cash.transactions.filters.title') }}</h3>
+                        <span v-if="activeTransactionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+                          {{ activeTransactionFiltersCount }}
+                        </span>
+                      </div>
+                      <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5 text-slate-400" />
+                    </DisclosureButton>
+                    <transition
+                      enter-active-class="transition duration-200 ease-out"
+                      enter-from-class="opacity-0 -translate-y-1"
+                      enter-to-class="opacity-100 translate-y-0"
+                      leave-active-class="transition duration-150 ease-in"
+                      leave-from-class="opacity-100 translate-y-0"
+                      leave-to-class="opacity-0 -translate-y-1"
+                    >
+                      <DisclosurePanel class="pt-4 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          <BaseSelect v-model="filters.cashboxId" class="!bg-slate-50">
+                            <option value="">{{ t('admin.pages.cash.transactions.filters.allCashboxes') }}</option>
+                            <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
+                          </BaseSelect>
+                          <BaseSelect v-model="filters.type" class="!bg-slate-50">
+                            <option value="">{{ t('admin.pages.cash.transactions.filters.allTypes') }}</option>
+                            <option value="SALE_PAYMENT">{{ t('admin.pages.cash.transactions.types.SALE_PAYMENT') }}</option>
+                            <option value="CUSTOMER_PAYMENT">{{ t('admin.pages.cash.transactions.types.CUSTOMER_PAYMENT') }}</option>
+                            <option value="SUPPLIER_PAYMENT">{{ t('admin.pages.cash.transactions.types.SUPPLIER_PAYMENT') }}</option>
+                            <option value="EXPENSE">{{ t('admin.pages.cash.transactions.types.EXPENSE') }}</option>
+                            <option value="CHARGE">{{ t('admin.pages.cash.transactions.types.CHARGE') }}</option>
+                            <option value="TRANSFER">{{ t('admin.pages.cash.transactions.types.TRANSFER') }}</option>
+                          </BaseSelect>
+                          <BaseSelect v-model="filters.direction" class="!bg-slate-50">
+                            <option value="">{{ t('admin.pages.cash.transactions.filters.allDirections') }}</option>
+                            <option value="IN">{{ t('admin.pages.cash.directions.in') }}</option>
+                            <option value="OUT">{{ t('admin.pages.cash.directions.out') }}</option>
+                          </BaseSelect>
+                          <BaseSelect v-model="filters.method" class="!bg-slate-50">
+                            <option value="">{{ t('admin.pages.cash.transactions.filters.allMethods') }}</option>
+                            <option value="CASH">{{ t('admin.pages.cash.methods.CASH') }}</option>
+                            <option value="CARD">{{ t('admin.pages.cash.methods.CARD') }}</option>
+                            <option value="TRANSFER">{{ t('admin.pages.cash.methods.TRANSFER') }}</option>
+                            <option value="OTHER">{{ t('admin.pages.cash.methods.OTHER') }}</option>
+                          </BaseSelect>
+                          <BaseSelect v-model="filters.userId" class="!bg-slate-50">
+                            <option value="">{{ t('admin.pages.cash.transactions.filters.allUsers') }}</option>
+                            <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
+                          </BaseSelect>
+                        </div>
+                        <DateFilter v-model:start-date="filters.startDate" v-model:end-date="filters.endDate" />
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                          @click="resetTxFilters"
+                        >
+                          <Icon name="lucide:rotate-ccw" class="h-3.5 w-3.5" />
+                          {{ t('admin.common.reset') }}
+                        </button>
+                      </DisclosurePanel>
+                    </transition>
+                  </div>
+                </Disclosure>
 
         <div v-if="loadingTxs" class="p-10 text-center">
           <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600" />
@@ -232,188 +458,284 @@
           </p>
         </div>
 
-        <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-slate-200/70">
-            <thead class="bg-slate-50">
-              <tr>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  {{ t('admin.pages.cash.transactions.table.date') }}
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  {{ t('admin.pages.cash.transactions.table.cashbox') }}
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  {{ t('admin.pages.cash.transactions.table.type') }}
-                </th>
-                <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  {{ t('admin.pages.cash.transactions.table.method') }}
-                </th>
-                <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  {{ t('admin.pages.cash.transactions.table.amount') }}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200/70 bg-white">
-              <tr v-for="tx in txs" :key="tx.id" class="hover:bg-slate-50 transition-colors">
-                <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
-                  {{ formatDate(tx.createdAt) }}
-                </td>
-                <td class="px-5 py-4 text-sm font-medium text-slate-900">
-                  {{ cashboxName(tx.cashboxId) }}
-                </td>
-                <td class="px-5 py-4 text-sm text-slate-700">
-                  <div class="flex flex-col">
-                    <span class="font-medium text-slate-900">{{ typeLabel(tx.type) }}</span>
-                    <span v-if="tx.expenseCategory" class="text-xs text-slate-500 mt-0.5">
-                       {{ tx.expenseCategory }}
-                    </span>
-                    <span v-if="tx.reference" class="text-xs text-slate-500 mt-0.5">
-                       Ref: {{ tx.reference }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-5 py-4 text-sm text-slate-600">
-                   <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
+        <div v-else>
+          <div class="sm:hidden divide-y divide-slate-200/70">
+            <div v-for="tx in txs" :key="tx.id" class="p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-slate-900 truncate">{{ typeLabel(tx.type) }}</p>
+                  <p class="mt-0.5 text-xs text-slate-500">
+                    {{ formatDate(tx.createdAt) }}
+                  </p>
+                  <p class="mt-2 text-xs text-slate-600 truncate">
+                    {{ cashboxName(tx.cashboxId) }} · {{ userEmail(tx.createdByUserId) }}
+                  </p>
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-700">
                       <Icon v-if="tx.method === 'CASH'" name="lucide:banknote" class="h-3 w-3" />
                       <Icon v-else-if="tx.method === 'CARD'" name="lucide:credit-card" class="h-3 w-3" />
                       <Icon v-else name="lucide:arrow-left-right" class="h-3 w-3" />
                       {{ methodLabel(tx.method) }}
-                   </span>
-                </td>
-                <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+                    </span>
+                    <span v-if="tx.expenseCategory" class="rounded-md bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
+                      {{ tx.expenseCategory }}
+                    </span>
+                    <span v-if="tx.reference" class="rounded-md bg-slate-50 px-2 py-1 text-[11px] text-slate-600 truncate max-w-[220px]">
+                      Ref: {{ tx.reference }}
+                    </span>
+                  </div>
+                </div>
+                <p class="shrink-0 whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
                   {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
+                </p>
+              </div>
+            </div>
+          </div>
 
-    <section class="rounded-2xl border border-slate-200/70 bg-white shadow-sm overflow-hidden h-fit">
-      <div class="border-b border-slate-200/70 p-5">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h3 class="font-semibold text-slate-900">
-              {{ t('admin.pages.cash.sessions.title') }}
-            </h3>
-            <p class="mt-1 text-sm text-slate-500">
-              {{ t('admin.pages.cash.sessions.subtitle') }}
+          <div class="hidden sm:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200/70">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {{ t('admin.pages.cash.transactions.table.date') }}
+                  </th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {{ t('admin.pages.cash.transactions.table.cashbox') }}
+                  </th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {{ t('admin.pages.cash.transactions.table.user') }}
+                  </th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {{ t('admin.pages.cash.transactions.table.type') }}
+                  </th>
+                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {{ t('admin.pages.cash.transactions.table.method') }}
+                  </th>
+                  <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {{ t('admin.pages.cash.transactions.table.amount') }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200/70 bg-white">
+                <tr v-for="tx in txs" :key="tx.id" class="hover:bg-slate-50 transition-colors">
+                  <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
+                    {{ formatDate(tx.createdAt) }}
+                  </td>
+                  <td class="px-5 py-4 text-sm font-medium text-slate-900">
+                    {{ cashboxName(tx.cashboxId) }}
+                  </td>
+                  <td class="px-5 py-4 text-sm text-slate-600 max-w-[220px] truncate">
+                    {{ userEmail(tx.createdByUserId) }}
+                  </td>
+                  <td class="px-5 py-4 text-sm text-slate-700">
+                    <div class="flex flex-col">
+                      <span class="font-medium text-slate-900">{{ typeLabel(tx.type) }}</span>
+                      <span v-if="tx.expenseCategory" class="text-xs text-slate-500 mt-0.5">
+                        {{ tx.expenseCategory }}
+                      </span>
+                      <span v-if="tx.reference" class="text-xs text-slate-500 mt-0.5">
+                        Ref: {{ tx.reference }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-sm text-slate-600">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
+                      <Icon v-if="tx.method === 'CASH'" name="lucide:banknote" class="h-3 w-3" />
+                      <Icon v-else-if="tx.method === 'CARD'" name="lucide:credit-card" class="h-3 w-3" />
+                      <Icon v-else name="lucide:arrow-left-right" class="h-3 w-3" />
+                      {{ methodLabel(tx.method) }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+                    {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </TabPanel>
+        <!-- Sessions Tab -->
+        <TabPanel>
+          <!-- Collapsible Filters -->
+          <Disclosure v-slot="{ open }" defaultOpen>
+            <div class="border-b border-slate-200/70 px-5 py-4">
+              <DisclosureButton class="flex w-full items-center justify-between text-left">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-semibold text-slate-900">{{ t('admin.pages.cash.sessions.filters.title') }}</h3>
+                  <span v-if="activeSessionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+                    {{ activeSessionFiltersCount }}
+                  </span>
+                </div>
+                <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5 text-slate-400" />
+              </DisclosureButton>
+              <transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0 -translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-1"
+              >
+                <DisclosurePanel class="pt-4 space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <BaseSelect v-model="sessionFilters.cashboxId" class="!bg-slate-50">
+                      <option value="">{{ t('admin.pages.cash.sessions.filters.allCashboxes') }}</option>
+                      <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
+                    </BaseSelect>
+                    <BaseSelect v-model="sessionFilters.status" class="!bg-slate-50">
+                      <option value="">{{ t('admin.pages.cash.sessions.filters.allStatuses') }}</option>
+                      <option value="OPEN">{{ t('admin.pages.cash.status.OPEN') }}</option>
+                      <option value="CLOSED">{{ t('admin.pages.cash.status.CLOSED') }}</option>
+                    </BaseSelect>
+                    <BaseSelect v-model="sessionFilters.userId" class="!bg-slate-50">
+                      <option value="">{{ t('admin.pages.cash.sessions.filters.allUsers') }}</option>
+                      <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
+                    </BaseSelect>
+                  </div>
+                  <DateFilter v-model:start-date="sessionFilters.startDate" v-model:end-date="sessionFilters.endDate" />
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                    @click="resetSessionFilters"
+                  >
+                    <Icon name="lucide:rotate-ccw" class="h-3.5 w-3.5" />
+                    {{ t('admin.common.reset') }}
+                  </button>
+                </DisclosurePanel>
+              </transition>
+            </div>
+          </Disclosure>
+
+          <div v-if="loadingSessions" class="p-10 text-center">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600" />
+            <p class="mt-2 text-sm text-slate-500">
+              {{ t('admin.pages.cash.sessions.loading') }}
             </p>
           </div>
 
-          <div class="flex flex-col gap-2 w-full sm:w-auto">
-            <div class="flex flex-wrap gap-2">
-              <div class="min-w-[160px]">
-                <BaseSelect v-model="sessionFilters.cashboxId" class="!bg-slate-50 !border-slate-200 !text-sm">
-                  <option value="">{{ t('admin.pages.cash.sessions.filters.allCashboxes') }}</option>
-                  <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
-                </BaseSelect>
-              </div>
-              <div class="min-w-[140px]">
-                <BaseSelect v-model="sessionFilters.status" class="!bg-slate-50 !border-slate-200 !text-sm">
-                  <option value="">{{ t('admin.pages.cash.sessions.filters.allStatuses') }}</option>
-                  <option value="OPEN">{{ t('admin.pages.cash.status.OPEN') }}</option>
-                  <option value="CLOSED">{{ t('admin.pages.cash.status.CLOSED') }}</option>
-                </BaseSelect>
+          <div v-else-if="sessions.length === 0" class="p-10 text-center">
+             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+                 <Icon name="lucide:inbox" class="h-5 w-5 text-slate-400" />
+             </div>
+            <p class="mt-3 text-sm font-medium text-slate-900">
+              {{ t('admin.pages.cash.sessions.empty') }}
+            </p>
+            <p class="mt-1 text-sm text-slate-500">
+              {{ t('admin.pages.cash.sessions.emptyHint') }}
+            </p>
+          </div>
+
+          <div v-else>
+            <div class="sm:hidden divide-y divide-slate-200/70">
+              <div v-for="s in sessions" :key="s.id" class="p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate">
+                      {{ cashboxName(s.cashboxId) }}
+                    </p>
+                    <div class="mt-2 flex items-center gap-2">
+                      <span
+                        class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
+                        :class="s.status === 'OPEN' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'"
+                      >
+                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-slate-500'" />
+                        {{ t(`admin.pages.cash.status.${s.status}`) }}
+                      </span>
+                    </div>
+                    <div class="mt-3 space-y-1.5 text-xs text-slate-600">
+                      <p>{{ t('admin.pages.cash.sessions.table.user') }}: {{ userEmail(s.openedByUserId) }}</p>
+                      <p>{{ t('admin.pages.cash.sessions.table.opened') }}: {{ formatDate(s.openedAt) }}</p>
+                      <p v-if="s.closedAt">{{ t('admin.pages.cash.sessions.table.closed') }}: {{ formatDate(s.closedAt) }}</p>
+                      <p v-if="s.openingFloat">{{ t('admin.pages.cash.sessions.table.opening') }}: {{ formatCurrency(Number(s.openingFloat)) }}</p>
+                      <p v-if="s.closingCount">{{ t('admin.pages.cash.sessions.table.closing') }}: {{ formatCurrency(Number(s.closingCount)) }}</p>
+                      <p v-if="s.difference" :class="Number(s.difference) !== 0 ? 'text-rose-600 font-medium' : 'text-slate-900'">
+                        {{ t('admin.pages.cash.sessions.table.difference') }}: {{ formatCurrency(Number(s.difference)) }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="w-full">
-               <DateFilter
-                v-model:start-date="sessionFilters.startDate"
-                v-model:end-date="sessionFilters.endDate"
-              />
+
+            <div class="hidden sm:block overflow-x-auto">
+              <table class="min-w-full divide-y divide-slate-200/70">
+                <thead class="bg-slate-50">
+                  <tr>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.cashbox') }}
+                    </th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.status') }}
+                    </th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.user') }}
+                    </th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.openedAt') }}
+                    </th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.closedAt') }}
+                    </th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.openingFloat') }}
+                    </th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.expectedClosing') }}
+                    </th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.closingCount') }}
+                    </th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {{ t('admin.pages.cash.sessions.table.difference') }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200/70 bg-white">
+                  <tr v-for="s in sessions" :key="s.id" class="hover:bg-slate-50 transition-colors">
+                    <td class="px-5 py-4 text-sm font-medium text-slate-900">
+                      {{ cashboxName(s.cashboxId) }}
+                    </td>
+                    <td class="px-5 py-4 text-sm">
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                        :class="s.status === 'OPEN' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'"
+                      >
+                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-slate-500'" />
+                        {{ t(`admin.pages.cash.status.${s.status}`) }}
+                      </span>
+                    </td>
+                    <td class="px-5 py-4 text-sm text-slate-600 max-w-[220px] truncate">
+                      {{ userEmail(s.openedByUserId) }}
+                    </td>
+                    <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
+                      {{ formatDate(s.openedAt) }}
+                    </td>
+                    <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
+                      {{ s.closedAt ? formatDate(s.closedAt) : '—' }}
+                    </td>
+                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                      {{ formatCurrency(Number(s.openingFloat)) }}
+                    </td>
+                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                      {{ s.expectedClosing ? formatCurrency(Number(s.expectedClosing)) : '—' }}
+                    </td>
+                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                      {{ s.closingCount ? formatCurrency(Number(s.closingCount)) : '—' }}
+                    </td>
+                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-600' : 'text-slate-900'">
+                      {{ s.difference ? formatCurrency(Number(s.difference)) : '—' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div v-if="loadingSessions" class="p-10 text-center">
-        <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600" />
-        <p class="mt-2 text-sm text-slate-500">
-          {{ t('admin.pages.cash.sessions.loading') }}
-        </p>
-      </div>
-
-      <div v-else-if="sessions.length === 0" class="p-10 text-center">
-         <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-             <Icon name="lucide:inbox" class="h-5 w-5 text-slate-400" />
-         </div>
-        <p class="mt-3 text-sm font-medium text-slate-900">
-          {{ t('admin.pages.cash.sessions.empty') }}
-        </p>
-        <p class="mt-1 text-sm text-slate-500">
-          {{ t('admin.pages.cash.sessions.emptyHint') }}
-        </p>
-      </div>
-
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200/70">
-          <thead class="bg-slate-50">
-            <tr>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.cashbox') }}
-              </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.status') }}
-              </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.openedAt') }}
-              </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.closedAt') }}
-              </th>
-              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.openingFloat') }}
-              </th>
-              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.expectedClosing') }}
-              </th>
-              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.closingCount') }}
-              </th>
-              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.cash.sessions.table.difference') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200/70 bg-white">
-            <tr v-for="s in sessions" :key="s.id" class="hover:bg-slate-50 transition-colors">
-              <td class="px-5 py-4 text-sm font-medium text-slate-900">
-                {{ cashboxName(s.cashboxId) }}
-              </td>
-              <td class="px-5 py-4 text-sm">
-                <span
-                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                  :class="s.status === 'OPEN' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'"
-                >
-                  <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-slate-500'" />
-                  {{ t(`admin.pages.cash.status.${s.status}`) }}
-                </span>
-              </td>
-              <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
-                {{ formatDate(s.openedAt) }}
-              </td>
-              <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
-                {{ s.closedAt ? formatDate(s.closedAt) : '—' }}
-              </td>
-              <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
-                {{ formatCurrency(Number(s.openingFloat)) }}
-              </td>
-              <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
-                {{ s.expectedClosing ? formatCurrency(Number(s.expectedClosing)) : '—' }}
-              </td>
-              <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
-                {{ s.closingCount ? formatCurrency(Number(s.closingCount)) : '—' }}
-              </td>
-              <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-600' : 'text-slate-900'">
-                {{ s.difference ? formatCurrency(Number(s.difference)) : '—' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+        </TabPanel>
+      </TabPanels>
+    </div>
+  </TabGroup>
+</section>
 
     <!-- Open Session Modal -->
     <div v-if="openSessionOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="openSessionOpen = false">
@@ -926,10 +1248,57 @@
         </div>
       </div>
     </div>
+
+    <!-- Create Cashbox Modal -->
+    <div v-if="cashboxCreateOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="cashboxCreateOpen = false">
+      <div class="flex min-h-screen items-center justify-center px-4">
+        <div class="fixed inset-0 bg-black/50" @click="cashboxCreateOpen = false" />
+        <div class="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+          <h3 class="text-lg font-semibold text-gray-900">
+            {{ t('admin.pages.cash.modals.createCashbox.title') }}
+          </h3>
+          <p class="mt-1 text-sm text-gray-500">
+            {{ t('admin.pages.cash.modals.createCashbox.subtitle') }}
+          </p>
+
+          <div class="mt-4 space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                {{ t('admin.pages.cash.modals.createCashbox.nameLabel') }}
+              </label>
+              <BaseInput v-model="cashboxForm.name" :placeholder="t('admin.pages.cash.modals.createCashbox.namePlaceholder')" />
+            </div>
+            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+              <input v-model="cashboxForm.isActive" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-teal-600" />
+              {{ t('admin.pages.cash.modals.createCashbox.activeLabel') }}
+            </label>
+          </div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              @click="cashboxCreateOpen = false"
+            >
+              {{ t('admin.common.cancel') }}
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              :disabled="actionLoading || !canCreateCashbox"
+              @click="submitCreateCashbox"
+            >
+              {{ actionLoading ? t('admin.common.creating') : t('admin.pages.cash.modals.createCashbox.confirm') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Menu, MenuButton, MenuItem, MenuItems, Tab, TabGroup, TabList, TabPanel, TabPanels, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
@@ -961,6 +1330,7 @@ type CashTx = {
   method: string
   expenseCategory: string | null
   reference: string | null
+  createdByUserId: string | null
   createdAt: string
 }
 
@@ -975,6 +1345,8 @@ type CashSession = {
   expectedClosing: string | number | null
   difference: string | number | null
   note: string | null
+  openedByUserId: string | null
+  closedByUserId: string | null
 }
 
 type CashSessionExpected = {
@@ -983,11 +1355,16 @@ type CashSessionExpected = {
   inSum: string | number
   outSum: string | number
   expectedClosing: string | number
+  expectedByMethod?: { CASH: string | number; CARD: string | number; TRANSFER: string | number; OTHER: string | number }
 }
+
+type CashUser = { id: string; email: string }
 
 const authStore = useAuthStore()
 const { t, locale } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
+
+const errorMessage = ref('')
 
 const cashboxes = ref<Cashbox[]>([])
 const loadingCashboxes = ref(true)
@@ -997,11 +1374,16 @@ const loadingTxs = ref(true)
 
 const sessions = ref<CashSession[]>([])
 const loadingSessions = ref(true)
+const today = new Date()
+const lastWeek = new Date(today)
+lastWeek.setDate(lastWeek.getDate() - 7)
+
 const sessionFilters = reactive({
   cashboxId: '',
   status: '',
-  startDate: '',
-  endDate: ''
+  userId: '',
+  startDate: lastWeek.toISOString().split('T')[0],
+  endDate: today.toISOString().split('T')[0]
 })
 
 const actionLoading = ref(false)
@@ -1010,9 +1392,90 @@ const filters = reactive({
   cashboxId: '',
   type: '',
   direction: '',
-  startDate: '',
-  endDate: ''
+  method: '',
+  userId: '',
+  startDate: lastWeek.toISOString().split('T')[0],
+  endDate: today.toISOString().split('T')[0]
 })
+
+const cashUsers = ref<CashUser[]>([])
+
+const userById = computed(() => new Map((cashUsers.value || []).map((u) => [u.id, u.email])))
+const userEmail = (userId: string | null | undefined) => {
+  if (!userId) return '—'
+  return userById.value.get(userId) ?? userId.substring(0, 8)
+}
+
+// Summary Statistics
+const todayStats = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  const todayTxs = txs.value.filter(tx => new Date(tx.createdAt) >= today)
+  const totalIn = todayTxs.filter(tx => tx.direction === 'IN').reduce((sum, tx) => sum + Number(tx.amount), 0)
+  const totalOut = todayTxs.filter(tx => tx.direction === 'OUT').reduce((sum, tx) => sum + Number(tx.amount), 0)
+  
+  return {
+    totalIn,
+    totalOut,
+    net: totalIn - totalOut
+  }
+})
+
+const activeSessions = computed(() => cashboxes.value.filter(c => c.openSession).length)
+
+// Active filter counts
+const activeTransactionFiltersCount = computed(() => {
+  let count = 0
+  if (filters.cashboxId) count++
+  if (filters.type) count++
+  if (filters.direction) count++
+  if (filters.method) count++
+  if (filters.userId) count++
+  if (filters.startDate || filters.endDate) count++
+  return count
+})
+
+const activeSessionFiltersCount = computed(() => {
+  let count = 0
+  if (sessionFilters.cashboxId) count++
+  if (sessionFilters.status) count++
+  if (sessionFilters.userId) count++
+  if (sessionFilters.startDate || sessionFilters.endDate) count++
+  return count
+})
+
+function onTabChange(index: number) {
+  // Optional: add any logic needed when switching tabs
+}
+
+const resetTxFilters = () => {
+  filters.cashboxId = ''
+  filters.type = ''
+  filters.direction = ''
+  filters.method = ''
+  filters.userId = ''
+  
+  const today = new Date()
+  const lastWeek = new Date(today)
+  lastWeek.setDate(lastWeek.getDate() - 7)
+  
+  filters.startDate = lastWeek.toISOString().split('T')[0]
+  filters.endDate = today.toISOString().split('T')[0]
+}
+
+const resetSessionFilters = () => {
+  sessionFilters.cashboxId = ''
+  sessionFilters.status = ''
+  sessionFilters.userId = ''
+  
+  const today = new Date()
+  const lastWeek = new Date(today)
+  lastWeek.setDate(lastWeek.getDate() - 7)
+  
+  sessionFilters.startDate = lastWeek.toISOString().split('T')[0]
+  sessionFilters.endDate = today.toISOString().split('T')[0]
+}
 
 const openSessionOpen = ref(false)
 const openSessionCashboxId = ref<string | null>(null)
@@ -1142,6 +1605,10 @@ async function fetchCashboxes() {
     cashboxes.value = await $fetch<Cashbox[]>('/api/admin/cashboxes', {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
+  } catch (e: any) {
+    console.error('Fetch cashboxes failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
+    cashboxes.value = []
   } finally {
     loadingCashboxes.value = false
   }
@@ -1154,6 +1621,8 @@ async function fetchTransactions() {
     if (filters.cashboxId) params.append('cashboxId', filters.cashboxId)
     if (filters.type) params.append('type', filters.type)
     if (filters.direction) params.append('direction', filters.direction)
+    if (filters.method) params.append('method', filters.method)
+    if (filters.userId) params.append('userId', filters.userId)
     if (filters.startDate) params.append('startDate', filters.startDate)
     if (filters.endDate) params.append('endDate', filters.endDate)
     const url = `/api/admin/cash-transactions${params.toString() ? '?' + params.toString() : ''}`
@@ -1161,6 +1630,10 @@ async function fetchTransactions() {
     txs.value = await $fetch<CashTx[]>(url, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
+  } catch (e: any) {
+    console.error('Fetch transactions failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
+    txs.value = []
   } finally {
     loadingTxs.value = false
   }
@@ -1172,6 +1645,7 @@ async function fetchSessions() {
     const params = new URLSearchParams()
     if (sessionFilters.cashboxId) params.append('cashboxId', sessionFilters.cashboxId)
     if (sessionFilters.status) params.append('status', sessionFilters.status)
+    if (sessionFilters.userId) params.append('userId', sessionFilters.userId)
     if (sessionFilters.startDate) params.append('startDate', sessionFilters.startDate)
     if (sessionFilters.endDate) params.append('endDate', sessionFilters.endDate)
     const url = `/api/admin/cash-sessions${params.toString() ? '?' + params.toString() : ''}`
@@ -1179,13 +1653,18 @@ async function fetchSessions() {
     sessions.value = await $fetch<CashSession[]>(url, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
+  } catch (e: any) {
+    console.error('Fetch sessions failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
+    sessions.value = []
   } finally {
     loadingSessions.value = false
   }
 }
 
 async function refreshAll() {
-  await Promise.all([fetchCashboxes(), fetchTransactions(), fetchSessions()])
+  errorMessage.value = ''
+  await Promise.all([fetchCashboxes(), fetchUsers(), fetchTransactions(), fetchSessions()])
 }
 
 function openOpenSession(cashboxId: string) {
@@ -1231,6 +1710,7 @@ async function submitOpenSession() {
     await refreshAll()
   } catch (e: any) {
     console.error('Open session failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
   } finally {
     actionLoading.value = false
   }
@@ -1250,6 +1730,7 @@ async function submitCloseSession() {
     await refreshAll()
   } catch (e: any) {
     console.error('Close session failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
   } finally {
     actionLoading.value = false
   }
@@ -1288,6 +1769,7 @@ async function submitExpense() {
     await fetchCashboxes()
   } catch (e: any) {
     console.error('Create expense failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
   } finally {
     actionLoading.value = false
   }
@@ -1311,6 +1793,7 @@ async function submitTransfer() {
     await refreshAll()
   } catch (e: any) {
     console.error('Transfer failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
   } finally {
     actionLoading.value = false
   }
@@ -1392,6 +1875,7 @@ async function submitCustomerPayment() {
     await refreshAll()
   } catch (e) {
     console.error('Create customer payment failed:', e)
+    errorMessage.value = (e as any)?.data?.statusMessage || (e as any)?.message || 'Error'
   } finally {
     actionLoading.value = false
   }
@@ -1419,6 +1903,47 @@ async function submitSupplierPayment() {
     await refreshAll()
   } catch (e) {
     console.error('Create supplier payment failed:', e)
+    errorMessage.value = (e as any)?.data?.statusMessage || (e as any)?.message || 'Error'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+async function fetchUsers() {
+  try {
+    cashUsers.value = await $fetch<CashUser[]>('/api/admin/cash-users', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+  } catch (e) {
+    console.error('Fetch cash users failed:', e)
+    cashUsers.value = []
+  }
+}
+
+const cashboxCreateOpen = ref(false)
+const cashboxForm = reactive({ name: '', isActive: true })
+const canCreateCashbox = computed(() => cashboxForm.name.trim().length >= 2)
+
+function openCashboxCreate() {
+  cashboxForm.name = ''
+  cashboxForm.isActive = true
+  cashboxCreateOpen.value = true
+}
+
+async function submitCreateCashbox() {
+  actionLoading.value = true
+  errorMessage.value = ''
+  try {
+    await $fetch('/api/admin/cashboxes', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { name: cashboxForm.name.trim(), isActive: cashboxForm.isActive }
+    })
+    cashboxCreateOpen.value = false
+    await fetchCashboxes()
+  } catch (e: any) {
+    console.error('Create cashbox failed:', e)
+    errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
   } finally {
     actionLoading.value = false
   }

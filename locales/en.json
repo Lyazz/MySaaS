@@ -1,7 +1,21 @@
 {
   "common": {
     "view": "View",
-    "details": "Details"
+    "details": "Details",
+    "errorPage": {
+      "notFound": {
+        "title": "Page not found",
+        "message": "The page you are looking for does not exist."
+      },
+      "generic": {
+        "title": "An error occurred",
+        "message": "Something went wrong. Please try again later."
+      },
+      "actions": {
+        "backHome": "Back to Home"
+      },
+      "details": "Error details"
+    }
   },
   "i18n": {
     "switcher": {
@@ -532,6 +546,7 @@
       }
     },
     "product": {
+      "detailsTitle": "Product Details",
       "addedToCart": "{title} added to cart!",
       "inStock": "In stock",
       "perUnit": "per unit",
@@ -673,6 +688,8 @@
       "back": "Back",
       "next": "Next",
       "previous": "Previous",
+      "showing": "Showing {from} to {to} of {total} results",
+      "page": "Page {page} of {total}",
       "close": "Close",
       "copy": "Copy",
       "cancel": "Cancel",
@@ -688,7 +705,13 @@
       "selectAll": "Select All",
       "deselectAll": "Deselect All",
       "fullAccess": "Full Access",
-      "viewOnly": "View Only"
+      "viewOnly": "View Only",
+      "view": "View",
+      "total": "Total",
+      "noneSelected": "-- None --",
+      "processing": "Processing…",
+      "error": "An error occurred. Please try again.",
+      "saved": "Saved!"
     },
     "confirmModal": {
       "defaults": {
@@ -714,6 +737,23 @@
           "invalidType": "Only PNG, JPEG, and WebP images are allowed",
           "tooLarge": "Image must be less than 5MB",
           "uploadFailed": "Upload failed"
+        }
+      },
+      "variantSelectorModal": {
+        "title": "Select Variants",
+        "search": {
+          "placeholder": "Search variants..."
+        },
+        "loading": "Loading variants...",
+        "empty": "No variants found.",
+        "table": {
+          "productVariant": "Product / Variant",
+          "sku": "SKU",
+          "currentStock": "Stock"
+        },
+        "selectedCount": "{count} variant(s) selected",
+        "actions": {
+          "addSelected": "Add Selected"
         }
       }
     },
@@ -1198,15 +1238,15 @@
     },
     "nav": {
       "overview": "Overview",
-      "marketing": "Marketing",
+      "marketing": "Marketing & CRM",
       "landingPage": "Landing Pages",
-      "catalog": "Catalog",
+      "catalog": "Catalog & Stock",
       "purchasing": "Purchasing",
-      "sales": "Sales",
+      "sales": "Sales & POS",
       "delivery": "Delivery",
       "finance": "Finance",
       "cash": "Cash",
-      "settings": "Settings",
+      "settings": "Administration",
       "dashboard": "Dashboard",
       "products": "Products",
       "inventory": "Inventory",
@@ -1311,6 +1351,12 @@
         "address": {
           "label": "Address",
           "placeholder": "Customer address"
+        },
+        "openingBalance": {
+          "label": "Opening balance",
+          "placeholder": "0.00",
+          "required": "Opening balance is required",
+          "hint": "The opening balance cannot be changed after creation."
         }
       },
       "supplier": {
@@ -1338,7 +1384,8 @@
       }
     },
     "integrations": {
-      "connect": "Connect"
+      "connect": "Connect",
+      "manage": "Manage"
     },
     "pages": {
       "pos": {
@@ -1389,12 +1436,47 @@
           "loading": "Loading variants...",
           "inStockCount": "{count} in stock",
           "inStock": "In stock"
+        },
+        "paymentModal": {
+          "title": "Complete Payment",
+          "totalToPay": "Total to pay",
+          "methods": {
+            "cash": "Cash",
+            "card": "Card"
+          },
+          "cashReceived": "Cash received",
+          "breakdown": {
+            "changeToReturn": "Change to return",
+            "remainingDue": "Remaining due"
+          },
+          "card": {
+            "chargeToCard": "Charge {amount} to card",
+            "waiting": "Waiting for card terminal..."
+          },
+          "keypad": "Keypad",
+          "actions": {
+            "confirmPayment": "Confirm Payment"
+          }
+        },
+        "alerts": {
+          "saleCreated": "Sale created successfully",
+          "saleFailed": "Sale failed: {message}",
+          "unknownError": "An unknown error occurred",
+          "featureComingSoon": "Feature {feature} coming soon",
+          "reprintNotImplemented": "Reprinting last sale is not implemented yet"
         }
       },
       "cash": {
         "title": "Cash Management",
         "subtitle": "Manage your cash funds, sessions, and transactions.",
+        "stats": {
+          "totalIn": "Total In",
+          "totalOut": "Total Out",
+          "activeSessions": "Active Sessions",
+          "netBalance": "Net Balance"
+        },
         "actions": {
+          "newAction": "Actions",
           "newCustomerPayment": "Customer payment",
           "newSupplierPayment": "Supplier payment",
           "newExpense": "New expense",
@@ -1403,6 +1485,7 @@
         },
         "cashboxes": {
           "title": "Cashboxes",
+          "create": "New cashbox",
           "status": "Status",
           "openSession": "Open session #{id}",
           "closed": "No open session",
@@ -1410,6 +1493,9 @@
           "close": "Close",
           "empty": "No cashboxes",
           "emptyHint": "Create a cashbox to get started."
+        },
+        "errors": {
+          "title": "Could not complete the operation."
         },
         "cashbox": {
           "titleFallback": "Cashbox",
@@ -1426,6 +1512,14 @@
           "out": "Out"
         },
         "modals": {
+          "createCashbox": {
+            "title": "New cashbox",
+            "subtitle": "Create a cashbox to record your operations.",
+            "nameLabel": "Name",
+            "namePlaceholder": "e.g. Main cashbox",
+            "activeLabel": "Active cashbox",
+            "confirm": "Create"
+          },
           "openSession": {
             "title": "Open session",
             "subtitle": "Set the opening float.",
@@ -1544,13 +1638,17 @@
           "empty": "No transactions",
           "emptyHint": "Sales payments, expenses, and transfers will show up here.",
           "filters": {
+            "title": "Filters",
             "allCashboxes": "All cashboxes",
             "allTypes": "All types",
-            "allDirections": "In + out"
+            "allDirections": "In + out",
+            "allMethods": "All methods",
+            "allUsers": "All users"
           },
           "table": {
             "date": "Date",
             "cashbox": "Cashbox",
+            "user": "User",
             "type": "Type",
             "method": "Method",
             "amount": "Amount"
@@ -1578,12 +1676,15 @@
           "empty": "No sessions",
           "emptyHint": "Open a session to start recording transactions.",
           "filters": {
+            "title": "Filters",
             "allCashboxes": "All cashboxes",
-            "allStatuses": "All statuses"
+            "allStatuses": "All statuses",
+            "allUsers": "All users"
           },
           "table": {
             "cashbox": "Cashbox",
             "status": "Status",
+            "user": "User",
             "openedAt": "Opened",
             "closedAt": "Closed",
             "openingFloat": "Opening float",
@@ -1603,7 +1704,78 @@
       },
       "integrations": {
         "title": "Apps & Integrations",
-        "subtitle": "Connect your store with third-party tools and services."
+        "subtitle": "Connect your store with third-party tools and services.",
+        "facebook": {
+          "title": "Facebook Pixel",
+          "description": "Track conversions and build audiences for your Facebook ads."
+        },
+        "telegram": {
+          "title": "Telegram Notifications",
+          "description": "Receive real-time notifications for new orders directly in Telegram.",
+          "modal": {
+            "title": "Telegram Configuration",
+            "fields": {
+              "botToken": {
+                "label": "Bot Token",
+                "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                "hint": "Get this from {'@'}BotFather on Telegram."
+              },
+              "chatId": {
+                "label": "Chat ID",
+                "placeholder": "-1001234567890",
+                "hint": "Your chat or group ID where notifications will be sent."
+              },
+              "enableNotifications": "Enable Telegram notifications"
+            },
+            "actions": {
+              "sendTestMessage": "Send test message",
+              "sending": "Sending...",
+              "saveSettings": "Save settings"
+            }
+          },
+          "test": {
+            "success": "Test message sent successfully!",
+            "failed": "Failed to send test message: {message}"
+          },
+          "errors": {
+            "saveFailed": "Failed to save Telegram settings."
+          }
+        },
+        "metaPixels": {
+          "title": "Meta Pixels",
+          "subtitle": "Track conversions and build audiences across multiple pixels.",
+          "loading": "Loading pixels...",
+          "empty": "No pixels added yet.",
+          "table": {
+            "pixelId": "Pixel ID",
+            "global": "Global",
+            "productsCount": "{count} products"
+          },
+          "actions": {
+            "setGlobal": "Set as global"
+          },
+          "confirm": {
+            "delete": "Are you sure you want to delete this pixel?"
+          },
+          "errors": {
+            "loadFailed": "Failed to load pixels.",
+            "createFailed": "Failed to create pixel.",
+            "updateFailed": "Failed to update pixel.",
+            "setGlobalFailed": "Failed to set global pixel.",
+            "deleteFailed": "Failed to delete pixel."
+          },
+          "addPixel": {
+            "title": "Add New Pixel",
+            "fields": {
+              "namePlaceholder": "Marketing Pixel",
+              "pixelIdHint": "The 15-16 digit ID from your Meta Events Manager.",
+              "setAsGlobal": "Apply to all products by default"
+            },
+            "actions": {
+              "addPixel": "Add Pixel"
+            }
+          }
+        }
       },
       "users": {
         "subtitle": "Manage tenant users and their access.",
@@ -1618,6 +1790,7 @@
           "email": "Email",
           "role": "Role",
           "staffRole": "Staff role",
+          "cashbox": "Cashbox",
           "status": "Status",
           "createdAt": "Created"
         },
@@ -1636,10 +1809,14 @@
           "email": "Email",
           "role": "Role",
           "staffRole": "Staff role",
+          "cashbox": "Cashbox",
           "password": "Password",
           "newPassword": "New password",
           "confirmPassword": "Confirm password",
           "isActive": "Active"
+        },
+        "cashbox": {
+          "unassigned": "Unassigned"
         },
         "hints": {
           "passwordRequired": "Minimum 8 characters.",
@@ -1699,6 +1876,7 @@
         "loadErrorTitle": "Dashboard data couldn’t be loaded.",
         "loadErrorHint": "Try refreshing. If it keeps happening, check your connection or login session.",
         "stats": {
+          "activeSessions": "Active Sessions",
           "orders7d": "Orders (7 days)",
           "revenue7d": "Revenue (7 days)",
           "products": "Products",
@@ -1733,7 +1911,10 @@
           "addProduct": "Add product",
           "manageProducts": "Manage products",
           "categories": "Categories",
-          "appearance": "Appearance"
+          "appearance": "Appearance",
+          "pos": "Point of Sale",
+          "cash": "Cash Management",
+          "newLandingPage": "New Landing Page"
         }
       },
       "billing": {
@@ -1999,9 +2180,33 @@
         }
       },
       "orders": {
+        "create": {
+          "title": "Create new order",
+          "customerSection": "Customer details",
+          "searchCustomer": "Search existing customer",
+          "newCustomer": "Create new customer",
+          "customerName": "Customer name",
+          "customerPhone": "Customer phone",
+          "shippingSection": "Shipping details",
+          "shippingProvider": "Shipping provider",
+          "deliveryMode": "Delivery mode",
+          "modes": {
+            "home": "Home delivery",
+            "desk": "Desk / Point"
+          },
+          "wilaya": "Wilaya",
+          "commune": "Commune",
+          "address": "Address",
+          "notes": "Notes",
+          "itemsSection": "Order items",
+          "emptyCart": "Cart is empty",
+          "itemsTotal": "Items total",
+          "submit": "Create order"
+        },
         "index": {
           "title": "Orders",
           "subtitle": "Manage customer orders",
+          "addBtn": "New order",
           "filters": {
             "searchLabel": "Search",
             "searchPlaceholder": "Search by customer name or phone…",
@@ -2031,15 +2236,25 @@
           "sections": {
             "orderInfo": "Order information",
             "customerInfo": "Customer information",
-            "orderItems": "Order items"
+            "orderItems": "Order items",
+            "internalNotes": "Internal Notes",
+            "securityAndFraud": "Security & Fraud"
           },
           "fields": {
             "orderId": "Order ID",
             "orderDate": "Order date",
             "customerName": "Name",
             "customerPhone": "Phone",
-            "deliveryAddress": "Delivery address"
+            "deliveryAddress": "Delivery address",
+            "calledCustomer": "Called Customer?",
+            "internalNotesPlaceholder": "Add private remarks about this order..."
           },
+          "actions": {
+            "blacklistCustomer": "Blacklist Customer",
+            "blacklistIp": "Blacklist IP Address",
+            "blacklistPhone": "Blacklist Phone Number"
+          },
+          "securityHelp": "Advanced actions to manage risky behavior.",
           "itemsTable": {
             "product": "Product",
             "price": "Price",
@@ -2116,7 +2331,8 @@
           },
           "table": {
             "customer": "Customer",
-            "phone": "Phone",
+            "info": "Info",
+            "address": "Address",
             "orders": "Sales",
             "totalSpent": "Total spent",
             "lastOrder": "Last order",
@@ -2318,7 +2534,9 @@
           "newPurchase": "New purchase",
           "filters": {
             "supplierLabel": "Filter by supplier",
-            "allSuppliers": "All suppliers"
+            "allSuppliers": "All suppliers",
+            "userLabel": "Filter by user",
+            "allUsers": "All users"
           },
           "loading": "Loading purchases…",
           "empty": {
@@ -2328,8 +2546,10 @@
           "table": {
             "id": "ID",
             "supplier": "Supplier",
+            "total": "Total",
             "status": "Status",
             "items": "Items",
+            "user": "User",
             "date": "Date",
             "action": "Action",
             "itemsCount": "{count} items",
@@ -2394,6 +2614,7 @@
               "total": "Total",
               "qtyPlaceholder": "Qty",
               "receiveStock": "Receive stock",
+              "receiveAndPay": "Receive & pay supplier",
               "removeItem": "Remove item",
               "totalOrderValue": "Total order value",
               "costMode": {
@@ -2405,6 +2626,21 @@
                 "weighted": "Weighted avg"
               }
             }
+          },
+          "paymentModal": {
+            "title": "Receive & pay supplier",
+            "subtitle": "Receive stock and record a supplier payment in the cashbox.",
+            "supplierRequired": "This purchase order has no supplier assigned. Assign a supplier before recording a supplier payment.",
+            "cashboxLabel": "Cashbox",
+            "cashboxAuto": "Auto (use assigned/default cashbox)",
+            "noOpenSession": "No open session",
+            "amountLabel": "Amount",
+            "methodLabel": "Method",
+            "referenceLabel": "Reference",
+            "referencePlaceholder": "Invoice number, receipt, etc.",
+            "noteLabel": "Note",
+            "notePlaceholder": "Optional note",
+            "confirm": "Receive & pay"
           },
           "deleteModal": {
             "title": "Delete purchase order",
@@ -2428,7 +2664,9 @@
           "subtitle": "Completed orders (DELIVERED)",
           "filters": {
             "searchLabel": "Search",
-            "searchPlaceholder": "Search by customer name, phone, or order id…"
+            "searchPlaceholder": "Search by customer name, phone, or order id…",
+            "userLabel": "Filter by user",
+            "allUsers": "All users"
           },
           "loading": "Loading sales…",
           "empty": {
@@ -2441,6 +2679,7 @@
             "customer": "Customer",
             "phone": "Phone",
             "total": "Total",
+            "user": "User",
             "completed": "Completed",
             "actions": "Actions"
           }

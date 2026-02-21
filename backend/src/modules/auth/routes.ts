@@ -63,13 +63,22 @@ router.post('/register', async (req, res) => {
                 }
             })
 
+            const defaultCashbox = await tx.cashbox.create({
+                data: {
+                    tenantId: tenant.id,
+                    name: 'Caisse principale',
+                    isActive: true
+                }
+            })
+
             const user = await tx.user.create({
                 data: {
                     email: normalizedEmail,
                     passwordHash,
                     role: 'owner',
                     isSuperAdmin: false,
-                    tenantId: tenant.id
+                    tenantId: tenant.id,
+                    cashboxId: defaultCashbox.id
                 }
             })
 
@@ -77,7 +86,8 @@ router.post('/register', async (req, res) => {
 
             await tx.storeSettings.create({
                 data: {
-                    tenantId: tenant.id
+                    tenantId: tenant.id,
+                    defaultCashboxId: defaultCashbox.id
                 }
             })
 

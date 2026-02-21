@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client'
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
@@ -75,7 +76,8 @@ export class PosService {
         }
     }
 
-    async createSale(
+    async createSaleInTx(
+        tx: Prisma.TransactionClient,
         tenantId: string,
         input: CreatePosSaleInput,
         subscription?: SubscriptionContext | null,
@@ -103,7 +105,7 @@ export class PosService {
         const customerId = input.customerId ? String(input.customerId).trim() : null
 
         const resolvedCustomer = customerId
-            ? await prisma.customer.findUnique({
+            ? await tx.customer.findUnique({
                 where: { tenantId_id: { tenantId, id: customerId } },
                 select: { id: true, name: true, phone: true, address: true }
             })
@@ -123,7 +125,7 @@ export class PosService {
         )
         const productIdsWithoutVariant = Array.from(new Set(normalizedItems.filter((i) => !i.variantId).map((i) => i.productId)))
 
-        const products = await prisma.product.findMany({
+        const products = await tx.product.findMany({
             where: { id: { in: productIds }, tenantId, isActive: true },
             select: { id: true, slug: true, price: true, title: true, stock: true }
         })
@@ -134,7 +136,7 @@ export class PosService {
         const productMap = new Map(products.map((p) => [p.id, p]))
 
         const variantsById = variantIds.length
-            ? await prisma.productVariant.findMany({
+            ? await tx.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId, isActive: true },
                 select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
@@ -145,7 +147,7 @@ export class PosService {
         }
 
         const defaultVariants = productIdsWithoutVariant.length
-            ? await prisma.productVariant.findMany({
+            ? await tx.productVariant.findMany({
                 where: {
                     tenantId,
                     productId: { in: productIdsWithoutVariant },
@@ -160,7 +162,7 @@ export class PosService {
         const defaultVariantByProductId = new Map(defaultVariants.map((v) => [v.productId, v]))
 
         if (productIdsWithoutVariant.length > 0) {
-            const optionRows = await prisma.productOption.findMany({
+            const optionRows = await tx.productOption.findMany({
                 where: { tenantId, productId: { in: productIdsWithoutVariant } },
                 select: { productId: true },
                 distinct: ['productId']
@@ -174,7 +176,7 @@ export class PosService {
                 const product = productMap.get(pid)
                 if (!product) continue
 
-                const created = await prisma.productVariant.create({
+                const created = await tx.productVariant.create({
                     data: {
                         tenantId,
                         productId: pid,
@@ -222,99 +224,104 @@ export class PosService {
             }
         })
 
-        const sale = await prisma.$transaction(async (tx) => {
-            const touchedProductIds = new Set<string>()
-            const createdSale = await tx.sale.create({
+        const touchedProductIds = new Set<string>()
+        const createdSale = await tx.sale.create({
+            data: {
+                tenantId,
+                customerId: resolvedCustomer?.id ?? null,
+                customerName,
+                customerPhone,
+                customerAddress,
+                notes: 'POS sale',
+                totalAmount: total,
+                status: 'COMPLETED',
+                createdByUserId: actor?.userId ?? null
+            }
+        })
+
+        await tx.saleItem.createMany({
+            data: validatedItems.map((i) => ({
+                tenantId,
+                saleId: createdSale.id,
+                productId: i.productId,
+                variantId: i.variantId,
+                quantity: i.quantity,
+                price: i.price
+            }))
+        })
+
+        await tx.productVariant.updateMany({
+            where: { tenantId, id: { in: validatedItems.map((i) => i.variantId) } },
+            data: { skuLocked: true }
+        })
+
+        for (const item of validatedItems) {
+            if (item.trackInventory === false) continue
+
+            const variantBefore = await tx.productVariant.findFirst({
+                where: { id: item.variantId, tenantId },
+                select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+            })
+            if (!variantBefore) throw new PosValidationError(409, 'Insufficient stock')
+            if (variantBefore.trackInventory === false) continue
+
+            if (variantBefore.stock < item.quantity + variantBefore.reserved + variantBefore.safetyStock) {
+                throw new PosValidationError(409, `Insufficient stock for ${item.productTitle}`)
+            }
+
+            const updated = await tx.productVariant.updateMany({
+                where: {
+                    tenantId,
+                    id: item.variantId,
+                    stock: variantBefore.stock,
+                    reserved: variantBefore.reserved,
+                    safetyStock: variantBefore.safetyStock
+                },
+                data: { stock: { decrement: item.quantity } }
+            })
+            if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry')
+            touchedProductIds.add(variantBefore.productId)
+
+            const after = await tx.productVariant.findFirst({
+                where: { tenantId, id: item.variantId },
+                select: { stock: true, reserved: true, safetyStock: true }
+            })
+
+            await tx.inventoryMovement.create({
                 data: {
                     tenantId,
-                    customerId: resolvedCustomer?.id ?? null,
-                    customerName,
-                    customerPhone,
-                    customerAddress,
-                    notes: 'POS sale',
-                    totalAmount: total,
-                    status: 'COMPLETED',
+                    variantId: item.variantId,
+                    type: 'ORDER_DECREMENT',
+                    delta: -item.quantity,
+                    reservedDelta: 0,
+                    safetyStockDelta: 0,
+                    reason: 'pos_sale',
+                    note: null,
+                    orderId: null,
+                    saleId: createdSale.id,
+                    stockAfter: after?.stock ?? null,
+                    reservedAfter: after?.reserved ?? null,
+                    safetyStockAfter: after?.safetyStock ?? null,
                     createdByUserId: actor?.userId ?? null
                 }
             })
+        }
 
-            await tx.saleItem.createMany({
-                data: validatedItems.map((i) => ({
-                    tenantId,
-                    saleId: createdSale.id,
-                    productId: i.productId,
-                    variantId: i.variantId,
-                    quantity: i.quantity,
-                    price: i.price
-                }))
-            })
+        await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
 
-            await tx.productVariant.updateMany({
-                where: { tenantId, id: { in: validatedItems.map((i) => i.variantId) } },
-                data: { skuLocked: true }
-            })
-
-            for (const item of validatedItems) {
-                if (item.trackInventory === false) continue
-
-                const variantBefore = await tx.productVariant.findFirst({
-                    where: { id: item.variantId, tenantId },
-                    select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
-                })
-                if (!variantBefore) throw new PosValidationError(409, 'Insufficient stock')
-                if (variantBefore.trackInventory === false) continue
-
-                if (variantBefore.stock < item.quantity + variantBefore.reserved + variantBefore.safetyStock) {
-                    throw new PosValidationError(409, `Insufficient stock for ${item.productTitle}`)
-                }
-
-                const updated = await tx.productVariant.updateMany({
-                    where: {
-                        tenantId,
-                        id: item.variantId,
-                        stock: variantBefore.stock,
-                        reserved: variantBefore.reserved,
-                        safetyStock: variantBefore.safetyStock
-                    },
-                    data: { stock: { decrement: item.quantity } }
-                })
-                if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry')
-                touchedProductIds.add(variantBefore.productId)
-
-                const after = await tx.productVariant.findFirst({
-                    where: { tenantId, id: item.variantId },
-                    select: { stock: true, reserved: true, safetyStock: true }
-                })
-
-                await tx.inventoryMovement.create({
-                    data: {
-                        tenantId,
-                        variantId: item.variantId,
-                        type: 'ORDER_DECREMENT',
-                        delta: -item.quantity,
-                        reservedDelta: 0,
-                        safetyStockDelta: 0,
-                        reason: 'pos_sale',
-                        note: null,
-                        orderId: null,
-                        saleId: createdSale.id,
-                        stockAfter: after?.stock ?? null,
-                        reservedAfter: after?.reserved ?? null,
-                        safetyStockAfter: after?.safetyStock ?? null,
-                        createdByUserId: actor?.userId ?? null
-                    }
-                })
-            }
-
-            await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
-
-            return createdSale
-        })
-
-        return prisma.sale.findFirst({
-            where: { id: sale.id, tenantId },
+        return tx.sale.findFirst({
+            where: { id: createdSale.id, tenantId },
             include: { items: { include: { product: true, variant: true } } }
         })
+    }
+
+    async createSale(
+        tenantId: string,
+        input: CreatePosSaleInput,
+        subscription?: SubscriptionContext | null,
+        actor?: { userId: string | null }
+    ) {
+        return prisma.$transaction(async (tx) => this.createSaleInTx(tx, tenantId, input, subscription ?? null, actor))
     }
 
     async lookupByCode(tenantId: string, code: string) {

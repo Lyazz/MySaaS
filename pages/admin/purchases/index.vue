@@ -33,6 +33,16 @@
           </BaseSelect>
         </div>
         <div>
+           <BaseSelect
+            v-model="selectedUser"
+            :label="t('admin.pages.purchases.index.filters.userLabel')"
+            :placeholder="t('admin.pages.purchases.index.filters.allUsers')"
+          >
+            <option value="">{{ t('admin.pages.purchases.index.filters.allUsers') }}</option>
+            <option v-for="u in users" :key="u.id" :value="u.id">{{ u.email }}</option>
+          </BaseSelect>
+        </div>
+        <div>
           <DateFilter
             v-model:startDate="startDate"
             v-model:endDate="endDate"
@@ -96,6 +106,12 @@
                 {{ t('admin.pages.purchases.index.table.supplier') }}
               </th>
               <th class="ui-th">
+                {{ t('admin.pages.purchases.index.table.total') }}
+              </th>
+              <th class="ui-th">
+                {{ t('admin.pages.purchases.index.table.user') }}
+              </th>
+              <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.status') }}
               </th>
               <th class="ui-th">
@@ -115,11 +131,36 @@
               :key="order.id"
               class="ui-tr"
             >
+              <td class="ui-td whitespace-nowrap">
+                <NuxtLink
+                  :to="`/admin/purchases/${order.id}`"
+                  class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                >
+                  #{{ order.id.slice(0, 8) }}
+                </NuxtLink>
+              </td>
+              <td class="ui-td whitespace-nowrap text-sm">
+                <NuxtLink
+                  v-if="order.supplier"
+                  :to="`/admin/suppliers/${order.supplier.id}`"
+                  class="text-slate-600 hover:text-teal-600 transition-colors"
+                >
+                  {{ order.supplier.name }}
+                </NuxtLink>
+                <span v-else class="text-slate-400">—</span>
+              </td>
               <td class="ui-td whitespace-nowrap font-medium text-slate-900">
-                #{{ order.id.slice(0, 8) }}
+                {{ formatCurrency(calculateTotal(order)) }}
               </td>
               <td class="ui-td whitespace-nowrap text-sm text-slate-600">
-                {{ order.supplier?.name || '—' }}
+                <a
+                  v-if="order.createdByEmail"
+                  :href="`mailto:${order.createdByEmail}`"
+                  class="hover:text-teal-600 transition-colors"
+                >
+                  {{ order.createdByEmail }}
+                </a>
+                <span v-else>System</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <span :class="getStatusClass(order.status)">
@@ -148,6 +189,25 @@
 
       <!-- Pagination -->
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+        <div class="flex flex-1 items-center justify-between sm:hidden">
+          <button
+            :disabled="currentPage === 1"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage--"
+          >
+            <Icon name="lucide:chevron-left" class="w-4 h-4" />
+          </button>
+          <span class="text-sm text-slate-600">
+            {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
+          </span>
+          <button
+            :disabled="currentPage === totalPages"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage++"
+          >
+            <Icon name="lucide:chevron-right" class="w-4 h-4" />
+          </button>
+        </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-slate-700">
@@ -213,18 +273,26 @@ type PurchaseOrder = {
   createdAt: string
   supplier: Supplier | null
   items: any[]
+  createdByEmail?: string | null
 }
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
+const { format: formatCurrency } = useCurrency()
 const suppliers = ref<Supplier[]>([])
+const users = ref<{ id: string; email: string }[]>([])
 const orders = ref<PurchaseOrder[]>([])
 const loading = ref(true)
 const selectedSupplier = ref('')
-const startDate = ref('')
-const endDate = ref('')
+const selectedUser = ref('')
+const today = new Date()
+const lastWeek = new Date(today)
+lastWeek.setDate(lastWeek.getDate() - 7)
+
+const startDate = ref(lastWeek.toISOString().split('T')[0])
+const endDate = ref(today.toISOString().split('T')[0])
 const currentPage = ref(1)
-const itemsPerPage = 10
+const itemsPerPage = 25
 
 // Computed
 const filteredOrders = computed(() => {
@@ -245,26 +313,37 @@ const paginatedOrders = computed(() => {
 
 // Methods
 const fetchSuppliers = async () => {
-  suppliers.value = await $fetch<Supplier[]>('/api/admin/suppliers', {
+  suppliers.value = await $fetch('/api/admin/suppliers', {
     headers: { Authorization: `Bearer ${authStore.token}` }
-  }).catch(() => [])
+  }).catch(() => []) as Supplier[]
+}
+
+const fetchUsers = async () => {
+  users.value = await $fetch('/api/admin/users', {
+    headers: { Authorization: `Bearer ${authStore.token}` }
+  }).catch(() => []) as { id: string; email: string }[]
 }
 
 const fetchOrders = async () => {
   loading.value = true
   try {
-    orders.value = await $fetch<PurchaseOrder[]>('/api/admin/purchases', {
+    orders.value = await $fetch('/api/admin/purchases', {
       headers: { Authorization: `Bearer ${authStore.token}` },
       query: {
         startDate: startDate.value || undefined,
-        endDate: endDate.value || undefined
+        endDate: endDate.value || undefined,
+        userId: selectedUser.value || undefined
       }
-    })
+    }) as PurchaseOrder[]
   } catch (e: any) {
     console.error('Failed to load purchases', e)
   } finally {
     loading.value = false
   }
+}
+
+const calculateTotal = (order: PurchaseOrder) => {
+  return order.items.reduce((sum, item) => sum + (item.quantityOrdered * Number(item.unitCost)), 0)
 }
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString()
@@ -291,8 +370,14 @@ watch([startDate, endDate], () => {
     fetchOrders()
 })
 
+watch(selectedUser, () => {
+    currentPage.value = 1
+    fetchOrders()
+})
+
 onMounted(async () => {
   await fetchSuppliers()
+  await fetchUsers()
   await fetchOrders()
 })
 </script>

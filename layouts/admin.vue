@@ -148,6 +148,8 @@
           <div class="flex items-center gap-4">
             <a
               :href="storefrontUrl"
+              target="_blank"
+              rel="noopener noreferrer"
               class="hidden sm:flex ui-btn ui-btn--secondary ui-btn--md"
             >
               <Icon name="lucide:external-link" class="w-4 h-4" />
@@ -319,20 +321,43 @@ const navGroups = ref<NavGroup[]>([
     ]
   },
   {
-    titleKey: 'admin.nav.marketing',
+    titleKey: 'admin.nav.sales',
     collapsed: false,
     items: [
       {
-        path: '/admin/marketing/landing-page/new',
-        labelKey: 'admin.nav.landingPage',
-        icon: 'lucide:megaphone',
+        path: '/admin/pos',
+        labelKey: 'admin.nav.pos',
+        icon: 'lucide:monitor-smartphone',
+        access: 'admin'
+      },
+      {
+        path: '/admin/orders',
+        labelKey: 'admin.nav.orders',
+        icon: 'lucide:handbag',
+        access: 'member'
+      },
+      {
+        path: '/admin/sales',
+        labelKey: 'admin.nav.salesItem',
+        icon: 'lucide:badge-dollar-sign',
+        access: 'admin'
+      },
+      {
+        path: '/admin/cash',
+        labelKey: 'admin.nav.cash',
+        icon: 'lucide:wallet',
+        access: 'admin'
+      },
+      {
+        path: '/admin/delivery',
+        labelKey: 'admin.nav.deliveryItem',
+        icon: 'lucide:truck',
         access: 'admin'
       }
     ]
   },
   {
     titleKey: 'admin.nav.catalog',
-
     collapsed: false,
     items: [
       {
@@ -342,23 +367,17 @@ const navGroups = ref<NavGroup[]>([
         access: 'admin'
       },
       {
+        path: '/admin/categories',
+        labelKey: 'admin.nav.categories',
+        icon: 'lucide:tags',
+        access: 'admin'
+      },
+      {
         path: '/admin/inventory',
         labelKey: 'admin.nav.inventory',
         icon: 'lucide:warehouse',
         access: 'admin'
       },
-      {
-        path: '/admin/categories',
-        labelKey: 'admin.nav.categories',
-        icon: 'lucide:tags',
-        access: 'admin'
-      }
-    ]
-  },
-  {
-    titleKey: 'admin.nav.purchasing',
-    collapsed: false,
-    items: [
       {
         path: '/admin/suppliers',
         labelKey: 'admin.nav.suppliers',
@@ -374,43 +393,19 @@ const navGroups = ref<NavGroup[]>([
     ]
   },
   {
-    titleKey: 'admin.nav.sales',
+    titleKey: 'admin.nav.marketing',
     collapsed: false,
     items: [
-      {
-        path: '/admin/orders',
-        labelKey: 'admin.nav.orders',
-        icon: 'lucide:handbag',
-        access: 'member'
-      },
-      {
-        path: '/admin/sales',
-        labelKey: 'admin.nav.salesItem',
-        icon: 'lucide:badge-dollar-sign',
-        access: 'admin'
-      },
-      {
-        path: '/admin/pos',
-        labelKey: 'admin.nav.pos',
-        icon: 'lucide:monitor-smartphone',
-        access: 'admin'
-      },
       {
         path: '/admin/customers',
         labelKey: 'admin.nav.customers',
         icon: 'lucide:users',
         access: 'admin'
-      }
-    ]
-  },
-  {
-    titleKey: 'admin.nav.delivery',
-    collapsed: false,
-    items: [
+      },
       {
-        path: '/admin/delivery',
-        labelKey: 'admin.nav.deliveryItem',
-        icon: 'lucide:truck',
+        path: '/admin/marketing/landing-page/new',
+        labelKey: 'admin.nav.landingPage',
+        icon: 'lucide:megaphone',
         access: 'admin'
       }
     ]
@@ -420,12 +415,6 @@ const navGroups = ref<NavGroup[]>([
     collapsed: false,
     items: [
       {
-        path: '/admin/cash',
-        labelKey: 'admin.nav.cash',
-        icon: 'lucide:wallet',
-        access: 'admin'
-      },
-      {
         path: '/admin/billing',
         labelKey: 'admin.nav.billing',
         icon: 'lucide:credit-card',
@@ -433,11 +422,22 @@ const navGroups = ref<NavGroup[]>([
       }
     ]
   },
-
   {
     titleKey: 'admin.nav.settings',
     collapsed: false,
     items: [
+      {
+        path: '/admin/users',
+        labelKey: 'admin.nav.users',
+        icon: 'lucide:user-cog',
+        access: 'admin'
+      },
+      {
+        path: '/admin/integrations',
+        labelKey: 'admin.nav.integrations',
+        icon: 'lucide:puzzle',
+        access: 'admin'
+      },
       {
         path: '/admin/settings/appearance',
         labelKey: 'admin.nav.appearance',
@@ -460,18 +460,6 @@ const navGroups = ref<NavGroup[]>([
         path: '/admin/settings/functional',
         labelKey: 'admin.nav.functional',
         icon: 'lucide:sliders',
-        access: 'admin'
-      },
-      {
-        path: '/admin/integrations',
-        labelKey: 'admin.nav.integrations',
-        icon: 'lucide:puzzle',
-        access: 'admin'
-      },
-      {
-        path: '/admin/users',
-        labelKey: 'admin.nav.users',
-        icon: 'lucide:user-cog',
         access: 'admin'
       }
     ]

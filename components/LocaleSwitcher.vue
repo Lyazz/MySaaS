@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
+
 const props = withDefaults(
   defineProps<{
     class?: string
@@ -10,9 +13,18 @@ const props = withDefaults(
 )
 
 const i18n = useI18n({ useScope: 'global' })
-const switchLocale = async (code: 'en' | 'fr' | 'ar') => {
-  // Nuxt i18n augments the composer with `setLocale`.
-  // Fall back to direct assignment for plain vue-i18n.
+
+const locales = [
+  { code: 'en', label: 'English', short: 'EN' },
+  { code: 'fr', label: 'Français', short: 'FR' },
+  { code: 'ar', label: 'العربية', short: 'AR' }
+]
+
+const currentLocale = computed(() => {
+  return locales.find(l => l.code === i18n.locale.value) || locales[0]
+})
+
+const switchLocale = async (code: string) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const composer = i18n as any
   if (typeof composer.setLocale === 'function') {
@@ -28,41 +40,56 @@ const switchLocale = async (code: 'en' | 'fr' | 'ar') => {
 </script>
 
 <template>
-  <div
-    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1"
-    :class="props.class"
-    data-testid="locale-switcher"
-    :aria-label="i18n.t('i18n.switcher.label')"
-  >
-    <button
-      type="button"
-      class="px-2 py-1 text-xs font-semibold rounded-md transition-colors"
-      :class="i18n.locale === 'fr' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'"
-      data-testid="locale-switch-fr"
-      @click="switchLocale('fr')"
+  <Menu as="div" class="relative inline-block text-left" data-testid="locale-switcher">
+    <div>
+      <MenuButton
+        class="ui-btn ui-btn--secondary"
+        :class="props.class"
+      >
+        <Icon name="lucide:languages" class="h-4 w-4 opacity-70" aria-hidden="true" />
+        <span class="hidden sm:inline-block" v-if="showLabels">{{ currentLocale.label }}</span>
+        <span class="inline-block sm:hidden" v-if="showLabels">{{ currentLocale.short }}</span>
+        <span v-else>{{ currentLocale.short }}</span>
+        <Icon name="lucide:chevron-down" class="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
+      </MenuButton>
+    </div>
+
+    <transition
+      enter-active-class="transition ease-out duration-150"
+      enter-from-class="transform opacity-0 scale-95 translate-y-[-4px]"
+      enter-to-class="transform opacity-100 scale-100 translate-y-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="transform opacity-100 scale-100 translate-y-0"
+      leave-to-class="transform opacity-0 scale-95 translate-y-[-4px]"
     >
-      <span v-if="showLabels">{{ i18n.t('i18n.locales.fr') }}</span>
-      <span v-else>FR</span>
-    </button>
-    <button
-      type="button"
-      class="px-2 py-1 text-xs font-semibold rounded-md transition-colors"
-      :class="i18n.locale === 'ar' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'"
-      data-testid="locale-switch-ar"
-      @click="switchLocale('ar')"
-    >
-      <span v-if="showLabels">{{ i18n.t('i18n.locales.ar') }}</span>
-      <span v-else>AR</span>
-    </button>
-    <button
-      type="button"
-      class="px-2 py-1 text-xs font-semibold rounded-md transition-colors"
-      :class="i18n.locale === 'en' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'"
-      data-testid="locale-switch-en"
-      @click="switchLocale('en')"
-    >
-      <span v-if="showLabels">{{ i18n.t('i18n.locales.en') }}</span>
-      <span v-else>EN</span>
-    </button>
-  </div>
+      <MenuItems
+        class="absolute right-0 z-50 mt-2 w-40 origin-top-right overflow-hidden rounded-xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 ring-1 ring-black/5 focus:outline-none"
+      >
+        <div class="p-1.5">
+          <MenuItem
+            v-for="locale in locales"
+            :key="locale.code"
+            v-slot="{ active }"
+          >
+            <button
+              type="button"
+              :class="[
+                active ? 'bg-slate-100/80 text-teal-700' : 'text-slate-600',
+                i18n.locale.value === locale.code ? 'font-semibold bg-teal-50/50 text-teal-700' : '',
+                'group flex w-full items-center rounded-md px-3 py-2 text-sm text-left transition-all duration-150'
+              ]"
+              @click="switchLocale(locale.code)"
+            >
+              <span class="flex-1">{{ locale.label }}</span>
+              <Icon 
+                v-if="i18n.locale.value === locale.code"
+                name="lucide:check" 
+                class="ml-2 h-4 w-4 text-teal-600" 
+              />
+            </button>
+          </MenuItem>
+        </div>
+      </MenuItems>
+    </transition>
+  </Menu>
 </template>

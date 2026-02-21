@@ -21,7 +21,12 @@ export class CashController {
             res.status(201).json(cashbox)
         } catch (error: any) {
             if (error instanceof CashValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Create cashbox error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -39,7 +44,12 @@ export class CashController {
             res.json(updated)
         } catch (error: any) {
             if (error instanceof CashValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Update cashbox error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -57,7 +67,12 @@ export class CashController {
             res.status(201).json(session)
         } catch (error: any) {
             if (error instanceof CashValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Open cash session error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -75,7 +90,12 @@ export class CashController {
             res.json(session)
         } catch (error: any) {
             if (error instanceof CashValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Close cash session error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -85,13 +105,14 @@ export class CashController {
     async listSessions(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { cashboxId, status, startDate, endDate } = req.query as {
+            const { cashboxId, status, startDate, endDate, userId } = req.query as {
                 cashboxId?: string
                 status?: string
                 startDate?: string
                 endDate?: string
+                userId?: string
             }
-            const sessions = await service.listSessions(tenant.id, { cashboxId, status, startDate, endDate })
+            const sessions = await service.listSessions(tenant.id, { cashboxId, status, startDate, endDate, userId })
             res.json(sessions)
         } catch (error) {
             console.error('List cash sessions error:', error)
@@ -109,7 +130,12 @@ export class CashController {
             res.json(result)
         } catch (error: any) {
             if (error instanceof CashValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Get expected closing error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -119,18 +145,39 @@ export class CashController {
     async listTransactions(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { cashboxId, sessionId, type, direction, startDate, endDate } = req.query as {
+            const { cashboxId, sessionId, type, direction, startDate, endDate, method, userId } = req.query as {
                 cashboxId?: string
                 sessionId?: string
                 type?: string
                 direction?: string
                 startDate?: string
                 endDate?: string
+                method?: string
+                userId?: string
             }
-            const txs = await service.listTransactions(tenant.id, { cashboxId, sessionId, type, direction, startDate, endDate })
+            const txs = await service.listTransactions(tenant.id, {
+                cashboxId,
+                sessionId,
+                type,
+                direction,
+                startDate,
+                endDate,
+                method,
+                userId
+            })
             res.json(txs)
         } catch (error) {
             console.error('List cash transactions error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async listCashUsers(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            res.json(await service.listCashUsers(tenant.id))
+        } catch (error) {
+            console.error('List cash users error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
@@ -143,7 +190,12 @@ export class CashController {
             res.status(201).json(tx)
         } catch (error: any) {
             if (error instanceof CashValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Create cash transaction error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -158,7 +210,12 @@ export class CashController {
             res.status(201).json(result)
         } catch (error: any) {
             if (error instanceof CashValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Cash transfer error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

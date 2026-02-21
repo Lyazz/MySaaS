@@ -1,6 +1,9 @@
 import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
+import { CashService, CashValidationError } from '../cash/cash.service'
+
+const cashService = new CashService()
 
 export class PurchaseValidationError extends Error {
     statusCode: number
@@ -162,6 +165,16 @@ export class PurchasesService {
     ) {
         const costMode = normalizeCostMode(input?.costMode)
         const salePriceMode = normalizeSalePriceMode(input?.salePriceMode)
+        const payment = input?.payment
+        const paymentMode = typeof payment?.mode === 'string' ? payment.mode.trim().toLowerCase() : ''
+        const paymentAmountStr = toMoneyString(payment?.amount)
+        const wantsSupplierPayment =
+            paymentMode === 'full' || paymentMode === 'partial' || paymentAmountStr !== null
+        const shouldAutoComputePaymentAmount = wantsSupplierPayment && paymentAmountStr === null && paymentMode === 'full'
+        const paymentMethod = typeof payment?.method === 'string' && payment.method.trim() ? payment.method.trim() : null
+        const paymentCashboxId = typeof payment?.cashboxId === 'string' && payment.cashboxId.trim() ? payment.cashboxId.trim() : null
+        const paymentReference = typeof payment?.reference === 'string' && payment.reference.trim() ? payment.reference.trim().slice(0, 64) : null
+        const paymentNote = typeof payment?.note === 'string' && payment.note.trim() ? payment.note.trim().slice(0, 500) : null
 
         const order = await prisma.purchaseOrder.findFirst({
             where: { tenantId, id: purchaseOrderId },
@@ -170,6 +183,9 @@ export class PurchasesService {
         if (!order) throw new PurchaseValidationError(404, 'Purchase order not found')
         if (!Array.isArray(input?.items) || input.items.length === 0) {
             throw new PurchaseValidationError(400, 'At least one receive item is required')
+        }
+        if (wantsSupplierPayment && !order.supplierId) {
+            throw new PurchaseValidationError(400, 'supplierId is required to record a supplier payment')
         }
 
         const receiveItems = input.items.map((row: any) => ({
@@ -196,12 +212,17 @@ export class PurchasesService {
 
         await prisma.$transaction(async (tx) => {
             const touchedProductIds = new Set<string>()
+            let computedPaymentTotal = new Prisma.Decimal(0)
             for (const row of receiveItems) {
                 const item = itemById.get(row.itemId)!
                 const qty = row.quantityReceived!
 
                 const newUnitCost = row.unitCost ?? String(item.unitCost)
                 const newSalePrice = row.salePrice ?? (item.salePrice ? String(item.salePrice) : null)
+                if (shouldAutoComputePaymentAmount) {
+                    const lineTotal = toDecimal(newUnitCost).mul(new Prisma.Decimal(qty))
+                    computedPaymentTotal = computedPaymentTotal.add(lineTotal)
+                }
 
                 await tx.purchaseOrderItem.updateMany({
                     where: { tenantId, id: item.id },
@@ -330,6 +351,38 @@ export class PurchasesService {
                     orderedAt: order.orderedAt ?? new Date()
                 }
             })
+
+            if (wantsSupplierPayment) {
+                const amountStr = paymentAmountStr ?? (shouldAutoComputePaymentAmount ? computedPaymentTotal.toString() : null)
+                if (!amountStr) {
+                    throw new PurchaseValidationError(400, 'payment.amount is required for partial payments')
+                }
+
+                try {
+                    await cashService.createTransactionInTx(
+                        tx,
+                        tenantId,
+                        {
+                            cashboxId: paymentCashboxId,
+                            type: 'SUPPLIER_PAYMENT',
+                            direction: 'OUT',
+                            amount: amountStr,
+                            currency: (order.currency || 'DZD').slice(0, 8),
+                            method: paymentMethod ?? undefined,
+                            supplierId: order.supplierId,
+                            purchaseOrderId,
+                            reference: paymentReference ?? undefined,
+                            note: paymentNote ?? `Purchase receive payment: ${purchaseOrderId}`.slice(0, 500)
+                        },
+                        { userId: actor?.userId ?? null }
+                    )
+                } catch (error: any) {
+                    if (error instanceof CashValidationError) {
+                        throw new PurchaseValidationError(error.statusCode, error.statusMessage)
+                    }
+                    throw error
+                }
+            }
         })
 
         return this.getById(tenantId, purchaseOrderId)

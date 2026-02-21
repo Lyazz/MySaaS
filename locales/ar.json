@@ -1,7 +1,21 @@
 {
   "common": {
     "view": "عرض",
-    "details": "تفاصيل"
+    "details": "تفاصيل",
+    "errorPage": {
+      "notFound": {
+        "title": "الصفحة غير موجودة",
+        "message": "الصفحة التي تبحث عنها غير موجودة."
+      },
+      "generic": {
+        "title": "حدث خطأ",
+        "message": "حدث خطأ ما. يرجى المحاولة مرة أخرى لاحقًا."
+      },
+      "actions": {
+        "backHome": "العودة للرئيسية"
+      },
+      "details": "تفاصيل الخطأ"
+    }
   },
   "i18n": {
     "switcher": {
@@ -532,6 +546,7 @@
       }
     },
     "product": {
+      "detailsTitle": "تفاصيل المنتج",
       "addedToCart": "تمت إضافة {title} إلى السلة",
       "inStock": "متوفر",
       "perUnit": "للوحدة",
@@ -673,6 +688,8 @@
       "back": "رجوع",
       "next": "التالي",
       "previous": "السابق",
+      "showing": "عرض {from} إلى {to} من {total} نتيجة",
+      "page": "صفحة {page} من {total}",
       "close": "إغلاق",
       "copy": "نسخ",
       "cancel": "إلغاء",
@@ -688,7 +705,13 @@
       "selectAll": "تحديد الكل",
       "deselectAll": "إلغاء تحديد الكل",
       "fullAccess": "وصول كامل",
-      "viewOnly": "عرض فقط"
+      "viewOnly": "عرض فقط",
+      "view": "عرض",
+      "total": "الإجمالي",
+      "noneSelected": "-- لا شيء --",
+      "processing": "جارٍ المعالجة…",
+      "error": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+      "saved": "تم الحفظ!"
     },
     "confirmModal": {
       "defaults": {
@@ -714,6 +737,23 @@
           "invalidType": "يسمح فقط بصور PNG وJPEG وWebP",
           "tooLarge": "يجب أن يكون حجم الصورة أقل من 5MB",
           "uploadFailed": "فشل الرفع"
+        }
+      },
+      "variantSelectorModal": {
+        "title": "اختيار النسخ",
+        "search": {
+          "placeholder": "البحث عن النسخ..."
+        },
+        "loading": "جارٍ تحميل النسخ...",
+        "empty": "لم يتم العثور على نسخ.",
+        "table": {
+          "productVariant": "المنتج / النسخة",
+          "sku": "SKU",
+          "currentStock": "المخزون"
+        },
+        "selectedCount": "تم اختيار {count} من النسخ",
+        "actions": {
+          "addSelected": "إضافة المحدد"
         }
       }
     },
@@ -1198,13 +1238,15 @@
     },
     "nav": {
       "overview": "نظرة عامة",
-      "catalog": "الكتالوج",
+      "marketing": "التسويق والعملاء",
+      "landingPage": "صفحات الهبوط",
+      "catalog": "الكتالوج والمخزون",
       "purchasing": "المشتريات",
-      "sales": "المبيعات",
+      "sales": "المبيعات ونقاط البيع",
       "delivery": "التوصيل",
       "finance": "المالية",
       "cash": "الصندوق",
-      "settings": "الإعدادات",
+      "settings": "الإدارة",
       "dashboard": "لوحة التحكم",
       "products": "المنتجات",
       "inventory": "المخزون",
@@ -1307,6 +1349,12 @@
         "address": {
           "label": "العنوان",
           "placeholder": "عنوان العميل"
+        },
+        "openingBalance": {
+          "label": "الرصيد الافتتاحي",
+          "placeholder": "0.00",
+          "required": "الرصيد الافتتاحي مطلوب",
+          "hint": "لا يمكن تغيير الرصيد الافتتاحي بعد الإنشاء."
         }
       },
       "supplier": {
@@ -1326,12 +1374,12 @@
         "address": {
           "label": "العنوان",
           "placeholder": "عنوان المورّد"
-        },
-        "notes": {
-          "label": "ملاحظات",
-          "placeholder": "ملاحظات إضافية…"
         }
       }
+    },
+    "integrations": {
+      "connect": "اتصال",
+      "manage": "إدارة"
     },
     "pages": {
       "pos": {
@@ -1382,12 +1430,40 @@
           "loading": "جار تحميل المتغيرات...",
           "inStockCount": "{count} متوفر",
           "inStock": "متوفر"
+        },
+        "paymentModal": {
+          "title": "إتمام الدفع",
+          "totalToPay": "المجموع للدفع",
+          "methods": {
+            "cash": "نقداً",
+            "card": "بطاقة"
+          },
+          "cashReceived": "المبلغ المستلم",
+          "breakdown": {
+            "changeToReturn": "الباقي للإرجاع",
+            "remainingDue": "المتبقي للدفع"
+          },
+          "card": {
+            "chargeToCard": "خصم {amount} من البطاقة",
+            "waiting": "في انتظار جهاز الدفع الإلكتروني..."
+          },
+          "keypad": "لوحة الأرقام",
+          "actions": {
+            "confirmPayment": "تأكيد الدفع"
+          }
         }
       },
       "cash": {
         "title": "إدارة الصناديق",
         "subtitle": "إدارة الأموال والجلسات والمعاملات.",
+        "stats": {
+          "totalIn": "مجموع المداخيل",
+          "totalOut": "مجموع المصاريف",
+          "activeSessions": "جلسات نشطة",
+          "netBalance": "الرصيد الصافي"
+        },
         "actions": {
+          "newAction": "إجراءات",
           "newCustomerPayment": "دفعة عميل",
           "newSupplierPayment": "دفعة لمورد",
           "newExpense": "مصروف جديد",
@@ -1396,6 +1472,7 @@
         },
         "cashboxes": {
           "title": "الصناديق",
+          "create": "صندوق جديد",
           "status": "الحالة",
           "openSession": "جلسة مفتوحة #{id}",
           "closed": "لا توجد جلسة مفتوحة",
@@ -1403,6 +1480,9 @@
           "close": "إغلاق",
           "empty": "لا توجد صناديق",
           "emptyHint": "أنشئ صندوقاً للبدء."
+        },
+        "errors": {
+          "title": "تعذّر إكمال العملية."
         },
         "cashbox": {
           "titleFallback": "صندوق",
@@ -1419,6 +1499,14 @@
           "out": "صادر"
         },
         "modals": {
+          "createCashbox": {
+            "title": "صندوق جديد",
+            "subtitle": "أنشئ صندوقاً لتسجيل العمليات.",
+            "nameLabel": "الاسم",
+            "namePlaceholder": "مثال: الصندوق الرئيسي",
+            "activeLabel": "صندوق نشط",
+            "confirm": "إنشاء"
+          },
           "openSession": {
             "title": "فتح جلسة",
             "subtitle": "حدد رصيد الافتتاح.",
@@ -1537,13 +1625,17 @@
           "empty": "لا توجد معاملات",
           "emptyHint": "ستظهر تحصيلات البيع والمصاريف والتحويلات هنا.",
           "filters": {
+            "title": "تصفية",
             "allCashboxes": "كل الصناديق",
             "allTypes": "كل الأنواع",
-            "allDirections": "وارد + صادر"
+            "allDirections": "وارد + صادر",
+            "allMethods": "كل الطرق",
+            "allUsers": "كل المستخدمين"
           },
           "table": {
             "date": "التاريخ",
             "cashbox": "الصندوق",
+            "user": "المستخدم",
             "type": "النوع",
             "method": "الطريقة",
             "amount": "المبلغ"
@@ -1571,12 +1663,15 @@
           "empty": "لا توجد جلسات",
           "emptyHint": "افتح جلسة لبدء تسجيل المعاملات.",
           "filters": {
+            "title": "تصفية",
             "allCashboxes": "كل الصناديق",
-            "allStatuses": "كل الحالات"
+            "allStatuses": "كل الحالات",
+            "allUsers": "كل المستخدمين"
           },
           "table": {
             "cashbox": "الصندوق",
             "status": "الحالة",
+            "user": "المستخدم",
             "openedAt": "فتح",
             "closedAt": "إغلاق",
             "openingFloat": "رصيد الافتتاح",
@@ -1594,6 +1689,81 @@
           "CLOSED": "مغلق"
         }
       },
+      "integrations": {
+        "title": "التطبيقات والارتباطات",
+        "subtitle": "اربط متجرك مع أدوات وخدمات خارجية.",
+        "facebook": {
+          "title": "فيسبوك بيكسل",
+          "description": "تتبع التحويلات وبناء جماهير لإعلاناتك على فيسبوك."
+        },
+        "telegram": {
+          "title": "تنبيهات تيليغرام",
+          "description": "احصل على تنبيهات فورية للطلبات الجديدة مباشرة في تيليغرام.",
+          "modal": {
+            "title": "إعدادات تيليغرام",
+            "fields": {
+              "botToken": {
+                "label": "رمز البوت (Bot Token)",
+                "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                "hint": "احصل على هذا من {'@'}BotFather على تيليغرام."
+              },
+              "chatId": {
+                "label": "معرّف الدردشة (Chat ID)",
+                "placeholder": "-1001234567890",
+                "hint": "معرّف الدردشة أو المجموعة التي ستُرسل إليها التنبيهات."
+              },
+              "enableNotifications": "تفعيل تنبيهات تيليغرام"
+            },
+            "actions": {
+              "sendTestMessage": "إرسال رسالة تجريبية",
+              "sending": "جاري الإرسال...",
+              "saveSettings": "حفظ الإعدادات"
+            }
+          },
+          "test": {
+            "success": "تم إرسال الرسالة التجريبية بنجاح!",
+            "failed": "فشل إرسال الرسالة التجريبية: {message}"
+          },
+          "errors": {
+            "saveFailed": "فشل حفظ إعدادات تيليغرام."
+          }
+        },
+        "metaPixels": {
+          "title": "بيكسلات ميتا",
+          "subtitle": "تتبع التحويلات وبناء الجماهير عبر بيكسلات متعددة.",
+          "loading": "جاري تحميل البيكسلات...",
+          "empty": "لم يتم إضافة أي بيكسل بعد.",
+          "table": {
+            "pixelId": "معرّف البيكسل",
+            "global": "عام",
+            "productsCount": "{count} منتجات"
+          },
+          "actions": {
+            "setGlobal": "تعيين كعام"
+          },
+          "confirm": {
+            "delete": "هل أنت متأكد من رغبتك في حذف هذا البيكسل؟"
+          },
+          "errors": {
+            "loadFailed": "فشل تحميل البيكسلات.",
+            "createFailed": "فشل إنشاء البيكسل.",
+            "updateFailed": "فشل تحديث البيكسل.",
+            "setGlobalFailed": "فشل تعيين البيكسل كعام.",
+            "deleteFailed": "فشل حذف البيكسل."
+          },
+          "addPixel": {
+            "title": "إضافة بيكسل جديد",
+            "fields": {
+              "namePlaceholder": "بيكسل تسويقي",
+              "pixelIdHint": "المعرّف المكون من 15-16 رقماً من مدير أحداث ميتا الخاص بك.",
+              "setAsGlobal": "تطبيق على جميع المنتجات افتراضياً"
+            },
+            "actions": {
+              "addPixel": "إضافة البيكسل"
+            }
+          }
+        }
+      },
       "users": {
         "subtitle": "إدارة مستخدمي المتجر وصلاحياتهم.",
         "searchPlaceholder": "ابحث بالبريد أو المعرّف…",
@@ -1607,6 +1777,7 @@
           "email": "البريد الإلكتروني",
           "role": "الدور",
           "staffRole": "دور الموظف",
+          "cashbox": "الصندوق",
           "status": "الحالة",
           "createdAt": "تاريخ الإنشاء"
         },
@@ -1625,10 +1796,14 @@
           "email": "البريد الإلكتروني",
           "role": "الدور",
           "staffRole": "دور الموظف",
+          "cashbox": "الصندوق",
           "password": "كلمة المرور",
           "newPassword": "كلمة مرور جديدة",
           "confirmPassword": "تأكيد كلمة المرور",
           "isActive": "نشط"
+        },
+        "cashbox": {
+          "unassigned": "غير مُعيّن"
         },
         "hints": {
           "passwordRequired": "8 أحرف على الأقل.",
@@ -1688,6 +1863,7 @@
         "loadErrorTitle": "تعذر تحميل بيانات لوحة التحكم.",
         "loadErrorHint": "جرّب التحديث. إذا استمر الأمر، تحقق من الاتصال أو جلسة تسجيل الدخول.",
         "stats": {
+          "activeSessions": "الجلسات النشطة",
           "orders7d": "الطلبات (7 أيام)",
           "revenue7d": "الإيرادات (7 أيام)",
           "products": "المنتجات",
@@ -1722,7 +1898,10 @@
           "addProduct": "إضافة منتج",
           "manageProducts": "إدارة المنتجات",
           "categories": "التصنيفات",
-          "appearance": "المظهر"
+          "appearance": "المظهر",
+          "pos": "نقطة البيع",
+          "cash": "إدارة النقد",
+          "newLandingPage": "صفحة هبوط جديدة"
         }
       },
       "billing": {
@@ -1988,9 +2167,33 @@
         }
       },
       "orders": {
+        "create": {
+          "title": "إنشاء طلب جديد",
+          "customerSection": "تفاصيل العميل",
+          "searchCustomer": "البحث عن عميل موجود",
+          "newCustomer": "إنشاء عميل جديد",
+          "customerName": "اسم العميل",
+          "customerPhone": "رقم هاتف العميل",
+          "shippingSection": "تفاصيل الشحن",
+          "shippingProvider": "شركة الشحن",
+          "deliveryMode": "طريقة التوصيل",
+          "modes": {
+            "home": "توصيل للمنزل",
+            "desk": "مكتب / نقطة استلام"
+          },
+          "wilaya": "الولاية",
+          "commune": "البلدية",
+          "address": "العنوان",
+          "notes": "ملاحظات",
+          "itemsSection": "عناصر الطلب",
+          "emptyCart": "السلة فارغة",
+          "itemsTotal": "إجمالي العناصر",
+          "submit": "إنشاء الطلب"
+        },
         "index": {
           "title": "الطلبات",
           "subtitle": "إدارة طلبات العملاء",
+          "addBtn": "طلب جديد",
           "filters": {
             "searchLabel": "بحث",
             "searchPlaceholder": "ابحث بالاسم أو الهاتف…",
@@ -2020,15 +2223,25 @@
           "sections": {
             "orderInfo": "معلومات الطلب",
             "customerInfo": "معلومات العميل",
-            "orderItems": "عناصر الطلب"
+            "orderItems": "عناصر الطلب",
+            "internalNotes": "ملاحظات داخلية",
+            "securityAndFraud": "الأمان والاحتيال"
           },
           "fields": {
             "orderId": "رقم الطلب",
             "orderDate": "تاريخ الطلب",
             "customerName": "الاسم",
             "customerPhone": "الهاتف",
-            "deliveryAddress": "عنوان التوصيل"
+            "deliveryAddress": "عنوان التوصيل",
+            "calledCustomer": "تم الاتصال بالعميل؟",
+            "internalNotesPlaceholder": "أضف ملاحظات خاصة حول هذا الطلب..."
           },
+          "actions": {
+            "blacklistCustomer": "حظر العميل",
+            "blacklistIp": "حظر عنوان IP",
+            "blacklistPhone": "حظر رقم الهاتف"
+          },
+          "securityHelp": "إجراءات متقدمة لإدارة السلوك المريب.",
           "itemsTable": {
             "product": "المنتج",
             "price": "السعر",
@@ -2105,7 +2318,8 @@
           },
           "table": {
             "customer": "العميل",
-            "phone": "الهاتف",
+            "info": "معلومات",
+            "address": "العنوان",
             "orders": "المبيعات",
             "totalSpent": "إجمالي الإنفاق",
             "lastOrder": "آخر طلب",
@@ -2123,7 +2337,7 @@
           }
         },
         "edit": {
-          "metaTitle": "تعديل عميل",
+          "metaTitle": "تعديل العميل",
           "breadcrumbCustomer": "العميل",
           "breadcrumb": "تعديل",
           "title": "تعديل العميل",
@@ -2307,7 +2521,9 @@
           "newPurchase": "شراء جديد",
           "filters": {
             "supplierLabel": "تصفية حسب المورّد",
-            "allSuppliers": "كل المورّدين"
+            "allSuppliers": "كل المورّدين",
+            "userLabel": "تصفية حسب المستخدم",
+            "allUsers": "جميع المستخدمين"
           },
           "loading": "جارٍ تحميل المشتريات…",
           "empty": {
@@ -2317,8 +2533,10 @@
           "table": {
             "id": "المعرّف",
             "supplier": "المورّد",
+            "total": "الإجمالي",
             "status": "الحالة",
             "items": "العناصر",
+            "user": "المستخدم",
             "date": "التاريخ",
             "action": "إجراء",
             "itemsCount": "{count} عناصر",
@@ -2383,6 +2601,7 @@
               "total": "الإجمالي",
               "qtyPlaceholder": "الكمية",
               "receiveStock": "استلام المخزون",
+              "receiveAndPay": "استلام ودفع المورّد",
               "removeItem": "إزالة العنصر",
               "totalOrderValue": "القيمة الإجمالية للأمر",
               "costMode": {
@@ -2394,6 +2613,21 @@
                 "weighted": "متوسط مرجّح"
               }
             }
+          },
+          "paymentModal": {
+            "title": "استلام ودفع المورّد",
+            "subtitle": "استلم المخزون وسجّل دفعة للمورّد في صندوق النقد.",
+            "supplierRequired": "لا يوجد مورّد مرتبط بهذا الطلب. عيّن مورّدًا قبل تسجيل دفعة للمورّد.",
+            "cashboxLabel": "صندوق النقد",
+            "cashboxAuto": "تلقائي (الصندوق المعيّن/الافتراضي)",
+            "noOpenSession": "لا توجد جلسة مفتوحة",
+            "amountLabel": "المبلغ",
+            "methodLabel": "طريقة الدفع",
+            "referenceLabel": "المرجع",
+            "referencePlaceholder": "رقم الفاتورة، إيصال، إلخ",
+            "noteLabel": "ملاحظة",
+            "notePlaceholder": "ملاحظة اختيارية",
+            "confirm": "استلام ودفع"
           },
           "deleteModal": {
             "title": "حذف أمر الشراء",
@@ -2417,7 +2651,9 @@
           "subtitle": "الطلبات المكتملة (تم التسليم)",
           "filters": {
             "searchLabel": "بحث",
-            "searchPlaceholder": "ابحث بالاسم أو الهاتف أو رقم الطلب…"
+            "searchPlaceholder": "ابحث بالاسم أو الهاتف أو رقم الطلب…",
+            "userLabel": "تصفية حسب المستخدم",
+            "allUsers": "جميع المستخدمين"
           },
           "loading": "جارٍ تحميل المبيعات…",
           "empty": {
@@ -2430,7 +2666,8 @@
             "customer": "العميل",
             "phone": "الهاتف",
             "total": "الإجمالي",
-            "completed": "اكتمل",
+            "user": "المستخدم",
+            "completed": "مكتمل",
             "actions": "الإجراءات"
           }
         },

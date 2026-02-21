@@ -6,14 +6,24 @@ export interface SalesListFilters {
     search?: string
     startDate?: Date | null
     endDate?: Date | null
+    userId?: string
+}
+
+export interface SalesPagination {
+    page: number
+    limit: number
 }
 
 const posService = new PosService()
 const cashService = new CashService()
 
 export class SalesService {
-    async list(tenantId: string, filters: SalesListFilters) {
+    async list(tenantId: string, filters: SalesListFilters, pagination: SalesPagination = { page: 1, limit: 25 }) {
         const search = filters.search?.trim()
+        const { page, limit } = pagination
+        const skip = (page - 1) * limit
+        // Over-fetch so we can merge both sources and still have enough rows for slicing
+        const fetchLimit = page * limit + limit
 
         const orderWhere: any = { tenantId, status: 'DELIVERED', sale: { is: null } }
         const saleWhere: any = { tenantId, status: 'COMPLETED' }
@@ -35,34 +45,44 @@ export class SalesService {
             orderWhere.createdAt = {}
             saleWhere.createdAt = {}
             if (filters.startDate) {
-                orderWhere.createdAt.gte = filters.startDate
-                saleWhere.createdAt.gte = filters.startDate
+                const start = new Date(filters.startDate)
+                start.setHours(0, 0, 0, 0)
+                orderWhere.createdAt.gte = start
+                saleWhere.createdAt.gte = start
             }
             if (filters.endDate) {
-                orderWhere.createdAt.lt = filters.endDate
-                saleWhere.createdAt.lt = filters.endDate
+                const end = new Date(filters.endDate)
+                end.setHours(23, 59, 59, 999)
+                orderWhere.createdAt.lte = end
+                saleWhere.createdAt.lte = end
             }
         }
 
         const [orders, sales] = await Promise.all([
-            prisma.order.findMany({
-                where: orderWhere,
-                orderBy: { updatedAt: 'desc' },
-                take: 200,
-                select: {
-                    id: true,
-                    status: true,
-                    totalAmount: true,
-                    customerName: true,
-                    customerPhone: true,
-                    createdAt: true,
-                    updatedAt: true
-                }
-            }),
+            filters.userId
+                ? []
+                : prisma.order.findMany({
+                    where: orderWhere,
+                    orderBy: { updatedAt: 'desc' },
+                    take: fetchLimit,
+                    select: {
+                        id: true,
+                        status: true,
+                        totalAmount: true,
+                        customerName: true,
+                        customerPhone: true,
+                        customerId: true,
+                        createdAt: true,
+                        updatedAt: true
+                    }
+                }),
             prisma.sale.findMany({
-                where: saleWhere,
+                where: {
+                    ...saleWhere,
+                    ...(filters.userId ? { createdByUserId: filters.userId } : {})
+                },
                 orderBy: { updatedAt: 'desc' },
-                take: 200,
+                take: fetchLimit,
                 select: {
                     id: true,
                     source: true,
@@ -71,8 +91,15 @@ export class SalesService {
                     totalAmount: true,
                     customerName: true,
                     customerPhone: true,
+                    customerId: true,
                     createdAt: true,
-                    updatedAt: true
+                    updatedAt: true,
+                    createdBy: {
+                        select: {
+                            id: true,
+                            email: true
+                        }
+                    }
                 }
             })
         ])
@@ -80,17 +107,27 @@ export class SalesService {
         const merged = [
             ...orders.map((o) => ({
                 ...o,
-                type: 'ORDER' as const
+                type: 'ORDER' as const,
+                createdByEmail: null
             })),
             ...sales.map((s) => ({
                 ...s,
-                type: (s.source === 'ORDER' ? 'ORDER' : 'POS') as const,
+                type: (s.source === 'ORDER' ? 'ORDER' : 'POS') as 'ORDER' | 'POS',
                 customerName: s.customerName ?? 'Guest',
-                customerPhone: s.customerPhone ?? ''
+                customerPhone: s.customerPhone ?? '',
+                createdByEmail: s.createdBy?.email
             }))
         ].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
 
-        return merged.slice(0, 200)
+        const total = merged.length
+        const items = merged.slice(skip, skip + limit)
+
+        return {
+            items,
+            total,
+            page,
+            totalPages: Math.max(1, Math.ceil(total / limit))
+        }
     }
 
     async getById(tenantId: string, id: string) {
@@ -152,25 +189,45 @@ export class SalesService {
         subscription?: { planCode: string; currentPeriodStart: Date; currentPeriodEnd: Date | null; interval: string } | null,
         actor?: { userId?: string | null }
     ) {
-        const sale = await posService.createSale(
-            tenantId,
-            {
-                customerId: input.customerId ?? null,
-                items: Array.isArray(input.items) ? input.items : []
-            },
-            subscription ?? null,
-            actor
-        )
+        const wantsPayment = !!input?.payment
 
-        if (sale && input?.payment && input.cashboxId) {
-            await cashService.createTransaction(
+        if (!wantsPayment) {
+            return posService.createSale(
                 tenantId,
                 {
-                    cashboxId: input.cashboxId,
+                    customerId: input.customerId ?? null,
+                    items: Array.isArray(input.items) ? input.items : []
+                },
+                subscription ?? null,
+                actor ? { userId: actor.userId ?? null } : { userId: null }
+            )
+        }
+
+        return prisma.$transaction(async (tx) => {
+            const sale = await posService.createSaleInTx(
+                tx,
+                tenantId,
+                {
+                    customerId: input.customerId ?? null,
+                    items: Array.isArray(input.items) ? input.items : []
+                },
+                subscription ?? null,
+                { userId: actor?.userId ?? null }
+            )
+
+            if (!sale) {
+                throw new Error('Failed to create POS sale')
+            }
+
+            await cashService.createTransactionInTx(
+                tx,
+                tenantId,
+                {
+                    cashboxId: input.cashboxId ?? null,
                     type: 'SALE_PAYMENT',
                     direction: 'IN',
                     amount: String((sale as any).totalAmount ?? 0),
-                    method: input.payment.method ?? 'CASH',
+                    method: input.payment?.method ?? 'CASH',
                     customerId: (sale as any).customerId ?? null,
                     saleId: (sale as any).id ?? null,
                     reference: 'POS',
@@ -178,8 +235,8 @@ export class SalesService {
                 },
                 actor
             )
-        }
 
-        return sale
+            return sale
+        })
     }
 }

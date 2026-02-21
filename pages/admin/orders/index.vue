@@ -10,6 +10,13 @@
           {{ t('admin.pages.orders.index.subtitle') }}
         </p>
       </div>
+      <NuxtLink
+        to="/admin/orders/create"
+        class="ui-btn ui-btn--primary flex items-center gap-2"
+      >
+        <Icon name="lucide:plus" class="w-5 h-5" />
+        {{ t('admin.pages.orders.index.addBtn') }}
+      </NuxtLink>
     </div>
 
     <!-- Filters -->
@@ -123,18 +130,35 @@
               class="ui-tr"
             >
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium text-slate-900">
+                <NuxtLink
+                  :to="`/admin/orders/${order.id}`"
+                  class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                >
                   #{{ order.id.substring(0, 8) }}
-                </div>
+                </NuxtLink>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="text-slate-900">
+                <NuxtLink
+                  v-if="order.customerId"
+                  :to="`/admin/customers/${order.customerId}`"
+                  class="text-slate-900 hover:text-teal-600 transition-colors"
+                >
+                  {{ order.customerName }}
+                </NuxtLink>
+                <div v-else class="text-slate-900">
                   {{ order.customerName }}
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="text-slate-600">
+                <a
+                  v-if="order.customerPhone"
+                  :href="`tel:${order.customerPhone}`"
+                  class="text-slate-600 hover:text-teal-600 transition-colors"
+                >
                   {{ order.customerPhone }}
+                </a>
+                <div v-else class="text-slate-400">
+                  -
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
@@ -163,6 +187,71 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+        <div class="flex flex-1 items-center justify-between sm:hidden">
+          <button
+            :disabled="currentPage === 1"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage--"
+          >
+            <Icon name="lucide:chevron-left" class="w-4 h-4" />
+          </button>
+          <span class="text-sm text-slate-600">
+            {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
+          </span>
+          <button
+            :disabled="currentPage === totalPages"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage++"
+          >
+            <Icon name="lucide:chevron-right" class="w-4 h-4" />
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-slate-700">
+              {{ t('admin.common.showing', {
+                from: (currentPage - 1) * itemsPerPage + 1,
+                to: Math.min(currentPage * itemsPerPage, total),
+                total
+              }) }}
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                :disabled="currentPage === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                @click="currentPage--"
+              >
+                {{ t('admin.common.previous') }}
+              </button>
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                :class="[
+                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                  currentPage === page
+                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                ]"
+                @click="currentPage = page"
+              >
+                {{ page }}
+              </button>
+              <button
+                :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                @click="currentPage++"
+              >
+                {{ t('admin.common.next') }}
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -190,6 +279,7 @@ interface Order {
   customerName: string
   customerPhone: string
   customerAddress: string
+  customerId?: string
   totalAmount: number
   status: string
   createdAt: string
@@ -198,10 +288,19 @@ interface Order {
 
 const loading = ref(true)
 const orders = ref<Order[]>([])
+const total = ref(0)
+const totalPages = ref(1)
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
-const startDate = ref('')
-const endDate = ref('')
+const today = new Date()
+const lastWeek = new Date(today)
+lastWeek.setDate(lastWeek.getDate() - 7)
+
+const startDate = ref(lastWeek.toISOString().split('T')[0])
+const endDate = ref(today.toISOString().split('T')[0])
+
+const currentPage = ref(1)
+const itemsPerPage = 25
 
 const emptyHint = computed(() => {
   if (searchQuery.value || selectedStatus.value) return t('admin.pages.orders.index.empty.hintFiltered')
@@ -216,17 +315,18 @@ async function fetchOrders() {
     if (searchQuery.value) params.append('search', searchQuery.value)
     if (startDate.value) params.append('startDate', startDate.value)
     if (endDate.value) params.append('endDate', endDate.value)
-    
-    const queryString = params.toString()
-    const url = `/api/admin/orders${queryString ? '?' + queryString : ''}`
-    
-    const data = await $fetch<Order[]>(url, {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      }
-    })
-    
-    orders.value = data
+    params.append('page', String(currentPage.value))
+    params.append('limit', String(itemsPerPage))
+
+    const url = `/api/admin/orders?${params.toString()}`
+
+    const data = await $fetch(url, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    }) as { items: Order[]; total: number; page: number; totalPages: number }
+
+    orders.value = data.items
+    total.value = data.total
+    totalPages.value = data.totalPages
   } catch (error) {
     console.error('Failed to fetch orders:', error)
   } finally {
@@ -252,6 +352,11 @@ onMounted(() => {
 })
 
 watch([searchQuery, selectedStatus, startDate, endDate], () => {
+  currentPage.value = 1
+  fetchOrders()
+})
+
+watch(currentPage, () => {
   fetchOrders()
 })
 </script>

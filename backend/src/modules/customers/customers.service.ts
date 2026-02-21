@@ -52,12 +52,12 @@ export class CustomersService {
                 tenantId,
                 ...(search
                     ? {
-                          OR: [
-                              { name: { contains: search, mode: 'insensitive' } },
-                              { phone: { contains: search } },
-                              { email: { contains: search, mode: 'insensitive' } }
-                          ]
-                      }
+                        OR: [
+                            { name: { contains: search, mode: 'insensitive' } },
+                            { phone: { contains: search } },
+                            { email: { contains: search, mode: 'insensitive' } }
+                        ]
+                    }
                     : {})
             },
             orderBy: { updatedAt: 'desc' },
@@ -175,16 +175,16 @@ export class CustomersService {
 
         const summary = customer
             ? {
-                  id: customer.id,
-                  phone: customer.phone,
-                  name: customer.name,
-                  email: customer.email ?? null,
-                  address: customer.address ?? null,
-                  openingBalance: opening,
-                  currentBalance,
-                  lastSaleAt: sales[0]?.createdAt ?? null,
-                  lastSaleId: sales[0]?.id ?? null
-              }
+                id: customer.id,
+                phone: customer.phone,
+                name: customer.name,
+                email: customer.email ?? null,
+                address: customer.address ?? null,
+                openingBalance: opening,
+                currentBalance,
+                lastSaleAt: sales[0]?.createdAt ?? null,
+                lastSaleId: sales[0]?.id ?? null
+            }
             : null
 
         return { summary, sales, payments }
@@ -235,16 +235,16 @@ export class CustomersService {
 
         const summary = customer
             ? {
-                  id: customer.id,
-                  phone: customer.phone,
-                  name: customer.name,
-                  email: customer.email ?? null,
-                  address: customer.address ?? null,
-                  openingBalance: opening,
-                  currentBalance,
-                  lastSaleAt: sales[0]?.createdAt ?? null,
-                  lastSaleId: sales[0]?.id ?? null
-              }
+                id: customer.id,
+                phone: customer.phone,
+                name: customer.name,
+                email: customer.email ?? null,
+                address: customer.address ?? null,
+                openingBalance: opening,
+                currentBalance,
+                lastSaleAt: sales[0]?.createdAt ?? null,
+                lastSaleId: sales[0]?.id ?? null
+            }
             : null
 
         return { summary, sales, payments }
@@ -301,9 +301,6 @@ export class CustomersService {
         const email = input?.email !== undefined ? (typeof input.email === 'string' ? input.email.trim() || null : null) : undefined
         const address = input?.address !== undefined ? (typeof input.address === 'string' ? input.address.trim() || null : null) : undefined
 
-        const openingBalanceStr = input?.openingBalance !== undefined ? toMoneyString(input?.openingBalance) : undefined
-        const openingBalance = openingBalanceStr !== undefined ? new Prisma.Decimal(openingBalanceStr || '0') : undefined
-
         try {
             await prisma.customer.update({
                 where: { tenantId_id: { tenantId, id } },
@@ -311,8 +308,7 @@ export class CustomersService {
                     name,
                     phone,
                     email,
-                    address,
-                    openingBalance
+                    address
                 }
             })
         } catch (error: any) {

@@ -23,4 +23,6 @@ router.post('/cash-transactions', controller.createTransaction.bind(controller))
 
 router.post('/cash-transfers', controller.transfer.bind(controller))
 
+router.get('/cash-users', controller.listCashUsers.bind(controller))
+
 export default router

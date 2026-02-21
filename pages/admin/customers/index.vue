@@ -9,6 +9,13 @@
           {{ t('admin.pages.customers.index.subtitle') }}
         </p>
       </div>
+      <NuxtLink
+        to="/admin/customers/create"
+        class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
+      >
+        <Icon name="lucide:plus" class="w-5 h-5" />
+        <span>{{ t('admin.pages.customers.index.addCustomer') }}</span>
+      </NuxtLink>
     </div>
 
     <div class="bg-white p-4 rounded-lg shadow mb-6">
@@ -34,7 +41,7 @@
     </div>
 
     <div
-      v-else-if="customers.length === 0"
+      v-else-if="filteredCustomers.length === 0"
       class="ui-card p-12 text-center"
     >
       <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
@@ -58,7 +65,10 @@
                 {{ t('admin.pages.customers.index.table.customer') }}
               </th>
               <th class="ui-th">
-                {{ t('admin.pages.customers.index.table.phone') }}
+                {{ t('admin.pages.customers.index.table.info') }}
+              </th>
+              <th class="ui-th">
+                {{ t('admin.pages.customers.index.table.address') }}
               </th>
               <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.orders') }}
@@ -76,25 +86,58 @@
           </thead>
           <tbody class="ui-tbody">
             <tr
-              v-for="c in customers"
+              v-for="c in paginatedCustomers"
               :key="c.id"
               class="ui-tr"
             >
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium text-slate-900">
-                  {{ c.name }}
-                </div>
-                <div
-                  v-if="c.address"
-                  class="text-xs text-slate-500 truncate max-w-[28rem]"
-                >
-                  {{ c.address }}
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold uppercase">
+                    {{ c.name.charAt(0) }}
+                  </div>
+                  <div class="ml-4">
+                    <NuxtLink
+                      :to="`/admin/customers/${c.id}`"
+                      class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                    >
+                      {{ c.name }}
+                    </NuxtLink>
+                  </div>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="text-slate-600">
-                  {{ c.phone }}
+                <div class="flex flex-col text-sm text-slate-600">
+                  <div v-if="c.email" class="flex items-center gap-1">
+                    <Icon name="lucide:mail" class="w-3 h-3 text-slate-400" />
+                    <a
+                      :href="`mailto:${c.email}`"
+                      class="hover:text-teal-600 transition-colors"
+                    >
+                      {{ c.email }}
+                    </a>
+                  </div>
+                  <div v-if="c.phone" class="flex items-center gap-1 mt-1">
+                    <Icon name="lucide:phone" class="w-3 h-3 text-slate-400" />
+                    <a
+                      :href="`tel:${c.phone}`"
+                      class="hover:text-teal-600 transition-colors"
+                    >
+                      {{ c.phone }}
+                    </a>
+                  </div>
+                  <span v-if="!c.email && !c.phone" class="text-slate-400">—</span>
                 </div>
+              </td>
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <a
+                  v-if="c.address"
+                  :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}`"
+                  target="_blank"
+                  class="hover:text-teal-600 transition-colors"
+                >
+                  {{ c.address }}
+                </a>
+                <span v-else class="text-slate-400">—</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <div class="font-medium text-slate-900">
@@ -110,19 +153,91 @@
                 {{ formatDate(c.lastOrderAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end">
+                <div class="flex items-center justify-end space-x-2">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
                     class="ui-btn ui-btn--secondary ui-btn--sm"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                    <span>{{ t('common.view') }}</span>
+                    <span>{{ t('admin.common.view') }}</span>
+                  </NuxtLink>
+                  <NuxtLink
+                    :to="`/admin/customers/edit/${c.id}`"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                  >
+                    <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
+                    <span>{{ t('admin.common.edit') }}</span>
                   </NuxtLink>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+        <div class="flex flex-1 items-center justify-between sm:hidden">
+          <button
+            :disabled="currentPage === 1"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage--"
+          >
+            <Icon name="lucide:chevron-left" class="w-4 h-4" />
+          </button>
+          <span class="text-sm text-slate-600">
+            {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
+          </span>
+          <button
+            :disabled="currentPage === totalPages"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
+            @click="currentPage++"
+          >
+            <Icon name="lucide:chevron-right" class="w-4 h-4" />
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-slate-700">
+              {{ t('admin.common.showing', {
+                from: (currentPage - 1) * itemsPerPage + 1,
+                to: Math.min(currentPage * itemsPerPage, filteredCustomers.length),
+                total: filteredCustomers.length
+              }) }}
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button
+                :disabled="currentPage === 1"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                @click="currentPage--"
+              >
+                {{ t('admin.common.previous') }}
+              </button>
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                :class="[
+                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                  currentPage === page
+                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                ]"
+                @click="currentPage = page"
+              >
+                {{ page }}
+              </button>
+              <button
+                :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                @click="currentPage++"
+              >
+                {{ t('admin.common.next') }}
+              </button>
+            </nav>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -147,6 +262,7 @@ interface CustomerSummary {
   id: string
   phone: string
   name: string
+  email: string | null
   address: string | null
   ordersCount: number
   totalSpent: number
@@ -158,9 +274,27 @@ const loading = ref(true)
 const customers = ref<CustomerSummary[]>([])
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 
+const currentPage = ref(1)
+const itemsPerPage = 25
+
 const emptyHint = computed(() => {
   if (searchQuery.value) return t('admin.pages.customers.index.empty.hintFiltered')
   return t('admin.pages.customers.index.empty.hint')
+})
+
+const filteredCustomers = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return customers.value
+  return customers.value.filter(c =>
+    c.name.toLowerCase().includes(q) ||
+    (c.email?.toLowerCase().includes(q) ?? false) ||
+    (c.phone?.toLowerCase().includes(q) ?? false)
+  )
+})
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredCustomers.value.length / itemsPerPage)))
+const paginatedCustomers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredCustomers.value.slice(start, start + itemsPerPage)
 })
 
 async function fetchCustomers() {
@@ -172,13 +306,13 @@ async function fetchCustomers() {
     const queryString = params.toString()
     const url = `/api/admin/customers${queryString ? '?' + queryString : ''}`
 
-    const data = await $fetch<CustomerSummary[]>(url, {
+    const data = await $fetch(url, {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
     })
 
-    customers.value = data
+    customers.value = data as CustomerSummary[]
   } catch (error) {
     console.error('Failed to fetch customers:', error)
   } finally {
@@ -203,6 +337,7 @@ onMounted(() => {
 })
 
 watch([searchQuery], () => {
+  currentPage.value = 1
   fetchCustomers()
 })
 </script>

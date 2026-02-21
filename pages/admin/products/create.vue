@@ -250,12 +250,12 @@ function slugify(text: string): string {
 
 async function fetchCategories() {
   try {
-    const data = await $fetch<Category[]>('/api/admin/categories', {
+    const data = await $fetch('/api/admin/categories', {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
     })
-    categories.value = data
+    categories.value = data as Category[]
   } catch (error) {
     console.error('Failed to fetch categories:', error)
   }
@@ -282,13 +282,13 @@ async function handleSubmit() {
       payload.categoryId = form.value.categoryId
     }
 
-    const created = await $fetch<any>('/api/admin/products', {
+    const created = (await $fetch('/api/admin/products', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${authStore.token}`
       },
       body: payload
-    })
+    })) as any
 
     if (created?.id && productImages.value.length > 0) {
       try {

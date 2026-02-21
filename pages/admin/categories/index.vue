@@ -200,20 +200,23 @@
 
       <!-- Pagination -->
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
+        <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
-            class="ui-btn ui-btn--secondary ui-btn--md"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
             @click="currentPage--"
           >
-            {{ t('admin.common.previous') }}
+            <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
+          <span class="text-sm text-slate-600">
+            {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
+          </span>
           <button
             :disabled="currentPage === totalPages"
-            class="ui-btn ui-btn--secondary ui-btn--md ml-3"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
             @click="currentPage++"
           >
-            {{ t('admin.common.next') }}
+            <Icon name="lucide:chevron-right" class="w-4 h-4" />
           </button>
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
@@ -302,7 +305,7 @@ const searchQuery = ref('')
 const sortBy = ref<'createdAt' | 'title' | 'slug' | 'products'>('createdAt')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const currentPage = ref(1)
-const itemsPerPage = 10
+const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const categoryToDelete = ref<Category | null>(null)
 
@@ -370,7 +373,7 @@ const paginatedCategories = computed(() => {
 async function fetchCategories() {
   loading.value = true
   try {
-    const data = await $fetch<Category[]>('/api/admin/categories', {
+    const data = await $fetch('/api/admin/categories', {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       },
@@ -378,7 +381,7 @@ async function fetchCategories() {
         sortBy: sortBy.value,
         sortOrder: sortOrder.value
       }
-    })
+    }) as Category[]
     categories.value = data
   } catch (error) {
     console.error('Failed to fetch categories:', error)

@@ -132,25 +132,48 @@
                      {{ supplier.name.charAt(0) }}
                   </div>
                   <div class="ml-4">
-                    <div class="font-medium text-slate-900">
+                    <NuxtLink
+                      :to="`/admin/suppliers/${supplier.id}`"
+                      class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                    >
                       {{ supplier.name }}
-                    </div>
+                    </NuxtLink>
                   </div>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <div class="flex flex-col text-sm text-slate-600">
                    <div v-if="supplier.email" class="flex items-center gap-1">
-                     <Icon name="lucide:mail" class="w-3 h-3" /> {{ supplier.email }}
+                     <Icon name="lucide:mail" class="w-3 h-3 text-slate-400" />
+                     <a
+                       :href="`mailto:${supplier.email}`"
+                       class="hover:text-teal-600 transition-colors"
+                     >
+                       {{ supplier.email }}
+                     </a>
                    </div>
                    <div v-if="supplier.phone" class="flex items-center gap-1 mt-1">
-                     <Icon name="lucide:phone" class="w-3 h-3" /> {{ supplier.phone }}
+                     <Icon name="lucide:phone" class="w-3 h-3 text-slate-400" />
+                     <a
+                       :href="`tel:${supplier.phone}`"
+                       class="hover:text-teal-600 transition-colors"
+                     >
+                       {{ supplier.phone }}
+                     </a>
                    </div>
-                   <span v-if="!supplier.email && !supplier.phone">—</span>
+                   <span v-if="!supplier.email && !supplier.phone" class="text-slate-400">—</span>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap text-sm text-slate-600">
-                 {{ supplier.address || '—' }}
+                 <a
+                   v-if="supplier.address"
+                   :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(supplier.address)}`"
+                   target="_blank"
+                   class="hover:text-teal-600 transition-colors"
+                 >
+                   {{ supplier.address }}
+                 </a>
+                 <span v-else class="text-slate-400">—</span>
               </td>
               <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end space-x-3">
@@ -177,20 +200,23 @@
 
       <!-- Pagination -->
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
+        <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
-            class="ui-btn ui-btn--secondary ui-btn--md"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
             @click="currentPage--"
           >
-            {{ t('admin.common.previous') }}
+            <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
+          <span class="text-sm text-slate-600">
+            {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
+          </span>
           <button
             :disabled="currentPage === totalPages"
-            class="ui-btn ui-btn--secondary ui-btn--md ml-3"
+            class="ui-btn ui-btn--secondary ui-btn--sm"
             @click="currentPage++"
           >
-            {{ t('admin.common.next') }}
+            <Icon name="lucide:chevron-right" class="w-4 h-4" />
           </button>
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
@@ -278,7 +304,7 @@ const searchQuery = ref('')
 const sortBy = ref<'name'>('name')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 const currentPage = ref(1)
-const itemsPerPage = 10
+const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const supplierToDelete = ref<Supplier | null>(null)
 
@@ -333,11 +359,11 @@ const paginatedSuppliers = computed(() => {
 async function fetchSuppliers() {
   loading.value = true
   try {
-    const data = await $fetch<Supplier[]>('/api/admin/suppliers', {
+    const data = await $fetch('/api/admin/suppliers', {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
-    })
+    }) as Supplier[]
     suppliers.value = data
   } catch (error) {
     console.error('Failed to fetch suppliers:', error)

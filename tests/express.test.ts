@@ -31,6 +31,18 @@ describe('Express Backend Migration', async () => {
         expect(res.body.success).toBe(true)
         expect(res.body.tenant.slug).toBe(slug)
 
+        const tenant = await prisma.tenant.findUnique({ where: { slug }, select: { id: true } })
+        expect(tenant?.id).toBeTruthy()
+
+        const settings = tenant?.id
+            ? await prisma.storeSettings.findUnique({ where: { tenantId: tenant.id }, select: { defaultCashboxId: true } })
+            : null
+        expect(settings?.defaultCashboxId).toBeTruthy()
+
+        const cashboxes = tenant?.id ? await prisma.cashbox.findMany({ where: { tenantId: tenant.id } }) : []
+        expect(cashboxes.length).toBeGreaterThan(0)
+        expect(cashboxes.some((c) => c.id === settings?.defaultCashboxId)).toBe(true)
+
         // Cleanup
         await prisma.user.deleteMany({ where: { tenant: { slug } } })
         await prisma.tenant.deleteMany({ where: { slug } })

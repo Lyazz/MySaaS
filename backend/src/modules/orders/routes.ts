@@ -11,6 +11,7 @@ router.use(requireStaffCrud('orders'))
 
 router.get('/', controller.list.bind(controller))
 router.get('/:id', controller.getById.bind(controller))
+router.post('/', controller.createAdmin.bind(controller))
 router.patch('/:id', controller.updateStatus.bind(controller))
 
 export default router

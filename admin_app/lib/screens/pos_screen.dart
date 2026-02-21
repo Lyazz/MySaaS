@@ -984,9 +984,17 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             children: [
               _buildTopBar(posState, isMobile: false),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: _buildProductCatalog(posState),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildDesktopCategorySidebar(posState),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: _buildProductCatalog(posState, isMobile: false),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1037,9 +1045,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   Widget _buildTopBar(PosState posState, {bool isMobile = false}) {
     final notifier = ref.read(posProvider.notifier);
     final selectedCategoryId = posState.selectedCategoryId;
-    final selectedCategory = posState.categories
-        .where((c) => c.id == selectedCategoryId)
-        .firstOrNull;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1053,68 +1058,44 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         children: [
           Row(
             children: [
-              if (selectedCategoryId != null) ...[
-                IconButton(
-                  onPressed: () => notifier.selectCategory(null),
-                  icon: const Icon(
-                    LucideIcons.arrowLeft,
-                    color: Color(0xFF0F172A),
+              // Search Bar (Always show)
+              Expanded(
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  tooltip: 'Back to Categories',
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  selectedCategory?.title ?? 'Products',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-                const Spacer(),
-              ] else ...[
-                // Search Bar (Only show on root or let it persist? standard is usually persist, but let's follow "clean" request)
-                // Keeping search bar always accessible is better UX.
-                Expanded(
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (value) =>
-                          _searchDebouncer.run(() => setState(() {})),
-                      decoration: InputDecoration(
-                        hintText: 'Search products...',
-                        prefixIcon: const Icon(
-                          LucideIcons.search,
-                          color: Color(0xFF64748B),
-                        ),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(
-                                  LucideIcons.x,
-                                  color: Color(0xFF64748B),
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {});
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) =>
+                        _searchDebouncer.run(() => setState(() {})),
+                    decoration: InputDecoration(
+                      hintText: 'Search products...',
+                      prefixIcon: const Icon(
+                        LucideIcons.search,
+                        color: Color(0xFF64748B),
                       ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(
+                                LucideIcons.x,
+                                color: Color(0xFF64748B),
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-              ],
+              ),
+              const SizedBox(width: 12),
 
               // Action Buttons - Responsive Layout
               if (isMobile) ...[
@@ -1446,8 +1427,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final selectedCategoryId = posState.selectedCategoryId;
     final searchQuery = _searchController.text.trim();
 
-    // 1. Show Category Grid if no category selected AND no search
-    if (selectedCategoryId == null && searchQuery.isEmpty) {
+    // 1. Show Category Grid if no category selected AND no search (Mobile Only)
+    if (isMobile && selectedCategoryId == null && searchQuery.isEmpty) {
       return _buildCategoryGrid(posState, isMobile: isMobile);
     }
 
@@ -1495,9 +1476,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     // User request: "the first products of a category is always a back button."
     // We will add it if a category is active.
 
-    final showBackButton = selectedCategoryId != null;
-    final totalItemCount = filteredProducts.length + (showBackButton ? 1 : 0);
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = isMobile
@@ -1508,14 +1486,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           // List View Implementation
           return ListView.separated(
             padding: EdgeInsets.only(bottom: isMobile ? 100 : 0),
-            itemCount: totalItemCount,
+            itemCount: filteredProducts.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              if (showBackButton) {
-                if (index == 0) return _buildBackListTile();
-                final product = filteredProducts[index - 1];
-                return _buildProductListTile(product);
-              }
               final product = filteredProducts[index];
               return _buildProductListTile(product);
             },
@@ -1535,18 +1508,134 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
-          itemCount: totalItemCount,
+          itemCount: filteredProducts.length,
           itemBuilder: (context, index) {
-            if (showBackButton) {
-              if (index == 0) return _buildBackCard();
-              final product = filteredProducts[index - 1];
-              return _buildProductCard(product);
-            }
             final product = filteredProducts[index];
             return _buildProductCard(product);
           },
         );
       },
+    );
+  }
+
+  Widget _buildDesktopCategorySidebar(PosState posState) {
+    final selectedCategoryId = posState.selectedCategoryId;
+    final notifier = ref.read(posProvider.notifier);
+
+    return Container(
+      width: 110,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          right: BorderSide(color: Colors.grey[200] ?? Colors.grey),
+        ),
+      ),
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        children: [
+          // "All Products" item
+          _buildDesktopCategoryItem(
+            title: 'Tous les produits',
+            icon: LucideIcons.layoutGrid,
+            isSelected: selectedCategoryId == null,
+            onTap: () => notifier.selectCategory(null),
+          ),
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Divider(),
+          ),
+          // Individual Categories
+          ...posState.categories.map((category) {
+            final imageUrl = category.imageUrl != null
+                ? ref.read(apiProvider).resolvePublicUrl(category.imageUrl!)
+                : null;
+            return _buildDesktopCategoryItem(
+              title: category.title,
+              icon: LucideIcons.image,
+              imageUrl: imageUrl,
+              isSelected: selectedCategoryId == category.id,
+              onTap: () => notifier.selectCategory(category.id),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopCategoryItem({
+    required String title,
+    IconData? icon,
+    String? imageUrl,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFF0FDFA)
+              : Colors.transparent, // Teal 50
+          border: Border(
+            left: BorderSide(
+              color: isSelected
+                  ? const Color(0xFF0D9488)
+                  : Colors.transparent, // Teal 600
+              width: 4,
+            ),
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? const Color(0xFFCCFBF1)
+                    : const Color(0xFFF1F5F9), // Teal 100 / Slate 100
+                shape: BoxShape.circle,
+              ),
+              child: imageUrl != null && imageUrl.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          icon ?? LucideIcons.image,
+                          color: isSelected
+                              ? const Color(0xFF0D9488)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      icon ?? LucideIcons.image,
+                      color: isSelected
+                          ? const Color(0xFF0D9488)
+                          : const Color(0xFF64748B),
+                    ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF0D9488)
+                    : const Color(0xFF64748B),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1581,74 +1670,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           },
         );
       },
-    );
-  }
-
-  Widget _buildBackCard() {
-    return _HoverableProductCard(
-      onTap: () => ref.read(posProvider.notifier).selectCategory(null),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: Color(0xFFCCFBF1), // Teal 100
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              LucideIcons.arrowLeft,
-              size: 40,
-              color: Color(0xFF0D9488), // Teal 600
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Back',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0D9488),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBackListTile() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0FDFA), // Teal 50
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF0D9488).withValues(alpha: 0.2),
-          width: 1.5,
-        ),
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            color: Color(0xFFCCFBF1), // Teal 100
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            LucideIcons.arrowLeft,
-            color: Color(0xFF0D9488),
-            size: 20,
-          ),
-        ),
-        title: const Text(
-          'Back to Categories',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF0D9488),
-          ),
-        ),
-        onTap: () => ref.read(posProvider.notifier).selectCategory(null),
-      ),
     );
   }
 

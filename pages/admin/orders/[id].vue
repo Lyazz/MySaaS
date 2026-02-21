@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto">
+  <div class="max-w-5xl mx-auto">
     <DeliveryPaymentModal
       v-model="deliveryModalOpen"
       :cashboxes="cashboxes"
@@ -45,209 +45,303 @@
     <!-- Order Detail -->
     <div
       v-else-if="order"
-      class="space-y-6"
+      class="grid grid-cols-1 lg:grid-cols-3 gap-6"
     >
-      <!-- Order Info Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">
-            {{ t('admin.pages.orders.detail.sections.orderInfo') }}
+      <!-- LEFT COLUMN -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Order Info Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">
+              {{ t('admin.pages.orders.detail.sections.orderInfo') }}
+            </h2>
+            <div class="flex items-center gap-3">
+              <NuxtLink
+                v-if="order.status === 'DELIVERED'"
+                :to="`/admin/sales/${order.id}`"
+                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-teal-50 text-teal-700 hover:bg-teal-100"
+              >
+                <Icon name="lucide:badge-dollar-sign" class="w-4 h-4 mr-2" />
+                {{ t('admin.pages.orders.detail.viewSale') }}
+              </NuxtLink>
+              <AdminOrderStatusBadge :status="order.status" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm font-medium text-gray-500">
+                {{ t('admin.pages.orders.detail.fields.orderId') }}
+              </p>
+              <div class="mt-1 flex items-center">
+                <p class="text-sm text-gray-900 mr-2">{{ order.id }}</p>
+                <button @click="copyToClipboard(order.id)" class="text-gray-400 hover:text-teal-600 transition-colors" title="Copy ID">
+                  <Icon name="lucide:copy" class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-500">
+                {{ t('admin.pages.orders.detail.fields.orderDate') }}
+              </p>
+              <p class="mt-1 text-sm text-gray-900">
+                {{ formatDate(order.createdAt) }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="ui-card p-6">
+          <h2 class="text-lg font-semibold text-slate-900 mb-4">
+            {{ t('admin.pages.orders.detail.sections.orderItems') }}
           </h2>
-          <div class="flex items-center gap-3">
-            <NuxtLink
-              v-if="order.status === 'DELIVERED'"
-              :to="`/admin/sales/${order.id}`"
-              class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-teal-50 text-teal-700 hover:bg-teal-100"
-            >
-              <Icon name="lucide:badge-dollar-sign" class="w-4 h-4 mr-2" />
-              {{ t('admin.pages.orders.detail.viewSale') }}
-            </NuxtLink>
-            <AdminOrderStatusBadge :status="order.status" />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('admin.pages.orders.detail.fields.orderId') }}
-            </p>
-            <p class="mt-1 text-sm text-gray-900">
-              {{ order.id }}
-            </p>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('admin.pages.orders.detail.fields.orderDate') }}
-            </p>
-            <p class="mt-1 text-sm text-gray-900">
-              {{ formatDate(order.createdAt) }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Customer Info Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ t('admin.pages.orders.detail.sections.customerInfo') }}
-        </h2>
-        <div class="space-y-3">
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('admin.pages.orders.detail.fields.customerName') }}
-            </p>
-            <p class="mt-1 text-sm text-gray-900">
-              {{ order.customerName }}
-            </p>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('admin.pages.orders.detail.fields.customerPhone') }}
-            </p>
-            <p class="mt-1 text-sm text-gray-900">
-              <a
-                :href="`tel:${order.customerPhone}`"
-                class="text-teal-600 hover:text-teal-800"
-              >
-                {{ order.customerPhone }}
-              </a>
-            </p>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('admin.pages.orders.detail.fields.deliveryAddress') }}
-            </p>
-            <p class="mt-1 text-sm text-gray-900">
-              {{ order.customerAddress }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Order Items -->
-      <div class="ui-card p-6">
-        <h2 class="text-lg font-semibold text-slate-900 mb-4">
-          {{ t('admin.pages.orders.detail.sections.orderItems') }}
-        </h2>
-        <div class="overflow-x-auto">
-          <table class="ui-table">
-            <thead class="ui-thead">
-              <tr>
-                <th class="ui-th">
-                  {{ t('admin.pages.orders.detail.itemsTable.product') }}
-                </th>
-                <th class="ui-th">
-                  {{ t('admin.pages.orders.detail.itemsTable.price') }}
-                </th>
-                <th class="ui-th">
-                  {{ t('admin.pages.orders.detail.itemsTable.quantity') }}
-                </th>
-                <th class="ui-th text-right">
-                  {{ t('admin.pages.orders.detail.itemsTable.subtotal') }}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="ui-tbody">
-              <tr
-                v-for="item in order.items"
-                :key="item.id"
-                class="ui-tr"
-              >
-                <td class="ui-td text-sm text-slate-900">
-                  {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct') }}
-                </td>
-                <td class="ui-td text-sm text-slate-900">
-                  {{ formatCurrency(item.price) }}
-                </td>
-                <td class="ui-td text-sm text-slate-900">
-                  {{ item.quantity }}
-                </td>
-                <td class="ui-td text-sm text-slate-900 text-right">
-                  {{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td
-                  colspan="3"
-                  class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
+          <div class="overflow-x-auto">
+            <table class="ui-table">
+              <thead class="ui-thead">
+                <tr>
+                  <th class="ui-th">
+                    {{ t('admin.pages.orders.detail.itemsTable.product') }}
+                  </th>
+                  <th class="ui-th">
+                    {{ t('admin.pages.orders.detail.itemsTable.price') }}
+                  </th>
+                  <th class="ui-th">
+                    {{ t('admin.pages.orders.detail.itemsTable.quantity') }}
+                  </th>
+                  <th class="ui-th text-right">
+                    {{ t('admin.pages.orders.detail.itemsTable.subtotal') }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="ui-tbody">
+                <tr
+                  v-for="item in order.items"
+                  :key="item.id"
+                  class="ui-tr"
                 >
-                  {{ t('admin.pages.orders.detail.itemsTable.total') }}
-                </td>
-                <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
-                  {{ formatCurrency(order.totalAmount) }}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+                  <td class="ui-td text-sm text-slate-900">
+                    {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct') }}
+                  </td>
+                  <td class="ui-td text-sm text-slate-900">
+                    {{ formatCurrency(item.price) }}
+                  </td>
+                  <td class="ui-td text-sm text-slate-900">
+                    {{ item.quantity }}
+                  </td>
+                  <td class="ui-td text-sm text-slate-900 text-right">
+                    {{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td
+                    colspan="3"
+                    class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
+                  >
+                    {{ t('admin.pages.orders.detail.itemsTable.total') }}
+                  </td>
+                  <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
+                    {{ formatCurrency(order.totalAmount) }}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Internal Notes (New) -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            {{ t('admin.pages.orders.detail.sections.internalNotes', 'Internal Notes') }}
+          </h2>
+          <div class="space-y-3">
+            <textarea
+              v-model="order.internalNotes"
+              rows="4"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+              :placeholder="t('admin.pages.orders.detail.fields.internalNotesPlaceholder', 'Add private remarks about this order...')"
+              @blur="handleUpdateInternalNotes"
+            ></textarea>
+            <div class="flex justify-end h-5 items-center">
+              <span v-if="savingNotes" class="text-xs text-gray-500 flex items-center">
+                <div class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
+                {{ t('admin.common.saving', 'Saving...') }}
+              </span>
+              <span v-else-if="notesSavedMessage" class="text-xs text-green-600 flex items-center">
+                <Icon name="lucide:check" class="w-3 h-3 mr-1" />
+                {{ notesSavedMessage }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Status Update -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ t('admin.pages.orders.detail.statusUpdate.title') }}
-        </h2>
-        <form
-          class="space-y-4"
-          @submit.prevent="handleStatusUpdate"
-        >
-          <div>
-            <label
-              for="status"
-              class="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {{ t('admin.pages.orders.detail.statusUpdate.statusLabel') }}
-            </label>
-            <BaseSelect
-              id="status"
-              v-model="newStatus"
-              :disabled="order.status === 'DELIVERED'"
-            >
-              <option
-                v-for="s in selectableStatuses"
-                :key="s"
-                :value="s"
+      <!-- RIGHT COLUMN -->
+      <div class="space-y-6">
+        <!-- Status Update -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            {{ t('admin.pages.orders.detail.statusUpdate.title') }}
+          </h2>
+          <form
+            class="space-y-4"
+            @submit.prevent="handleStatusUpdate"
+          >
+            <div>
+              <label
+                for="status"
+                class="block text-sm font-medium text-gray-700 mb-1"
               >
-                {{ orderStatusLabel(s) }}
-              </option>
-            </BaseSelect>
-          </div>
+                {{ t('admin.pages.orders.detail.statusUpdate.statusLabel') }}
+              </label>
+              <BaseSelect
+                id="status"
+                v-model="newStatus"
+                :disabled="order.status === 'DELIVERED'"
+              >
+                <option
+                  v-for="s in selectableStatuses"
+                  :key="s"
+                  :value="s"
+                >
+                  {{ orderStatusLabel(s) }}
+                </option>
+              </BaseSelect>
+            </div>
 
-          <div
-            v-if="errorMessage"
-            class="p-4 bg-red-50 border border-red-200 rounded-md"
-          >
-            <p class="text-sm text-red-800">
-              {{ errorMessage }}
-            </p>
-          </div>
-
-          <div
-            v-if="successMessage"
-            class="p-4 bg-green-50 border border-green-200 rounded-md"
-          >
-            <p class="text-sm text-green-800">
-              {{ successMessage }}
-            </p>
-          </div>
-
-          <div class="flex justify-end space-x-3">
-            <NuxtLink
-              to="/admin/orders"
-              class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            <div
+              v-if="errorMessage"
+              class="p-3 bg-red-50 border border-red-200 rounded-md"
             >
-              {{ t('admin.pages.orders.detail.backToOrders') }}
-            </NuxtLink>
+              <p class="text-sm text-red-800">
+                {{ errorMessage }}
+              </p>
+            </div>
+
+            <div
+              v-if="successMessage"
+              class="p-3 bg-green-50 border border-green-200 rounded-md"
+            >
+              <p class="text-sm text-green-800">
+                {{ successMessage }}
+              </p>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-2">
+              <button
+                type="submit"
+                :disabled="updating || newStatus === order.status || order.status === 'DELIVERED'"
+                class="w-full px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center"
+              >
+                {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Customer Info Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            {{ t('admin.pages.orders.detail.sections.customerInfo') }}
+          </h2>
+          <div class="space-y-3">
+            <div>
+              <p class="text-sm font-medium text-gray-500">
+                {{ t('admin.pages.orders.detail.fields.customerName') }}
+              </p>
+              <p class="mt-1 text-sm text-gray-900">
+                {{ order.customerName }}
+              </p>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-500">
+                {{ t('admin.pages.orders.detail.fields.customerPhone') }}
+              </p>
+              <div class="mt-1 flex items-center">
+                <a
+                  :href="`tel:${order.customerPhone}`"
+                  class="text-teal-600 hover:text-teal-800 text-sm mr-2"
+                >
+                  {{ order.customerPhone }}
+                </a>
+                <button @click="copyToClipboard(order.customerPhone)" class="text-gray-400 hover:text-teal-600 transition-colors" title="Copy Phone">
+                  <Icon name="lucide:copy" class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-500">
+                {{ t('admin.pages.orders.detail.fields.deliveryAddress') }}
+              </p>
+              <div class="mt-1 flex items-start">
+                <p class="text-sm text-gray-900 mr-2 flex-1">
+                  {{ order.customerAddress || 'N/A' }}
+                </p>
+                <button v-if="order.customerAddress" @click="copyToClipboard(order.customerAddress)" class="text-gray-400 hover:text-teal-600 transition-colors mt-0.5" title="Copy Address">
+                  <Icon name="lucide:copy" class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Trace Toggle -->
+          <div class="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-700">{{ t('admin.pages.orders.detail.fields.calledCustomer', 'Called Customer?') }}</span>
             <button
-              type="submit"
-              :disabled="updating || newStatus === order.status || order.status === 'DELIVERED'"
-              class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              type="button"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+              :class="order.calledCustomer ? 'bg-teal-600' : 'bg-gray-200'"
+              role="switch"
+              :aria-checked="order.calledCustomer"
+              @click="handleToggleCalledCustomer"
             >
-              {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
+              <span
+                aria-hidden="true"
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                :class="order.calledCustomer ? 'translate-x-5' : 'translate-x-0'"
+              />
             </button>
           </div>
-        </form>
+        </div>
+
+        <!-- Security & Fraud Placeholders -->
+        <div class="bg-white rounded-lg shadow p-6 border border-red-50">
+          <div class="flex items-center gap-2 mb-4">
+            <Icon name="lucide:shield-alert" class="w-5 h-5 text-red-500" />
+            <h2 class="text-lg font-semibold text-gray-900">
+              {{ t('admin.pages.orders.detail.sections.securityAndFraud', 'Security & Fraud') }}
+            </h2>
+          </div>
+          <p class="text-xs text-gray-500 mb-3">{{ t('admin.pages.orders.detail.securityHelp', 'Advanced actions to manage risky behavior.') }}</p>
+          <div class="space-y-2">
+            <button
+              type="button"
+              class="w-full text-left px-3 py-2 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-100 transition-colors"
+              @click="handleBlacklistPlaceholder('customer')"
+            >
+              <Icon name="lucide:user-x" class="w-4 h-4 inline mr-2 text-red-500" />
+              {{ t('admin.pages.orders.detail.actions.blacklistCustomer', 'Blacklist Customer') }}
+            </button>
+            <button
+              type="button"
+              class="w-full text-left px-3 py-2 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-100 transition-colors"
+              @click="handleBlacklistPlaceholder('ip')"
+            >
+              <Icon name="lucide:globe-lock" class="w-4 h-4 inline mr-2 text-red-500" />
+              {{ t('admin.pages.orders.detail.actions.blacklistIp', 'Blacklist IP Address') }}
+            </button>
+            <button
+              type="button"
+              class="w-full text-left px-3 py-2 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-100 transition-colors"
+              @click="handleBlacklistPlaceholder('phone')"
+            >
+              <Icon name="lucide:phone-off" class="w-4 h-4 inline mr-2 text-red-500" />
+              {{ t('admin.pages.orders.detail.actions.blacklistPhone', 'Blacklist Phone Number') }}
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -274,7 +368,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
@@ -312,6 +405,8 @@ interface Order {
   customerAddress: string
   totalAmount: number
   status: string
+  calledCustomer: boolean
+  internalNotes: string | null
   createdAt: string
   items: OrderItem[]
 }
@@ -324,6 +419,9 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const deliveryModalOpen = ref(false)
 const cashboxes = ref<any[]>([])
+
+const savingNotes = ref(false)
+const notesSavedMessage = ref('')
 
 const statusLabelKeyByCode: Record<string, string> = {
   PENDING: 'admin.orderStatus.pending',
@@ -356,7 +454,7 @@ const selectableStatuses = computed(() => {
 async function fetchOrder() {
   loading.value = true
   try {
-    const data = await $fetch<Order>(`/api/admin/orders/${orderId}`, {
+    const data = await $fetch(`/api/admin/orders/${orderId}`, {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
@@ -379,9 +477,10 @@ async function handleStatusUpdate() {
     successMessage.value = ''
 
     try {
-      cashboxes.value = await $fetch<any[]>('/api/admin/cashboxes', {
+      const data = await $fetch('/api/admin/cashboxes', {
         headers: { Authorization: `Bearer ${authStore.token}` }
       })
+      cashboxes.value = data as any[]
     } catch (e) {
       console.error('Failed to load cashboxes:', e)
       errorMessage.value = t('admin.pages.orders.detail.statusUpdate.errors.loadCashboxesFailed')
@@ -397,7 +496,7 @@ async function handleStatusUpdate() {
   updating.value = true
 
   try {
-    const updated = await $fetch<Order>(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -407,7 +506,7 @@ async function handleStatusUpdate() {
       }
     })
 
-    order.value = updated
+    order.value.status = updated.status
     successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
     
     // Clear success message after 3 seconds
@@ -429,7 +528,7 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
   updating.value = true
 
   try {
-    const updated = await $fetch<Order>(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -443,7 +542,7 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
       }
     })
 
-    order.value = updated
+    order.value.status = updated.status
     newStatus.value = updated.status
     successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
     setTimeout(() => {
@@ -454,6 +553,61 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
     errorMessage.value = error.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')
   } finally {
     updating.value = false
+  }
+}
+
+async function handleToggleCalledCustomer() {
+  if (!order.value) return
+  const original = order.value.calledCustomer
+  // optimistic update
+  order.value.calledCustomer = !original
+  try {
+    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { calledCustomer: order.value.calledCustomer }
+    })
+    order.value.calledCustomer = updated.calledCustomer
+  } catch (e: any) {
+    console.error('Toggle called failed:', e)
+    // revert
+    if (order.value) order.value.calledCustomer = original
+  }
+}
+
+async function handleUpdateInternalNotes() {
+  if (!order.value) return
+  savingNotes.value = true
+  notesSavedMessage.value = ''
+  try {
+    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { internalNotes: order.value.internalNotes }
+    })
+    order.value.internalNotes = updated.internalNotes
+    notesSavedMessage.value = t('admin.common.saved', 'Saved')
+    setTimeout(() => {
+      notesSavedMessage.value = ''
+    }, 2000)
+  } catch (e: any) {
+    console.error('Update notes failed:', e)
+  } finally {
+    savingNotes.value = false
+  }
+}
+
+function handleBlacklistPlaceholder(type: string) {
+  // Just show an alert acting as a placeholder
+  alert(`This is a placeholder for ${type} blacklisting. Feature coming soon!`)
+}
+
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    // Optional: add a quick toast or alert, or it's implicitly successful
+  } catch (err) {
+    console.error('Failed to copy text: ', err)
   }
 }
 

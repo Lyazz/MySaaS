@@ -26,6 +26,7 @@ export interface CreateTenantUserInput {
     password: string
     role?: 'admin' | 'staff'
     staffRoleId?: string
+    cashboxId?: string | null
 }
 
 export interface UpdateTenantUserInput {
@@ -34,6 +35,7 @@ export interface UpdateTenantUserInput {
     role?: 'admin' | 'staff'
     isActive?: boolean
     staffRoleId?: string | null
+    cashboxId?: string | null
 }
 
 const normalizeEmail = (email: unknown): string => {
@@ -62,6 +64,7 @@ const safeUserSelect = {
     email: true,
     role: true,
     isActive: true,
+    cashboxId: true,
     staffRoleId: true,
     createdAt: true,
     updatedAt: true
@@ -111,6 +114,22 @@ export class UsersService {
         }
 
         try {
+            const settings = await prisma.storeSettings.findUnique({
+                where: { tenantId },
+                select: { defaultCashboxId: true }
+            })
+            const defaultCashboxId = settings?.defaultCashboxId ?? null
+            const requestedCashboxId =
+                typeof input.cashboxId === 'string' && input.cashboxId.trim().length > 0 ? input.cashboxId.trim() : null
+
+            if (requestedCashboxId) {
+                const exists = await prisma.cashbox.findFirst({
+                    where: { tenantId, id: requestedCashboxId, isActive: true },
+                    select: { id: true }
+                })
+                if (!exists) throw new UsersValidationError(400, 'Invalid cashboxId')
+            }
+
             const user = await prisma.user.create({
                 data: {
                     tenantId,
@@ -118,7 +137,8 @@ export class UsersService {
                     passwordHash,
                     role,
                     ...(role === 'staff' ? { staffRoleId } : { staffRoleId: null }),
-                    isActive: true
+                    isActive: true,
+                    cashboxId: requestedCashboxId ?? defaultCashboxId
                 },
                 select: safeUserSelect
             })
@@ -215,6 +235,22 @@ export class UsersService {
 
             data.isActive = patch.isActive
             changes.push('isActive')
+        }
+
+        if (patch.cashboxId !== undefined) {
+            const cashboxId =
+                typeof patch.cashboxId === 'string' && patch.cashboxId.trim().length > 0 ? patch.cashboxId.trim() : null
+
+            if (cashboxId) {
+                const exists = await prisma.cashbox.findFirst({
+                    where: { tenantId, id: cashboxId, isActive: true },
+                    select: { id: true }
+                })
+                if (!exists) throw new UsersValidationError(400, 'Invalid cashboxId')
+            }
+
+            data.cashboxId = cashboxId
+            changes.push('cashbox')
         }
 
         if (changes.length === 0) throw new UsersValidationError(400, 'No fields to update')

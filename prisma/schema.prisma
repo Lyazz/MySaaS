@@ -62,6 +62,9 @@ model Cashbox {
   name     String
   isActive Boolean @default(true)
 
+  defaultForStoreSettings StoreSettings[] @relation("StoreSettingsDefaultCashbox")
+  users                   User[]          @relation("UserCashbox")
+
   sessions     CashSession[]
   transactions CashTransaction[]
 
@@ -83,10 +86,18 @@ model CashSession {
 
   status String @default("OPEN") // OPEN | CLOSED
 
-  openingFloat    Decimal  @default(0)
-  closingCount    Decimal?
-  expectedClosing Decimal?
-  difference      Decimal?
+  openingFloat     Decimal  @default(0)
+  closingCount     Decimal?
+  closingCash      Decimal?
+  closingCard      Decimal?
+  closingTransfer  Decimal?
+  closingOther     Decimal?
+  expectedClosing  Decimal?
+  expectedCash     Decimal?
+  expectedCard     Decimal?
+  expectedTransfer Decimal?
+  expectedOther    Decimal?
+  difference       Decimal?
 
   note String?
 
@@ -251,6 +262,9 @@ model StoreSettings {
   tenantId String @unique
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  defaultCashboxId String?
+  defaultCashbox   Cashbox? @relation("StoreSettingsDefaultCashbox", fields: [tenantId, defaultCashboxId], references: [tenantId, id], onDelete: SetNull)
+
   logoUrl      String? // URL of the tenant's store logo
   primaryColor String  @default("#0d9488") // teal-600
   templateKey  String  @default("modern") // e.g. classic | modern
@@ -306,6 +320,8 @@ model User {
   isActive     Boolean          @default(true)
   tenantId     String
   tenant       Tenant           @relation(fields: [tenantId], references: [id])
+  cashboxId    String?
+  cashbox      Cashbox?         @relation("UserCashbox", fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: SetNull)
   staffRoleId  String?
   staffRole    TenantStaffRole? @relation("StaffRoleUsers", fields: [tenantId, staffRoleId], references: [tenantId, id], onDelete: Restrict)
   createdAt    DateTime         @default(now())
@@ -324,6 +340,7 @@ model User {
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, isActive])
+  @@index([tenantId, cashboxId])
   @@index([tenantId, staffRoleId])
 }
 
@@ -805,6 +822,10 @@ model Order {
   customerName    String
   customerPhone   String
   customerAddress String?
+  customerIp      String?
+
+  calledCustomer  Boolean @default(false)
+  internalNotes   String?
 
   deliveryMode         String            @default("home") // home | pickup | store
   shippingProvider     ShipmentProvider?

@@ -332,6 +332,18 @@
                       class="w-4 h-4"
                     />
                   </button>
+                  <button
+                    type="button"
+                    class="p-2 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    :title="t('admin.pages.purchases.detail.items.table.receiveAndPay')"
+                    :disabled="receiving || item.quantityReceived >= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id] <= 0"
+                    @click="openReceivePay(item)"
+                  >
+                    <Icon
+                      name="lucide:credit-card"
+                      class="w-4 h-4"
+                    />
+                  </button>
                 </div>
                 <div class="mt-1">
                   <div class="flex items-center gap-3">
@@ -405,6 +417,93 @@
       @confirm="deleteOrder"
     />
 
+    <!-- Receive & Pay Modal -->
+    <div v-if="receivePayOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeReceivePay">
+      <div class="flex min-h-screen items-center justify-center px-4">
+        <div class="fixed inset-0 bg-black/50" @click="closeReceivePay" />
+        <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+          <h3 class="text-lg font-semibold text-gray-900">
+            {{ t('admin.pages.purchases.detail.paymentModal.title') }}
+          </h3>
+          <p class="mt-1 text-sm text-gray-500">
+            {{ t('admin.pages.purchases.detail.paymentModal.subtitle') }}
+          </p>
+
+          <div v-if="!order?.supplier?.id" class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            {{ t('admin.pages.purchases.detail.paymentModal.supplierRequired') }}
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <BaseSelect
+                v-model="receivePayForm.cashboxId"
+                :label="t('admin.pages.purchases.detail.paymentModal.cashboxLabel')"
+              >
+                <option value="">{{ t('admin.pages.purchases.detail.paymentModal.cashboxAuto') }}</option>
+                <option v-for="c in cashboxes" :key="c.id" :value="c.id" :disabled="!c.openSession">
+                  {{ c.name }}{{ !c.openSession ? ` (${t('admin.pages.purchases.detail.paymentModal.noOpenSession')})` : '' }}
+                </option>
+              </BaseSelect>
+            </div>
+
+            <div>
+              <BaseInput
+                v-model="receivePayForm.amount"
+                :label="t('admin.pages.purchases.detail.paymentModal.amountLabel')"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <BaseSelect
+                v-model="receivePayForm.method"
+                :label="t('admin.pages.purchases.detail.paymentModal.methodLabel')"
+              >
+                <option value="CASH">{{ t('admin.pages.cash.methods.CASH') }}</option>
+                <option value="CARD">{{ t('admin.pages.cash.methods.CARD') }}</option>
+                <option value="TRANSFER">{{ t('admin.pages.cash.methods.TRANSFER') }}</option>
+                <option value="OTHER">{{ t('admin.pages.cash.methods.OTHER') }}</option>
+              </BaseSelect>
+            </div>
+
+            <div class="sm:col-span-2">
+              <BaseInput
+                v-model="receivePayForm.reference"
+                :label="t('admin.pages.purchases.detail.paymentModal.referenceLabel')"
+                :placeholder="t('admin.pages.purchases.detail.paymentModal.referencePlaceholder')"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <BaseInput
+                v-model="receivePayForm.note"
+                :label="t('admin.pages.purchases.detail.paymentModal.noteLabel')"
+                :placeholder="t('admin.pages.purchases.detail.paymentModal.notePlaceholder')"
+              />
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              @click="closeReceivePay"
+            >
+              {{ t('admin.common.cancel') }}
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50"
+              :disabled="receiving || !canSubmitReceivePay"
+              @click="submitReceivePay"
+            >
+              {{ receiving ? t('admin.common.updating') : t('admin.pages.purchases.detail.paymentModal.confirm') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="flex justify-end mt-8">
       <button
         type="button"
@@ -430,6 +529,8 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import VariantSelectorModal from '~/components/admin/VariantSelectorModal.vue'
+import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -453,6 +554,17 @@ const costMode = ref<'replace' | 'weighted'>('replace')
 const salePriceMode = ref<'replace' | 'weighted'>('replace')
 
 const receiveQtyByItem = reactive<Record<string, number>>({})
+const receivePayOpen = ref(false)
+const receivePayItemId = ref<string | null>(null)
+const cashboxes = ref<Array<{ id: string; name: string; openSession?: any | null }>>([])
+const cashboxesLoaded = ref(false)
+const receivePayForm = reactive({
+  cashboxId: '',
+  amount: '',
+  method: 'CASH',
+  reference: '',
+  note: ''
+})
 
 // Track editing state for items to debounce updates
 const editingItems = reactive<Record<string, { quantityOrdered: number; unitCost: string; salePrice: string }>>({})
@@ -542,6 +654,106 @@ const receiveItem = async (item: any) => {
       }
     })
 
+    await fetchOrder()
+  } catch (e: any) {
+    errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.receiveFailed')
+  } finally {
+    receiving.value = false
+  }
+}
+
+const toMoneyString = (value: unknown): string | null => {
+  if (value === undefined || value === null) return null
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  if (typeof value === 'string' && value.trim()) return value.trim()
+  return null
+}
+
+const fetchCashboxes = async () => {
+  if (cashboxesLoaded.value) return
+  try {
+    const rows = await $fetch<any[]>('/api/admin/cashboxes', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    cashboxes.value = (rows || []).map((c: any) => ({ id: c.id, name: c.name, openSession: c.openSession }))
+    cashboxesLoaded.value = true
+  } catch {
+    cashboxes.value = []
+  }
+}
+
+const openReceivePay = async (item: any) => {
+  receivePayItemId.value = item?.id ?? null
+  receivePayForm.cashboxId = ''
+  receivePayForm.method = 'CASH'
+  receivePayForm.reference = ''
+  receivePayForm.note = ''
+
+  const qty = receiveQtyByItem[item.id]
+  const edit = editingItems[item.id]
+  const unitCost = parseMoney(edit?.unitCost ?? item.unitCost)
+  const amount = unitCost !== null && qty && qty > 0 ? unitCost * qty : null
+  receivePayForm.amount = amount !== null && amount > 0 ? String(amount) : ''
+
+  receivePayOpen.value = true
+  await fetchCashboxes()
+}
+
+const closeReceivePay = () => {
+  receivePayOpen.value = false
+  receivePayItemId.value = null
+}
+
+const canSubmitReceivePay = computed(() => {
+  if (!receivePayItemId.value) return false
+  const item = order.value?.items?.find((i: any) => i.id === receivePayItemId.value)
+  if (!item) return false
+  const qty = receiveQtyByItem[item.id]
+  if (!qty || qty <= 0) return false
+  if (!order.value?.supplier?.id) return false
+  const amountStr = toMoneyString(receivePayForm.amount)
+  const amount = amountStr ? Number(amountStr) : NaN
+  return Number.isFinite(amount) && amount > 0
+})
+
+const submitReceivePay = async () => {
+  if (!canSubmitReceivePay.value) return
+  const item = order.value?.items?.find((i: any) => i.id === receivePayItemId.value)
+  if (!item) return
+
+  const qty = receiveQtyByItem[item.id]
+  const edit = editingItems[item.id]
+
+  receiving.value = true
+  errorMessage.value = null
+
+  try {
+    await $fetch(`/api/admin/purchases/${purchaseId}/receive`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: {
+        costMode: costMode.value,
+        salePriceMode: salePriceMode.value,
+        items: [
+          {
+            itemId: item.id,
+            quantityReceived: qty,
+            unitCost: edit?.unitCost,
+            salePrice: edit?.salePrice?.trim() ? edit.salePrice.trim() : undefined
+          }
+        ],
+        payment: {
+          mode: 'partial',
+          cashboxId: receivePayForm.cashboxId || undefined,
+          amount: receivePayForm.amount,
+          method: receivePayForm.method,
+          reference: receivePayForm.reference,
+          note: receivePayForm.note
+        }
+      }
+    })
+
+    closeReceivePay()
     await fetchOrder()
   } catch (e: any) {
     errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.receiveFailed')

@@ -106,6 +106,10 @@ export class ProductsService {
                 variants: {
                     where: { isActive: true },
                     take: 1 // Just to see if there are variants
+                },
+                productImages: {
+                    orderBy: [{ isMain: 'desc' }, { position: 'asc' }],
+                    take: 1 // Only the main image needed for the list view
                 }
             },
             orderBy
