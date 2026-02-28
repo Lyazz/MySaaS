@@ -1,62 +1,113 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/sale.dart';
+import '../services/api_service.dart';
 
 class SalesState {
   final List<Sale> sales;
   final bool isLoading;
   final String? error;
+  final int page;
+  final int totalPages;
+  final int total;
 
-  SalesState({this.sales = const [], this.isLoading = false, this.error});
+  SalesState({
+    this.sales = const [],
+    this.isLoading = false,
+    this.error,
+    this.page = 1,
+    this.totalPages = 1,
+    this.total = 0,
+  });
 
-  SalesState copyWith({List<Sale>? sales, bool? isLoading, String? error}) {
+  SalesState copyWith({
+    List<Sale>? sales,
+    bool? isLoading,
+    String? error,
+    int? page,
+    int? totalPages,
+    int? total,
+  }) {
     return SalesState(
       sales: sales ?? this.sales,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      page: page ?? this.page,
+      totalPages: totalPages ?? this.totalPages,
+      total: total ?? this.total,
     );
   }
 }
 
+String _formatApiError(Object error) {
+  if (error is DioException) {
+    final data = error.response?.data;
+    if (data is Map && data['statusMessage'] != null) {
+      return data['statusMessage'].toString();
+    }
+    return error.message ?? 'Request failed';
+  }
+  return error.toString();
+}
+
 class SalesNotifier extends Notifier<SalesState> {
+  final SalesState? _initialState;
+
+  SalesNotifier([this._initialState]);
+
   @override
   SalesState build() {
-    return SalesState(
-      sales: [
-        Sale(
-          id: 'ORD-5001',
-          customerName: 'John Doe',
-          customerPhone: '(555) 111-2222',
-          totalAmount: 120.00,
-          status: 'DELIVERED',
-          updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
-          type: 'ORDER',
-        ),
-        Sale(
-          id: 'POS-1001',
-          customerName: 'Walk-in Customer',
-          customerPhone: '',
-          totalAmount: 45.50,
-          status: 'COMPLETED',
-          updatedAt: DateTime.now().subtract(const Duration(hours: 4)),
-          type: 'POS',
-        ),
-        Sale(
-          id: 'ORD-5002',
-          customerName: 'Jane Smith',
-          customerPhone: '(555) 333-4444',
-          totalAmount: 250.00,
-          status: 'SHIPPED',
-          updatedAt: DateTime.now().subtract(const Duration(days: 1)),
-          type: 'ORDER',
-        ),
-      ],
-    );
+    return _initialState ?? SalesState();
   }
 
-  Future<void> fetchSales() async {
+  Future<void> fetchSales({
+    String? search,
+    DateTime? startDate,
+    DateTime? endDate,
+    int page = 1,
+    int limit = 25,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
-    await Future.delayed(const Duration(milliseconds: 500));
-    state = state.copyWith(isLoading: false);
+
+    try {
+      final api = ref.read(apiProvider);
+      final query = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
+        if (startDate != null) 'startDate': startDate.toIso8601String(),
+        if (endDate != null) 'endDate': endDate.toIso8601String(),
+      };
+
+      final res = await api.client.get('/admin/sales', queryParameters: query);
+      final data = res.data;
+
+      final items = (data is Map && data['items'] is List)
+          ? (data['items'] as List)
+          : const [];
+
+      final sales = items
+          .whereType<Map>()
+          .map((e) => Sale.fromJson(e.cast<String, dynamic>()))
+          .toList();
+
+      state = state.copyWith(
+        isLoading: false,
+        sales: sales,
+        page: (data is Map && data['page'] is num)
+            ? (data['page'] as num).toInt()
+            : page,
+        totalPages: (data is Map && data['totalPages'] is num)
+            ? (data['totalPages'] as num).toInt()
+            : 1,
+        total: (data is Map && data['total'] is num)
+            ? (data['total'] as num).toInt()
+            : sales.length,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: _formatApiError(e));
+    }
   }
 }
 

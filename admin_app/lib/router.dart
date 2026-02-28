@@ -7,6 +7,7 @@ import 'screens/login_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'screens/orders_screen.dart';
+import 'screens/order_detail_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/categories_screen.dart';
 import 'screens/category_form_screen.dart';
@@ -14,10 +15,15 @@ import 'screens/settings_screen.dart';
 import 'screens/settings/printers_settings_page.dart';
 import 'screens/customers_screen.dart';
 import 'screens/customer_detail_screen.dart';
+import 'screens/customer_form_screen.dart';
 import 'screens/suppliers_screen.dart';
 import 'screens/supplier_form_screen.dart';
+import 'screens/users_screen.dart';
+import 'screens/cash_screen.dart';
+import 'screens/cashbox_detail_screen.dart';
 
 import 'screens/sales_screen.dart';
+import 'screens/sale_detail_screen.dart';
 import 'screens/purchases_screen.dart';
 import 'screens/purchase_form_screen.dart';
 import 'screens/purchase_detail_screen.dart';
@@ -46,6 +52,42 @@ class NoTransitionPage extends CustomTransitionPage<void> {
   }
 }
 
+String? _pathToResource(String path) {
+  if (path == '/' || path.startsWith('/dashboard')) return 'dashboard';
+  if (path.startsWith('/products')) return 'products';
+  if (path.startsWith('/inventory')) return 'inventory';
+  if (path.startsWith('/categories')) return 'categories';
+  if (path.startsWith('/suppliers')) return 'suppliers';
+  if (path.startsWith('/purchases')) return 'purchases';
+  if (path.startsWith('/orders')) return 'orders';
+  if (path.startsWith('/sales')) return 'sales';
+  if (path.startsWith('/pos')) return 'pos';
+  if (path.startsWith('/customers')) return 'customers';
+  if (path.startsWith('/users')) return 'users';
+  if (path.startsWith('/cash')) return 'cash';
+  if (path.startsWith('/delivery')) return 'delivery';
+  if (path.startsWith('/billing')) return 'billing';
+  return null;
+}
+
+String _firstAllowedPath(List<String> permissions) {
+  bool allow(String resource) => permissions.contains('$resource:read');
+  if (allow('orders')) return '/orders';
+  if (allow('dashboard')) return '/';
+  if (allow('products')) return '/products';
+  if (allow('inventory')) return '/inventory';
+  if (allow('categories')) return '/categories';
+  if (allow('customers')) return '/customers';
+  if (allow('suppliers')) return '/suppliers';
+  if (allow('purchases')) return '/purchases';
+  if (allow('sales')) return '/sales';
+  if (allow('pos')) return '/pos';
+  if (allow('delivery')) return '/delivery';
+  if (allow('cash')) return '/cash';
+  if (allow('billing')) return '/billing';
+  return '/orders';
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
   return GoRouter(
@@ -60,6 +102,22 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (isLoggedIn && isLoginRoute) {
         return '/';
+      }
+
+      if (isLoggedIn && authState.user?.isSuperAdmin == true) {
+        return '/login';
+      }
+
+      if (isLoggedIn && authState.user?.role == 'staff') {
+        final resource = _pathToResource(state.uri.path);
+        if (resource != null) {
+          final perms = authState.staffPermissions;
+          if (perms.isEmpty) {
+            if (resource != 'orders') return '/orders';
+          } else if (!perms.contains('$resource:read')) {
+            return _firstAllowedPath(perms);
+          }
+        }
       }
 
       return null;
@@ -110,8 +168,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/orders',
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const OrdersScreen(),
+              child: OrdersScreen(
+                initialStatus: state.uri.queryParameters['status'],
+              ),
             ),
+          ),
+          GoRoute(
+            path: '/orders/:id',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id'];
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: OrderDetailScreen(orderId: id ?? ''),
+              );
+            },
           ),
           GoRoute(
             path: '/sales',
@@ -119,6 +189,16 @@ final routerProvider = Provider<GoRouter>((ref) {
               key: state.pageKey,
               child: const SalesScreen(),
             ),
+          ),
+          GoRoute(
+            path: '/sales/:id',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: SaleDetailScreen(saleId: id),
+              );
+            },
           ),
           GoRoute(
             path: '/purchases',
@@ -204,6 +284,45 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const CustomersScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/customers/create',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const CustomerFormScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/customers/edit/:id',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id'];
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: CustomerFormScreen(customerId: id),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/cash',
+            pageBuilder: (context, state) =>
+                NoTransitionPage(key: state.pageKey, child: const CashScreen()),
+          ),
+          GoRoute(
+            path: '/cash/:id',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: CashboxDetailScreen(cashboxId: id),
+              );
+            },
+          ),
+          GoRoute(
+            path: '/users',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const UsersScreen(),
             ),
           ),
           GoRoute(

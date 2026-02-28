@@ -6,6 +6,10 @@ import '../../providers/printer_profiles_provider.dart';
 import '../../models/printer_profile.dart';
 import '../../services/discovery_service.dart';
 import '../../services/print_service.dart';
+import '../../widgets/form/form_input.dart';
+import '../../widgets/form/form_select.dart';
+import '../../widgets/dialogs/app_dialog.dart';
+import '../../widgets/buttons/app_button.dart';
 import 'receipt_layout_editor.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../../models/pos_models.dart'; // For CartItem
@@ -262,21 +266,10 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
               style: TextStyle(color: Colors.grey[500]),
             ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
+            AppButton.primary(
+              label: 'Add Printer',
+              icon: LucideIcons.plus,
               onPressed: () => _startEditing(),
-              icon: const Icon(LucideIcons.plus),
-              label: const Text('Add Printer'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accentColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
             ),
           ],
         ),
@@ -296,22 +289,10 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                 color: Color(0xFF334155),
               ),
             ),
-            ElevatedButton.icon(
+            AppButton.primary(
+              label: 'Add New',
+              icon: LucideIcons.plus,
               onPressed: () => _startEditing(),
-              icon: const Icon(LucideIcons.plus, size: 18),
-              label: const Text('Add New'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accentColor,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
             ),
           ],
         ),
@@ -507,24 +488,17 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
       case 'delete':
         final confirm = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Delete Printer?'),
+          builder: (context) => AppDialog(
+            title: 'Delete Printer?',
+            description: 'This action cannot be undone.',
             content: const Text(
               'Are you sure you want to delete this profile?',
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
+            secondaryLabel: 'Cancel',
+            onSecondary: () => Navigator.pop(context, false),
+            primaryLabel: 'Delete',
+            primaryVariant: AppDialogPrimaryVariant.destructive,
+            onPrimary: () => Navigator.pop(context, true),
           ),
         );
         if (confirm == true) {
@@ -552,19 +526,17 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                     icon: LucideIcons.info,
                     accentColor: accentColor,
                     children: [
-                      TextFormField(
+                      FormInput(
+                        label: 'Profile Name',
                         controller: _nameController,
-                        decoration: _inputDecoration(
-                          'Profile Name',
-                          hint: 'e.g. Kitchen Printer',
-                        ),
+                        hint: 'e.g. Kitchen Printer',
                         validator: (v) =>
                             v == null || v.isEmpty ? 'Name is required' : null,
                       ),
                       const SizedBox(height: 16),
-                      DropdownButtonFormField<PrinterTransport>(
+                      FormSelect<PrinterTransport>(
+                        label: 'Transport Type',
                         value: _transport,
-                        decoration: _inputDecoration('Transport Type'),
                         items: PrinterTransport.values.map((t) {
                           return DropdownMenuItem(
                             value: t,
@@ -574,9 +546,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                           );
                         }).toList(),
                         onChanged: (value) {
-                          setState(() {
-                            _transport = value!;
-                          });
+                          if (value == null) return;
+                          setState(() => _transport = value);
                         },
                       ),
                     ],
@@ -589,19 +560,19 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                     children: [
                       if (_transport == PrinterTransport.network) ...[
                         if (isMobile) ...[
-                          TextFormField(
+                          FormInput(
+                            label: 'IP Address',
                             controller: _ipController,
-                            decoration: _inputDecoration(
-                              'IP Address',
-                              hint: '192.168.1.100',
-                            ),
-                            validator: (v) =>
-                                v!.isEmpty ? 'IP is required' : null,
+                            hint: '192.168.1.100',
+                            validator: (v) => (v == null || v.isEmpty)
+                                ? 'IP is required'
+                                : null,
                           ),
                           const SizedBox(height: 16),
-                          TextFormField(
+                          FormInput(
+                            label: 'Port',
                             controller: _portController,
-                            decoration: _inputDecoration('Port', hint: '9100'),
+                            hint: '9100',
                             keyboardType: TextInputType.number,
                           ),
                         ] else ...[
@@ -610,24 +581,21 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                             children: [
                               Expanded(
                                 flex: 2,
-                                child: TextFormField(
+                                child: FormInput(
+                                  label: 'IP Address',
                                   controller: _ipController,
-                                  decoration: _inputDecoration(
-                                    'IP Address',
-                                    hint: '192.168.1.100',
-                                  ),
-                                  validator: (v) =>
-                                      v!.isEmpty ? 'IP is required' : null,
+                                  hint: '192.168.1.100',
+                                  validator: (v) => (v == null || v.isEmpty)
+                                      ? 'IP is required'
+                                      : null,
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
-                                child: TextFormField(
+                                child: FormInput(
+                                  label: 'Port',
                                   controller: _portController,
-                                  decoration: _inputDecoration(
-                                    'Port',
-                                    hint: '9100',
-                                  ),
+                                  hint: '9100',
                                   keyboardType: TextInputType.number,
                                 ),
                               ),
@@ -635,54 +603,50 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                           ),
                         ],
                       ] else if (_transport == PrinterTransport.bluetooth) ...[
-                        TextFormField(
+                        FormInput(
+                          label: 'MAC Address',
                           controller: _macController,
-                          decoration: _inputDecoration(
-                            'MAC Address',
-                            hint: '00:11:22:33:44:55',
-                          ),
-                          validator: (v) =>
-                              v!.isEmpty ? 'MAC is required' : null,
+                          hint: '00:11:22:33:44:55',
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'MAC is required'
+                              : null,
                         ),
                       ] else if (_transport == PrinterTransport.ble) ...[
-                        TextFormField(
+                        FormInput(
+                          label: 'Device ID (UUID)',
                           controller: _deviceIdController,
-                          decoration: _inputDecoration(
-                            'Device ID (UUID)',
-                            hint: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-                            suffixIcon: IconButton(
-                              icon: const Icon(LucideIcons.search),
-                              onPressed: _showBleScanDialog,
-                              tooltip: 'Scan for BLE Devices',
-                            ),
+                          hint: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+                          suffixIcon: IconButton(
+                            icon: const Icon(LucideIcons.search),
+                            onPressed: _showBleScanDialog,
+                            tooltip: 'Scan for BLE Devices',
                           ),
-                          validator: (v) =>
-                              v!.isEmpty ? 'ID is required' : null,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'ID is required'
+                              : null,
                         ),
                       ] else if (_transport == PrinterTransport.windows) ...[
-                        TextFormField(
+                        FormInput(
+                          label: 'Printer Name',
                           controller: _printerNameController,
-                          decoration: _inputDecoration(
-                            'Printer Name',
-                            hint: 'POS-58',
-                          ),
-                          validator: (v) =>
-                              v!.isEmpty ? 'Name is required' : null,
+                          hint: 'POS-58',
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Name is required'
+                              : null,
                         ),
                       ] else if (_transport == PrinterTransport.serial) ...[
-                        TextFormField(
+                        FormInput(
+                          label: 'Serial Port',
                           controller: _portNameController,
-                          decoration: _inputDecoration(
-                            'Serial Port',
-                            hint: 'COM1 or /dev/ttyS0',
-                            suffixIcon: IconButton(
-                              icon: const Icon(LucideIcons.refreshCcw),
-                              onPressed: _showSerialPortPicker,
-                              tooltip: 'Scan for Ports',
-                            ),
+                          hint: 'COM1 or /dev/ttyS0',
+                          suffixIcon: IconButton(
+                            icon: const Icon(LucideIcons.refreshCcw),
+                            onPressed: _showSerialPortPicker,
+                            tooltip: 'Scan for Ports',
                           ),
-                          validator: (v) =>
-                              v!.isEmpty ? 'Port is required' : null,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Port is required'
+                              : null,
                         ),
                       ] else ...[
                         const Text(
@@ -701,9 +665,9 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                       Row(
                         children: [
                           Expanded(
-                            child: DropdownButtonFormField<int>(
+                            child: FormSelect<int>(
+                              label: 'Paper Width',
                               value: _paperWidth,
-                              decoration: _inputDecoration('Paper Width'),
                               items: const [
                                 DropdownMenuItem(
                                   value: 80,
@@ -714,8 +678,10 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                                   child: Text('58mm (Narrow)'),
                                 ),
                               ],
-                              onChanged: (v) =>
-                                  setState(() => _paperWidth = v!),
+                              onChanged: (v) {
+                                if (v == null) return;
+                                setState(() => _paperWidth = v);
+                              },
                             ),
                           ),
                         ],
@@ -769,32 +735,15 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(
+                      AppButton.secondary(
+                        label: 'Cancel',
                         onPressed: _cancelEditing,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                        ),
-                        child: const Text('Cancel'),
                       ),
                       const SizedBox(width: 16),
-                      ElevatedButton.icon(
+                      AppButton.primary(
+                        label: 'Save Profile',
+                        icon: LucideIcons.save,
                         onPressed: _save,
-                        icon: const Icon(LucideIcons.save),
-                        label: const Text('Save Profile'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: accentColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -910,33 +859,6 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         });
       }
     });
-  }
-
-  InputDecoration _inputDecoration(
-    String label, {
-    String? hint,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      filled: true,
-      fillColor: const Color(0xFFF8FAFC),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF0D9488), width: 2),
-      ),
-      suffixIcon: suffixIcon,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    );
   }
 
   IconData _getIconForTransport(PrinterTransport transport) {
@@ -1067,25 +989,22 @@ class _BleScanDialogState extends State<_BleScanDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Row(
-        children: [
-          const Text('Scanning BLE Devices'),
-          if (_isScanning) ...[
-            const SizedBox(width: 16),
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          ],
-        ],
-      ),
+    return AppDialog(
+      title: 'Scanning BLE Devices',
+      description: _isScanning ? 'Scanning…' : 'Select a device from the list.',
+      maxWidth: 720,
       content: SizedBox(
-        width: double.maxFinite,
-        height: 300,
+        height: 320,
         child: _results.isEmpty
-            ? const Center(child: Text('No devices found'))
+            ? Center(
+                child: _isScanning
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('No devices found'),
+              )
             : ListView.builder(
                 itemCount: _results.length,
                 itemBuilder: (context, index) {
@@ -1102,14 +1021,10 @@ class _BleScanDialogState extends State<_BleScanDialog> {
                 },
               ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        if (!_isScanning)
-          TextButton(onPressed: _startScan, child: const Text('Scan Again')),
-      ],
+      secondaryLabel: 'Cancel',
+      onSecondary: () => Navigator.pop(context),
+      primaryLabel: _isScanning ? null : 'Scan Again',
+      onPrimary: _isScanning ? null : _startScan,
     );
   }
 }

@@ -109,6 +109,9 @@
             <option value="inactive">
               {{ t('admin.common.inactive') }}
             </option>
+            <option value="lowStock">
+              {{ t('admin.pages.products.index.filters.lowStock') }}
+            </option>
           </BaseSelect>
         </div>
       </div>
@@ -268,8 +271,24 @@
               <td class="ui-td whitespace-nowrap text-slate-900">
                 {{ formatCurrency(product.price) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-slate-900">
-                {{ product.stock }}
+              <td class="ui-td whitespace-nowrap">
+                <!-- Out of stock -->
+                <span
+                  v-if="product.stock === 0"
+                  class="ui-badge ui-badge--red"
+                >
+                  {{ t('admin.pages.products.index.table.outOfStock') }}
+                </span>
+                <!-- Low stock -->
+                <span
+                  v-else-if="product.stock <= (product.lowStockThreshold ?? 5)"
+                  class="ui-badge ui-badge--amber inline-flex items-center gap-1"
+                >
+                  <Icon name="lucide:triangle-alert" class="w-3 h-3" />
+                  {{ product.stock }}
+                </span>
+                <!-- Normal stock -->
+                <span v-else class="text-slate-900">{{ product.stock }}</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <span
@@ -620,6 +639,7 @@ interface Product {
   slug: string
   price: number
   stock: number
+  lowStockThreshold: number
   isActive: boolean
   images?: string[]
   productImages?: Array<{ id: string; url: string; isMain: boolean; position: number }>
@@ -702,9 +722,13 @@ const filteredProducts = computed(() => {
  
   // Status filter
   if (selectedStatus.value) {
-    filtered = filtered.filter(p => 
-      selectedStatus.value === 'active' ? p.isActive : !p.isActive
-    )
+    if (selectedStatus.value === 'lowStock') {
+      filtered = filtered.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5))
+    } else {
+      filtered = filtered.filter(p =>
+        selectedStatus.value === 'active' ? p.isActive : !p.isActive
+      )
+    }
   }
  
   return filtered

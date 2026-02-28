@@ -18,11 +18,17 @@ class Sale {
   });
 
   factory Sale.fromJson(Map<String, dynamic> json) {
+    double parseDouble(dynamic raw) {
+      if (raw == null) return 0;
+      if (raw is num) return raw.toDouble();
+      return double.tryParse(raw.toString()) ?? 0;
+    }
+
     return Sale(
       id: json['id'] ?? '',
       customerName: json['customerName'] ?? '',
       customerPhone: json['customerPhone'] ?? '',
-      totalAmount: (json['totalAmount'] ?? 0).toDouble(),
+      totalAmount: parseDouble(json['totalAmount']),
       status: json['status'] ?? 'COMPLETED',
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])

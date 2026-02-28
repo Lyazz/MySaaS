@@ -226,8 +226,8 @@ export class CashService {
 
     async listSessions(
         tenantId: string,
-        filters?: { cashboxId?: string; status?: string; startDate?: string; endDate?: string; userId?: string }
-    ): Promise<CashSessionSummary[]> {
+        filters?: { cashboxId?: string; status?: string; startDate?: string; endDate?: string; userId?: string; page?: number; limit?: number }
+    ): Promise<{ items: CashSessionSummary[]; total: number; page: number; totalPages: number }> {
         const where: any = { tenantId }
         const cashboxId = filters?.cashboxId ? String(filters.cashboxId).trim() : ''
         if (cashboxId) where.cashboxId = cashboxId
@@ -253,25 +253,35 @@ export class CashService {
             }
         }
 
-        return prisma.cashSession.findMany({
-            where,
-            orderBy: { openedAt: 'desc' },
-            take: 200,
-            select: {
-                id: true,
-                cashboxId: true,
-                status: true,
-                openingFloat: true,
-                openedAt: true,
-                closedAt: true,
-                closingCount: true,
-                expectedClosing: true,
-                difference: true,
-                note: true,
-                openedByUserId: true,
-                closedByUserId: true
-            }
-        })
+        const page = Math.max(1, filters?.page ?? 1)
+        const limit = Math.min(100, Math.max(1, filters?.limit ?? 25))
+        const skip = (page - 1) * limit
+
+        const [items, total] = await Promise.all([
+            prisma.cashSession.findMany({
+                where,
+                orderBy: { openedAt: 'desc' },
+                skip,
+                take: limit,
+                select: {
+                    id: true,
+                    cashboxId: true,
+                    status: true,
+                    openingFloat: true,
+                    openedAt: true,
+                    closedAt: true,
+                    closingCount: true,
+                    expectedClosing: true,
+                    difference: true,
+                    note: true,
+                    openedByUserId: true,
+                    closedByUserId: true
+                }
+            }),
+            prisma.cashSession.count({ where })
+        ])
+
+        return { items, total, page, totalPages: Math.max(1, Math.ceil(total / limit)) }
     }
 
     private async computeSessionExpectedClosing(tenantId: string, sessionId: string) {
@@ -450,8 +460,10 @@ export class CashService {
             userId?: string
             startDate?: string
             endDate?: string
+            page?: number
+            limit?: number
         }
-    ): Promise<CashTransactionSummary[]> {
+    ): Promise<{ items: CashTransactionSummary[]; total: number; page: number; totalPages: number }> {
         const where: any = { tenantId }
         const cashboxId = filters?.cashboxId ? String(filters.cashboxId).trim() : ''
         if (cashboxId) where.cashboxId = cashboxId
@@ -484,32 +496,42 @@ export class CashService {
             }
         }
 
-        return prisma.cashTransaction.findMany({
-            where,
-            orderBy: { createdAt: 'desc' },
-            take: 500,
-            select: {
-                id: true,
-                cashboxId: true,
-                sessionId: true,
-                direction: true,
-                type: true,
-                amount: true,
-                currency: true,
-                method: true,
-                customerId: true,
-                supplierId: true,
-                saleId: true,
-                orderId: true,
-                purchaseOrderId: true,
-                expenseCategory: true,
-                transferGroupId: true,
-                reference: true,
-                note: true,
-                createdByUserId: true,
-                createdAt: true
-            }
-        })
+        const page = Math.max(1, filters?.page ?? 1)
+        const limit = Math.min(100, Math.max(1, filters?.limit ?? 25))
+        const skip = (page - 1) * limit
+
+        const [items, total] = await Promise.all([
+            prisma.cashTransaction.findMany({
+                where,
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+                select: {
+                    id: true,
+                    cashboxId: true,
+                    sessionId: true,
+                    direction: true,
+                    type: true,
+                    amount: true,
+                    currency: true,
+                    method: true,
+                    customerId: true,
+                    supplierId: true,
+                    saleId: true,
+                    orderId: true,
+                    purchaseOrderId: true,
+                    expenseCategory: true,
+                    transferGroupId: true,
+                    reference: true,
+                    note: true,
+                    createdByUserId: true,
+                    createdAt: true
+                }
+            }),
+            prisma.cashTransaction.count({ where })
+        ])
+
+        return { items, total, page, totalPages: Math.max(1, Math.ceil(total / limit)) }
     }
 
     private async createTransactionInternal(tx: Prisma.TransactionClient, tenantId: string, input: any, actor?: { userId?: string | null }) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/products_provider.dart';
+import 'form/form_input.dart';
+import 'dialogs/app_dialog.dart';
 
 class OptionMetadataDialog extends ConsumerStatefulWidget {
   final String productId;
@@ -76,23 +78,20 @@ class _OptionMetadataDialogState extends ConsumerState<OptionMetadataDialog> {
     final title = isColor ? 'Edit Color' : 'Edit Image';
     final label = isColor ? 'Color Hex (e.g. #FF0000)' : 'Image URL';
 
-    return AlertDialog(
-      title: Text('$title for "${widget.currentLabel}"'),
+    return AppDialog(
+      title: '$title for "${widget.currentLabel}"',
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
+          FormInput(
+            label: label,
             controller: _metaController,
-            decoration: InputDecoration(
-              labelText: label,
-              border: const OutlineInputBorder(),
-              hintText: isColor ? '#000000' : 'https://...',
-            ),
-            onChanged: (val) => setState(() {}), // Refresh preview
+            hint: isColor ? '#000000' : 'https://...',
+            onChanged: (_) => setState(() {}), // Refresh preview
           ),
           const SizedBox(height: 16),
-          const Text('Preview:', style: TextStyle(fontWeight: FontWeight.w500)),
+          const Text('Preview:', style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           if (isColor)
             Container(
@@ -122,22 +121,11 @@ class _OptionMetadataDialogState extends ConsumerState<OptionMetadataDialog> {
             const Text('No image URL', style: TextStyle(color: Colors.grey)),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _isSaving ? null : _save,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Save'),
-        ),
-      ],
+      secondaryLabel: 'Cancel',
+      onSecondary: () => Navigator.pop(context),
+      primaryLabel: 'Save',
+      onPrimary: _save,
+      primaryLoading: _isSaving,
     );
   }
 

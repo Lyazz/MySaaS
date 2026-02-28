@@ -2,13 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../providers/suppliers_provider.dart';
 import '../models/supplier.dart';
 import '../utils/debouncer.dart';
 import '../widgets/responsive_paginated_table.dart';
+import '../widgets/responsive_filter_bar.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/form/form_select.dart';
+import '../widgets/dialogs/app_dialog.dart';
+import '../widgets/buttons/app_button.dart';
 
 class SuppliersScreen extends ConsumerStatefulWidget {
-  const SuppliersScreen({super.key});
+  final bool autoFetch;
+
+  const SuppliersScreen({super.key, this.autoFetch = true});
 
   @override
   ConsumerState<SuppliersScreen> createState() => _SuppliersScreenState();
@@ -17,13 +25,16 @@ class SuppliersScreen extends ConsumerStatefulWidget {
 class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
   final TextEditingController _searchController = TextEditingController();
   final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
+  String _sortBy = 'name_asc';
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(suppliersProvider.notifier).fetchSuppliers();
-    });
+    if (widget.autoFetch) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(suppliersProvider.notifier).fetchSuppliers();
+      });
+    }
   }
 
   @override
@@ -38,6 +49,23 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     final suppliersState = ref.watch(suppliersProvider);
     final suppliers = suppliersState.suppliers;
     final isMobile = MediaQuery.of(context).size.width < 800;
+
+    final query = _searchController.text.trim().toLowerCase();
+    final filteredSuppliers = query.isEmpty
+        ? List<Supplier>.of(suppliers)
+        : suppliers.where((supplier) {
+            final name = supplier.name.toLowerCase();
+            final email = (supplier.email ?? '').toLowerCase();
+            final phone = (supplier.phone ?? '').toLowerCase();
+            return name.contains(query) ||
+                (email.isNotEmpty && email.contains(query)) ||
+                (phone.isNotEmpty && phone.contains(query));
+          }).toList();
+
+    filteredSuppliers.sort((a, b) {
+      final cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      return _sortBy == 'name_desc' ? -cmp : cmp;
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -58,11 +86,11 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Suppliers',
+                        'admin.pages.suppliers.index.title'.tr(),
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -72,7 +100,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Manage your suppliers list',
+                        'admin.pages.suppliers.index.subtitle'.tr(),
                         style: TextStyle(
                           color: Color(0xFF6B7280),
                           fontSize: 14,
@@ -80,117 +108,66 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
+                  AppButton.primary(
+                    label: 'admin.pages.suppliers.index.addSupplier'.tr(),
+                    icon: LucideIcons.plus,
                     onPressed: () => context.go('/suppliers/create'),
-                    icon: const Icon(LucideIcons.plus, size: 16),
-                    label: const Text('Add Supplier'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981), // Emerald-500
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 0,
-                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
             ],
 
-            // Search and Sort
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+            ResponsiveFilterBar(
+              searchField: FormInput(
+                label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
+                controller: _searchController,
+                hint: 'admin.pages.suppliers.index.filters.searchPlaceholder'.tr(),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                onChanged: (value) =>
+                    _searchDebouncer.run(() => setState(() {})),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: 'Search suppliers...',
-                        prefixIcon: Icon(
-                          LucideIcons.search,
-                          size: 18,
-                          color: Color(0xFF9CA3AF),
-                        ),
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
+              filters: [
+                SizedBox(
+                  width: 200,
+                  child: FormSelect<String>(
+                    label: 'Sort',
+                    value: _sortBy,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'name_asc',
+                        child: Text('Name A-Z'),
                       ),
-                      onChanged: (value) =>
-                          _searchDebouncer.run(() => setState(() {})),
-                    ),
+                      DropdownMenuItem(
+                        value: 'name_desc',
+                        child: Text('Name Z-A'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _sortBy = value ?? 'name_asc');
+                    },
                   ),
-                  Container(
-                    height: 24,
-                    width: 1,
-                    color: const Color(0xFFE5E7EB),
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Row(
-                      children: [
-                        const Text(
-                          'Sort by:',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            children: [
-                              const Text(
-                                'Name',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF374151),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                LucideIcons.chevronDown,
-                                size: 14,
-                                color: Color(0xFF6B7280),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+              onClearFilters: () {
+                setState(() {
+                  _searchController.clear();
+                  _sortBy = 'name_asc';
+                });
+              },
             ),
             const SizedBox(height: 24),
             Expanded(
               child: suppliersState.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : _buildSuppliersTable(suppliers),
+                  : _buildSuppliersTable(filteredSuppliers),
             ),
           ],
         ),
@@ -202,12 +179,12 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     return ResponsivePaginatedTable<Supplier>(
       items: suppliers,
       minWidth: 900,
-      header: const Row(
+      header: Row(
         children: [
           Expanded(
             flex: 3,
             child: Text(
-              'NAME',
+              'admin.pages.suppliers.index.table.name'.tr().toUpperCase(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
@@ -219,7 +196,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
           Expanded(
             flex: 3,
             child: Text(
-              'INFO',
+              'admin.pages.suppliers.index.table.info'.tr().toUpperCase(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
@@ -231,7 +208,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
           Expanded(
             flex: 3,
             child: Text(
-              'ADDRESS',
+              'admin.pages.suppliers.index.table.address'.tr().toUpperCase(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
@@ -241,9 +218,9 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
             ),
           ),
           SizedBox(
-            width: 140,
+            width: 220,
             child: Text(
-              'ACTIONS',
+              'admin.common.actions'.tr().toUpperCase(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
@@ -357,68 +334,29 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                 ),
               ),
               SizedBox(
-                width: 140,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    InkWell(
-                      onTap: () => context.go('/suppliers/${supplier.id}'),
-                      borderRadius: BorderRadius.circular(6),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          children: const [
-                            Icon(
-                              LucideIcons.pencil,
-                              size: 14,
-                              color: Color(0xFF10B981),
-                            ), // Emerald-500
-                            SizedBox(width: 4),
-                            Text(
-                              'Edit',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF10B981),
-                              ),
-                            ),
-                          ],
-                        ),
+                width: 220,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      AppButton.secondary(
+                        label: 'admin.common.edit'.tr(),
+                        icon: LucideIcons.pencil,
+                        size: AppButtonSize.sm,
+                        onPressed: () => context.go('/suppliers/${supplier.id}'),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: () => _confirmDelete(supplier),
-                      borderRadius: BorderRadius.circular(6),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          children: const [
-                            Icon(
-                              LucideIcons.trash2,
-                              size: 14,
-                              color: Color(0xFFEF4444),
-                            ), // Red-500
-                            SizedBox(width: 4),
-                            Text(
-                              'Delete',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFFEF4444),
-                              ),
-                            ),
-                          ],
-                        ),
+                      AppButton.danger(
+                        label: 'admin.common.delete'.tr(),
+                        icon: LucideIcons.trash2,
+                        size: AppButtonSize.sm,
+                        onPressed: () => _confirmDelete(supplier),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -431,24 +369,16 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
   Future<void> _confirmDelete(Supplier supplier) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Supplier'),
-        content: Text(
-          'Are you sure you want to delete ${supplier.name}? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFDC2626), // Red-600
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
+      builder: (context) => AppDialog(
+        title: 'admin.pages.suppliers.index.deleteModal.title'.tr(),
+        description: 'admin.pages.suppliers.index.deleteModal.messageWithName'
+            .tr(namedArgs: {'name': supplier.name}),
+        content: Text(supplier.name),
+        secondaryLabel: 'admin.common.cancel'.tr(),
+        onSecondary: () => Navigator.pop(context, false),
+        primaryLabel: 'admin.common.delete'.tr(),
+        primaryVariant: AppDialogPrimaryVariant.destructive,
+        onPrimary: () => Navigator.pop(context, true),
       ),
     );
 

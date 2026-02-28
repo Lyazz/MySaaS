@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../models/product.dart';
 import '../providers/products_provider.dart';
+import 'form/form_input.dart';
+import 'form/form_select.dart';
+import 'buttons/app_button.dart';
+import 'dialogs/app_dialog.dart';
 import 'option_metadata_dialog.dart';
 
 class ProductOptionsList extends ConsumerStatefulWidget {
@@ -72,22 +76,16 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
   Future<void> _deleteOption(String optionId) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Option'),
-        content: const Text(
-          'Are you sure? This will delete all variants associated with this option.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
+      builder: (context) => AppDialog(
+        title: 'Delete Option',
+        description:
+            'This will delete all variants associated with this option.',
+        content: const Text('Are you sure you want to delete this option?'),
+        secondaryLabel: 'Cancel',
+        onSecondary: () => Navigator.pop(context, false),
+        primaryLabel: 'Delete',
+        primaryVariant: AppDialogPrimaryVariant.destructive,
+        onPrimary: () => Navigator.pop(context, true),
       ),
     );
 
@@ -155,13 +153,11 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
               ),
             ),
             if (widget.options.length < 3 && !_isCreatingOption)
-              TextButton.icon(
+              AppButton.secondary(
+                label: 'Add Option',
+                icon: LucideIcons.plus,
+                size: AppButtonSize.sm,
                 onPressed: () => setState(() => _isCreatingOption = true),
-                icon: const Icon(LucideIcons.plus, size: 16),
-                label: const Text('Add Option'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF0D9488),
-                ),
               ),
           ],
         ),
@@ -196,29 +192,19 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                FormInput(
+                  label: 'Option Name',
                   controller: _newOptionNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Option Name',
-                    hintText: 'e.g. Size, Color',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                  hint: 'e.g. Size, Color',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
                   ),
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
+                FormSelect<String>(
+                  label: 'Display Type',
                   value: _newOptionType,
-                  decoration: const InputDecoration(
-                    labelText: 'Display Type',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
                   items: const [
                     DropdownMenuItem(
                       value: 'dropdown',
@@ -241,41 +227,34 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                       child: Text('Image with Text'),
                     ),
                   ],
-                  onChanged: (v) => setState(() => _newOptionType = v!),
+                  onChanged: (v) =>
+                      setState(() => _newOptionType = v ?? 'dropdown'),
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                FormInput(
+                  label: 'Values',
                   controller: _newOptionValuesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Values',
-                    hintText: 'Separate with comma (e.g. S, M, L)',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                  hint: 'Separate with comma (e.g. S, M, L)',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
+                    AppButton.secondary(
+                      label: 'Cancel',
+                      size: AppButtonSize.sm,
                       onPressed: () =>
                           setState(() => _isCreatingOption = false),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.grey),
-                      ),
                     ),
                     const SizedBox(width: 8),
-                    ElevatedButton(
+                    AppButton.primary(
+                      label: 'Add',
+                      size: AppButtonSize.sm,
                       onPressed: _createOption,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0D9488),
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Add'),
                     ),
                   ],
                 ),
@@ -331,19 +310,19 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
               ...option.values.map((value) => _buildValueChip(option, value)),
               SizedBox(
                 width: 120,
-                child: TextField(
+                child: FormInput(
+                  label: 'Add value',
+                  showLabel: false,
                   controller: valueController,
-                  decoration: const InputDecoration(
-                    hintText: 'Add value',
-                    isDense: true,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 0,
-                      vertical: 8,
-                    ),
-                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                  hint: 'Add value',
+                  hintStyle: const TextStyle(fontSize: 12, color: Colors.grey),
+                  textStyle: const TextStyle(fontSize: 12),
+                  borderless: true,
+                  filled: false,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 0,
+                    vertical: 8,
                   ),
-                  style: const TextStyle(fontSize: 12),
                   onSubmitted: (_) => _addValue(option.id),
                 ),
               ),

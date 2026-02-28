@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../providers/billing_provider.dart';
+import '../widgets/buttons/app_button.dart';
 
 class BillingScreen extends ConsumerWidget {
   const BillingScreen({super.key});
@@ -174,25 +175,14 @@ class BillingScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: isCurrent
-                                  ? null
-                                  : () => ref
-                                        .read(billingProvider.notifier)
-                                        .upgradePlan(plan.code),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isCurrent
-                                    ? Colors.grey
-                                    : Colors.teal,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                              ),
-                              child: Text(isCurrent ? 'Current' : 'Select'),
-                            ),
+                          AppButton.primary(
+                            label: isCurrent ? 'Current' : 'Select',
+                            onPressed: isCurrent
+                                ? null
+                                : () => ref
+                                      .read(billingProvider.notifier)
+                                      .upgradePlan(plan.code),
+                            fullWidth: true,
                           ),
                         ],
                       ),

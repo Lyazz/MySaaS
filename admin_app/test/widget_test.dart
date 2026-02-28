@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:admin_app/main.dart';
@@ -12,7 +13,17 @@ void main() {
     });
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProviderScope(child: AdminApp()));
+    await tester.pumpWidget(
+      EasyLocalization(
+        supportedLocales: const [Locale('en'), Locale('fr'), Locale('ar')],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en'),
+        startLocale: const Locale('en'),
+        useOnlyLangCode: true,
+        child: const ProviderScope(child: AdminApp()),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     // Verify that the dashboard placeholder or title is present.
     // Since we start at '/', we expect DashboardScreen.

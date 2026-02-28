@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/auth_provider.dart';
+import '../providers/workspace_provider.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/buttons/app_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +19,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _workspaceController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -25,7 +29,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   static const Color slate900 = Color(0xFF0F172A);
   static const Color slate500 = Color(0xFF64748B);
   static const Color slate400 = Color(0xFF94A3B8);
-  static const Color slate300 = Color(0xFFCBD5E1);
   static const Color slate200 = Color(0xFFE2E8F0);
   static const Color slate50 = Color(0xFFF8FAFC);
 
@@ -41,6 +44,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
 
+    final workspace = ref.read(workspaceProvider);
+    _workspaceController.text = workspace.apiBaseUrl;
+
     assert(() {
       _emailController.text = 'admin@apple.com';
       _passwordController.text = 'password';
@@ -50,6 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
+    _workspaceController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -64,6 +71,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
+      await ref
+          .read(workspaceProvider.notifier)
+          .setWorkspaceUrl(_workspaceController.text);
       await ref
           .read(authProvider.notifier)
           .login(_emailController.text, _passwordController.text);
@@ -342,53 +352,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 20),
 
+                          // Workspace Field
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FormInput(
+                                label: 'Workspace URL',
+                                controller: _workspaceController,
+                                keyboardType: TextInputType.url,
+                                hint: 'https://your-tenant.platform.com',
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter your workspace URL';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tip: include http:// for localhost (e.g. http://apple.localhost:3000)',
+                                style: GoogleFonts.outfit(
+                                  color: slate500,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
                           // Email Field
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Email Address',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.grey[700], // slate-700
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              TextFormField(
+                              FormInput(
+                                label: 'Email Address',
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
-                                style: GoogleFonts.outfit(fontSize: 14),
-                                decoration: InputDecoration(
-                                  hintText: 'name@company.com',
-                                  hintStyle: GoogleFonts.outfit(
-                                    color: slate400,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: slate300,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: slate300,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: teal500,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12, // py-3
-                                  ),
+                                hint: 'name@company.com',
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -428,40 +435,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ],
                               ),
                               const SizedBox(height: 4),
-                              TextFormField(
+                              FormInput(
+                                label: 'Password',
+                                showLabel: false,
                                 controller: _passwordController,
                                 obscureText: true,
-                                style: GoogleFonts.outfit(fontSize: 14),
-                                decoration: InputDecoration(
-                                  hintText: '••••••••',
-                                  hintStyle: GoogleFonts.outfit(
-                                    color: slate400,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: slate300,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: slate300,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: const BorderSide(
-                                      color: teal500,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
+                                hint: '••••••••',
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -508,42 +490,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // Login Button
                           SizedBox(
                             height: 48, // approximate py-3.5
-                            child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleLogin,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: teal600,
-                                foregroundColor: Colors.white,
-                                shadowColor: teal500.withValues(alpha: 0.3),
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: _isLoading
-                                  ? const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text('Signing in...'),
-                                      ],
-                                    )
-                                  : Text(
-                                      'Sign in',
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                            child: AppButton.primary(
+                              label: 'Sign in',
+                              onPressed: _handleLogin,
+                              loading: _isLoading,
+                              fullWidth: true,
                             ),
                           ),
                           const SizedBox(height: 24),

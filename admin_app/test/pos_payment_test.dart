@@ -53,4 +53,3 @@ void main() {
     expect(lines[1].change, 10);
   });
 }
-

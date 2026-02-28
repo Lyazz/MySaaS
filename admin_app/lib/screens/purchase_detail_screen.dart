@@ -8,6 +8,11 @@ import '../providers/products_provider.dart';
 import '../models/purchase.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/form/form_select.dart';
+import '../widgets/dialogs/app_dialog.dart';
+import '../widgets/buttons/app_button.dart';
+import '../widgets/badges/status_badges.dart';
 
 class PurchaseDetailScreen extends ConsumerStatefulWidget {
   final String purchaseId;
@@ -65,22 +70,17 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
   void _deletePurchase() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Purchase Order'),
+      builder: (context) => AppDialog(
+        title: 'Delete Purchase Order',
+        description: 'This action cannot be undone.',
         content: const Text(
-          'Are you sure you want to delete this purchase order? This action cannot be undone.',
+          'Are you sure you want to delete this purchase order?',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
+        secondaryLabel: 'Cancel',
+        onSecondary: () => Navigator.pop(context, false),
+        primaryLabel: 'Delete',
+        primaryVariant: AppDialogPrimaryVariant.destructive,
+        onPrimary: () => Navigator.pop(context, true),
       ),
     );
 
@@ -173,7 +173,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        _StatusBadge(status: purchase.status),
+                        PurchaseStatusBadge(status: purchase.status),
                       ],
                     ),
                   ],
@@ -181,27 +181,18 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                 if (isMobile) const SizedBox(height: 16),
                 Row(
                   children: [
-                    OutlinedButton.icon(
+                    AppButton.secondary(
+                      label: 'Refresh',
+                      icon: LucideIcons.refreshCw,
                       onPressed: () => ref
                           .read(purchasesProvider.notifier)
                           .fetchPurchase(widget.purchaseId),
-                      icon: const Icon(LucideIcons.refreshCw, size: 16),
-                      label: const Text('Refresh'),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.grey[700],
-                        side: BorderSide(color: Colors.grey[300]!),
-                      ),
                     ),
                     const SizedBox(width: 12),
-                    ElevatedButton.icon(
+                    AppButton.primary(
+                      label: 'Add Products',
+                      icon: LucideIcons.plus,
                       onPressed: _showAddProductModal,
-                      icon: const Icon(LucideIcons.plus, size: 16),
-                      label: const Text('Add Products'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal[600],
-                        foregroundColor: Colors.white,
-                      ),
                     ),
                   ],
                 ),
@@ -355,22 +346,10 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             const SizedBox(height: 24),
             Align(
               alignment: Alignment.centerRight,
-              child: OutlinedButton.icon(
+              child: AppButton.danger(
+                label: 'Delete Order',
+                icon: LucideIcons.trash2,
                 onPressed: _deletePurchase,
-                icon: const Icon(
-                  LucideIcons.trash2,
-                  size: 16,
-                  color: Colors.red,
-                ),
-                label: const Text('Delete Order'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: BorderSide(color: Colors.red[200]!),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
               ),
             ),
           ],
@@ -473,14 +452,10 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             style: TextStyle(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
+          AppButton.primary(
+            label: 'Add Products',
+            icon: LucideIcons.plus,
             onPressed: _showAddProductModal,
-            icon: const Icon(LucideIcons.plus, size: 16),
-            label: const Text('Add Products'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal[600],
-              foregroundColor: Colors.white,
-            ),
           ),
         ],
       ),
@@ -610,54 +585,6 @@ class _SummaryRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final String status;
-
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    Color bgColor;
-
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'received':
-        color = const Color(0xFF166534); // green-800
-        bgColor = const Color(0xFFDCFCE7); // green-100
-        break;
-      case 'pending':
-      case 'ordered':
-        color = const Color(0xFF854D0E); // yellow-800
-        bgColor = const Color(0xFFFEF9C3); // yellow-100
-        break;
-      case 'cancelled':
-        color = const Color(0xFF991B1B); // red-800
-        bgColor = const Color(0xFFFEE2E2); // red-100
-        break;
-      default:
-        color = const Color(0xFF1F2937); // gray-800
-        bgColor = const Color(0xFFF3F4F6); // gray-100
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }
@@ -812,19 +739,15 @@ class _TableRowState extends State<_TableRow> {
                       '${widget.item.quantityOrdered}',
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     )
-                  : TextField(
+                  : FormInput(
+                      label: 'Qty ordered',
+                      showLabel: false,
                       controller: _qtyController,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
+                      borderRadius: 6,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
                       ),
                       onChanged: (val) {
                         final v = double.tryParse(val);
@@ -845,20 +768,16 @@ class _TableRowState extends State<_TableRow> {
                         widget.item.unitCost,
                       ),
                     )
-                  : TextField(
+                  : FormInput(
+                      label: 'Unit cost',
+                      showLabel: false,
                       controller: _costController,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        prefixText: '\$ ',
+                      prefixText: '\$ ',
+                      borderRadius: 6,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
                       ),
                       onChanged: (val) {
                         final v = double.tryParse(val);
@@ -911,20 +830,16 @@ class _TableRowState extends State<_TableRow> {
                 children: [
                   SizedBox(
                     width: 70,
-                    child: TextField(
+                    child: FormInput(
+                      label: 'Receive',
+                      showLabel: false,
                       controller: _receiveController,
                       enabled: !isFullyReceived,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
+                      borderRadius: 6,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
                       ),
                     ),
                   ),
@@ -968,14 +883,18 @@ class _TableRowState extends State<_TableRow> {
                   const SizedBox(width: 8),
                   // Simple Dropdown for mode (Replace/Weighted)
                   Expanded(
-                    child: DropdownButtonFormField<String>(
+                    child: FormSelect<String>(
+                      label: 'Mode',
+                      showLabel: false,
                       value: widget.salePriceMode,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.all(0),
-                      ),
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      borderless: true,
+                      filled: false,
                       isDense: true,
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      contentPadding: EdgeInsets.zero,
                       items: const [
                         DropdownMenuItem(
                           value: 'replace',
@@ -987,7 +906,8 @@ class _TableRowState extends State<_TableRow> {
                         ),
                       ],
                       onChanged: (val) {
-                        if (val != null) widget.onUpdateMode(val);
+                        if (val == null) return;
+                        widget.onUpdateMode(val);
                       },
                     ),
                   ),
@@ -1079,18 +999,15 @@ class _VariantSelectorDialogState
               ],
             ),
             const SizedBox(height: 16),
-            TextField(
+            FormInput(
+              label: 'Search',
+              showLabel: false,
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search products...',
-                prefixIcon: const Icon(LucideIcons.search, size: 18),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+              hint: 'Search products...',
+              prefixIcon: const Icon(LucideIcons.search, size: 18),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
               ),
               onChanged: (val) {
                 _debouncer.run(() {
@@ -1158,16 +1075,11 @@ class _VariantSelectorDialogState
                               subtitle: Text(
                                 'SKU: ${variant.sku.isNotEmpty ? variant.sku : "-"}  |  Stock: ${variant.stock}',
                               ),
-                              trailing: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.teal[700],
-                                  elevation: 0,
-                                  side: BorderSide(color: Colors.teal[200]!),
-                                ),
+                              trailing: AppButton.secondary(
+                                label: 'Add',
+                                size: AppButtonSize.sm,
                                 onPressed: () =>
                                     widget.onSelect(product, variant),
-                                child: const Text('Add'),
                               ),
                             );
                           }).toList(),

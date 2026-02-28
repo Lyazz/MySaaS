@@ -31,9 +31,13 @@ class ProductsState {
 }
 
 class ProductsNotifier extends Notifier<ProductsState> {
+  final ProductsState? _initialState;
+
+  ProductsNotifier([this._initialState]);
+
   @override
   ProductsState build() {
-    return ProductsState();
+    return _initialState ?? ProductsState();
   }
 
   Future<void> fetchProducts() async {

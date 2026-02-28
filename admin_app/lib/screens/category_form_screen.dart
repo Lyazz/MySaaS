@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import '../providers/categories_provider.dart';
 import '../services/api_service.dart';
 import '../models/product.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/buttons/app_button.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   final String? categoryId;
@@ -246,41 +248,17 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              TextButton(
+                              AppButton.secondary(
+                                label: 'Cancel',
                                 onPressed: () => context.pop(),
-                                child: const Text('Cancel'),
                               ),
                               const SizedBox(width: 12),
-                              ElevatedButton(
-                                onPressed: _isLoading ? null : _saveCategory,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF14B8A6),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                        ),
-                                      )
-                                    : Text(
-                                        widget.categoryId == null
-                                            ? 'Create Category'
-                                            : 'Save Changes',
-                                      ),
+                              AppButton.primary(
+                                label: widget.categoryId == null
+                                    ? 'Create Category'
+                                    : 'Save Changes',
+                                onPressed: _saveCategory,
+                                loading: _isLoading,
                               ),
                             ],
                           ),
@@ -333,49 +311,15 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     String? Function(String?)? validator,
     void Function(String)? onChanged,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF475569),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: hint,
-            filled: true,
-            fillColor: const Color(0xFFF8FAFC),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF14B8A6), width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFDC2626)),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-          ),
-          validator: validator,
-          onChanged: onChanged,
-        ),
-      ],
+    return FormInput(
+      label: label,
+      controller: controller,
+      hint: hint,
+      validator: validator,
+      onChanged: onChanged,
+      fillColor: const Color(0xFFF8FAFC),
+      borderRadius: 8,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
 
@@ -414,34 +358,24 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         ],
         Row(
           children: [
-            ElevatedButton.icon(
+            AppButton.secondary(
+              label: hasImage ? 'Change Image' : 'Upload Image',
+              icon: LucideIcons.upload,
+              size: AppButtonSize.sm,
               onPressed: _pickImage,
-              icon: const Icon(LucideIcons.upload, size: 16),
-              label: Text(hasImage ? 'Change Image' : 'Upload Image'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF0F172A),
-                side: const BorderSide(color: Color(0xFFCBD5E1)),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
             ),
             if (hasImage) ...[
               const SizedBox(width: 12),
-              TextButton.icon(
+              AppButton.danger(
+                label: 'Remove',
+                icon: LucideIcons.trash2,
+                size: AppButtonSize.sm,
                 onPressed: () {
                   setState(() {
                     _imageFile = null;
                     _imageUrl = null;
                   });
                 },
-                icon: const Icon(LucideIcons.trash2, size: 16),
-                label: const Text('Remove'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFFDC2626),
-                ),
               ),
             ],
           ],

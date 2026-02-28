@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/purchases_provider.dart';
 import '../providers/suppliers_provider.dart';
+import '../widgets/form/form_select.dart';
+import '../widgets/buttons/app_button.dart';
 
 class PurchaseFormScreen extends ConsumerStatefulWidget {
   const PurchaseFormScreen({super.key});
@@ -109,11 +111,8 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Select Supplier',
-                          border: OutlineInputBorder(),
-                        ),
+                      FormSelect<String>(
+                        label: 'Select Supplier',
                         value: _selectedSupplierId,
                         items: suppliers
                             .map(
@@ -124,6 +123,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                             )
                             .toList(),
                         onChanged: (value) {
+                          if (value == null) return;
                           setState(() {
                             _selectedSupplierId = value;
                             _selectedSupplierName = suppliers
@@ -137,41 +137,17 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          OutlinedButton(
+                          AppButton.secondary(
+                            label: 'Cancel',
                             onPressed: () => context.pop(),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.grey[700],
-                              side: BorderSide(color: Colors.grey[300]!),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                            child: const Text('Cancel'),
                           ),
                           const SizedBox(width: 12),
-                          ElevatedButton(
-                            onPressed: _isLoading || _selectedSupplierId == null
+                          AppButton.primary(
+                            label: 'Create Draft',
+                            onPressed: _selectedSupplierId == null
                                 ? null
                                 : _createDraft,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.teal[600],
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text('Create Draft'),
+                            loading: _isLoading,
                           ),
                         ],
                       ),

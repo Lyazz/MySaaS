@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../models/receipt_layout.dart';
+import '../../widgets/form/form_input.dart';
+import '../../widgets/buttons/app_button.dart';
 
 class ReceiptLayoutEditor extends StatefulWidget {
   final ReceiptLayout? initialLayout;
@@ -133,10 +135,14 @@ class _ReceiptLayoutEditorState extends State<ReceiptLayoutEditor> {
             backgroundColor: Colors.white,
             elevation: 0,
             actions: [
-              TextButton.icon(
-                onPressed: () => widget.onSave(currentLayout),
-                icon: const Icon(LucideIcons.save),
-                label: const Text('Save Layout'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: AppButton.primary(
+                  label: 'Save Layout',
+                  icon: LucideIcons.save,
+                  size: AppButtonSize.sm,
+                  onPressed: () => widget.onSave(currentLayout),
+                ),
               ),
               const SizedBox(width: 16),
             ],
@@ -195,12 +201,9 @@ class _ReceiptLayoutEditorState extends State<ReceiptLayoutEditor> {
                   horizontal: 16,
                   vertical: 8,
                 ),
-                child: TextField(
+                child: FormInput(
+                  label: 'Header Text',
                   controller: _headerTextController,
-                  decoration: const InputDecoration(
-                    labelText: 'Header Text',
-                    border: OutlineInputBorder(),
-                  ),
                 ),
               ),
 
@@ -294,12 +297,9 @@ class _ReceiptLayoutEditorState extends State<ReceiptLayoutEditor> {
                   horizontal: 16,
                   vertical: 8,
                 ),
-                child: TextField(
+                child: FormInput(
+                  label: 'Footer Text',
                   controller: _footerTextController,
-                  decoration: const InputDecoration(
-                    labelText: 'Footer Text',
-                    border: OutlineInputBorder(),
-                  ),
                   maxLines: 2,
                 ),
               ),
@@ -409,10 +409,10 @@ class _ReceiptPreview extends StatelessWidget {
           ),
           const Divider(color: Colors.black, thickness: 1),
 
-          // Mock Items
-          _buildMockItem('Cheeseburger', 2, 8.50),
-          _buildMockItem('Fries (Large)', 1, 4.00),
-          _buildMockItem('Cola', 2, 2.50),
+          // Sample items (preview)
+          _buildSampleItem('Cheeseburger', 2, 8.50),
+          _buildSampleItem('Fries (Large)', 1, 4.00),
+          _buildSampleItem('Cola', 2, 2.50),
 
           const SizedBox(height: 8),
           const Divider(color: Colors.black, thickness: 1),
@@ -474,7 +474,7 @@ class _ReceiptPreview extends StatelessWidget {
     );
   }
 
-  Widget _buildMockItem(String name, int qty, double price) {
+  Widget _buildSampleItem(String name, int qty, double price) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

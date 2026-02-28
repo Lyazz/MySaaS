@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/purchases_provider.dart';
 import '../providers/suppliers_provider.dart';
 import '../models/purchase.dart';
+import '../utils/debouncer.dart';
 import '../widgets/responsive_paginated_table.dart';
-// import '../widgets/responsive_filter_bar.dart';
+import '../widgets/responsive_filter_bar.dart';
+import '../widgets/form/date_range_filter_field.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/form/form_select.dart';
+import '../widgets/buttons/app_button.dart';
+import '../widgets/badges/status_badges.dart';
 
 class PurchasesScreen extends ConsumerStatefulWidget {
   const PurchasesScreen({super.key});
@@ -17,14 +23,37 @@ class PurchasesScreen extends ConsumerStatefulWidget {
 }
 
 class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
   DateTime? _startDate;
   DateTime? _endDate;
   String? _selectedSupplierId;
 
+  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _endOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day, 23, 59, 59, 999);
+
+  static DateTimeRange _normalizeRange(DateTimeRange range) => DateTimeRange(
+        start: _startOfDay(range.start),
+        end: _endOfDay(range.end),
+      );
+
+  void _setDefaultDateRange() {
+    final now = DateTime.now();
+    final start = _startOfDay(now.subtract(const Duration(days: 7)));
+    final end = _endOfDay(now);
+    _startDate = start;
+    _endDate = end;
+  }
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => _fetchPurchases());
+    Future.microtask(() {
+      _setDefaultDateRange();
+      ref.read(suppliersProvider.notifier).fetchSuppliers();
+      _fetchPurchases();
+    });
   }
 
   void _fetchPurchases() {
@@ -35,6 +64,8 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
 
   @override
   void dispose() {
+    _searchDebouncer.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -46,12 +77,18 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     final suppliers = suppliersState.suppliers;
     final isMobile = MediaQuery.of(context).size.width < 800;
 
+    final query = _searchController.text.trim().toLowerCase();
     final filteredPurchases = purchases.where((purchase) {
+      final matchesQuery =
+          query.isEmpty ||
+          purchase.id.toLowerCase().contains(query) ||
+          purchase.supplierName.toLowerCase().contains(query) ||
+          purchase.status.toLowerCase().contains(query);
       final matchesSupplier =
           _selectedSupplierId == null ||
           purchase.supplierId == _selectedSupplierId;
 
-      return matchesSupplier;
+      return matchesQuery && matchesSupplier;
     }).toList();
 
     return Scaffold(
@@ -95,159 +132,81 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                         ),
                       ],
                     ),
-                    ElevatedButton.icon(
+                    AppButton.primary(
+                      label: 'New Purchase',
+                      icon: LucideIcons.plus,
                       onPressed: () => context.go('/purchases/create'),
-                      icon: const Icon(LucideIcons.plus, size: 16),
-                      label: const Text('New Purchase'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F172A), // Slate-900
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
               ],
 
-              // Search and Filter
-              // Filters
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+              ResponsiveFilterBar(
+                searchField: FormInput(
+                  label: 'Search',
+                  controller: _searchController,
+                  hint: 'Search purchases...',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  onChanged: (_) => _searchDebouncer.run(() => setState(() {})),
                 ),
-                child: Row(
-                  children: [
-                    // Date Range Picker
-                    InkWell(
-                      onTap: () async {
-                        final picked = await showDateRangePicker(
-                          context: context,
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime.now().add(
-                            const Duration(days: 365),
+                filters: [
+                  SizedBox(
+                    width: 320,
+                  child: DateRangeFilterField(
+                    range: (_startDate != null && _endDate != null)
+                        ? DateTimeRange(start: _startDate!, end: _endDate!)
+                        : null,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                    normalize: _normalizeRange,
+                    onChanged: (range) {
+                      setState(() {
+                        _startDate = range?.start;
+                        _endDate = range?.end;
+                      });
+                      _fetchPurchases();
+                    },
+                  ),
+                ),
+                  SizedBox(
+                    width: 240,
+                    child: FormSelect<String?>(
+                      label: 'Supplier',
+                      value: _selectedSupplierId,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('All Suppliers'),
+                        ),
+                        ...suppliers.map(
+                          (s) => DropdownMenuItem<String?>(
+                            value: s.id,
+                            child: Text(s.name),
                           ),
-                          initialDateRange:
-                              _startDate != null && _endDate != null
-                              ? DateTimeRange(
-                                  start: _startDate!,
-                                  end: _endDate!,
-                                )
-                              : null,
-                        );
-                        if (picked != null) {
-                          setState(() {
-                            _startDate = picked.start;
-                            _endDate = picked.end;
-                          });
-                          _fetchPurchases();
-                        }
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() => _selectedSupplierId = value);
                       },
-                      borderRadius: BorderRadius.circular(6),
-                      child: Container(
-                        height: 36,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              LucideIcons.calendar,
-                              size: 14,
-                              color: _startDate != null
-                                  ? const Color(0xFF0F766E)
-                                  : const Color(0xFF6B7280),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              _startDate != null && _endDate != null
-                                  ? '${DateFormat('MMM d').format(_startDate!)} - ${DateFormat('MMM d').format(_endDate!)}'
-                                  : 'Date Range',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: _startDate != null
-                                    ? const Color(0xFF0F766E)
-                                    : const Color(0xFF374151),
-                              ),
-                            ),
-                            if (_startDate != null) ...[
-                              const SizedBox(width: 8),
-                              InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _startDate = null;
-                                    _endDate = null;
-                                  });
-                                  _fetchPurchases();
-                                },
-                                child: const Icon(
-                                  LucideIcons.x,
-                                  size: 12,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
                     ),
-                    const SizedBox(width: 8),
-                    // Supplier Dropdown
-                    Container(
-                      height: 36,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedSupplierId,
-                          hint: const Text('All Suppliers'),
-                          icon: const Icon(
-                            LucideIcons.chevronDown,
-                            size: 14,
-                            color: Color(0xFF6B7280),
-                          ),
-                          items: [
-                            const DropdownMenuItem(
-                              value: null,
-                              child: Text('All Suppliers'),
-                            ),
-                            ...suppliers.map(
-                              (s) => DropdownMenuItem(
-                                value: s.id,
-                                child: Text(s.name),
-                              ),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() => _selectedSupplierId = value);
-                          },
-                          style: const TextStyle(
-                            color: Color(0xFF374151),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+                onClearFilters: () {
+                  setState(() {
+                    _searchController.clear();
+                    _setDefaultDateRange();
+                    _selectedSupplierId = null;
+                  });
+                  _fetchPurchases();
+                },
               ),
               const SizedBox(height: 24),
 
@@ -350,7 +309,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   flex: 2,
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: _StatusBadge(status: purchase.status),
+                    child: PurchaseStatusBadge(status: purchase.status),
                   ),
                 ),
                 Expanded(
@@ -377,17 +336,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   flex: 1,
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: TextButton(
+                    child: AppButton.secondary(
+                      label: 'Manage',
+                      size: AppButtonSize.sm,
                       onPressed: () => context.go('/purchases/${purchase.id}'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF0F766E), // Teal-700
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        textStyle: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      child: const Text('Manage'),
                     ),
                   ),
                 ),
@@ -405,52 +357,4 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     color: Color(0xFF6B7280), // Gray-500
     letterSpacing: 0.5,
   );
-}
-
-class _StatusBadge extends StatelessWidget {
-  final String status;
-
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    Color bgColor;
-
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'received':
-        color = const Color(0xFF166534); // green-800
-        bgColor = const Color(0xFFDCFCE7); // green-100
-        break;
-      case 'pending':
-      case 'ordered':
-        color = const Color(0xFF854D0E); // yellow-800
-        bgColor = const Color(0xFFFEF9C3); // yellow-100
-        break;
-      case 'cancelled':
-        color = const Color(0xFF991B1B); // red-800
-        bgColor = const Color(0xFFFEE2E2); // red-100
-        break;
-      default:
-        color = const Color(0xFF1F2937); // gray-800
-        bgColor = const Color(0xFFF3F4F6); // gray-100
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(9999),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
 }

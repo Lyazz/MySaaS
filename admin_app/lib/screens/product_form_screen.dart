@@ -9,6 +9,9 @@ import '../widgets/rich_text_editor.dart';
 import '../widgets/product_options_list.dart';
 import 'variant_edit_screen.dart';
 import '../models/product.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/form/form_select.dart';
+import '../widgets/buttons/app_button.dart';
 
 class ProductFormScreen extends ConsumerStatefulWidget {
   final String? productId;
@@ -337,11 +340,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                       children: [
                                         _buildLabel('Product Title'),
                                         const SizedBox(height: 6),
-                                        TextFormField(
+                                        FormInput(
+                                          label: 'Product Title',
+                                          showLabel: false,
                                           controller: _titleController,
-                                          decoration: _inputDecoration(
-                                            placeholder: 'Enter product title',
-                                          ),
+                                          hint: 'Enter product title',
                                           validator: (v) {
                                             if (v?.isEmpty == true) {
                                               return 'Required';
@@ -357,11 +360,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                               'URL-friendly version of the title',
                                         ),
                                         const SizedBox(height: 6),
-                                        TextFormField(
+                                        FormInput(
+                                          label: 'Product Slug',
+                                          showLabel: false,
                                           controller: _slugController,
-                                          decoration: _inputDecoration(
-                                            placeholder: 'product-slug',
-                                          ),
+                                          hint: 'product-slug',
                                           validator: (v) {
                                             if (v?.isEmpty == true) {
                                               return 'Required';
@@ -376,13 +379,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                           hint: 'Short description for lists',
                                         ),
                                         const SizedBox(height: 6),
-                                        TextFormField(
+                                        FormInput(
+                                          label: 'Mini Description',
+                                          showLabel: false,
                                           controller:
                                               _miniDescriptionController,
-                                          decoration: _inputDecoration(
-                                            placeholder:
-                                                'Enter a short summary...',
-                                          ),
+                                          hint: 'Enter a short summary...',
                                           maxLines: 3,
                                         ),
                                         const SizedBox(height: 24),
@@ -398,13 +400,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                 children: [
                                                   _buildLabel('Price (\$)'),
                                                   const SizedBox(height: 6),
-                                                  TextFormField(
+                                                  FormInput(
+                                                    label: 'Price',
+                                                    showLabel: false,
                                                     controller:
                                                         _priceController,
-                                                    decoration:
-                                                        _inputDecoration(
-                                                          placeholder: '0.00',
-                                                        ),
+                                                    hint: '0.00',
                                                     keyboardType:
                                                         const TextInputType.numberWithOptions(
                                                           decimal: true,
@@ -432,13 +433,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                 children: [
                                                   _buildLabel('Stock Quantity'),
                                                   const SizedBox(height: 6),
-                                                  TextFormField(
+                                                  FormInput(
+                                                    label: 'Stock Quantity',
+                                                    showLabel: false,
                                                     controller:
                                                         _stockController,
-                                                    decoration:
-                                                        _inputDecoration(
-                                                          placeholder: '0',
-                                                        ),
+                                                    hint: '0',
                                                     keyboardType:
                                                         TextInputType.number,
                                                     enabled: !isEditing,
@@ -463,54 +463,30 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
                                         _buildLabel('Category'),
                                         const SizedBox(height: 6),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
+                                        FormSelect<String?>(
+                                          label: 'Category',
+                                          showLabel: false,
+                                          value: _selectedCategoryId,
+                                          hint: 'Select a category (optional)',
+                                          icon: const Icon(
+                                            LucideIcons.chevronDown,
+                                            size: 16,
+                                            color: Color(0xFF64748B),
                                           ),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: const Color(0xFFCBD5E1),
+                                          items: [
+                                            const DropdownMenuItem<String?>(
+                                              value: null,
+                                              child: Text('None'),
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: DropdownButtonHideUnderline(
-                                            child: DropdownButton<String>(
-                                              value: _selectedCategoryId,
-                                              isExpanded: true,
-                                              hint: const Text(
-                                                'Select a category (optional)',
-                                                style: TextStyle(
-                                                  color: Color(0xFF94A3B8),
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              icon: const Icon(
-                                                LucideIcons.chevronDown,
-                                                size: 16,
-                                                color: Color(0xFF64748B),
-                                              ),
-                                              items: [
-                                                const DropdownMenuItem(
-                                                  value: null,
-                                                  child: Text('None'),
-                                                ),
-                                                ...categories.map(
-                                                  (c) => DropdownMenuItem(
-                                                    value: c.id,
-                                                    child: Text(c.title),
-                                                  ),
-                                                ),
-                                              ],
-                                              onChanged: (v) => setState(
-                                                () => _selectedCategoryId = v,
-                                              ),
-                                              style: const TextStyle(
-                                                color: Color(0xFF334155),
-                                                fontSize: 14,
+                                            ...categories.map(
+                                              (c) => DropdownMenuItem<String?>(
+                                                value: c.id,
+                                                child: Text(c.title),
                                               ),
                                             ),
+                                          ],
+                                          onChanged: (v) => setState(
+                                            () => _selectedCategoryId = v,
                                           ),
                                         ),
                                         const SizedBox(height: 24),
@@ -958,51 +934,17 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                TextButton(
+                                AppButton.secondary(
+                                  label: 'Cancel',
                                   onPressed: () => context.pop(),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: const Color(
-                                      0xFF64748B,
-                                    ), // Slate-500
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: const BorderSide(
-                                        color: Color(0xFFCBD5E1),
-                                      ), // Slate-300
-                                    ),
-                                  ),
-                                  child: const Text('Cancel'),
                                 ),
                                 const SizedBox(width: 12),
-                                ElevatedButton(
-                                  onPressed: _isLoading ? null : _submit,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(
-                                      0xFF0D9488,
-                                    ), // Teal-600
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    _isLoading
-                                        ? (isEditing
-                                              ? 'Updating...'
-                                              : 'Creating...')
-                                        : (isEditing
-                                              ? 'Update Product'
-                                              : 'Create Product'),
-                                  ),
+                                AppButton.primary(
+                                  label: isEditing
+                                      ? 'Update Product'
+                                      : 'Create Product',
+                                  onPressed: _submit,
+                                  loading: _isLoading,
                                 ),
                               ],
                             ),
@@ -1042,35 +984,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           ),
         ],
       ],
-    );
-  }
-
-  InputDecoration _inputDecoration({String? placeholder}) {
-    return InputDecoration(
-      hintText: placeholder,
-      hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFCBD5E1)), // Slate-300
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(
-          color: Color(0xFF0D9488),
-          width: 1.5,
-        ), // Teal-600
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFEF4444)),
-      ),
     );
   }
 }

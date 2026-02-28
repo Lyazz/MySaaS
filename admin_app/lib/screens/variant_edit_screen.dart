@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../models/product.dart';
 import '../providers/products_provider.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/buttons/app_button.dart';
 
 class VariantEditScreen extends ConsumerStatefulWidget {
   final ProductVariant variant;
@@ -129,94 +131,78 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
               _buildCard(
                 title: 'General Information',
                 children: [
-                  TextFormField(
+                  FormInput(
+                    label: 'Price',
                     controller: _priceController,
-                    decoration: const InputDecoration(
-                      labelText: 'Price',
-                      prefixText: '\$ ',
-                      border: OutlineInputBorder(),
-                    ),
+                    prefixText: '\$ ',
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
+                  FormInput(
+                    label: 'Cost (Purchase price)',
                     controller: _costController,
-                    decoration: const InputDecoration(
-                      labelText: 'Cost (Purchase price)',
-                      prefixText: '\$ ',
-                      border: OutlineInputBorder(),
-                    ),
+                    prefixText: '\$ ',
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
+                  FormInput(
+                    label: 'SKU',
                     controller: _skuController,
-                    decoration: InputDecoration(
-                      labelText: 'SKU',
-                      border: OutlineInputBorder(),
-                      suffixIcon: widget.variant.skuLocked == true
-                          ? null
-                          : IconButton(
-                              tooltip: 'Suggest SKU',
-                              onPressed: _isLoading
-                                  ? null
-                                  : () async {
-                                      final messenger = ScaffoldMessenger.of(
-                                        context,
-                                      );
-                                      try {
-                                        final suggested = await ref
-                                            .read(productsProvider.notifier)
-                                            .suggestVariantSku(
-                                              widget.variant.id,
-                                            );
-                                        if (!mounted) return;
-                                        if (suggested.trim().isEmpty) {
-                                          messenger.showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                'No SKU suggestion',
-                                              ),
-                                            ),
-                                          );
-                                          return;
-                                        }
-                                        setState(() {
-                                          _skuController.text = suggested;
-                                        });
-                                      } catch (e) {
-                                        if (!mounted) return;
+                    enabled: widget.variant.skuLocked != true,
+                    suffixIcon: widget.variant.skuLocked == true
+                        ? null
+                        : IconButton(
+                            tooltip: 'Suggest SKU',
+                            onPressed: _isLoading
+                                ? null
+                                : () async {
+                                    final messenger = ScaffoldMessenger.of(
+                                      context,
+                                    );
+                                    try {
+                                      final suggested = await ref
+                                          .read(productsProvider.notifier)
+                                          .suggestVariantSku(widget.variant.id);
+                                      if (!mounted) return;
+                                      if (suggested.trim().isEmpty) {
                                         messenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Failed to suggest SKU: $e',
-                                            ),
+                                          const SnackBar(
+                                            content: Text('No SKU suggestion'),
                                           ),
                                         );
+                                        return;
                                       }
-                                    },
-                              icon: const Icon(LucideIcons.wand2, size: 18),
-                            ),
-                    ),
-                    enabled: widget.variant.skuLocked != true,
+                                      setState(() {
+                                        _skuController.text = suggested;
+                                      });
+                                    } catch (e) {
+                                      if (!mounted) return;
+                                      messenger.showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Failed to suggest SKU: $e',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                            icon: const Icon(LucideIcons.wand2, size: 18),
+                          ),
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _barcodeController,
-                    decoration: const InputDecoration(
-                      labelText: 'Barcode',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
+                  FormInput(label: 'Barcode', controller: _barcodeController),
                   const SizedBox(height: 16),
                   if (widget.variant.skuLocked != true)
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: OutlinedButton.icon(
+                      child: AppButton.secondary(
+                        label: 'Lock SKU',
+                        icon: LucideIcons.lock,
+                        size: AppButtonSize.sm,
                         onPressed: _isLoading
                             ? null
                             : () async {
@@ -238,8 +224,6 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                                   );
                                 }
                               },
-                        icon: const Icon(LucideIcons.lock, size: 16),
-                        label: const Text('Lock SKU'),
                       ),
                     )
                   else
@@ -276,12 +260,9 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
+                          child: FormInput(
+                            label: 'Stock',
                             controller: _stockController,
-                            decoration: const InputDecoration(
-                              labelText: 'Stock',
-                              border: OutlineInputBorder(),
-                            ),
                             keyboardType: TextInputType.number,
                             readOnly: true,
                             enabled: false,
@@ -289,24 +270,18 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: TextFormField(
+                          child: FormInput(
+                            label: 'Safety Stock',
                             controller: _safetyStockController,
-                            decoration: const InputDecoration(
-                              labelText: 'Safety Stock',
-                              border: OutlineInputBorder(),
-                            ),
                             keyboardType: TextInputType.number,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    FormInput(
+                      label: 'Reserved',
                       controller: _reservedController,
-                      decoration: const InputDecoration(
-                        labelText: 'Reserved',
-                        border: OutlineInputBorder(),
-                      ),
                       readOnly: true,
                       keyboardType: TextInputType.number,
                     ),
@@ -315,26 +290,11 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
               ),
 
               const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D9488),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    foregroundColor: Colors.white,
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text('Save Changes'),
-                ),
+              AppButton.primary(
+                label: 'Save Changes',
+                onPressed: _save,
+                fullWidth: true,
+                loading: _isLoading,
               ),
             ],
           ),

@@ -6,11 +6,18 @@ import 'package:intl/intl.dart';
 import '../models/order.dart';
 import '../providers/orders_provider.dart';
 import '../utils/debouncer.dart';
-import '../widgets/responsive_paginated_table.dart';
-// import '../widgets/responsive_filter_bar.dart';
+import '../widgets/responsive_filter_bar.dart';
+import '../widgets/responsive_server_paginated_table.dart';
+import '../widgets/form/date_range_filter_field.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/form/form_select.dart';
+import '../widgets/buttons/app_button.dart';
+import '../widgets/badges/status_badges.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
-  const OrdersScreen({super.key});
+  final String? initialStatus;
+
+  const OrdersScreen({super.key, this.initialStatus});
 
   @override
   ConsumerState<OrdersScreen> createState() => _OrdersScreenState();
@@ -19,16 +26,40 @@ class OrdersScreen extends ConsumerStatefulWidget {
 class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   final TextEditingController _searchController = TextEditingController();
   final _debouncer = Debouncer(milliseconds: 500);
-  String _selectedStatus = '';
+  final int _itemsPerPage = 25;
 
-  DateTimeRange? _selectedDateRange;
+  String _selectedStatus = '';
+  DateTime? _startDate;
+  DateTime? _endDate;
+  int _page = 1;
 
   @override
   void initState() {
     super.initState();
+    _setDefaultFilters();
+    final initialStatus = widget.initialStatus?.trim() ?? '';
+    if (initialStatus.isNotEmpty) {
+      _selectedStatus = initialStatus;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchOrders();
     });
+  }
+
+  void _setDefaultFilters() {
+    final today = DateTime.now();
+    final lastWeek = today.subtract(const Duration(days: 7));
+
+    _searchController.clear();
+    _selectedStatus = '';
+    _startDate = DateTime(lastWeek.year, lastWeek.month, lastWeek.day);
+    _endDate = DateTime(today.year, today.month, today.day);
+    _page = 1;
+  }
+
+  void _resetFilters() {
+    setState(_setDefaultFilters);
+    _fetchOrders();
   }
 
   void _fetchOrders() {
@@ -37,23 +68,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         .fetchOrders(
           search: _searchController.text,
           status: _selectedStatus,
-          startDate: _selectedDateRange?.start,
-          endDate: _selectedDateRange?.end,
+          startDate: _startDate,
+          endDate: _endDate,
+          page: _page,
+          limit: _itemsPerPage,
         );
-  }
-
-  Future<void> _pickDateRange() async {
-    final now = DateTime.now();
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2023),
-      lastDate: now,
-      initialDateRange: _selectedDateRange,
-    );
-    if (picked != null) {
-      setState(() => _selectedDateRange = picked);
-      _fetchOrders();
-    }
   }
 
   @override
@@ -70,327 +89,350 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB), // Gray-50
+      floatingActionButton: isMobile
+          ? FloatingActionButton(
+              onPressed: () => context.go('/pos'),
+              backgroundColor: const Color(0xFF0F172A), // Slate-900
+              child: const Icon(LucideIcons.plus, color: Colors.white),
+            )
+          : null,
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(isMobile ? 16 : 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (!isMobile) ...[_buildHeader(), const SizedBox(height: 24)],
-            _buildFilters(),
-            const SizedBox(height: 24),
-            if (ordersState.isLoading)
-              const Center(child: CircularProgressIndicator())
-            else if (ordersState.error != null)
-              Center(child: Text('Error: ${ordersState.error}'))
-            else if (ordersState.orders.isEmpty)
-              _buildEmptyState()
-            else
-              _buildOrdersTable(ordersState.orders),
-          ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1280),
+            child: Padding(
+              padding: EdgeInsets.all(isMobile ? 16 : 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isMobile) ...[
+                    _buildHeader(),
+                    const SizedBox(height: 24),
+                  ],
+                  _buildFiltersCard(),
+                  const SizedBox(height: 24),
+                  if (ordersState.isLoading)
+                    _buildLoadingCard()
+                  else if (ordersState.error != null)
+                    _buildErrorCard(ordersState.error!)
+                  else if (ordersState.orders.isEmpty)
+                    _buildEmptyCard()
+                  else
+                    _buildOrdersTable(ordersState),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Orders',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF111827), // Gray-900
-            letterSpacing: -0.5,
-          ),
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Orders',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF111827), // Gray-900
+                letterSpacing: -0.5,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Manage customer orders',
+              style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+            ),
+          ],
         ),
-        SizedBox(height: 4),
-        Text(
-          'Manage customer orders',
-          style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)), // Gray-500
+        AppButton.primary(
+          label: 'Add Order',
+          icon: LucideIcons.plus,
+          onPressed: () => context.go('/pos'),
         ),
       ],
     );
   }
 
-  Widget _buildFilters() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search orders...',
-                    prefixIcon: const Icon(
-                      LucideIcons.search,
-                      size: 16,
-                      color: Color(0xFF9CA3AF), // Gray-400
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 0,
-                    ),
-                  ),
-                  onChanged: (value) => _debouncer.run(() => _fetchOrders()),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Date Range Picker
-              InkWell(
-                onTap: _pickDateRange,
-                borderRadius: BorderRadius.circular(6),
-                child: Container(
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        LucideIcons.calendar,
-                        size: 14,
-                        color: _selectedDateRange == null
-                            ? const Color(0xFF6B7280)
-                            : const Color(0xFF0F766E),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _selectedDateRange == null
-                            ? 'Date Range'
-                            : '${DateFormat('MMM d').format(_selectedDateRange!.start)} - ${DateFormat('MMM d').format(_selectedDateRange!.end)}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: _selectedDateRange == null
-                              ? const Color(0xFF374151)
-                              : const Color(0xFF0F766E),
-                        ),
-                      ),
-                      if (_selectedDateRange != null) ...[
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {
-                            setState(() => _selectedDateRange = null);
-                            _fetchOrders();
-                          },
-                          child: const Icon(
-                            LucideIcons.x,
-                            size: 12,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Status Dropdown
-              Container(
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedStatus,
-                    icon: const Icon(
-                      LucideIcons.chevronDown,
-                      size: 14,
-                      color: Color(0xFF6B7280),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: '', child: Text('All Status')),
-                      DropdownMenuItem(
-                        value: 'PENDING',
-                        child: Text('Pending'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'CONFIRMED',
-                        child: Text('Confirmed'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'SHIPPED',
-                        child: Text('Shipped'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'DELIVERED',
-                        child: Text('Delivered'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'CANCELLED',
-                        child: Text('Cancelled'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() => _selectedStatus = value ?? '');
-                      _fetchOrders();
-                    },
-                    style: const TextStyle(
-                      color: Color(0xFF374151),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  bool get _hasSearchOrStatusFilter =>
+      _searchController.text.trim().isNotEmpty || _selectedStatus.isNotEmpty;
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(LucideIcons.clipboardList, size: 64, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            'No orders found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
+  Widget _buildFiltersCard() {
+    return ResponsiveFilterBar(
+      searchField: FormInput(
+        label: 'Search',
+        controller: _searchController,
+        hint: 'Search orders...',
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        onChanged: (value) => _debouncer.run(() {
+          setState(() => _page = 1);
+          _fetchOrders();
+        }),
+      ),
+      filters: [
+        SizedBox(
+          width: 320,
+          child: DateRangeFilterField(
+            range: (_startDate != null && _endDate != null)
+                ? DateTimeRange(start: _startDate!, end: _endDate!)
+                : null,
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now(),
+            onChanged: (range) {
+              setState(() {
+                _page = 1;
+                _startDate = range?.start;
+                _endDate = range?.end;
+              });
+              _fetchOrders();
+            },
+          ),
+        ),
+        SizedBox(
+          width: 220,
+          child: FormSelect<String>(
+            label: 'Status',
+            value: _selectedStatus,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
             ),
+            items: const [
+              DropdownMenuItem(value: '', child: Text('All Orders')),
+              DropdownMenuItem(value: 'PENDING', child: Text('Pending')),
+              DropdownMenuItem(value: 'CONFIRMED', child: Text('Confirmed')),
+              DropdownMenuItem(value: 'SHIPPED', child: Text('Shipped')),
+              DropdownMenuItem(value: 'DELIVERED', child: Text('Delivered')),
+              DropdownMenuItem(value: 'CANCELLED', child: Text('Cancelled')),
+              DropdownMenuItem(value: 'RETURNED', child: Text('Returned')),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _selectedStatus = value ?? '';
+                _page = 1;
+              });
+              _fetchOrders();
+            },
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Try adjusting your filters or wait for new orders.',
-            style: TextStyle(color: Colors.grey[500]),
-          ),
-        ],
+        ),
+      ],
+      onClearFilters: _resetFilters,
+    );
+  }
+
+  Widget _buildLoadingCard() {
+    return _card(
+      child: const Padding(
+        padding: EdgeInsets.all(48),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 32,
+              width: 32,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Loading orders...',
+              style: TextStyle(color: Color(0xFF64748B)), // Slate-500
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildOrdersTable(List<Order> orders) {
-    return ResponsivePaginatedTable<Order>(
-      items: orders,
-      minWidth: 1000,
+  Widget _buildErrorCard(String message) {
+    return _card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const Icon(LucideIcons.alertCircle, size: 28),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            AppButton.secondary(
+              label: 'Retry',
+              icon: LucideIcons.refreshCw,
+              onPressed: _fetchOrders,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyCard() {
+    final hint = _hasSearchOrStatusFilter
+        ? 'Try adjusting your filters.'
+        : 'No orders yet. New orders will appear here.';
+
+    return _card(
+      child: Padding(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          children: [
+            Icon(LucideIcons.clipboardList, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 12),
+            const Text(
+              'No orders found',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF111827), // Gray-900
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              hint,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF6B7280), // Gray-500
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrdersTable(OrdersState ordersState) {
+    final money = NumberFormat.simpleCurrency(name: 'DZD');
+
+    return ResponsiveServerPaginatedTable<Order>(
+      items: ordersState.orders,
+      minWidth: 1100,
+      page: ordersState.page,
+      totalPages: ordersState.totalPages,
+      totalItems: ordersState.total,
+      itemsPerPage: ordersState.limit,
+      onPageChanged: (newPage) {
+        setState(() => _page = newPage);
+        _fetchOrders();
+      },
       header: Row(
         children: [
-          _buildHeaderCell('ORDER ID', flex: 2),
-          _buildHeaderCell('CUSTOMER', flex: 3),
-          _buildHeaderCell('TOTAL', flex: 2),
-          _buildHeaderCell('STATUS', flex: 2),
-          _buildHeaderCell('DATE', flex: 2),
-          const Expanded(flex: 1, child: SizedBox()), // Actions
+          _buildHeaderCell('Order ID', flex: 2),
+          _buildHeaderCell('Customer', flex: 3),
+          _buildHeaderCell('Phone', flex: 2),
+          _buildHeaderCell('Total', flex: 2),
+          _buildHeaderCell('Status', flex: 2),
+          _buildHeaderCell('Date', flex: 2),
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: _headerText('Actions'),
+            ),
+          ),
         ],
       ),
       rowBuilder: (context, order, index) {
+        final shortId = order.id.length > 8
+            ? order.id.substring(0, 8)
+            : order.id;
         return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width < 800 ? 12 : 24,
-            vertical: 12,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
             children: [
-              // Order ID
               Expanded(
                 flex: 2,
-                child: Text(
-                  '#${order.id.substring(0, 8)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF111827), // Gray-900
-                    fontFamily:
-                        'RobotoMono', // Optional: if you have a mono font
+                child: InkWell(
+                  onTap: () => context.push('/orders/${order.id}'),
+                  child: Text(
+                    '#$shortId',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Color(0xFF0F172A), // Slate-900
+                    ),
                   ),
                 ),
               ),
-              // Customer
               Expanded(
                 flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      order.customerName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: Color(0xFF1F2937), // Gray-800
+                child: order.customerId == null || order.customerId!.isEmpty
+                    ? Text(
+                        order.customerName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: Color(0xFF0F172A), // Slate-900
+                        ),
+                      )
+                    : InkWell(
+                        onTap: () =>
+                            context.push('/customers/${order.customerId}'),
+                        child: Text(
+                          order.customerName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: Color(0xFF0F172A), // Slate-900
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      order.customerPhone,
-                      style: const TextStyle(
-                        color: Color(0xFF6B7280), // Gray-500
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-              // Total
               Expanded(
                 flex: 2,
                 child: Text(
-                  '\$${order.totalAmount.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF111827), // Gray-900
-                  ),
-                ),
-              ),
-              // Status
-              Expanded(flex: 2, child: _buildStatusBadge(order.status)),
-              // Date
-              Expanded(
-                flex: 2,
-                child: Text(
-                  DateFormat('MMM d, yyyy').format(order.createdAt),
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280), // Gray-500
+                  order.customerPhone.isEmpty ? '-' : order.customerPhone,
+                  style: TextStyle(
+                    color: order.customerPhone.isEmpty
+                        ? const Color(0xFF94A3B8) // Slate-400
+                        : const Color(0xFF475569), // Slate-600
                     fontSize: 13,
                   ),
                 ),
               ),
-              // Actions
               Expanded(
-                flex: 1,
+                flex: 2,
+                child: Text(
+                  money.format(order.totalAmount),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFF0F172A), // Slate-900
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: OrderStatusBadge(status: order.status),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  DateFormat.yMMMd().add_jm().format(order.createdAt),
+                  style: const TextStyle(
+                    color: Color(0xFF64748B), // Slate-500
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      context.push('/orders/${order.id}');
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF0F766E), // Teal-700
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      textStyle: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    child: const Text('View'),
+                  child: AppButton.secondary(
+                    label: 'View',
+                    icon: LucideIcons.eye,
+                    size: AppButtonSize.sm,
+                    onPressed: () => context.push('/orders/${order.id}'),
                   ),
                 ),
               ),
@@ -401,72 +443,37 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     );
   }
 
-  Widget _buildHeaderCell(String text, {required int flex}) {
-    return Expanded(
-      flex: flex,
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF6B7280), // Gray-500
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
+  Widget _headerText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Color(0xFF6B7280), // Gray-500
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    Color color;
-    Color bgColor;
+  Widget _buildHeaderCell(String text, {required int flex}) {
+    return Expanded(flex: flex, child: _headerText(text));
+  }
 
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        color = const Color(0xFFB45309); // Amber-700
-        bgColor = const Color(0xFFFEF3C7); // Amber-100
-        break;
-      case 'CONFIRMED':
-        color = const Color(0xFF0369A1); // Sky-700
-        bgColor = const Color(0xFFE0F2FE); // Sky-100
-        break;
-      case 'SHIPPED':
-        color = const Color(0xFF7E22CE); // Purple-700
-        bgColor = const Color(0xFFF3E8FF); // Purple-100
-        break;
-      case 'DELIVERED':
-        color = const Color(0xFF15803D); // Green-700
-        bgColor = const Color(0xFFDCFCE7); // Green-100
-        break;
-      case 'CANCELLED':
-        color = const Color(0xFFB91C1C); // Red-700
-        bgColor = const Color(0xFFFEE2E2); // Red-100
-        break;
-      case 'RETURNED':
-        color = const Color(0xFF374151); // Gray-700
-        bgColor = const Color(0xFFF3F4F6); // Gray-100
-        break;
-      default:
-        color = const Color(0xFF374151); // Gray-700
-        bgColor = const Color(0xFFF3F4F6); // Gray-100
-    }
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(9999), // Pill shape
-        ),
-        child: Text(
-          status[0].toUpperCase() + status.substring(1).toLowerCase(),
-          style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+  Widget _card({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
-        ),
+        ],
       ),
+      child: Center(child: child),
     );
   }
 }

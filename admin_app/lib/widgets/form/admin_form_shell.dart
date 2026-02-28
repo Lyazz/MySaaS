@@ -43,19 +43,23 @@ class AdminFormShell extends StatelessWidget {
                   // Breadcrumb
                   Row(
                     children: [
-                      InkWell(
-                        onTap: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go(backPath);
-                          }
-                        },
-                        child: Text(
-                          backLabel,
-                          style: const TextStyle(
-                            color: Color(0xFF475569),
-                            fontWeight: FontWeight.w500,
+                      Flexible(
+                        child: InkWell(
+                          onTap: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go(backPath);
+                            }
+                          },
+                          child: Text(
+                            backLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF475569),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
@@ -67,9 +71,13 @@ class AdminFormShell extends StatelessWidget {
                           color: Color(0xFF94A3B8),
                         ),
                       ),
-                      Text(
-                        title,
-                        style: const TextStyle(color: Color(0xFF94A3B8)),
+                      Flexible(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Color(0xFF94A3B8)),
+                        ),
                       ),
                     ],
                   ),
@@ -79,26 +87,32 @@ class AdminFormShell extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937), // Gray-800
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1F2937), // Gray-800
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            subtitle,
-                            style: const TextStyle(
-                              color: Color(0xFF4B5563), // Gray-600
-                              fontSize: 14,
+                            const SizedBox(height: 4),
+                            Text(
+                              subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFF4B5563), // Gray-600
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -116,6 +130,8 @@ class AdminFormShell extends StatelessWidget {
                       const SizedBox(width: 16),
                       Text(
                         title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

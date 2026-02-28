@@ -3,20 +3,25 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final apiProvider = Provider<ApiService>((ref) => ApiService());
+import '../bootstrap.dart';
+
+final apiProvider = Provider<ApiService>((ref) {
+  final bootstrap = ref.read(bootstrapProvider);
+  return ApiService(baseUrl: bootstrap.apiBaseUrl);
+});
 
 class ApiService {
-  static String _resolveBaseUrl() {
+  static String _defaultBaseUrl() {
     if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
       return 'http://localhost:3000/api';
     }
 
-    return 'http://192.168.1.4:3000/api';
+    return 'http://192.168.1.5:3000/api';
   }
 
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: _resolveBaseUrl(),
+      baseUrl: _defaultBaseUrl(),
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -26,13 +31,24 @@ class ApiService {
     ),
   );
 
-  ApiService() {
+  ApiService({String? baseUrl}) {
+    final resolved = (baseUrl ?? '').trim();
+    if (resolved.isNotEmpty) {
+      _dio.options.baseUrl = resolved;
+    }
+
     _dio.interceptors.add(
       LogInterceptor(responseBody: true, requestBody: true),
     );
   }
 
   Dio get client => _dio;
+
+  String get baseUrl => _dio.options.baseUrl;
+
+  void setBaseUrl(String baseUrl) {
+    _dio.options.baseUrl = baseUrl.trim();
+  }
 
   /// Resolves relative URLs like `/uploads/...` against the API host
   /// (e.g. `http://localhost:3000/api` -> `http://localhost:3000/uploads/...`).

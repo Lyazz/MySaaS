@@ -27,9 +27,13 @@ class SuppliersState {
 }
 
 class SuppliersNotifier extends Notifier<SuppliersState> {
+  final SuppliersState? _initialState;
+
+  SuppliersNotifier([this._initialState]);
+
   @override
   SuppliersState build() {
-    return SuppliersState();
+    return _initialState ?? SuppliersState();
   }
 
   Future<void> fetchSuppliers() async {

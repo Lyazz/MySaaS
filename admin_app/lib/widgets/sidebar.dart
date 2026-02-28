@@ -2,15 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sidebar_provider.dart';
 
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key});
 
+  bool _canRead(AuthState auth, String resource) {
+    final user = auth.user;
+    if (user == null) return false;
+    if (user.role != 'staff') return true;
+
+    final perms = auth.staffPermissions;
+    if (perms.isEmpty) return resource == 'orders';
+    return perms.contains('$resource:read');
+  }
+
+  bool _isTenantAdmin(AuthState auth) {
+    final user = auth.user;
+    if (user == null) return false;
+    return user.role == 'owner' || user.role == 'admin';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCollapsed = ref.watch(sidebarProvider);
+    final authState = ref.watch(authProvider);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -28,98 +46,122 @@ class Sidebar extends ConsumerWidget {
               child: Column(
                 children: [
                   _buildNavGroup(
-                    title: 'Overview',
+                    title: 'admin.nav.overview'.tr(),
                     isCollapsed: isCollapsed,
                     items: [
-                      _NavItem(
-                        route: '/',
-                        label: 'Dashboard',
-                        icon: LucideIcons.layoutDashboard,
-                      ),
+                      if (_canRead(authState, 'dashboard'))
+                        _NavItem(
+                          route: '/',
+                          label: 'admin.nav.dashboard'.tr(),
+                          icon: LucideIcons.layoutDashboard,
+                        ),
                     ],
                     context: context,
                   ),
                   const SizedBox(height: 24),
                   _buildNavGroup(
-                    title: 'Catalog',
+                    title: 'admin.nav.catalog'.tr(),
                     isCollapsed: isCollapsed,
                     items: [
-                      _NavItem(
-                        route: '/products',
-                        label: 'Products',
-                        icon: LucideIcons.package,
-                      ),
-                      _NavItem(
-                        route: '/inventory',
-                        label: 'Inventory',
-                        icon: LucideIcons.warehouse,
-                      ),
-                      _NavItem(
-                        route: '/categories',
-                        label: 'Categories',
-                        icon: LucideIcons.tags,
-                      ),
-                      _NavItem(
-                        route: '/suppliers',
-                        label: 'Suppliers',
-                        icon: LucideIcons.truck,
-                      ),
+                      if (_canRead(authState, 'products'))
+                        _NavItem(
+                          route: '/products',
+                          label: 'admin.nav.products'.tr(),
+                          icon: LucideIcons.package,
+                        ),
+                      if (_canRead(authState, 'inventory'))
+                        _NavItem(
+                          route: '/inventory',
+                          label: 'admin.nav.inventory'.tr(),
+                          icon: LucideIcons.warehouse,
+                        ),
+                      if (_canRead(authState, 'categories'))
+                        _NavItem(
+                          route: '/categories',
+                          label: 'admin.nav.categories'.tr(),
+                          icon: LucideIcons.tags,
+                        ),
+                      if (_canRead(authState, 'suppliers'))
+                        _NavItem(
+                          route: '/suppliers',
+                          label: 'admin.nav.suppliers'.tr(),
+                          icon: LucideIcons.truck,
+                        ),
                     ],
                     context: context,
                   ),
                   const SizedBox(height: 24),
                   _buildNavGroup(
-                    title: 'Sales',
+                    title: 'admin.nav.sales'.tr(),
                     isCollapsed: isCollapsed,
                     items: [
-                      _NavItem(
-                        route: '/orders',
-                        label: 'Orders',
-                        icon: LucideIcons.shoppingBag,
-                      ),
-                      _NavItem(
-                        route: '/sales',
-                        label: 'Sales',
-                        icon: LucideIcons.barChart,
-                      ),
-                      _NavItem(
-                        route: '/pos',
-                        label: 'Point of Sale',
-                        icon: LucideIcons.monitor,
-                      ),
-                      _NavItem(
-                        route: '/purchases',
-                        label: 'Purchases',
-                        icon: LucideIcons.shoppingCart,
-                      ),
-                      _NavItem(
-                        route: '/customers',
-                        label: 'Customers',
-                        icon: LucideIcons.users,
-                      ),
+                      if (_canRead(authState, 'orders'))
+                        _NavItem(
+                          route: '/orders',
+                          label: 'admin.nav.orders'.tr(),
+                          icon: LucideIcons.shoppingBag,
+                        ),
+                      if (_canRead(authState, 'sales'))
+                        _NavItem(
+                          route: '/sales',
+                          label: 'admin.nav.salesItem'.tr(),
+                          icon: LucideIcons.barChart,
+                        ),
+                      if (_canRead(authState, 'pos'))
+                        _NavItem(
+                          route: '/pos',
+                          label: 'admin.nav.pos'.tr(),
+                          icon: LucideIcons.monitor,
+                        ),
+                      if (_canRead(authState, 'purchases'))
+                        _NavItem(
+                          route: '/purchases',
+                          label: 'admin.nav.purchases'.tr(),
+                          icon: LucideIcons.shoppingCart,
+                        ),
+                      if (_canRead(authState, 'customers'))
+                        _NavItem(
+                          route: '/customers',
+                          label: 'admin.nav.customers'.tr(),
+                          icon: LucideIcons.users,
+                        ),
+                      if (_canRead(authState, 'cash'))
+                        _NavItem(
+                          route: '/cash',
+                          label: 'admin.nav.cash'.tr(),
+                          icon: LucideIcons.wallet,
+                        ),
                     ],
                     context: context,
                   ),
                   const SizedBox(height: 24),
                   _buildNavGroup(
-                    title: 'Settings',
+                    title: 'admin.nav.settings'.tr(),
                     isCollapsed: isCollapsed,
                     items: [
                       _NavItem(
                         route: '/settings',
-                        label: 'App Settings',
+                        label: 'admin.nav.settings'.tr(),
                         icon: LucideIcons.palette,
                       ),
-                      _NavItem(
-                        route: '/delivery',
-                        label: 'Delivery',
-                        icon: LucideIcons.truck,
-                      ),
-                      _NavItem(
-                        route: '/billing',
-                        label: 'Billing',
-                        icon: LucideIcons.creditCard,
-                      ),
+                      if (_isTenantAdmin(authState))
+                        _NavItem(
+                          route: '/users',
+                          label: 'admin.nav.users'.tr(),
+                          icon: LucideIcons.users,
+                        ),
+                      if (_canRead(authState, 'delivery'))
+                        _NavItem(
+                          route: '/delivery',
+                          label: 'admin.nav.deliveryItem'.tr(),
+                          icon: LucideIcons.truck,
+                        ),
+                      if (_canRead(authState, 'billing'))
+                        _NavItem(
+                          route: '/billing',
+                          label: 'admin.nav.billing'.tr(),
+                          icon: LucideIcons.creditCard,
+                        ),
                     ],
                     context: context,
                   ),
@@ -192,7 +234,7 @@ class Sidebar extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Text(
-              title.toUpperCase(),
+              title,
               style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 11,
@@ -208,7 +250,9 @@ class Sidebar extends ConsumerWidget {
 
   Widget _buildNavItem(BuildContext context, _NavItem item, bool isCollapsed) {
     final String location = GoRouterState.of(context).uri.toString();
-    final bool isActive = location == item.route;
+    final bool isActive = item.route == '/'
+        ? location == '/'
+        : (location == item.route || location.startsWith('${item.route}/'));
 
     // Base content of the nav item
     Widget content = Container(
@@ -321,6 +365,11 @@ class Sidebar extends ConsumerWidget {
     WidgetRef ref,
     bool isCollapsed,
   ) {
+    final auth = ref.watch(authProvider);
+    final user = auth.user;
+    final email = user?.email ?? '—';
+    final role = user?.role ?? '—';
+
     return Container(
       padding: EdgeInsets.all(isCollapsed ? 8 : 16),
       decoration: const BoxDecoration(
@@ -342,8 +391,8 @@ class Sidebar extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'admin@swekly.com',
+                  Text(
+                    email,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -352,7 +401,7 @@ class Sidebar extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    'Admin',
+                    role,
                     style: TextStyle(color: Colors.grey[400], fontSize: 12),
                   ),
                 ],
@@ -368,7 +417,7 @@ class Sidebar extends ConsumerWidget {
                 ref.read(authProvider.notifier).logout();
                 context.go('/login');
               },
-              tooltip: 'Logout',
+              tooltip: 'admin.actions.logout'.tr(),
             ),
           ],
         ],

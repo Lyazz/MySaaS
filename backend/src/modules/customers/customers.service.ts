@@ -16,6 +16,11 @@ export interface CustomersListFilters {
     search?: string
 }
 
+export interface CustomersListPagination {
+    page: number
+    limit: number
+}
+
 export interface CustomerSummary {
     id: string
     phone: string
@@ -44,34 +49,17 @@ const toMoneyString = (value: unknown): string | null => {
 }
 
 export class CustomersService {
-    async list(tenantId: string, filters: CustomersListFilters): Promise<CustomerSummary[]> {
-        const search = filters.search?.trim()
-
-        const customers = await prisma.customer.findMany({
-            where: {
-                tenantId,
-                ...(search
-                    ? {
-                        OR: [
-                            { name: { contains: search, mode: 'insensitive' } },
-                            { phone: { contains: search } },
-                            { email: { contains: search, mode: 'insensitive' } }
-                        ]
-                    }
-                    : {})
-            },
-            orderBy: { updatedAt: 'desc' },
-            take: 200,
-            select: {
-                id: true,
-                phone: true,
-                name: true,
-                email: true,
-                address: true,
-                openingBalance: true
-            }
-        })
-
+    private async summarizeCustomers(
+        tenantId: string,
+        customers: Array<{
+            id: string
+            phone: string
+            name: string
+            email: string | null
+            address: string | null
+            openingBalance: any
+        }>
+    ): Promise<CustomerSummary[]> {
         if (customers.length === 0) return []
 
         const customerIds = customers.map((c) => c.id)
@@ -128,6 +116,80 @@ export class CustomersService {
                 lastOrderId: last.id
             }
         })
+    }
+
+    private buildWhere(tenantId: string, filters: CustomersListFilters) {
+        const search = filters.search?.trim()
+        return {
+            tenantId,
+            ...(search
+                ? {
+                    OR: [
+                        { name: { contains: search, mode: 'insensitive' } },
+                        { phone: { contains: search } },
+                        { email: { contains: search, mode: 'insensitive' } }
+                    ]
+                }
+                : {})
+        }
+    }
+
+    async list(tenantId: string, filters: CustomersListFilters): Promise<CustomerSummary[]> {
+        const customers = await prisma.customer.findMany({
+            where: this.buildWhere(tenantId, filters),
+            orderBy: { updatedAt: 'desc' },
+            take: 200,
+            select: {
+                id: true,
+                phone: true,
+                name: true,
+                email: true,
+                address: true,
+                openingBalance: true
+            }
+        })
+
+        return this.summarizeCustomers(tenantId, customers)
+    }
+
+    async listPaginated(
+        tenantId: string,
+        filters: CustomersListFilters,
+        pagination: CustomersListPagination = { page: 1, limit: 25 }
+    ): Promise<{ items: CustomerSummary[]; total: number; page: number; totalPages: number; limit: number }> {
+        const page = Math.max(1, Math.trunc(pagination.page) || 1)
+        const limit = Math.min(100, Math.max(1, Math.trunc(pagination.limit) || 25))
+        const skip = (page - 1) * limit
+
+        const where = this.buildWhere(tenantId, filters)
+
+        const [rows, total] = await Promise.all([
+            prisma.customer.findMany({
+                where,
+                orderBy: { updatedAt: 'desc' },
+                skip,
+                take: limit,
+                select: {
+                    id: true,
+                    phone: true,
+                    name: true,
+                    email: true,
+                    address: true,
+                    openingBalance: true
+                }
+            }),
+            prisma.customer.count({ where })
+        ])
+
+        const items = await this.summarizeCustomers(tenantId, rows)
+
+        return {
+            items,
+            total,
+            page,
+            totalPages: Math.max(1, Math.ceil(total / limit)),
+            limit
+        }
     }
 
     async getById(tenantId: string, id: string) {
@@ -322,4 +384,3 @@ export class CustomersService {
         })
     }
 }
-

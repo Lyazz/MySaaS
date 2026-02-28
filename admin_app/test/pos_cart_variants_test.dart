@@ -25,7 +25,10 @@ void main() {
     final variantS = ProductVariant(
       id: 'var_s',
       price: 10,
+      cost: 0,
       stock: 10,
+      sku: 'SKU-S',
+      skuLocked: false,
       isActive: true,
       trackInventory: true,
       safetyStock: 0,
@@ -43,7 +46,10 @@ void main() {
     final variantM = ProductVariant(
       id: 'var_m',
       price: 12,
+      cost: 0,
       stock: 10,
+      sku: 'SKU-M',
+      skuLocked: false,
       isActive: true,
       trackInventory: true,
       safetyStock: 0,

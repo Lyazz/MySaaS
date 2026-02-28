@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'form/form_select.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ResponsivePaginatedTable<T> extends StatefulWidget {
   final List<T> items;
@@ -26,15 +29,43 @@ class ResponsivePaginatedTable<T> extends StatefulWidget {
       _ResponsivePaginatedTableState<T>();
 }
 
+class _TableScrollBehavior extends MaterialScrollBehavior {
+  const _TableScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.unknown,
+  };
+}
+
 class _ResponsivePaginatedTableState<T>
     extends State<ResponsivePaginatedTable<T>> {
   int _currentPage = 0;
   late int _rowsPerPage;
+  final ScrollController _horizontalController = ScrollController();
+  final ScrollController _verticalController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _rowsPerPage = widget.rowsPerPageOptions.first;
+  }
+
+  @override
+  void dispose() {
+    _horizontalController.dispose();
+    _verticalController.dispose();
+    super.dispose();
+  }
+
+  void _scrollRowsToTop() {
+    if (_verticalController.hasClients) {
+      _verticalController.jumpTo(0);
+    }
   }
 
   @override
@@ -50,12 +81,12 @@ class _ResponsivePaginatedTableState<T>
 
     if (widget.items.isEmpty) {
       return widget.emptyState ??
-          const Center(
+          Center(
             child: Padding(
               padding: EdgeInsets.all(48.0),
               child: Text(
-                'No data available',
-                style: TextStyle(color: Colors.grey),
+                'admin.common.noDataAvailable'.tr(),
+                style: const TextStyle(color: Colors.grey),
               ),
             ),
           );
@@ -77,10 +108,17 @@ class _ResponsivePaginatedTableState<T>
         : totalItems;
     final currentItems = widget.items.sublist(startIndex, endIndex);
 
-    return Column(
-      children: [
-        // Table Container
-        Container(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final hasBoundedHeight = constraints.hasBoundedHeight;
+        final availableWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : widget.minWidth;
+        final tableWidth = availableWidth > widget.minWidth
+            ? availableWidth
+            : widget.minWidth;
+
+        return Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -98,48 +136,24 @@ class _ResponsivePaginatedTableState<T>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Scrollable Area
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: widget.minWidth),
-                  child: IntrinsicWidth(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Header
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF8FAFC), // Slate-50
-                            border: Border(
-                              bottom: BorderSide(color: Color(0xFFE2E8F0)),
-                            ),
-                          ),
-                          child: widget.header,
-                        ),
-
-                        // Rows
-                        ...currentItems.asMap().entries.map((entry) {
-                          final index = startIndex + entry.key;
-                          final item = entry.value;
-                          return Container(
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: Color(0xFFF1F5F9)),
-                              ),
-                            ),
-                            child: widget.rowBuilder(context, item, index),
-                          );
-                        }),
-                      ],
-                    ),
+              if (hasBoundedHeight)
+                Expanded(
+                  child: _buildScrollableArea(
+                    context,
+                    tableWidth,
+                    currentItems,
+                    startIndex,
+                    useVerticalScroll: true,
                   ),
+                )
+              else
+                _buildScrollableArea(
+                  context,
+                  tableWidth,
+                  currentItems,
+                  startIndex,
+                  useVerticalScroll: false,
                 ),
-              ),
 
               // Pagination Footer
               Container(
@@ -160,8 +174,98 @@ class _ResponsivePaginatedTableState<T>
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildScrollableArea(
+    BuildContext context,
+    double tableWidth,
+    List<T> currentItems,
+    int startIndex, {
+    required bool useVerticalScroll,
+  }) {
+    return ScrollConfiguration(
+      behavior: const _TableScrollBehavior(),
+      child: Scrollbar(
+        controller: _horizontalController,
+        thumbVisibility: true,
+        trackVisibility: true,
+        interactive: true,
+        notificationPredicate: (notification) =>
+            notification.metrics.axis == Axis.horizontal,
+        child: SingleChildScrollView(
+          controller: _horizontalController,
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: tableWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF8FAFC), // Slate-50
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                  ),
+                  child: widget.header,
+                ),
+
+                if (useVerticalScroll)
+                  Expanded(
+                    child: ScrollConfiguration(
+                      behavior: const _TableScrollBehavior(),
+                      child: Scrollbar(
+                        controller: _verticalController,
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        interactive: true,
+                        notificationPredicate: (notification) =>
+                            notification.metrics.axis == Axis.vertical,
+                        child: ListView.builder(
+                          controller: _verticalController,
+                          itemCount: currentItems.length,
+                          itemBuilder: (context, i) {
+                            final index = startIndex + i;
+                            final item = currentItems[i];
+                            return Container(
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                                ),
+                              ),
+                              child: widget.rowBuilder(context, item, index),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ...currentItems.asMap().entries.map((entry) {
+                    final index = startIndex + entry.key;
+                    final item = entry.value;
+                    return Container(
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                        ),
+                      ),
+                      child: widget.rowBuilder(context, item, index),
+                    );
+                  }),
+              ],
+            ),
+          ),
         ),
-      ],
+      ),
     );
   }
 
@@ -170,121 +274,150 @@ class _ResponsivePaginatedTableState<T>
       builder: (context, constraints) {
         final isSmall = constraints.maxWidth < 600;
 
-        return Flex(
-          direction: isSmall ? Axis.vertical : Axis.horizontal,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Rows per page & Info
-            Row(
-              mainAxisAlignment: isSmall
-                  ? MainAxisAlignment.spaceBetween
-                  : MainAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      'Rows per page:',
-                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<int>(
-                          value: _rowsPerPage,
-                          isDense: true,
-                          icon: const Icon(LucideIcons.chevronDown, size: 14),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF334155),
-                          ),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                _rowsPerPage = value;
-                                _currentPage = 0; // Reset to first page
-                              });
-                            }
-                          },
-                          items: widget.rowsPerPageOptions.map((n) {
-                            return DropdownMenuItem(
-                              value: n,
-                              child: Text(n.toString()),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (!isSmall) const SizedBox(width: 24),
-                if (!isSmall)
-                  Text(
-                    '$start-$end of $total',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF64748B),
-                    ),
+        Widget rowsPerPageControl() {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${'admin.common.rowsPerPage'.tr()}:',
+                style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 96,
+                child: FormSelect<int>(
+                  label: 'admin.common.rowsPerPage'.tr(),
+                  showLabel: false,
+                  value: _rowsPerPage,
+                  icon: const Icon(LucideIcons.chevronDown, size: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
                   ),
-              ],
-            ),
-
-            if (isSmall) const SizedBox(height: 12),
-            if (isSmall)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  '$start-$end of $total',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF64748B),
-                  ),
+                  borderRadius: 6,
+                  items: widget.rowsPerPageOptions.map((n) {
+                    return DropdownMenuItem(
+                      value: n,
+                      child: Text(n.toString()),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() {
+                      _rowsPerPage = value;
+                      _currentPage = 0; // Reset to first page
+                      _scrollRowsToTop();
+                    });
+                  },
                 ),
               ),
-            if (isSmall) const SizedBox(height: 12),
+            ],
+          );
+        }
 
-            // Pagination Controls
-            Row(
-              mainAxisAlignment: isSmall
-                  ? MainAxisAlignment.center
-                  : MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  onPressed: _currentPage > 0
-                      ? () => setState(() => _currentPage--)
-                      : null,
-                  icon: const Icon(LucideIcons.chevronLeft, size: 16),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  splashRadius: 20,
-                  tooltip: 'Previous Page',
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  'Page ${_currentPage + 1} of $totalPages',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF334155),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                IconButton(
-                  onPressed: _currentPage < totalPages - 1
-                      ? () => setState(() => _currentPage++)
-                      : null,
-                  icon: const Icon(LucideIcons.chevronRight, size: 16),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  splashRadius: 20,
-                  tooltip: 'Next Page',
-                ),
-              ],
+        Widget showingText({TextAlign? align}) {
+          return Text(
+            'admin.common.showing'.tr(
+              namedArgs: {
+                'from': start.toString(),
+                'to': end.toString(),
+                'total': total.toString(),
+              },
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: align,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0xFF64748B),
+            ),
+          );
+        }
+
+        Widget paginationControls() {
+          return Row(
+            mainAxisAlignment:
+                isSmall ? MainAxisAlignment.center : MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: _currentPage > 0
+                    ? () => setState(() {
+                        _currentPage--;
+                        _scrollRowsToTop();
+                      })
+                    : null,
+                icon: const Icon(LucideIcons.chevronLeft, size: 16),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                splashRadius: 20,
+                tooltip: 'admin.common.previous'.tr(),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'admin.common.page'.tr(
+                  namedArgs: {
+                    'page': (_currentPage + 1).toString(),
+                    'total': totalPages.toString(),
+                  },
+                ),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF334155),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 16),
+              IconButton(
+                onPressed: _currentPage < totalPages - 1
+                    ? () => setState(() {
+                        _currentPage++;
+                        _scrollRowsToTop();
+                      })
+                    : null,
+                icon: const Icon(LucideIcons.chevronRight, size: 16),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                splashRadius: 20,
+                tooltip: 'admin.common.next'.tr(),
+              ),
+            ],
+          );
+        }
+
+        if (isSmall) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  rowsPerPageControl(),
+                  const SizedBox(width: 12),
+                  Expanded(child: showingText(align: TextAlign.right)),
+                ],
+              ),
+              const SizedBox(height: 12),
+              paginationControls(),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 24,
+                runSpacing: 8,
+                children: [
+                  rowsPerPageControl(),
+                  showingText(),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            paginationControls(),
           ],
         );
       },

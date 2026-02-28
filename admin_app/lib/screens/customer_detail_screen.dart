@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:easy_localization/easy_localization.dart';
+
+import '../models/customer.dart';
+import '../models/customer_detail.dart';
+import '../models/customer_payment.dart';
+import '../models/customer_sale.dart';
 import '../providers/customers_provider.dart';
-import '../models/order.dart';
+import '../widgets/badges/status_badges.dart';
+import '../widgets/badges/ui_badge.dart';
+import '../widgets/buttons/app_button.dart';
+import '../widgets/responsive_server_paginated_table.dart';
+import '../widgets/stat_card.dart';
 
 class CustomerDetailScreen extends ConsumerStatefulWidget {
   final String customerId;
@@ -17,191 +27,654 @@ class CustomerDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
+  late Future<CustomerDetail?> _future;
+
   @override
-  Widget build(BuildContext context) {
-    // In a real app, verify we have the customer or fetch it
-    // For now we assume the provider has the list or we fetch
-    final customerAsync = ref
-        .read(customersProvider.notifier)
-        .fetchCustomer(widget.customerId);
-
-    return FutureBuilder(
-      future: customerAsync,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (snapshot.hasError || !snapshot.hasData) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Customer Not Found')),
-            body: const Center(child: Text('Customer not found')),
-          );
-        }
-
-        final customer = snapshot.data!;
-
-        return Scaffold(
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => context.go('/customers'),
-                      icon: const Icon(LucideIcons.arrowLeft),
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          customer.name,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          customer.phone,
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Stats
-                Row(
-                  children: [
-                    _buildStatCard(
-                      'Total Orders',
-                      '${customer.ordersCount}',
-                      LucideIcons.shoppingBag,
-                    ),
-                    const SizedBox(width: 16),
-                    _buildStatCard(
-                      'Total Spent',
-                      NumberFormat.simpleCurrency().format(customer.totalSpent),
-                      LucideIcons.dollarSign,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                const Text(
-                  'Recent Orders',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 16),
-                _buildRecentOrders(widget.customerId),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  void initState() {
+    super.initState();
+    _future = _fetch();
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
-    return Expanded(
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey[200]!),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(color: Colors.grey[500], fontSize: 13),
+  @override
+  void didUpdateWidget(covariant CustomerDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.customerId != widget.customerId) {
+      _future = _fetch(force: true);
+    }
+  }
+
+  Future<CustomerDetail?> _fetch({bool force = false}) {
+    return ref
+        .read(customersProvider.notifier)
+        .fetchCustomerDetail(widget.customerId, force: force);
+  }
+
+  void _refresh() {
+    setState(() => _future = _fetch(force: true));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 800;
+    final locale = context.locale.toLanguageTag();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
+      body: SingleChildScrollView(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1280),
+            child: Padding(
+              padding: EdgeInsets.all(isMobile ? 16 : 24),
+              child: FutureBuilder<CustomerDetail?>(
+                future: _future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _loadingCard();
+                  }
+
+                  if (snapshot.hasError) {
+                    return _errorCard(snapshot.error.toString());
+                  }
+
+                  final detail = snapshot.data;
+                  final summary = detail?.summary;
+                  if (detail == null || summary == null) {
+                    return _notFoundCard();
+                  }
+
+                  final sales = detail.sales;
+                  final payments = detail.payments;
+                  final money = NumberFormat.currency(
+                    locale: locale,
+                    symbol: 'DA',
+                    decimalDigits: 2,
+                  );
+
+                  final totalSpent = sales.fold<double>(
+                    0,
+                    (sum, s) => sum + s.totalAmount,
+                  );
+                  final totalPaid = payments.fold<double>(
+                    0,
+                    (sum, p) => sum + p.amount,
+                  );
+                  final computedBalance =
+                      summary.openingBalance + totalSpent - totalPaid;
+                  final currentBalance = summary.currentBalance != 0
+                      ? summary.currentBalance
+                      : computedBalance;
+
+                  final balanceColor = currentBalance >= 0
+                      ? const Color(0xFFB45309) // Amber-700
+                      : const Color(0xFF047857); // Emerald-700
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 12),
+                      if (!isMobile)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: _buildTitleBlock(summary)),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildStatsRow(
+                                ordersCount: sales.length,
+                                totalSpent: money.format(totalSpent),
+                                totalPaid: money.format(totalPaid),
+                                currentBalance: money.format(currentBalance),
+                                balanceColor: balanceColor,
+                              ),
+                            ),
+                          ],
+                        )
+                      else ...[
+                        _buildTitleBlock(summary),
+                        const SizedBox(height: 12),
+                        _buildStatsRow(
+                          ordersCount: sales.length,
+                          totalSpent: money.format(totalSpent),
+                          totalPaid: money.format(totalPaid),
+                          currentBalance: money.format(currentBalance),
+                          balanceColor: balanceColor,
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      if (sales.isEmpty && payments.isEmpty)
+                        _emptyCard()
+                      else ...[
+                        if (sales.isNotEmpty) ...[
+                          _buildSalesTable(sales, money, locale: locale),
+                          const SizedBox(height: 24),
+                        ],
+                        if (payments.isNotEmpty) ...[
+                          _buildPaymentsTable(payments, money, locale: locale),
+                        ],
+                      ],
+                    ],
+                  );
+                },
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Icon(icon, color: Colors.grey[400], size: 20),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildRecentOrders(String customerId) {
-    final ordersAsync = ref
-        .read(customersProvider.notifier)
-        .fetchCustomerOrders(customerId);
-
-    return FutureBuilder<List<Order>>(
-      future: ordersAsync,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 100,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey[200]!),
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        InkWell(
+          onTap: () => context.go('/customers'),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                const Icon(
+                  LucideIcons.arrowLeft,
+                  size: 16,
+                  color: Color(0xFF64748B),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'admin.pages.customers.index.title'.tr(),
+                  style: const TextStyle(
+                    color: Color(0xFF64748B), // Slate-500
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            child: const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: Text('No orders found')),
-            ),
-          );
-        }
-
-        final orders = snapshot.data!;
-        return Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey[200]!),
           ),
-          child: ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: orders.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final order = orders[index];
-              return ListTile(
-                title: Text(
-                  order.id,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTitleBlock(Customer summary) {
+    final phone = summary.phone.trim();
+    final address = (summary.address ?? '').trim();
+    final subtitle = [
+      if (phone.isNotEmpty) phone,
+      if (address.isNotEmpty) address,
+    ].join(' · ');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                summary.name.trim().isEmpty
+                    ? 'admin.pages.customers.detail.fallbackTitle'.tr()
+                    : summary.name.trim(),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A), // Slate-900
+                  letterSpacing: -0.5,
                 ),
-                subtitle: Text(DateFormat.yMMMd().format(order.createdAt)),
-                trailing: Text(
-                  NumberFormat.simpleCurrency().format(order.totalAmount),
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(width: 12),
+            AppButton.secondary(
+              label: 'admin.common.edit'.tr(),
+              icon: LucideIcons.pencil,
+              size: AppButtonSize.sm,
+              onPressed: () => context.push('/customers/edit/${summary.id}'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          subtitle,
+          style: const TextStyle(
+            color: Color(0xFF64748B), // Slate-500
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsRow({
+    required int ordersCount,
+    required String totalSpent,
+    required String totalPaid,
+    required String currentBalance,
+    required Color balanceColor,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 720;
+
+        final cards = [
+          StatCard(
+            label: 'admin.pages.customers.detail.stats.orders'.tr(),
+            value: ordersCount.toString(),
+            icon: LucideIcons.shoppingBag,
+            moodColor: const Color(0xFF2563EB), // Blue-600
+            dense: true,
+            showIcon: false,
+          ),
+          StatCard(
+            label: 'admin.pages.customers.detail.stats.totalSpent'.tr(),
+            value: totalSpent,
+            icon: LucideIcons.dollarSign,
+            moodColor: const Color(0xFF0F766E), // Teal-700
+            dense: true,
+            showIcon: false,
+          ),
+          StatCard(
+            label: 'admin.pages.customers.detail.stats.totalPaid'.tr(),
+            value: totalPaid,
+            icon: LucideIcons.wallet,
+            moodColor: const Color(0xFF047857), // Emerald-700
+            dense: true,
+            showIcon: false,
+          ),
+          StatCard(
+            label: 'admin.pages.customers.detail.stats.currentBalance'.tr(),
+            value: currentBalance,
+            icon: LucideIcons.scale,
+            moodColor: balanceColor,
+            dense: true,
+            showIcon: false,
+          ),
+        ];
+
+        if (isWide) {
+          return Row(
+            children: [
+              Expanded(child: cards[0]),
+              const SizedBox(width: 12),
+              Expanded(child: cards[1]),
+              const SizedBox(width: 12),
+              Expanded(child: cards[2]),
+              const SizedBox(width: 12),
+              Expanded(child: cards[3]),
+            ],
+          );
+        }
+
+        final cardWidth = (constraints.maxWidth - 12) / 2;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            SizedBox(width: cardWidth, child: cards[0]),
+            SizedBox(width: cardWidth, child: cards[1]),
+            SizedBox(width: cardWidth, child: cards[2]),
+            SizedBox(width: cardWidth, child: cards[3]),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSalesTable(
+    List<CustomerSale> sales,
+    NumberFormat money, {
+    required String locale,
+  }) {
+    return ResponsiveServerPaginatedTable<CustomerSale>(
+      items: sales,
+      title: Text('admin.pages.customers.detail.stats.orders'.tr()),
+      minWidth: 950,
+      page: 1,
+      totalPages: 1,
+      totalItems: sales.length,
+      itemsPerPage: sales.length,
+      onPageChanged: (_) {},
+      showFooter: false,
+      header: Row(
+        children: [
+          _buildHeaderCell('admin.pages.customers.detail.table.order'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.customers.detail.table.total'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.customers.detail.table.status'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.customers.detail.table.date'.tr(), flex: 3),
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: _headerText(
+                'admin.pages.customers.detail.table.actions'.tr(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      rowBuilder: (context, s, index) {
+        final shortId = s.id.length > 8 ? s.id.substring(0, 8) : s.id;
+        final date = s.createdAt ?? s.updatedAt;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  '#$shortId',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFF0F172A),
+                  ),
                 ),
-              );
-            },
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  money.format(s.totalAmount),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SaleStatusBadge(status: s.status),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  date != null
+                      ? DateFormat.yMMMd(locale).add_jm().format(date)
+                      : '—',
+                  style: const TextStyle(
+                    color: Color(0xFF64748B), // Slate-500
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: AppButton.secondary(
+                    label: 'admin.common.view'.tr(),
+                    icon: LucideIcons.eye,
+                    size: AppButtonSize.sm,
+                    onPressed: () => context.push('/sales/${s.id}'),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPaymentsTable(
+    List<CustomerPayment> payments,
+    NumberFormat money,
+    {required String locale}
+  ) {
+    return ResponsiveServerPaginatedTable<CustomerPayment>(
+      items: payments,
+      title: Text('admin.pages.customers.detail.stats.payments'.tr()),
+      minWidth: 950,
+      page: 1,
+      totalPages: 1,
+      totalItems: payments.length,
+      itemsPerPage: payments.length,
+      onPageChanged: (_) {},
+      showFooter: false,
+      header: Row(
+        children: [
+          _buildHeaderCell('admin.pages.customers.detail.table.date'.tr(), flex: 3),
+          _buildHeaderCell('admin.pages.customers.detail.table.total'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.customers.detail.stats.method'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.customers.detail.stats.reference'.tr(), flex: 3),
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: _headerText(
+                'admin.pages.customers.detail.table.actions'.tr(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      rowBuilder: (context, p, index) {
+        final date = p.createdAt;
+        final method = p.method.trim().isEmpty ? '—' : p.method.trim();
+        final reference = (p.reference ?? '').trim();
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(
+                  date != null
+                      ? DateFormat.yMMMd(locale).add_jm().format(date)
+                      : '—',
+                  style: const TextStyle(
+                    color: Color(0xFF64748B), // Slate-500
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  money.format(p.amount),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: UiBadge(
+                    label: method,
+                    tone: UiBadgeTone.slate,
+                    uppercase: true,
+                    maxWidth: 120,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  reference.isEmpty ? '—' : reference,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: reference.isEmpty
+                        ? const Color(0xFF94A3B8) // Slate-400
+                        : const Color(0xFF475569), // Slate-600
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: p.saleId == null || p.saleId!.trim().isEmpty
+                      ? const Text(
+                          '—',
+                          style: TextStyle(color: Color(0xFF94A3B8)),
+                        )
+                      : AppButton.secondary(
+                          label: 'admin.common.view'.tr(),
+                          icon: LucideIcons.eye,
+                          size: AppButtonSize.sm,
+                          onPressed: () =>
+                              context.push('/sales/${p.saleId!.trim()}'),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _headerText(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Color(0xFF64748B), // Slate-500
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  Widget _buildHeaderCell(String text, {required int flex}) {
+    return Expanded(flex: flex, child: _headerText(text));
+  }
+
+  Widget _loadingCard() {
+    return _card(
+      child: Padding(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 32,
+              width: 32,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'admin.pages.customers.detail.loading'.tr(),
+              style: const TextStyle(color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _errorCard(String message) {
+    return _card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const Icon(LucideIcons.alertCircle, size: 28),
+            const SizedBox(height: 12),
+            Text(
+              'admin.pages.customers.detail.errors.loadFailed'.tr(),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            AppButton.secondary(
+              label: 'admin.common.refresh'.tr(),
+              icon: LucideIcons.refreshCw,
+              onPressed: _refresh,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _notFoundCard() {
+    return _card(
+      child: Padding(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          children: [
+            Icon(LucideIcons.users, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 12),
+            Text(
+              'admin.pages.customers.detail.notFound.title'.tr(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF111827),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'admin.pages.customers.detail.notFound.hint'.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+            ),
+            const SizedBox(height: 16),
+            AppButton.secondary(
+              label: 'admin.common.back'.tr(),
+              icon: LucideIcons.arrowLeft,
+              onPressed: () => context.go('/customers'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _emptyCard() {
+    return _card(
+      child: Padding(
+        padding: const EdgeInsets.all(48),
+        child: Column(
+          children: [
+            Icon(
+              LucideIcons.clipboardList,
+              size: 48,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'admin.pages.customers.detail.empty.title'.tr(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF111827),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'admin.pages.customers.detail.empty.hint'.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _card({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Center(child: child),
     );
   }
 }

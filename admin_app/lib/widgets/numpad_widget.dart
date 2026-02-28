@@ -52,7 +52,10 @@ class NumpadWidget extends StatelessWidget {
         textColor: Colors.black87,
         onTap: onBackspace ?? onClear,
       ),
-      if (allowDecimal) _buildButton('.', onTap: () => onNumberTap('.')) else placeholder(),
+      if (allowDecimal)
+        _buildButton('.', onTap: () => onNumberTap('.'))
+      else
+        placeholder(),
       _buildButton('00', onTap: () => onNumberTap('00')),
       _buildButton(
         'Enter',
@@ -68,13 +71,25 @@ class NumpadWidget extends StatelessWidget {
 
         final availableHeight = constraints.hasBoundedHeight
             ? constraints.maxHeight
-            : (labelHeight + labelBottomPadding + (rowCount * 64) + ((rowCount - 1) * spacing));
+            : (labelHeight +
+                  labelBottomPadding +
+                  (rowCount * 64) +
+                  ((rowCount - 1) * spacing));
 
-        final gridHeight = (availableHeight - (labelHeight + labelBottomPadding)).clamp(0.0, double.infinity);
-        final tileWidth = (width - ((crossAxisCount - 1) * spacing)) / crossAxisCount;
+        final gridHeight =
+            (availableHeight - (labelHeight + labelBottomPadding)).clamp(
+              0.0,
+              double.infinity,
+            );
+        final tileWidth =
+            (width - ((crossAxisCount - 1) * spacing)) / crossAxisCount;
         final tileHeight = (gridHeight - ((rowCount - 1) * spacing)) / rowCount;
-        final safeTileHeight = tileHeight.isFinite && tileHeight > 0 ? tileHeight : 64.0;
-        final safeTileWidth = tileWidth.isFinite && tileWidth > 0 ? tileWidth : 96.0;
+        final safeTileHeight = tileHeight.isFinite && tileHeight > 0
+            ? tileHeight
+            : 64.0;
+        final safeTileWidth = tileWidth.isFinite && tileWidth > 0
+            ? tileWidth
+            : 96.0;
         final ratio = safeTileWidth / safeTileHeight;
 
         return SizedBox(
@@ -89,7 +104,10 @@ class NumpadWidget extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ),

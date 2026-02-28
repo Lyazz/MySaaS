@@ -212,6 +212,17 @@
             />
             </div>
 
+            <!-- Low Stock Threshold -->
+            <BaseInput
+              v-model.number="form.lowStockThreshold"
+              :label="t('admin.forms.product.lowStockThreshold.label')"
+              :error="errors.lowStockThreshold"
+              type="number"
+              min="0"
+              :placeholder="t('admin.forms.product.lowStockThreshold.placeholder')"
+              :hint="t('admin.forms.product.lowStockThreshold.hint')"
+            />
+
             <!-- Category -->
             <BaseSelect
               v-model="form.categoryId"
@@ -574,6 +585,7 @@ const form = ref({
   description: '',
   price: 0,
   stock: 0,
+  lowStockThreshold: 5,
   categoryId: '',
   isActive: true,
   images: [] as string[] // Legacy field for backwards compatibility
@@ -631,6 +643,7 @@ async function fetchProduct() {
       description: data.description || '',
       price: Number(data.price),
       stock: data.stock,
+      lowStockThreshold: data.lowStockThreshold ?? 5,
       categoryId: data.categoryId || '',
       isActive: data.isActive,
       images: data.images || []
@@ -805,6 +818,7 @@ async function handleSubmit() {
 	      description: form.value.description || null,
 	      price: form.value.price,
 	      isActive: form.value.isActive,
+	      lowStockThreshold: Number(form.value.lowStockThreshold),
 	      images: productImages.value.map(img => img.url) // Keep legacy images in sync
 	    }
 

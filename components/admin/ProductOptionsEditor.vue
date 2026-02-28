@@ -47,7 +47,7 @@
                             <div v-if="option.displayType === 'dropdown'" class="relative max-w-xs">
                                 <select
                                     disabled
-                                    class="block w-full h-9 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8"
+                                    class="block w-full h-9 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8 appearance-none bg-none"
                                 >
                                     <option
                                         v-for="v in previewValuesForOption(option, { max: 6, min: 1 })"
@@ -246,7 +246,7 @@
                                 <div v-if="newOptionType === 'dropdown'" class="relative max-w-xs">
                                     <select
                                         disabled
-                                        class="block w-full h-8 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8"
+                                        class="block w-full h-8 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8 appearance-none bg-none"
                                     >
                                         <option
                                             v-for="v in newOptionPreviewValues.slice(0, 6)"

@@ -407,6 +407,7 @@ model Product {
   miniDescription String?
   price           Decimal @default(0)
   stock           Int     @default(0)
+  lowStockThreshold Int   @default(5)
 
   isActive      Boolean        @default(true)
   images        String[]       @default([]) // Deprecated: Use ProductImage model

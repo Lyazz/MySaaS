@@ -7,6 +7,7 @@ import '../models/product.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../utils/debouncer.dart';
+import '../widgets/form/form_input.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -65,22 +66,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   Widget _buildHeader() {
     return ResponsiveFilterBar(
-      searchField: TextField(
+      searchField: FormInput(
+        label: 'Search',
         controller: _searchController,
-        decoration: InputDecoration(
-          hintText: 'Search products by name or SKU...',
-          prefixIcon: const Icon(LucideIcons.search, size: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          filled: true,
-          fillColor: Colors.white,
+        hint: 'Search products by name or SKU...',
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
         ),
         onChanged: (value) => _searchDebouncer.run(() => setState(() {})),
       ),
@@ -131,7 +123,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ],
       ),
       rowBuilder: (context, product, index) {
-        // Check if any variant is low stock (mock logic: < 10)
+        // Low-stock threshold (basic): < 10
         final isLowStock = product.stock < 10;
         final rawImageUrl = product.mainImageUrl;
         final imageUrl = rawImageUrl == null

@@ -105,15 +105,25 @@ export class CashController {
     async listSessions(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { cashboxId, status, startDate, endDate, userId } = req.query as {
+            const { cashboxId, status, startDate, endDate, userId, page, limit } = req.query as {
                 cashboxId?: string
                 status?: string
                 startDate?: string
                 endDate?: string
                 userId?: string
+                page?: string
+                limit?: string
             }
-            const sessions = await service.listSessions(tenant.id, { cashboxId, status, startDate, endDate, userId })
-            res.json(sessions)
+            const result = await service.listSessions(tenant.id, {
+                cashboxId,
+                status,
+                startDate,
+                endDate,
+                userId,
+                page: page ? parseInt(page, 10) : 1,
+                limit: limit ? parseInt(limit, 10) : 25
+            })
+            res.json(result)
         } catch (error) {
             console.error('List cash sessions error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -145,7 +155,7 @@ export class CashController {
     async listTransactions(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { cashboxId, sessionId, type, direction, startDate, endDate, method, userId } = req.query as {
+            const { cashboxId, sessionId, type, direction, startDate, endDate, method, userId, page, limit } = req.query as {
                 cashboxId?: string
                 sessionId?: string
                 type?: string
@@ -154,8 +164,10 @@ export class CashController {
                 endDate?: string
                 method?: string
                 userId?: string
+                page?: string
+                limit?: string
             }
-            const txs = await service.listTransactions(tenant.id, {
+            const result = await service.listTransactions(tenant.id, {
                 cashboxId,
                 sessionId,
                 type,
@@ -163,9 +175,11 @@ export class CashController {
                 startDate,
                 endDate,
                 method,
-                userId
+                userId,
+                page: page ? parseInt(page, 10) : 1,
+                limit: limit ? parseInt(limit, 10) : 25
             })
-            res.json(txs)
+            res.json(result)
         } catch (error) {
             console.error('List cash transactions error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

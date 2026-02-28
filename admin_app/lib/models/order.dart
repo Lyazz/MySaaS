@@ -3,6 +3,7 @@ class Order {
   final String customerName;
   final String customerPhone;
   final String customerAddress;
+  final String? customerId;
   final double totalAmount;
   final String status;
   final DateTime createdAt;
@@ -13,6 +14,7 @@ class Order {
     required this.customerName,
     required this.customerPhone,
     required this.customerAddress,
+    this.customerId,
     required this.totalAmount,
     required this.status,
     required this.createdAt,
@@ -25,6 +27,7 @@ class Order {
       customerName: json['customerName'] ?? '',
       customerPhone: json['customerPhone'] ?? '',
       customerAddress: json['customerAddress'] ?? '',
+      customerId: json['customerId']?.toString(),
       totalAmount:
           double.tryParse(json['totalAmount']?.toString() ?? '0') ?? 0.0,
       status: json['status'] ?? 'PENDING',

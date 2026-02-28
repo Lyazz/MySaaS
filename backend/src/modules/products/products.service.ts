@@ -153,6 +153,7 @@ export class ProductsService {
                     miniDescription: data.miniDescription,
                     price: data.price || 0,
                     stock: data.stock || 0,
+                    lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : 5,
                     isActive: data.isActive ?? true,
                     categoryId: data.categoryId,
                     images: images ?? []
@@ -324,7 +325,8 @@ export class ProductsService {
                 price: data.price !== undefined ? String(data.price) : undefined,
                 isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
                 categoryId: data.categoryId,
-                images: images
+                images: images,
+                lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : undefined
             }
         })
 
@@ -479,12 +481,12 @@ export class ProductsService {
         })
 
         // If label changed, we might want to regenerate variant names if we store them explicitly,
-        // but currently we generate them dynamically or they are just relations. 
-        // Syncing variants might be needed if we tracked something specific, but for now 
+        // but currently we generate them dynamically or they are just relations.
+        // Syncing variants might be needed if we tracked something specific, but for now
         // the relations stay the same, just the label on the value changed.
-        // However, if we cache variant titles, we'd need to update them. 
-        // Our getVariantTitle in frontend is dynamic. 
-        // Does backend store anything? 
+        // However, if we cache variant titles, we'd need to update them.
+        // Our getVariantTitle in frontend is dynamic.
+        // Does backend store anything?
         // ProductVariant model has no title field. It relies on relations.
         // So no need to syncVariants for a simple label change.
 

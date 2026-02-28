@@ -493,41 +493,41 @@
           </div>
 
           <div class="hidden sm:block overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200/70">
-              <thead class="bg-slate-50">
+            <table class="ui-table">
+              <thead class="ui-thead">
                 <tr>
-                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="ui-th">
                     {{ t('admin.pages.cash.transactions.table.date') }}
                   </th>
-                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="ui-th">
                     {{ t('admin.pages.cash.transactions.table.cashbox') }}
                   </th>
-                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="ui-th">
                     {{ t('admin.pages.cash.transactions.table.user') }}
                   </th>
-                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="ui-th">
                     {{ t('admin.pages.cash.transactions.table.type') }}
                   </th>
-                  <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="ui-th">
                     {{ t('admin.pages.cash.transactions.table.method') }}
                   </th>
-                  <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="ui-th text-right">
                     {{ t('admin.pages.cash.transactions.table.amount') }}
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-200/70 bg-white">
-                <tr v-for="tx in txs" :key="tx.id" class="hover:bg-slate-50 transition-colors">
-                  <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
+              <tbody class="ui-tbody">
+                <tr v-for="tx in paginatedTxs" :key="tx.id" class="ui-tr">
+                  <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                     {{ formatDate(tx.createdAt) }}
                   </td>
-                  <td class="px-5 py-4 text-sm font-medium text-slate-900">
+                  <td class="ui-td text-sm font-medium text-slate-900">
                     {{ cashboxName(tx.cashboxId) }}
                   </td>
-                  <td class="px-5 py-4 text-sm text-slate-600 max-w-[220px] truncate">
+                  <td class="ui-td text-sm text-slate-600 max-w-[220px] truncate">
                     {{ userEmail(tx.createdByUserId) }}
                   </td>
-                  <td class="px-5 py-4 text-sm text-slate-700">
+                  <td class="ui-td text-sm text-slate-700">
                     <div class="flex flex-col">
                       <span class="font-medium text-slate-900">{{ typeLabel(tx.type) }}</span>
                       <span v-if="tx.expenseCategory" class="text-xs text-slate-500 mt-0.5">
@@ -538,7 +538,7 @@
                       </span>
                     </div>
                   </td>
-                  <td class="px-5 py-4 text-sm text-slate-600">
+                  <td class="ui-td text-sm text-slate-600">
                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
                       <Icon v-if="tx.method === 'CASH'" name="lucide:banknote" class="h-3 w-3" />
                       <Icon v-else-if="tx.method === 'CARD'" name="lucide:credit-card" class="h-3 w-3" />
@@ -546,12 +546,77 @@
                       {{ methodLabel(tx.method) }}
                     </span>
                   </td>
-                  <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+                  <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
                     {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Transactions Pagination -->
+          <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+            <div class="flex flex-1 items-center justify-between sm:hidden">
+              <button
+                :disabled="txPage === 1"
+                class="ui-btn ui-btn--secondary ui-btn--sm"
+                @click="txPage--; fetchTransactions()"
+              >
+                <Icon name="lucide:chevron-left" class="w-4 h-4" />
+              </button>
+              <span class="text-sm text-slate-600">
+                {{ t('admin.common.page', { page: txPage, total: txTotalPages }) }}
+              </span>
+              <button
+                :disabled="txPage === txTotalPages"
+                class="ui-btn ui-btn--secondary ui-btn--sm"
+                @click="txPage++; fetchTransactions()"
+              >
+                <Icon name="lucide:chevron-right" class="w-4 h-4" />
+              </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-slate-700">
+                  {{ t('admin.common.showing', {
+                    from: txTotal === 0 ? 0 : (txPage - 1) * txPerPage + 1,
+                    to: Math.min(txPage * txPerPage, txTotal),
+                    total: txTotal
+                  }) }}
+                </p>
+              </div>
+              <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <button
+                    :disabled="txPage === 1"
+                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    @click="txPage--; fetchTransactions()"
+                  >
+                    {{ t('admin.common.previous') }}
+                  </button>
+                  <button
+                    v-for="page in txTotalPages"
+                    :key="page"
+                    :class="[
+                      'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                      txPage === page
+                        ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    ]"
+                    @click="txPage = page; fetchTransactions()"
+                  >
+                    {{ page }}
+                  </button>
+                  <button
+                    :disabled="txPage === txTotalPages"
+                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    @click="txPage++; fetchTransactions()"
+                  >
+                    {{ t('admin.common.next') }}
+                  </button>
+                </nav>
+              </div>
+            </div>
           </div>
         </div>
       </TabPanel>
@@ -659,44 +724,44 @@
             </div>
 
             <div class="hidden sm:block overflow-x-auto">
-              <table class="min-w-full divide-y divide-slate-200/70">
-                <thead class="bg-slate-50">
+              <table class="ui-table">
+                <thead class="ui-thead">
                   <tr>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th">
                       {{ t('admin.pages.cash.sessions.table.cashbox') }}
                     </th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th">
                       {{ t('admin.pages.cash.sessions.table.status') }}
                     </th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th">
                       {{ t('admin.pages.cash.sessions.table.user') }}
                     </th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th">
                       {{ t('admin.pages.cash.sessions.table.openedAt') }}
                     </th>
-                    <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th">
                       {{ t('admin.pages.cash.sessions.table.closedAt') }}
                     </th>
-                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th text-right">
                       {{ t('admin.pages.cash.sessions.table.openingFloat') }}
                     </th>
-                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th text-right">
                       {{ t('admin.pages.cash.sessions.table.expectedClosing') }}
                     </th>
-                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th text-right">
                       {{ t('admin.pages.cash.sessions.table.closingCount') }}
                     </th>
-                    <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th class="ui-th text-right">
                       {{ t('admin.pages.cash.sessions.table.difference') }}
                     </th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200/70 bg-white">
-                  <tr v-for="s in sessions" :key="s.id" class="hover:bg-slate-50 transition-colors">
-                    <td class="px-5 py-4 text-sm font-medium text-slate-900">
+                <tbody class="ui-tbody">
+                  <tr v-for="s in paginatedSessions" :key="s.id" class="ui-tr">
+                    <td class="ui-td text-sm font-medium text-slate-900">
                       {{ cashboxName(s.cashboxId) }}
                     </td>
-                    <td class="px-5 py-4 text-sm">
+                    <td class="ui-td text-sm">
                       <span
                         class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
                         :class="s.status === 'OPEN' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'"
@@ -705,30 +770,95 @@
                         {{ t(`admin.pages.cash.status.${s.status}`) }}
                       </span>
                     </td>
-                    <td class="px-5 py-4 text-sm text-slate-600 max-w-[220px] truncate">
+                    <td class="ui-td text-sm text-slate-600 max-w-[220px] truncate">
                       {{ userEmail(s.openedByUserId) }}
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
+                    <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                       {{ formatDate(s.openedAt) }}
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-slate-600">
+                    <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                       {{ s.closedAt ? formatDate(s.closedAt) : '—' }}
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium text-slate-900">
                       {{ formatCurrency(Number(s.openingFloat)) }}
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium text-slate-900">
                       {{ s.expectedClosing ? formatCurrency(Number(s.expectedClosing)) : '—' }}
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium text-slate-900">
                       {{ s.closingCount ? formatCurrency(Number(s.closingCount)) : '—' }}
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-600' : 'text-slate-900'">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-600' : 'text-slate-900'">
                       {{ s.difference ? formatCurrency(Number(s.difference)) : '—' }}
                     </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <!-- Sessions Pagination -->
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+              <div class="flex flex-1 items-center justify-between sm:hidden">
+                <button
+                  :disabled="sessionsPage === 1"
+                  class="ui-btn ui-btn--secondary ui-btn--sm"
+                  @click="sessionsPage--; fetchSessions()"
+                >
+                  <Icon name="lucide:chevron-left" class="w-4 h-4" />
+                </button>
+                <span class="text-sm text-slate-600">
+                  {{ t('admin.common.page', { page: sessionsPage, total: sessionsTotalPages }) }}
+                </span>
+                <button
+                  :disabled="sessionsPage === sessionsTotalPages"
+                  class="ui-btn ui-btn--secondary ui-btn--sm"
+                  @click="sessionsPage++; fetchSessions()"
+                >
+                  <Icon name="lucide:chevron-right" class="w-4 h-4" />
+                </button>
+              </div>
+              <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p class="text-sm text-slate-700">
+                    {{ t('admin.common.showing', {
+                      from: sessionsTotal === 0 ? 0 : (sessionsPage - 1) * sessionsPerPage + 1,
+                      to: Math.min(sessionsPage * sessionsPerPage, sessionsTotal),
+                      total: sessionsTotal
+                    }) }}
+                  </p>
+                </div>
+                <div>
+                  <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    <button
+                      :disabled="sessionsPage === 1"
+                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      @click="sessionsPage--; fetchSessions()"
+                    >
+                      {{ t('admin.common.previous') }}
+                    </button>
+                    <button
+                      v-for="page in sessionsTotalPages"
+                      :key="page"
+                      :class="[
+                        'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                        sessionsPage === page
+                          ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      ]"
+                      @click="sessionsPage = page; fetchSessions()"
+                    >
+                      {{ page }}
+                    </button>
+                    <button
+                      :disabled="sessionsPage === sessionsTotalPages"
+                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      @click="sessionsPage++; fetchSessions()"
+                    >
+                      {{ t('admin.common.next') }}
+                    </button>
+                  </nav>
+                </div>
+              </div>
             </div>
           </div>
         </TabPanel>
@@ -1371,9 +1501,19 @@ const loadingCashboxes = ref(true)
 
 const txs = ref<CashTx[]>([])
 const loadingTxs = ref(true)
+const txPage = ref(1)
+const txPerPage = ref(25)
+const txTotal = ref(0)
+const txTotalPages = ref(1)
+const paginatedTxs = computed(() => txs.value)
 
 const sessions = ref<CashSession[]>([])
 const loadingSessions = ref(true)
+const sessionsPage = ref(1)
+const sessionsPerPage = ref(25)
+const sessionsTotal = ref(0)
+const sessionsTotalPages = ref(1)
+const paginatedSessions = computed(() => sessions.value)
 const today = new Date()
 const lastWeek = new Date(today)
 lastWeek.setDate(lastWeek.getDate() - 7)
@@ -1614,8 +1754,9 @@ async function fetchCashboxes() {
   }
 }
 
-async function fetchTransactions() {
+async function fetchTransactions(resetPage = false) {
   loadingTxs.value = true
+  if (resetPage) txPage.value = 1
   try {
     const params = new URLSearchParams()
     if (filters.cashboxId) params.append('cashboxId', filters.cashboxId)
@@ -1625,22 +1766,31 @@ async function fetchTransactions() {
     if (filters.userId) params.append('userId', filters.userId)
     if (filters.startDate) params.append('startDate', filters.startDate)
     if (filters.endDate) params.append('endDate', filters.endDate)
-    const url = `/api/admin/cash-transactions${params.toString() ? '?' + params.toString() : ''}`
+    params.append('page', String(txPage.value))
+    params.append('limit', String(txPerPage.value))
+    const url = `/api/admin/cash-transactions?${params.toString()}`
 
-    txs.value = await $fetch<CashTx[]>(url, {
+    const result = await $fetch<{ items: CashTx[]; total: number; page: number; totalPages: number }>(url, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
+    txs.value = result.items
+    txTotal.value = result.total
+    txTotalPages.value = result.totalPages
+    txPage.value = result.page
   } catch (e: any) {
     console.error('Fetch transactions failed:', e)
     errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
     txs.value = []
+    txTotal.value = 0
+    txTotalPages.value = 1
   } finally {
     loadingTxs.value = false
   }
 }
 
-async function fetchSessions() {
+async function fetchSessions(resetPage = false) {
   loadingSessions.value = true
+  if (resetPage) sessionsPage.value = 1
   try {
     const params = new URLSearchParams()
     if (sessionFilters.cashboxId) params.append('cashboxId', sessionFilters.cashboxId)
@@ -1648,15 +1798,23 @@ async function fetchSessions() {
     if (sessionFilters.userId) params.append('userId', sessionFilters.userId)
     if (sessionFilters.startDate) params.append('startDate', sessionFilters.startDate)
     if (sessionFilters.endDate) params.append('endDate', sessionFilters.endDate)
-    const url = `/api/admin/cash-sessions${params.toString() ? '?' + params.toString() : ''}`
+    params.append('page', String(sessionsPage.value))
+    params.append('limit', String(sessionsPerPage.value))
+    const url = `/api/admin/cash-sessions?${params.toString()}`
 
-    sessions.value = await $fetch<CashSession[]>(url, {
+    const result = await $fetch<{ items: CashSession[]; total: number; page: number; totalPages: number }>(url, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
+    sessions.value = result.items
+    sessionsTotal.value = result.total
+    sessionsTotalPages.value = result.totalPages
+    sessionsPage.value = result.page
   } catch (e: any) {
     console.error('Fetch sessions failed:', e)
     errorMessage.value = e?.data?.statusMessage || e?.message || 'Error'
     sessions.value = []
+    sessionsTotal.value = 0
+    sessionsTotalPages.value = 1
   } finally {
     loadingSessions.value = false
   }
@@ -1765,7 +1923,7 @@ async function submitExpense() {
       }
     })
     expenseOpen.value = false
-    await fetchTransactions()
+    await fetchTransactions(true)
     await fetchCashboxes()
   } catch (e: any) {
     console.error('Create expense failed:', e)
@@ -1956,7 +2114,7 @@ onMounted(async () => {
 watch(
   () => ({ ...filters }),
   () => {
-    fetchTransactions()
+    fetchTransactions(true)
   }
 )
 
@@ -1971,7 +2129,7 @@ watch(customerSearch, (value) => {
 watch(
   () => ({ ...sessionFilters }),
   () => {
-    fetchSessions()
+    fetchSessions(true)
   }
 )
 </script>

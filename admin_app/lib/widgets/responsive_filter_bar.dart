@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'buttons/app_button.dart';
 
 class ResponsiveFilterBar extends StatelessWidget {
   final Widget searchField;
@@ -85,7 +87,7 @@ class ResponsiveFilterBar extends StatelessWidget {
           IconButton(
             onPressed: onClearFilters,
             icon: const Icon(LucideIcons.x, size: 16),
-            tooltip: 'Clear filters',
+            tooltip: 'admin.common.clear'.tr(),
           ),
         ],
       ],
@@ -110,7 +112,7 @@ class ResponsiveFilterBar extends StatelessWidget {
                 size: 20,
                 color: Color(0xFF64748B),
               ),
-              tooltip: 'Filters',
+              tooltip: 'admin.common.filters'.tr(),
               style: IconButton.styleFrom(
                 padding: const EdgeInsets.all(12),
                 shape: RoundedRectangleBorder(
@@ -163,20 +165,20 @@ class ResponsiveFilterBar extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Filters',
+                      Text(
+                        'admin.common.filters'.tr(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       if (onClearFilters != null)
-                        TextButton(
+                        AppButton.ghost(
+                          label: 'admin.common.clear'.tr(),
                           onPressed: () {
                             onClearFilters!();
                             Navigator.pop(context);
                           },
-                          child: const Text('Clear all'),
                         ),
                     ],
                   ),
@@ -201,17 +203,10 @@ class ResponsiveFilterBar extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: AppButton.primary(
+                      label: 'admin.common.close'.tr(),
                       onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F172A),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Close'),
+                      fullWidth: true,
                     ),
                   ),
                 ),

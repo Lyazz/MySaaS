@@ -16,6 +16,9 @@ import '../providers/customers_provider.dart';
 import '../widgets/numpad_widget.dart';
 import '../widgets/shimmer_skeleton.dart';
 import '../widgets/smart_cash_suggestions.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/dialogs/app_dialog.dart';
+import '../widgets/buttons/app_button.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -298,22 +301,18 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     // - Require authorization for large discounts
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Apply Discount'),
+      builder: (context) => AppDialog(
+        title: 'Apply Discount',
+        description: 'Discount functionality is not implemented yet.',
         content: const Text(
-          'TODO: Implement discount functionality\n\n'
           'Features to add:\n'
           '• Percentage discount\n'
           '• Fixed amount discount\n'
           '• Per-item or cart-wide\n'
           '• Authorization requirements',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
+        secondaryLabel: 'Close',
+        onSecondary: () => Navigator.pop(context),
       ),
     );
   }
@@ -908,37 +907,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                             child: SizedBox(
                               width: double.infinity,
                               height: 56,
-                              child: ElevatedButton(
-                                onPressed:
-                                    (breakdown.isSettled && !posState.isLoading)
-                                    ? confirm
-                                    : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0F172A),
-                                  foregroundColor: Colors.white,
-                                  disabledBackgroundColor: Colors.grey[200],
-                                  disabledForegroundColor: Colors.grey[400],
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: posState.isLoading
-                                    ? const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Text(
-                                        'Confirm Payment (Enter)',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                              child: AppButton.neutral(
+                                label: 'Confirm Payment (Enter)',
+                                onPressed: breakdown.isSettled ? confirm : null,
+                                loading: posState.isLoading,
+                                fullWidth: true,
                               ),
                             ),
                           ),
@@ -1066,32 +1039,33 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: TextField(
+                  child: FormInput(
+                    label: 'Search',
+                    showLabel: false,
                     controller: _searchController,
+                    hint: 'Search products...',
+                    prefixIcon: const Icon(
+                      LucideIcons.search,
+                      color: Color(0xFF64748B),
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(
+                              LucideIcons.x,
+                              color: Color(0xFF64748B),
+                              size: 18,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {});
+                            },
+                          )
+                        : null,
+                    borderless: true,
+                    filled: false,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     onChanged: (value) =>
                         _searchDebouncer.run(() => setState(() {})),
-                    decoration: InputDecoration(
-                      hintText: 'Search products...',
-                      prefixIcon: const Icon(
-                        LucideIcons.search,
-                        color: Color(0xFF64748B),
-                      ),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(
-                                LucideIcons.x,
-                                color: Color(0xFF64748B),
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {});
-                              },
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
                   ),
                 ),
               ),
@@ -2045,15 +2019,33 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                item.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: Color(0xFF0F172A),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    item.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: Color(0xFF0F172A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (item.variantTitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      item.variantTitle!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF64748B),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(width: 8),
@@ -2299,40 +2291,37 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               controller.text = posState.selectedCustomer!.name;
             }
             // Clear text logic if needed
-            return TextField(
+            return FormInput(
+              label: 'Customer',
+              showLabel: false,
               controller: controller,
               focusNode: focusNode,
-              decoration: InputDecoration(
-                hintText: 'Add Client +',
-                hintStyle: const TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 13,
-                ),
-                prefixIcon: const Icon(
-                  LucideIcons.user,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-                suffixIcon: posState.selectedCustomer != null
-                    ? IconButton(
-                        icon: const Icon(LucideIcons.x, size: 14),
-                        onPressed: () {
-                          ref.read(posProvider.notifier).selectCustomer(null);
-                          controller.clear();
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: const Color(0xFFF1F5F9), // Slate 100
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 0,
-                ),
+              hint: 'Add Client +',
+              hintStyle: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontSize: 13,
               ),
+              prefixIcon: const Icon(
+                LucideIcons.user,
+                size: 16,
+                color: Colors.grey,
+              ),
+              suffixIcon: posState.selectedCustomer != null
+                  ? IconButton(
+                      icon: const Icon(LucideIcons.x, size: 14),
+                      onPressed: () {
+                        ref.read(posProvider.notifier).selectCustomer(null);
+                        controller.clear();
+                      },
+                    )
+                  : null,
+              fillColor: const Color(0xFFF1F5F9), // Slate 100
+              borderless: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              onSubmitted: (_) => onFieldSubmitted(),
             );
           },
         );
@@ -2379,31 +2368,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 flex: 2,
                 child: SizedBox(
                   height: 56,
-                  child: OutlinedButton(
+                  child: AppButton.secondary(
+                    label: 'Payment',
+                    icon: LucideIcons.creditCard,
                     onPressed: posState.cart.isEmpty
                         ? null
                         : () => _showPaymentSheet(posState),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF64748B),
-                      side: const BorderSide(color: Color(0xFFE2E8F0)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(LucideIcons.creditCard, size: 20),
-                        SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            'Payment',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                    fullWidth: true,
                   ),
                 ),
               ),
@@ -2412,7 +2383,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 flex: 3,
                 child: SizedBox(
                   height: 56,
-                  child: ElevatedButton(
+                  child: AppButton.primary(
+                    label: 'Checkout',
                     onPressed: posState.cart.isEmpty
                         ? null
                         : () async {
@@ -2436,27 +2408,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                               ),
                             );
                           },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4F46E5),
-                      foregroundColor: Colors.white,
-                      elevation: 2,
-                      shadowColor: const Color(
-                        0xFF4F46E5,
-                      ).withValues(alpha: 0.4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: posState.isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Checkout',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                    loading: posState.isLoading,
+                    fullWidth: true,
                   ),
                 ),
               ),
@@ -2666,202 +2619,93 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 
   Future<ProductVariant?> _showVariantSelectorSheet(Product product) {
-    // Keep mostly same logic but update styling
-    // final rawImageUrl = product.mainImageUrl;
-    // final imageUrl = rawImageUrl == null
-    //     ? null
-    //     : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
-
-    return showModalBottomSheet<ProductVariant>(
+    return showDialog<ProductVariant>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (context) {
-        final options = product.options;
         final variants = product.variants.where((v) => v.isActive).toList();
 
-        final selectedByOptionId = <String, String?>{
-          for (final o in options) o.id: null,
-        };
+        int availableStock(ProductVariant variant) {
+          if (!variant.trackInventory) return 999999;
+          final available =
+              variant.stock - variant.reserved - variant.safetyStock;
+          return available < 0 ? 0 : available;
+        }
 
-        return StatefulBuilder(
-          builder: (context, setState) {
-            ProductVariant? matchVariant() {
-              if (options.isEmpty) return null;
-              final allSelected = options.every(
-                (o) => selectedByOptionId[o.id] != null,
-              );
-              if (!allSelected) return null;
-
-              for (final variant in variants) {
-                final ok = options.every((o) {
-                  final wantedValueId = selectedByOptionId[o.id]!;
-                  return variant.optionValues.any(
-                    (ov) =>
-                        ov.optionId == o.id &&
-                        ov.optionValueId == wantedValueId,
-                  );
-                });
-                if (ok) return variant;
-              }
-              return null;
-            }
-
-            int availableStock(ProductVariant variant) {
-              if (!variant.trackInventory) return 999999;
-              final available =
-                  variant.stock - variant.reserved - variant.safetyStock;
-              return available < 0 ? 0 : available;
-            }
-
-            final currentVariant = matchVariant();
-            final canAdd =
-                currentVariant != null &&
-                (!currentVariant.trackInventory ||
-                    availableStock(currentVariant) > 0);
-
-            return SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 24,
-                  right: 24,
-                  top: 24,
-                  bottom: 24 + MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return Dialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            width: 480,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            product.title,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0F172A),
-                            ),
-                          ),
+                    Expanded(
+                      child: Text(
+                        product.title,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
                         ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(LucideIcons.x),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    ...options.map((option) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            option.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Color(0xFF64748B),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: option.values.map((value) {
-                              final isSelected =
-                                  selectedByOptionId[option.id] == value.id;
-                              return ChoiceChip(
-                                label: Text(value.label),
-                                selected: isSelected,
-                                selectedColor: const Color(0xFF0F172A),
-                                backgroundColor: Colors.white,
-                                labelStyle: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : const Color(0xFF0F172A),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? const Color(0xFF0F172A)
-                                        : const Color(0xFFE2E8F0),
-                                  ),
-                                ),
-                                onSelected: (selected) {
-                                  setState(() {
-                                    selectedByOptionId[option.id] = selected
-                                        ? value.id
-                                        : null;
-                                  });
-                                },
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      );
-                    }),
-                    if (currentVariant != null) ...[
-                      const Divider(),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                NumberFormat.simpleCurrency().format(
-                                  currentVariant.price,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0D9488),
-                                ),
-                              ),
-                              if (currentVariant.trackInventory)
-                                Text(
-                                  '${availableStock(currentVariant)} available',
-                                  style: TextStyle(
-                                    color: availableStock(currentVariant) > 0
-                                        ? Colors.green
-                                        : Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          ElevatedButton(
-                            onPressed: canAdd
-                                ? () => Navigator.pop(context, currentVariant)
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0F172A),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text('Add to Cart'),
-                          ),
-                        ],
                       ),
-                    ],
+                    ),
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFF3B82F6)),
+                        ),
+                        child: const Icon(
+                          LucideIcons.x,
+                          size: 16,
+                          color: Color(0xFF3B82F6),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            );
-          },
+                const SizedBox(height: 24),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: variants.map((variant) {
+                        final available = availableStock(variant);
+                        final bool inStock =
+                            !variant.trackInventory || available > 0;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _VariantListItem(
+                            variant: variant,
+                            available: available,
+                            inStock: inStock,
+                            onTap: inStock
+                                ? () => Navigator.pop(context, variant)
+                                : null,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -3125,6 +2969,101 @@ class _PaymentMethodButton extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VariantListItem extends StatefulWidget {
+  final ProductVariant variant;
+  final int available;
+  final bool inStock;
+  final VoidCallback? onTap;
+
+  const _VariantListItem({
+    required this.variant,
+    required this.available,
+    required this.inStock,
+    this.onTap,
+  });
+
+  @override
+  State<_VariantListItem> createState() => _VariantListItemState();
+}
+
+class _VariantListItemState extends State<_VariantListItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = widget.variant.title;
+    final price = NumberFormat.simpleCurrency().format(widget.variant.price);
+    final borderColor = _isHovered && widget.inStock
+        ? const Color(0xFF0D9488)
+        : const Color(0xFFE2E8F0);
+    final bgColor = _isHovered && widget.inStock
+        ? const Color(0xFFF0FDFA)
+        : Colors.white;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: widget.inStock
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: widget.inStock ? bgColor : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor, width: 1),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: widget.inStock
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFF94A3B8),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.variant.trackInventory
+                          ? '${widget.available} en stock'
+                          : 'En stock',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                price,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: widget.inStock
+                      ? const Color(0xFF0D9488)
+                      : const Color(0xFF94A3B8),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

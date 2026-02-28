@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/workspace_provider.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/dialogs/app_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -12,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
+    final workspace = ref.watch(workspaceProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -140,6 +144,60 @@ class SettingsScreen extends ConsumerWidget {
             ),
             child: Column(
               children: [
+                ListTile(
+                  title: const Text(
+                    'Workspace',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: Text(workspace.apiBaseUrl),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDBEAFE), // Blue 50
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      LucideIcons.link,
+                      color: Colors.blue,
+                      size: 20,
+                    ),
+                  ),
+                  trailing: const Icon(LucideIcons.chevronRight, size: 20),
+                  onTap: () async {
+                    final controller = TextEditingController(
+                      text: workspace.apiBaseUrl,
+                    );
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AppDialog(
+                        title: 'Workspace URL',
+                        description:
+                            'Change the API base URL used by this admin app.',
+                        content: FormInput(
+                          label: 'Workspace URL',
+                          controller: controller,
+                          hint: 'https://your-tenant.platform.com',
+                        ),
+                        secondaryLabel: 'Cancel',
+                        onSecondary: () => Navigator.of(ctx).pop(false),
+                        primaryLabel: 'Save',
+                        onPrimary: () => Navigator.of(ctx).pop(true),
+                      ),
+                    );
+                    if (ok != true) return;
+                    try {
+                      await ref
+                          .read(workspaceProvider.notifier)
+                          .setWorkspaceUrl(controller.text);
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  },
+                ),
+                const Divider(height: 1),
                 ListTile(
                   title: const Text(
                     'Currency',

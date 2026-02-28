@@ -6,6 +6,7 @@ class Product {
   final String? description;
   final double price;
   final int stock;
+  final int lowStockThreshold;
   final bool isActive;
   final List<String> images;
   final List<ProductImage> productImages;
@@ -22,6 +23,7 @@ class Product {
     this.description,
     required this.price,
     required this.stock,
+    this.lowStockThreshold = 5,
     required this.isActive,
     this.images = const [],
     this.productImages = const [],
@@ -52,6 +54,9 @@ class Product {
       description: json['description'],
       price: _parseCheckDouble(json['price']),
       stock: _parseCheckInt(json['stock']),
+      lowStockThreshold: _parseCheckInt(json['lowStockThreshold']) > 0
+          ? _parseCheckInt(json['lowStockThreshold'])
+          : 5,
       isActive: json['isActive'] ?? false,
       images: (json['images'] as List?)?.map((e) => e as String).toList() ?? [],
       productImages:
@@ -83,6 +88,7 @@ class Product {
       'description': description,
       'price': price,
       'stock': stock,
+      'lowStockThreshold': lowStockThreshold,
       'isActive': isActive,
       'categoryId': categoryId,
       'images': images, // Simplified for creation

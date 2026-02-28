@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../providers/suppliers_provider.dart';
 import '../models/supplier.dart';
 import '../widgets/form/admin_form_shell.dart';
 import '../widgets/form/form_input.dart';
+import '../widgets/buttons/app_button.dart';
 
 class SupplierFormScreen extends ConsumerStatefulWidget {
   final String? supplierId;
@@ -110,12 +112,14 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
     }
 
     return AdminFormShell(
-      title: widget.supplierId != null ? 'Edit Supplier' : 'Create Supplier',
+      title: widget.supplierId != null
+          ? 'admin.pages.suppliers.edit.title'.tr()
+          : 'admin.pages.suppliers.create.title'.tr(),
       subtitle: widget.supplierId != null
-          ? 'Update supplier information'
-          : 'Add a new supplier to your list',
+          ? 'admin.pages.suppliers.edit.subtitle'.tr()
+          : 'admin.pages.suppliers.create.subtitle'.tr(),
       backPath: '/suppliers',
-      backLabel: 'Suppliers',
+      backLabel: 'admin.pages.suppliers.index.title'.tr(),
       error: _error,
       child: Form(
         key: _formKey,
@@ -137,18 +141,23 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                               Expanded(
                                 child: FormInput(
                                   controller: _nameController,
-                                  label: 'Supplier Name',
-                                  hint: 'Enter supplier name',
+                                  label: 'admin.forms.supplier.name.label'.tr(),
+                                  hint: 'admin.forms.supplier.name.placeholder'
+                                      .tr(),
                                   validator: (v) =>
-                                      v!.isEmpty ? 'Name is required' : null,
+                                      v!.isEmpty
+                                          ? 'admin.forms.supplier.name.required'
+                                                .tr()
+                                          : null,
                                 ),
                               ),
                               const SizedBox(width: 24),
                               Expanded(
                                 child: FormInput(
                                   controller: _phoneController,
-                                  label: 'Phone',
-                                  hint: 'Enter phone number',
+                                  label: 'admin.forms.supplier.phone.label'.tr(),
+                                  hint: 'admin.forms.supplier.phone.placeholder'
+                                      .tr(),
                                   keyboardType: TextInputType.phone,
                                 ),
                               ),
@@ -157,16 +166,18 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                         else ...[
                           FormInput(
                             controller: _nameController,
-                            label: 'Supplier Name',
-                            hint: 'Enter supplier name',
+                            label: 'admin.forms.supplier.name.label'.tr(),
+                            hint: 'admin.forms.supplier.name.placeholder'.tr(),
                             validator: (v) =>
-                                v!.isEmpty ? 'Name is required' : null,
+                                v!.isEmpty
+                                    ? 'admin.forms.supplier.name.required'.tr()
+                                    : null,
                           ),
                           const SizedBox(height: 24),
                           FormInput(
                             controller: _phoneController,
-                            label: 'Phone',
-                            hint: 'Enter phone number',
+                            label: 'admin.forms.supplier.phone.label'.tr(),
+                            hint: 'admin.forms.supplier.phone.placeholder'.tr(),
                             keyboardType: TextInputType.phone,
                           ),
                         ],
@@ -178,8 +189,9 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                               Expanded(
                                 child: FormInput(
                                   controller: _emailController,
-                                  label: 'Email',
-                                  hint: 'Enter email address',
+                                  label: 'admin.forms.supplier.email.label'.tr(),
+                                  hint: 'admin.forms.supplier.email.placeholder'
+                                      .tr(),
                                   keyboardType: TextInputType.emailAddress,
                                 ),
                               ),
@@ -187,8 +199,11 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                               Expanded(
                                 child: FormInput(
                                   controller: _addressController,
-                                  label: 'Address',
-                                  hint: 'Enter full address',
+                                  label: 'admin.forms.supplier.address.label'
+                                      .tr(),
+                                  hint:
+                                      'admin.forms.supplier.address.placeholder'
+                                          .tr(),
                                 ),
                               ),
                             ],
@@ -196,22 +211,23 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                         else ...[
                           FormInput(
                             controller: _emailController,
-                            label: 'Email',
-                            hint: 'Enter email address',
+                            label: 'admin.forms.supplier.email.label'.tr(),
+                            hint: 'admin.forms.supplier.email.placeholder'.tr(),
                             keyboardType: TextInputType.emailAddress,
                           ),
                           const SizedBox(height: 24),
                           FormInput(
                             controller: _addressController,
-                            label: 'Address',
-                            hint: 'Enter full address',
+                            label: 'admin.forms.supplier.address.label'.tr(),
+                            hint:
+                                'admin.forms.supplier.address.placeholder'.tr(),
                           ),
                         ],
                         const SizedBox(height: 24),
                         FormInput(
                           controller: _notesController,
-                          label: 'Notes',
-                          hint: 'Additional notes about the supplier...',
+                          label: 'admin.forms.supplier.notes.label'.tr(),
+                          hint: 'admin.forms.supplier.notes.placeholder'.tr(),
                           maxLines: 3,
                         ),
                       ],
@@ -228,54 +244,17 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  OutlinedButton(
+                  AppButton.secondary(
+                    label: 'admin.common.cancel'.tr(),
                     onPressed: () => context.go('/suppliers'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF374151), // Gray-700
-                      side: const BorderSide(
-                        color: Color(0xFFD1D5DB),
-                      ), // Gray-300
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _saveSupplier,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D9488), // Teal-600
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            widget.supplierId != null
-                                ? 'Update Supplier'
-                                : 'Create Supplier',
-                          ),
+                  AppButton.primary(
+                    label: widget.supplierId != null
+                        ? 'admin.common.update'.tr()
+                        : 'admin.pages.suppliers.create.submit'.tr(),
+                    onPressed: _saveSupplier,
+                    loading: _isLoading,
                   ),
                 ],
               ),

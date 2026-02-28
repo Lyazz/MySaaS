@@ -1,10 +1,13 @@
 import 'dart:ui';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sidebar_provider.dart';
+import 'buttons/app_button.dart';
+import 'language_switcher_button.dart';
 import 'responsive_layout.dart';
 import 'sidebar.dart';
 
@@ -44,6 +47,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           icon: const Icon(LucideIcons.menu),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
+        actions: const [LanguageSwitcherButton(compact: true)],
       ),
       drawer: const Sidebar(),
       body: widget.child,
@@ -103,7 +107,17 @@ class _AppShellState extends ConsumerState<AppShell> {
               ),
               Row(
                 children: [
-                  _buildHeaderAction(LucideIcons.externalLink, 'View Store'),
+                  _buildHeaderAction(
+                    LucideIcons.externalLink,
+                    'admin.actions.viewStore'.tr(),
+                  ),
+                  Container(
+                    height: 32,
+                    width: 1,
+                    color: Colors.grey[200],
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  const LanguageSwitcherButton(),
                   Container(
                     height: 32,
                     width: 1,
@@ -112,7 +126,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                   ),
                   _buildHeaderAction(
                     LucideIcons.logOut,
-                    'Logout',
+                    'admin.actions.logout'.tr(),
                     color: Colors.red,
                     onPressed: () {
                       ref.read(authProvider.notifier).logout();
@@ -134,46 +148,86 @@ class _AppShellState extends ConsumerState<AppShell> {
     Color? color,
     VoidCallback? onPressed,
   }) {
-    return TextButton.icon(
-      onPressed: onPressed ?? () {},
-      icon: Icon(icon, size: 16, color: color ?? Colors.grey[600]),
-      label: Text(
-        label,
-        style: TextStyle(
-          color: color ?? Colors.grey[600],
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      style: TextButton.styleFrom(
-        backgroundColor: (color ?? Colors.grey[100])!.withValues(alpha: 0.1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
+    final resolvedOnPressed = onPressed ?? () {};
+    if (color == Colors.red) {
+      return AppButton.danger(
+        label: label,
+        icon: icon,
+        size: AppButtonSize.sm,
+        onPressed: resolvedOnPressed,
+      );
+    }
+
+    return AppButton.secondary(
+      label: label,
+      icon: icon,
+      size: AppButtonSize.sm,
+      onPressed: resolvedOnPressed,
     );
   }
 
   String _getPageTitle(BuildContext context) {
     final String location = GoRouterState.of(context).uri.toString();
-    if (location == '/') return 'Dashboard';
-    if (location == '/products') return 'Products';
-    if (location == '/products/create') return 'Add Product';
-    if (location.startsWith('/products/')) return 'Edit Product';
-    if (location == '/orders') return 'Orders';
-    if (location == '/inventory') return 'Inventory';
-    if (location == '/sales') return 'Sales';
-    if (location == '/purchases') return 'Purchases';
-    if (location == '/purchases/create') return 'Add Purchase';
-    if (location.startsWith('/purchases/')) return 'Purchase Details';
-    if (location == '/pos') return 'POS';
-    if (location == '/delivery') return 'Delivery Settings';
-    if (location == '/billing') return 'Billing & Subscription';
-    if (location == '/categories') return 'Categories';
-    if (location == '/suppliers') return 'Suppliers';
-    if (location == '/suppliers/create') return 'Add Supplier';
-    if (location.startsWith('/suppliers/')) return 'Supplier Details';
-    if (location == '/customers') return 'Customers';
-    if (location.startsWith('/customers/')) return 'Customer Details';
-    if (location == '/settings') return 'App Settings';
-    if (location == '/settings/printers') return 'Printer Settings';
-    return 'Admin Dashboard';
+    if (location == '/' || location.startsWith('/dashboard')) {
+      return 'admin.nav.dashboard'.tr();
+    }
+    if (location == '/products') return 'admin.nav.products'.tr();
+    if (location == '/products/create') {
+      return 'admin.pages.products.create.title'.tr();
+    }
+    if (location.startsWith('/products/')) {
+      return 'admin.pages.products.edit.title'.tr();
+    }
+    if (location == '/orders') return 'admin.nav.orders'.tr();
+    if (location.startsWith('/orders/')) {
+      return 'admin.pages.orders.detail.metaTitle'.tr();
+    }
+    if (location == '/inventory') return 'admin.nav.inventory'.tr();
+    if (location == '/sales') return 'admin.pages.sales.index.title'.tr();
+    if (location.startsWith('/sales/')) {
+      return 'admin.pages.sale.detail.metaTitle'.tr();
+    }
+    if (location == '/purchases') return 'admin.pages.purchases.index.title'.tr();
+    if (location == '/purchases/create') {
+      return 'admin.pages.purchases.create.title'.tr();
+    }
+    if (location.startsWith('/purchases/')) {
+      return 'admin.pages.purchases.detail.metaTitle'.tr();
+    }
+    if (location == '/pos') return 'admin.nav.pos'.tr();
+    if (location == '/delivery') return 'admin.nav.delivery'.tr();
+    if (location == '/billing') return 'admin.nav.billing'.tr();
+    if (location == '/cash') return 'admin.nav.cash'.tr();
+    if (location.startsWith('/cash/')) {
+      return 'admin.pages.cash.cashbox.titleFallback'.tr();
+    }
+    if (location == '/categories') return 'admin.pages.categories.index.title'.tr();
+    if (location == '/categories/create') {
+      return 'admin.pages.categories.create.title'.tr();
+    }
+    if (location.startsWith('/categories/')) {
+      return 'admin.pages.categories.edit.title'.tr();
+    }
+    if (location == '/suppliers') return 'admin.pages.suppliers.index.title'.tr();
+    if (location == '/suppliers/create') {
+      return 'admin.pages.suppliers.create.title'.tr();
+    }
+    if (location.startsWith('/suppliers/')) {
+      return 'admin.pages.suppliers.edit.title'.tr();
+    }
+    if (location == '/customers') return 'admin.pages.customers.index.title'.tr();
+    if (location == '/customers/create') {
+      return 'admin.pages.customers.create.title'.tr();
+    }
+    if (location.startsWith('/customers/edit/')) {
+      return 'admin.pages.customers.edit.title'.tr();
+    }
+    if (location.startsWith('/customers/')) {
+      return 'admin.pages.customers.detail.fallbackTitle'.tr();
+    }
+    if (location == '/users') return 'admin.nav.users'.tr();
+    if (location == '/settings') return 'admin.nav.settings'.tr();
+    if (location == '/settings/printers') return 'Printers';
+    return 'admin.nav.dashboard'.tr();
   }
 }

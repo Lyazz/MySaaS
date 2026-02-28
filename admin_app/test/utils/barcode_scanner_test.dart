@@ -12,10 +12,14 @@ void main() {
 
     final t0 = DateTime(2024, 1, 1);
     expect(buffer.addCharacter('1', t0), isFalse);
-    expect(buffer.addCharacter('2', t0.add(const Duration(milliseconds: 20))),
-        isTrue);
-    expect(buffer.addCharacter('3', t0.add(const Duration(milliseconds: 40))),
-        isTrue);
+    expect(
+      buffer.addCharacter('2', t0.add(const Duration(milliseconds: 20))),
+      isTrue,
+    );
+    expect(
+      buffer.addCharacter('3', t0.add(const Duration(milliseconds: 40))),
+      isTrue,
+    );
 
     expect(buffer.submit(t0.add(const Duration(milliseconds: 60))), '123');
     expect(buffer.hasPending, isFalse);
@@ -63,4 +67,3 @@ void main() {
     expect(buffer.submit(t0.add(const Duration(milliseconds: 60))), isNull);
   });
 }
-

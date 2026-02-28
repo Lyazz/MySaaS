@@ -8,7 +8,10 @@ import '../providers/categories_provider.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
 import '../widgets/responsive_paginated_table.dart';
-// import '../widgets/responsive_filter_bar.dart';
+import '../widgets/responsive_filter_bar.dart';
+import '../widgets/form/form_input.dart';
+import '../widgets/form/form_select.dart';
+import '../widgets/buttons/app_button.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({super.key});
@@ -128,93 +131,60 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
           ],
         ),
-        ElevatedButton.icon(
+        AppButton.primary(
+          label: 'Add Category',
+          icon: LucideIcons.plus,
           onPressed: () => context.go('/categories/create'),
-          icon: const Icon(LucideIcons.plus, size: 16),
-          label: const Text('Add Category'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0F172A), // Slate-900
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            elevation: 0,
-          ),
         ),
       ],
     );
   }
 
   Widget _buildFiltersCard() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+    return ResponsiveFilterBar(
+      searchField: FormInput(
+        label: 'Search',
+        controller: _searchController,
+        hint: 'Search categories...',
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        onChanged: (value) => _searchDebouncer.run(() => setState(() {})),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search categories...',
-                prefixIcon: const Icon(
-                  LucideIcons.search,
-                  size: 16,
-                  color: Color(0xFF9CA3AF), // Gray-400
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 0,
-                ),
-              ),
-              onChanged: (value) => _searchDebouncer.run(() => setState(() {})),
+      filters: [
+        SizedBox(
+          width: 180,
+          child: FormSelect<String>(
+            label: 'Sort',
+            value: _sortBy,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
             ),
+            items: const [
+              DropdownMenuItem(value: 'createdAt', child: Text('Newest')),
+              DropdownMenuItem(value: 'title', child: Text('Title')),
+              DropdownMenuItem(value: 'slug', child: Text('Slug')),
+              DropdownMenuItem(value: 'products', child: Text('Products')),
+            ],
+            onChanged: (value) {
+              if (value == null) return;
+              _setSort(value);
+            },
           ),
-          const SizedBox(width: 8),
-          Container(
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _sortBy,
-                icon: const Icon(
-                  LucideIcons.chevronDown,
-                  size: 14,
-                  color: Color(0xFF6B7280),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'createdAt', child: Text('Newest')),
-                  DropdownMenuItem(value: 'title', child: Text('Title')),
-                  DropdownMenuItem(value: 'slug', child: Text('Slug')),
-                  DropdownMenuItem(value: 'products', child: Text('Products')),
-                ],
-                onChanged: (value) {
-                  if (value != null) _setSort(value);
-                },
-                style: const TextStyle(
-                  color: Color(0xFF374151),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
+      onClearFilters: () {
+        setState(() {
+          _searchController.clear();
+          _sortBy = 'createdAt';
+          _sortOrder = 'desc';
+        });
+        ref
+            .read(categoriesProvider.notifier)
+            .fetchCategories(sortBy: _sortBy, sortOrder: _sortOrder);
+      },
     );
   }
 
@@ -266,20 +236,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               style: TextStyle(color: Color(0xFF64748B)), // Slate-500
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.push('/categories/create');
-              },
-              icon: const Icon(LucideIcons.plus, size: 16),
-              label: const Text('Add Category'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF14B8A6),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+            AppButton.primary(
+              label: 'Add Category',
+              icon: LucideIcons.plus,
+              onPressed: () => context.push('/categories/create'),
             ),
           ],
         ),
@@ -476,38 +436,19 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton.icon(
+                    AppButton.secondary(
+                      label: 'Edit',
+                      icon: LucideIcons.pencil,
+                      size: AppButtonSize.sm,
                       onPressed: () =>
                           context.push('/categories/${category.id}'),
-                      icon: const Icon(LucideIcons.pencil, size: 14),
-                      label: const Text('Edit'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF0D9488), // Teal-600
-                        textStyle: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                      ),
                     ),
-                    TextButton.icon(
+                    const SizedBox(width: 8),
+                    AppButton.danger(
+                      label: 'Delete',
+                      icon: LucideIcons.trash2,
+                      size: AppButtonSize.sm,
                       onPressed: () => _confirmDelete(category),
-                      icon: const Icon(LucideIcons.trash2, size: 14),
-                      label: const Text('Delete'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFFDC2626), // Red-600
-                        textStyle: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -597,24 +538,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  AppButton.secondary(
+                    label: 'Cancel',
                     onPressed: () {
                       setState(() {
                         _showDeleteModal = false;
                         _categoryToDelete = null;
                       });
                     },
-                    child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: _handleDelete,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFDC2626),
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('Delete'),
-                  ),
+                  AppButton.danger(label: 'Delete', onPressed: _handleDelete),
                 ],
               ),
             ],

@@ -123,21 +123,6 @@ watch([() => props.product, selectedOptions], ([product]) => {
                 />
             </div>
             
-            <!-- Accordions/Extras Placeholder -->
-            <div class="space-y-4 border-t border-stone-200 pt-6">
-                 <div class="group cursor-pointer flex justify-between items-center py-2">
-                    <span class="font-wellness text-stone-900 text-lg">{{ t('storefront.templates.wellness.product.sections.keyBenefits') }}</span>
-                    <Icon name="lucide:plus" class="w-4 h-4 text-stone-400 group-hover:text-brand-700" />
-                 </div>
-                 <div class="group cursor-pointer flex justify-between items-center py-2 border-t border-stone-200">
-                    <span class="font-wellness text-stone-900 text-lg">{{ t('storefront.templates.wellness.product.sections.ingredients') }}</span>
-                    <Icon name="lucide:plus" class="w-4 h-4 text-stone-400 group-hover:text-brand-700" />
-                 </div>
-                 <div class="group cursor-pointer flex justify-between items-center py-2 border-t border-stone-200">
-                    <span class="font-wellness text-stone-900 text-lg">{{ t('storefront.templates.wellness.product.sections.howToUse') }}</span>
-                    <Icon name="lucide:plus" class="w-4 h-4 text-stone-400 group-hover:text-brand-700" />
-                 </div>
-            </div>
         </div>
 
         <!-- Full Description (Rich Text) -->
@@ -145,12 +130,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
             class="mt-20 col-span-12 max-w-4xl mx-auto animate-fade-in-up"
             style="animation-delay: 0.2s"
         >
-            <div class="text-center mb-10">
-                <h2 class="font-wellness text-3xl md:text-4xl text-stone-900 mb-4">
-                {{ t('storefront.templates.wellness.product.aboutTitle') }}
-                </h2>
-                <div class="w-16 h-px bg-brand-600 mx-auto opacity-50"></div>
-            </div>
+       
 
             <div 
             v-if="product?.description" 

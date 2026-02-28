@@ -7,12 +7,20 @@ export class CustomersController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { search } = req.query as { search?: string }
+            const { search, page: pageStr, limit: limitStr } = req.query as { search?: string; page?: string; limit?: string }
 
-            const customers = await service.list(tenant.id, {
-                search: typeof search === 'string' ? search : undefined
-            })
-            res.json(customers)
+            const resolvedSearch = typeof search === 'string' ? search : undefined
+            const hasPagination = pageStr !== undefined || limitStr !== undefined
+
+            if (hasPagination) {
+                const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1)
+                const limit = Math.min(100, Math.max(1, parseInt(limitStr ?? '25', 10) || 25))
+                const result = await service.listPaginated(tenant.id, { search: resolvedSearch }, { page, limit })
+                return res.json(result)
+            }
+
+            const customers = await service.list(tenant.id, { search: resolvedSearch })
+            return res.json(customers)
         } catch (error: any) {
             if (error instanceof CustomerValidationError) {
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })

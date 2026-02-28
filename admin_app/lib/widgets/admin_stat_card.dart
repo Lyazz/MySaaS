@@ -3,24 +3,28 @@ import 'package:flutter/material.dart';
 class AdminStatCard extends StatelessWidget {
   final String label;
   final String value;
+  final String? hint;
   final IconData icon;
   final String tone; // 'teal', 'blue', 'orange', 'red'
   final bool isLoading;
+  final VoidCallback? onTap;
 
   const AdminStatCard({
     super.key,
     required this.label,
     required this.value,
     required this.icon,
+    this.hint,
     this.tone = 'teal',
     this.isLoading = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = _getToneColors(tone);
 
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -40,39 +44,65 @@ class AdminStatCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF475569), // slate-600
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (isLoading)
-                Container(
-                  width: 80,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9), // slate-100
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                )
-              else
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  value,
+                  label,
                   style: const TextStyle(
-                    fontSize: 30, // text-3xl
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A), // slate-900
-                    letterSpacing: -0.5,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF475569), // slate-600
                   ),
                 ),
-            ],
+                const SizedBox(height: 8),
+                if (isLoading)
+                  Container(
+                    width: 80,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9), // slate-100
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  )
+                else
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 30, // text-3xl
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F172A), // slate-900
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                if ((hint ?? '').trim().isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  if (isLoading)
+                    Container(
+                      width: 140,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    )
+                  else
+                    Text(
+                      hint!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B), // slate-500
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ],
+            ),
           ),
+          const SizedBox(width: 12),
           Container(
             width: 44, // h-11
             height: 44,
@@ -85,6 +115,13 @@ class AdminStatCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (onTap == null) return card;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: card,
     );
   }
 
