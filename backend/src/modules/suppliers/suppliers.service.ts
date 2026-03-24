@@ -143,6 +143,14 @@ export class SuppliersService {
         const existing = await this.getById(tenantId, supplierId)
         if (!existing) throw new SupplierValidationError(404, 'Supplier not found')
 
+        // Block deletion if supplier has linked purchase orders
+        const purchaseOrderCount = await prisma.purchaseOrder.count({
+            where: { tenantId, supplierId }
+        })
+        if (purchaseOrderCount > 0) {
+            throw new SupplierValidationError(409, 'HAS_TRANSACTIONS')
+        }
+
         await prisma.supplier.deleteMany({ where: { tenantId, id: supplierId } })
         return { success: true }
     }

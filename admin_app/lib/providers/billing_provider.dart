@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/billing_models.dart';
+import '../repositories/billing_repository.dart';
+import '../services/api_service.dart';
+import 'auth_provider.dart';
 
 class BillingState {
   final Subscription? currentSubscription;
@@ -26,14 +29,14 @@ class BillingState {
 }
 
 class BillingNotifier extends Notifier<BillingState> {
+  late BillingRepository _repo;
+
   @override
   BillingState build() {
+    final api = ref.watch(apiProvider);
+    _repo = BillingRepository(api);
+    Future.microtask(() => loadSubscription());
     return BillingState(
-      currentSubscription: Subscription(
-        planCode: 'pro',
-        status: 'ACTIVE',
-        nextBillingDate: DateTime.now().add(const Duration(days: 15)),
-      ),
       availablePlans: [
         SubscriptionPlan(
           code: 'basic',
@@ -57,6 +60,18 @@ class BillingNotifier extends Notifier<BillingState> {
     );
   }
 
+  Future<void> loadSubscription({bool forceRefresh = false}) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final sub = await _repo.getSubscription(forceRefresh: forceRefresh);
+      state = state.copyWith(currentSubscription: sub, isLoading: false);
+      // If a payment/upgrade happened outside the app, refresh tenant flags (e.g. isOffline).
+      ref.read(authProvider.notifier).refreshMe();
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   Future<void> upgradePlan(String planCode) async {
     state = state.copyWith(isLoading: true);
     await Future.delayed(const Duration(seconds: 1));
@@ -66,6 +81,7 @@ class BillingNotifier extends Notifier<BillingState> {
       nextBillingDate: DateTime.now().add(const Duration(days: 30)),
     );
     state = state.copyWith(currentSubscription: newSub, isLoading: false);
+    ref.read(authProvider.notifier).refreshMe();
   }
 }
 

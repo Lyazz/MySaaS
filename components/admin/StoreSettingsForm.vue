@@ -1,12 +1,34 @@
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-slate-200">
-    <div class="p-6 border-b border-slate-200">
-      <h2 class="text-xl font-bold text-slate-800">
-        {{ t('admin.storeSettingsForm.title') }}
-      </h2>
-      <p class="text-slate-600 mt-1">
-        {{ t('admin.storeSettingsForm.subtitle') }}
-      </p>
+    <div class="p-6 border-b border-slate-200 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-bold text-slate-800">
+          {{ t('admin.storeSettingsForm.title') }}
+        </h2>
+        <p class="text-slate-600 mt-1">
+          {{ t('admin.storeSettingsForm.subtitle') }}
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          :disabled="loading || saving"
+          @click="reset"
+        >
+          {{ t('admin.common.reset') }}
+        </button>
+        <button
+          type="button"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
+          :disabled="loading || saving"
+          @click="save"
+        >
+          <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+          {{ t('admin.common.saveChanges') }}
+        </button>
+      </div>
     </div>
 
     <form
@@ -300,7 +322,7 @@
 
         <button
           type="button"
-          class="px-4 py-2 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
           :disabled="loading || saving"
           @click="reset"
         >
@@ -308,14 +330,11 @@
         </button>
         <button
           type="submit"
-          class="inline-flex justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
           :disabled="loading || saving"
         >
-          <Icon
-            v-if="saving"
-            name="lucide:loader-2"
-            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-          />
+          <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
         </button>
       </div>

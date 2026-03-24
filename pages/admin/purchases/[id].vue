@@ -23,10 +23,22 @@
           <span :class="getStatusClass(order?.status || '')">
             {{ order?.status }}
           </span>
+          <span :class="getPaymentStatusClass(order?.paymentStatus || '')">
+            {{ order?.paymentStatus || 'UNPAID' }}
+          </span>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
+        <button
+          v-if="order?.supplier && order?.paymentStatus !== 'PAID'"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm font-medium text-teal-700 shadow-sm hover:bg-teal-100 transition-colors"
+          @click="openPaymentModal"
+        >
+          <Icon name="lucide:banknote" class="h-4 w-4" />
+          {{ t('admin.common.recordPayment', 'Record Payment') }}
+        </button>
         <button
           type="button"
           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
@@ -126,7 +138,19 @@
           </div>
           <div class="flex justify-between text-sm pt-2 border-t border-slate-100">
             <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.estimatedTotal') }}:</span>
-            <span class="font-medium text-slate-900">{{ formatCurrency(totalCost) }}</span>
+            <span class="font-medium text-slate-900">{{ formatCurrency(Number(order?.totalAmount || totalCost)) }}</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.paidAmount', 'Paid Amount') }}:</span>
+            <span class="font-medium text-emerald-600">{{ formatCurrency(Number(order?.paidAmount || 0)) }}</span>
+          </div>
+          <div class="flex justify-between text-sm pt-2 border-t border-slate-100">
+            <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.balance', 'Balance') }}:</span>
+            <span class="font-medium text-slate-900">{{ formatCurrency(Number(order?.totalAmount || totalCost) - Number(order?.paidAmount || 0)) }}</span>
+          </div>
+          <div class="flex justify-between text-sm pt-2 border-t border-slate-100">
+            <span class="text-slate-600">{{ t('admin.pages.purchases.index.table.user') }}:</span>
+            <span class="font-medium text-slate-900">{{ order?.createdByEmail || 'System' }}</span>
           </div>
         </div>
       </div>
@@ -150,7 +174,18 @@
         <h3 class="font-medium text-slate-900">
           {{ t('admin.pages.purchases.detail.items.title') }}
         </h3>
-        <span class="text-sm text-slate-500">{{ t('admin.pages.purchases.detail.items.count', { count: order?.items?.length || 0 }) }}</span>
+        <div class="flex items-center gap-3">
+          <button
+            v-if="hasItemsToReceive"
+            type="button"
+            class="text-sm font-medium text-teal-600 hover:text-teal-700 bg-teal-50 px-2 py-1 rounded"
+            :disabled="receiving"
+            @click="receiveAll"
+          >
+            {{ t('admin.common.receiveAll', 'Receive All') }}
+          </button>
+          <span class="text-sm text-slate-500">{{ t('admin.pages.purchases.detail.items.count', { count: order?.items?.length || 0 }) }}</span>
+        </div>
       </div>
 
       <div
@@ -185,32 +220,53 @@
           {{ t('admin.pages.purchases.detail.addProducts') }}
         </button>
       </div>
+
       <div
         v-else
         class="overflow-x-auto"
       >
-        <table class="ui-table">
+        <div class="mb-4 flex flex-wrap gap-4 items-center px-6 pt-4 text-sm bg-slate-50 border-b border-slate-200" v-if="order?.items?.length > 0">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-500 font-medium">{{ t('admin.pages.purchases.detail.items.table.costMode.label') }}</span>
+            <select
+              v-model="costMode"
+              class="text-sm border-slate-300 rounded-md py-1 pl-2 pr-8 focus:ring-teal-500 focus:border-teal-500"
+            >
+              <option value="replace">{{ t('admin.pages.purchases.detail.items.table.costMode.replace') }}</option>
+              <option value="weighted">{{ t('admin.pages.purchases.detail.items.table.costMode.weighted') }}</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-slate-500 font-medium">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.label') }}</span>
+            <select
+              v-model="salePriceMode"
+              class="text-sm border-slate-300 rounded-md py-1 pl-2 pr-8 focus:ring-teal-500 focus:border-teal-500"
+            >
+              <option value="replace">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.replace') }}</option>
+              <option value="weighted">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.weighted') }}</option>
+            </select>
+          </div>
+        </div>
+
+        <table class="ui-table border-t-0">
           <thead class="ui-thead">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[20%]">
                 {{ t('admin.pages.purchases.detail.items.table.product') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">
-                {{ t('admin.pages.purchases.detail.items.table.ordered') }}
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
+                {{ t('admin.pages.purchases.detail.items.table.ordered') }} / {{ t('admin.pages.purchases.detail.items.table.received') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
                 {{ t('admin.pages.purchases.detail.items.table.unitCost') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-36">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
                 {{ t('admin.pages.purchases.detail.items.table.salePrice') }}
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-32">
-                {{ t('admin.pages.purchases.detail.items.table.received') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-48">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[20%]">
                 {{ t('admin.pages.purchases.detail.items.table.receiveNow') }}
               </th>
-              <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
                 {{ t('admin.pages.purchases.detail.items.table.total') }}
               </th>
             </tr>
@@ -219,186 +275,160 @@
             <tr
               v-for="item in order.items"
               :key="item.id"
-              class="ui-tr"
+              class="ui-tr group"
             >
-              <td class="px-6 py-4">
+              <!-- Product Info -->
+              <td class="px-4 py-3 align-top">
                 <div>
-                  <div class="font-medium text-slate-900">
+                  <div class="font-medium text-slate-900 truncate max-w-[200px]" :title="item.variant?.product?.title || t('admin.pages.purchases.detail.items.unknownProduct')">
                     {{ item.variant?.product?.title || t('admin.pages.purchases.detail.items.unknownProduct') }}
                   </div>
-                  <div class="text-sm text-slate-500">
+                  <div class="text-xs text-slate-500">
                     {{ getVariantLabel(item.variant) }}
                   </div>
-                  <div class="text-xs text-slate-400 mt-0.5">
-                    {{ t('admin.pages.purchases.detail.items.sku') }}: {{ item.variant?.sku || '—' }}
+                  <div v-if="item.variant?.sku" class="text-xs text-slate-400 mt-0.5 font-mono">
+                    {{ item.variant.sku }}
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4">
-                <div class="flex items-center">
-                  <input
-                    v-if="item.quantityReceived === 0"
-                    v-model.number="editingItems[item.id].quantityOrdered"
-                    type="number"
-                    min="1"
-                    class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    @change="updateItem(item)"
-                  >
-                  <span
-                    v-else
-                    class="text-sm font-medium text-slate-900"
-                  >{{ item.quantityOrdered }}</span>
+              
+              <!-- Qty: Ordered / Received -->
+              <td class="px-4 py-3 align-top">
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex items-center gap-2">
+                    <input
+                      v-if="item.quantityReceived === 0"
+                      v-model.number="editingItems[item.id].quantityOrdered"
+                      type="number"
+                      min="1"
+                      class="w-16 rounded-md border border-slate-300 px-2 py-1 text-sm text-center shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                      @change="updateItem(item)"
+                    >
+                    <span v-else class="text-sm font-medium text-slate-900 w-16 text-center inline-block">
+                      {{ item.quantityOrdered }}
+                    </span>
+                    <span class="text-slate-400">/</span>
+                    <span
+                      class="text-sm font-medium w-16 text-center inline-block"
+                      :class="item.quantityReceived >= item.quantityOrdered ? 'text-green-600' : 'text-slate-600'"
+                    >
+                      {{ item.quantityReceived }}
+                    </span>
+                  </div>
+                  
+                  <div class="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden" v-if="item.quantityOrdered > 0">
+                    <div
+                      class="bg-teal-500 h-1 transition-all duration-300"
+                      :style="`width: ${Math.min((item.quantityReceived / item.quantityOrdered) * 100, 100)}%`"
+                    />
+                  </div>
                 </div>
               </td>
-              <td class="px-6 py-4">
-                <div class="text-xs text-slate-500 mb-1">
-                  {{ t('admin.pages.purchases.detail.items.table.currentCost') }}:
-                  <span class="font-medium text-slate-700">{{ formatCurrency(Number(item.variant?.cost || 0)) }}</span>
-                </div>
-                <div class="flex items-center">
+              
+              <!-- Unit Cost -->
+              <td class="px-4 py-3 align-top">
+                <div class="flex flex-col gap-1">
                   <input
                     v-if="item.quantityReceived === 0"
                     v-model="editingItems[item.id].unitCost"
                     type="text"
-                    class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                    class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm text-right shadow-sm focus:border-teal-500 focus:ring-teal-500"
                     placeholder="0.00"
                     @change="updateItem(item)"
                   >
-                  <span
-                    v-else
-                    class="text-sm text-slate-900"
-                  >{{ item.unitCost ? formatCurrency(item.unitCost) : '—' }}</span>
-                </div>
-                <div class="text-xs text-slate-500 mt-1">
-                  {{ t('admin.pages.purchases.detail.items.table.newCostPreview') }}:
-                  <span class="font-medium text-slate-700">{{ formatMoneyOrDash(getCostPreview(item)) }}</span>
+                  <span v-else class="text-sm text-slate-900 block pt-1">
+                    {{ item.unitCost ? formatCurrency(item.unitCost) : '—' }}
+                  </span>
+                  
+                  <div class="flex flex-col gap-1 mt-0.5">
+                    <div class="text-[11px] text-slate-400">
+                      Actuel: {{ formatCurrency(Number(item.variant?.cost || 0)) }}
+                    </div>
+                    <!-- New Cost Preview Badge (only if changed and receiving) -->
+                    <div 
+                      v-if="item.quantityReceived < item.quantityOrdered && getCostPreview(item) != item.variant?.cost && getCostPreview(item) > 0" 
+                      class="inline-flex max-w-fit items-center bg-blue-50 text-blue-700 text-[10px] font-medium px-1.5 py-0.5 rounded border border-blue-100 whitespace-nowrap"
+                      title="Nouveau prix moyen"
+                    >
+                      {{ formatMoneyOrDash(getCostPreview(item)) }} (Nouveau)
+                    </div>
+                  </div>
                 </div>
               </td>
-              <td class="px-6 py-4">
-                <div class="text-xs text-slate-500 mb-1">
-                  {{ t('admin.pages.purchases.detail.items.table.currentSalePrice') }}:
-                  <span class="font-medium text-slate-700">{{ formatCurrency(Number(item.variant?.price || 0)) }}</span>
-                </div>
-                <div class="flex items-center">
+              
+              <!-- Sale Price -->
+              <td class="px-4 py-3 align-top">
+                <div class="flex flex-col gap-1">
                   <input
                     v-if="item.quantityReceived === 0"
                     v-model="editingItems[item.id].salePrice"
                     type="text"
-                    class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                    class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm text-right shadow-sm focus:border-teal-500 focus:ring-teal-500"
                     placeholder="—"
                     @change="updateItem(item)"
                   >
-                  <span
-                    v-else
-                    class="text-sm text-slate-900"
-                  >{{ item.salePrice ? formatCurrency(item.salePrice) : '—' }}</span>
+                  <span v-else class="text-sm text-slate-900 block pt-1">
+                    {{ item.salePrice ? formatCurrency(item.salePrice) : '—' }}
+                  </span>
+                  <div class="text-[11px] text-slate-400 mt-0.5">
+                    Actuel: {{ formatCurrency(Number(item.variant?.price || 0)) }}
+                  </div>
                 </div>
               </td>
-              <td class="px-6 py-4">
-                <div
-                  class="text-sm font-medium"
-                  :class="item.quantityReceived >= item.quantityOrdered ? 'text-green-600' : 'text-slate-900'"
-                >
-                  {{ item.quantityReceived }} / {{ item.quantityOrdered }}
-                </div>
-                <!-- Progress Bar -->
-                <div class="w-full bg-slate-200 rounded-full h-1.5 mt-2">
-                  <div
-                    class="bg-teal-600 h-1.5 rounded-full"
-                    :style="`width: ${Math.min((item.quantityReceived / item.quantityOrdered) * 100, 100)}%`"
-                  />
-                </div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
+              
+              <!-- Receive Actions -->
+              <td class="px-4 py-3 align-top">
+                <div class="flex items-start gap-1.5">
                   <input
                     v-model.number="receiveQtyByItem[item.id]"
                     type="number"
                     min="0"
                     :max="Math.max(0, item.quantityOrdered - item.quantityReceived)"
-                    class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :placeholder="t('admin.pages.purchases.detail.items.table.qtyPlaceholder')"
+                    class="w-16 rounded-md border border-slate-300 px-2 py-1 text-sm text-center shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                    placeholder="Qté"
                     :disabled="item.quantityReceived >= item.quantityOrdered"
                   >
-                  <button
-                    type="button"
-                    class="p-2 rounded-md bg-teal-50 text-teal-700 hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :title="t('admin.pages.purchases.detail.items.table.receiveStock')"
-                    :disabled="receiving || item.quantityReceived >= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id] <= 0"
-                    @click="receiveItem(item)"
-                  >
-                    <Icon
-                      name="lucide:check"
-                      class="w-4 h-4"
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    class="p-2 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :title="t('admin.pages.purchases.detail.items.table.receiveAndPay')"
-                    :disabled="receiving || item.quantityReceived >= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id] <= 0"
-                    @click="openReceivePay(item)"
-                  >
-                    <Icon
-                      name="lucide:credit-card"
-                      class="w-4 h-4"
-                    />
-                  </button>
-                </div>
-                <div class="mt-1">
-                  <div class="flex items-center gap-3">
-                    <select
-                      v-model="costMode"
-                      class="text-xs text-slate-500 border-none bg-transparent p-0 focus:ring-0 cursor-pointer hover:text-slate-700"
+                  
+                  <div class="flex flex-col gap-1 w-full max-w-[130px]">
+                    <button
+                      type="button"
+                      class="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-teal-50 text-teal-700 hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed border border-teal-100 text-xs font-medium transition-colors"
+                      :title="t('admin.common.receive')"
+                      :disabled="receiving || item.quantityReceived >= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id] <= 0"
+                      @click="receiveItem(item)"
                     >
-                      <option value="replace">
-                        {{ t('admin.pages.purchases.detail.items.table.costMode.replace') }}
-                      </option>
-                      <option value="weighted">
-                        {{ t('admin.pages.purchases.detail.items.table.costMode.weighted') }}
-                      </option>
-                    </select>
-                    <select
-                      v-model="salePriceMode"
-                      class="text-xs text-slate-500 border-none bg-transparent p-0 focus:ring-0 cursor-pointer hover:text-slate-700"
-                    >
-                      <option value="replace">
-                        {{ t('admin.pages.purchases.detail.items.table.salePriceMode.replace') }}
-                      </option>
-                      <option value="weighted">
-                        {{ t('admin.pages.purchases.detail.items.table.salePriceMode.weighted') }}
-                      </option>
-                    </select>
+                      <Icon name="lucide:package-check" class="w-3.5 h-3.5" />
+                      {{ t('admin.common.receive', 'Receive') }}
+                    </button>
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 text-right text-sm font-medium text-slate-900">
-                <div class="flex items-center justify-end gap-3">
-                  <span>{{ formatCurrency(Number(editingItems[item.id]?.unitCost || 0) * (editingItems[item.id]?.quantityOrdered || item.quantityOrdered)) }}</span>
+              
+              <!-- Total & Row Actions -->
+              <td class="px-4 py-3 align-top text-right">
+                <div class="flex flex-col items-end gap-2">
+                  <span class="text-sm font-semibold text-slate-800">
+                    {{ formatCurrency(Number(editingItems[item.id]?.unitCost || 0) * (editingItems[item.id]?.quantityOrdered || item.quantityOrdered)) }}
+                  </span>
+                  
                   <button
                     v-if="item.quantityReceived === 0"
-                    class="text-red-400 hover:text-red-600 transition-colors"
+                    class="text-slate-400 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 opacity-0 group-hover:opacity-100 focus:opacity-100"
                     :title="t('admin.pages.purchases.detail.items.table.removeItem')"
                     @click="removeItem(item)"
                   >
-                    <Icon
-                      name="lucide:trash"
-                      class="w-4 h-4"
-                    />
+                    <Icon name="lucide:trash-2" class="w-4 h-4" />
                   </button>
                 </div>
               </td>
             </tr>
           </tbody>
-          <tfoot class="bg-slate-50 font-semibold text-slate-900">
+          <tfoot class="bg-slate-50 font-semibold text-slate-900 border-t border-slate-200">
             <tr>
-              <td
-                colspan="6"
-                class="px-6 py-3 text-right"
-              >
+              <td colspan="5" class="px-4 py-4 text-right">
                 {{ t('admin.pages.purchases.detail.items.table.totalOrderValue') }}
               </td>
-              <td class="px-6 py-3 text-right">
+              <td class="px-4 py-4 text-right text-base text-teal-700">
                 {{ formatCurrency(totalCost) }}
               </td>
             </tr>
@@ -417,10 +447,10 @@
       @confirm="deleteOrder"
     />
 
-    <!-- Receive & Pay Modal -->
-    <div v-if="receivePayOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeReceivePay">
+    <!-- Payment Modal -->
+    <div v-if="paymentModalOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closePaymentModal">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="closeReceivePay" />
+        <div class="fixed inset-0 bg-black/50" @click="closePaymentModal" />
         <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
           <h3 class="text-lg font-semibold text-gray-900">
             {{ t('admin.pages.purchases.detail.paymentModal.title') }}
@@ -436,7 +466,7 @@
           <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
               <BaseSelect
-                v-model="receivePayForm.cashboxId"
+                v-model="paymentForm.cashboxId"
                 :label="t('admin.pages.purchases.detail.paymentModal.cashboxLabel')"
               >
                 <option value="">{{ t('admin.pages.purchases.detail.paymentModal.cashboxAuto') }}</option>
@@ -446,17 +476,17 @@
               </BaseSelect>
             </div>
 
-            <div>
+            <div class="sm:col-span-2">
               <BaseInput
-                v-model="receivePayForm.amount"
+                v-model="paymentForm.amount"
                 :label="t('admin.pages.purchases.detail.paymentModal.amountLabel')"
                 placeholder="0"
               />
             </div>
 
-            <div>
+            <div class="sm:col-span-2">
               <BaseSelect
-                v-model="receivePayForm.method"
+                v-model="paymentForm.method"
                 :label="t('admin.pages.purchases.detail.paymentModal.methodLabel')"
               >
                 <option value="CASH">{{ t('admin.pages.cash.methods.CASH') }}</option>
@@ -468,7 +498,7 @@
 
             <div class="sm:col-span-2">
               <BaseInput
-                v-model="receivePayForm.reference"
+                v-model="paymentForm.reference"
                 :label="t('admin.pages.purchases.detail.paymentModal.referenceLabel')"
                 :placeholder="t('admin.pages.purchases.detail.paymentModal.referencePlaceholder')"
               />
@@ -476,7 +506,7 @@
 
             <div class="sm:col-span-2">
               <BaseInput
-                v-model="receivePayForm.note"
+                v-model="paymentForm.note"
                 :label="t('admin.pages.purchases.detail.paymentModal.noteLabel')"
                 :placeholder="t('admin.pages.purchases.detail.paymentModal.notePlaceholder')"
               />
@@ -487,17 +517,17 @@
             <button
               type="button"
               class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              @click="closeReceivePay"
+              @click="closePaymentModal"
             >
               {{ t('admin.common.cancel') }}
             </button>
             <button
               type="button"
               class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50"
-              :disabled="receiving || !canSubmitReceivePay"
-              @click="submitReceivePay"
+              :disabled="savingPayment || !canSubmitPayment"
+              @click="submitPayment"
             >
-              {{ receiving ? t('admin.common.updating') : t('admin.pages.purchases.detail.paymentModal.confirm') }}
+              {{ savingPayment ? t('admin.common.updating') : t('admin.pages.purchases.detail.paymentModal.confirm') }}
             </button>
           </div>
         </div>
@@ -550,20 +580,24 @@ const errorMessage = ref<string | null>(null)
 const showVariantModal = ref(false)
 const showDeleteOrderModal = ref(false)
 const receiving = ref(false)
+const savingPayment = ref(false)
 const costMode = ref<'replace' | 'weighted'>('replace')
 const salePriceMode = ref<'replace' | 'weighted'>('replace')
-
 const receiveQtyByItem = reactive<Record<string, number>>({})
-const receivePayOpen = ref(false)
-const receivePayItemId = ref<string | null>(null)
 const cashboxes = ref<Array<{ id: string; name: string; openSession?: any | null }>>([])
 const cashboxesLoaded = ref(false)
-const receivePayForm = reactive({
+const paymentModalOpen = ref(false)
+const paymentForm = reactive({
   cashboxId: '',
   amount: '',
   method: 'CASH',
   reference: '',
   note: ''
+})
+
+const hasItemsToReceive = computed(() => {
+  if (!order.value?.items) return false
+  return order.value.items.some((i: any) => i.quantityReceived < i.quantityOrdered)
 })
 
 // Track editing state for items to debounce updates
@@ -662,6 +696,45 @@ const receiveItem = async (item: any) => {
   }
 }
 
+const receiveAll = async () => {
+  if (!order.value?.items) return
+  
+  const itemsToReceive = order.value.items
+    .filter((i: any) => i.quantityReceived < i.quantityOrdered)
+    .map((item: any) => {
+      const edit = editingItems[item.id]
+      return {
+        itemId: item.id,
+        quantityReceived: item.quantityOrdered - item.quantityReceived,
+        unitCost: edit?.unitCost ?? item.unitCost,
+        salePrice: edit?.salePrice?.trim() ? edit.salePrice.trim() : undefined
+      }
+    })
+
+  if (itemsToReceive.length === 0) return
+
+  receiving.value = true
+  errorMessage.value = null
+
+  try {
+    await $fetch(`/api/admin/purchases/${purchaseId}/receive`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: {
+        costMode: costMode.value,
+        salePriceMode: salePriceMode.value,
+        items: itemsToReceive
+      }
+    })
+
+    await fetchOrder()
+  } catch (e: any) {
+    errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.receiveFailed')
+  } finally {
+    receiving.value = false
+  }
+}
+
 const toMoneyString = (value: unknown): string | null => {
   if (value === undefined || value === null) return null
   if (typeof value === 'number' && Number.isFinite(value)) return String(value)
@@ -682,83 +755,59 @@ const fetchCashboxes = async () => {
   }
 }
 
-const openReceivePay = async (item: any) => {
-  receivePayItemId.value = item?.id ?? null
-  receivePayForm.cashboxId = ''
-  receivePayForm.method = 'CASH'
-  receivePayForm.reference = ''
-  receivePayForm.note = ''
+const openPaymentModal = async () => {
+  paymentForm.cashboxId = ''
+  paymentForm.method = 'CASH'
+  paymentForm.reference = ''
+  paymentForm.note = ''
 
-  const qty = receiveQtyByItem[item.id]
-  const edit = editingItems[item.id]
-  const unitCost = parseMoney(edit?.unitCost ?? item.unitCost)
-  const amount = unitCost !== null && qty && qty > 0 ? unitCost * qty : null
-  receivePayForm.amount = amount !== null && amount > 0 ? String(amount) : ''
+  const balance = Number(order.value?.totalAmount || totalCost.value) - Number(order.value?.paidAmount || 0)
+  paymentForm.amount = balance > 0 ? String(balance) : ''
 
-  receivePayOpen.value = true
+  paymentModalOpen.value = true
   await fetchCashboxes()
 }
 
-const closeReceivePay = () => {
-  receivePayOpen.value = false
-  receivePayItemId.value = null
+const closePaymentModal = () => {
+  paymentModalOpen.value = false
 }
 
-const canSubmitReceivePay = computed(() => {
-  if (!receivePayItemId.value) return false
-  const item = order.value?.items?.find((i: any) => i.id === receivePayItemId.value)
-  if (!item) return false
-  const qty = receiveQtyByItem[item.id]
-  if (!qty || qty <= 0) return false
+const canSubmitPayment = computed(() => {
   if (!order.value?.supplier?.id) return false
-  const amountStr = toMoneyString(receivePayForm.amount)
+  const amountStr = toMoneyString(paymentForm.amount)
   const amount = amountStr ? Number(amountStr) : NaN
   return Number.isFinite(amount) && amount > 0
 })
 
-const submitReceivePay = async () => {
-  if (!canSubmitReceivePay.value) return
-  const item = order.value?.items?.find((i: any) => i.id === receivePayItemId.value)
-  if (!item) return
+const submitPayment = async () => {
+  if (!canSubmitPayment.value) return
 
-  const qty = receiveQtyByItem[item.id]
-  const edit = editingItems[item.id]
-
-  receiving.value = true
+  savingPayment.value = true
   errorMessage.value = null
 
   try {
-    await $fetch(`/api/admin/purchases/${purchaseId}/receive`, {
+    await $fetch('/api/admin/cash-transactions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: {
-        costMode: costMode.value,
-        salePriceMode: salePriceMode.value,
-        items: [
-          {
-            itemId: item.id,
-            quantityReceived: qty,
-            unitCost: edit?.unitCost,
-            salePrice: edit?.salePrice?.trim() ? edit.salePrice.trim() : undefined
-          }
-        ],
-        payment: {
-          mode: 'partial',
-          cashboxId: receivePayForm.cashboxId || undefined,
-          amount: receivePayForm.amount,
-          method: receivePayForm.method,
-          reference: receivePayForm.reference,
-          note: receivePayForm.note
-        }
+        cashboxId: paymentForm.cashboxId || undefined,
+        type: 'SUPPLIER_PAYMENT',
+        direction: 'OUT',
+        amount: paymentForm.amount,
+        supplierId: order.value?.supplier?.id,
+        purchaseOrderId: purchaseId,
+        method: paymentForm.method,
+        reference: paymentForm.reference,
+        note: paymentForm.note
       }
     })
 
-    closeReceivePay()
+    closePaymentModal()
     await fetchOrder()
   } catch (e: any) {
     errorMessage.value = e?.data?.statusMessage || t('admin.pages.purchases.detail.errors.receiveFailed')
   } finally {
-    receiving.value = false
+    savingPayment.value = false
   }
 }
 
@@ -826,11 +875,24 @@ const getStatusClass = (status: string) => {
     case 'completed':
     case 'received':
       return base + 'bg-green-100 text-green-800'
+    case 'partially_received':
     case 'pending':
     case 'ordered':
       return base + 'bg-yellow-100 text-yellow-800'
     case 'cancelled':
       return base + 'bg-red-100 text-red-800'
+    default:
+      return base + 'bg-gray-100 text-gray-800'
+  }
+}
+
+const getPaymentStatusClass = (status: string) => {
+  const base = 'px-2.5 py-0.5 inline-flex text-xs font-semibold rounded-full '
+  switch (status?.toLowerCase()) {
+    case 'paid':
+      return base + 'bg-green-100 text-green-800'
+    case 'partially_paid':
+      return base + 'bg-yellow-100 text-yellow-800'
     default:
       return base + 'bg-gray-100 text-gray-800'
   }

@@ -4,6 +4,7 @@ import { getOptionValueState, type OptionValueState, type SelectedOptions } from
 const props = defineProps<{
     product: any
     currentPrice: number
+    originalPrice?: number
     selectedOptions: SelectedOptions
 }>()
 
@@ -51,20 +52,54 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <div class="flex flex-col animate-fade-in-right space-y-8">
         <!-- Header -->
         <div>
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-900 tracking-tight leading-tight mb-4">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-sans font-bold text-slate-900 tracking-tight leading-tight mb-2">
             {{ product?.title }}
         </h1>
 
-        <div class="flex items-baseline gap-4">
+        <div class="flex items-center gap-2 mb-4 text-sm font-medium text-slate-600">
+            <div class="flex text-amber-400">
+                <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+                <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+                <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+                <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+                <Icon name="lucide:star-half" class="w-4 h-4 fill-current" />
+            </div>
+            <span class="font-bold text-slate-800">4.9 / 5</span>
+            <span class="text-slate-500">{{ $t('storefront.product.reviewsCount', { count: 1000 }) }}</span>
+        </div>
+
+        <div class="flex flex-wrap items-baseline gap-3 md:gap-4 mb-4">
             <div class="text-4xl font-sans font-bold text-brand-600 tracking-tight">
             {{ formatPrice(currentPrice) }}
             </div>
             <div
-            v-if="(Number(props.product?.price) * 1.2) > 0"
-            class="text-lg text-slate-400 line-through decoration-2 decoration-slate-200"
+            v-if="originalPrice && originalPrice > currentPrice"
+            class="text-lg text-slate-400 line-through decoration-2 decoration-slate-200 whitespace-nowrap"
             >
-            {{ formatPrice(currentPrice * 1.2) }}
+            {{ formatPrice(originalPrice) }}
             </div>
+            <div v-if="originalPrice && originalPrice > currentPrice" class="px-2.5 py-1 bg-red-600 text-white text-xs font-bold rounded-md shadow-sm tracking-wide whitespace-nowrap shrink-0">
+                -{{ Math.round(((originalPrice - currentPrice) / originalPrice) * 100) }}%
+            </div>
+        </div>
+
+        <StorefrontSharedCountdownTimer
+            v-if="product?.showCountdown && product?.promotionEndDate"
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            show-icon
+            class="mb-4"
+        />
+
+        <!-- Urgency Banner -->
+        <div class="bg-brand-50 border border-brand-100 rounded-xl p-3 flex items-center gap-3 shadow-sm">
+            <div class="relative flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-600"></span>
+            </div>
+            <span class="text-sm font-medium text-brand-900">
+                <strong class="font-bold">{{ $t('storefront.product.highDemandBadge') }}</strong> {{ $t('storefront.product.viewingRightNow', { count: 15 }) }}
+            </span>
         </div>
         </div>
 

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/api_service.dart';
 import '../models/order.dart';
+import '../repositories/order_repository.dart';
 
 class OrdersState {
   final List<Order> orders;
@@ -55,8 +56,13 @@ class OrdersState {
 }
 
 class OrdersNotifier extends Notifier<OrdersState> {
+  late OrderRepository _repo;
+
   @override
   OrdersState build() {
+    final api = ref.watch(apiProvider);
+    _repo = OrderRepository(api);
+    Future.microtask(() => fetchOrders());
     return OrdersState();
   }
 
@@ -70,70 +76,22 @@ class OrdersNotifier extends Notifier<OrdersState> {
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final apiService = ref.read(apiProvider);
-
-      final Map<String, dynamic> queryParameters = {};
-      if (search != null && search.isNotEmpty) {
-        queryParameters['search'] = search;
-      }
-      if (status != null && status.isNotEmpty) {
-        queryParameters['status'] = status;
-      }
-      if (startDate != null) {
-        queryParameters['startDate'] = startDate
-            .toIso8601String()
-            .split('T')
-            .first;
-      }
-      if (endDate != null) {
-        queryParameters['endDate'] = endDate.toIso8601String().split('T').first;
-      }
-      queryParameters['page'] = page;
-      queryParameters['limit'] = limit;
-
-      final response = await apiService.client.get(
-        '/admin/orders',
-        queryParameters: queryParameters,
+      final result = await _repo.getOrdersPage(
+        search: search,
+        status: status,
+        startDate: startDate,
+        endDate: endDate,
+        page: page,
+        limit: limit,
       );
-
-      final data = response.data;
-      List<dynamic> items = const [];
-      int total = 0;
-      int resolvedPage = page;
-      int resolvedTotalPages = 1;
-
-      if (data is Map) {
-        if (data['items'] is List) {
-          items = data['items'] as List<dynamic>;
-        }
-        total = int.tryParse(data['total']?.toString() ?? '') ?? 0;
-        resolvedPage =
-            int.tryParse(data['page']?.toString() ?? '') ?? resolvedPage;
-        resolvedTotalPages =
-            int.tryParse(data['totalPages']?.toString() ?? '') ??
-            resolvedTotalPages;
-      } else if (data is List) {
-        items = data;
-        total = items.length;
-        resolvedTotalPages = 1;
-        resolvedPage = 1;
-      }
-
-      final orders = items.whereType<Map>().map((e) {
-        final normalized = <String, dynamic>{};
-        for (final entry in e.entries) {
-          normalized[entry.key.toString()] = entry.value;
-        }
-        return Order.fromJson(normalized);
-      }).toList();
 
       state = state.copyWithPagination(
         isLoading: false,
-        orders: orders,
-        total: total == 0 ? orders.length : total,
-        page: resolvedPage,
-        totalPages: resolvedTotalPages,
-        limit: limit,
+        orders: result.items,
+        total: result.total,
+        page: result.page,
+        totalPages: result.totalPages,
+        limit: result.limit,
         error: null,
       );
     } catch (e) {

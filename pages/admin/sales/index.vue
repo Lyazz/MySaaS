@@ -155,10 +155,10 @@
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/sales/${sale.id}`"
-                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    :title="t('common.view')"
                   >
-                    <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                    <span>{{ t('common.view') }}</span>
+                    <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                 </div>
               </td>

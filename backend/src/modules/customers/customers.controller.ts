@@ -102,4 +102,23 @@ export class CustomersController {
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
+
+    async delete(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Customer ID is required' })
+            }
+
+            const result = await service.delete(tenant.id, id)
+            res.json(result)
+        } catch (error: any) {
+            if (error instanceof CustomerValidationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Delete customer error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
 }

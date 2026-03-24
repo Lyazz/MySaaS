@@ -1,116 +1,146 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import '../models/printer_profile.dart';
 import '../models/receipt_layout.dart';
+import '../repositories/printer_profile_repository.dart';
+import '../repositories/receipt_layout_repository.dart';
+import '../services/api_service.dart';
 
 class PrinterProfilesState {
   final List<PrinterProfile> profiles;
   final PrinterProfile? defaultProfile;
   final ReceiptLayout? receiptLayout;
+  final bool isLoading;
 
   PrinterProfilesState({
     this.profiles = const [],
     this.defaultProfile,
     this.receiptLayout,
+    this.isLoading = false,
   });
 
   PrinterProfilesState copyWith({
     List<PrinterProfile>? profiles,
     PrinterProfile? defaultProfile,
     ReceiptLayout? receiptLayout,
+    bool? isLoading,
   }) {
     return PrinterProfilesState(
       profiles: profiles ?? this.profiles,
       defaultProfile: defaultProfile ?? this.defaultProfile,
       receiptLayout: receiptLayout ?? this.receiptLayout,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 }
 
 class PrinterProfilesNotifier extends Notifier<PrinterProfilesState> {
-  static const _keyProfiles = 'printer_profiles';
   static const _keyDefaultProfileId = 'default_printer_profile_id';
-  static const _keyReceiptLayout = 'receipt_layout';
+  late final PrinterProfileRepository _printerRepo;
+  late final ReceiptLayoutRepository _receiptRepo;
 
   @override
   PrinterProfilesState build() {
-    loadProfiles();
-    return PrinterProfilesState();
+    final api = ref.watch(apiProvider);
+    _printerRepo = PrinterProfileRepository(api);
+    _receiptRepo = ReceiptLayoutRepository(api);
+
+    // Start data fetch automatically when provider is used
+    Future.microtask(() => loadProfiles());
+    return PrinterProfilesState(isLoading: true);
   }
 
-  Future<void> loadProfiles() async {
-    final prefs = await SharedPreferences.getInstance();
-    final profilesJson = prefs.getStringList(_keyProfiles) ?? [];
+  Future<void> loadProfiles({bool forceRefresh = false}) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final profiles = await _printerRepo.getProfiles(
+        forceRefresh: forceRefresh,
+      );
 
-    final profiles = profilesJson
-        .map((e) => PrinterProfile.fromJson(e))
-        .toList();
+      final prefs = await SharedPreferences.getInstance();
+      final defaultProfileId = prefs.getString(_keyDefaultProfileId);
 
-    final defaultProfileId = prefs.getString(_keyDefaultProfileId);
-    PrinterProfile? defaultProfile;
-    if (defaultProfileId != null) {
-      defaultProfile = profiles
-          .where((p) => p.id == defaultProfileId)
-          .firstOrNull;
-      // If default not found (deleted?), clear it
-      if (defaultProfile == null) {
-        await prefs.remove(_keyDefaultProfileId);
+      PrinterProfile? defaultProfile;
+      if (defaultProfileId != null) {
+        defaultProfile = profiles
+            .where((p) => p.id == defaultProfileId)
+            .firstOrNull;
+        if (defaultProfile == null) {
+          await prefs.remove(_keyDefaultProfileId);
+        }
       }
-    }
 
-    // Load Receipt Layout
-    final layoutJson = prefs.getString(_keyReceiptLayout);
-    ReceiptLayout? layout;
-    if (layoutJson != null) {
-      layout = ReceiptLayout.fromMap(json.decode(layoutJson));
-    } else {
-      layout = ReceiptLayout.standard();
-    }
+      final layouts = await _receiptRepo.getLayouts(forceRefresh: forceRefresh);
+      ReceiptLayout layout = layouts.isNotEmpty
+          ? layouts.first
+          : ReceiptLayout.standard();
 
-    state = state.copyWith(
-      profiles: profiles,
-      defaultProfile: defaultProfile,
-      receiptLayout: layout,
-    );
+      state = state.copyWith(
+        profiles: profiles,
+        defaultProfile: defaultProfile,
+        receiptLayout: layout,
+        isLoading: false,
+      );
+    } catch (e) {
+      print('Error loading printer profiles: \$e');
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   Future<void> saveLayout(ReceiptLayout layout) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyReceiptLayout, json.encode(layout.toMap()));
-    state = state.copyWith(receiptLayout: layout);
+    // Check if it exists, if standard and new, we might create it, else update
+    final current = state.receiptLayout;
+    if (current != null && current.id != 'standard') {
+      final newLayout = layout.copyWith(id: current.id);
+      await _receiptRepo.updateLayout(newLayout);
+      state = state.copyWith(receiptLayout: newLayout);
+    } else {
+      final created = await _receiptRepo.createLayout(layout);
+      state = state.copyWith(receiptLayout: created);
+    }
   }
 
   Future<void> addProfile(PrinterProfile profile) async {
-    final newProfiles = [...state.profiles, profile];
-    await _saveProfiles(newProfiles);
+    final created = await _printerRepo.createProfile(profile);
 
-    // Auto-set default if it's the first one
+    final newProfiles = [...state.profiles, created];
+    state = state.copyWith(profiles: newProfiles);
+
     if (state.defaultProfile == null) {
-      await setDefaultProfile(profile.id);
+      await setDefaultProfile(created.id);
     }
   }
 
   Future<void> updateProfile(PrinterProfile profile) async {
+    await _printerRepo.updateProfile(profile);
+
     final index = state.profiles.indexWhere((p) => p.id == profile.id);
     if (index != -1) {
       final newProfiles = [...state.profiles];
       newProfiles[index] = profile;
-      await _saveProfiles(newProfiles);
 
-      // Update default if it was modified
-      if (state.defaultProfile?.id == profile.id) {
-        state = state.copyWith(defaultProfile: profile);
+      PrinterProfile? defaultProfile = state.defaultProfile;
+      if (defaultProfile?.id == profile.id) {
+        defaultProfile = profile;
+        // In a real scenario we'd persist this preference
       }
+
+      state = state.copyWith(
+        profiles: newProfiles,
+        defaultProfile: defaultProfile,
+      );
     }
   }
 
   Future<void> removeProfile(String id) async {
+    await _printerRepo.deleteProfile(id);
     final newProfiles = state.profiles.where((p) => p.id != id).toList();
-    await _saveProfiles(newProfiles);
 
     if (state.defaultProfile?.id == id) {
       await setDefaultProfile(null);
+      state = state.copyWith(profiles: newProfiles, defaultProfile: null);
+    } else {
+      state = state.copyWith(profiles: newProfiles);
     }
   }
 
@@ -123,22 +153,14 @@ class PrinterProfilesNotifier extends Notifier<PrinterProfilesState> {
       final profile = state.profiles.where((p) => p.id == id).firstOrNull;
       if (profile != null) {
         await prefs.setString(_keyDefaultProfileId, id);
-        // Force update state to ensure UI reflects it
-        // Note: In Riverpod Notifier, copyWith with existing value might strictly equal check,
-        // but here we are creating new State object.
         state = PrinterProfilesState(
           profiles: state.profiles,
           defaultProfile: profile,
+          receiptLayout: state.receiptLayout,
+          isLoading: state.isLoading,
         );
       }
     }
-  }
-
-  Future<void> _saveProfiles(List<PrinterProfile> profiles) async {
-    final prefs = await SharedPreferences.getInstance();
-    final profilesJson = profiles.map((p) => p.toJson()).toList();
-    await prefs.setStringList(_keyProfiles, profilesJson);
-    state = state.copyWith(profiles: profiles);
   }
 }
 

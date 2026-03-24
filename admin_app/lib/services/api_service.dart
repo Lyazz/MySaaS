@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../bootstrap.dart';
+import 'tenant_mode_service.dart';
 
 final apiProvider = Provider<ApiService>((ref) {
   final bootstrap = ref.read(bootstrapProvider);
@@ -36,6 +37,26 @@ class ApiService {
     if (resolved.isNotEmpty) {
       _dio.options.baseUrl = resolved;
     }
+
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final path = options.path;
+          if (!TenantModeService().isRequestAllowed(path)) {
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                type: DioExceptionType.cancel,
+                message:
+                    'Offline tenant mode: network request blocked for $path',
+              ),
+            );
+            return;
+          }
+          handler.next(options);
+        },
+      ),
+    );
 
     _dio.interceptors.add(
       LogInterceptor(responseBody: true, requestBody: true),

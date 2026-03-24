@@ -11,6 +11,7 @@ interface User {
         id: string
         name: string
         slug: string
+        isOffline?: boolean
     }
 }
 
@@ -30,16 +31,19 @@ export const useAuthStore = defineStore('auth', () => {
     async function login(email: string, password: string): Promise<boolean> {
         console.log('[Auth Store] logging in with', email)
         try {
-            const data = await $fetch<any>('/api/login', {
+            const data = await $fetch('/api/login', {
                 method: 'POST',
                 body: { email, password }
-            })
+            }) as any
 
             console.log('[Auth Store] Login success data:', data)
 
             if (data && data.success) {
                 token.value = data.token
-                user.value = data.user
+                user.value = {
+                    ...data.user,
+                    tenant: data.tenant
+                }
                 staffRole.value = data.staffRole ?? null
                 staffPermissions.value = data.staffPermissions ?? null
                 console.log('[Auth Store] Token set, returning true')

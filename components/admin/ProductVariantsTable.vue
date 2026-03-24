@@ -384,7 +384,7 @@
         <div class="flex justify-end gap-3 pt-2">
           <button
             type="button"
-            class="px-4 py-2 rounded-md border text-sm"
+            class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
             @click="closeImageEditor"
           >
             {{ t('admin.common.cancel') }}
@@ -392,9 +392,11 @@
           <button
             type="button"
             :disabled="savingImages"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md text-sm hover:bg-teal-700 disabled:opacity-50"
+            class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30 active:scale-95 flex items-center gap-2"
+            :class="savingImages ? 'bg-teal-500 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'"
             @click="saveVariantImages"
           >
+            <Icon v-if="savingImages" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
             {{ savingImages ? t('admin.common.saving') : t('admin.variantsTable.imagePicker.save') }}
           </button>
         </div>

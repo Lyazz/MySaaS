@@ -2,6 +2,7 @@
 import { homeTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
 import type { TemplateKey } from '~/components/storefront/templates/registry'
 import { DEFAULT_STOREFRONT_HOME_CONFIG, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import { useRoute } from 'vue-router'
 
 type Tenant = { id: string; slug: string; name: string }
 type Product = {
@@ -48,7 +49,13 @@ const featuredProducts = computed(() => {
   return products.value.slice(0, Math.max(1, Math.min(24, limit)))
 })
 
-const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
+const route = useRoute()
+const templateKey = computed<TemplateKey>(() => {
+  if (route.query.preview_template) {
+     return resolveTemplateKey(route.query.preview_template as string)
+  }
+  return resolveTemplateKey(storeSettings.value?.templateKey)
+})
 const activeTemplate = computed(() => homeTemplates[templateKey.value])
 </script>
 

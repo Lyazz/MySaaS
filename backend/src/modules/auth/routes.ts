@@ -200,8 +200,12 @@ router.post('/login', async (req, res) => {
             tenantId: user.tenantId
         })
 
-        // Return user info sans password
         const { passwordHash, ...userInfo } = user
+
+        let isOffline = false
+        if (tenant) {
+            isOffline = tenant.isOffline
+        }
 
         let staffRole: { id: string; name: string } | null = null
         let staffPermissions: string[] | null = null
@@ -219,7 +223,7 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             token,
-            user: userInfo,
+            user: { ...userInfo, tenant: { ...tenant, isOffline } },
             staffRole,
             staffPermissions
         })
@@ -257,7 +261,12 @@ router.get('/me', async (req, res) => {
             }
         }
 
-        return res.json({ success: true, user: userInfo, tenant, staffRole, staffPermissions })
+        let isOffline = false
+        if (tenant) {
+            isOffline = tenant.isOffline
+        }
+
+        return res.json({ success: true, user: userInfo, tenant: { ...tenant, isOffline }, staffRole, staffPermissions })
     } catch (error) {
         console.error('Me endpoint error:', error)
         return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })

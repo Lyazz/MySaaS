@@ -132,6 +132,9 @@ export class ProductsController {
                 if (e.message === 'Product not found') {
                     return res.status(404).json({ statusCode: 404, statusMessage: e.message })
                 }
+                if (e.statusCode === 409 || e.message === 'HAS_TRANSACTIONS') {
+                    return res.status(409).json({ statusCode: 409, statusMessage: 'HAS_TRANSACTIONS' })
+                }
                 throw e
             }
         } catch (error) {

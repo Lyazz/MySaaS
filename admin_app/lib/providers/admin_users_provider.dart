@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/admin_user.dart';
 import '../services/api_service.dart';
+import '../repositories/user_repository.dart';
 
 class AdminUsersState {
   final List<AdminUser> users;
@@ -64,17 +65,9 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
 
     try {
       final api = ref.read(apiProvider);
-      final res = await api.client.get(
-        '/admin/users',
-        queryParameters: {'includeInactive': nextIncludeInactive.toString()},
-      );
+      final repo = UserRepository(api);
 
-      final data = res.data;
-      final rows = (data is List) ? data : const [];
-      final users = rows
-          .whereType<Map>()
-          .map((e) => AdminUser.fromJson(e.cast<String, dynamic>()))
-          .toList();
+      final users = await repo.getUsers(includeInactive: nextIncludeInactive);
 
       state = state.copyWith(isLoading: false, users: users);
     } catch (e) {
@@ -90,26 +83,17 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
   }) async {
     try {
       final api = ref.read(apiProvider);
-      final res = await api.client.post(
-        '/admin/users',
-        data: {
-          'email': email.trim(),
-          'password': password,
-          'role': role,
-          if (staffRoleId != null) 'staffRoleId': staffRoleId,
-        },
-      );
+      final repo = UserRepository(api);
 
-      if (res.data is Map) {
-        final created = AdminUser.fromJson(
-          (res.data as Map).cast<String, dynamic>(),
-        );
-        await fetchUsers();
-        return created;
-      }
+      final created = await repo.createUser({
+        'email': email.trim(),
+        'password': password,
+        'role': role,
+        if (staffRoleId != null) 'staffRoleId': staffRoleId,
+      });
 
       await fetchUsers();
-      return null;
+      return created;
     } catch (e) {
       state = state.copyWith(error: _formatApiError(e));
       rethrow;
@@ -126,6 +110,8 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
   }) async {
     try {
       final api = ref.read(apiProvider);
+      final repo = UserRepository(api);
+
       final data = <String, dynamic>{};
       if (email != null) data['email'] = email.trim();
       if (password != null && password.isNotEmpty) data['password'] = password;
@@ -133,18 +119,9 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
       if (isActive != null) data['isActive'] = isActive;
       if (staffRoleId != null) data['staffRoleId'] = staffRoleId;
 
-      final res = await api.client.patch('/admin/users/$id', data: data);
-
-      if (res.data is Map) {
-        final updated = AdminUser.fromJson(
-          (res.data as Map).cast<String, dynamic>(),
-        );
-        await fetchUsers();
-        return updated;
-      }
-
+      final updated = await repo.updateUser(id, data);
       await fetchUsers();
-      return null;
+      return updated;
     } catch (e) {
       state = state.copyWith(error: _formatApiError(e));
       rethrow;
@@ -154,7 +131,12 @@ class AdminUsersNotifier extends Notifier<AdminUsersState> {
   Future<void> deactivateUser(String id) async {
     try {
       final api = ref.read(apiProvider);
-      await api.client.delete('/admin/users/$id');
+      final repo = UserRepository(api);
+
+      // We still delete logically in the offline sync or delete physically
+      // If we just deactivate, probably update user
+      await repo.deleteUser(id);
+
       await fetchUsers();
     } catch (e) {
       state = state.copyWith(error: _formatApiError(e));

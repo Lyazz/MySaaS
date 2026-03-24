@@ -1,10 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../models/order.dart';
+import '../repositories/order_repository.dart';
 import '../services/api_service.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
@@ -22,7 +23,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   bool _loading = true;
   bool _updating = false;
   String? _error;
-  Map<String, dynamic>? _order;
+  Order? _order;
 
   @override
   void initState() {
@@ -39,32 +40,19 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
     try {
       final api = ref.read(apiProvider);
-      final res = await api.client.get('/admin/orders/${widget.orderId}');
-      final data = res.data;
-      if (data is! Map) {
-        throw Exception('Invalid order response');
-      }
+      final repo = OrderRepository(api);
+      final order = await repo.getOrder(widget.orderId);
+      if (order == null) throw Exception('Order not found');
       setState(() {
-        _order = data.cast<String, dynamic>();
+        _order = order;
         _loading = false;
       });
     } catch (e) {
       setState(() {
-        _error = _formatError(e);
+        _error = e.toString();
         _loading = false;
       });
     }
-  }
-
-  String _formatError(Object error) {
-    if (error is DioException) {
-      final data = error.response?.data;
-      if (data is Map && data['statusMessage'] != null) {
-        return data['statusMessage'].toString();
-      }
-      return error.message ?? 'Request failed';
-    }
-    return error.toString();
   }
 
   Future<void> _updateStatus(String status) async {
@@ -76,21 +64,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
     try {
       final api = ref.read(apiProvider);
-      final res = await api.client.patch(
-        '/admin/orders/${widget.orderId}',
-        data: {'status': status},
-      );
-      final data = res.data;
-      if (data is Map) {
-        setState(() {
-          _order = data.cast<String, dynamic>();
-        });
-      } else {
-        await _load();
-      }
+      final repo = OrderRepository(api);
+      await repo.updateStatus(widget.orderId, status);
+      await _load();
     } catch (e) {
       setState(() {
-        _error = _formatError(e);
+        _error = e.toString();
       });
     } finally {
       if (mounted) {
@@ -134,28 +113,15 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
       );
     }
 
-    final order = _order ?? const <String, dynamic>{};
-    final id = (order['id'] ?? widget.orderId).toString();
-    final status = (order['status'] ?? '').toString();
-    final customerName = (order['customerName'] ?? '').toString();
-    final customerPhone = (order['customerPhone'] ?? '').toString();
-    final customerAddress = (order['customerAddress'] ?? '').toString();
-    final totalAmountRaw = order['totalAmount'];
-    final totalAmount = double.tryParse(totalAmountRaw?.toString() ?? '0') ?? 0;
-    final createdAtRaw = order['createdAt']?.toString();
-    final createdAt = createdAtRaw != null
-        ? DateTime.tryParse(createdAtRaw)
-        : null;
-
-    final items = (order['items'] is List)
-        ? (order['items'] as List).whereType<Map>().map((e) {
-            final map = <String, dynamic>{};
-            for (final entry in e.entries) {
-              map[entry.key.toString()] = entry.value;
-            }
-            return map;
-          }).toList()
-        : const <Map<String, dynamic>>[];
+    final order = _order!;
+    final id = order.id.isNotEmpty ? order.id : widget.orderId;
+    final status = order.status;
+    final customerName = order.customerName;
+    final customerPhone = order.customerPhone;
+    final customerAddress = order.customerAddress;
+    final totalAmount = order.totalAmount;
+    final createdAt = order.createdAt;
+    final items = order.items;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -240,9 +206,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               _InfoCard(
                 title: 'Created',
                 child: Text(
-                  createdAt != null
-                      ? DateFormat.yMd().add_jm().format(createdAt)
-                      : '—',
+                  DateFormat.yMd().add_jm().format(createdAt),
                 ),
               ),
             ],
@@ -318,25 +282,15 @@ class _InfoCard extends StatelessWidget {
 }
 
 class _OrderItemRow extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final OrderItem item;
 
   const _OrderItemRow({required this.item});
 
   @override
   Widget build(BuildContext context) {
-    final qty = item['quantity']?.toString() ?? '';
-    final price = double.tryParse(item['price']?.toString() ?? '0') ?? 0;
-    final product = item['product'];
-    final variant = item['variant'];
-    final productTitle =
-        (product is Map ? product['title'] : null)?.toString() ?? '';
-    final variantTitle =
-        (variant is Map ? variant['title'] : null)?.toString() ?? '';
-
-    final title = productTitle.isNotEmpty
-        ? productTitle
-        : (item['productId'] ?? 'Item').toString();
-    final subtitle = variantTitle.isNotEmpty ? variantTitle : null;
+    final qty = item.quantity;
+    final price = item.price;
+    final title = item.productId.isNotEmpty ? item.productId : 'Item';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -350,13 +304,6 @@ class _OrderItemRow extends StatelessWidget {
                   title,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(color: Color(0xFF64748B)),
-                  ),
-                ],
               ],
             ),
           ),

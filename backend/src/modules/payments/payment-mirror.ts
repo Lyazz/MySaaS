@@ -1,4 +1,4 @@
-import type { CashTransaction, Prisma } from '@prisma/client'
+import { Prisma, type CashTransaction } from '@prisma/client'
 
 type DbClient = Prisma.TransactionClient
 
@@ -63,6 +63,30 @@ export async function mirrorCashTransactionToPayments(tx: DbClient, tenantId: st
             },
             update: {}
         })
+
+        if (cashTx.purchaseOrderId) {
+            const aggs = await tx.cashTransaction.aggregate({
+                where: { tenantId, purchaseOrderId: cashTx.purchaseOrderId, direction: 'OUT', type: 'SUPPLIER_PAYMENT' },
+                _sum: { amount: true }
+            })
+            const paidAmount = aggs._sum.amount ? new Prisma.Decimal(aggs._sum.amount) : new Prisma.Decimal(0)
+
+            const po = await tx.purchaseOrder.findFirst({
+                where: { tenantId, id: cashTx.purchaseOrderId },
+                select: { totalAmount: true }
+            })
+            if (po) {
+                const total = new Prisma.Decimal(String(po.totalAmount))
+                let paymentStatus = 'UNPAID'
+                if (paidAmount.gt(0)) {
+                    paymentStatus = paidAmount.gte(total) && total.gt(0) ? 'PAID' : 'PARTIALLY_PAID'
+                }
+                await tx.purchaseOrder.updateMany({
+                    where: { tenantId, id: cashTx.purchaseOrderId },
+                    data: { paidAmount, paymentStatus }
+                })
+            }
+        }
     }
 }
 

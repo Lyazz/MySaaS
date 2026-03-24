@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/cash.dart';
+import '../repositories/cash_repository.dart';
+import '../repositories/user_repository.dart';
 import '../services/api_service.dart';
 
 class CashState {
@@ -66,31 +68,24 @@ String _formatApiError(Object error) {
 
 class CashNotifier extends Notifier<CashState> {
   final CashState? _initialState;
+  late CashRepository _repo;
 
   CashNotifier([this._initialState]);
 
   @override
   CashState build() {
+    final api = ref.watch(apiProvider);
+    _repo = CashRepository(api);
     return _initialState ?? CashState();
   }
 
-  Future<void> fetchCashboxes() async {
+  Future<void> fetchCashboxes({bool forceRefresh = false}) async {
     state = state.copyWith(isLoadingCashboxes: true, error: null);
     try {
-      final api = ref.read(apiProvider);
-      final res = await api.client.get('/admin/cashboxes');
-      final data = res.data;
-      final rows = (data is List) ? data : const [];
-      final cashboxes = rows
-          .whereType<Map>()
-          .map((e) => CashboxSummary.fromJson(e.cast<String, dynamic>()))
-          .toList();
+      final cashboxes = await _repo.getCashboxes(forceRefresh: forceRefresh);
       state = state.copyWith(isLoadingCashboxes: false, cashboxes: cashboxes);
     } catch (e) {
-      state = state.copyWith(
-        isLoadingCashboxes: false,
-        error: _formatApiError(e),
-      );
+      state = state.copyWith(isLoadingCashboxes: false, error: e.toString());
     }
   }
 
@@ -100,34 +95,21 @@ class CashNotifier extends Notifier<CashState> {
     DateTime? startDate,
     DateTime? endDate,
     String? userId,
+    bool forceRefresh = false,
   }) async {
     state = state.copyWith(isLoadingSessions: true, error: null);
     try {
-      final api = ref.read(apiProvider);
-      final query = <String, dynamic>{
-        if (cashboxId != null && cashboxId.trim().isNotEmpty)
-          'cashboxId': cashboxId.trim(),
-        if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
-        if (userId != null && userId.trim().isNotEmpty) 'userId': userId.trim(),
-        if (startDate != null) 'startDate': startDate.toIso8601String(),
-        if (endDate != null) 'endDate': endDate.toIso8601String(),
-      };
-      final res = await api.client.get(
-        '/admin/cash-sessions',
-        queryParameters: query,
+      final sessions = await _repo.getSessions(
+        cashboxId: cashboxId,
+        status: status,
+        userId: userId,
+        startDate: startDate,
+        endDate: endDate,
+        forceRefresh: forceRefresh,
       );
-      final data = res.data;
-      final rows = (data is List) ? data : const [];
-      final sessions = rows
-          .whereType<Map>()
-          .map((e) => CashSessionSummary.fromJson(e.cast<String, dynamic>()))
-          .toList();
       state = state.copyWith(isLoadingSessions: false, sessions: sessions);
     } catch (e) {
-      state = state.copyWith(
-        isLoadingSessions: false,
-        error: _formatApiError(e),
-      );
+      state = state.copyWith(isLoadingSessions: false, error: e.toString());
     }
   }
 
@@ -140,41 +122,24 @@ class CashNotifier extends Notifier<CashState> {
     String? userId,
     DateTime? startDate,
     DateTime? endDate,
+    bool forceRefresh = false,
   }) async {
     state = state.copyWith(isLoadingTransactions: true, error: null);
     try {
-      final api = ref.read(apiProvider);
-      final query = <String, dynamic>{
-        if (cashboxId != null && cashboxId.trim().isNotEmpty)
-          'cashboxId': cashboxId.trim(),
-        if (sessionId != null && sessionId.trim().isNotEmpty)
-          'sessionId': sessionId.trim(),
-        if (type != null && type.trim().isNotEmpty) 'type': type.trim(),
-        if (direction != null && direction.trim().isNotEmpty)
-          'direction': direction.trim(),
-        if (method != null && method.trim().isNotEmpty) 'method': method.trim(),
-        if (userId != null && userId.trim().isNotEmpty) 'userId': userId.trim(),
-        if (startDate != null) 'startDate': startDate.toIso8601String(),
-        if (endDate != null) 'endDate': endDate.toIso8601String(),
-      };
-      final res = await api.client.get(
-        '/admin/cash-transactions',
-        queryParameters: query,
+      final txs = await _repo.getTransactions(
+        cashboxId: cashboxId,
+        sessionId: sessionId,
+        type: type,
+        direction: direction,
+        method: method,
+        userId: userId,
+        startDate: startDate,
+        endDate: endDate,
+        forceRefresh: forceRefresh,
       );
-      final data = res.data;
-      final rows = (data is List) ? data : const [];
-      final txs = rows
-          .whereType<Map>()
-          .map(
-            (e) => CashTransactionSummary.fromJson(e.cast<String, dynamic>()),
-          )
-          .toList();
       state = state.copyWith(isLoadingTransactions: false, transactions: txs);
     } catch (e) {
-      state = state.copyWith(
-        isLoadingTransactions: false,
-        error: _formatApiError(e),
-      );
+      state = state.copyWith(isLoadingTransactions: false, error: e.toString());
     }
   }
 
@@ -182,16 +147,21 @@ class CashNotifier extends Notifier<CashState> {
     state = state.copyWith(isLoadingUsers: true, error: null);
     try {
       final api = ref.read(apiProvider);
-      final res = await api.client.get('/admin/cash-users');
-      final data = res.data;
-      final rows = (data is List) ? data : const [];
-      final users = rows
-          .whereType<Map>()
-          .map((e) => CashUserSummary.fromJson(e.cast<String, dynamic>()))
+      final repo = UserRepository(api);
+      final usersRaw = await repo.getUsers(includeInactive: true);
+      final users = usersRaw
+          .map(
+            (u) => CashUserSummary(
+              id: u.id,
+              email: u.email,
+              role: u.role,
+              isActive: u.isActive,
+            ),
+          )
           .toList();
       state = state.copyWith(isLoadingUsers: false, cashUsers: users);
     } catch (e) {
-      state = state.copyWith(isLoadingUsers: false, error: _formatApiError(e));
+      state = state.copyWith(isLoadingUsers: false, error: e.toString());
     }
   }
 
@@ -200,6 +170,10 @@ class CashNotifier extends Notifier<CashState> {
     bool isActive = true,
   }) async {
     try {
+      // NOTE: Not all apps allow POS to create cashboxes offline, typically a manager function.
+      // Here we assume CashRepository doesn't actively support offline Cashbox CREATION yet,
+      // but if it did, we would call it.
+      // For now, we will leave API pass-through for config creation, or we can mock it.
       final api = ref.read(apiProvider);
       final res = await api.client.post(
         '/admin/cashboxes',
@@ -212,7 +186,7 @@ class CashNotifier extends Notifier<CashState> {
       }
       return null;
     } catch (e) {
-      state = state.copyWith(error: _formatApiError(e));
+      state = state.copyWith(error: e.toString());
       rethrow;
     }
   }
@@ -235,7 +209,7 @@ class CashNotifier extends Notifier<CashState> {
       }
       return null;
     } catch (e) {
-      state = state.copyWith(error: _formatApiError(e));
+      state = state.copyWith(error: e.toString());
       rethrow;
     }
   }
@@ -246,23 +220,16 @@ class CashNotifier extends Notifier<CashState> {
     String? note,
   }) async {
     try {
-      final api = ref.read(apiProvider);
-      final res = await api.client.post(
-        '/admin/cashboxes/$cashboxId/sessions/open',
-        data: {
-          'openingFloat': openingFloat.toString(),
-          if (note != null) 'note': note,
-        },
+      final sessionSummary = await _repo.openSession(
+        cashboxId: cashboxId,
+        openingFloat: openingFloat,
+        note: note,
       );
       await fetchCashboxes();
       await fetchSessions();
-      final data = res.data;
-      if (data is Map) {
-        return CashSessionSummary.fromJson(data.cast<String, dynamic>());
-      }
-      return null;
+      return sessionSummary;
     } catch (e) {
-      state = state.copyWith(error: _formatApiError(e));
+      state = state.copyWith(error: e.toString());
       rethrow;
     }
   }
@@ -271,19 +238,12 @@ class CashNotifier extends Notifier<CashState> {
     String sessionId,
   ) async {
     try {
-      final api = ref.read(apiProvider);
-      final res = await api.client.get(
-        '/admin/cash-sessions/$sessionId/expected',
-      );
-      final data = res.data;
-      if (data is Map) {
-        return CashSessionExpectedClosing.fromJson(
-          data.cast<String, dynamic>(),
-        );
-      }
-      return null;
+      // Offline fallback: we might need to compute this manually by aggregating transactions
+      // from the CashRepository. The API currently provides this. If offline, the UI might need
+      // to calculate expected closing.
+      return await _repo.getExpectedClosing(sessionId);
     } catch (e) {
-      state = state.copyWith(error: _formatApiError(e));
+      state = state.copyWith(error: e.toString());
       return null;
     }
   }
@@ -294,23 +254,16 @@ class CashNotifier extends Notifier<CashState> {
     String? note,
   }) async {
     try {
-      final api = ref.read(apiProvider);
-      final res = await api.client.post(
-        '/admin/cash-sessions/$sessionId/close',
-        data: {
-          'closingCount': closingCount.toString(),
-          if (note != null) 'note': note,
-        },
+      final summary = await _repo.closeSession(
+        sessionId: sessionId,
+        closingCount: closingCount,
+        note: note,
       );
       await fetchCashboxes();
       await fetchSessions();
-      final data = res.data;
-      if (data is Map) {
-        return CashSessionSummary.fromJson(data.cast<String, dynamic>());
-      }
-      return null;
+      return summary;
     } catch (e) {
-      state = state.copyWith(error: _formatApiError(e));
+      state = state.copyWith(error: e.toString());
       rethrow;
     }
   }
@@ -329,32 +282,29 @@ class CashNotifier extends Notifier<CashState> {
     String? note,
   }) async {
     try {
-      final api = ref.read(apiProvider);
-      final payload = <String, dynamic>{
-        'type': type,
-        'direction': direction,
-        'amount': amount.toString(),
-        'currency': currency,
-        'method': method,
-        if (cashboxId != null) 'cashboxId': cashboxId,
-        if (customerId != null) 'customerId': customerId,
-        if (supplierId != null) 'supplierId': supplierId,
-        if (expenseCategory != null) 'expenseCategory': expenseCategory,
-        if (reference != null) 'reference': reference,
-        if (note != null) 'note': note,
-      };
-      final res = await api.client.post(
-        '/admin/cash-transactions',
-        data: payload,
+      // Resolve sessionId if not provided via some lookup, or CashRepo handles it
+      String sessionIdStr = '';
+      if (cashboxId != null) {
+        final openSessions = await _repo.getSessions(
+          cashboxId: cashboxId,
+          status: 'OPEN',
+        );
+        if (openSessions.isNotEmpty) sessionIdStr = openSessions.first.id;
+      }
+
+      final summary = await _repo.addTransaction(
+        sessionId: sessionIdStr,
+        type: type,
+        direction: direction,
+        amount: amount,
+        note: note,
+        expenseCategory: expenseCategory,
+        reference: reference,
       );
       await fetchTransactions();
-      final data = res.data;
-      if (data is Map) {
-        return CashTransactionSummary.fromJson(data.cast<String, dynamic>());
-      }
-      return null;
+      return summary;
     } catch (e) {
-      state = state.copyWith(error: _formatApiError(e));
+      state = state.copyWith(error: e.toString());
       rethrow;
     }
   }

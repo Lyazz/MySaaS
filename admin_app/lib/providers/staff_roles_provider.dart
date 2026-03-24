@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/staff_role.dart';
+import '../repositories/staff_role_repository.dart';
 import '../services/api_service.dart';
 
 class StaffRolesState {
@@ -37,25 +38,22 @@ String _formatApiError(Object error) {
 
 class StaffRolesNotifier extends Notifier<StaffRolesState> {
   final StaffRolesState? _initialState;
+  late StaffRoleRepository _repo;
 
   StaffRolesNotifier([this._initialState]);
 
   @override
   StaffRolesState build() {
+    final api = ref.watch(apiProvider);
+    _repo = StaffRoleRepository(api);
+    Future.microtask(() => fetchRoles());
     return _initialState ?? StaffRolesState();
   }
 
-  Future<void> fetchRoles() async {
+  Future<void> fetchRoles({bool forceRefresh = false}) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final api = ref.read(apiProvider);
-      final res = await api.client.get('/admin/staff-roles');
-      final data = res.data;
-      final rows = (data is List) ? data : const [];
-      final roles = rows
-          .whereType<Map>()
-          .map((e) => StaffRole.fromJson(e.cast<String, dynamic>()))
-          .toList();
+      final roles = await _repo.getRoles(forceRefresh: forceRefresh);
       state = state.copyWith(isLoading: false, roles: roles);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _formatApiError(e));
@@ -67,23 +65,9 @@ class StaffRolesNotifier extends Notifier<StaffRolesState> {
     required List<StaffRolePermissionGroup> permissions,
   }) async {
     try {
-      final api = ref.read(apiProvider);
-      final res = await api.client.post(
-        '/admin/staff-roles',
-        data: {
-          'name': name.trim(),
-          'permissions': permissions.map((p) => p.toJson()).toList(),
-        },
-      );
-      if (res.data is Map) {
-        final role = StaffRole.fromJson(
-          (res.data as Map).cast<String, dynamic>(),
-        );
-        await fetchRoles();
-        return role;
-      }
+      final role = await _repo.createRole(name: name, permissions: permissions);
       await fetchRoles();
-      return null;
+      return role;
     } catch (e) {
       state = state.copyWith(error: _formatApiError(e));
       rethrow;
@@ -96,23 +80,13 @@ class StaffRolesNotifier extends Notifier<StaffRolesState> {
     required List<StaffRolePermissionGroup> permissions,
   }) async {
     try {
-      final api = ref.read(apiProvider);
-      final res = await api.client.patch(
-        '/admin/staff-roles/$id',
-        data: {
-          'name': name.trim(),
-          'permissions': permissions.map((p) => p.toJson()).toList(),
-        },
+      final role = await _repo.updateRole(
+        id,
+        name: name,
+        permissions: permissions,
       );
-      if (res.data is Map) {
-        final role = StaffRole.fromJson(
-          (res.data as Map).cast<String, dynamic>(),
-        );
-        await fetchRoles();
-        return role;
-      }
       await fetchRoles();
-      return null;
+      return role;
     } catch (e) {
       state = state.copyWith(error: _formatApiError(e));
       rethrow;
@@ -121,8 +95,7 @@ class StaffRolesNotifier extends Notifier<StaffRolesState> {
 
   Future<void> deleteRole(String id) async {
     try {
-      final api = ref.read(apiProvider);
-      await api.client.delete('/admin/staff-roles/$id');
+      await _repo.deleteRole(id);
       await fetchRoles();
     } catch (e) {
       state = state.copyWith(error: _formatApiError(e));

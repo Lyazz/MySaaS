@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -3231,8 +3230,9 @@ class _TransferDialogState extends State<_TransferDialog> {
               onChanged: (v) => setState(() => _to = v),
               validator: (v) {
                 if (v == null) return 'Select destination cashbox';
-                if (_from != null && v == _from)
+                if (_from != null && v == _from) {
                   return 'Destination must differ';
+                }
                 return null;
               },
             ),

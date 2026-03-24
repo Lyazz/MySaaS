@@ -10,6 +10,12 @@ interface Product {
   isActive: boolean
   images?: string[]
   description?: string
+  isPromotionActive?: boolean
+  promotionalPrice?: number | string | null
+  promotionStartDate?: string | Date | null
+  promotionEndDate?: string | Date | null
+  showCountdown?: boolean
+  bundleDeals?: any[]
 }
 
 const props = defineProps<{
@@ -18,6 +24,26 @@ const props = defineProps<{
 }>()
 
 defineEmits(['quick-view'])
+
+
+const isPromoValid = computed(() => {
+    if (!props.product?.isPromotionActive) return false
+    const now = new Date().getTime()
+    if (props.product.promotionStartDate && new Date(props.product.promotionStartDate).getTime() > now) return false
+    if (props.product.promotionEndDate && new Date(props.product.promotionEndDate).getTime() < now) return false
+    return true
+})
+
+const originalPrice = computed(() => {
+    return Number(props.product.price)
+})
+
+const displayPrice = computed(() => {
+    if (isPromoValid.value && props.product.promotionalPrice) {
+        return Number(props.product.promotionalPrice)
+    }
+    return originalPrice.value
+})
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
@@ -33,11 +59,7 @@ const mainImage = computed(() => {
 
 // TODO: Replace with real discount logic when available in backend
 const discount = 0 
-const oldPrice = computed(() => {
-    return null
-    // const p = Number(props.product.price)
-    // return Math.round(p * 1.33)
-})
+
 
 const isNew = computed(() => {
     // Logic for "New" badge, e.g. created within last 30 days
@@ -145,6 +167,17 @@ function handleAddToCart() {
           <Icon name="lucide:shopping-basket" class="w-5 h-5" />
         </button>
       </div>
+    
+      <!-- Countdown Overlay -->
+      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
+        <div class="scale-[0.85] sm:scale-90 origin-bottom">
+          <StorefrontSharedCountdownTimer
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            :show-icon="true"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Details -->
@@ -160,7 +193,8 @@ function handleAddToCart() {
             :to="`/p/${product.slug}`"
             class="group-hover:text-brand-600 transition-colors duration-200"
         >
-            <h3 
+            
+<h3 
             class="font-bold text-stone-900 leading-tight"
             :class="[ viewMode === 'list' ? 'text-2xl mb-2' : 'text-lg' ]"
             >
@@ -174,9 +208,9 @@ function handleAddToCart() {
                 {{ Number(product.price).toLocaleString() }} <span class="text-[10px]">{{ currencyCode }}</span>
             </span>
              <span
-                v-if="oldPrice"
+                v-if="originalPrice"
                 class="text-[10px] text-stone-400 line-through mt-0.5"
-                >{{ oldPrice }}</span
+                >{{ originalPrice }}</span
             >
         </div>
       </div>
@@ -200,9 +234,9 @@ function handleAddToCart() {
            <div class="flex items-center gap-2">
                 <span class="text-2xl font-bold text-stone-900">{{ Number(product.price).toLocaleString() }} <span class="text-sm font-normal text-stone-500">{{ currencyCode }}</span></span>
                 <span
-                v-if="oldPrice"
+                v-if="originalPrice"
                 class="text-sm text-stone-400 line-through"
-                >{{ oldPrice }} {{ currencyCode }}</span>
+                >{{ originalPrice }} {{ currencyCode }}</span>
            </div>
 
           <button 

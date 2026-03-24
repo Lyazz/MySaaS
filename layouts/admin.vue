@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen overflow-hidden bg-slate-50 flex font-sans text-slate-600" :style="adminStyle">
+  <div class="h-screen overflow-hidden bg-slate-100 flex font-sans text-slate-600" :style="adminStyle">
     <!-- Sidebar -->
     <!-- Mobile Backdrop -->
     <div 
@@ -54,7 +54,7 @@
           <button 
             v-if="entry.group.titleKey" 
             @click="toggleGroup(entry.originalIndex)"
-            class="w-full flex items-center justify-between px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider transition-opacity duration-300 hover:text-slate-300 group/header"
+            class="w-full flex items-center justify-between px-3 mb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider transition-opacity duration-300 hover:text-slate-300 group/header"
             :class="sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'"
           >
             <span>{{ t(entry.group.titleKey) }}</span>
@@ -110,7 +110,7 @@
       </nav>
 
       <!-- User Section -->
-      <div class="p-4 border-t border-white/5 bg-black/20">
+      <div class="p-5 border-t border-slate-800 bg-black/20">
         <div 
           class="flex items-center rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
           :class="sidebarOpen ? 'gap-3 p-2' : 'gap-0 justify-center p-2'"
@@ -150,9 +150,9 @@
               :href="storefrontUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="hidden sm:flex ui-btn ui-btn--secondary ui-btn--md"
+              class="hidden sm:flex ui-btn ui-btn--secondary ui-btn--md !text-teal-600 !border-teal-200 hover:!bg-teal-50 !shadow-none"
             >
-              <Icon name="lucide:external-link" class="w-4 h-4" />
+              <Icon name="lucide:eye" class="w-4 h-4" />
               <span>{{ t('admin.actions.viewStore') }}</span>
             </a>
 
@@ -162,9 +162,9 @@
 
             <button 
               @click="handleLogout" 
-              class="ui-btn ui-btn--danger ui-btn--md"
+              class="ui-btn ui-btn--secondary ui-btn--md"
             >
-              <Icon name="lucide:log-out" class="w-4 h-4" />
+              <Icon name="lucide:log-out" class="w-4 h-4 text-slate-500" />
               <span>{{ t('admin.actions.logout') }}</span>
             </button>
           </div>
@@ -172,12 +172,14 @@
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50 custom-scrollbar">
+      <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-100 custom-scrollbar">
         <div class="max-w-7xl mx-auto animate-fadeIn">
           <slot />
         </div>
       </main>
     </div>
+    
+    <HelpCenterWidget />
   </div>
 </template>
 
@@ -185,6 +187,7 @@
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
+import HelpCenterWidget from '~/components/admin/HelpCenterWidget.vue'
 
 const { t } = useI18n({ useScope: 'global' })
 

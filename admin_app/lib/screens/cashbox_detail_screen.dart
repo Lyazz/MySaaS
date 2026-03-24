@@ -21,7 +21,7 @@ class CashboxDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
-  DateTimeRange _range = _defaultRange();
+  final DateTimeRange _range = _defaultRange();
 
   static DateTimeRange _defaultRange() {
     final now = DateTime.now();

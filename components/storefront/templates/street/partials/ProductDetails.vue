@@ -56,7 +56,15 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
        <h1 class="font-street text-5xl md:text-7xl leading-none uppercase mb-4 text-black drop-shadow-[4px_4px_0_var(--brand)]">
          {{ product?.title }}
        </h1>
-       <div class="flex items-center gap-4">
+       
+        <StorefrontSharedCountdownTimer
+            v-if="product?.showCountdown && product?.promotionEndDate "
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            show-icon
+            class="mb-4"
+        />
+<div class="flex items-center gap-4">
          <span class="text-3xl font-mono font-bold bg-brand px-2 border-2 border-black shadow-[4px_4px_0_0_#000]">
            {{ formatPrice(currentPrice) }}
          </span>

@@ -156,7 +156,12 @@ export class ProductsService {
                     lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : 5,
                     isActive: data.isActive ?? true,
                     categoryId: data.categoryId,
-                    images: images ?? []
+                    images: images ?? [],
+                    promotionalPrice: data.promotionalPrice !== undefined && data.promotionalPrice !== null ? String(data.promotionalPrice) : null,
+                    isPromotionActive: data.isPromotionActive ?? false,
+                    promotionStartDate: data.promotionStartDate ? new Date(data.promotionStartDate) : null,
+                    promotionEndDate: data.promotionEndDate ? new Date(data.promotionEndDate) : null,
+                    showCountdown: data.showCountdown ?? false
                 }
             })
 
@@ -326,7 +331,12 @@ export class ProductsService {
                 isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
                 categoryId: data.categoryId,
                 images: images,
-                lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : undefined
+                lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : undefined,
+                promotionalPrice: data.promotionalPrice !== undefined ? (data.promotionalPrice !== null ? String(data.promotionalPrice) : null) : undefined,
+                isPromotionActive: typeof data.isPromotionActive === 'boolean' ? data.isPromotionActive : undefined,
+                promotionStartDate: data.promotionStartDate !== undefined ? (data.promotionStartDate ? new Date(data.promotionStartDate) : null) : undefined,
+                promotionEndDate: data.promotionEndDate !== undefined ? (data.promotionEndDate ? new Date(data.promotionEndDate) : null) : undefined,
+                showCountdown: typeof data.showCountdown === 'boolean' ? data.showCountdown : undefined
             }
         })
 
@@ -364,6 +374,21 @@ export class ProductsService {
 
         if (!existing) {
             throw new Error('Product not found')
+        }
+
+        // Block deletion if product has related sale items or purchase order items
+        const variantIds = (existing.variants || []).map((v: any) => v.id)
+        if (variantIds.length > 0) {
+            const [saleItemCount, purchaseItemCount] = await Promise.all([
+                prisma.saleItem.count({ where: { tenantId, variantId: { in: variantIds } } }),
+                prisma.purchaseOrderItem.count({ where: { tenantId, variantId: { in: variantIds } } })
+            ])
+            if (saleItemCount > 0 || purchaseItemCount > 0) {
+                const err: any = new Error('HAS_TRANSACTIONS')
+                err.statusCode = 409
+                err.statusMessage = 'HAS_TRANSACTIONS'
+                throw err
+            }
         }
 
         await prisma.product.deleteMany({

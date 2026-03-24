@@ -1,25 +1,43 @@
 <template>
-  <div class="space-y-6">
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="p-6 md:p-8 flex items-start justify-between gap-6">
+  <div class="max-w-4xl mx-auto space-y-8 pb-24">
+    <div class="space-y-6">
+      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">{{ t('admin.contactInfosForm.title') }}</h2>
-          <p class="text-slate-600 mt-2 max-w-2xl">
+          <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.contactInfosForm.title') }}</h1>
+          <p class="text-slate-600 mt-1 max-w-2xl">
             {{ t('admin.contactInfosForm.subtitle') }}
           </p>
         </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            :disabled="loading"
+            @click="fetchItems"
+          >
+            {{ t('admin.common.reset') || 'Cancel' }}
+          </button>
+          
+          <button
+            type="button"
+            class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            :disabled="loading"
+            @click="addDraft"
+          >
+            <Icon name="lucide:plus" class="w-4 h-4" />
+            {{ t('admin.common.create') }}
+          </button>
 
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 disabled:opacity-50"
-          :disabled="loading"
-          @click="addDraft"
-        >
-          <Icon name="lucide:plus" class="w-4 h-4" />
-          {{ t('admin.common.create') }}
-        </button>
+          <button
+            type="button"
+            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            :disabled="loading"
+            @click="fetchItems"
+          >
+            {{ t('admin.common.saveChanges') || 'Save' }}
+          </button>
+        </div>
       </div>
-    </div>
 
     <div v-if="errorMessage" class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm">
       {{ errorMessage }}
@@ -38,7 +56,7 @@
             </div>
           </div>
 
-          <button type="button" class="text-sm text-slate-500 hover:text-slate-700" @click="draft = null">
+          <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50" @click="draft = null">
             {{ t('admin.common.cancel') }}
           </button>
         </div>
@@ -82,7 +100,7 @@
           </div>
           <button
             type="button"
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 disabled:opacity-50"
+            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             :disabled="creating || !draft.value?.trim()"
             @click="createDraft"
           >
@@ -106,9 +124,9 @@
           <div
             v-for="(item, index) in items"
             :key="item.id"
-            class="rounded-xl border border-slate-200 p-4 md:p-5"
+            class="bg-white rounded-xl border transition-all duration-200 relative group border-slate-200 hover:border-slate-300 shadow-sm"
           >
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div class="flex items-start gap-3 flex-1">
                 <div class="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0">
                   <Icon :name="kindDef(item.kind).iconName" class="w-5 h-5 text-slate-700" />
@@ -190,13 +208,38 @@
             </div>
           </div>
 
-          <div v-if="items.length === 0" class="text-sm text-slate-500">
-            {{ t('admin.contactInfosForm.items.empty') }}
+          <div v-if="items.length === 0" class="text-sm text-slate-500 text-center py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+            <Icon name="lucide:list" class="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <p class="text-slate-500 font-medium">{{ t('admin.contactInfosForm.items.empty') }}</p>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Actions Footer -->
+    <div class="fixed bottom-6 right-6 md:static md:flex md:justify-end mt-6">
+       <div class="bg-white md:bg-transparent p-2 md:p-0 rounded-full shadow-lg md:shadow-none border md:border-none border-slate-200 flex items-center gap-3">
+          <button
+            type="button"
+            class="hidden md:inline-flex px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            :disabled="loading"
+            @click="fetchItems"
+          >
+            {{ t('admin.common.reset') || 'Cancel' }}
+          </button>
+          
+          <button
+            type="button"
+            class="inline-flex px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 justify-center min-w-[140px]"
+            :disabled="loading"
+            @click="fetchItems"
+          >
+            {{ t('admin.common.saveChanges') || 'Save' }}
+          </button>
+       </div>
+    </div>
   </div>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -245,10 +288,10 @@ const fetchItems = async () => {
   loading.value = true
   errorMessage.value = ''
   try {
-    const res = await $fetch<{ items: ContactInfoItem[] }>('/api/admin/contact-infos', {
+    const res = await $fetch('/api/admin/contact-infos', {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
-    items.value = (res.items || []).slice().sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    }) as { items: ContactInfoItem[] }
+    items.value = (res.items || []).slice().sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))
   } catch (e: any) {
     console.error('Failed to load contact infos', e)
     errorMessage.value = e.data?.statusMessage || t('admin.contactInfosForm.messages.loadFailed')
@@ -266,7 +309,7 @@ const createDraft = async () => {
   creating.value = true
   errorMessage.value = ''
   try {
-    const created = await $fetch<ContactInfoItem>('/api/admin/contact-infos', {
+    const created = await $fetch('/api/admin/contact-infos', {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: {
@@ -274,8 +317,8 @@ const createDraft = async () => {
         label: draft.value.label?.trim() || null,
         value: draft.value.value
       }
-    })
-    items.value = [...items.value, created].sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    }) as ContactInfoItem
+    items.value = [...items.value, created].sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))
     useState<any[]>('contactInfos', () => []).value = items.value.filter((i) => i.isActive)
     draft.value = null
   } catch (e: any) {
@@ -291,7 +334,7 @@ const saveItem = async (item: ContactInfoItem) => {
   savingIds.value.add(item.id)
   errorMessage.value = ''
   try {
-    const updated = await $fetch<ContactInfoItem>(`/api/admin/contact-infos/${item.id}`, {
+    const updated = await $fetch(`/api/admin/contact-infos/${item.id}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: {
@@ -301,7 +344,7 @@ const saveItem = async (item: ContactInfoItem) => {
         position: item.position,
         isActive: item.isActive
       }
-    })
+    }) as ContactInfoItem
 
     items.value = items.value.map((x) => (x.id === updated.id ? { ...x, ...updated } : x))
     useState<any[]>('contactInfos', () => []).value = items.value.filter((i) => i.isActive)

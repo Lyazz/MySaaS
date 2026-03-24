@@ -27,6 +27,11 @@
       "ar": "Arabe"
     }
   },
+  "store": {
+    "countdown": {
+      "days": "Jours"
+    }
+  },
   "bundleTags": {
     "MOST_POPULAR": "Le plus populaire",
     "BEST_VALUE": "Meilleur rapport qualité/prix"
@@ -551,7 +556,20 @@
       "inStock": "En stock",
       "perUnit": "par unité",
       "descriptionFallback": "Découvrez le parfait équilibre entre style et fonctionnalité.",
-      "viewFullDetails": "Voir les détails"
+      "viewFullDetails": "Voir les détails",
+      "bestsellerBadge": "Meilleure vente",
+      "youMayAlsoLike": "Vous aimerez aussi",
+      "saleBanner": "VENTE PROLONGÉE BLACK FRIDAY - BIENTÔT FINI !",
+      "reviewsCount": "(+{count} Avis)",
+      "highDemandBadge": "Forte demande !",
+      "viewingRightNow": "{count} personnes consultent cet article.",
+      "savePercentage": "ÉCONOMISEZ {percent} %",
+      "whyChooseUs": "Pourquoi nous choisir ?",
+      "features": {
+        "delivery": "Livraison Rapide",
+        "support": "Service Client 24/7",
+        "securePayment": "Paiement Sécurisé"
+      }
     },
     "productForm": {
       "quantity": {
@@ -761,6 +779,13 @@
           "addSelected": "Ajouter la sélection"
         }
       }
+    },
+    "help": {
+      "button": "Centre d'aide",
+      "title": "Support Swekly",
+      "subtitle": "Comment pouvons-nous vous aider aujourd'hui ?",
+      "greeting": "Bonjour ! Je suis l'assistant Swekly. Comment puis-je vous aider à gérer votre boutique aujourd'hui ?",
+      "inputPlaceholder": "Tapez votre message..."
     },
     "storeSettingsForm": {
       "title": "Apparence et paramètres de la boutique",
@@ -1172,6 +1197,11 @@
           "upload": "Téléverser le logo",
           "hint": "Carré (1:1), PNG recommandé."
         },
+        "favicon": {
+          "label": "Favicon",
+          "upload": "Téléverser le favicon",
+          "hint": "Image carrée (ICO, PNG), taille recommandée 32x32px"
+        },
         "primaryColor": {
           "label": "Couleur principale",
           "hint": "Utilisée pour les boutons, liens et accents."
@@ -1192,35 +1222,58 @@
         "options": {
           "classic": {
             "label": "Classique",
-            "description": "Élégance intemporelle avec typographie serif."
+            "description": "Élégance intemporelle avec typographie serif.",
+            "storeTypes": "Vêtements, bijoux, déco d'intérieur"
           },
           "modern": {
             "label": "Minimal moderne",
-            "description": "Esthétique épurée avec accents marqués."
+            "description": "Esthétique épurée avec accents marqués.",
+            "storeTypes": "Mode, beauté, lifestyle"
           },
           "street": {
             "label": "Urbain",
-            "description": "Style énergique à fort contraste."
+            "description": "Style énergique à fort contraste.",
+            "storeTypes": "Sneakers, streetwear, éditions limitées"
           },
           "cozy": {
             "label": "Chaleureux",
-            "description": "Verts doux et formes arrondies."
+            "description": "Verts doux et formes arrondies.",
+            "storeTypes": "Bougies, cadeaux, bien-être"
           },
           "cyber": {
             "label": "Cyber futur",
-            "description": "Mode sombre avec accents néon."
+            "description": "Mode sombre avec accents néon.",
+            "storeTypes": "Tech, électronique, gaming"
           },
           "stationnery": {
             "label": "Papeterie",
-            "description": "Structure raffinée pour les professionnels."
+            "description": "Structure raffinée pour les professionnels.",
+            "storeTypes": "Livres, papeterie, bureau"
           },
           "food": {
             "label": "Marché food",
-            "description": "Vibrant et appétissant."
+            "description": "Vibrant et appétissant.",
+            "storeTypes": "Restaurants, boulangeries, épiceries"
           },
           "wellness": {
             "label": "Bien-être",
-            "description": "Organique, calme et naturel."
+            "description": "Organique, calme et naturel.",
+            "storeTypes": "Compléments, cosmétiques, bio"
+          },
+          "playful": {
+            "label": "Ludique",
+            "description": "Coloré et fun pour enfants & familles.",
+            "storeTypes": "Jouets, mode enfant, famille"
+          },
+          "activewear": {
+            "label": "Sport",
+            "description": "Dynamique et percutant pour le sport & la gym.",
+            "storeTypes": "Sport, fitness, plein air"
+          },
+          "chrono": {
+            "label": "Chrono Luxe",
+            "description": "Thème sombre de luxe avec accents dorés pour accessoires premium.",
+            "storeTypes": "Montres, lunettes, bijoux, accessoires de luxe"
           }
         }
       },
@@ -1923,6 +1976,17 @@
         "errors": {
           "loadFailed": "Impossible de charger les informations de facturation."
         },
+        "status": {
+          "pending": {
+            "title": "Paiement en cours de vérification",
+            "desc": "Nous avons bien reçu votre justificatif de paiement. Notre équipe le vérifie en ce moment. Votre abonnement sera mis à jour dès validation.",
+            "badge": "en attente"
+          },
+          "approved": {
+            "title": "Paiement approuvé",
+            "desc": "Votre dernier paiement a été validé et votre abonnement est actif."
+          }
+        },
         "currentPlan": {
           "title": "Forfait actuel",
           "hint": "Vous pouvez changer de forfait pour tester (mensuel uniquement).",
@@ -1944,6 +2008,68 @@
           "title": "Forfaits disponibles",
           "ordersPerMonth": "{count} commandes / mois",
           "perMonth": "/mois"
+        },
+        "interval": {
+          "monthly": "Facturation mensuelle",
+          "yearly": "Facturation annuelle",
+          "annual": "Annuel",
+          "save": "Économisez {pct}%"
+        },
+        "mo": "mois",
+        "yr": "an",
+        "currentPlanBadge": "Votre forfait",
+        "unlimitedOrders": "Commandes illimitées",
+        "upToOrders": "Jusqu'à {count} commandes/mois",
+        "selectedBtn": "Sélectionné",
+        "selectBtn": "Choisir ce forfait",
+        "prioritySupport": "Support prioritaire",
+        "customBranding": "Marque personnalisée & SMS",
+        "payment": {
+          "methods": {
+            "myfin": "MyFin",
+            "paysera": "Paysera",
+            "baridimob": "BaridiMob",
+            "ccp": "CCP / Poste",
+            "chargily": "Chargily (CIB/Edahabia)"
+          },
+          "emptyTitle": "Caisse",
+          "emptyDesc": "Sélectionnez un forfait dans la liste pour commencer la mise à niveau.",
+          "instructions": {
+            "myfin": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte MyFin :\nIBAN : BG98MYFI123123123\nNom : MySaaS LLC",
+            "paysera": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte Paysera :\nEmail : payments{'@'}mysaas.com\nNom : MySaaS LLC",
+            "baridimob": "Veuillez envoyer {amount} DZD via BaridiMob à :\nRIP : 00799999000000000012\nTéléphone : +213 555 55 55 55",
+            "ccp": "Veuillez déposer {amount} DZD sur notre compte CCP :\nCompte : 12345678 99\nNom : MySaaS LLC"
+          },
+          "title": "Finaliser votre abonnement",
+          "subtitle": "Sélectionnez un mode de paiement pour continuer.",
+          "totalLabel": "Total à payer",
+          "uploadProof": "Joindre le justificatif de paiement",
+          "uploadSuccess": "Justificatif joint avec succès",
+          "chargilyNote": "L'intégration automatique est actuellement indisponible. Veuillez choisir une autre méthode manuelle comme CCP ou BaridiMob.",
+          "submitBtn": "Confirmer et soumettre le paiement",
+          "submitting": "Envoi en cours…",
+          "success": "Paiement soumis ! Notre équipe va examiner votre justificatif et activer votre abonnement.",
+          "errors": {
+            "proofRequired": "Veuillez joindre un justificatif de paiement.",
+            "submitFailed": "L'envoi du paiement a échoué. Veuillez réessayer."
+          }
+        },
+        "history": {
+          "title": "Historique des paiements",
+          "entries": "entrées",
+          "col": {
+            "date": "Date",
+            "plan": "Forfait",
+            "amount": "Montant",
+            "method": "Méthode",
+            "status": "Statut",
+            "proof": "Justificatif"
+          },
+          "viewProof": "Voir"
+        },
+        "common": {
+          "uploading": "Téléversement…",
+          "clickToUpload": "Cliquez pour joindre le justificatif"
         }
       },
       "products": {
@@ -2000,7 +2126,8 @@
           "deleteModal": {
             "title": "Supprimer le produit",
             "message": "Voulez-vous vraiment supprimer « {title} » ? Cette action est irréversible.",
-            "error": "Impossible de supprimer le produit. Veuillez réessayer."
+            "error": "Impossible de supprimer le produit. Veuillez réessayer.",
+            "errorHasTransactions": "Impossible de supprimer ce produit car il est référencé par des ventes ou commandes fournisseur existantes."
           },
           "bulk": {
             "selected": "{count} sélectionné(s)",
@@ -2141,7 +2268,8 @@
             "title": "Supprimer la catégorie",
             "message": "Voulez-vous vraiment supprimer cette catégorie ? Les produits deviendront « sans catégorie ».",
             "messageWithTitle": "Voulez-vous vraiment supprimer « {title} » ? Les produits deviendront « sans catégorie ».",
-            "error": "Impossible de supprimer la catégorie. Veuillez réessayer."
+            "error": "Impossible de supprimer la catégorie. Veuillez réessayer.",
+            "errorHasProducts": "Impossible de supprimer cette catégorie car elle contient encore des produits. Déplacez ou supprimez-les d'abord."
           }
         },
         "create": {
@@ -2248,6 +2376,16 @@
             "customerPhone": "Téléphone",
             "deliveryAddress": "Adresse de livraison",
             "calledCustomer": "Client appelé ?",
+            "callStatus": "Statut d'appel",
+            "callStatusValues": {
+              "not_called": "Non appelé",
+              "called": "Appelé",
+              "no_answer": "Pas de réponse",
+              "attempt_1": "1ère tentative",
+              "attempt_2": "2ème tentative",
+              "attempt_3": "3ème tentative",
+              "switched_off": "Hors réseau"
+            },
             "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande..."
           },
           "actions": {
@@ -2338,6 +2476,13 @@
             "totalSpent": "Total dépensé",
             "lastOrder": "Dernière commande",
             "actions": "Actions"
+          },
+          "deleteModal": {
+            "title": "Supprimer le client",
+            "message": "Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.",
+            "messageWithName": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible.",
+            "error": "Impossible de supprimer le client. Veuillez réessayer.",
+            "errorHasTransactions": "Impossible de supprimer ce client car il a des ventes ou paiements existants."
           }
         },
         "create": {
@@ -2537,7 +2682,23 @@
             "supplierLabel": "Filtrer par fournisseur",
             "allSuppliers": "Tous les fournisseurs",
             "userLabel": "Filtrer par utilisateur",
-            "allUsers": "Tous les utilisateurs"
+            "allUsers": "Tous les utilisateurs",
+            "allStatuses": "Tous les statuts",
+            "statusLabel": "Statut",
+            "allPaymentStatuses": "Tous les statuts de paiement",
+            "paymentStatusLabel": "Statut de paiement",
+            "statusValues": {
+              "DRAFT": "Brouillon",
+              "ORDERED": "Commandé",
+              "PARTIALLY_RECEIVED": "Partiellement reçu",
+              "RECEIVED": "Reçu",
+              "CANCELLED": "Annulé"
+            },
+            "paymentStatusValues": {
+              "UNPAID": "Non payé",
+              "PARTIALLY_PAID": "Partiellement payé",
+              "PAID": "Payé"
+            }
           },
           "loading": "Chargement des achats…",
           "empty": {
@@ -2554,7 +2715,9 @@
             "date": "Date",
             "action": "Action",
             "itemsCount": "{count} articles",
-            "manage": "Gérer"
+            "manage": "Gérer",
+            "paymentStatus": "Statut de paiement",
+            "payment": "Paiement"
           },
           "pagination": {
             "showing": "Affichage de {from} à {to} sur {total} résultats"
@@ -2619,10 +2782,12 @@
               "removeItem": "Supprimer l’article",
               "totalOrderValue": "Valeur totale de la commande",
               "costMode": {
+                "label": "Mode de calcul prix d'achat",
                 "replace": "Dernier prix d'achat",
                 "weighted": "Coût moyen"
               },
               "salePriceMode": {
+                "label": "Mode de calcul prix de vente",
                 "replace": "Mettre à jour le prix de vente",
                 "weighted": "Moyenne pondérée"
               }
@@ -2773,7 +2938,8 @@
             "title": "Supprimer le fournisseur",
             "message": "Voulez-vous vraiment supprimer ce fournisseur ?",
             "messageWithName": "Voulez-vous vraiment supprimer le fournisseur « {name} » ?",
-            "error": "Impossible de supprimer le fournisseur. Veuillez réessayer."
+            "error": "Impossible de supprimer le fournisseur. Veuillez réessayer.",
+            "errorHasTransactions": "Impossible de supprimer ce fournisseur car il a des commandes fournisseur existantes."
           }
         },
         "create": {
@@ -2943,6 +3109,68 @@
       "confirm": {
         "suspend": "Voulez-vous vraiment suspendre {name} ?",
         "delete": "Voulez-vous vraiment SUPPRIMER {name} ? Cette action est irréversible !"
+      }
+    },
+    "paymentsPage": {
+      "title": "Paiements du tenant",
+      "subtitle": "Importer une preuve de paiement et consulter l’historique de facturation de ce tenant.",
+      "actions": {
+        "refresh": "Actualiser"
+      },
+      "import": {
+        "title": "Importer une preuve de paiement",
+        "fields": {
+          "plan": "Offre",
+          "interval": "Période",
+          "proofUrl": "URL de la preuve",
+          "proofUrlPlaceholder": "https://...",
+          "proofUrlHint": "Optionnel. Lien vers un reçu ou une capture d’écran.",
+          "externalReference": "Référence externe",
+          "externalReferencePlaceholder": "Référence du virement…",
+          "notes": "Notes",
+          "notesPlaceholder": "Ajouter des notes…"
+        },
+        "applySubscription": {
+          "label": "Appliquer l’abonnement",
+          "hint": "Si activé, l’abonnement du tenant sera mis à jour selon l’offre et la période sélectionnées."
+        },
+        "actions": {
+          "importing": "Importation…",
+          "importProof": "Importer"
+        }
+      },
+      "history": {
+        "title": "Historique des paiements",
+        "lastEntries": "{count} entrées",
+        "loading": "Chargement des paiements…",
+        "empty": "Aucun paiement",
+        "table": {
+          "date": "Date",
+          "plan": "Offre",
+          "amount": "Montant",
+          "method": "Méthode",
+          "status": "Statut",
+          "proof": "Preuve"
+        },
+        "proof": {
+          "open": "Ouvrir"
+        },
+        "actions": {
+          "approve": "Approuver",
+          "reject": "Rejeter"
+        }
+      },
+      "planOption": {
+        "ordersPerMonth": "{count} commandes/mois"
+      },
+      "interval": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel"
+      },
+      "errors": {
+        "loadFailed": "Impossible de charger les paiements",
+        "importFailed": "Impossible d’importer le paiement",
+        "reviewFailed": "Impossible de traiter le paiement"
       }
     }
   }

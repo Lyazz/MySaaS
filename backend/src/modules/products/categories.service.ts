@@ -154,13 +154,25 @@ export class CategoriesService {
     }
 
     async deleteCategory(tenantId: string, categoryId: string) {
-        const deleteResult = await prisma.category.deleteMany({
-            where: { id: categoryId, tenantId }
+        const category = await prisma.category.findFirst({
+            where: { id: categoryId, tenantId },
+            include: { _count: { select: { products: true } } }
         })
 
-        if (deleteResult.count === 0) {
+        if (!category) {
             throw new Error('Category not found')
         }
+
+        if (category._count.products > 0) {
+            const err: any = new Error('HAS_PRODUCTS')
+            err.statusCode = 409
+            err.statusMessage = 'HAS_PRODUCTS'
+            throw err
+        }
+
+        await prisma.category.deleteMany({
+            where: { id: categoryId, tenantId }
+        })
 
         return true
     }

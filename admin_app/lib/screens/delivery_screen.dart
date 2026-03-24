@@ -90,7 +90,7 @@ class DeliveryScreen extends ConsumerWidget {
                                       ),
                                     ),
                                     Text(
-                                      provider.description,
+                                      provider.description ?? '',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey[600],

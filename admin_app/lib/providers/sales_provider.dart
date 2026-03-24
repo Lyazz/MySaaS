@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/sale.dart';
 import '../services/api_service.dart';
+import '../repositories/sale_repository.dart';
 
 class SalesState {
   final List<Sale> sales;
@@ -72,38 +73,21 @@ class SalesNotifier extends Notifier<SalesState> {
 
     try {
       final api = ref.read(apiProvider);
-      final query = <String, dynamic>{
-        'page': page,
-        'limit': limit,
-        if (search != null && search.trim().isNotEmpty) 'search': search.trim(),
-        if (startDate != null) 'startDate': startDate.toIso8601String(),
-        if (endDate != null) 'endDate': endDate.toIso8601String(),
-      };
-
-      final res = await api.client.get('/admin/sales', queryParameters: query);
-      final data = res.data;
-
-      final items = (data is Map && data['items'] is List)
-          ? (data['items'] as List)
-          : const [];
-
-      final sales = items
-          .whereType<Map>()
-          .map((e) => Sale.fromJson(e.cast<String, dynamic>()))
-          .toList();
+      final repo = SaleRepository(api);
+      final result = await repo.listSales(
+        search: search,
+        startDate: startDate,
+        endDate: endDate,
+        page: page,
+        limit: limit,
+      );
 
       state = state.copyWith(
         isLoading: false,
-        sales: sales,
-        page: (data is Map && data['page'] is num)
-            ? (data['page'] as num).toInt()
-            : page,
-        totalPages: (data is Map && data['totalPages'] is num)
-            ? (data['totalPages'] as num).toInt()
-            : 1,
-        total: (data is Map && data['total'] is num)
-            ? (data['total'] as num).toInt()
-            : sales.length,
+        sales: result.items,
+        page: result.page,
+        totalPages: result.totalPages,
+        total: result.total,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _formatApiError(e));

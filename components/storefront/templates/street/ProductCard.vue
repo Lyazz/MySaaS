@@ -6,6 +6,26 @@ const props = defineProps<{
     viewMode?: 'grid' | 'list'
 }>()
 
+
+const isPromoValid = computed(() => {
+    if (!props.product?.isPromotionActive) return false
+    const now = new Date().getTime()
+    if (props.product.promotionStartDate && new Date(props.product.promotionStartDate).getTime() > now) return false
+    if (props.product.promotionEndDate && new Date(props.product.promotionEndDate).getTime() < now) return false
+    return true
+})
+
+const originalPrice = computed(() => {
+    return Number(props.product.price)
+})
+
+const displayPrice = computed(() => {
+    if (isPromoValid.value && props.product.promotionalPrice) {
+        return Number(props.product.promotionalPrice)
+    }
+    return originalPrice.value
+})
+
 const cartStore = useCartStore()
 const { format: formatPrice } = useCurrency()
 const { currencyCode } = useCurrency()
@@ -81,11 +101,23 @@ function handleAddToCart() {
             >
                 {{ storefrontContent.actions.addToCart }}
             </button>
+        
+      <!-- Countdown Overlay -->
+      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
+        <div class="scale-[0.85] sm:scale-90 origin-bottom">
+          <StorefrontSharedCountdownTimer
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            :show-icon="true"
+          />
         </div>
+      </div>
+    </div>
 
         <!-- Details -->
         <div class="p-4 flex flex-col flex-grow">
-            <h3 class="font-street text-2xl leading-none mb-2 uppercase truncate">
+            
+<h3 class="font-street text-2xl leading-none mb-2 uppercase truncate">
                 <NuxtLink :to="`/p/${product.slug}`">
                     {{ product.title }}
                 </NuxtLink>

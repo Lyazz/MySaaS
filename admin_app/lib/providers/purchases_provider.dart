@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/api_service.dart';
 import '../models/purchase.dart';
+import '../repositories/purchase_repository.dart';
 
 class PurchasesState {
   final List<Purchase> purchases;
@@ -36,20 +37,12 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      final queryParams = <String, dynamic>{};
-      if (startDate != null) {
-        queryParams['startDate'] = startDate.toIso8601String();
-      }
-      if (endDate != null) {
-        queryParams['endDate'] = endDate.toIso8601String();
-      }
+      final repo = PurchaseRepository(apiService);
 
-      final response = await apiService.client.get(
-        '/admin/purchases',
-        queryParameters: queryParams,
+      final purchases = await repo.getPurchases(
+        startDate: startDate,
+        endDate: endDate,
       );
-      final List<dynamic> data = response.data;
-      final purchases = data.map((e) => Purchase.fromJson(e)).toList();
       state = state.copyWith(isLoading: false, purchases: purchases);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -57,19 +50,13 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
   }
 
   Future<Purchase?> fetchPurchase(String id) async {
-    // Check if we already have it in state
-    final existing = state.purchases.where((p) => p.id == id).firstOrNull;
-    if (existing != null && existing.items.isNotEmpty) {
-      // If we have items, it might be detailed enough, but let's refresh to be safe
-      // or duplicate return for immediate UI then fetch background
-    }
-
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/purchases/$id');
-      final purchase = Purchase.fromJson(response.data);
+      final repo = PurchaseRepository(apiService);
 
-      // Update local state by replacing the purchase or adding it
+      final purchase = await repo.getPurchase(id);
+      if (purchase == null) return null;
+
       final updatedPurchases = [
         for (final p in state.purchases)
           if (p.id == id) purchase else p,
@@ -93,15 +80,13 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      // We send supplierId. The backend should handle creating the draft.
-      // supplierName is passed to this method because the UI has it,
-      // but the backend likely looks it up or stores it.
-      final response = await apiService.client.post(
-        '/admin/purchases',
-        data: {'supplierId': supplierId},
+      final repo = PurchaseRepository(apiService);
+
+      final newPurchase = await repo.createDraftPurchase(
+        supplierId,
+        supplierName,
       );
 
-      final newPurchase = Purchase.fromJson(response.data);
       state = state.copyWith(
         isLoading: false,
         purchases: [newPurchase, ...state.purchases],
@@ -116,16 +101,8 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
   Future<void> addPurchaseItem(String purchaseId, PurchaseItem item) async {
     try {
       final apiService = ref.read(apiProvider);
-      await apiService.client.post(
-        '/admin/purchases/$purchaseId/items',
-        data: {
-          'variantId': item
-              .productId, // Using productId as variantId based on model update
-          'quantityOrdered': item.quantityOrdered,
-          'unitCost': item.unitCost,
-        },
-      );
-      // Refresh the purchase to get updated items and totals
+      final repo = PurchaseRepository(apiService);
+      await repo.addPurchaseItem(purchaseId, item);
       await fetchPurchase(purchaseId);
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -141,14 +118,12 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
   }) async {
     try {
       final apiService = ref.read(apiProvider);
-      await apiService.client.post(
-        '/admin/purchases/$purchaseId/receive',
-        data: {
-          'salePriceMode': salePriceMode,
-          'items': [
-            {'itemId': itemId, 'quantityReceived': quantityReceived},
-          ],
-        },
+      final repo = PurchaseRepository(apiService);
+      await repo.receiveItem(
+        purchaseId,
+        itemId,
+        quantityReceived,
+        salePriceMode: salePriceMode,
       );
       await fetchPurchase(purchaseId);
     } catch (e) {
@@ -165,13 +140,12 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
   }) async {
     try {
       final apiService = ref.read(apiProvider);
-      final data = <String, dynamic>{};
-      if (quantity != null) data['quantityOrdered'] = quantity;
-      if (cost != null) data['unitCost'] = cost;
-
-      await apiService.client.put(
-        '/admin/purchases/$purchaseId/items/$itemId',
-        data: data,
+      final repo = PurchaseRepository(apiService);
+      await repo.updatePurchaseItem(
+        purchaseId,
+        itemId,
+        quantity: quantity,
+        cost: cost,
       );
       await fetchPurchase(purchaseId);
     } catch (e) {
@@ -183,9 +157,8 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
   Future<void> removePurchaseItem(String purchaseId, String itemId) async {
     try {
       final apiService = ref.read(apiProvider);
-      await apiService.client.delete(
-        '/admin/purchases/$purchaseId/items/$itemId',
-      );
+      final repo = PurchaseRepository(apiService);
+      await repo.removePurchaseItem(purchaseId, itemId);
       await fetchPurchase(purchaseId);
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -197,7 +170,8 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      await apiService.client.delete('/admin/purchases/$id');
+      final repo = PurchaseRepository(apiService);
+      await repo.deletePurchase(id);
 
       final updatedPurchases = state.purchases
           .where((p) => p.id != id)
@@ -212,10 +186,8 @@ class PurchasesNotifier extends Notifier<PurchasesState> {
   Future<void> updateStatus(String id, String status) async {
     try {
       final apiService = ref.read(apiProvider);
-      await apiService.client.patch(
-        '/admin/purchases/$id/status',
-        data: {'status': status},
-      );
+      final repo = PurchaseRepository(apiService);
+      await repo.updateStatus(id, status);
       await fetchPurchase(id);
     } catch (e) {
       state = state.copyWith(error: e.toString());

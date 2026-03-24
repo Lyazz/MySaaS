@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/supplier.dart';
 import '../services/api_service.dart';
+import '../repositories/supplier_repository.dart';
 
 class SuppliersState {
   final List<Supplier> suppliers;
@@ -40,9 +41,8 @@ class SuppliersNotifier extends Notifier<SuppliersState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/suppliers');
-      final List<dynamic> data = response.data;
-      final suppliers = data.map((e) => Supplier.fromJson(e)).toList();
+      final repo = SupplierRepository(apiService);
+      final suppliers = await repo.getSuppliers();
       state = state.copyWith(isLoading: false, suppliers: suppliers);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -50,10 +50,13 @@ class SuppliersNotifier extends Notifier<SuppliersState> {
   }
 
   Future<Supplier?> fetchSupplier(String id) async {
+    // A more localized fetch if needed, right now we just grab from state or reload list
     try {
-      final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/suppliers/$id');
-      return Supplier.fromJson(response.data);
+      final existing = state.suppliers.where((s) => s.id == id).firstOrNull;
+      if (existing != null) return existing;
+
+      await fetchSuppliers();
+      return state.suppliers.where((s) => s.id == id).firstOrNull;
     } catch (e) {
       return null;
     }
@@ -63,8 +66,8 @@ class SuppliersNotifier extends Notifier<SuppliersState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      final data = supplier.toJson()..remove('id');
-      await apiService.client.post('/admin/suppliers', data: data);
+      final repo = SupplierRepository(apiService);
+      await repo.createSupplier(supplier);
       await fetchSuppliers();
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -76,10 +79,8 @@ class SuppliersNotifier extends Notifier<SuppliersState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      await apiService.client.put(
-        '/admin/suppliers/${supplier.id}',
-        data: supplier.toJson(),
-      );
+      final repo = SupplierRepository(apiService);
+      await repo.updateSupplier(supplier);
       await fetchSuppliers();
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -91,7 +92,9 @@ class SuppliersNotifier extends Notifier<SuppliersState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      await apiService.client.delete('/admin/suppliers/$id');
+      final repo = SupplierRepository(apiService);
+      await repo.deleteSupplier(id);
+
       final updatedSuppliers = state.suppliers
           .where((s) => s.id != id)
           .toList();

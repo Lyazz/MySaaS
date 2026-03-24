@@ -383,4 +383,24 @@ export class CustomersService {
             select: { id: true, phone: true, name: true, email: true, address: true, openingBalance: true }
         })
     }
+
+    async delete(tenantId: string, id: string) {
+        const existing = await prisma.customer.findUnique({
+            where: { tenantId_id: { tenantId, id } },
+            select: { id: true }
+        })
+        if (!existing) throw new CustomerValidationError(404, 'Customer not found')
+
+        // Block deletion if customer has linked sales or payments
+        const [saleCount, paymentCount] = await Promise.all([
+            prisma.sale.count({ where: { tenantId, customerId: id } }),
+            prisma.customerPayment.count({ where: { tenantId, customerId: id } })
+        ])
+        if (saleCount > 0 || paymentCount > 0) {
+            throw new CustomerValidationError(409, 'HAS_TRANSACTIONS')
+        }
+
+        await prisma.customer.delete({ where: { tenantId_id: { tenantId, id } } })
+        return { success: true }
+    }
 }

@@ -261,6 +261,74 @@
             </div>
           </div>
 
+          <!-- Promotions Tab -->
+          <div
+            v-show="currentTab === 'promotions'"
+            class="space-y-6"
+          >
+            <!-- Active Status -->
+            <div class="flex items-center">
+              <input
+                id="isPromotionActive"
+                v-model="form.isPromotionActive"
+                type="checkbox"
+                class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+              >
+              <label
+                for="isPromotionActive"
+                class="ml-2 block text-sm text-gray-900"
+              >
+                {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
+              </label>
+            </div>
+
+            <!-- Promotional Price -->
+            <div v-if="form.isPromotionActive" class="space-y-6">
+              <BaseInput
+                v-model.number="form.promotionalPrice"
+                :label="t('admin.forms.product.promotionalPrice.label', 'Prix promotionnel')"
+                :error="errors.promotionalPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+                :placeholder="t('admin.forms.product.promotionalPrice.placeholder', 'Nouveau prix')"
+              />
+
+              <!-- Start Date -->
+              <BaseInput
+                v-model="form.promotionStartDate"
+                :label="t('admin.forms.product.promotionStartDate.label', 'Date de début (optionnel)')"
+                :error="errors.promotionStartDate"
+                type="datetime-local"
+              />
+
+              <!-- End Date -->
+              <BaseInput
+                v-model="form.promotionEndDate"
+                :label="t('admin.forms.product.promotionEndDate.label', 'Date de fin (requis pour le compte à rebours)')"
+                :error="errors.promotionEndDate"
+                type="datetime-local"
+              />
+
+              <!-- Show Countdown -->
+              <div class="flex items-center">
+                <input
+                  id="showCountdown"
+                  v-model="form.showCountdown"
+                  type="checkbox"
+                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                >
+                <label
+                  for="showCountdown"
+                  class="ml-2 block text-sm text-gray-900"
+                >
+                  {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
+                </label>
+              </div>
+            </div>
+          </div>
+
           <!-- Landing Page Description Tab -->
           <div
             v-show="currentTab === 'description'"
@@ -588,7 +656,12 @@ const form = ref({
   lowStockThreshold: 5,
   categoryId: '',
   isActive: true,
-  images: [] as string[] // Legacy field for backwards compatibility
+  images: [] as string[], // Legacy field for backwards compatibility
+  promotionalPrice: null as number | null,
+  isPromotionActive: false,
+  promotionStartDate: '',
+  promotionEndDate: '',
+  showCountdown: false
 })
 
 const options = ref<any[]>([])
@@ -613,6 +686,7 @@ const categories = ref<Category[]>([])
 // Tabs configuration
 const tabs = computed(() => ([
   { id: 'general', name: t('admin.pages.products.edit.tabs.general') },
+  { id: 'promotions', name: t('admin.pages.products.edit.tabs.promotions', 'Promotions') },
   { id: 'description', name: t('admin.pages.products.edit.tabs.description') },
   { id: 'variants', name: t('admin.pages.products.edit.tabs.variants') },
   { id: 'bundles', name: t('admin.pages.products.edit.tabs.bundles') },
@@ -646,7 +720,12 @@ async function fetchProduct() {
       lowStockThreshold: data.lowStockThreshold ?? 5,
       categoryId: data.categoryId || '',
       isActive: data.isActive,
-      images: data.images || []
+      images: data.images || [],
+      promotionalPrice: data.promotionalPrice ? Number(data.promotionalPrice) : null,
+      isPromotionActive: data.isPromotionActive ?? false,
+      promotionStartDate: data.promotionStartDate ? new Date(data.promotionStartDate).toISOString().slice(0, 16) : '',
+      promotionEndDate: data.promotionEndDate ? new Date(data.promotionEndDate).toISOString().slice(0, 16) : '',
+      showCountdown: data.showCountdown ?? false
     }
 
     options.value = data.options || []
@@ -811,16 +890,21 @@ async function handleSubmit() {
 
   try {
     // First update basic product info
-	    const payload: any = {
-	      title: form.value.title,
-	      slug: form.value.slug,
-	      miniDescription: form.value.miniDescription || null,
-	      description: form.value.description || null,
-	      price: form.value.price,
-	      isActive: form.value.isActive,
-	      lowStockThreshold: Number(form.value.lowStockThreshold),
-	      images: productImages.value.map(img => img.url) // Keep legacy images in sync
-	    }
+    const payload: any = {
+      title: form.value.title,
+      slug: form.value.slug,
+      miniDescription: form.value.miniDescription || null,
+      description: form.value.description || null,
+      price: form.value.price,
+      isActive: form.value.isActive,
+      lowStockThreshold: Number(form.value.lowStockThreshold),
+      images: productImages.value.map(img => img.url), // Keep legacy images in sync
+      promotionalPrice: form.value.isPromotionActive && form.value.promotionalPrice ? Number(form.value.promotionalPrice) : null,
+      isPromotionActive: form.value.isPromotionActive,
+      promotionStartDate: form.value.isPromotionActive && form.value.promotionStartDate ? new Date(form.value.promotionStartDate).toISOString() : null,
+      promotionEndDate: form.value.isPromotionActive && form.value.promotionEndDate ? new Date(form.value.promotionEndDate).toISOString() : null,
+      showCountdown: form.value.isPromotionActive && form.value.showCountdown
+    }
 
     if (form.value.categoryId) {
       payload.categoryId = form.value.categoryId
@@ -859,8 +943,10 @@ async function handleSubmit() {
       }
     }
 
-    // Redirect to products list
-    router.push('/admin/products')
+    // Show success toast instead of redirecting
+    const { showToast } = useToast()
+    showToast(t('admin.common.saved') || 'Product updated successfully', 'success')
+
   } catch (error: any) {
     console.error('Failed to update product:', error)
     
@@ -961,17 +1047,4 @@ async function saveProductMetaPixels() {
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-    height: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #c7c7cc;
-    border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #a1a1aa;
-}
 </style>

@@ -16,9 +16,10 @@ import '../providers/customers_provider.dart';
 import '../widgets/numpad_widget.dart';
 import '../widgets/shimmer_skeleton.dart';
 import '../widgets/smart_cash_suggestions.dart';
-import '../widgets/form/form_input.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/offline_banner.dart';
+import '../widgets/form/form_input.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -934,14 +935,21 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9), // Slate 100
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 900) {
-            return _buildMobileLayout(posState);
-          } else {
-            return _buildDesktopLayout(posState);
-          }
-        },
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < 900) {
+                  return _buildMobileLayout(posState);
+                } else {
+                  return _buildDesktopLayout(posState);
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1258,6 +1266,17 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                   ),
                   child: PopupMenuButton<int>(
+                    tooltip: 'Grid Columns (${posState.crossAxisCount})',
+                    onSelected: (value) => notifier.setCrossAxisCount(value),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(value: 3, child: Text('3 Columns')),
+                      const PopupMenuItem(value: 4, child: Text('4 Columns')),
+                      const PopupMenuItem(value: 5, child: Text('5 Columns')),
+                      const PopupMenuItem(value: 6, child: Text('6 Columns')),
+                    ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Container(
                       width: 48,
                       height: 48,
@@ -1282,17 +1301,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           ),
                         ],
                       ),
-                    ),
-                    tooltip: 'Grid Columns (${posState.crossAxisCount})',
-                    onSelected: (value) => notifier.setCrossAxisCount(value),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(value: 3, child: Text('3 Columns')),
-                      const PopupMenuItem(value: 4, child: Text('4 Columns')),
-                      const PopupMenuItem(value: 5, child: Text('5 Columns')),
-                      const PopupMenuItem(value: 6, child: Text('6 Columns')),
-                    ],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),

@@ -11,7 +11,7 @@ const firstString = (value: unknown): string | null => {
 }
 
 export class BillingAdminController {
-    constructor(private readonly service = new BillingAdminService()) {}
+    constructor(private readonly service = new BillingAdminService()) { }
 
     async listTenantPayments(req: Request, res: Response) {
         const user = req.user
@@ -31,6 +31,16 @@ export class BillingAdminController {
             return res.json({ payments })
         } catch (error) {
             console.error('List tenant payments error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
+    async listPendingPayments(req: Request, res: Response) {
+        try {
+            const payments = await this.service.listPendingPayments()
+            return res.json({ payments })
+        } catch (error) {
+            console.error('List pending payments error', error)
             return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
     }
@@ -117,6 +127,48 @@ export class BillingAdminController {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid planCode' })
             }
             console.error('Set tenant subscription error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
+    async reviewPayment(req: Request, res: Response) {
+        const user = req.user
+        const tenantId = firstString((req.params as any)?.tenantId)
+        const paymentId = firstString((req.params as any)?.paymentId)
+        const { status } = req.body ?? {}
+
+        if (!tenantId) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Missing tenantId' })
+        }
+        if (!paymentId) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Missing paymentId' })
+        }
+        if (status !== 'PAID' && status !== 'REJECTED') {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid status. Must be PAID or REJECTED' })
+        }
+
+        try {
+            const payment = await this.service.reviewPayment({
+                tenantId,
+                paymentId,
+                status,
+                reviewedByUserId: user?.id
+            })
+
+            await logAction({
+                action: 'REVIEW_PAYMENT',
+                details: `Reviewed payment ${paymentId} for tenant ${tenantId} (${status})`,
+                userId: user?.id,
+                targetId: payment.id,
+                tenantId
+            })
+
+            return res.json(payment)
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Payment not found') {
+                return res.status(404).json({ statusCode: 404, statusMessage: 'Payment not found' })
+            }
+            console.error('Review payment error', error)
             return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
     }

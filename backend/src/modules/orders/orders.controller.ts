@@ -46,7 +46,7 @@ export class OrdersController {
             const tenant = req.tenant!
             const user = req.user
             const { id } = req.params
-            const { status, cashboxId, method, reference, note, calledCustomer, internalNotes } = req.body ?? {}
+            const { status, cashboxId, method, reference, note, callStatus, internalNotes } = req.body ?? {}
 
             if (!id || Array.isArray(id)) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
@@ -58,7 +58,7 @@ export class OrdersController {
                     id,
                     status,
                     { userId: user?.id ?? null },
-                    { cashboxId, method, reference, note, calledCustomer, internalNotes }
+                    { cashboxId, method, reference, note, callStatus, internalNotes }
                 )
                 res.json(updated)
             } catch (err) {

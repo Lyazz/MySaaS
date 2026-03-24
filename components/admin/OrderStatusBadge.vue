@@ -1,6 +1,6 @@
-<template>
+  <template>
   <span :class="badgeClasses">
-    {{ status }}
+    {{ label }}
   </span>
 </template>
 
@@ -10,6 +10,21 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { t } = useI18n({ useScope: 'global' })
+
+const statusKeys: Record<string, string> = {
+  PENDING: 'admin.orderStatus.pending',
+  CONFIRMED: 'admin.orderStatus.confirmed',
+  SHIPPED: 'admin.orderStatus.shipped',
+  DELIVERED: 'admin.orderStatus.delivered',
+  CANCELLED: 'admin.orderStatus.cancelled',
+  RETURNED: 'admin.orderStatus.returned'
+}
+
+const label = computed(() => {
+  const key = statusKeys[String(props.status || '').toUpperCase()]
+  return key ? t(key) : props.status
+})
 
 const badgeClasses = computed(() => {
   const baseClasses = 'ui-badge'

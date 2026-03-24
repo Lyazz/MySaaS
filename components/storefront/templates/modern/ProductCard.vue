@@ -10,6 +10,12 @@ interface Product {
   isActive: boolean
   images?: string[]
   description?: string
+  isPromotionActive?: boolean
+  promotionalPrice?: number | string | null
+  promotionStartDate?: string | Date | null
+  promotionEndDate?: string | Date | null
+  showCountdown?: boolean
+  bundleDeals?: any[]
 }
 
 const props = defineProps<{
@@ -31,12 +37,20 @@ const mainImage = computed(() => {
     return 'https://placehold.co/400x550'
 })
 
-// TODO: Replace with real discount logic when available in backend
-const discount = 0 
-const oldPrice = computed(() => {
-    return null
-    // const p = Number(props.product.price)
-    // return Math.round(p * 1.33)
+const isPromoValid = computed(() => {
+    if (!props.product?.isPromotionActive) return false
+    const now = new Date().getTime()
+    if (props.product.promotionStartDate && new Date(props.product.promotionStartDate).getTime() > now) return false
+    if (props.product.promotionEndDate && new Date(props.product.promotionEndDate).getTime() < now) return false
+    return true
+})
+
+const displayPrice = computed(() => {
+    return (isPromoValid.value && props.product.promotionalPrice) ? Number(props.product.promotionalPrice) : Number(props.product.price)
+})
+
+const originalPrice = computed(() => {
+    return (isPromoValid.value && props.product.promotionalPrice) ? Number(props.product.price) : null
 })
 
 const isNew = computed(() => {
@@ -65,7 +79,7 @@ function handleAddToCart() {
     productId: props.product.id,
     title: props.product.title,
     slug: props.product.slug,
-    price: Number(props.product.price),
+    price: displayPrice.value,
     bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
     image: mainImage.value,
@@ -115,9 +129,9 @@ function handleAddToCart() {
           class="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90"
         >New</span>
         <span
-          v-if="discount > 0"
-          class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90"
-        >-{{ discount }}%</span>
+          v-if="isPromoValid"
+          class="px-2.5 py-1 bg-red-600 text-white text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90"
+        >-{{ Math.round(((Number(product.price) - Number(product.promotionalPrice)) / Number(product.price)) * 100) }}%</span>
       </div>
 
       <!-- Floating Actions (Right) -->
@@ -172,6 +186,17 @@ function handleAddToCart() {
           Out of Stock
         </span>
       </div>
+    
+      <!-- Countdown Overlay -->
+      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
+        <div class="scale-[0.85] sm:scale-90 origin-bottom">
+          <StorefrontSharedCountdownTimer
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            :show-icon="true"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Details -->
@@ -202,14 +227,14 @@ function handleAddToCart() {
         class="flex items-center gap-2" 
         :class="[ viewMode === 'list' ? '' : 'justify-center mt-1' ]"
       >
-        <span class="text-lg font-bold text-slate-900">{{ Number(product.price).toLocaleString() }} <span class="text-xs font-normal text-slate-500">{{ currencyCode }}</span></span>
+        <span class="text-lg font-bold text-slate-900">{{ displayPrice.toLocaleString() }} <span class="text-xs font-normal text-slate-500">{{ currencyCode }}</span></span>
         <span
-          v-if="oldPrice"
+          v-if="originalPrice"
           class="text-xs text-slate-400 line-through"
-        >{{ oldPrice }} {{ currencyCode }}</span>
+        >{{ originalPrice.toLocaleString() }} {{ currencyCode }}</span>
       </div>
-      
-      <!-- List View Extra Actions -->
+
+<!-- List View Extra Actions -->
        <div v-if="viewMode === 'list'" class="mt-4 flex gap-3">
           <button 
              v-if="storeSettings?.cartEnabled !== false"

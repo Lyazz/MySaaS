@@ -1152,6 +1152,21 @@
               </div>
             </div>
 
+            <div class="sm:col-span-2" v-if="supplierPaymentForm.supplierId">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Purchase Order (Optional)
+              </label>
+              <div class="flex items-center gap-2">
+                <BaseSelect v-model="supplierPaymentForm.purchaseOrderId" class="flex-1" :disabled="loadingSupplierPOs">
+                  <option value="">No specific order</option>
+                  <option v-for="po in supplierPurchaseOrders" :key="po.id" :value="po.id">
+                    {{ po.reference || po.id.substring(0, 8) }} — Total: {{ po.totalAmount }}, Paid: {{ po.paidAmount }}, Status: {{ po.status }} / {{ po.paymentStatus }}
+                  </option>
+                </BaseSelect>
+                <div v-if="loadingSupplierPOs" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600" />
+              </div>
+            </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
                 {{ t('admin.pages.cash.modals.supplierPayment.amountLabel') }}
@@ -1677,6 +1692,7 @@ const supplierPaymentOpen = ref(false)
 const supplierPaymentForm = reactive({
   cashboxId: '',
   supplierId: '',
+  purchaseOrderId: '',
   amount: '',
   method: 'CASH',
   reference: '',
@@ -1684,6 +1700,35 @@ const supplierPaymentForm = reactive({
 })
 const supplierSearch = ref('')
 const suppliers = ref<SupplierOption[]>([])
+const supplierPurchaseOrders = ref<any[]>([])
+const loadingSupplierPOs = ref(false)
+
+const fetchSupplierPurchaseOrders = async (supplierId: string) => {
+  if (!supplierId) {
+    supplierPurchaseOrders.value = []
+    return
+  }
+  loadingSupplierPOs.value = true
+  try {
+    supplierPurchaseOrders.value = await $fetch<any[]>(`/api/admin/purchases?supplierId=${supplierId}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+  } catch (e) {
+    console.error('Fetch supplier POs failed:', e)
+    supplierPurchaseOrders.value = []
+  } finally {
+    loadingSupplierPOs.value = false
+  }
+}
+
+watch(() => supplierPaymentForm.supplierId, (newId) => {
+  supplierPaymentForm.purchaseOrderId = ''
+  if (newId) {
+    fetchSupplierPurchaseOrders(newId)
+  } else {
+    supplierPurchaseOrders.value = []
+  }
+})
 
 const filteredSuppliers = computed(() => {
   const q = supplierSearch.value.trim().toLowerCase()
@@ -2002,6 +2047,7 @@ function openCustomerPaymentModal() {
 async function openSupplierPaymentModal() {
   supplierPaymentForm.cashboxId = ''
   supplierPaymentForm.supplierId = ''
+  supplierPaymentForm.purchaseOrderId = ''
   supplierPaymentForm.amount = ''
   supplierPaymentForm.method = 'CASH'
   supplierPaymentForm.reference = ''
@@ -2052,6 +2098,7 @@ async function submitSupplierPayment() {
         direction: 'OUT',
         amount: supplierPaymentForm.amount,
         supplierId: supplierPaymentForm.supplierId,
+        purchaseOrderId: supplierPaymentForm.purchaseOrderId || undefined,
         method: supplierPaymentForm.method,
         reference: supplierPaymentForm.reference,
         note: supplierPaymentForm.note

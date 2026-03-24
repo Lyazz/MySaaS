@@ -14,18 +14,23 @@ const htmlLang = computed(() => {
   return 'en-US'
 })
 
-useHead({
-  htmlAttrs: {
-    lang: htmlLang,
-    dir: htmlDir
-  }
-})
-
 // Initialize tenant state globally
 const event = useRequestEvent()
 const tenant = useState('tenant', () => event?.context.tenant)
 const storeSettings = useState<any>('storeSettings', () => event?.context.storeSettings)
 const facebookPixelId = useState<string | null>('facebookPixelId', () => (event?.context as any)?.facebookPixelId ?? null)
+
+const faviconUrl = computed(() => storeSettings.value?.faviconUrl || '/favicon.ico')
+
+useHead({
+  htmlAttrs: {
+    lang: htmlLang,
+    dir: htmlDir
+  },
+  link: [
+    { rel: 'icon', type: 'image/x-icon', href: faviconUrl }
+  ]
+})
 
 // Store default language should be applied when user has no locale cookie yet.
 const localeCookie = useCookie<string | null>('i18n_redirected', { default: () => null })

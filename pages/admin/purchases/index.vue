@@ -21,7 +21,7 @@
 
     <!-- Filters -->
     <div class="ui-card p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
            <BaseSelect
             v-model="selectedSupplier"
@@ -47,6 +47,32 @@
             v-model:startDate="startDate"
             v-model:endDate="endDate"
           />
+        </div>
+        <div>
+           <BaseSelect
+            v-model="selectedStatus"
+            :label="t('admin.pages.purchases.index.filters.statusLabel')"
+            :placeholder="t('admin.pages.purchases.index.filters.allStatuses')"
+          >
+            <option value="">{{ t('admin.pages.purchases.index.filters.allStatuses') }}</option>
+            <option value="DRAFT">{{ t('admin.pages.purchases.index.filters.statusValues.DRAFT') }}</option>
+            <option value="ORDERED">{{ t('admin.pages.purchases.index.filters.statusValues.ORDERED') }}</option>
+            <option value="PARTIALLY_RECEIVED">{{ t('admin.pages.purchases.index.filters.statusValues.PARTIALLY_RECEIVED') }}</option>
+            <option value="RECEIVED">{{ t('admin.pages.purchases.index.filters.statusValues.RECEIVED') }}</option>
+            <option value="CANCELLED">{{ t('admin.pages.purchases.index.filters.statusValues.CANCELLED') }}</option>
+          </BaseSelect>
+        </div>
+        <div>
+           <BaseSelect
+            v-model="selectedPaymentStatus"
+            :label="t('admin.pages.purchases.index.filters.paymentStatusLabel')"
+            :placeholder="t('admin.pages.purchases.index.filters.allPaymentStatuses')"
+          >
+            <option value="">{{ t('admin.pages.purchases.index.filters.allPaymentStatuses') }}</option>
+            <option value="UNPAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.UNPAID') }}</option>
+            <option value="PARTIALLY_PAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.PARTIALLY_PAID') }}</option>
+            <option value="PAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.PAID') }}</option>
+          </BaseSelect>
         </div>
         <div class="hidden">
           <p class="text-sm text-gray-500">
@@ -115,6 +141,12 @@
                 {{ t('admin.pages.purchases.index.table.status') }}
               </th>
               <th class="ui-th">
+                {{ t('admin.pages.purchases.index.table.paymentStatus') }}
+              </th>
+              <th class="ui-th">
+                {{ t('admin.pages.purchases.index.table.payment') }}
+              </th>
+              <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.items') }}
               </th>
               <th class="ui-th">
@@ -166,6 +198,14 @@
                 <span :class="getStatusClass(order.status)">
                   {{ order.status }}
                 </span>
+              </td>
+              <td class="ui-td whitespace-nowrap">
+                <span :class="getPaymentStatusClass(order.paymentStatus)">
+                  {{ order.paymentStatus }}
+                </span>
+              </td>
+              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                {{ formatCurrency(Number(order.paidAmount || 0)) }} / {{ formatCurrency(Number(order.totalAmount || calculateTotal(order))) }}
               </td>
               <td class="ui-td whitespace-nowrap text-sm text-slate-600">
                 {{ t('admin.pages.purchases.index.table.itemsCount', { count: order.items?.length || 0 }) }}
@@ -270,6 +310,9 @@ type Supplier = { id: string; name: string }
 type PurchaseOrder = {
   id: string
   status: string
+  paymentStatus: string
+  totalAmount: any
+  paidAmount: any
   createdAt: string
   supplier: Supplier | null
   items: any[]
@@ -285,6 +328,8 @@ const orders = ref<PurchaseOrder[]>([])
 const loading = ref(true)
 const selectedSupplier = ref('')
 const selectedUser = ref('')
+const selectedStatus = ref('')
+const selectedPaymentStatus = ref('')
 const today = new Date()
 const lastWeek = new Date(today)
 lastWeek.setDate(lastWeek.getDate() - 7)
@@ -332,7 +377,9 @@ const fetchOrders = async () => {
       query: {
         startDate: startDate.value || undefined,
         endDate: endDate.value || undefined,
-        userId: selectedUser.value || undefined
+        userId: selectedUser.value || undefined,
+        status: selectedStatus.value || undefined,
+        paymentStatus: selectedPaymentStatus.value || undefined
       }
     }) as PurchaseOrder[]
   } catch (e: any) {
@@ -354,11 +401,24 @@ const getStatusClass = (status: string) => {
     case 'completed':
     case 'received':
       return base + 'ui-badge--emerald'
+    case 'partially_received':
     case 'pending':
     case 'ordered':
       return base + 'ui-badge--amber'
     case 'cancelled':
       return base + 'ui-badge--red'
+    default:
+      return base + 'ui-badge--slate'
+  }
+}
+
+const getPaymentStatusClass = (status: string) => {
+  const base = 'ui-badge '
+  switch (status?.toLowerCase()) {
+    case 'paid':
+      return base + 'ui-badge--emerald'
+    case 'partially_paid':
+      return base + 'ui-badge--amber'
     default:
       return base + 'ui-badge--slate'
   }
@@ -371,6 +431,11 @@ watch([startDate, endDate], () => {
 })
 
 watch(selectedUser, () => {
+    currentPage.value = 1
+    fetchOrders()
+})
+
+watch([selectedStatus, selectedPaymentStatus], () => {
     currentPage.value = 1
     fetchOrders()
 })

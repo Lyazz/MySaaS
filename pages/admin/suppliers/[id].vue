@@ -18,9 +18,28 @@
     </nav>
 
     <!-- Header -->
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.suppliers.edit.title') }}</h2>
-      <p class="text-gray-600 mt-1">{{ t('admin.pages.suppliers.edit.subtitle') }}</p>
+    <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.suppliers.edit.title') }}</h2>
+        <p class="text-gray-600 mt-1">{{ t('admin.pages.suppliers.edit.subtitle') }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <NuxtLink
+          to="/admin/suppliers"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          {{ t('admin.common.cancel') }}
+        </NuxtLink>
+        <button
+          form="supplier-edit-form"
+          type="submit"
+          :disabled="submitting || loading"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+        >
+          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+          {{ submitting ? t('admin.common.saving') : t('admin.common.saveChanges') }}
+        </button>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -30,7 +49,7 @@
     </div>
 
     <!-- Form -->
-    <form v-else class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
+    <form v-else id="supplier-edit-form" class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <BaseInput
           v-model="form.name"
@@ -85,12 +104,11 @@
           {{ t('admin.common.cancel') }}
         </NuxtLink>
         <button
-          type="button"
+          type="submit"
           :disabled="submitting"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          @click="handleSubmit"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
-          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
+          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.saving') : t('admin.common.saveChanges') }}
         </button>
       </div>
@@ -129,7 +147,7 @@ const submitting = ref(false)
 
 onMounted(async () => {
   try {
-    const data = await $fetch<any>(`/api/admin/suppliers/${supplierId}`, {
+    const data = await $fetch(`/api/admin/suppliers/${supplierId}`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
 

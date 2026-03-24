@@ -157,17 +157,17 @@
                 </span>
               </td>
               <td class="ui-td whitespace-nowrap text-sm text-slate-600">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-1">
                   <a
                     :href="getCategoryUrl(category.slug)"
                     target="_blank"
-                    class="text-teal-600 hover:text-teal-700"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
                     :title="t('admin.pages.categories.index.links.openCategory')"
                   >
                     <Icon name="lucide:external-link" class="w-4 h-4" />
                   </a>
                   <button
-                    class="text-slate-400 hover:text-slate-600"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
                     :title="t('admin.pages.categories.index.links.copyCategory')"
                     @click="copyLink(`/c/${category.slug}`)"
                   >
@@ -176,20 +176,20 @@
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-3">
+                <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/categories/${category.id}`"
-                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    :title="t('admin.common.edit')"
                   >
-                    <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
-                    <span>{{ t('admin.common.edit') }}</span>
+                    <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="ui-btn ui-btn--danger ui-btn--sm"
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    :title="t('admin.common.delete')"
                     @click="confirmDelete(category)"
                   >
-                    <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
-                    <span>{{ t('admin.common.delete') }}</span>
+                    <Icon name="lucide:trash" class="w-4 h-4" />
                   </button>
                 </div>
               </td>
@@ -271,7 +271,9 @@
       :message="deleteMessage"
       :confirm-text="t('admin.common.delete')"
       :cancel-text="t('admin.common.cancel')"
+      :error="deleteError"
       @confirm="handleDelete"
+      @update:model-value="val => { if (!val) deleteError = null }"
     />
   </div>
 </template>
@@ -308,6 +310,7 @@ const currentPage = ref(1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const categoryToDelete = ref<Category | null>(null)
+const deleteError = ref<string | null>(null)
 
 const sortOptions = [
   { key: 'createdAt', labelKey: 'admin.pages.categories.index.sort.newest' },
@@ -408,9 +411,17 @@ async function handleDelete() {
 
     categories.value = categories.value.filter((c) => c.id !== categoryToDelete.value?.id)
     categoryToDelete.value = null
-  } catch (error) {
+    showDeleteModal.value = false
+    deleteError.value = null
+  } catch (error: any) {
     console.error('Failed to delete category:', error)
-    alert(t('admin.pages.categories.index.deleteModal.error'))
+    const status = error?.response?.status || error?.statusCode
+    const msg = error?.data?.statusMessage || error?.response?.data?.statusMessage
+    if (status === 409 || msg === 'HAS_PRODUCTS') {
+      deleteError.value = t('admin.pages.categories.index.deleteModal.errorHasProducts')
+    } else {
+      deleteError.value = t('admin.pages.categories.index.deleteModal.error')
+    }
   }
 }
 

@@ -18,12 +18,38 @@ type Product = {
   images?: string[]
   productImages?: { url: string; isMain?: boolean; position?: number }[]
   metaPixelIds?: string[]
+  categoryId?: string | null
 }
 
 const productUrl = useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`)
 const { data: product, error } = await useFetch<Product>(productUrl, {
     headers: useTenantApiHeaders(),
     key: `product-${slug}`
+})
+
+const productsUrl = useTenantApiUrl('/api/products')
+const { data: allProducts } = await useFetch<Product[]>(productsUrl, { 
+    headers: useTenantApiHeaders(),
+    key: `products-list-related-${slug}`,
+    default: () => []
+})
+
+const relatedProducts = computed(() => {
+    if (!Array.isArray(allProducts.value)) return []
+    
+    const available = allProducts.value.filter(p => p.id !== product.value?.id && p.isActive)
+    const currentCategoryId = (product.value as any)?.categoryId
+    
+    // Prioritize products in the same category
+    if (currentCategoryId) {
+        available.sort((a, b) => {
+            const aMatch = a.categoryId === currentCategoryId ? 1 : 0
+            const bMatch = b.categoryId === currentCategoryId ? 1 : 0
+            return bMatch - aMatch
+        })
+    }
+    
+    return available.slice(0, 8)
 })
 
 const currencyCode = computed(() => storeSettings.value?.currencyCode || 'DZD')
@@ -117,6 +143,7 @@ const layoutName = computed(() => isLandingMode.value ? 'landing' : 'store')
     <component
         :is="ActiveTemplate"
         :product="product"
+        :related-products="relatedProducts"
     />
   </NuxtLayout>
 </template>

@@ -154,6 +154,7 @@ export class OrdersService {
                 select: {
                     id: true,
                     status: true,
+                    callStatus: true,
                     totalAmount: true,
                     customerName: true,
                     customerPhone: true,
@@ -244,7 +245,7 @@ export class OrdersService {
         id: string,
         status?: string,
         actor?: { userId?: string | null },
-        opts?: { cashboxId?: string | null; method?: string | null; reference?: string | null; note?: string | null; calledCustomer?: boolean; internalNotes?: string | null }
+        opts?: { cashboxId?: string | null; method?: string | null; reference?: string | null; note?: string | null; callStatus?: string; internalNotes?: string | null }
     ) {
         if (status && !ORDER_STATUSES.includes(status as any)) {
             throw new OrderValidationError(400, 'Invalid status value')
@@ -261,11 +262,11 @@ export class OrdersService {
         const shouldUpdateStatus = status !== undefined && fromStatus !== toStatus
 
         if (!shouldUpdateStatus) {
-            if (opts?.calledCustomer === undefined && opts?.internalNotes === undefined) {
+            if (opts?.callStatus === undefined && opts?.internalNotes === undefined) {
                 return prisma.order.findFirst({ where: { id, tenantId } })
             }
             const updateData: any = {}
-            if (opts?.calledCustomer !== undefined) updateData.calledCustomer = opts.calledCustomer
+            if (opts?.callStatus !== undefined) updateData.callStatus = opts.callStatus
             if (opts?.internalNotes !== undefined) updateData.internalNotes = opts.internalNotes
 
             await prisma.order.updateMany({ where: { tenantId, id }, data: updateData })
@@ -623,7 +624,7 @@ export class OrdersService {
             }
 
             const updateData: any = { status: toStatus }
-            if (opts?.calledCustomer !== undefined) updateData.calledCustomer = opts.calledCustomer
+            if (opts?.callStatus !== undefined) updateData.callStatus = opts.callStatus
             if (opts?.internalNotes !== undefined) updateData.internalNotes = opts.internalNotes
 
             const updated = await tx.order.updateMany({ where: { tenantId, id }, data: updateData })
@@ -717,7 +718,7 @@ export class OrdersService {
 
         const products = await prisma.product.findMany({
             where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true }
+            select: { id: true, slug: true, price: true, title: true, stock: true, isPromotionActive: true, promotionalPrice: true, promotionStartDate: true, promotionEndDate: true }
         })
 
         if (products.length !== productIds.length) {
@@ -819,7 +820,15 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = Number(variant.price ?? product.price)
+            let price = Number(variant.price ?? product.price)
+            if (product.isPromotionActive && product.promotionalPrice) {
+                const now = new Date().getTime()
+                const start = product.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
+                const end = product.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
+                if (now >= start && now <= end) {
+                    price = Number(product.promotionalPrice)
+                }
+            }
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY
@@ -986,7 +995,7 @@ export class OrdersService {
 
         const products = await prisma.product.findMany({
             where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true }
+            select: { id: true, slug: true, price: true, title: true, stock: true, isPromotionActive: true, promotionalPrice: true, promotionStartDate: true, promotionEndDate: true }
         })
 
         if (products.length !== productIds.length) {
@@ -1086,7 +1095,15 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = Number(variant.price ?? product.price)
+            let price = Number(variant.price ?? product.price)
+            if (product.isPromotionActive && product.promotionalPrice) {
+                const now = new Date().getTime()
+                const start = product.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
+                const end = product.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
+                if (now >= start && now <= end) {
+                    price = Number(product.promotionalPrice)
+                }
+            }
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY

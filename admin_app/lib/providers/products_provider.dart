@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/api_service.dart';
 import '../models/product.dart';
+import '../providers/auth_provider.dart';
+import '../repositories/category_repository.dart';
+import '../repositories/product_repository.dart';
 
 class ProductsState {
   final List<Product> products;
@@ -40,14 +43,21 @@ class ProductsNotifier extends Notifier<ProductsState> {
     return _initialState ?? ProductsState();
   }
 
-  Future<void> fetchProducts() async {
+  bool get _isOfflineTenant =>
+      ref.read(authProvider).user?.isOfflineTenant ?? false;
+
+  void _requireOnlineTenantFeature() {
+    if (_isOfflineTenant) {
+      throw Exception('This feature is not available for offline tenants.');
+    }
+  }
+
+  Future<void> fetchProducts({bool forceRefresh = false}) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/products');
-
-      final List<dynamic> data = response.data;
-      final products = data.map((e) => Product.fromJson(e)).toList();
+      final repo = ProductRepository(apiService);
+      final products = await repo.getProducts(forceRefresh: forceRefresh);
 
       state = state.copyWith(isLoading: false, products: products);
     } catch (e) {
@@ -55,13 +65,11 @@ class ProductsNotifier extends Notifier<ProductsState> {
     }
   }
 
-  Future<void> fetchCategories() async {
+  Future<void> fetchCategories({bool forceRefresh = false}) async {
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/categories');
-
-      final List<dynamic> data = response.data;
-      final categories = data.map((e) => Category.fromJson(e)).toList();
+      final repo = CategoryRepository(apiService);
+      final categories = await repo.getCategories();
 
       state = state.copyWith(categories: categories);
       // Silently fail for categories or handle differently
@@ -73,8 +81,8 @@ class ProductsNotifier extends Notifier<ProductsState> {
   Future<Product?> fetchProduct(String id) async {
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/products/$id');
-      return Product.fromJson(response.data);
+      final repo = ProductRepository(apiService);
+      return await repo.getProductById(id);
     } catch (e) {
       state = state.copyWith(error: e.toString());
       return null;
@@ -84,6 +92,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
   Future<void> createProduct(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.post('/admin/products', data: data);
       await fetchProducts(); // Refresh list
@@ -96,6 +105,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
   Future<void> updateProduct(String id, Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.put('/admin/products/$id', data: data);
       await fetchProducts(); // Refresh list
@@ -107,6 +117,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
 
   Future<void> deleteProduct(String id) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.delete('/admin/products/$id');
 
@@ -122,6 +133,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
 
   Future<void> createOption(String productId, Map<String, dynamic> data) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.post(
         '/admin/products/$productId/options',
@@ -139,6 +151,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
     Map<String, dynamic> data,
   ) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.put(
         '/admin/products/$productId/options/$optionId',
@@ -152,6 +165,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
 
   Future<void> deleteOption(String productId, String optionId) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.delete(
         '/admin/products/$productId/options/$optionId',
@@ -168,6 +182,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
     String label,
   ) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.post(
         '/admin/products/$productId/options/$optionId/values',
@@ -185,6 +200,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
     String valueId,
   ) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.delete(
         '/admin/products/$productId/options/$optionId/values/$valueId',
@@ -202,6 +218,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
     Map<String, dynamic> data,
   ) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.put(
         '/admin/products/$productId/options/$optionId/values/$valueId',
@@ -220,6 +237,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
     Map<String, dynamic> data,
   ) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.put('/admin/variants/$variantId', data: data);
       // Note: We might need to refresh the product here, but usually updating a variant relies on the caller refetching if needed.
@@ -233,6 +251,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
 
   Future<void> lockVariantSku(String variantId) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.post('/admin/variants/$variantId/sku/lock');
     } catch (e) {
@@ -242,6 +261,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
 
   Future<String> suggestVariantSku(String variantId) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       final res = await apiService.client.get(
         '/admin/variants/$variantId/sku/suggest',
@@ -258,6 +278,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
     Map<String, dynamic> data,
   ) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.patch(
         '/admin/inventory/variants/$variantId',
@@ -273,6 +294,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
     List<String> imageUrls,
   ) async {
     try {
+      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
       await apiService.client.post(
         '/admin/variants/$variantId/images',

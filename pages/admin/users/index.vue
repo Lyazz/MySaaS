@@ -146,33 +146,33 @@
                 {{ formatDate(u.createdAt) }}
               </td>
               <td class="ui-td text-right">
-                <div class="inline-flex items-center gap-2">
+                <div class="flex items-center justify-end space-x-1">
                   <button
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    :title="t('admin.common.edit')"
                     @click="openEdit(u)"
                   >
-                    <Icon name="lucide:pencil" class="h-3.5 w-3.5" />
-                    {{ t('admin.common.edit') }}
+                    <Icon name="lucide:pencil" class="w-4 h-4" />
                   </button>
                   <button
                     v-if="u.isActive"
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100"
+                    class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors disabled:opacity-50"
+                    :title="t('admin.pages.users.actions.deactivate')"
                     :disabled="cannotDeactivate(u)"
                     @click="deactivate(u)"
                   >
-                    <Icon name="lucide:user-x" class="h-3.5 w-3.5" />
-                    {{ t('admin.pages.users.actions.deactivate') }}
+                    <Icon name="lucide:user-x" class="w-4 h-4" />
                   </button>
                   <button
                     v-else
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 shadow-sm hover:bg-emerald-100"
+                    class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                    :title="t('admin.pages.users.actions.activate')"
                     @click="setActive(u, true)"
                   >
-                    <Icon name="lucide:user-check" class="h-3.5 w-3.5" />
-                    {{ t('admin.pages.users.actions.activate') }}
+                    <Icon name="lucide:user-check" class="w-4 h-4" />
                   </button>
                 </div>
               </td>
@@ -305,22 +305,22 @@
                 </div>
               </td>
               <td class="ui-td text-right">
-                <div class="inline-flex items-center gap-2">
+                <div class="flex items-center justify-end space-x-1">
                   <button
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    :title="t('admin.common.edit')"
                     @click="openEditRole(r)"
                   >
-                    <Icon name="lucide:pencil" class="h-3.5 w-3.5" />
-                    {{ t('admin.common.edit') }}
+                    <Icon name="lucide:pencil" class="w-4 h-4" />
                   </button>
                   <button
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 shadow-sm hover:bg-red-100"
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    :title="t('admin.common.delete')"
                     @click="deleteRole(r)"
                   >
-                    <Icon name="lucide:trash-2" class="h-3.5 w-3.5" />
-                    {{ t('admin.common.delete') }}
+                    <Icon name="lucide:trash-2" class="w-4 h-4" />
                   </button>
                 </div>
               </td>

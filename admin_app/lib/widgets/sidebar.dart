@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sidebar_provider.dart';
+import '../providers/store_settings_provider.dart';
 
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key});
@@ -36,7 +37,7 @@ class Sidebar extends ConsumerWidget {
       color: const Color(0xFF020617), // Slate-950
       child: Column(
         children: [
-          _buildHeader(isCollapsed),
+          _buildHeader(isCollapsed, ref),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
@@ -175,7 +176,13 @@ class Sidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(bool isCollapsed) {
+  Widget _buildHeader(bool isCollapsed, WidgetRef ref) {
+    final storeState = ref.watch(storeSettingsProvider);
+    final storeName = storeState.settings.name.isNotEmpty
+        ? storeState.settings.name
+        : 'Swekly';
+    final initial = storeName.isNotEmpty ? storeName[0].toUpperCase() : 'S';
+
     return Container(
       height: 64,
       padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 24),
@@ -195,9 +202,9 @@ class Sidebar extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             alignment: Alignment.center,
-            child: const Text(
-              'S',
-              style: TextStyle(
+            child: Text(
+              initial,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
@@ -205,12 +212,15 @@ class Sidebar extends ConsumerWidget {
           ),
           if (!isCollapsed) ...[
             const SizedBox(width: 12),
-            const Text(
-              'Swekly',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                storeName,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

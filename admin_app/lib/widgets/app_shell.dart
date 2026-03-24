@@ -6,10 +6,15 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sidebar_provider.dart';
+import '../providers/store_settings_provider.dart';
+import '../providers/sync_provider.dart';
+import '../providers/workspace_provider.dart';
 import 'buttons/app_button.dart';
 import 'language_switcher_button.dart';
 import 'responsive_layout.dart';
 import 'sidebar.dart';
+import 'offline_banner.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   final Widget child;
@@ -25,6 +30,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize background sync loop (online tenants only).
+    ref.watch(syncServiceProvider);
     return ResponsiveLayout(
       mobile: _buildMobileLayout(),
       desktop: _buildDesktopLayout(),
@@ -50,7 +57,12 @@ class _AppShellState extends ConsumerState<AppShell> {
         actions: const [LanguageSwitcherButton(compact: true)],
       ),
       drawer: const Sidebar(),
-      body: widget.child,
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Expanded(child: widget.child),
+        ],
+      ),
     );
   }
 
@@ -62,6 +74,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           Expanded(
             child: Column(
               children: [
+                const OfflineBanner(),
                 _buildDesktopHeader(),
                 Expanded(child: widget.child),
               ],
@@ -73,6 +86,19 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   Widget _buildDesktopHeader() {
+    final storeState = ref.watch(storeSettingsProvider);
+    final storeSlug = storeState.settings.slug;
+    final workspaceState = ref.watch(workspaceProvider);
+
+    // Derive storefront URL: strip /api suffix and use slug-based path
+    String storefrontUrl = workspaceState.apiBaseUrl.replaceFirst(
+      RegExp(r'/api$'),
+      '',
+    );
+    if (storeSlug.isNotEmpty) {
+      storefrontUrl = '$storefrontUrl/shop/$storeSlug';
+    }
+
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -108,8 +134,17 @@ class _AppShellState extends ConsumerState<AppShell> {
               Row(
                 children: [
                   _buildHeaderAction(
-                    LucideIcons.externalLink,
+                    LucideIcons.eye,
                     'admin.actions.viewStore'.tr(),
+                    onPressed: () async {
+                      final uri = Uri.tryParse(storefrontUrl);
+                      if (uri != null) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
+                    },
                   ),
                   Container(
                     height: 32,
@@ -127,7 +162,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                   _buildHeaderAction(
                     LucideIcons.logOut,
                     'admin.actions.logout'.tr(),
-                    color: Colors.red,
                     onPressed: () {
                       ref.read(authProvider.notifier).logout();
                       context.go('/login');
@@ -145,12 +179,11 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget _buildHeaderAction(
     IconData icon,
     String label, {
-    Color? color,
     VoidCallback? onPressed,
   }) {
     final resolvedOnPressed = onPressed ?? () {};
-    if (color == Colors.red) {
-      return AppButton.danger(
+    if (icon == LucideIcons.eye) {
+      return AppButton.secondary(
         label: label,
         icon: icon,
         size: AppButtonSize.sm,
@@ -187,7 +220,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (location.startsWith('/sales/')) {
       return 'admin.pages.sale.detail.metaTitle'.tr();
     }
-    if (location == '/purchases') return 'admin.pages.purchases.index.title'.tr();
+    if (location == '/purchases')
+      return 'admin.pages.purchases.index.title'.tr();
     if (location == '/purchases/create') {
       return 'admin.pages.purchases.create.title'.tr();
     }
@@ -201,21 +235,24 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (location.startsWith('/cash/')) {
       return 'admin.pages.cash.cashbox.titleFallback'.tr();
     }
-    if (location == '/categories') return 'admin.pages.categories.index.title'.tr();
+    if (location == '/categories')
+      return 'admin.pages.categories.index.title'.tr();
     if (location == '/categories/create') {
       return 'admin.pages.categories.create.title'.tr();
     }
     if (location.startsWith('/categories/')) {
       return 'admin.pages.categories.edit.title'.tr();
     }
-    if (location == '/suppliers') return 'admin.pages.suppliers.index.title'.tr();
+    if (location == '/suppliers')
+      return 'admin.pages.suppliers.index.title'.tr();
     if (location == '/suppliers/create') {
       return 'admin.pages.suppliers.create.title'.tr();
     }
     if (location.startsWith('/suppliers/')) {
       return 'admin.pages.suppliers.edit.title'.tr();
     }
-    if (location == '/customers') return 'admin.pages.customers.index.title'.tr();
+    if (location == '/customers')
+      return 'admin.pages.customers.index.title'.tr();
     if (location == '/customers/create') {
       return 'admin.pages.customers.create.title'.tr();
     }

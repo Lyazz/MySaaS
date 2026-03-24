@@ -236,7 +236,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                     title: const Text('Active'),
                     subtitle: const Text('Visible to customers'),
                     value: _isActive,
-                    activeColor: const Color(0xFF0D9488),
+                    activeThumbColor: const Color(0xFF0D9488),
                     onChanged: (v) => setState(() => _isActive = v),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -251,7 +251,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                   SwitchListTile(
                     title: const Text('Track Inventory'),
                     value: _trackInventory,
-                    activeColor: const Color(0xFF0D9488),
+                    activeThumbColor: const Color(0xFF0D9488),
                     onChanged: (v) => setState(() => _trackInventory = v),
                     contentPadding: EdgeInsets.zero,
                   ),

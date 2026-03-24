@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../bootstrap.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
+import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 // Simple user model for now
 class User {
@@ -13,6 +15,7 @@ class User {
   final bool isSuperAdmin;
   final String tenantId;
   final String? staffRoleId;
+  final bool isOfflineTenant;
 
   User({
     required this.id,
@@ -22,9 +25,15 @@ class User {
     required this.tenantId,
     this.name,
     this.staffRoleId,
+    this.isOfflineTenant = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    bool isOffline = false;
+    if (json['tenant'] != null && json['tenant']['isOffline'] == true) {
+      isOffline = true;
+    }
+
     return User(
       id: json['id'] ?? '',
       email: json['email'] ?? '',
@@ -33,6 +42,7 @@ class User {
       isSuperAdmin: json['isSuperAdmin'] == true,
       tenantId: json['tenantId'] ?? '',
       staffRoleId: json['staffRoleId'],
+      isOfflineTenant: isOffline,
     );
   }
 
@@ -44,6 +54,7 @@ class User {
     'isSuperAdmin': isSuperAdmin,
     'tenantId': tenantId,
     'staffRoleId': staffRoleId,
+    'tenant': {'isOffline': isOfflineTenant},
   };
 }
 
@@ -123,6 +134,9 @@ class AuthNotifier extends Notifier<AuthState> {
       staffPermissions: bootstrap.staffPermissions,
     );
 
+    TenantModeService().setOfflineTenant(user?.isOfflineTenant ?? false);
+    SyncService().setOfflineTenant(user?.isOfflineTenant ?? false);
+
     if (token != null) {
       Future.microtask(() => refreshMe());
     }
@@ -169,6 +183,9 @@ class AuthNotifier extends Notifier<AuthState> {
         }
 
         apiService.setToken(token);
+        TenantModeService().setOfflineTenant(user.isOfflineTenant);
+        SyncService().setOfflineTenant(user.isOfflineTenant);
+
         state = state.copyWith(
           isLoading: false,
           token: token,
@@ -200,6 +217,11 @@ class AuthNotifier extends Notifier<AuthState> {
       final apiService = ref.read(apiProvider);
       final response = await apiService.client.get('/me');
       final rawUser = (response.data?['user'] as Map?)?.cast<String, dynamic>();
+
+      if (response.data?['tenant'] != null && rawUser != null) {
+        rawUser['tenant'] = response.data?['tenant'];
+      }
+
       if (rawUser == null) return;
 
       final user = User.fromJson(rawUser);
@@ -212,6 +234,9 @@ class AuthNotifier extends Notifier<AuthState> {
       final staffPermissions = (staffPermissionsRaw is List)
           ? staffPermissionsRaw.map((e) => e.toString()).toList()
           : <String>[];
+
+      TenantModeService().setOfflineTenant(user.isOfflineTenant);
+      SyncService().setOfflineTenant(user.isOfflineTenant);
 
       state = state.copyWith(
         user: user,
@@ -226,13 +251,16 @@ class AuthNotifier extends Notifier<AuthState> {
         staffPermissions: staffPermissions,
       );
     } catch (_) {
-      await logout();
+      // Avoid logging out on transient network errors
+      // await logout();
     }
   }
 
   Future<void> logout() async {
     final apiService = ref.read(apiProvider);
     apiService.setToken(null);
+    TenantModeService().setOfflineTenant(false);
+    SyncService().setOfflineTenant(false);
     state = const AuthState();
     await AppStorage.clearAuthSession();
   }

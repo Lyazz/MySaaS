@@ -10,6 +10,26 @@ const emit = defineEmits<{
     (e: 'quick-view', product: any): void
 }>()
 
+
+const isPromoValid = computed(() => {
+    if (!props.product?.isPromotionActive) return false
+    const now = new Date().getTime()
+    if (props.product.promotionStartDate && new Date(props.product.promotionStartDate).getTime() > now) return false
+    if (props.product.promotionEndDate && new Date(props.product.promotionEndDate).getTime() < now) return false
+    return true
+})
+
+const originalPrice = computed(() => {
+    return Number(props.product.price)
+})
+
+const displayPrice = computed(() => {
+    if (isPromoValid.value && props.product.promotionalPrice) {
+        return Number(props.product.promotionalPrice)
+    }
+    return originalPrice.value
+})
+
 const cartStore = useCartStore()
 const { format: formatPrice } = useCurrency()
 const storefrontContent = useStorefrontContent()
@@ -66,7 +86,18 @@ function handleAddToCart() {
     class="group relative flex flex-row gap-6 p-4 bg-[#1a0a2e]/90 rounded-2xl border border-purple-500/30 hover:border-pink-500/50 transition-all overflow-hidden"
   >
     <!-- Glow on hover -->
-    <div class="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity">
+      <!-- Countdown Overlay -->
+      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
+        <div class="scale-[0.85] sm:scale-90 origin-bottom">
+          <StorefrontSharedCountdownTimer
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            :show-icon="true"
+          />
+        </div>
+      </div>
+    </div>
     
     <!-- Image -->
     <NuxtLink
@@ -83,7 +114,8 @@ function handleAddToCart() {
     <!-- Details -->
     <div class="flex-1 flex flex-col justify-center relative z-10">
       <NuxtLink :to="`/p/${product.slug}`">
-        <h3 class="font-bold text-white text-lg group-hover:text-pink-400 transition-colors line-clamp-1 mb-2">
+        
+<h3 class="font-bold text-white text-lg group-hover:text-pink-400 transition-colors line-clamp-1 mb-2">
           {{ product.title }}
         </h3>
       </NuxtLink>
@@ -157,7 +189,8 @@ function handleAddToCart() {
     <!-- Product Info -->
     <div class="p-4">
       <NuxtLink :to="`/p/${product.slug}`">
-        <h3 class="font-bold text-white text-base group-hover:text-pink-400 transition-colors line-clamp-2 mb-2 leading-tight">
+        
+<h3 class="font-bold text-white text-base group-hover:text-pink-400 transition-colors line-clamp-2 mb-2 leading-tight">
           {{ product.title }}
         </h3>
       </NuxtLink>

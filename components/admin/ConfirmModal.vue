@@ -25,9 +25,14 @@
           </h3>
 
           <!-- Message -->
-          <p class="text-sm text-gray-500 text-center mb-6">
+          <p class="text-sm text-gray-500 text-center mb-4">
             {{ resolvedMessage }}
           </p>
+
+          <!-- Inline error -->
+          <div v-if="error" class="mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {{ error }}
+          </div>
 
           <!-- Actions -->
           <div class="flex space-x-3">
@@ -59,6 +64,7 @@ interface Props {
   message?: string
   confirmText?: string
   cancelText?: string
+  error?: string | null
 }
 
 const props = defineProps<Props>()
@@ -77,7 +83,7 @@ const emit = defineEmits<{
 
 function handleConfirm() {
   emit('confirm')
-  emit('update:modelValue', false)
+  // Don't auto-close — the parent will close once the action succeeds (or show error)
 }
 
 function handleCancel() {

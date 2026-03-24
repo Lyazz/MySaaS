@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/delivery_provider.dart';
+import '../repositories/delivery_provider_repository.dart';
+import '../services/api_service.dart';
 
 class DeliveryState {
   final List<DeliveryProvider> providers;
@@ -16,30 +18,24 @@ class DeliveryState {
 }
 
 class DeliveryNotifier extends Notifier<DeliveryState> {
+  late DeliveryProviderRepository _repo;
+
   @override
   DeliveryState build() {
-    return DeliveryState(
-      providers: [
-        DeliveryProvider(
-          id: 'YALIDINE',
-          name: 'Yalidine Express',
-          description: 'National delivery network',
-          isEnabled: true,
-        ),
-        DeliveryProvider(
-          id: 'MAYSTRO',
-          name: 'Maystro Delivery',
-          description: 'E-commerce logistics',
-          isEnabled: false,
-        ),
-        DeliveryProvider(
-          id: 'SELF',
-          name: 'Self Delivery',
-          description: 'Internal fleet management',
-          isEnabled: true,
-        ),
-      ],
-    );
+    final api = ref.watch(apiProvider);
+    _repo = DeliveryProviderRepository(api);
+    Future.microtask(() => loadProviders());
+    return DeliveryState();
+  }
+
+  Future<void> loadProviders({bool forceRefresh = false}) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final providers = await _repo.getProviders(forceRefresh: forceRefresh);
+      state = state.copyWith(providers: providers, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   Future<void> toggleProvider(String id) async {

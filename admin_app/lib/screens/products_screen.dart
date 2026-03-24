@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/api_service.dart';
+import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
@@ -87,11 +88,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final productsState = ref.watch(productsProvider);
     final filteredProducts = _filterProducts(productsState.products);
     final categories = ref.watch(productsProvider).categories;
+    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB), // Gray-50
-      floatingActionButton: isMobile
+      floatingActionButton: (isMobile && !isOfflineTenant)
           ? FloatingActionButton(
               onPressed: () => context.go('/products/create'),
               backgroundColor: const Color(0xFF0F172A), // Slate-900
@@ -197,6 +199,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildHeader() {
+    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -222,11 +225,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ),
           ],
         ),
-        AppButton.primary(
-          label: 'admin.pages.products.index.addProduct'.tr(),
-          icon: LucideIcons.plus,
-          onPressed: () => context.go('/products/create'),
-        ),
+        if (!isOfflineTenant)
+          AppButton.primary(
+            label: 'admin.pages.products.index.addProduct'.tr(),
+            icon: LucideIcons.plus,
+            onPressed: () => context.go('/products/create'),
+          ),
       ],
     );
   }
@@ -549,19 +553,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     controller: scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     children: [
-                      ListTile(
-                        leading: const Icon(
-                          LucideIcons.plus,
-                          color: Color(0xFF0F172A),
+                      if (!(ref.read(authProvider).user?.isOfflineTenant ?? false))
+                        ListTile(
+                          leading: const Icon(
+                            LucideIcons.plus,
+                            color: Color(0xFF0F172A),
+                          ),
+                          title: Text(
+                            'admin.pages.products.index.addProduct'.tr(),
+                          ),
+                          onTap: () {
+                            context.pop();
+                            context.go('/products/create');
+                          },
                         ),
-                        title: Text(
-                          'admin.pages.products.index.addProduct'.tr(),
-                        ),
-                        onTap: () {
-                          context.pop();
-                          context.go('/products/create');
-                        },
-                      ),
                       ListTile(
                         leading: const Icon(
                           LucideIcons.arrowUpDown,
@@ -773,11 +778,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               style: const TextStyle(color: Color(0xFF64748B)), // Slate-500
             ),
             const SizedBox(height: 24),
-            AppButton.primary(
-              label: 'admin.pages.products.index.empty.newProduct'.tr(),
-              icon: LucideIcons.plus,
-              onPressed: () => context.push('/products/create'),
-            ),
+            if (!(ref.watch(authProvider).user?.isOfflineTenant ?? false))
+              AppButton.primary(
+                label: 'admin.pages.products.index.empty.newProduct'.tr(),
+                icon: LucideIcons.plus,
+                onPressed: () => context.push('/products/create'),
+              ),
           ],
         ),
       ),

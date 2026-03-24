@@ -2260,7 +2260,16 @@
             "customerName": "Name",
             "customerPhone": "Phone",
             "deliveryAddress": "Delivery address",
-            "calledCustomer": "Called Customer?",
+            "callStatus": "Call Status",
+            "callStatusValues": {
+              "not_called": "Not Called",
+              "called": "Called",
+              "no_answer": "No Answer",
+              "attempt_1": "1st Attempt",
+              "attempt_2": "2nd Attempt",
+              "attempt_3": "3rd Attempt",
+              "switched_off": "Switched Off"
+            },
             "internalNotesPlaceholder": "Add private remarks about this order..."
           },
           "actions": {

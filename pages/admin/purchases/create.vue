@@ -18,9 +18,28 @@
     </nav>
 
     <!-- Header -->
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.purchases.create.title') }}</h2>
-      <p class="text-gray-600 mt-1">{{ t('admin.pages.purchases.create.subtitle') }}</p>
+    <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.purchases.create.title') }}</h2>
+        <p class="text-gray-600 mt-1">{{ t('admin.pages.purchases.create.subtitle') }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <NuxtLink
+          to="/admin/purchases"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          {{ t('admin.common.cancel') }}
+        </NuxtLink>
+        <button
+          type="button"
+          :disabled="submitting || !form.supplierId"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          @click="handleSubmit"
+        >
+          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+          {{ submitting ? t('admin.pages.purchases.create.creatingDraft') : t('admin.pages.purchases.create.submit') }}
+        </button>
+      </div>
     </div>
 
     <!-- Form -->
@@ -56,10 +75,10 @@
         <button
           type="button"
           :disabled="submitting || !form.supplierId"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
           @click="handleSubmit"
         >
-          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
+          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.pages.purchases.create.creatingDraft') : t('admin.pages.purchases.create.submit') }}
         </button>
       </div>
@@ -107,11 +126,11 @@ async function handleSubmit() {
   errorMessage.value = ''
 
   try {
-    const created = await $fetch<{ id: string }>('/api/admin/purchases', {
+    const created = (await $fetch('/api/admin/purchases', {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: { supplierId: form.supplierId }
-    })
+    })) as { id: string }
     
     router.push(`/admin/purchases/${created.id}`)
   } catch (error: any) {

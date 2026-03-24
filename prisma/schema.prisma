@@ -11,6 +11,7 @@ model Tenant {
   id          String   @id @default(uuid())
   slug        String   @unique
   name        String
+  isOffline   Boolean  @default(true)
   isSuspended Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -210,7 +211,7 @@ model BillingPayment {
   amountDzd Int
   currency  String @default("DA")
 
-  method String @default("SIMULATED") // SIMULATED | MANUAL_PROOF
+  method String @default("SIMULATED") // SIMULATED | MANUAL_PROOF | MYFIN | PAYSERA | BARIDIMOB | CCP | CHARGILY
   status String @default("PAID") // PAID | PENDING | REJECTED | IMPORTED
 
   proofUrl          String?
@@ -228,6 +229,7 @@ model BillingPayment {
 
   @@index([tenantId])
   @@index([tenantId, createdAt])
+  @@index([status])
 }
 
 model TenantDomain {
@@ -266,6 +268,7 @@ model StoreSettings {
   defaultCashbox   Cashbox? @relation("StoreSettingsDefaultCashbox", fields: [tenantId, defaultCashboxId], references: [tenantId, id], onDelete: SetNull)
 
   logoUrl      String? // URL of the tenant's store logo
+  faviconUrl   String? // URL of the tenant's store favicon
   primaryColor String  @default("#0d9488") // teal-600
   templateKey  String  @default("modern") // e.g. classic | modern
   fontFamily   String  @default("Outfit")
@@ -400,14 +403,21 @@ model Category {
 }
 
 model Product {
-  id              String  @id @default(uuid())
-  title           String
-  slug            String
-  description     String?
-  miniDescription String?
-  price           Decimal @default(0)
-  stock           Int     @default(0)
-  lowStockThreshold Int   @default(5)
+  id                String  @id @default(uuid())
+  title             String
+  slug              String
+  description       String?
+  miniDescription   String?
+  price             Decimal @default(0)
+  stock             Int     @default(0)
+  lowStockThreshold Int     @default(5)
+
+  // Promotion fields
+  promotionalPrice   Decimal?
+  isPromotionActive  Boolean   @default(false)
+  promotionStartDate DateTime?
+  promotionEndDate   DateTime?
+  showCountdown      Boolean   @default(false)
 
   isActive      Boolean        @default(true)
   images        String[]       @default([]) // Deprecated: Use ProductImage model
@@ -761,7 +771,11 @@ model PurchaseOrder {
   supplierId String?
   supplier   Supplier? @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: Restrict)
 
-  status    String  @default("DRAFT") // DRAFT | ORDERED | RECEIVED | CANCELLED
+  status        String  @default("DRAFT") // DRAFT | ORDERED | PARTIALLY_RECEIVED | RECEIVED | CANCELLED
+  paymentStatus String  @default("UNPAID") // UNPAID | PARTIALLY_PAID | PAID
+  totalAmount   Decimal @default(0)
+  paidAmount    Decimal @default(0)
+
   reference String?
   currency  String  @default("DZD")
   notes     String?
@@ -825,8 +839,8 @@ model Order {
   customerAddress String?
   customerIp      String?
 
-  calledCustomer  Boolean @default(false)
-  internalNotes   String?
+  callStatus    String  @default("not_called")
+  internalNotes String?
 
   deliveryMode         String            @default("home") // home | pickup | store
   shippingProvider     ShipmentProvider?

@@ -117,6 +117,9 @@ export class CategoriesController {
                 if (e.message === 'Category not found') {
                     return res.status(404).json({ statusCode: 404, statusMessage: e.message })
                 }
+                if (e.statusCode === 409 || e.message === 'HAS_PRODUCTS') {
+                    return res.status(409).json({ statusCode: 409, statusMessage: 'HAS_PRODUCTS' })
+                }
                 throw e
             }
         } catch (error) {

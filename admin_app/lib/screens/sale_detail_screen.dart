@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:dio/dio.dart';
 
 import '../services/api_service.dart';
+import '../services/database_service.dart';
+import '../repositories/product_repository.dart';
+import '../models/product.dart';
 import '../widgets/badges/status_badges.dart';
 import '../widgets/badges/ui_badge.dart';
 import '../widgets/buttons/app_button.dart';
@@ -33,10 +39,112 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     if (id.isEmpty) return null;
 
     final api = ref.read(apiProvider);
-    final res = await api.client.get('/admin/sales/$id');
-    final data = res.data;
-    if (data is! Map) return null;
-    return _SaleDetail.fromJson(data.cast<String, dynamic>());
+    try {
+      // POS sale details have a dedicated route on the backend.
+      final res = await api.client.get('/admin/sales/pos/$id');
+      final data = res.data;
+      if (data is Map) return _SaleDetail.fromJson(data.cast<String, dynamic>());
+    } on DioException catch (e) {
+      if (e.response?.statusCode != 404) {
+        // fall through to local fallback
+      }
+    } catch (_) {}
+
+    try {
+      final res = await api.client.get('/admin/sales/$id');
+      final data = res.data;
+      if (data is Map) return _SaleDetail.fromJson(data.cast<String, dynamic>());
+    } catch (_) {
+      // fall through to local fallback
+    }
+
+    // Offline/local fallback: read from local `sales` table (POS sales).
+    final db = await DatabaseService().database;
+    final rows = await db.query('sales', where: 'id = ?', whereArgs: [id], limit: 1);
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+
+    final customerId = row['customerId']?.toString();
+    String customerName = '';
+    String customerPhone = '';
+    String customerAddress = '';
+    if (customerId != null && customerId.trim().isNotEmpty) {
+      final customerRows = await db.query(
+        'customers',
+        where: 'id = ?',
+        whereArgs: [customerId],
+        limit: 1,
+      );
+      if (customerRows.isNotEmpty) {
+        final c = customerRows.first;
+        customerName = c['name']?.toString() ?? '';
+        customerPhone = c['phone']?.toString() ?? '';
+        customerAddress = c['address']?.toString() ?? '';
+      }
+    }
+
+    final payloadRaw = row['payloadJson']?.toString();
+    final payload = (payloadRaw != null && payloadRaw.trim().isNotEmpty)
+        ? (jsonDecode(payloadRaw) as Map?)?.cast<String, dynamic>()
+        : null;
+
+    final products = await ProductRepository(api).getProducts();
+    final productById = {for (final p in products) p.id: p};
+
+    String variantLabel(ProductVariant v) {
+      final labels = v.optionValues
+          .map((ov) => ov.optionValue?.label)
+          .whereType<String>()
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
+      if (labels.isNotEmpty) return labels.join(' / ');
+      return v.sku;
+    }
+
+    final itemsRaw = payload?['items'];
+    final items = (itemsRaw is List)
+        ? itemsRaw
+            .whereType<Map>()
+            .map((m) => m.cast<String, dynamic>())
+            .map((item) {
+              final productId = item['productId']?.toString() ?? '';
+              final variantId = item['variantId']?.toString();
+              final product = productById[productId];
+              String label = product?.title ?? (productId.isNotEmpty ? productId : 'Item');
+              if (product != null && variantId != null) {
+                ProductVariant? v;
+                for (final vv in product.variants) {
+                  if (vv.id == variantId) {
+                    v = vv;
+                    break;
+                  }
+                }
+                if (v != null) {
+                  final vLabel = variantLabel(v);
+                  if (vLabel.trim().isNotEmpty) label = '${product.title} · $vLabel';
+                }
+              }
+              return _SaleItem.fromJson({
+                'product': {'title': label},
+                'variant': const {},
+                'quantity': item['quantity'],
+                'price': item['price'],
+              });
+            })
+            .toList()
+        : <_SaleItem>[];
+
+    return _SaleDetail(
+      id: row['id']?.toString() ?? id,
+      source: 'POS',
+      status: row['status']?.toString() ?? 'COMPLETED',
+      totalAmount: (row['total'] is num) ? (row['total'] as num).toDouble() : 0,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      customerAddress: customerAddress,
+      createdAt: DateTime.tryParse(row['createdAt']?.toString() ?? ''),
+      items: items,
+    );
   }
 
   void _retry() {
@@ -519,4 +627,3 @@ class _SaleItem {
     );
   }
 }
-

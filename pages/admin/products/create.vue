@@ -24,17 +24,37 @@
     </nav>
 
     <!--  Header -->
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">
-        {{ t('admin.pages.products.create.title') }}
-      </h2>
-      <p class="text-gray-600 mt-1">
-        {{ t('admin.pages.products.create.subtitle') }}
-      </p>
+    <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800">
+          {{ t('admin.pages.products.create.title') }}
+        </h2>
+        <p class="text-gray-600 mt-1">
+          {{ t('admin.pages.products.create.subtitle') }}
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <NuxtLink
+          to="/admin/products"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          {{ t('admin.common.cancel') }}
+        </NuxtLink>
+        <button
+          form="product-create-form"
+          type="submit"
+          :disabled="submitting"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+        >
+          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+          {{ submitting ? t('admin.common.creating') : t('admin.pages.products.create.submit') }}
+        </button>
+      </div>
     </div>
 
     <!-- Form -->
     <form
+      id="product-create-form"
       class="bg-white rounded-lg shadow p-6 space-y-6"
       @submit.prevent="handleSubmit"
     >
@@ -156,6 +176,75 @@
         </label>
       </div>
 
+      <!-- Promotions Section -->
+      <div class="border-t pt-6 space-y-6">
+        <h3 class="text-lg font-medium text-gray-900 border-b pb-2">
+          {{ t('admin.pages.products.edit.tabs.promotions', 'Promotions') }}
+        </h3>
+
+        <!-- Active Status -->
+        <div class="flex items-center">
+          <input
+            id="isPromotionActive"
+            v-model="form.isPromotionActive"
+            type="checkbox"
+            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+          >
+          <label
+            for="isPromotionActive"
+            class="ml-2 block text-sm text-gray-900"
+          >
+            {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
+          </label>
+        </div>
+
+        <!-- Promotional Fields -->
+        <div v-if="form.isPromotionActive" class="space-y-6">
+          <BaseInput
+            v-model.number="form.promotionalPrice"
+            :label="t('admin.forms.product.promotionalPrice.label', 'Prix promotionnel')"
+            :error="errors.promotionalPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            :placeholder="t('admin.forms.product.promotionalPrice.placeholder', 'Nouveau prix')"
+          />
+
+          <!-- Start Date -->
+          <BaseInput
+            v-model="form.promotionStartDate"
+            :label="t('admin.forms.product.promotionStartDate.label', 'Date de début (optionnel)')"
+            :error="errors.promotionStartDate"
+            type="datetime-local"
+          />
+
+          <!-- End Date -->
+          <BaseInput
+            v-model="form.promotionEndDate"
+            :label="t('admin.forms.product.promotionEndDate.label', 'Date de fin (requis pour le compte à rebours)')"
+            :error="errors.promotionEndDate"
+            type="datetime-local"
+          />
+
+          <!-- Show Countdown -->
+          <div class="flex items-center">
+            <input
+              id="showCountdown"
+              v-model="form.showCountdown"
+              type="checkbox"
+              class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+            >
+            <label
+              for="showCountdown"
+              class="ml-2 block text-sm text-gray-900"
+            >
+              {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Error Message -->
       <div
         v-if="errorMessage"
@@ -177,8 +266,9 @@
         <button
           type="submit"
           :disabled="submitting"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
+          <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.creating') : t('admin.pages.products.create.submit') }}
         </button>
       </div>
@@ -216,7 +306,12 @@ const form = ref({
   price: 0,
   stock: 0,
   categoryId: '',
-  isActive: true
+  isActive: true,
+  promotionalPrice: null as number | null,
+  isPromotionActive: false,
+  promotionStartDate: '',
+  promotionEndDate: '',
+  showCountdown: false
 })
 
 const productImages = ref<ProductImage[]>([])
@@ -275,7 +370,12 @@ async function handleSubmit() {
       price: form.value.price,
       stock: form.value.stock,
       isActive: form.value.isActive,
-      images: productImages.value.map(img => img.url)
+      images: productImages.value.map(img => img.url),
+      promotionalPrice: form.value.isPromotionActive && form.value.promotionalPrice ? Number(form.value.promotionalPrice) : null,
+      isPromotionActive: form.value.isPromotionActive,
+      promotionStartDate: form.value.isPromotionActive && form.value.promotionStartDate ? new Date(form.value.promotionStartDate).toISOString() : null,
+      promotionEndDate: form.value.isPromotionActive && form.value.promotionEndDate ? new Date(form.value.promotionEndDate).toISOString() : null,
+      showCountdown: form.value.isPromotionActive && form.value.showCountdown
     }
 
     if (form.value.categoryId) {

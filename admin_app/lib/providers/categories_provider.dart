@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
+import '../repositories/category_repository.dart';
 
 class CategoriesState {
   final List<Category> categories;
@@ -28,6 +29,15 @@ class CategoriesState {
 }
 
 class CategoriesNotifier extends Notifier<CategoriesState> {
+  bool get _isOfflineTenant =>
+      ref.read(authProvider).user?.isOfflineTenant ?? false;
+
+  void _requireOnlineTenantFeature() {
+    if (_isOfflineTenant) {
+      throw Exception('This feature is not available for offline tenants.');
+    }
+  }
+
   @override
   CategoriesState build() {
     return CategoriesState();
@@ -37,25 +47,8 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final api = ref.read(apiProvider);
-      final authState = ref.read(authProvider);
-
-      if (authState.token == null) {
-        state = state.copyWith(isLoading: false, error: 'Not authenticated');
-        return;
-      }
-
-      final queryParams = <String, dynamic>{};
-      if (sortBy != null) queryParams['sortBy'] = sortBy;
-      if (sortOrder != null) queryParams['sortOrder'] = sortOrder;
-
-      final response = await api.client.get(
-        '/admin/categories',
-        queryParameters: queryParams,
-      );
-
-      final categoriesList = (response.data as List)
-          .map((json) => Category.fromJson(json))
-          .toList();
+      final repo = CategoryRepository(api);
+      final categoriesList = await repo.getCategories();
 
       state = state.copyWith(isLoading: false, categories: categoriesList);
     } catch (e) {
@@ -70,6 +63,7 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      _requireOnlineTenantFeature();
       final api = ref.read(apiProvider);
 
       final response = await api.client.post(
@@ -97,6 +91,7 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      _requireOnlineTenantFeature();
       final api = ref.read(apiProvider);
 
       final response = await api.client.put(
@@ -123,6 +118,7 @@ class CategoriesNotifier extends Notifier<CategoriesState> {
   Future<bool> deleteCategory(String id) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      _requireOnlineTenantFeature();
       final api = ref.read(apiProvider);
 
       await api.client.delete('/admin/categories/$id');

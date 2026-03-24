@@ -287,21 +287,29 @@
 
           <!-- Contact Trace Toggle -->
           <div class="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700">{{ t('admin.pages.orders.detail.fields.calledCustomer', 'Called Customer?') }}</span>
-            <button
-              type="button"
-              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
-              :class="order.calledCustomer ? 'bg-teal-600' : 'bg-gray-200'"
-              role="switch"
-              :aria-checked="order.calledCustomer"
-              @click="handleToggleCalledCustomer"
-            >
-              <span
-                aria-hidden="true"
-                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                :class="order.calledCustomer ? 'translate-x-5' : 'translate-x-0'"
-              />
-            </button>
+            <span class="text-sm font-medium text-gray-700">{{ t('admin.pages.orders.detail.fields.callStatus', 'Call Status') }}</span>
+            <div class="w-48">
+              <BaseSelect
+                v-model="order.callStatus"
+                @change="handleUpdateCallStatus"
+              >
+                <option value="not_called">{{ t('admin.pages.orders.detail.fields.callStatusValues.not_called', 'Not Called') }}</option>
+                <option value="called">{{ t('admin.pages.orders.detail.fields.callStatusValues.called', 'Called') }}</option>
+                <option value="no_answer">{{ t('admin.pages.orders.detail.fields.callStatusValues.no_answer', 'No Answer') }}</option>
+                <option value="attempt_1">{{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_1', '1st Attempt') }}</option>
+                <option value="attempt_2">{{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_2', '2nd Attempt') }}</option>
+                <option value="attempt_3">{{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_3', '3rd Attempt') }}</option>
+                <option value="switched_off">{{ t('admin.pages.orders.detail.fields.callStatusValues.switched_off', 'Switched Off') }}</option>
+              </BaseSelect>
+            </div>
+            <div class="flex justify-end h-5 ml-2 items-center min-w-[3rem]">
+              <span v-if="savingCallStatus" class="text-xs text-gray-500 flex items-center">
+                <div class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
+              </span>
+              <span v-else-if="callStatusSavedMessage" class="text-xs text-green-600 flex items-center">
+                <Icon name="lucide:check" class="w-3 h-3 mr-1" />
+              </span>
+            </div>
           </div>
         </div>
 
@@ -405,7 +413,7 @@ interface Order {
   customerAddress: string
   totalAmount: number
   status: string
-  calledCustomer: boolean
+  callStatus: string
   internalNotes: string | null
   createdAt: string
   items: OrderItem[]
@@ -422,6 +430,9 @@ const cashboxes = ref<any[]>([])
 
 const savingNotes = ref(false)
 const notesSavedMessage = ref('')
+
+const savingCallStatus = ref(false)
+const callStatusSavedMessage = ref('')
 
 const statusLabelKeyByCode: Record<string, string> = {
   PENDING: 'admin.orderStatus.pending',
@@ -556,22 +567,26 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
   }
 }
 
-async function handleToggleCalledCustomer() {
+async function handleUpdateCallStatus() {
   if (!order.value) return
-  const original = order.value.calledCustomer
-  // optimistic update
-  order.value.calledCustomer = !original
+  savingCallStatus.value = true
+  callStatusSavedMessage.value = ''
+  
   try {
     const updated = await $fetch(`/api/admin/orders/${orderId}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { calledCustomer: order.value.calledCustomer }
+      body: { callStatus: order.value.callStatus }
     })
-    order.value.calledCustomer = updated.calledCustomer
+    order.value.callStatus = updated.callStatus
+    callStatusSavedMessage.value = t('admin.common.saved', 'Saved')
+    setTimeout(() => {
+      callStatusSavedMessage.value = ''
+    }, 2000)
   } catch (e: any) {
-    console.error('Toggle called failed:', e)
-    // revert
-    if (order.value) order.value.calledCustomer = original
+    console.error('Update call status failed:', e)
+  } finally {
+    savingCallStatus.value = false
   }
 }
 

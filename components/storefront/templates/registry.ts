@@ -7,6 +7,7 @@ import ClassicAbout from './classic/AboutPage.vue'
 import ClassicCheckout from './classic/Checkout.vue'
 import ClassicHome from './classic/Home.vue'
 import ClassicProduct from './classic/Product.vue'
+import ClassicProductCard from './classic/ProductCard.vue'
 import ClassicShop from './classic/Shop.vue'
 import ClassicStoreShell from './classic/StoreShell.vue'
 import ClassicThemeProvider from './classic/ThemeProvider.vue'
@@ -19,6 +20,7 @@ import ModernAbout from './modern/AboutPage.vue'
 import ModernCheckout from './modern/Checkout.vue'
 import ModernHome from './modern/Home.vue'
 import ModernProduct from './modern/Product.vue'
+import ModernProductCard from './modern/ProductCard.vue'
 import ModernShop from './modern/Shop.vue'
 import ModernStoreShell from './modern/StoreShell.vue'
 import ModernThemeProvider from './modern/ThemeProvider.vue'
@@ -31,6 +33,7 @@ import FoodAbout from './food/AboutPage.vue'
 import FoodCheckout from './food/Checkout.vue'
 import FoodHome from './food/Home.vue'
 import FoodProduct from './food/Product.vue'
+import FoodProductCard from './food/ProductCard.vue'
 import FoodShop from './food/Shop.vue'
 import FoodStoreShell from './food/StoreShell.vue'
 import FoodThemeProvider from './food/ThemeProvider.vue'
@@ -45,6 +48,7 @@ import StreetContact from './street/ContactPage.vue'
 import StreetAbout from './street/AboutPage.vue'
 import StreetCheckout from './street/Checkout.vue'
 import StreetProduct from './street/Product.vue'
+import StreetProductCard from './street/ProductCard.vue'
 import StreetShop from './street/Shop.vue'
 import StreetCart from './street/Cart.vue'
 
@@ -57,6 +61,7 @@ import CozyContact from './cozy/ContactPage.vue'
 import CozyAbout from './cozy/AboutPage.vue'
 import CozyCheckout from './cozy/Checkout.vue'
 import CozyProduct from './cozy/Product.vue'
+import CozyProductCard from './cozy/ProductCard.vue'
 import CozyShop from './cozy/Shop.vue'
 import CozyCart from './cozy/Cart.vue'
 
@@ -69,6 +74,7 @@ import CyberContact from './cyber/ContactPage.vue'
 import CyberAbout from './cyber/AboutPage.vue'
 import CyberCheckout from './cyber/Checkout.vue'
 import CyberProduct from './cyber/Product.vue'
+import CyberProductCard from './cyber/ProductCard.vue'
 import CyberShop from './cyber/Shop.vue'
 import CyberCart from './cyber/Cart.vue'
 
@@ -81,6 +87,7 @@ import StationneryContact from './stationnery/ContactPage.vue'
 import StationneryAbout from './stationnery/AboutPage.vue'
 import StationneryCheckout from './stationnery/Checkout.vue'
 import StationneryProduct from './stationnery/Product.vue'
+import StationneryProductCard from './stationnery/ProductCard.vue'
 import StationneryShop from './stationnery/Shop.vue'
 import StationneryCart from './stationnery/Cart.vue'
 
@@ -93,14 +100,54 @@ import WellnessContact from './wellness/ContactPage.vue'
 import WellnessAbout from './wellness/AboutPage.vue'
 import WellnessCheckout from './wellness/Checkout.vue'
 import WellnessProduct from './wellness/Product.vue'
+import WellnessProductCard from './wellness/ProductCard.vue'
 import WellnessShop from './wellness/Shop.vue'
 import WellnessCart from './wellness/Cart.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness'
+// Playful Imports
+import PlayfulHome from './playful/Home.vue'
+import PlayfulStoreShell from './playful/StoreShell.vue'
+import PlayfulThemeProvider from './playful/ThemeProvider.vue'
+import PlayfulCategory from './playful/Category.vue'
+import PlayfulContact from './playful/ContactPage.vue'
+import PlayfulAbout from './playful/AboutPage.vue'
+import PlayfulCheckout from './playful/Checkout.vue'
+import PlayfulProduct from './playful/Product.vue'
+import PlayfulProductCard from './playful/ProductCard.vue'
+import PlayfulShop from './playful/Shop.vue'
+import PlayfulCart from './playful/Cart.vue'
+
+// Activewear Imports
+import ActivewearHome from './activewear/Home.vue'
+import ActivewearStoreShell from './activewear/StoreShell.vue'
+import ActivewearThemeProvider from './activewear/ThemeProvider.vue'
+import ActivewearCategory from './activewear/Category.vue'
+import ActivewearContact from './activewear/ContactPage.vue'
+import ActivewearAbout from './activewear/AboutPage.vue'
+import ActivewearCheckout from './activewear/Checkout.vue'
+import ActivewearProduct from './activewear/Product.vue'
+import ActivewearProductCard from './activewear/ProductCard.vue'
+import ActivewearShop from './activewear/Shop.vue'
+import ActivewearCart from './activewear/Cart.vue'
+
+// Chrono Imports
+import ChronoHome from './chrono/Home.vue'
+import ChronoStoreShell from './chrono/StoreShell.vue'
+import ChronoThemeProvider from './chrono/ThemeProvider.vue'
+import ChronoCategory from './chrono/Category.vue'
+import ChronoContact from './chrono/ContactPage.vue'
+import ChronoAbout from './chrono/AboutPage.vue'
+import ChronoCheckout from './chrono/Checkout.vue'
+import ChronoProduct from './chrono/Product.vue'
+import ChronoProductCard from './chrono/ProductCard.vue'
+import ChronoShop from './chrono/Shop.vue'
+import ChronoCart from './chrono/Cart.vue'
+
+export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
@@ -110,7 +157,10 @@ export const homeTemplates = {
   cyber: CyberHome,
   stationnery: StationneryHome,
   food: FoodHome,
-  wellness: WellnessHome
+  wellness: WellnessHome,
+  playful: PlayfulHome,
+  activewear: ActivewearHome,
+  chrono: ChronoHome
 } satisfies Record<TemplateKey, Component>
 
 export const productTemplates = {
@@ -121,7 +171,24 @@ export const productTemplates = {
   cyber: CyberProduct,
   stationnery: StationneryProduct,
   food: FoodProduct,
-  wellness: WellnessProduct
+  wellness: WellnessProduct,
+  playful: PlayfulProduct,
+  activewear: ActivewearProduct,
+  chrono: ChronoProduct
+} satisfies Record<TemplateKey, Component>
+
+export const productCardTemplates = {
+  classic: ClassicProductCard,
+  modern: ModernProductCard,
+  street: StreetProductCard,
+  cozy: CozyProductCard,
+  cyber: CyberProductCard,
+  stationnery: StationneryProductCard,
+  food: FoodProductCard,
+  wellness: WellnessProductCard,
+  playful: PlayfulProductCard,
+  activewear: ActivewearProductCard,
+  chrono: ChronoProductCard
 } satisfies Record<TemplateKey, Component>
 
 export const categoryTemplates = {
@@ -132,7 +199,10 @@ export const categoryTemplates = {
   cyber: CyberCategory,
   stationnery: StationneryCategory,
   food: FoodCategory,
-  wellness: WellnessCategory
+  wellness: WellnessCategory,
+  playful: PlayfulCategory,
+  activewear: ActivewearCategory,
+  chrono: ChronoCategory
 } satisfies Record<TemplateKey, Component>
 
 export const storeShellTemplates = {
@@ -143,7 +213,10 @@ export const storeShellTemplates = {
   cyber: CyberStoreShell,
   stationnery: StationneryStoreShell,
   food: FoodStoreShell,
-  wellness: WellnessStoreShell
+  wellness: WellnessStoreShell,
+  playful: PlayfulStoreShell,
+  activewear: ActivewearStoreShell,
+  chrono: ChronoStoreShell
 } satisfies Record<TemplateKey, Component>
 
 export const shopTemplates = {
@@ -154,7 +227,10 @@ export const shopTemplates = {
   cyber: CyberShop,
   stationnery: StationneryShop,
   food: FoodShop,
-  wellness: WellnessShop
+  wellness: WellnessShop,
+  playful: PlayfulShop,
+  activewear: ActivewearShop,
+  chrono: ChronoShop
 } satisfies Record<TemplateKey, Component>
 
 export const checkoutTemplates = {
@@ -165,7 +241,10 @@ export const checkoutTemplates = {
   cyber: CyberCheckout,
   stationnery: StationneryCheckout,
   food: FoodCheckout,
-  wellness: WellnessCheckout
+  wellness: WellnessCheckout,
+  playful: PlayfulCheckout,
+  activewear: ActivewearCheckout,
+  chrono: ChronoCheckout
 } satisfies Record<TemplateKey, Component>
 
 export const cartTemplates = {
@@ -176,7 +255,10 @@ export const cartTemplates = {
   cyber: CyberCart,
   stationnery: StationneryCart,
   food: FoodCart,
-  wellness: WellnessCart
+  wellness: WellnessCart,
+  playful: PlayfulCart,
+  activewear: ActivewearCart,
+  chrono: ChronoCart
 } satisfies Record<TemplateKey, Component>
 
 export const aboutPageTemplates = {
@@ -187,7 +269,10 @@ export const aboutPageTemplates = {
   cyber: CyberAbout,
   stationnery: StationneryAbout,
   food: FoodAbout,
-  wellness: WellnessAbout
+  wellness: WellnessAbout,
+  playful: PlayfulAbout,
+  activewear: ActivewearAbout,
+  chrono: ChronoAbout
 } satisfies Record<TemplateKey, Component>
 
 export const contactPageTemplates = {
@@ -198,7 +283,10 @@ export const contactPageTemplates = {
   cyber: CyberContact,
   stationnery: StationneryContact,
   food: FoodContact,
-  wellness: WellnessContact
+  wellness: WellnessContact,
+  playful: PlayfulContact,
+  activewear: ActivewearContact,
+  chrono: ChronoContact
 } satisfies Record<TemplateKey, Component>
 
 export const themeProviderTemplates = {
@@ -209,7 +297,10 @@ export const themeProviderTemplates = {
   cyber: CyberThemeProvider,
   stationnery: StationneryThemeProvider,
   food: FoodThemeProvider,
-  wellness: WellnessThemeProvider
+  wellness: WellnessThemeProvider,
+  playful: PlayfulThemeProvider,
+  activewear: ActivewearThemeProvider,
+  chrono: ChronoThemeProvider
 } satisfies Record<TemplateKey, Component>
 
 export const selectTemplate = (

@@ -176,20 +176,20 @@
                  <span v-else class="text-slate-400">—</span>
               </td>
               <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-3">
+                <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/suppliers/${supplier.id}`"
-                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    :title="t('admin.common.edit')"
                   >
-                    <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
-                    <span>{{ t('admin.common.edit') }}</span>
+                    <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="ui-btn ui-btn--danger ui-btn--sm"
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    :title="t('admin.common.delete')"
                     @click="confirmDelete(supplier)"
                   >
-                    <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
-                    <span>{{ t('admin.common.delete') }}</span>
+                    <Icon name="lucide:trash" class="w-4 h-4" />
                   </button>
                 </div>
               </td>
@@ -271,7 +271,9 @@
       :message="deleteMessage"
       :confirm-text="t('admin.common.delete')"
       :cancel-text="t('admin.common.cancel')"
+      :error="deleteError"
       @confirm="handleDelete"
+      @update:model-value="val => { if (!val) deleteError = null }"
     />
   </div>
 </template>
@@ -307,6 +309,7 @@ const currentPage = ref(1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const supplierToDelete = ref<Supplier | null>(null)
+const deleteError = ref<string | null>(null)
 
 const sortOptions = [
   { key: 'name', labelKey: 'admin.pages.suppliers.index.sort.name' }
@@ -390,9 +393,17 @@ async function handleDelete() {
 
     suppliers.value = suppliers.value.filter((s) => s.id !== supplierToDelete.value?.id)
     supplierToDelete.value = null
-  } catch (error) {
+    showDeleteModal.value = false
+    deleteError.value = null
+  } catch (error: any) {
     console.error('Failed to delete supplier:', error)
-    alert(t('admin.pages.suppliers.index.deleteModal.error'))
+    const status = error?.response?.status || error?.statusCode
+    const msg = error?.data?.statusMessage || error?.response?.data?.statusMessage
+    if (status === 409 || msg === 'HAS_TRANSACTIONS') {
+      deleteError.value = t('admin.pages.suppliers.index.deleteModal.errorHasTransactions')
+    } else {
+      deleteError.value = t('admin.pages.suppliers.index.deleteModal.error')
+    }
   }
 }
 

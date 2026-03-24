@@ -61,7 +61,15 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </h1>
 
             <div class="flex items-baseline gap-4">
-                <div class="text-3xl font-wellness text-stone-800">
+                
+        <StorefrontSharedCountdownTimer
+            v-if="product?.showCountdown && product?.promotionEndDate "
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            show-icon
+            class="mb-4"
+        />
+<div class="text-3xl font-wellness text-stone-800">
                 {{ formatPrice(currentPrice) }}
                 </div>
                 <div

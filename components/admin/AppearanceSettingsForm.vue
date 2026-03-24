@@ -1,8 +1,34 @@
 <template>
-  <div class="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-8 min-h-[calc(100vh-120px)] items-start">
-    
-    <!-- Left Column: Settings Form -->
-    <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+  <div class="max-w-4xl mx-auto space-y-8 pb-24">
+    <!-- Header with Action Bar -->
+    <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.appearance.title') || "Appearance Settings" }}</h2>
+        <p class="text-slate-600 mt-1">{{ t('admin.pages.settings.appearance.subtitle') || "Manage your store's look and feel" }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          :disabled="loading || saving"
+          @click="reset"
+        >
+          {{ t('admin.common.reset') || 'Reset' }}
+        </button>
+        <button
+          type="button"
+          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
+          :disabled="loading || saving"
+          @click="save"
+        >
+          <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+          {{ t('admin.common.saveChanges') || 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="space-y-6">
       
       <!-- Store Identity -->
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -54,15 +80,26 @@
 
           <div class="grid md:grid-cols-2 gap-8">
             <!-- Logo Upload -->
-            <div>
-               <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.logo.label') }}</label>
-               <SingleImageUploader
-                 v-model="form.logoUrl"
-                 :label="t('admin.appearanceSettingsForm.brandAssets.logo.upload')"
-                 :hint="t('admin.appearanceSettingsForm.brandAssets.logo.hint')"
-                 class="w-full"
-               />
-            </div>
+             <div>
+                <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.logo.label') }}</label>
+                <SingleImageUploader
+                  v-model="form.logoUrl"
+                  :label="t('admin.appearanceSettingsForm.brandAssets.logo.upload')"
+                  :hint="t('admin.appearanceSettingsForm.brandAssets.logo.hint')"
+                  class="w-full"
+                />
+             </div>
+ 
+             <!-- Favicon Upload -->
+             <div>
+                <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.favicon.label') || "Favicon" }}</label>
+                <SingleImageUploader
+                  v-model="form.faviconUrl"
+                  :label="t('admin.appearanceSettingsForm.brandAssets.favicon.upload') || 'Upload Favicon'"
+                  :hint="t('admin.appearanceSettingsForm.brandAssets.favicon.hint') || 'Square image (ICO, PNG), recommended size 32x32px'"
+                  class="w-full"
+                />
+             </div>
 
             <!-- Color Picker -->
             <div>
@@ -146,41 +183,102 @@
            <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.templates.title') }}</h3>
            <p class="text-sm text-slate-500 mb-6">{{ t('admin.appearanceSettingsForm.templates.subtitle') }}</p>
 
-           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           <div class="mb-4 flex items-center justify-between">
+              <h4 class="text-base font-bold text-slate-800">Sélectionner un modèle</h4>
+              <p class="text-sm text-slate-500">Sélectionnez le template à appliquer à votre boutique.</p>
+           </div>
+
+           <!-- Thumbnails Grid -->
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div
                 v-for="tpl in templates"
                 :key="tpl.key"
-                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col h-full bg-white overflow-hidden"
-                :class="form.templateKey === tpl.key ? 'border-teal-600 ring-1 ring-teal-600' : 'border-slate-200 hover:border-teal-300 shadow-sm hover:shadow-md'"
+                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col overflow-hidden bg-white"
+                :class="form.templateKey === tpl.key ? 'border-brand-600 ring-4 ring-brand-600/20 shadow-md' : 'border-slate-200 hover:border-brand-300 shadow-sm hover:shadow'"
                 @click="form.templateKey = tpl.key"
               >
-                 <!-- Template Screenshot -->
-                 <div class="aspect-[16/10] w-full bg-slate-100 border-b border-slate-100 relative overflow-hidden">
-                    <img 
-                      :src="`/templates/${tpl.key}.png`" 
-                      class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                      onerror="this.style.display='none'"
-                    >
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                 <!-- Style Swatch Preview -->
+                 <div
+                   class="relative w-full border-b overflow-hidden flex flex-col"
+                   style="height: 200px;"
+                   :style="{ background: tpl.bg, borderColor: tpl.border }"
+                 >
+                   <!-- Top accent strip -->
+                   <div class="h-1 w-full shrink-0" :style="{ background: tpl.color }"></div>
+
+                   <!-- Mock product card (centered) -->
+                   <div class="flex-1 flex items-center justify-center p-4">
+                     <div
+                       class="w-full max-w-[140px] overflow-hidden shadow-sm"
+                       :style="{ background: tpl.cardBg, borderRadius: tpl.radius, border: `1px solid ${tpl.border}` }"
+                     >
+                       <!-- Image zone -->
+                       <div
+                         class="w-full flex items-center justify-center text-3xl"
+                         style="height: 80px;"
+                         :style="{ background: tpl.imgBg }"
+                       >
+                         {{ tpl.emoji }}
+                       </div>
+                       <!-- Text body -->
+                       <div class="px-2.5 py-2" :style="{ fontFamily: tpl.fontStyle }">
+                         <p class="text-[11px] font-semibold leading-tight truncate" :style="{ color: tpl.textColor }">
+                           {{ tpl.sampleDesc }}
+                         </p>
+                         <p class="text-[11px] mt-0.5 font-bold" :style="{ color: tpl.color }">
+                           {{ tpl.samplePrice }}
+                         </p>
+                         <!-- Mini button -->
+                         <div
+                           class="mt-2 w-full text-center text-[9px] font-bold py-1 leading-none"
+                           :style="{ background: tpl.color, color: tpl.btnText, borderRadius: tpl.radius }"
+                         >
+                           BUY
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   <!-- Hover overlay with Prévisualiser button -->
+                   <div class="absolute inset-0 z-10 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col justify-end p-3">
+                     <NuxtLink
+                       :to="`/admin/preview?template=${tpl.key}`"
+                       target="_blank"
+                       class="pointer-events-auto py-2 px-4 bg-white/95 hover:bg-white backdrop-blur-sm text-slate-900 font-medium text-sm rounded-lg shadow border border-slate-200 flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300"
+                       @click.stop
+                     >
+                       <Icon name="lucide:external-link" class="w-4 h-4" />
+                       Prévisualiser
+                     </NuxtLink>
+                   </div>
                  </div>
 
-                 <div class="p-4 flex flex-col flex-1">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                           <div class="p-1.5 rounded-md bg-slate-50 border border-slate-100 text-slate-500">
-                              <Icon :name="tpl.icon" class="w-4 h-4" />
-                           </div>
-                           <span class="font-bold text-slate-900" :class="tpl.fontClass">{{ tpl.label }}</span>
-                        </div>
-                        <div class="w-3 h-3 rounded-full border border-slate-200" :style="{ backgroundColor: tpl.color }"></div>
-                    </div>
-                    
-                    <p class="text-xs text-slate-500 leading-relaxed mb-1">{{ tpl.description }}</p>
-                 </div>
-                 
-                 <div v-if="form.templateKey === tpl.key" class="absolute top-3 right-3 text-teal-600 bg-white rounded-full shadow-sm z-10">
-                    <Icon name="lucide:check-circle-2" class="w-6 h-6" />
+                 <!-- Template Identity Footer -->
+                 <div class="p-3 bg-white flex flex-col gap-2">
+                   <div class="flex items-center justify-between">
+                     <span class="font-bold text-slate-800 text-sm" :class="tpl.fontClass">{{ tpl.label }}</span>
+                     <div v-if="form.templateKey === tpl.key" class="text-brand-600">
+                       <Icon name="lucide:check-circle-2" class="w-5 h-5" />
+                     </div>
+                   </div>
+                   <div class="flex flex-col gap-0.5">
+                     <p class="text-[11px] font-medium text-slate-600 leading-snug">{{ tpl.storeTypes }}</p>
+                     <p class="text-[11px] text-slate-500 leading-snug">{{ tpl.description }}</p>
+                   </div>
+                   <!-- Color + font pills -->
+                   <div class="flex items-center gap-1.5 flex-wrap">
+                     <span
+                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                       :style="{ borderColor: tpl.color + '40', background: tpl.color + '12', color: tpl.color }"
+                     >
+                       <span class="w-2 h-2 rounded-full inline-block" :style="{ background: tpl.color }"></span>
+                       {{ tpl.color.toUpperCase() }}
+                     </span>
+                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 border border-slate-200 text-slate-600">
+                       <Icon name="lucide:type" class="w-2.5 h-2.5" />
+                       {{ tpl.fontName }}
+                     </span>
+                   </div>
                  </div>
               </div>
            </div>
@@ -189,92 +287,38 @@
 
     </div>
 
-    <!-- Right Column: Live Preview (Sticky) -->
-    <div class="hidden lg:block lg:col-span-5 xl:col-span-4 relative">
-       <div class="sticky top-24 space-y-4">
-          <div class="flex items-center justify-between">
-             <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">{{ t('admin.appearanceSettingsForm.preview.title') }}</h3>
-             <span class="text-xs px-2 py-1 bg-teal-100 text-teal-700 rounded font-medium">{{ t('admin.appearanceSettingsForm.preview.mobile') }}</span>
-          </div>
+      <!-- Form Actions -->
+      <div class="pt-4 flex items-center justify-end gap-6">
+         <div 
+           v-if="message.text" 
+           class="px-3 py-1.5 rounded-full text-sm font-medium animate-fadeIn"
+           :class="message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'"
+         >
+           {{ message.text }}
+         </div>
 
-          <!-- Phone/Browser Mockup Window -->
-          <div class="bg-white border-8 border-slate-900 rounded-[2rem] shadow-2xl overflow-hidden aspect-[9/18] relative ring-1 ring-slate-900/5 mx-auto w-full" :style="{ maxWidth: 'calc((100vh - 12rem) * 9 / 18)' }">
-             
-             <!-- Mockup Status Bar -->
-             <div class="absolute top-0 left-0 right-0 h-6 bg-slate-900 z-20 flex items-center justify-between px-6">
-                <div class="text-[10px] text-white font-medium">9:41</div>
-                <div class="flex gap-1.5 opacity-90">
-                   <div class="w-3 h-3 text-white"><Icon name="lucide:signal" class="w-full h-full" /></div>
-                   <div class="w-3 h-3 text-white"><Icon name="lucide:wifi" class="w-full h-full" /></div>
-                   <div class="w-3 h-3 text-white"><Icon name="lucide:battery-medium" class="w-full h-full" /></div>
-                </div>
-             </div>
-
-             <!-- Mockup Scrollable Content -->
-             <div class="absolute top-6 inset-x-0 bottom-0 bg-white overflow-hidden rounded-b-[2rem]">
-                <iframe
-                  v-if="previewUrl"
-                  :src="previewUrl"
-                  class="w-full h-full border-none"
-                  :title="t('admin.appearanceSettingsForm.preview.iframeTitle')" 
-                />
-                <div v-else class="flex flex-col items-center justify-center h-full text-slate-400 p-6 text-center">
-                  <Icon name="lucide:loader" class="w-6 h-6 animate-spin mb-2" />
-                  <p class="text-xs">{{ t('admin.appearanceSettingsForm.preview.loading') }}</p>
-                </div>
-             </div>
-
-             <!-- Mockup Home Indicator -->
-             <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-slate-900 rounded-full z-30 opacity-20"></div>
-          </div>
-
-
-
-          <p class="text-xs text-center text-slate-400">
-             {{ t('admin.appearanceSettingsForm.preview.note') }}
-             <a v-if="previewUrl" :href="previewUrl" target="_blank" class="text-teal-600 hover:underline">{{ t('admin.appearanceSettingsForm.preview.openNewTab') }}</a>
-          </p>
-       </div>
-    </div>
-    
-  <!-- Floating Save Bar (Mobile & Desktop) -->
-  <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 z-40 lg:sticky lg:bottom-6 lg:bg-transparent lg:border-none lg:p-0 lg:col-span-12 lg:flex lg:justify-end pointer-events-none">
-     <div class="pointer-events-auto max-w-7xl mx-auto flex items-center justify-between gap-4 lg:bg-white lg:px-4 lg:py-2 lg:rounded-2xl lg:shadow-xl lg:border lg:border-slate-100">
-        
-        <div class="flex items-center gap-3">
-           <div 
-              v-if="message.text" 
-              class="px-3 py-1.5 rounded-full text-sm font-medium animate-fadeIn"
-              :class="message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'"
-           >
-              {{ message.text }}
-           </div>
-        </div>
-
-        <div class="flex items-center gap-3">
+         <div class="flex items-center gap-3">
            <button
              type="button"
-             class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
-           :disabled="loading || saving"
-           @click="reset"
-         >
+             class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+             :disabled="loading || saving"
+             @click="reset"
+           >
              {{ t('admin.common.cancel') }}
            </button>
            
            <button
              @click="save"
-             class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30 active:scale-95 flex items-center gap-2"
-             :class="saving ? 'bg-teal-500 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'"
+             class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+             :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
              :disabled="loading || saving"
            >
              <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
              {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
            </button>
-        </div>
-     </div>
-  </div>
-
-  </div>
+         </div>
+      </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -306,6 +350,7 @@ const form = reactive({
   name: '',
   slug: '',
   logoUrl: null as string | null,
+  faviconUrl: null as string | null,
   primaryColor: '#0F766E',
   templateKey: 'classic',
   announcementText: '',
@@ -325,6 +370,9 @@ const getSelectedTemplateFont = computed(() => {
   const tpl = templates.value.find((tpl) => tpl.key === form.templateKey)
   return tpl ? tpl.fontClass : 'font-sans'
 })
+
+// -- Methods --
+
 
 // -- Lifecycle --
 onMounted(() => {
@@ -347,69 +395,247 @@ onMounted(() => {
 // -- Templates Data --
 const templates = computed(() => [
   { 
-    key: 'classic', 
-    label: t('admin.appearanceSettingsForm.templates.options.classic.label'), 
+    key: 'classic',
+    label: 'Classic',
     description: t('admin.appearanceSettingsForm.templates.options.classic.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.classic.storeTypes'),
     icon: 'lucide:layout-grid',
     fontClass: 'font-serif',
-    color: '#0f172a'
+    fontName: 'Alice',
+    fontStyle: "'Alice', serif",
+    color: '#0f172a',
+    bg: '#f8fafc',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)',
+    border: '#e2e8f0',
+    textColor: '#0f172a',
+    subColor: '#64748b',
+    btnText: '#ffffff',
+    radius: '4px',
+    emoji: '🖼️',
+    sampleDesc: 'Élégant & intemporel',
+    samplePrice: '189 €',
   },
   { 
-    key: 'modern', 
-    label: t('admin.appearanceSettingsForm.templates.options.modern.label'), 
+    key: 'modern',
+    label: 'Modern',
     description: t('admin.appearanceSettingsForm.templates.options.modern.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.modern.storeTypes'),
     icon: 'lucide:layout-template',
     fontClass: 'font-sans',
-    color: '#0d9488'
+    fontName: 'Outfit',
+    fontStyle: "'Outfit', ui-sans-serif, system-ui, sans-serif",
+    color: '#0d9488',
+    bg: '#f8fafc',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#ccfbf1,#99f6e4)',
+    border: '#e2e8f0',
+    textColor: '#475569',
+    subColor: '#64748b',
+    btnText: '#ffffff',
+    radius: '8px',
+    emoji: '🛍️',
+    sampleDesc: 'Minimaliste & moderne',
+    samplePrice: '129 €',
   },
   { 
-    key: 'street', 
-    label: t('admin.appearanceSettingsForm.templates.options.street.label'), 
+    key: 'street',
+    label: 'Street',
     description: t('admin.appearanceSettingsForm.templates.options.street.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.street.storeTypes'),
     icon: 'lucide:zap',
     fontClass: 'font-street',
-    color: '#FACC15'
+    fontName: 'Anton',
+    fontStyle: "'Anton', sans-serif",
+    color: '#FACC15',
+    bg: '#ffffff',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#fef9c3,#fde68a)',
+    border: '#FACC15',
+    textColor: '#000000',
+    subColor: '#374151',
+    btnText: '#000000',
+    radius: '0px',
+    emoji: '👟',
+    sampleDesc: 'Limited drop',
+    samplePrice: '99 €',
   },
   { 
-    key: 'cozy', 
-    label: t('admin.appearanceSettingsForm.templates.options.cozy.label'), 
+    key: 'cozy',
+    label: 'Cozy',
     description: t('admin.appearanceSettingsForm.templates.options.cozy.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.cozy.storeTypes'),
     icon: 'lucide:coffee',
     fontClass: 'font-cozy',
-    color: '#A4C3B2'
+    fontName: 'Nunito',
+    fontStyle: "'Nunito', sans-serif",
+    color: '#A4C3B2',
+    bg: '#F5F2EA',
+    cardBg: '#F5F2EA',
+    imgBg: 'linear-gradient(135deg,#d1fae5,#bbf7d0)',
+    border: '#e8f0eb',
+    textColor: '#475569',
+    subColor: '#6b7280',
+    btnText: '#ffffff',
+    radius: '16px',
+    emoji: '🕯️',
+    sampleDesc: 'Doux & chaleureux',
+    samplePrice: '24 €',
   },
   { 
-    key: 'cyber', 
-    label: t('admin.appearanceSettingsForm.templates.options.cyber.label'), 
+    key: 'cyber',
+    label: 'Cyber',
     description: t('admin.appearanceSettingsForm.templates.options.cyber.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.cyber.storeTypes'),
     icon: 'lucide:cpu',
     fontClass: 'font-cyber',
-    color: '#F43F5E'
+    fontName: 'Orbitron',
+    fontStyle: "'Orbitron', sans-serif",
+    color: '#F43F5E',
+    bg: '#0d0515',
+    cardBg: '#1a0a2e',
+    imgBg: 'linear-gradient(135deg,#2d1b5e,#1a0a2e)',
+    border: '#F43F5E',
+    textColor: '#e9d5ff',
+    subColor: '#c084fc',
+    btnText: '#ffffff',
+    radius: '4px',
+    emoji: '🤖',
+    sampleDesc: 'Next-gen tech',
+    samplePrice: '499 €',
   },
   { 
-    key: 'stationnery', 
-    label: t('admin.appearanceSettingsForm.templates.options.stationnery.label'), 
+    key: 'stationnery',
+    label: 'Stationery',
     description: t('admin.appearanceSettingsForm.templates.options.stationnery.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.stationnery.storeTypes'),
     icon: 'lucide:pen-tool',
     fontClass: 'font-stationery',
-    color: '#334155'
+    fontName: 'Merriweather',
+    fontStyle: "'Merriweather', 'Playfair Display', serif",
+    color: '#334155',
+    bg: '#fdfbf7',
+    cardBg: '#fdfbf7',
+    imgBg: 'linear-gradient(135deg,#f8fafc,#e2e8f0)',
+    border: '#cbd5e1',
+    textColor: '#1e293b',
+    subColor: '#64748b',
+    btnText: '#fdfbf7',
+    radius: '2px',
+    emoji: '📓',
+    sampleDesc: 'Élégance papeterie',
+    samplePrice: '18 €',
   },
   { 
-    key: 'food', 
-    label: t('admin.appearanceSettingsForm.templates.options.food.label'), 
+    key: 'food',
+    label: 'Food',
     description: t('admin.appearanceSettingsForm.templates.options.food.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.food.storeTypes'),
     icon: 'lucide:utensils',
     fontClass: 'font-food',
-    color: '#EA580C'
+    fontName: 'Nunito',
+    fontStyle: "'Nunito', sans-serif",
+    color: '#ea580c',
+    bg: '#f5f5f4',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#ffedd5,#fed7aa)',
+    border: '#e7e5e4',
+    textColor: '#292524',
+    subColor: '#78716c',
+    btnText: '#ffffff',
+    radius: '12px',
+    emoji: '🍕',
+    sampleDesc: 'Saveurs artisanales',
+    samplePrice: '14 €',
   },
   { 
-    key: 'wellness', 
-    label: t('admin.appearanceSettingsForm.templates.options.wellness.label'), 
+    key: 'wellness',
+    label: 'Wellness',
     description: t('admin.appearanceSettingsForm.templates.options.wellness.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.wellness.storeTypes'),
     icon: 'lucide:flower-2',
     fontClass: 'font-wellness',
-    color: '#8A9A5B'
-  }
+    fontName: 'Solway',
+    fontStyle: "'Solway', ui-serif, Georgia, serif",
+    color: '#2A9D8F',
+    bg: '#f8fafc',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#ccfbf1,#a7f3d0)',
+    border: '#ccfbf1',
+    textColor: '#475569',
+    subColor: '#64748b',
+    btnText: '#ffffff',
+    radius: '12px',
+    emoji: '🌿',
+    sampleDesc: 'Bio & naturel',
+    samplePrice: '22 €',
+  },
+  { 
+    key: 'playful',
+    label: 'Playful',
+    description: t('admin.appearanceSettingsForm.templates.options.playful.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.playful.storeTypes'),
+    icon: 'lucide:smile',
+    fontClass: 'font-sans',
+    fontName: 'Nunito',
+    fontStyle: "'Nunito', 'Quicksand', sans-serif",
+    color: '#9333EA', // Purple 600 — matches ThemeProvider
+    bg: '#faf5ff', // matches ThemeProvider bg-[#faf5ff]
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#f3e8ff,#e9d5ff)',
+    border: '#e9d5ff',
+    textColor: '#334155', // slate-700
+    subColor: '#7c3aed',
+    btnText: '#ffffff',
+    radius: '20px',
+    emoji: '🧸',
+    sampleDesc: 'Toys & Fun',
+    samplePrice: '15 €',
+  },
+  { 
+    key: 'activewear',
+    label: 'Activewear',
+    description: t('admin.appearanceSettingsForm.templates.options.activewear.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.activewear.storeTypes'),
+    icon: 'lucide:activity',
+    fontClass: 'font-activewear',
+    fontName: 'Teko',
+    fontStyle: "'Teko', sans-serif",
+    color: '#EAB308', // Electric Yellow — matches ThemeProvider
+    bg: '#000000', // bg-black — matches ThemeProvider
+    cardBg: '#111111',
+    imgBg: 'linear-gradient(135deg,#1f2937,#000000)',
+    border: '#333333',
+    textColor: '#d1d5db', // gray-300 — matches ThemeProvider text-gray-300
+    subColor: '#9ca3af',
+    btnText: '#000000',
+    radius: '0px',
+    emoji: '⚡',
+    sampleDesc: 'High Performance',
+    samplePrice: '89 €',
+  },
+  { 
+    key: 'chrono',
+    label: 'Chrono Luxe',
+    description: t('admin.appearanceSettingsForm.templates.options.chrono.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.chrono.storeTypes'),
+    icon: 'lucide:watch',
+    fontClass: 'font-serif',
+    fontName: 'Cormorant Garamond',
+    fontStyle: "'Cormorant Garamond', serif",
+    color: '#A67C52', // Warm Copper-Bronze
+    bg: '#0E1117', // Midnight navy — softer than pure black
+    cardBg: '#131720',
+    imgBg: 'linear-gradient(135deg,#1A1F2E,#0B0E16)',
+    border: 'rgba(212,197,169,0.18)',
+    textColor: '#E8E0D5',
+    subColor: '#8A8070',
+    btnText: '#ffffff',
+    radius: '2px',
+    emoji: '⌚',
+    sampleDesc: 'Luxury Accessories',
+    samplePrice: '3,500 €',
+  },
 ])
 
 // -- Methods --
@@ -429,6 +655,7 @@ const updateForm = (data: any) => {
   form.name = data.name || ''
   form.slug = data.slug || ''
   form.logoUrl = data.logoUrl || null
+  form.faviconUrl = data.faviconUrl || null
   form.primaryColor = data.primaryColor || '#0F766E'
   form.templateKey = data.templateKey || 'classic'
   form.announcementText = data.announcementText || ''
@@ -463,6 +690,7 @@ const save = async () => {
         primaryColor: form.primaryColor,
         templateKey: form.templateKey,
         logoUrl: form.logoUrl,
+        faviconUrl: form.faviconUrl,
         announcementText: form.announcementText,
         announcementScrolling: form.announcementScrolling
       }

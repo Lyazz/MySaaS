@@ -2247,7 +2247,16 @@
             "customerName": "الاسم",
             "customerPhone": "الهاتف",
             "deliveryAddress": "عنوان التوصيل",
-            "calledCustomer": "تم الاتصال بالعميل؟",
+            "callStatus": "حالة الاتصال",
+            "callStatusValues": {
+              "not_called": "لم يتم الاتصال",
+              "called": "تم الاتصال",
+              "no_answer": "لم يرد",
+              "attempt_1": "المحاولة الأولى",
+              "attempt_2": "المحاولة الثانية",
+              "attempt_3": "المحاولة الثالثة",
+              "switched_off": "مغلق"
+            },
             "internalNotesPlaceholder": "أضف ملاحظات خاصة حول هذا الطلب..."
           },
           "actions": {

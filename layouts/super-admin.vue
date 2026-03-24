@@ -53,16 +53,34 @@
             class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-teal-500"
           ></div>
 
-          <Icon 
-            :name="item.icon" 
-            class="w-5 h-5 transition-transform duration-300 group-hover:scale-110 shrink-0"
-            :class="route.path === item.path ? 'text-teal-400' : ''"
-          />
+          <div class="relative shrink-0">
+            <Icon 
+              :name="item.icon" 
+              class="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
+              :class="route.path === item.path ? 'text-teal-400' : ''"
+            />
+            <!-- Pending badge on collapsed icon -->
+            <span
+              v-if="item.badge && !sidebarOpen"
+              class="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] px-0.5 bg-amber-400 text-slate-900 text-[9px] font-bold rounded-full flex items-center justify-center leading-none"
+            >
+              {{ item.badge }}
+            </span>
+          </div>
+
           <span 
-            class="font-medium text-sm transition-all duration-300 whitespace-nowrap overflow-hidden"
+            class="font-medium text-sm transition-all duration-300 whitespace-nowrap overflow-hidden flex-1"
             :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
           >
             {{ item.label }}
+          </span>
+
+          <!-- Pending badge on expanded label -->
+          <span
+            v-if="item.badge && sidebarOpen"
+            class="ml-auto shrink-0 min-w-[20px] h-5 px-1.5 bg-amber-400 text-slate-900 text-[10px] font-bold rounded-full flex items-center justify-center leading-none"
+          >
+            {{ item.badge }}
           </span>
           
           <!-- Tooltip for collapsed state -->
@@ -71,6 +89,9 @@
             class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
           >
             {{ item.label }}
+            <span v-if="item.badge" class="ml-1.5 bg-amber-400 text-slate-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+              {{ item.badge }}
+            </span>
           </div>
         </NuxtLink>
       </nav>
@@ -140,12 +161,25 @@ const authStore = useAuthStore()
 const route = useRoute()
 const sidebarOpen = ref(false)
 const { t } = useI18n({ useScope: 'global' })
+const pendingPaymentsCount = ref(0)
 
-onMounted(() => {
+onMounted(async () => {
   if (window.innerWidth >= 1024) {
     sidebarOpen.value = true
   }
+  await loadPendingCount()
 })
+
+async function loadPendingCount() {
+  try {
+    const res = await $fetch('/api/super-admin/billing/pending-payments', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    }) as { payments: any[] }
+    pendingPaymentsCount.value = res?.payments?.length ?? 0
+  } catch {
+    // silently fail — badge is non-critical
+  }
+}
 
 const userInitial = computed(() => authStore.user?.email?.charAt(0).toUpperCase() || 'S')
 
@@ -158,22 +192,32 @@ const navItems = computed(() => [
   {
     path: '/super-admin',
     label: t('superAdmin.nav.dashboard'),
-    icon: 'lucide:layout-dashboard'
+    icon: 'lucide:layout-dashboard',
+    badge: 0
   },
   {
     path: '/super-admin/tenants',
     label: t('superAdmin.nav.tenants'),
-    icon: 'lucide:building'
+    icon: 'lucide:building',
+    badge: 0
+  },
+  {
+    path: '/super-admin/payments',
+    label: t('superAdmin.nav.payments', 'Payments'),
+    icon: 'lucide:clock',
+    badge: pendingPaymentsCount.value
   },
   {
     path: '/super-admin/analytics',
     label: t('superAdmin.nav.analytics'),
-    icon: 'lucide:bar-chart-2'
+    icon: 'lucide:bar-chart-2',
+    badge: 0
   },
   {
     path: '/super-admin/audit-logs',
     label: t('superAdmin.nav.auditLogs'),
-    icon: 'lucide:history'
+    icon: 'lucide:history',
+    badge: 0
   }
 ])
 

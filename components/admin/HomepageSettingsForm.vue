@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-5xl mx-auto space-y-8 pb-24">
+  <div class="max-w-4xl mx-auto space-y-8 pb-24">
     
     <!-- Header Section -->
     <div class="space-y-6">
@@ -16,24 +16,17 @@
 
         <!-- Feature Sections -->
         <HomeFeatureSection v-model="form.sections" />
-      </form>
-    </div>
-
-    <!-- Floating Save Bar -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 z-40 lg:sticky lg:bottom-6 lg:bg-transparent lg:border-none lg:p-0 flex justify-end pointer-events-none">
-       <div class="pointer-events-auto flex items-center gap-4 lg:bg-white lg:px-6 lg:py-3 lg:rounded-2xl lg:shadow-xl lg:border lg:border-slate-100">
-          
-          <div 
+        <!-- Form Actions -->
+        <div class="pt-4 flex items-center justify-end gap-6">
+           <div 
              v-if="message.text" 
              class="px-3 py-1.5 rounded-full text-sm font-medium animate-fadeIn"
              :class="message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'"
-          >
+           >
              {{ message.text }}
-          </div>
+           </div>
 
-          <div class="h-6 w-px bg-slate-200 hidden lg:block"></div>
-
-          <div class="flex items-center gap-3">
+           <div class="flex items-center gap-3">
              <button
                type="button"
                class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
@@ -44,7 +37,7 @@
              </button>
              
              <button
-               @click="save"
+               type="submit"
                class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30 active:scale-95 flex items-center gap-2"
                :class="saving ? 'bg-teal-500 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'"
                :disabled="loading || saving"
@@ -52,8 +45,9 @@
                <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
                {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
              </button>
-          </div>
-       </div>
+           </div>
+        </div>
+      </form>
     </div>
 
   </div>
@@ -88,9 +82,9 @@ const applyLoaded = (cfg: StorefrontHomeConfig | null | undefined) => {
 const fetchHomepageSettings = async () => {
   loading.value = true
   try {
-    const data = await $fetch<{ homeConfig: StorefrontHomeConfig }>('/api/admin/homepage-settings', {
+    const data = await $fetch('/api/admin/homepage-settings', {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    }) as { homeConfig: StorefrontHomeConfig }
     applyLoaded(data.homeConfig)
   } catch (e) {
     console.error('Failed to load homepage settings', e)
@@ -104,7 +98,7 @@ const save = async () => {
   saving.value = true
   message.text = ''
   try {
-    const updated = await $fetch<{ homeConfig: StorefrontHomeConfig }>('/api/admin/homepage-settings', {
+    const updated = await $fetch('/api/admin/homepage-settings', {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: { homeConfig: form }

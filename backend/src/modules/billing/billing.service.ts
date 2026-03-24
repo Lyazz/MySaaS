@@ -110,6 +110,55 @@ export class BillingService {
         return this.getTenantBillingSnapshot(params.tenantId)
     }
 
+    async submitPayment(params: {
+        tenantId: string
+        userId?: string
+        planCode: PlanCode
+        interval: BillingInterval
+        method: string
+        amountDzd: number
+        proofUrl?: string
+        notes?: string
+    }) {
+        const plan = getPlanByCode(params.planCode)
+        if (!plan) throw new Error('Invalid planCode')
+
+        const subscription = await prisma.tenantSubscription.findUnique({
+            where: { tenantId: params.tenantId }
+        })
+
+        // If the tenant doesn't have an active subscription, or it's just 'basic', 
+        // the new period will start now or at the end of the current period.
+        // For simplicity, we capture the intended period start/end based on the current state.
+        const now = new Date()
+        let periodStart = now
+        let periodEnd = params.interval === 'year' ? addUtcYears(now, 1) : addUtcMonths(now, 1)
+
+        if (subscription && subscription.status === 'ACTIVE' && subscription.currentPeriodEnd && subscription.currentPeriodEnd > now) {
+            periodStart = subscription.currentPeriodEnd
+            periodEnd = params.interval === 'year' ? addUtcYears(periodStart, 1) : addUtcMonths(periodStart, 1)
+        }
+
+        const payment = await prisma.billingPayment.create({
+            data: {
+                tenantId: params.tenantId,
+                planCode: params.planCode,
+                interval: params.interval,
+                amountDzd: params.amountDzd,
+                currency: plan.pricing.currency,
+                method: params.method,
+                status: 'PENDING',
+                proofUrl: params.proofUrl,
+                notes: params.notes,
+                createdByUserId: params.userId,
+                periodStart,
+                periodEnd
+            }
+        })
+
+        return payment
+    }
+
     async getTenantBillingSnapshot(tenantId: string): Promise<TenantBillingSnapshot> {
         const subscription = await prisma.tenantSubscription.findUnique({ where: { tenantId } })
 

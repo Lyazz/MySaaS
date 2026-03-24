@@ -27,6 +27,11 @@
       "ar": "Arabic"
     }
   },
+  "store": {
+    "countdown": {
+      "days": "Days"
+    }
+  },
   "bundleTags": {
     "MOST_POPULAR": "Most popular",
     "BEST_VALUE": "Best value"
@@ -551,7 +556,20 @@
       "inStock": "In stock",
       "perUnit": "per unit",
       "descriptionFallback": "Experience the perfect blend of style and functionality.",
-      "viewFullDetails": "View full details"
+      "viewFullDetails": "View full details",
+      "bestsellerBadge": "Bestseller",
+      "youMayAlsoLike": "You May Also Like",
+      "saleBanner": "EXTENDED BLACK FRIDAY SALE - ENDS SOON!",
+      "reviewsCount": "(+{count} Reviews)",
+      "highDemandBadge": "High Demand!",
+      "viewingRightNow": "{count} people are viewing this right now.",
+      "savePercentage": "SAVE {percent}%",
+      "whyChooseUs": "Why choose us?",
+      "features": {
+        "delivery": "Worldwide Fast Delivery",
+        "support": "24/7 Customer Service",
+        "securePayment": "Secure Payment"
+      }
     },
     "productForm": {
       "quantity": {
@@ -761,6 +779,13 @@
           "addSelected": "Add Selected"
         }
       }
+    },
+    "help": {
+      "button": "Help Center",
+      "title": "Swekly Support",
+      "subtitle": "How can we help you today?",
+      "greeting": "Hi there! I'm the Swekly assistant. How can I help you manage your store today?",
+      "inputPlaceholder": "Type your message..."
     },
     "storeSettingsForm": {
       "title": "Store appearance & settings",
@@ -1172,6 +1197,11 @@
           "upload": "Upload logo",
           "hint": "Square (1:1), PNG recommended."
         },
+        "favicon": {
+          "label": "Favicon",
+          "upload": "Upload favicon",
+          "hint": "Square image (ICO, PNG), recommended size 32x32px"
+        },
         "primaryColor": {
           "label": "Primary color",
           "hint": "Used for buttons, links, and highlights."
@@ -1192,35 +1222,58 @@
         "options": {
           "classic": {
             "label": "Classic Shop",
-            "description": "Timeless elegance with serif typography."
+            "description": "Timeless elegance with serif typography.",
+            "storeTypes": "Clothing, jewelry, home decor"
           },
           "modern": {
             "label": "Modern Minimal",
-            "description": "Clean aesthetic with bold accents."
+            "description": "Clean aesthetic with bold accents.",
+            "storeTypes": "Fashion, beauty, lifestyle"
           },
           "street": {
             "label": "Street Urban",
-            "description": "Energetic, high-contrast style."
+            "description": "Energetic, high-contrast style.",
+            "storeTypes": "Sneakers, streetwear, limited drops"
           },
           "cozy": {
             "label": "Cozy Warm",
-            "description": "Soft greens and rounded nuances."
+            "description": "Soft greens and rounded nuances.",
+            "storeTypes": "Candles, gifts, wellness"
           },
           "cyber": {
             "label": "Cyber Future",
-            "description": "Dark mode with neon accents."
+            "description": "Dark mode with neon accents.",
+            "storeTypes": "Tech, electronics, gaming"
           },
           "stationnery": {
             "label": "Stationery",
-            "description": "Refined structure for professionals."
+            "description": "Refined structure for professionals.",
+            "storeTypes": "Books, paper goods, office"
           },
           "food": {
             "label": "Food Market",
-            "description": "Vibrant and appetizing."
+            "description": "Vibrant and appetizing.",
+            "storeTypes": "Restaurants, bakeries, groceries"
           },
           "wellness": {
             "label": "Wellness",
-            "description": "Organic, calm, and natural."
+            "description": "Organic, calm, and natural.",
+            "storeTypes": "Supplements, cosmetics, organic"
+          },
+          "playful": {
+            "label": "Playful",
+            "description": "Fun and vibrant for kids & families.",
+            "storeTypes": "Toys, kids fashion, family products"
+          },
+          "activewear": {
+            "label": "Activewear",
+            "description": "Bold and high-energy for sports & gym.",
+            "storeTypes": "Sports, gym, outdoor gear"
+          },
+          "chrono": {
+            "label": "Chrono Luxe",
+            "description": "Luxury dark theme with gold accents for premium accessories.",
+            "storeTypes": "Watches, sunglasses, jewelry, luxury accessories"
           }
         }
       },
@@ -1936,6 +1989,17 @@
         "errors": {
           "loadFailed": "Failed to load billing info."
         },
+        "status": {
+          "pending": {
+            "title": "Payment under review",
+            "desc": "We received your payment proof and our team is reviewing it. Your subscription will be updated once approved.",
+            "badge": "pending"
+          },
+          "approved": {
+            "title": "Payment approved",
+            "desc": "Your latest payment was approved and your subscription is active."
+          }
+        },
         "currentPlan": {
           "title": "Current Plan",
           "hint": "You can switch plans for testing (monthly only).",
@@ -1957,6 +2021,68 @@
           "title": "Available Plans",
           "ordersPerMonth": "{count} Orders / month",
           "perMonth": "/mo"
+        },
+        "interval": {
+          "monthly": "Monthly Billing",
+          "yearly": "Yearly Billing",
+          "annual": "Annual",
+          "save": "Save {pct}%"
+        },
+        "mo": "mo",
+        "yr": "yr",
+        "currentPlanBadge": "Your Plan",
+        "unlimitedOrders": "Unlimited Orders",
+        "upToOrders": "Up to {count} orders/mo",
+        "selectedBtn": "Selected",
+        "selectBtn": "Select Plan",
+        "prioritySupport": "Priority support",
+        "customBranding": "Custom branding & SMS config",
+        "payment": {
+          "methods": {
+            "myfin": "MyFin",
+            "paysera": "Paysera",
+            "baridimob": "BaridiMob",
+            "ccp": "CCP / Poste",
+            "chargily": "Chargily (CIB/Edahabia)"
+          },
+          "emptyTitle": "Checkout",
+          "emptyDesc": "Select a plan from the list to start your upgrade.",
+          "instructions": {
+            "myfin": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our MyFin account:\nIBAN: BG98MYFI123123123\nName: MySaaS LLC",
+            "paysera": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our Paysera account:\nEmail: payments{'@'}mysaas.com\nName: MySaaS LLC",
+            "baridimob": "Please send {amount} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +213 555 55 55 55",
+            "ccp": "Please deposit {amount} DZD to our CCP account:\nAccount: 12345678 99\nName: MySaaS LLC"
+          },
+          "title": "Complete your upgrade",
+          "subtitle": "Select a payment method to proceed.",
+          "totalLabel": "Total to pay",
+          "uploadProof": "Upload Receipt/Proof",
+          "uploadSuccess": "Receipt attached successfully",
+          "chargilyNote": "Automatic payment gateway integration is currently unavailable. Please choose another manual method like CCP or BaridiMob in the meantime.",
+          "submitBtn": "Confirm & Submit Payment",
+          "submitting": "Submitting…",
+          "success": "Payment submitted! Our team will review your receipt and activate your subscription.",
+          "errors": {
+            "proofRequired": "Please attach a payment proof.",
+            "submitFailed": "Failed to submit payment. Please try again."
+          }
+        },
+        "history": {
+          "title": "Payment history",
+          "entries": "entries",
+          "col": {
+            "date": "Date",
+            "plan": "Plan",
+            "amount": "Amount",
+            "method": "Method",
+            "status": "Status",
+            "proof": "Proof"
+          },
+          "viewProof": "View"
+        },
+        "common": {
+          "uploading": "Uploading...",
+          "clickToUpload": "Click to upload receipt"
         }
       },
       "products": {
@@ -2012,8 +2138,9 @@
           },
           "deleteModal": {
             "title": "Delete product",
-            "message": "Are you sure you want to delete “{title}”? This action cannot be undone.",
-            "error": "Failed to delete product. Please try again."
+            "message": "Are you sure you want to delete \u201c{title}\u201d? This action cannot be undone.",
+            "error": "Failed to delete product. Please try again.",
+            "errorHasTransactions": "Cannot delete this product because it is referenced by existing sales or purchase orders."
           },
           "bulk": {
             "selected": "{count} selected",
@@ -2154,7 +2281,8 @@
             "title": "Delete category",
             "message": "Are you sure you want to delete this category? Products in this category will become uncategorized.",
             "messageWithTitle": "Are you sure you want to delete “{title}”? Products in this category will become uncategorized.",
-            "error": "Failed to delete category. Please try again."
+            "error": "Failed to delete category. Please try again.",
+            "errorHasProducts": "Cannot delete this category because it still contains products. Move or delete them first."
           }
         },
         "create": {
@@ -2261,6 +2389,16 @@
             "customerPhone": "Phone",
             "deliveryAddress": "Delivery address",
             "calledCustomer": "Called Customer?",
+            "callStatus": "Call Status",
+            "callStatusValues": {
+              "not_called": "Not Called",
+              "called": "Called",
+              "no_answer": "No Answer",
+              "attempt_1": "1st Attempt",
+              "attempt_2": "2nd Attempt",
+              "attempt_3": "3rd Attempt",
+              "switched_off": "Switched Off"
+            },
             "internalNotesPlaceholder": "Add private remarks about this order..."
           },
           "actions": {
@@ -2351,6 +2489,13 @@
             "totalSpent": "Total spent",
             "lastOrder": "Last order",
             "actions": "Actions"
+          },
+          "deleteModal": {
+            "title": "Delete customer",
+            "message": "Are you sure you want to delete this customer? This action cannot be undone.",
+            "messageWithName": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+            "error": "Failed to delete customer. Please try again.",
+            "errorHasTransactions": "Cannot delete this customer because they have existing sales or payments."
           }
         },
         "create": {
@@ -2550,7 +2695,23 @@
             "supplierLabel": "Filter by supplier",
             "allSuppliers": "All suppliers",
             "userLabel": "Filter by user",
-            "allUsers": "All users"
+            "allUsers": "All users",
+            "allStatuses": "All Statuses",
+            "statusLabel": "Status",
+            "allPaymentStatuses": "All Payment Statuses",
+            "paymentStatusLabel": "Payment Status",
+            "statusValues": {
+              "DRAFT": "Draft",
+              "ORDERED": "Ordered",
+              "PARTIALLY_RECEIVED": "Partially Received",
+              "RECEIVED": "Received",
+              "CANCELLED": "Cancelled"
+            },
+            "paymentStatusValues": {
+              "UNPAID": "Unpaid",
+              "PARTIALLY_PAID": "Partially Paid",
+              "PAID": "Paid"
+            }
           },
           "loading": "Loading purchases…",
           "empty": {
@@ -2567,7 +2728,9 @@
             "date": "Date",
             "action": "Action",
             "itemsCount": "{count} items",
-            "manage": "Manage"
+            "manage": "Manage",
+            "paymentStatus": "Payment Status",
+            "payment": "Payment"
           },
           "pagination": {
             "showing": "Showing {from} to {to} of {total} results"
@@ -2632,10 +2795,12 @@
               "removeItem": "Remove item",
               "totalOrderValue": "Total order value",
               "costMode": {
+                "label": "Cost calculation mode",
                 "replace": "Replace cost",
                 "weighted": "Avg cost"
               },
               "salePriceMode": {
+                "label": "Sell price calculation mode",
                 "replace": "Replace sell price",
                 "weighted": "Weighted avg"
               }
@@ -2786,7 +2951,8 @@
             "title": "Delete supplier",
             "message": "Are you sure you want to delete this supplier?",
             "messageWithName": "Are you sure you want to delete supplier “{name}”?",
-            "error": "Failed to delete supplier. Please try again."
+            "error": "Failed to delete supplier. Please try again.",
+            "errorHasTransactions": "Cannot delete this supplier because they have existing purchase orders."
           }
         },
         "create": {
@@ -2956,6 +3122,68 @@
       "confirm": {
         "suspend": "Are you sure you want to suspend {name}?",
         "delete": "Are you sure you want to DELETE {name}? This action cannot be undone!"
+      }
+    },
+    "paymentsPage": {
+      "title": "Tenant payments",
+      "subtitle": "Import payment proofs and review billing history for this tenant.",
+      "actions": {
+        "refresh": "Refresh"
+      },
+      "import": {
+        "title": "Import payment proof",
+        "fields": {
+          "plan": "Plan",
+          "interval": "Billing interval",
+          "proofUrl": "Proof URL",
+          "proofUrlPlaceholder": "https://...",
+          "proofUrlHint": "Optional. Link to a receipt or screenshot.",
+          "externalReference": "External reference",
+          "externalReferencePlaceholder": "Bank transfer reference…",
+          "notes": "Notes",
+          "notesPlaceholder": "Add notes…"
+        },
+        "applySubscription": {
+          "label": "Apply subscription",
+          "hint": "If enabled, this will update the tenant subscription based on the selected plan and interval."
+        },
+        "actions": {
+          "importing": "Importing…",
+          "importProof": "Import proof"
+        }
+      },
+      "history": {
+        "title": "Payment history",
+        "lastEntries": "{count} entries",
+        "loading": "Loading payments…",
+        "empty": "No payments found",
+        "table": {
+          "date": "Date",
+          "plan": "Plan",
+          "amount": "Amount",
+          "method": "Method",
+          "status": "Status",
+          "proof": "Proof"
+        },
+        "proof": {
+          "open": "Open"
+        },
+        "actions": {
+          "approve": "Approve",
+          "reject": "Reject"
+        }
+      },
+      "planOption": {
+        "ordersPerMonth": "{count} Orders/mo"
+      },
+      "interval": {
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "errors": {
+        "loadFailed": "Failed to load payments",
+        "importFailed": "Failed to import payment",
+        "reviewFailed": "Failed to review payment"
       }
     }
   }

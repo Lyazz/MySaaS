@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:intl/intl.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/sales_provider.dart';
 import '../models/sale.dart';
@@ -233,9 +232,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       : sale.id;
                   final isOrder = sale.type.toUpperCase() == 'ORDER';
                   return InkWell(
-                    onTap: isOrder
-                        ? () => context.push('/orders/${sale.id}')
-                        : null,
+                    onTap: () => context.push('/sales/${sale.id}'),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -325,7 +322,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                 size: AppButtonSize.sm,
                                 onPressed: isOrder
                                     ? () => context.push('/orders/${sale.id}')
-                                    : null,
+                                    : () => context.push('/sales/${sale.id}'),
                               ),
                             ),
                           ),

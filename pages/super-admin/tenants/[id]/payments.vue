@@ -141,6 +141,24 @@
                     </a>
                     <span v-else class="text-slate-400">—</span>
                   </td>
+                  <td class="ui-td text-right">
+                    <div v-if="p.status === 'PENDING'" class="flex items-center justify-end gap-2">
+                      <button
+                        class="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-semibold"
+                        :disabled="reviewingId === p.id"
+                        @click="reviewPayment(p.id, 'PAID')"
+                      >
+                        {{ t('superAdmin.paymentsPage.history.actions.approve', 'Approve') }}
+                      </button>
+                      <button
+                        class="px-3 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg text-xs font-semibold"
+                        :disabled="reviewingId === p.id"
+                        @click="reviewPayment(p.id, 'REJECTED')"
+                      >
+                        {{ t('superAdmin.paymentsPage.history.actions.reject', 'Reject') }}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -253,6 +271,25 @@ async function submitImport() {
     error.value = e?.data?.statusMessage || e?.message || t('superAdmin.paymentsPage.errors.importFailed')
   } finally {
     submitting.value = false
+  }
+}
+
+const reviewingId = ref<string | null>(null)
+
+async function reviewPayment(paymentId: string, status: 'PAID' | 'REJECTED') {
+  error.value = ''
+  reviewingId.value = paymentId
+  try {
+    await $fetch(`/api/super-admin/billing/tenants/${encodeURIComponent(tenantId.value)}/payments/${encodeURIComponent(paymentId)}/review`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { status }
+    })
+    await loadPayments()
+  } catch (e: any) {
+    error.value = e?.data?.statusMessage || e?.message || t('superAdmin.paymentsPage.errors.reviewFailed', 'Failed to review payment')
+  } finally {
+    reviewingId.value = null
   }
 }
 

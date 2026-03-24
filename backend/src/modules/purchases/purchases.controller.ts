@@ -7,8 +7,8 @@ export class PurchasesController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { startDate, endDate } = req.query as { startDate?: string; endDate?: string }
-            res.json(await service.list(tenant.id, { startDate, endDate }))
+            const { startDate, endDate, supplierId, status, paymentStatus } = req.query as { startDate?: string; endDate?: string; supplierId?: string; status?: string; paymentStatus?: string }
+            res.json(await service.list(tenant.id, { startDate, endDate, supplierId, status, paymentStatus }))
         } catch (error) {
             console.error('List purchases error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

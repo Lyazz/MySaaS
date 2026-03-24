@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../services/api_service.dart';
+import '../providers/auth_provider.dart';
 import '../providers/categories_provider.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
@@ -49,11 +50,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   Widget build(BuildContext context) {
     final categoriesState = ref.watch(categoriesProvider);
     final filteredCategories = _filterCategories(categoriesState.categories);
+    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB), // Gray-50
-      floatingActionButton: isMobile
+      floatingActionButton: (isMobile && !isOfflineTenant)
           ? FloatingActionButton(
               onPressed: () => context.go('/categories/create'),
               backgroundColor: const Color(0xFF14B8A6), // Teal-500
@@ -106,6 +108,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   }
 
   Widget _buildHeader() {
+    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -131,11 +134,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
           ],
         ),
-        AppButton.primary(
-          label: 'Add Category',
-          icon: LucideIcons.plus,
-          onPressed: () => context.go('/categories/create'),
-        ),
+        if (!isOfflineTenant)
+          AppButton.primary(
+            label: 'Add Category',
+            icon: LucideIcons.plus,
+            onPressed: () => context.go('/categories/create'),
+          ),
       ],
     );
   }
@@ -236,11 +240,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               style: TextStyle(color: Color(0xFF64748B)), // Slate-500
             ),
             const SizedBox(height: 24),
-            AppButton.primary(
-              label: 'Add Category',
-              icon: LucideIcons.plus,
-              onPressed: () => context.push('/categories/create'),
-            ),
+            if (!(ref.watch(authProvider).user?.isOfflineTenant ?? false))
+              AppButton.primary(
+                label: 'Add Category',
+                icon: LucideIcons.plus,
+                onPressed: () => context.push('/categories/create'),
+              ),
           ],
         ),
       ),

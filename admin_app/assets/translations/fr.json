@@ -2247,7 +2247,16 @@
             "customerName": "Nom",
             "customerPhone": "Téléphone",
             "deliveryAddress": "Adresse de livraison",
-            "calledCustomer": "Client appelé ?",
+            "callStatus": "Statut d'appel",
+            "callStatusValues": {
+              "not_called": "Non appelé",
+              "called": "Appelé",
+              "no_answer": "N'a pas répondu",
+              "attempt_1": "1ère tentative",
+              "attempt_2": "2ème tentative",
+              "attempt_3": "3ème tentative",
+              "switched_off": "Éteint"
+            },
             "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande..."
           },
           "actions": {

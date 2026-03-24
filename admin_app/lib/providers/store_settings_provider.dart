@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/store_settings.dart';
 import '../services/api_service.dart';
+import '../repositories/store_settings_repository.dart';
 
 class StoreSettingsState {
   final StoreSettings settings;
@@ -28,18 +29,23 @@ class StoreSettingsState {
 }
 
 class StoreSettingsNotifier extends Notifier<StoreSettingsState> {
+  late final StoreSettingsRepository _repo;
+
   @override
   StoreSettingsState build() {
-    return const StoreSettingsState(settings: StoreSettings.empty, isLoading: false);
+    final api = ref.watch(apiProvider);
+    _repo = StoreSettingsRepository(api);
+    Future.microtask(() => fetchStoreSettings());
+    return const StoreSettingsState(
+      settings: StoreSettings.empty,
+      isLoading: true,
+    );
   }
 
-  Future<void> fetchStoreSettings() async {
+  Future<void> fetchStoreSettings({bool forceRefresh = false}) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final api = ref.read(apiProvider);
-      final response = await api.client.get('/admin/store-settings');
-      final raw = (response.data as Map?)?.cast<String, dynamic>() ?? const {};
-      final settings = StoreSettings.fromJson(raw);
+      final settings = await _repo.getStoreSettings(forceRefresh: forceRefresh);
       state = state.copyWith(settings: settings, isLoading: false, error: null);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -51,4 +57,3 @@ final storeSettingsProvider =
     NotifierProvider<StoreSettingsNotifier, StoreSettingsState>(
       StoreSettingsNotifier.new,
     );
-

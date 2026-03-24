@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/customer.dart';
 import '../models/customer_detail.dart';
 import '../services/api_service.dart';
+import '../repositories/customer_repository.dart'; // NEW
+import '../repositories/customer_detail_repository.dart';
 
 class CustomersState {
   final List<Customer> customers;
@@ -97,58 +99,57 @@ class CustomersNotifier extends Notifier<CustomersState> {
     return _initialState ?? CustomersState();
   }
 
-  Future<void> fetchCustomers({String? search, int page = 1, int limit = 25})
-  async {
+  Future<void> fetchCustomers({
+    String? search,
+    int page = 1,
+    int limit = 25,
+  }) async {
     final q = (search ?? state.search).trim();
     state = state.copyWith(isLoading: true, error: null, search: q);
 
     try {
       final api = ref.read(apiProvider);
-      final res = await api.client.get(
-        '/admin/customers',
-        queryParameters: {
-          if (q.isNotEmpty) 'search': q,
-          'page': page,
-          'limit': limit,
-        },
-      );
+      final repo = CustomerRepository(api);
 
-      final data = res.data;
-      List<dynamic> items = const [];
-      int total = 0;
-      int resolvedPage = page;
-      int resolvedTotalPages = 1;
-      int resolvedLimit = limit;
+      // Get local + background sync customers
+      var allCustomers = await repo.getCustomers();
 
-      if (data is Map) {
-        if (data['items'] is List) items = data['items'] as List<dynamic>;
-        total = int.tryParse(data['total']?.toString() ?? '') ?? 0;
-        resolvedPage =
-            int.tryParse(data['page']?.toString() ?? '') ?? resolvedPage;
-        resolvedTotalPages =
-            int.tryParse(data['totalPages']?.toString() ?? '') ??
-            resolvedTotalPages;
-        resolvedLimit =
-            int.tryParse(data['limit']?.toString() ?? '') ?? resolvedLimit;
-      } else if (data is List) {
-        items = data;
-        total = items.length;
-        resolvedPage = 1;
-        resolvedTotalPages = 1;
+      // Basic local search filtering
+      if (q.isNotEmpty) {
+        final query = q.toLowerCase();
+        allCustomers = allCustomers
+            .where(
+              (c) =>
+                  c.name.toLowerCase().contains(query) ||
+                  (c.phone.contains(query)) ||
+                  (c.email?.toLowerCase().contains(query) ?? false),
+            )
+            .toList();
       }
 
-      final customers = items
-          .whereType<Map>()
-          .map((e) => Customer.fromJson(e.cast<String, dynamic>()))
-          .toList();
+      // Basic local pagination
+      final total = allCustomers.length;
+      final totalPages = (total / limit).ceil() > 0
+          ? (total / limit).ceil()
+          : 1;
+
+      final startIndex = (page - 1) * limit;
+      var paginatedCustomers = <Customer>[];
+
+      if (startIndex < total) {
+        final endIndex = startIndex + limit < total
+            ? startIndex + limit
+            : total;
+        paginatedCustomers = allCustomers.sublist(startIndex, endIndex);
+      }
 
       state = state.copyWithPagination(
         isLoading: false,
-        customers: customers,
-        total: total == 0 ? customers.length : total,
-        page: resolvedPage,
-        totalPages: resolvedTotalPages,
-        limit: resolvedLimit,
+        customers: paginatedCustomers,
+        total: total == 0 ? paginatedCustomers.length : total,
+        page: page,
+        totalPages: totalPages,
+        limit: limit,
         error: null,
         search: q,
       );
@@ -178,16 +179,15 @@ class CustomersNotifier extends Notifier<CustomersState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final api = ref.read(apiProvider);
-      await api.client.post(
-        '/admin/customers',
-        data: {
-          'name': trimmedName,
-          'phone': trimmedPhone,
-          'email': (email ?? '').trim().isEmpty ? null : email!.trim(),
-          'address': (address ?? '').trim().isEmpty ? null : address!.trim(),
-          'openingBalance': openingBalance,
-        },
-      );
+      final repo = CustomerRepository(api);
+
+      await repo.createCustomer({
+        'name': trimmedName,
+        'phone': trimmedPhone,
+        'email': (email ?? '').trim().isEmpty ? null : email!.trim(),
+        'address': (address ?? '').trim().isEmpty ? null : address!.trim(),
+        'openingBalance': openingBalance,
+      });
 
       await fetchCustomers(search: state.search, page: 1, limit: state.limit);
     } catch (e) {
@@ -196,8 +196,10 @@ class CustomersNotifier extends Notifier<CustomersState> {
     }
   }
 
-  Future<CustomerDetail?> fetchCustomerDetail(String id, {bool force = false})
-  async {
+  Future<CustomerDetail?> fetchCustomerDetail(
+    String id, {
+    bool force = false,
+  }) async {
     if (id.trim().isEmpty) return null;
     if (!force) {
       final cached = state.detailsById[id];
@@ -206,10 +208,9 @@ class CustomersNotifier extends Notifier<CustomersState> {
 
     try {
       final api = ref.read(apiProvider);
-      final res = await api.client.get('/admin/customers/$id');
-      final data = res.data;
-      if (data is! Map) return null;
-      final detail = CustomerDetail.fromJson(data.cast<String, dynamic>());
+      final repo = CustomerDetailRepository(api);
+      final detail = await repo.getCustomerDetail(id, forceRefresh: force);
+      if (detail == null) return null;
       state = state.copyWith(detailsById: {...state.detailsById, id: detail});
       return detail;
     } catch (e) {
@@ -235,15 +236,13 @@ class CustomersNotifier extends Notifier<CustomersState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final api = ref.read(apiProvider);
-      await api.client.patch(
-        '/admin/customers/$trimmedId',
-        data: {
-          'name': trimmedName,
-          'phone': trimmedPhone,
-          'email': (email ?? '').trim().isEmpty ? null : email!.trim(),
-          'address': (address ?? '').trim().isEmpty ? null : address!.trim(),
-        },
-      );
+      final repo = CustomerRepository(api);
+      await repo.updateCustomer(trimmedId, {
+        'name': trimmedName,
+        'phone': trimmedPhone,
+        'email': (email ?? '').trim().isNotEmpty ? email!.trim() : null,
+        'address': (address ?? '').trim().isNotEmpty ? address!.trim() : null,
+      });
 
       final nextDetails = Map<String, CustomerDetail>.of(state.detailsById);
       nextDetails.remove(trimmedId);

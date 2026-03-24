@@ -1,6 +1,6 @@
 import prisma from '../../lib/prisma'
 
-export type StoreTemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness'
+export type StoreTemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono'
 export type StoreLanguage = 'ar' | 'fr' | 'en'
 
 
@@ -12,7 +12,10 @@ export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; descriptio
     { key: 'cyber', label: 'Cyber', description: 'Futuristic dark mode with neon accents.' },
     { key: 'stationnery', label: 'Stationnery', description: 'Stationery oriented theme.' },
     { key: 'food', label: 'Food Market', description: 'Appetizing design with warm stone tones.' },
-    { key: 'wellness', label: 'Wellness', description: 'Organic, health-focused design with Sage Green tones.' }
+    { key: 'wellness', label: 'Wellness', description: 'Organic, health-focused design with Sage Green tones.' },
+    { key: 'playful', label: 'Playful', description: 'Kids & fun' },
+    { key: 'activewear', label: 'Activewear', description: 'Bold, aggressive typography and neon colors for sports.' },
+    { key: 'chrono', label: 'Chrono Luxe', description: 'Luxury dark theme with gold accents for premium accessories.' }
 ]
 
 export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [
@@ -45,6 +48,7 @@ export type StoreSettingsPatchInput = Partial<{
     name: string
     slug: string
     logoUrl: string | null
+    faviconUrl: string | null
     primaryColor: string
     templateKey: string
 
@@ -104,6 +108,13 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('logoUrl must be a string URL or null')
             }
             updateSettings.logoUrl = input.logoUrl
+        }
+ 
+        if (input.faviconUrl !== undefined) {
+            if (input.faviconUrl !== null && typeof input.faviconUrl !== 'string') {
+                throw new StoreSettingsValidationError('faviconUrl must be a string URL or null')
+            }
+            updateSettings.faviconUrl = input.faviconUrl
         }
 
         if (input.primaryColor !== undefined) {
@@ -217,6 +228,7 @@ export class StoreSettingsService {
         tenant: { id: string; slug: string; name: string }
         settings: {
             logoUrl: string | null
+            faviconUrl: string | null
             primaryColor: string
             templateKey: string
             announcementText: string | null
@@ -263,6 +275,8 @@ export class StoreSettingsService {
             ``,
             `## Store Settings (Chosen)`,
             `- Template: ${args.settings.templateKey}`,
+            `- Logo: ${args.settings.logoUrl ? args.settings.logoUrl : '(none)'}`,
+            `- Favicon: ${args.settings.faviconUrl ? args.settings.faviconUrl : '(none)'}`,
             `- Primary color: ${args.settings.primaryColor}`,
             `- Announcement: ${args.settings.announcementText ? `"${args.settings.announcementText}"` : '(none)'} (scrolling: ${args.settings.announcementScrolling})`,
             `- Language: ${args.settings.language}`,

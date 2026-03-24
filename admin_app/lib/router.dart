@@ -34,10 +34,8 @@ import 'widgets/app_shell.dart';
 
 // Custom transition that removes the slow overlay effect
 class NoTransitionPage extends CustomTransitionPage<void> {
-  const NoTransitionPage({required Widget child, LocalKey? key})
+  const NoTransitionPage({required super.child, super.key})
     : super(
-        key: key,
-        child: child,
         transitionsBuilder: _transitionsBuilder,
         transitionDuration: Duration.zero,
       );

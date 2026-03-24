@@ -69,19 +69,22 @@
             to="/admin/categories"
             class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            {{ t('admin.pages.categories.edit.backToList') }}
+            {{ t('admin.common.cancel') }}
           </NuxtLink>
           <button
-            :disabled="submitting"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="handleSubmit"
+            form="category-edit-form"
+            type="submit"
+            :disabled="submitting || loading"
+            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
           >
+            <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
             {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}
           </button>
         </div>
       </div>
 
       <form
+        id="category-edit-form"
         class="bg-white rounded-lg shadow p-6 space-y-6"
         @submit.prevent="handleSubmit"
       >
@@ -136,8 +139,9 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
             >
+              <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
               {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}
             </button>
           </div>
@@ -221,7 +225,7 @@ async function fetchCategory() {
   loading.value = true
   errorMessage.value = ''
   try {
-    const data = await $fetch<any>(`/api/admin/categories/${route.params.id}`, {
+    const data = await $fetch(`/api/admin/categories/${route.params.id}`, {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }

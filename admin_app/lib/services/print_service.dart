@@ -103,7 +103,7 @@ class PrintService {
                     pw.Expanded(child: pw.Text(item.name)),
                     pw.Text('x${item.quantity}'),
                     pw.Text(
-                      '${(item.price * item.quantity).toStringAsFixed(2)}',
+                      (item.price * item.quantity).toStringAsFixed(2),
                     ),
                   ],
                 ),

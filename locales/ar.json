@@ -27,6 +27,11 @@
       "ar": "العربية"
     }
   },
+  "store": {
+    "countdown": {
+      "days": "أيام"
+    }
+  },
   "bundleTags": {
     "MOST_POPULAR": "الأكثر شيوعًا",
     "BEST_VALUE": "أفضل قيمة"
@@ -551,7 +556,20 @@
       "inStock": "متوفر",
       "perUnit": "للوحدة",
       "descriptionFallback": "استمتع بالمزيج المثالي بين الأناقة والعملية.",
-      "viewFullDetails": "عرض التفاصيل"
+      "viewFullDetails": "عرض التفاصيل",
+      "bestsellerBadge": "الأكثر مبيعاً",
+      "youMayAlsoLike": "قد يعجبك أيضًا",
+      "saleBanner": "تخفيضات الجمعة السوداء الممتدة - تنتهي قريباً!",
+      "reviewsCount": "(+{count} تقييم)",
+      "highDemandBadge": "طلب مرتفع!",
+      "viewingRightNow": "{count} أشخاص يشاهدون هذا الآن.",
+      "savePercentage": "وفر {percent}%",
+      "whyChooseUs": "لماذا تختارنا؟",
+      "features": {
+        "delivery": "توصيل سريع لجميع أنحاء العالم",
+        "support": "خدمة عملاء على مدار 24/7",
+        "securePayment": "دفع آمن"
+      }
     },
     "productForm": {
       "quantity": {
@@ -761,6 +779,13 @@
           "addSelected": "إضافة المحدد"
         }
       }
+    },
+    "help": {
+      "button": "مركز المساعدة",
+      "title": "دعم Swekly",
+      "subtitle": "كيف يمكننا مساعدتك اليوم؟",
+      "greeting": "مرحباً! أنا مساعد Swekly. كيف يمكنني مساعدتك في إدارة متجرك اليوم؟",
+      "inputPlaceholder": "اكتب رسالتك..."
     },
     "storeSettingsForm": {
       "title": "مظهر وإعدادات المتجر",
@@ -1172,6 +1197,11 @@
           "upload": "رفع الشعار",
           "hint": "مربع (1:1)، يفضل PNG."
         },
+        "favicon": {
+          "label": "أيقونة المتجر (Favicon)",
+          "upload": "رفع الأيقونة",
+          "hint": "صورة مربعة (ICO, PNG)، الحجم الموصى به 32x32 بكسل"
+        },
         "primaryColor": {
           "label": "اللون الأساسي",
           "hint": "يستخدم للأزرار والروابط والعناصر البارزة."
@@ -1192,35 +1222,58 @@
         "options": {
           "classic": {
             "label": "كلاسيكي",
-            "description": "أناقة كلاسيكية بخط serif."
+            "description": "أناقة كلاسيكية بخط serif.",
+            "storeTypes": "ملابس، مجوهرات، ديكور منزلي"
           },
           "modern": {
             "label": "حديث بسيط",
-            "description": "تصميم نظيف مع لمسات جريئة."
+            "description": "تصميم نظيف مع لمسات جريئة.",
+            "storeTypes": "أزياء، تجميل، أسلوب حياة"
           },
           "street": {
             "label": "شارع",
-            "description": "أسلوب عالي التباين وحيوي."
+            "description": "أسلوب عالي التباين وحيوي.",
+            "storeTypes": "أحذية رياضية، ملابس شارع، إصدارات محدودة"
           },
           "cozy": {
             "label": "دافئ",
-            "description": "ألوان ناعمة وتفاصيل مستديرة."
+            "description": "ألوان ناعمة وتفاصيل مستديرة.",
+            "storeTypes": "شموع، هدايا، عافية"
           },
           "cyber": {
             "label": "سايبَر",
-            "description": "وضع داكن مع لمسات نيون."
+            "description": "وضع داكن مع لمسات نيون.",
+            "storeTypes": "تقنية، إلكترونيات، ألعاب"
           },
           "stationnery": {
             "label": "قرطاسية",
-            "description": "هيكلة أنيقة للمحترفين."
+            "description": "هيكلة أنيقة للمحترفين.",
+            "storeTypes": "كتب، قرطاسية، مكتب"
           },
           "food": {
             "label": "طعام",
-            "description": "ألوان نابضة وشهية."
+            "description": "ألوان نابضة وشهية.",
+            "storeTypes": "مطاعم، مخابز، بقالة"
           },
           "wellness": {
             "label": "عافية",
-            "description": "طبيعي وهادئ."
+            "description": "طبيعي وهادئ.",
+            "storeTypes": "مكملات غذائية، مستحضرات تجميل، طبيعي"
+          },
+          "playful": {
+            "label": "Playful",
+            "description": "ملون وممتع للأطفال والعائلات.",
+            "storeTypes": "ألعاب، أزياء أطفال، منتجات عائلية"
+          },
+          "activewear": {
+            "label": "Activewear",
+            "description": "ديناميكي وجريء للرياضة والصالات.",
+            "storeTypes": "رياضة، صالة ألعاب، معدات خارجية"
+          },
+          "chrono": {
+            "label": "Chrono Luxe",
+            "description": "تصميم داكن فاخر مع لمسات ذهبية للإكسسوارات الفاخرة.",
+            "storeTypes": "ساعات، نظارات شمسية، مجوهرات، إكسسوارات فاخرة"
           }
         }
       },
@@ -1923,6 +1976,17 @@
         "errors": {
           "loadFailed": "تعذر تحميل معلومات الفوترة."
         },
+        "status": {
+          "pending": {
+            "title": "الدفعة قيد المراجعة",
+            "desc": "استلمنا إثبات دفعتك وفريقنا يراجعه حالياً. سيتم تحديث اشتراكك بمجرد الموافقة.",
+            "badge": "قيد الانتظار"
+          },
+          "approved": {
+            "title": "تمت الموافقة على الدفعة",
+            "desc": "تمت الموافقة على آخر دفعة لك واشتراكك نشط."
+          }
+        },
         "currentPlan": {
           "title": "الخطة الحالية",
           "hint": "يمكنك تغيير الخطة للاختبار (شهري فقط).",
@@ -1944,6 +2008,68 @@
           "title": "الخطط المتاحة",
           "ordersPerMonth": "{count} طلب / شهر",
           "perMonth": "/شهر"
+        },
+        "interval": {
+          "monthly": "فوترة شهرية",
+          "yearly": "فوترة سنوية",
+          "annual": "سنوي",
+          "save": "وفّر {pct}%"
+        },
+        "mo": "شهر",
+        "yr": "سنة",
+        "currentPlanBadge": "خطتك الحالية",
+        "unlimitedOrders": "طلبات غير محدودة",
+        "upToOrders": "حتى {count} طلب/شهر",
+        "selectedBtn": "مختار",
+        "selectBtn": "اختيار الخطة",
+        "prioritySupport": "دعم ذو أولوية",
+        "customBranding": "هوية مخصصة وإعداد SMS",
+        "payment": {
+          "methods": {
+            "myfin": "MyFin",
+            "paysera": "Paysera",
+            "baridimob": "بريدي موب",
+            "ccp": "بريد الجزائر (CCP)",
+            "chargily": "شاريجلي (بطاقة CIB/الذهبية)"
+          },
+          "emptyTitle": "الدفع",
+          "emptyDesc": "اختر خطة من القائمة لبدء الترقية.",
+          "instructions": {
+            "myfin": "يرجى إرسال {eurAmount} يورو (السعر: 1€ = {rate} دج) إلى حساب MyFin الخاص بنا:\nIBAN: BG98MYFI123123123\nالاسم: MySaaS LLC",
+            "paysera": "يرجى إرسال {eurAmount} يورو (السعر: 1€ = {rate} دج) إلى حساب Paysera الخاص بنا:\nالبريد: payments{'@'}mysaas.com\nالاسم: MySaaS LLC",
+            "baridimob": "يرجى إرسال {amount} دج عبر بريدي موب إلى:\nRIP: 00799999000000000012\nالهاتف: +213 555 55 55 55",
+            "ccp": "يرجى إيداع {amount} دج في حساب CCP الخاص بنا:\nالحساب: 12345678 99\nالاسم: MySaaS LLC"
+          },
+          "title": "إتمام الترقية",
+          "subtitle": "اختر طريقة دفع للمتابعة.",
+          "totalLabel": "المبلغ الإجمالي",
+          "uploadProof": "إرفاق إيصال/إثبات الدفع",
+          "uploadSuccess": "تم إرفاق الإيصال بنجاح",
+          "chargilyNote": "بوابة الدفع التلقائي غير متاحة حالياً. يُرجى اختيار طريقة يدوية أخرى كـ CCP أو BaridiMob.",
+          "submitBtn": "تأكيد وإرسال الدفعة",
+          "submitting": "جارٍ الإرسال…",
+          "success": "تم إرسال الدفعة! سيراجع فريقنا إيصالك ويفعّل اشتراكك.",
+          "errors": {
+            "proofRequired": "يُرجى إرفاق إثبات الدفع.",
+            "submitFailed": "فشل إرسال الدفعة. حاول مرة أخرى."
+          }
+        },
+        "history": {
+          "title": "سجل الدفعات",
+          "entries": "إدخالات",
+          "col": {
+            "date": "التاريخ",
+            "plan": "الخطة",
+            "amount": "المبلغ",
+            "method": "الطريقة",
+            "status": "الحالة",
+            "proof": "الإيصال"
+          },
+          "viewProof": "عرض"
+        },
+        "common": {
+          "uploading": "جارٍ الرفع…",
+          "clickToUpload": "اضغط لإرفاق الإيصال"
         }
       },
       "products": {
@@ -2000,7 +2126,8 @@
           "deleteModal": {
             "title": "حذف المنتج",
             "message": "هل أنت متأكد من حذف “{title}”؟ لا يمكن التراجع عن هذا الإجراء.",
-            "error": "تعذر حذف المنتج. حاول مرة أخرى."
+            "error": "تعذر حذف المنتج. حاول مرة أخرى.",
+            "errorHasTransactions": "لا يمكن حذف هذا المنتج لأنه مرتبط بمبيعات أو طلبيات شراء موجودة."
           },
           "bulk": {
             "selected": "{count} محدد",
@@ -2141,7 +2268,8 @@
             "title": "حذف التصنيف",
             "message": "هل أنت متأكد من حذف هذا التصنيف؟ ستصبح المنتجات غير مصنفة.",
             "messageWithTitle": "هل أنت متأكد من حذف “{title}”؟ ستصبح المنتجات غير مصنفة.",
-            "error": "تعذر حذف التصنيف. حاول مرة أخرى."
+            "error": "تعذر حذف التصنيف. حاول مرة أخرى.",
+            "errorHasProducts": "لا يمكن حذف هذا التصنيف لأنه لا يزال يحتوي على منتجات. انقلها أو احذفها أولاً."
           }
         },
         "create": {
@@ -2248,6 +2376,16 @@
             "customerPhone": "الهاتف",
             "deliveryAddress": "عنوان التوصيل",
             "calledCustomer": "تم الاتصال بالعميل؟",
+            "callStatus": "حالة المكالمة",
+            "callStatusValues": {
+              "not_called": "لم يتم الاتصال",
+              "called": "تم الاتصال",
+              "no_answer": "لا يوجد رد",
+              "attempt_1": "محاولة 1",
+              "attempt_2": "محاولة 2",
+              "attempt_3": "محاولة 3",
+              "switched_off": "الهاتف مغلق"
+            },
             "internalNotesPlaceholder": "أضف ملاحظات خاصة حول هذا الطلب..."
           },
           "actions": {
@@ -2338,6 +2476,13 @@
             "totalSpent": "إجمالي الإنفاق",
             "lastOrder": "آخر طلب",
             "actions": "الإجراءات"
+          },
+          "deleteModal": {
+            "title": "حذف العميل",
+            "message": "هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء.",
+            "messageWithName": "هل أنت متأكد من حذف \"{name}\"? لا يمكن التراجع عن هذا الإجراء.",
+            "error": "فشل حذف العميل. حاول مرة أخرى.",
+            "errorHasTransactions": "لا يمكن حذف هذا العميل لأنه يملك مبيعات أو مدفوعات موجودة."
           }
         },
         "create": {
@@ -2537,7 +2682,23 @@
             "supplierLabel": "تصفية حسب المورّد",
             "allSuppliers": "كل المورّدين",
             "userLabel": "تصفية حسب المستخدم",
-            "allUsers": "جميع المستخدمين"
+            "allUsers": "جميع المستخدمين",
+            "allStatuses": "جميع الحالات",
+            "statusLabel": "الحالة",
+            "allPaymentStatuses": "جميع حالات الدفع",
+            "paymentStatusLabel": "حالة الدفع",
+            "statusValues": {
+              "DRAFT": "مسودة",
+              "ORDERED": "مطلوب",
+              "PARTIALLY_RECEIVED": "مستلم جزئياً",
+              "RECEIVED": "مستلم",
+              "CANCELLED": "ملغى"
+            },
+            "paymentStatusValues": {
+              "UNPAID": "غير مدفوع",
+              "PARTIALLY_PAID": "مدفوع جزئياً",
+              "PAID": "مدفوع"
+            }
           },
           "loading": "جارٍ تحميل المشتريات…",
           "empty": {
@@ -2554,7 +2715,9 @@
             "date": "التاريخ",
             "action": "إجراء",
             "itemsCount": "{count} عناصر",
-            "manage": "إدارة"
+            "manage": "إدارة",
+            "paymentStatus": "حالة الدفع",
+            "payment": "الدفع"
           },
           "pagination": {
             "showing": "عرض {from} إلى {to} من أصل {total} نتيجة"
@@ -2619,10 +2782,12 @@
               "removeItem": "إزالة العنصر",
               "totalOrderValue": "القيمة الإجمالية للأمر",
               "costMode": {
+                "label": "طريقة حساب تكلفة الشراء",
                 "replace": "استبدال تكلفة الشراء",
                 "weighted": "متوسط التكلفة"
               },
               "salePriceMode": {
+                "label": "طريقة حساب سعر البيع",
                 "replace": "تحديث سعر البيع",
                 "weighted": "متوسط مرجّح"
               }
@@ -2773,7 +2938,8 @@
             "title": "حذف المورّد",
             "message": "هل أنت متأكد من حذف هذا المورّد؟",
             "messageWithName": "هل أنت متأكد من حذف المورّد “{name}”؟",
-            "error": "تعذر حذف المورّد. حاول مرة أخرى."
+            "error": "تعذر حذف المورّد. حاول مرة أخرى.",
+            "errorHasTransactions": "لا يمكن حذف هذا المورّد لأنه يملك طلبيات شراء موجودة."
           }
         },
         "create": {
@@ -2801,6 +2967,147 @@
     },
     "validation": {
       "invalidNumber": "أدخل رقمًا صالحًا"
+    }
+  },
+  "superAdmin": {
+    "layout": {
+      "brand": "المشرف العام",
+      "role": "المشرف العام",
+      "closeSidebar": "إغلاق الشريط الجانبي",
+      "toggleSidebar": "إظهار/إخفاء الشريط الجانبي",
+      "defaultTitle": "لوحة تحكم المشرف العام"
+    },
+    "actions": {
+      "logout": "تسجيل الخروج"
+    },
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "tenants": "المستأجرون",
+      "analytics": "التحليلات",
+      "auditLogs": "سجل التدقيق"
+    },
+    "tenants": {
+      "title": "إدارة المستأجرين",
+      "actions": {
+        "createTenant": "إنشاء مستأجر",
+        "payments": "المدفوعات",
+        "suspend": "تعليق",
+        "activate": "تفعيل"
+      },
+      "search": {
+        "placeholder": "ابحث عن مستأجر..."
+      },
+      "loading": "جارٍ تحميل المستأجرين...",
+      "empty": "لا توجد نتائج",
+      "table": {
+        "name": "الاسم",
+        "slug": "المعرّف",
+        "status": "الحالة",
+        "users": "المستخدمون",
+        "products": "المنتجات",
+        "orders": "الطلبات",
+        "created": "تاريخ الإنشاء",
+        "actions": "إجراءات"
+      },
+      "status": {
+        "active": "نشط",
+        "suspended": "معلّق"
+      },
+      "modal": {
+        "createTitle": "إنشاء مستأجر جديد",
+        "editTitle": "تعديل المستأجر",
+        "fields": {
+          "name": {
+            "label": "اسم المستأجر",
+            "placeholder": "Acme Corp"
+          },
+          "slug": {
+            "label": "المعرّف (النطاق الفرعي)",
+            "placeholder": "acme",
+            "slugFallback": "slug",
+            "hint": "سيكون متاحًا على {slug}.localhost:3000"
+          },
+          "ownerEmail": {
+            "label": "بريد المالك",
+            "placeholder": "admin{'@'}acme.com"
+          },
+          "ownerPassword": {
+            "label": "كلمة مرور المالك"
+          }
+        }
+      },
+      "errors": {
+        "generic": "حدث خطأ",
+        "suspendFailed": "تعذر تعليق المستأجر",
+        "activateFailed": "تعذر تفعيل المستأجر",
+        "deleteFailed": "تعذر حذف المستأجر"
+      },
+      "confirm": {
+        "suspend": "هل أنت متأكد من تعليق {name}؟",
+        "delete": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء!"
+      }
+    },
+    "paymentsPage": {
+      "title": "مدفوعات المستأجر",
+      "subtitle": "استيراد إثبات الدفع ومراجعة سجل مدفوعات هذا المستأجر.",
+      "actions": {
+        "refresh": "تحديث"
+      },
+      "import": {
+        "title": "استيراد إثبات الدفع",
+        "fields": {
+          "plan": "الخطة",
+          "interval": "الفترة",
+          "proofUrl": "رابط الإثبات",
+          "proofUrlPlaceholder": "https://...",
+          "proofUrlHint": "اختياري. رابط إلى إيصال أو لقطة شاشة.",
+          "externalReference": "مرجع خارجي",
+          "externalReferencePlaceholder": "مرجع التحويل البنكي…",
+          "notes": "ملاحظات",
+          "notesPlaceholder": "أضف ملاحظات…"
+        },
+        "applySubscription": {
+          "label": "تطبيق الاشتراك",
+          "hint": "عند التفعيل، سيتم تحديث اشتراك المستأجر بحسب الخطة والفترة المحددتين."
+        },
+        "actions": {
+          "importing": "جارٍ الاستيراد…",
+          "importProof": "استيراد"
+        }
+      },
+      "history": {
+        "title": "سجل المدفوعات",
+        "lastEntries": "{count} إدخالات",
+        "loading": "جارٍ تحميل المدفوعات…",
+        "empty": "لا توجد مدفوعات",
+        "table": {
+          "date": "التاريخ",
+          "plan": "الخطة",
+          "amount": "المبلغ",
+          "method": "الطريقة",
+          "status": "الحالة",
+          "proof": "الإثبات"
+        },
+        "proof": {
+          "open": "فتح"
+        },
+        "actions": {
+          "approve": "قبول",
+          "reject": "رفض"
+        }
+      },
+      "planOption": {
+        "ordersPerMonth": "{count} طلب/شهر"
+      },
+      "interval": {
+        "monthly": "شهري",
+        "yearly": "سنوي"
+      },
+      "errors": {
+        "loadFailed": "تعذر تحميل المدفوعات",
+        "importFailed": "تعذر استيراد الدفع",
+        "reviewFailed": "تعذر مراجعة الدفع"
+      }
     }
   }
 }

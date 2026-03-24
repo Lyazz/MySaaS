@@ -71,4 +71,32 @@ class ReceiptLayout {
       showTaxBreakdown: map['showTaxBreakdown'] ?? true,
     );
   }
+
+  ReceiptLayout copyWith({
+    String? id,
+    String? name,
+    bool? showLogo,
+    bool? showHeader,
+    String? headerText,
+    bool? showDate,
+    bool? showOrderNumber,
+    bool? showCustomerInfo,
+    bool? showFooter,
+    String? footerText,
+    bool? showTaxBreakdown,
+  }) {
+    return ReceiptLayout(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      showLogo: showLogo ?? this.showLogo,
+      showHeader: showHeader ?? this.showHeader,
+      headerText: headerText ?? this.headerText,
+      showDate: showDate ?? this.showDate,
+      showOrderNumber: showOrderNumber ?? this.showOrderNumber,
+      showCustomerInfo: showCustomerInfo ?? this.showCustomerInfo,
+      showFooter: showFooter ?? this.showFooter,
+      footerText: footerText ?? this.footerText,
+      showTaxBreakdown: showTaxBreakdown ?? this.showTaxBreakdown,
+    );
+  }
 }

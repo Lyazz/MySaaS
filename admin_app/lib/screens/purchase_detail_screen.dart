@@ -864,18 +864,20 @@ class _TableRowState extends State<_TableRow> {
                           padding: const EdgeInsets.all(8),
                           minimumSize: const Size(32, 32),
                         ).copyWith(
-                          backgroundColor: MaterialStateProperty.resolveWith((
+                          backgroundColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
-                            if (states.contains(MaterialState.disabled))
+                            if (states.contains(WidgetState.disabled)) {
                               return Colors.grey[100];
+                            }
                             return Colors.green[50];
                           }),
-                          foregroundColor: MaterialStateProperty.resolveWith((
+                          foregroundColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
-                            if (states.contains(MaterialState.disabled))
+                            if (states.contains(WidgetState.disabled)) {
                               return Colors.grey[400];
+                            }
                             return Colors.green[700];
                           }),
                         ),

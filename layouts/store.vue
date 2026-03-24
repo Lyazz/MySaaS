@@ -2,12 +2,18 @@
 import { storeShellTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
 
 const storeSettings = useState<any>('storeSettings')
-const templateKey = computed(() => resolveTemplateKey(storeSettings.value?.templateKey))
+const route = useRoute()
+
+const templateKey = computed(() => {
+  if (route.query.preview_template) {
+    return resolveTemplateKey(route.query.preview_template as string)
+  }
+  return resolveTemplateKey(storeSettings.value?.templateKey)
+})
 const StoreShell = computed(() => storeShellTemplates[templateKey.value])
 
 const tenant = useState<any>('tenant')
 const facebookPixelId = useState<string | null>('facebookPixelId')
-const route = useRoute()
 
 const pixelScriptEnabled = computed(() => Boolean(tenant.value))
 const pixelNoscriptEnabled = computed(() => Boolean(tenant.value && facebookPixelId.value))

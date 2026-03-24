@@ -49,8 +49,8 @@ const normalizeCostMode = (value: unknown): CostMode => {
 const toDecimal = (value: string) => new Prisma.Decimal(value)
 
 export class PurchasesService {
-    async list(tenantId: string, filters?: { startDate?: string; endDate?: string }) {
-        const where: any = { tenantId }
+    async list(tenantId: string, filters?: { startDate?: string; endDate?: string; supplierId?: string; status?: string; paymentStatus?: string }) {
+        const where: Prisma.PurchaseOrderWhereInput = { tenantId }
 
         if (filters?.startDate || filters?.endDate) {
             where.createdAt = {}
@@ -66,11 +66,29 @@ export class PurchasesService {
             }
         }
 
-        return prisma.purchaseOrder.findMany({
+        if (filters?.supplierId) {
+            where.supplierId = filters.supplierId
+        }
+
+        if (filters?.status) {
+            where.status = filters.status
+        }
+
+        if (filters?.paymentStatus) {
+            (where as any).paymentStatus = filters.paymentStatus
+        }
+
+        const orders = await prisma.purchaseOrder.findMany({
             where,
-            include: { supplier: true, items: true },
+            include: { supplier: true, items: true, createdBy: { select: { email: true } } },
             orderBy: { createdAt: 'desc' }
         })
+
+        return orders.map((order: any) => ({
+            ...order,
+            createdByEmail: order.createdBy?.email ?? null,
+            createdByName: order.createdBy?.name ?? null
+        }))
     }
 
     async create(tenantId: string, input: any, actor?: { userId?: string | null }) {
@@ -84,7 +102,7 @@ export class PurchasesService {
         const reference = typeof input?.reference === 'string' && input.reference.trim() ? input.reference.trim().slice(0, 64) : null
         const notes = typeof input?.notes === 'string' && input.notes.trim() ? input.notes.trim().slice(0, 500) : null
 
-        return prisma.purchaseOrder.create({
+        const created = await prisma.purchaseOrder.create({
             data: {
                 tenantId,
                 supplierId: supplierId ?? null,
@@ -94,15 +112,22 @@ export class PurchasesService {
                 status: 'DRAFT',
                 createdByUserId: actor?.userId ?? null
             },
-            include: { supplier: true, items: { include: { variant: true } } }
+            include: { supplier: true, items: { include: { variant: true } }, createdBy: { select: { email: true } } }
         })
+
+        return {
+            ...created,
+            createdByEmail: (created as any).createdBy?.email ?? null,
+            createdByName: (created as any).createdBy?.name ?? null
+        }
     }
 
     async getById(tenantId: string, purchaseOrderId: string) {
-        return prisma.purchaseOrder.findFirst({
+        const order = await prisma.purchaseOrder.findFirst({
             where: { tenantId, id: purchaseOrderId },
             include: {
                 supplier: true,
+                createdBy: { select: { email: true } },
                 items: {
                     include: {
                         variant: {
@@ -111,6 +136,45 @@ export class PurchasesService {
                     },
                     orderBy: { createdAt: 'asc' }
                 }
+            }
+        })
+
+        if (!order) return null
+
+        return {
+            ...order,
+            createdByEmail: (order as any).createdBy?.email ?? null,
+            createdByName: (order as any).createdBy?.name ?? null
+        }
+    }
+
+    private async syncOrderTotals(tx: Prisma.TransactionClient, tenantId: string, purchaseOrderId: string) {
+        const items = await tx.purchaseOrderItem.findMany({
+            where: { tenantId, purchaseOrderId },
+            select: { quantityOrdered: true, unitCost: true }
+        })
+        const totalAmount = items.reduce((sum, item) => {
+            return sum.add(new Prisma.Decimal(item.quantityOrdered).mul(new Prisma.Decimal(String(item.unitCost))))
+        }, new Prisma.Decimal(0))
+
+        const po = await tx.purchaseOrder.findFirst({
+            where: { tenantId, id: purchaseOrderId },
+            select: { paidAmount: true }
+        })
+
+        const currentPaid = po?.paidAmount ? new Prisma.Decimal(String((po as any).paidAmount)) : new Prisma.Decimal(0)
+        let paymentStatus = 'UNPAID'
+        if (currentPaid.greaterThanOrEqualTo(totalAmount) && totalAmount.greaterThan(0)) {
+            paymentStatus = 'PAID'
+        } else if (currentPaid.greaterThan(0)) {
+            paymentStatus = 'PARTIALLY_PAID'
+        }
+
+        await tx.purchaseOrder.update({
+            where: { id: purchaseOrderId, tenantId },
+            data: {
+                totalAmount: totalAmount,
+                paymentStatus
             }
         })
     }
@@ -152,6 +216,8 @@ export class PurchasesService {
                 where: { tenantId, id: variantId },
                 data: { skuLocked: true }
             })
+
+            await this.syncOrderTotals(tx, tenantId, purchaseOrderId)
 
             return created
         })
@@ -346,11 +412,13 @@ export class PurchasesService {
             await tx.purchaseOrder.updateMany({
                 where: { tenantId, id: purchaseOrderId },
                 data: {
-                    status: remainingCount === 0 ? 'RECEIVED' : 'ORDERED',
+                    status: remainingCount === 0 ? 'RECEIVED' : (remainingCount < allItems.length ? 'PARTIALLY_RECEIVED' : 'ORDERED'),
                     receivedAt: remainingCount === 0 ? new Date() : undefined,
                     orderedAt: order.orderedAt ?? new Date()
                 }
             })
+
+            await this.syncOrderTotals(tx, tenantId, purchaseOrderId)
 
             if (wantsSupplierPayment) {
                 const amountStr = paymentAmountStr ?? (shouldAutoComputePaymentAmount ? computedPaymentTotal.toString() : null)
@@ -429,9 +497,12 @@ export class PurchasesService {
             data.salePrice = price
         }
 
-        return prisma.purchaseOrderItem.update({
-            where: { tenantId, id: itemId },
-            data
+        await prisma.$transaction(async (tx) => {
+            await tx.purchaseOrderItem.update({
+                where: { tenantId, id: itemId },
+                data
+            })
+            await this.syncOrderTotals(tx, tenantId, purchaseOrderId)
         })
     }
 
@@ -441,6 +512,9 @@ export class PurchasesService {
 
         if (item.quantityReceived > 0) throw new PurchaseValidationError(400, 'Cannot remove item with received stock')
 
-        await prisma.purchaseOrderItem.delete({ where: { tenantId, id: itemId } })
+        await prisma.$transaction(async (tx) => {
+            await tx.purchaseOrderItem.delete({ where: { tenantId, id: itemId } })
+            await this.syncOrderTotals(tx, tenantId, purchaseOrderId)
+        })
     }
 }

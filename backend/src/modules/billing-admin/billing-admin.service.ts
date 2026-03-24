@@ -98,4 +98,58 @@ export class BillingAdminService {
             take: 100
         })
     }
+
+    async listPendingPayments() {
+        return prisma.billingPayment.findMany({
+            where: { status: 'PENDING' },
+            orderBy: { createdAt: 'asc' },
+            include: {
+                tenant: {
+                    select: { id: true, name: true, slug: true }
+                }
+            }
+        })
+    }
+
+    async reviewPayment(params: {
+        tenantId: string
+        paymentId: string
+        status: 'PAID' | 'REJECTED'
+        reviewedByUserId?: string
+    }) {
+        const payment = await prisma.billingPayment.findUnique({
+            where: { id: params.paymentId, tenantId: params.tenantId }
+        })
+
+        if (!payment) {
+            throw new Error('Payment not found')
+        }
+
+        // Apply subscription if payment is approved
+        if (params.status === 'PAID') {
+            const sub = await this.setTenantSubscription({
+                tenantId: params.tenantId,
+                planCode: payment.planCode as PlanCode,
+                interval: payment.interval as BillingInterval
+            })
+
+            return prisma.billingPayment.update({
+                where: { id: params.paymentId },
+                data: {
+                    status: params.status,
+                    reviewedByUserId: params.reviewedByUserId,
+                    periodStart: sub.currentPeriodStart,
+                    periodEnd: sub.currentPeriodEnd
+                }
+            })
+        }
+
+        return prisma.billingPayment.update({
+            where: { id: params.paymentId },
+            data: {
+                status: params.status,
+                reviewedByUserId: params.reviewedByUserId
+            }
+        })
+    }
 }

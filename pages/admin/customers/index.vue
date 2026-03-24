@@ -153,21 +153,28 @@
                 {{ formatDate(c.lastOrderAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-2">
+                <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
-                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    :title="t('admin.common.view')"
                   >
-                    <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
-                    <span>{{ t('admin.common.view') }}</span>
+                    <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <NuxtLink
                     :to="`/admin/customers/edit/${c.id}`"
-                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    :title="t('admin.common.edit')"
                   >
-                    <Icon name="lucide:pencil" class="w-4 h-4 mr-1" />
-                    <span>{{ t('admin.common.edit') }}</span>
+                    <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
+                  <button
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    :title="t('admin.common.delete')"
+                    @click="confirmDelete(c)"
+                  >
+                    <Icon name="lucide:trash-2" class="w-4 h-4" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -240,6 +247,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <AdminConfirmModal
+      v-model="showDeleteModal"
+      :title="t('admin.pages.customers.index.deleteModal.title')"
+      :message="deleteMessage"
+      :confirm-text="t('admin.common.delete')"
+      :cancel-text="t('admin.common.cancel')"
+      :error="deleteError"
+      @confirm="handleDelete"
+      @update:model-value="val => { if (!val) deleteError = null }"
+    />
   </div>
 </template>
 
@@ -276,6 +295,17 @@ const searchQuery = ref(typeof route.query.search === 'string' ? route.query.sea
 
 const currentPage = ref(1)
 const itemsPerPage = 25
+
+const showDeleteModal = ref(false)
+const customerToDelete = ref<CustomerSummary | null>(null)
+const deleteError = ref<string | null>(null)
+
+const deleteMessage = computed(() => {
+  if (customerToDelete.value?.name) {
+    return t('admin.pages.customers.index.deleteModal.messageWithName', { name: customerToDelete.value.name })
+  }
+  return t('admin.pages.customers.index.deleteModal.message')
+})
 
 const emptyHint = computed(() => {
   if (searchQuery.value) return t('admin.pages.customers.index.empty.hintFiltered')
@@ -330,6 +360,39 @@ function formatDate(dateString: string | null) {
     month: 'short',
     day: 'numeric'
   })
+}
+
+function confirmDelete(customer: CustomerSummary) {
+  customerToDelete.value = customer
+  showDeleteModal.value = true
+  deleteError.value = null
+}
+
+async function handleDelete() {
+  if (!customerToDelete.value) return
+
+  try {
+    await $fetch(`/api/admin/customers/${customerToDelete.value.id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+
+    customers.value = customers.value.filter((c) => c.id !== customerToDelete.value?.id)
+    customerToDelete.value = null
+    showDeleteModal.value = false
+    deleteError.value = null
+  } catch (error: any) {
+    console.error('Failed to delete customer:', error)
+    const status = error?.response?.status || error?.statusCode
+    const msg = error?.data?.statusMessage || error?.response?.data?.statusMessage
+    if (status === 409 || msg === 'HAS_TRANSACTIONS') {
+      deleteError.value = t('admin.pages.customers.index.deleteModal.errorHasTransactions')
+    } else {
+      deleteError.value = t('admin.pages.customers.index.deleteModal.error')
+    }
+  }
 }
 
 onMounted(() => {

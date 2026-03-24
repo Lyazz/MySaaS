@@ -3,10 +3,12 @@ import { useCartStore } from '~/stores/cart'
 import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
+import RelatedProducts from './partials/RelatedProducts.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
 
 const props = defineProps<{
     product: any
+    relatedProducts?: any[]
 }>()
 
 const cartStore = useCartStore()
@@ -33,8 +35,23 @@ const currentVariant = computed(() => {
     return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
-const currentPrice = computed(() => {
+const isPromoValid = computed(() => {
+    if (!props.product?.isPromotionActive) return false
+    const now = new Date().getTime()
+    if (props.product.promotionStartDate && new Date(props.product.promotionStartDate).getTime() > now) return false
+    if (props.product.promotionEndDate && new Date(props.product.promotionEndDate).getTime() < now) return false
+    return true
+})
+
+const originalPrice = computed(() => {
     return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
+})
+
+const currentPrice = computed(() => {
+    if (isPromoValid.value && props.product?.promotionalPrice) {
+        return Number(props.product.promotionalPrice)
+    }
+    return originalPrice.value
 })
 
 const currentStock = computed(() => {
@@ -77,8 +94,15 @@ watch([() => props.product, selectedOptions], ([product]) => {
 </script>
 
 <template>
-  <div class="bg-slate-50 min-h-screen py-10 font-sans">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="bg-slate-50 min-h-screen font-sans">
+    <!-- Top Announcement Bar -->
+    <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white text-center py-3 px-4 text-sm font-bold flex items-center justify-center gap-3 shadow-md relative z-10 border-b border-brand-500/30">
+        <Icon name="lucide:sparkles" class="w-4 h-4 text-brand-400 animate-pulse" />
+        <span class="tracking-wide text-brand-50">{{ $t('storefront.product.saleBanner') }}</span>
+        <Icon name="lucide:sparkles" class="w-4 h-4 text-brand-400 animate-pulse" />
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Breadcrumb -->
       <nav class="flex items-center text-sm text-slate-500 mb-8 animate-fade-in-up">
         <NuxtLink
@@ -109,6 +133,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
             <ProductDetails 
                 :product="product" 
                 :current-price="currentPrice" 
+                :original-price="originalPrice"
                 v-model:selected-options="selectedOptions" 
             />
 
@@ -143,6 +168,12 @@ watch([() => props.product, selectedOptions], ([product]) => {
         </div>
         </div>
     </div>
+
+    <!-- Related Products Section -->
+    <RelatedProducts 
+      v-if="relatedProducts && relatedProducts.length > 0" 
+      :products="relatedProducts" 
+    />
   </div>
 </template>
 

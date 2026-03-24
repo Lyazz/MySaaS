@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[calc(100vh-4rem)] bg-slate-50 text-slate-900 font-sans selection:bg-teal-500 selection:text-white overflow-hidden relative rounded-xl shadow-sm border border-slate-200 flex">
+  <div class="h-[calc(100vh-4rem)] bg-slate-100 text-slate-900 font-sans selection:bg-teal-500 selection:text-white overflow-hidden relative rounded-xl shadow-sm border border-slate-200 flex">
     
     <!-- LEFT SIDEBAR: CONFIGURATION (35%) -->
     <div class="w-[400px] flex-shrink-0 border-r border-slate-200 bg-white flex flex-col h-full z-20">
@@ -430,20 +430,6 @@ function useCurrency() {
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent; 
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.8); 
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.8); 
-}
-
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }

@@ -12,6 +12,8 @@ router.use(requireStaffCrud('billing'))
 router.get('/plans', controller.listPlans.bind(controller))
 router.get('/subscription', controller.getSubscription.bind(controller))
 router.get('/payments', controller.listPayments.bind(controller))
+router.post('/payments/submit', controller.submitPayment.bind(controller))
 router.post('/payments/simulate', controller.simulatePayment.bind(controller))
 
 export default router
+

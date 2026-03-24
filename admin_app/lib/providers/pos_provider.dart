@@ -5,9 +5,13 @@ import '../models/pos_models.dart';
 import '../models/customer.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
-import '../services/print_service.dart'; // NEW
+import '../services/print_service.dart';
+import '../repositories/product_repository.dart'; // NEW
+import '../repositories/category_repository.dart'; // NEW
+import '../repositories/pos_sale_repository.dart'; // NEW
 import '../providers/printer_profiles_provider.dart'; // NEW - Assuming this path
 import '../utils/pos_payment.dart';
+import '../services/sync_service.dart';
 
 enum ProductSortType { name, priceAsc, priceDesc, recent }
 
@@ -189,10 +193,8 @@ class PosNotifier extends Notifier<PosState> {
   Future<void> fetchCategories() async {
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/categories');
-
-      final List<dynamic> data = response.data;
-      final categories = data.map((e) => Category.fromJson(e)).toList();
+      final repository = CategoryRepository(apiService);
+      final categories = await repository.getCategories();
 
       state = state.copyWith(categories: categories);
     } catch (e) {
@@ -204,22 +206,16 @@ class PosNotifier extends Notifier<PosState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get('/admin/products');
-
-      final List<dynamic> data = response.data;
-
-      final products = data
-          .map((e) => Product.fromJson(e))
-          // .where((p) => p.isActive) // Temporarily disabled for debugging
-          .toList();
+      final repository = ProductRepository(apiService);
+      final products = await repository.getProducts();
 
       state = state.copyWith(
         products: products,
         isLoading: false,
         debugInfo:
-            'Success. API returned ${data.length} items. Parsed ${products.length} products.',
+            'Success. Parsed ${products.length} products (from cache or API).',
       );
-    } catch (e, stack) {
+    } catch (e) {
       state = state.copyWith(
         error: 'Failed to load products: $e',
         isLoading: false,
@@ -234,12 +230,9 @@ class PosNotifier extends Notifier<PosState> {
 
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get(
-        '/admin/products/$productId',
-      );
-      final product = Product.fromJson(
-        Map<String, dynamic>.from(response.data),
-      );
+      final repository = ProductRepository(apiService);
+      final product = await repository.getProductById(productId);
+      if (product == null) return null;
       _productDetailsCache[productId] = product;
       return product;
     } catch (e) {
@@ -254,11 +247,49 @@ class PosNotifier extends Notifier<PosState> {
 
     try {
       final apiService = ref.read(apiProvider);
-      final response = await apiService.client.get(
-        '/admin/pos/lookup',
-        queryParameters: {'code': normalized},
-      );
-      return PosLookupItem.fromJson(Map<String, dynamic>.from(response.data));
+      final sync = SyncService();
+      if (await sync.isOnline) {
+        final response = await apiService.client.get(
+          '/admin/pos/lookup',
+          queryParameters: {'code': normalized},
+        );
+        return PosLookupItem.fromJson(Map<String, dynamic>.from(response.data));
+      }
+
+      // Offline lookup: search locally cached products/variants by SKU or barcode.
+      final repository = ProductRepository(apiService);
+      final products = await repository.getProducts();
+
+      String variantLabelFrom(ProductVariant v) {
+        final labels = v.optionValues
+            .map((ov) => ov.optionValue?.label)
+            .whereType<String>()
+            .where((s) => s.trim().isNotEmpty)
+            .toList();
+        if (labels.isNotEmpty) return labels.join(' / ');
+        return v.sku;
+      }
+
+      for (final p in products) {
+        for (final v in p.variants) {
+          final matchesSku = v.sku.trim().isNotEmpty && v.sku == normalized;
+          final matchesBarcode =
+              (v.barcode != null && v.barcode!.trim() == normalized);
+          if (matchesSku || matchesBarcode) {
+            return PosLookupItem(
+              productId: p.id,
+              variantId: v.id,
+              title: p.title,
+              variantLabel: variantLabelFrom(v),
+              sku: v.sku,
+              price: v.price,
+              imageUrl: p.mainImageUrl,
+            );
+          }
+        }
+      }
+
+      return null;
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return null;
       throw Exception('POS lookup failed: ${e.message}');
@@ -466,6 +497,7 @@ class PosNotifier extends Notifier<PosState> {
     state = state.copyWith(isLoading: true);
     try {
       final apiService = ref.read(apiProvider);
+      final saleRepository = PosSaleRepository(apiService);
       final current = state.currentSession;
       final total = current.total;
 
@@ -506,11 +538,8 @@ class PosNotifier extends Notifier<PosState> {
           },
       };
 
-      final res = await apiService.client.post(
-        '/admin/pos/sales',
-        data: payload,
-      );
-      final saleId = res.data is Map ? res.data['saleId']?.toString() : null;
+      // Create sale via Repository (handles SQLite + Sync Queue)
+      final saleId = await saleRepository.createSale(payload);
 
       // Store cart details before clearing for potential printing
       final List<CartItem> itemsToPrint = List.from(current.cart);
