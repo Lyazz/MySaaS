@@ -1,26 +1,22 @@
 # ---- Stage 1: Build ----
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
-# Copy dependency files first for caching
-COPY package.json .npmrc ./
-
-# Install ALL dependencies (postinstall runs nuxt prepare automatically)
-RUN npm install
-
-# Copy the rest of the source code
+# Copy everything first so nuxt.config.ts is present for postinstall
 COPY . .
+
+# Install all deps (postinstall will run nuxt prepare with all files present)
+RUN npm install
 
 # Build the Nuxt app
 RUN npm run build
 
 # ---- Stage 2: Production ----
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 
 WORKDIR /app
 
-# Copy built output
 COPY --from=builder /app/.output /app/.output
 COPY --from=builder /app/package.json /app/package.json
 
