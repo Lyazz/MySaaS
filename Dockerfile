@@ -1,25 +1,25 @@
 # ---- Stage 1: Build ----
 FROM node:22-slim AS builder
 
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY . .
 
-# Install deps without postinstall
 RUN rm -f package-lock.json && npm install --ignore-scripts
 
-# Generate Prisma client
 RUN npx prisma generate
 
-# Run nuxt prepare
 RUN npx nuxt prepare
 
-# Build with increased memory
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # ---- Stage 2: Production ----
 FROM node:22-slim AS runner
+
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
