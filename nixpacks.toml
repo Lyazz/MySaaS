@@ -1,8 +1,12 @@
 [phases.setup]
-nixPkgs = ["nodejs_22", "pnpm"]
+nixPkgs = ["nodejs_20", "pnpm"]
 
 [phases.install]
-cmds = ["rm -f package-lock.json", "pnpm config set store-dir /app/.pnpm-store-v2", "pnpm install --no-frozen-lockfile"]
+cmds = [
+  "rm -f package-lock.json",
+  "pnpm config set store-dir /app/.pnpm-store-v3",
+  "pnpm install --no-frozen-lockfile --shamefully-hoist"
+]
 
 [phases.build]
 cmds = ["pnpm run build"]
