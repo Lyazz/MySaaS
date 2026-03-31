@@ -79,5 +79,11 @@
     "typescript": "^5.4.0",
     "vitest": "latest",
     "vue-tsc": "^2.0.0"
+  },
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": ["linux"],
+      "cpu": ["x64", "arm64"]
+    }
   }
 }
