@@ -26,7 +26,9 @@ WORKDIR /app
 COPY --from=builder /app/.output /app/.output
 COPY --from=builder /app/node_modules/.prisma /app/node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma /app/node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma /app/node_modules/prisma
 COPY --from=builder /app/package.json /app/package.json
+COPY --from=builder /app/prisma /app/prisma
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
@@ -34,4 +36,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["node", ".output/server/index.mjs"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node .output/server/index.mjs"]
