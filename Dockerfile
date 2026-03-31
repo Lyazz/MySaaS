@@ -3,11 +3,11 @@ FROM node:22-slim AS builder
 
 WORKDIR /app
 
-# Copy everything first so nuxt.config.ts is present for postinstall
+# Copy everything
 COPY . .
 
-# Install all deps (postinstall will run nuxt prepare with all files present)
-RUN npm install
+# DELETE the Mac lockfile and install fresh for Linux
+RUN rm -f package-lock.json && npm install
 
 # Build the Nuxt app
 RUN npm run build
