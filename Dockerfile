@@ -6,14 +6,15 @@ WORKDIR /app
 # Copy everything (source files needed for nuxt prepare)
 COPY . .
 
-# 1) Delete Mac lockfile
-# 2) Install deps WITHOUT running postinstall (avoids oxc/unstorage chicken-egg)
-# 3) Run nuxt prepare separately (all deps + source files are present)
-# 4) Build
-RUN rm -f package-lock.json \
-    && npm install --ignore-scripts \
-    && npx nuxt prepare \
-    && npm run build
+# Delete Mac lockfile and install deps (no postinstall)
+RUN rm -f package-lock.json && npm install --ignore-scripts
+
+# Run nuxt prepare separately
+RUN npx nuxt prepare
+
+# Build with increased memory
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN npm run build
 
 # ---- Stage 2: Production ----
 FROM node:22-slim AS runner
