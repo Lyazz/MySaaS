@@ -3,14 +3,17 @@ FROM node:22-slim AS builder
 
 WORKDIR /app
 
-# Copy everything
+# Copy everything (source files needed for nuxt prepare)
 COPY . .
 
-# DELETE the Mac lockfile and install fresh for Linux
-RUN rm -f package-lock.json && npm install
-
-# Build the Nuxt app
-RUN npm run build
+# 1) Delete Mac lockfile
+# 2) Install deps WITHOUT running postinstall (avoids oxc/unstorage chicken-egg)
+# 3) Run nuxt prepare separately (all deps + source files are present)
+# 4) Build
+RUN rm -f package-lock.json \
+    && npm install --ignore-scripts \
+    && npx nuxt prepare \
+    && npm run build
 
 # ---- Stage 2: Production ----
 FROM node:22-slim AS runner
