@@ -59,7 +59,7 @@ export class InventoryService {
         return typeof value === 'string' && value.trim() ? value.trim().slice(0, 500) : null
     }
 
-    async listVariants(tenantId: string, opts?: { search?: string | null; productId?: string | null }) {
+    async listVariants(tenantId: string, opts?: { search?: string | null; productId?: string | null; sortBy?: string; sortOrder?: 'asc' | 'desc' }) {
         const where: any = { tenantId, isActive: true }
         if (opts?.productId) where.productId = opts.productId
         if (opts?.search) {
@@ -80,7 +80,7 @@ export class InventoryService {
             orderBy: [{ product: { title: 'asc' } }, { createdAt: 'asc' }]
         })
 
-        return variants.map((variant): VariantInventoryDto => {
+        const mapped = variants.map((variant): VariantInventoryDto => {
             const optionTitle = (variant.optionValues ?? [])
                 .slice()
                 .sort((a, b) => (a.optionValue?.option?.position ?? 999) - (b.optionValue?.option?.position ?? 999))
@@ -104,6 +104,19 @@ export class InventoryService {
                 optionTitle
             }
         })
+
+        if (opts?.sortBy) {
+            const dir = opts.sortOrder === 'desc' ? -1 : 1
+            mapped.sort((a, b) => {
+                const va = (a as any)[opts.sortBy!]
+                const vb = (b as any)[opts.sortBy!]
+                if (typeof va === 'string' && typeof vb === 'string') return va.localeCompare(vb) * dir
+                if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir
+                return 0
+            })
+        }
+
+        return mapped
     }
 
     async listMovements(tenantId: string, variantId: string, opts?: { take?: number }) {

@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
                 token.value = data.token
                 user.value = {
                     ...data.user,
-                    tenant: data.tenant
+                    tenant: data.tenant || data.user.tenant
                 }
                 staffRole.value = data.staffRole ?? null
                 staffPermissions.value = data.staffPermissions ?? null

@@ -30,11 +30,6 @@
             :placeholder="t('admin.pages.categories.index.filters.searchPlaceholder')"
           />
         </div>
-        <div class="flex items-end">
-          <p class="text-sm text-gray-500">
-            {{ t('admin.pages.categories.index.filters.sortHint') }}
-          </p>
-        </div>
       </div>
     </div>
 
@@ -77,40 +72,21 @@
       v-else
       class="ui-card overflow-hidden"
     >
-      <div class="ui-card-header bg-slate-50 flex flex-wrap items-center gap-3 justify-between">
-        <div class="text-sm text-slate-700">
-          {{ t('admin.pages.categories.index.sort.sortBy') }}
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="option in sortOptions"
-            :key="option.key"
-            :class="[
-              'inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full transition-colors',
-              sortBy === option.key
-                ? 'bg-teal-50 border-teal-500 text-teal-700'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
-            ]"
-            @click="setSort(option.key)"
-          >
-            <span>{{ t(option.labelKey) }}</span>
-            <Icon
-              v-if="sortBy === option.key"
-              :name="sortOrder === 'asc' ? 'lucide:chevron-up' : 'lucide:chevron-down'"
-              class="w-4 h-4 ml-2"
-            />
-          </button>
-        </div>
-      </div>
       <div class="overflow-x-auto">
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
-              <th class="ui-th">
-                {{ t('admin.pages.categories.index.table.category') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('title')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.categories.index.table.category') }}
+                  <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.categories.index.table.products') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('products')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.categories.index.table.products') }}
+                  <Icon v-if="sortBy === 'products'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
               <th class="ui-th">
                 {{ t('admin.pages.categories.index.table.links') }}

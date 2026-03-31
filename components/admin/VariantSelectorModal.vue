@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div v-if="modelValue" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 py-8">
       <div class="w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col max-h-[90vh]">
         <!-- Header -->
         <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
@@ -144,7 +144,7 @@ const handleSearch = () => {
 const fetchVariants = async () => {
   loading.value = true
   try {
-    const data = await $fetch<any[]>('/api/admin/inventory/variants', {
+    const data = await $fetch('/api/admin/inventory/variants', {
       headers: { Authorization: `Bearer ${authStore.token}` },
       query: { search: searchQuery.value }
     })

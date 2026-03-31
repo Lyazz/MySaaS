@@ -246,7 +246,7 @@
         "subtitle": "Join thousands of merchants building the next generation of commerce. Scalable, secure, and ready for growth.",
         "testimonial": {
           "quote": "Moving to Swekly was the best decision we made. Our revenue doubled in 3 months.",
-          "name": "John Doe",
+          "name": "Yanis M.",
           "role": "CEO, FashionNova"
         },
         "copyright": "© {year} Swekly Inc."
@@ -500,7 +500,7 @@
       "form": {
         "fullName": {
           "label": "Full name",
-          "placeholder": "e.g. John Doe"
+          "placeholder": "e.g. Yanis M."
         },
         "phone": {
           "label": "Phone",
@@ -2088,7 +2088,7 @@
           },
           "bundlesTab": {
             "title": "Bundle deals",
-            "hint": "Create fixed bundle prices like “2 for 1800 DZD”. Checkout will automatically pick the best combination.",
+            "hint": "Create fixed prices for your bundle deals. Checkout will automatically pick the best combination.",
             "addBundle": "Add bundle",
             "table": {
               "qty": "Qty",
@@ -2120,8 +2120,7 @@
           "addCategory": "Add category",
           "filters": {
             "searchLabel": "Search",
-            "searchPlaceholder": "Search categories…",
-            "sortHint": "Use the chips above the table to sort by newest, title, slug, or product count."
+            "searchPlaceholder": "Search categories…"
           },
           "loading": "Loading categories…",
           "empty": {
@@ -2769,7 +2768,6 @@
           "filters": {
             "searchLabel": "Search",
             "searchPlaceholder": "Search suppliers…",
-            "sortHint": "Use the sort buttons to order results.",
             "clear": "Clear"
           },
           "loading": "Loading suppliers…",

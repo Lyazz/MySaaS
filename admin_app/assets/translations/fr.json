@@ -246,7 +246,7 @@
         "subtitle": "Rejoignez des milliers de marchands qui construisent la prochaine génération du commerce. Évolutif, sécurisé et prêt pour la croissance.",
         "testimonial": {
           "quote": "Passer sur Swekly a été la meilleure décision. Notre chiffre d’affaires a doublé en 3 mois.",
-          "name": "John Doe",
+          "name": "Yanis M.",
           "role": "PDG, FashionNova"
         },
         "copyright": "© {year} Swekly Inc."
@@ -500,7 +500,7 @@
       "form": {
         "fullName": {
           "label": "Nom complet",
-          "placeholder": "ex : John Doe"
+          "placeholder": "ex : Yanis M."
         },
         "phone": {
           "label": "Téléphone",
@@ -1435,7 +1435,8 @@
           "order": "Commande {index}"
         },
         "customer": {
-          "addClient": "Ajouter client"
+          "addClient": "Ajouter client",
+          "defaultClient": "Client par défaut"
         },
         "variants": {
           "loading": "Chargement des variantes...",
@@ -2075,7 +2076,7 @@
           },
           "bundlesTab": {
             "title": "Offres en bundle",
-            "hint": "Créez des prix fixes comme « 2 pour 1800 DZD ». Le paiement choisira automatiquement la meilleure combinaison.",
+            "hint": "Créez des prix fixes pour vos offres en lots. Le paiement choisira automatiquement la meilleure combinaison.",
             "addBundle": "Ajouter un bundle",
             "table": {
               "qty": "Qté",
@@ -2107,8 +2108,7 @@
           "addCategory": "Ajouter une catégorie",
           "filters": {
             "searchLabel": "Rechercher",
-            "searchPlaceholder": "Rechercher des catégories…",
-            "sortHint": "Utilisez les puces au-dessus du tableau pour trier par date, titre, slug ou nombre de produits."
+            "searchPlaceholder": "Rechercher des catégories…"
           },
           "loading": "Chargement des catégories…",
           "empty": {
@@ -2309,7 +2309,7 @@
       "customers": {
         "index": {
           "title": "Clients",
-          "subtitle": "Dérivé de l’historique des ventes",
+          "subtitle": "Gérer vos clients",
           "addCustomer": "Ajouter un client",
           "count": "{count} clients",
           "loadingInline": "Chargement…",
@@ -2671,7 +2671,7 @@
       "sales": {
         "index": {
           "title": "Ventes",
-          "subtitle": "Commandes terminées (LIVRÉE)",
+          "subtitle": "Historique des ventes",
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher par nom, téléphone ou ID…",
@@ -2681,7 +2681,7 @@
           "loading": "Chargement des ventes…",
           "empty": {
             "title": "Aucune vente",
-            "hint": "Les commandes livrées apparaîtront ici",
+            "hint": "Les ventes apparaîtront ici",
             "hintFiltered": "Essayez d’ajuster votre recherche"
           },
           "table": {
@@ -2690,7 +2690,7 @@
             "phone": "Téléphone",
             "total": "Total",
             "user": "Utilisateur",
-            "completed": "Terminée",
+            "completed": "Vente",
             "actions": "Actions"
           }
         },
@@ -2756,7 +2756,6 @@
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher des fournisseurs…",
-            "sortHint": "Utilisez les boutons de tri pour ordonner les résultats.",
             "clear": "Effacer"
           },
           "loading": "Chargement des fournisseurs…",

@@ -171,9 +171,14 @@
         </div>
       </header>
 
-      <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-100 custom-scrollbar">
-        <div class="max-w-7xl mx-auto animate-fadeIn">
+      <main 
+        class="flex-1 overflow-y-auto bg-slate-100 custom-scrollbar"
+        :class="route.path.startsWith('/admin/pos') ? 'p-0' : 'p-6 md:p-8'"
+      >
+        <div 
+          class="animate-fadeIn"
+          :class="route.path.startsWith('/admin/pos') ? 'h-full max-w-none' : 'max-w-7xl mx-auto'"
+        >
           <slot />
         </div>
       </main>
@@ -210,7 +215,15 @@ if (settings.value) {
 
 onMounted(() => {
   if (window.innerWidth >= 1024) {
-    sidebarOpen.value = true
+    sidebarOpen.value = route.path !== '/admin/pos'
+  }
+})
+
+watch(() => route.path, (newPath) => {
+  if (window.innerWidth >= 1024) {
+    sidebarOpen.value = newPath !== '/admin/pos'
+  } else {
+    sidebarOpen.value = false
   }
 })
 
@@ -426,21 +439,9 @@ const navGroups = ref<NavGroup[]>([
     ]
   },
   {
-    titleKey: 'admin.nav.settings',
+    titleKey: 'admin.nav.storeParameters',
     collapsed: false,
     items: [
-      {
-        path: '/admin/users',
-        labelKey: 'admin.nav.users',
-        icon: 'lucide:user-cog',
-        access: 'admin'
-      },
-      {
-        path: '/admin/integrations',
-        labelKey: 'admin.nav.integrations',
-        icon: 'lucide:puzzle',
-        access: 'admin'
-      },
       {
         path: '/admin/settings/appearance',
         labelKey: 'admin.nav.appearance',
@@ -463,6 +464,24 @@ const navGroups = ref<NavGroup[]>([
         path: '/admin/settings/functional',
         labelKey: 'admin.nav.functional',
         icon: 'lucide:sliders',
+        access: 'admin'
+      }
+    ]
+  },
+  {
+    titleKey: 'admin.nav.settings',
+    collapsed: false,
+    items: [
+      {
+        path: '/admin/users',
+        labelKey: 'admin.nav.users',
+        icon: 'lucide:user-cog',
+        access: 'admin'
+      },
+      {
+        path: '/admin/integrations',
+        labelKey: 'admin.nav.integrations',
+        icon: 'lucide:puzzle',
         access: 'admin'
       }
     ]

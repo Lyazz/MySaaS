@@ -7,6 +7,8 @@ export interface SalesListFilters {
     startDate?: Date | null
     endDate?: Date | null
     userId?: string
+    sortBy?: string
+    sortOrder?: 'asc' | 'desc'
 }
 
 export interface SalesPagination {
@@ -117,7 +119,22 @@ export class SalesService {
                 customerPhone: s.customerPhone ?? '',
                 createdByEmail: s.createdBy?.email
             }))
-        ].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        ].sort((a: any, b: any) => {
+            const dir = (filters.sortOrder || 'desc') === 'asc' ? 1 : -1
+            switch (filters.sortBy) {
+                case 'customerName':
+                    return a.customerName.localeCompare(b.customerName) * dir
+                case 'totalAmount':
+                    return (a.totalAmount - b.totalAmount) * dir
+                case 'id':
+                    return a.id.localeCompare(b.id) * dir
+                case 'updatedAt':
+                case 'completed':
+                    return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * dir
+                default:
+                    return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * dir
+            }
+        })
 
         const total = merged.length
         const items = merged.slice(skip, skip + limit)

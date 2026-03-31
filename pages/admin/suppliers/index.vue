@@ -30,11 +30,6 @@
             :placeholder="t('admin.pages.suppliers.index.filters.searchPlaceholder')"
           />
         </div>
-        <div class="flex items-end">
-          <p class="text-sm text-gray-500">
-            {{ t('admin.pages.suppliers.index.filters.sortHint') }}
-          </p>
-        </div>
       </div>
     </div>
 
@@ -77,43 +72,27 @@
       v-else
       class="ui-card overflow-hidden"
     >
-      <div class="ui-card-header bg-slate-50 flex flex-wrap items-center gap-3 justify-between">
-        <div class="text-sm text-slate-700">
-          {{ t('admin.pages.suppliers.index.sort.sortBy') }}
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="option in sortOptions"
-            :key="option.key"
-            :class="[
-              'inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full transition-colors',
-              sortBy === option.key
-                ? 'bg-teal-50 border-teal-500 text-teal-700'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
-            ]"
-            @click="setSort(option.key)"
-          >
-            <span>{{ t(option.labelKey) }}</span>
-            <Icon
-              v-if="sortBy === option.key"
-              :name="sortOrder === 'asc' ? 'lucide:chevron-up' : 'lucide:chevron-down'"
-              class="w-4 h-4 ml-2"
-            />
-          </button>
-        </div>
-      </div>
       <div class="overflow-x-auto">
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
-              <th class="ui-th">
-                {{ t('admin.pages.suppliers.index.table.name') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('name')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.suppliers.index.table.name') }}
+                  <Icon v-if="sortBy === 'name'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.suppliers.index.table.info') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('email')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.suppliers.index.table.info') }}
+                  <Icon v-if="sortBy === 'email'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.suppliers.index.table.address') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('address')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.suppliers.index.table.address') }}
+                  <Icon v-if="sortBy === 'address'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
               <th class="ui-th text-right">
                 {{ t('admin.common.actions') }}
@@ -303,17 +282,13 @@ interface Supplier {
 const suppliers = ref<Supplier[]>([])
 const loading = ref(true)
 const searchQuery = ref('')
-const sortBy = ref<'name'>('name')
+const sortBy = ref<string>('name')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 const currentPage = ref(1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const supplierToDelete = ref<Supplier | null>(null)
 const deleteError = ref<string | null>(null)
-
-const sortOptions = [
-  { key: 'name', labelKey: 'admin.pages.suppliers.index.sort.name' }
-] as const
 
 const deleteMessage = computed(() => {
   if (supplierToDelete.value?.name) {
@@ -322,22 +297,8 @@ const deleteMessage = computed(() => {
   return t('admin.pages.suppliers.index.deleteModal.message')
 })
 
-const sortedSuppliers = computed(() => {
-  const data = [...suppliers.value]
-  const dir = sortOrder.value === 'asc' ? 1 : -1
-
-  return data.sort((a, b) => {
-    switch (sortBy.value) {
-      case 'name':
-        return a.name.localeCompare(b.name) * dir
-      default:
-        return 0
-    }
-  })
-})
-
 const filteredSuppliers = computed(() => {
-  let filtered = sortedSuppliers.value
+  let filtered = suppliers.value
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
@@ -365,6 +326,10 @@ async function fetchSuppliers() {
     const data = await $fetch('/api/admin/suppliers', {
       headers: {
         Authorization: `Bearer ${authStore.token}`
+      },
+      query: {
+        sortBy: sortBy.value,
+        sortOrder: sortOrder.value
       }
     }) as Supplier[]
     suppliers.value = data
@@ -407,13 +372,14 @@ async function handleDelete() {
   }
 }
 
-function setSort(field: typeof sortOptions[number]['key']) {
+function setSort(field: string) {
   if (sortBy.value === field) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   } else {
     sortBy.value = field
     sortOrder.value = 'asc'
   }
+  fetchSuppliers()
 }
 
 watch([searchQuery], () => {

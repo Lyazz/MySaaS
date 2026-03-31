@@ -74,16 +74,17 @@
     </div>
 
     <!-- Telegram Modal -->
-    <div v-if="showTelegramModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div class="w-full max-w-lg rounded-xl bg-white shadow-xl">
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.pages.integrations.telegram.modal.title') }}</h3>
+    <Teleport to="body">
+      <div v-if="showTelegramModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8">
+        <div class="w-full max-w-lg rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
+          <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 shrink-0">
+            <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.pages.integrations.telegram.modal.title') }}</h3>
           <button @click="closeTelegramModal" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
             <Icon name="lucide:x" class="h-5 w-5" />
           </button>
         </div>
         
-        <div class="p-6 space-y-4">
+        <div class="p-6 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.label') }}</label>
             <input v-model="telegramForm.botToken" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.botToken.placeholder')" />
@@ -102,7 +103,7 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-xl">
+        <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-xl shrink-0">
           <button 
             @click="testTelegramConnection" 
             :disabled="testing || !telegramForm.botToken || !telegramForm.chatId"
@@ -123,13 +124,15 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Teleport>
 
     <!-- Facebook Modal (Multiple Pixels) -->
-    <div v-if="showFacebookModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div class="w-full max-w-3xl rounded-xl bg-white shadow-xl">
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <div>
+    <Teleport to="body">
+      <div v-if="showFacebookModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8">
+        <div class="w-full max-w-3xl rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
+          <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 shrink-0">
+            <div>
             <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.pages.integrations.metaPixels.title') }}</h3>
             <p class="text-xs text-gray-500 mt-0.5">{{ t('admin.pages.integrations.metaPixels.subtitle') }}</p>
           </div>
@@ -138,7 +141,7 @@
           </button>
         </div>
 
-        <div class="p-6 space-y-6">
+        <div class="p-6 space-y-6 overflow-y-auto">
           <div v-if="metaPixelsLoading" class="text-sm text-gray-600">
             {{ t('admin.pages.integrations.metaPixels.loading') }}
           </div>
@@ -248,7 +251,7 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-xl">
+        <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-xl shrink-0">
           <div />
 
           <div class="flex gap-3">
@@ -258,6 +261,7 @@
         </div>
       </div>
     </div>
+  </Teleport>
   </div>
 </template>
 

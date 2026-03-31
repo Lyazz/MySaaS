@@ -38,46 +38,46 @@
   },
   "saasLanding": {
     "seo": {
-      "title": "Swekly - Le futur du commerce",
-      "description": "La plateforme tout-en-un pour créer, vendre et développer votre activité B2B ou B2C avec des outils de niveau entreprise."
+      "title": "Swekly - La meilleure plateforme e-commerce pour votre boutique",
+      "description": "Lancez, gérez et développez votre activité e-commerce avec Swekly. La plateforme puissante et intuitive pour les boutiques en ligne."
     },
     "hero": {
       "title": {
-        "buildSell": "Créez. Vendez.",
-        "scale": "Développez."
+        "buildSell": "Lancez. Vendez.",
+        "scale": "Réussissez."
       },
-      "subtitle": "La plateforme tout-en-un pensée pour le commerce moderne. Concentrez-vous sur votre produit, nous gérons l’infrastructure, les paiements et la logistique.",
-      "ctaPrimary": "Commencer gratuitement",
-      "ctaSecondary": "Voir la démo"
+      "subtitle": "La plateforme e-commerce conçue pour transformer vos idées en une boutique en ligne florissante. Gérez vos produits, acceptez les paiements et développez votre activité sans effort.",
+      "ctaPrimary": "Démarrer l'essai gratuit",
+      "ctaSecondary": "Explorer les fonctionnalités"
     },
     "features": {
       "title": {
-        "prefix": "Tout ce qu’il vous faut pour",
-        "accent": "dominer"
+        "prefix": "Tout ce qu'il vous faut pour",
+        "accent": "vendre en ligne"
       },
-      "subtitle": "Des outils puissants conçus pour la croissance, réunis dans une interface élégante.",
+      "subtitle": "Des outils e-commerce puissants conçus pour la croissance, réunis dans une interface élégante.",
       "items": {
-        "storeBuilder": {
-          "title": "Créateur de boutique",
-          "description": "Éditeur glisser-déposer pour créer des vitrines superbes en quelques minutes."
+        "aiTools": {
+          "title": "Outils d'Intelligence Artificielle",
+          "description": "Génération automatique par l'IA de landing pages, fiches produits et SEO."
         },
-        "globalPayments": {
-          "title": "Paiements globaux",
-          "description": "Acceptez des paiements partout grâce à des passerelles intégrées."
+        "competitivePricing": {
+          "title": "Tarifs Concurrentiels",
+          "description": "Des offres transparentes et abordables pour vous aider à croître sans limites."
         },
-        "analytics": {
-          "title": "Analytique & insights",
-          "description": "Données en temps réel pour optimiser vos conversions."
+        "templates": {
+          "title": "Multi-Templates de Boutique",
+          "description": "Un large choix de thèmes optimisés pour la conversion et entièrement personnalisables."
         },
-        "automatedShipping": {
-          "title": "Livraison automatisée",
-          "description": "Connectez Yalidine, Eckoz et plus pour l’expédition automatique."
+        "fastSupport": {
+          "title": "Assistance Rapide 24/7",
+          "description": "Une équipe dédiée pour vous accompagner à chaque étape de votre croissance."
         }
       }
     },
     "stats": {
-      "activeMerchants": "Marchands actifs",
-      "revenueGenerated": "Revenus générés",
+      "activeMerchants": "Boutiques actives",
+      "revenueGenerated": "Ventes traitées",
       "uptime": "Disponibilité"
     },
     "faq": {
@@ -108,36 +108,53 @@
       "avatarAlt": "Avatar",
       "userAvatarAlt": "Avatar utilisateur",
       "items": {
-        "sarah": {
-          "text": "J’ai quitté Shopify et je ne suis jamais revenue en arrière. Les pages se chargent instantanément et mon taux de conversion a augmenté de 40% du jour au lendemain.",
-          "role": "PDG, FashionNova"
+        "nassim": {
+          "text": "Swekly a complètement transformé la gestion de Nokhba Store. C'est si simple de lister notre papeterie et nos livres, et les ventes n'ont jamais été aussi bonnes.",
+          "role": "Propriétaire, Nokhba Store"
         },
-        "karim": {
-          "text": "Le tableau de bord analytique est superbe. Les données dont j’ai besoin sont à un clic. On dirait que cet outil a été conçu pour 2026.",
-          "role": "Fondateur, TechShop"
+        "amina": {
+          "text": "Les fonctionnalités de domaine personnalisé et d'analyse sont incroyables. Ma marque de cosmétiques a l'air si professionnelle.",
+          "role": "Fondatrice, Dzair Cosmetics"
         },
-        "emily": {
-          "text": "Enfin une plateforme qui n’applique pas des frais de transaction abusifs. Le support des domaines personnalisés est fluide.",
-          "role": "CTO, GreenEarth"
+        "yanis": {
+          "text": "Swekly est la solution e-commerce ultime en Algérie. Les options d'expédition locale intégrées nous ont fait gagner des heures de travail.",
+          "role": "Directeur, TechAlgeria"
         },
-        "michael": {
-          "text": "La meilleure décision pour notre entreprise. Le support est incroyable et les fonctionnalités correspondent exactement à nos besoins.",
-          "role": "COO, GearUp"
+        "lyes": {
+          "text": "Nous vendons des centaines d'articles de mode chaque jour, et la plateforme gère le trafic sans faille. La meilleure décision pour nous.",
+          "role": "Propriétaire, Oran Fashion"
         },
-        "lisa": {
-          "text": "Passer à 10 000 commandes par mois a été simple. Aucun downtime, aucun souci. Je recommande vivement.",
-          "role": "Propriétaire, Kicks"
+        "meriem": {
+          "text": "Fini la prise de commandes manuelle sur les réseaux sociaux. Nos clients adorent la fluidité du paiement.",
+          "role": "PDG, BioAtlas"
         },
-        "david": {
-          "text": "L’éditeur glisser-déposer est réellement utilisable. J’ai construit ma boutique en un après‑midi.",
-          "role": "Fondateur, ArtSpace"
+        "sofiane": {
+          "text": "Créer la boutique a été un jeu d'enfant. Nous avons lancé Casbah Gifts en une seule après-midi.",
+          "role": "Gérant, Casbah Gifts"
         }
       }
     },
     "finalCta": {
-      "title": "Prêt à lancer ?",
-      "subtitle": "Rejoignez la plateforme qui évolue avec vous.",
-      "cta": "Commencer maintenant"
+      "title": "Prêt à lancer votre boutique ?",
+      "subtitle": "Rejoignez des milliers de marchands qui construisent le futur du e-commerce.",
+      "cta": "Démarrer l'essai gratuit"
+    },
+    "trust": {
+      "secure": "Paiements 100% sécurisés",
+      "ssl": "Certificat SSL inclus",
+      "cloud": "Hébergement Cloud fiable"
+    },
+    "integrations": {
+      "title": "Compatible avec vos outils préférés",
+      "subtitle": "Connectez-vous aux meilleures solutions de paiement, d'expédition et de marketing."
+    },
+    "themes": {
+      "title": {
+        "prefix": "Des vitrines",
+        "accent": "magnifiques"
+      },
+      "subtitle": "Choisissez parmi des modèles optimisés pour la conversion ou personnalisez tout. Pensé pour le mobile.",
+      "viewAll": "Explorer les thèmes"
     }
   },
   "marketing": {
@@ -163,11 +180,11 @@
       "items": {
         "builder": {
           "title": "Constructeur de boutique (drag & drop)",
-          "description": "Créez des vitrines professionnelles et responsive sans écrire une seule ligne de code. Personnalisez chaque détail en quelques minutes."
+          "description": "Créez des vitrines professionnelles sans écrire une seule ligne de code. Personnalisez chaque détail en quelques minutes."
         },
         "payments": {
           "title": "Paiements mondiaux",
-          "description": "Acceptez des paiements partout grâce à des passerelles intégrées comme Stripe, PayPal et des fournisseurs locaux."
+          "description": "Acceptez des paiements partout grâce à des passerelles intégrées comme CIB, Edahabia et des fournisseurs locaux."
         },
         "analytics": {
           "title": "Analytique avancée",
@@ -251,8 +268,8 @@
         "subtitle": "Rejoignez des milliers de marchands qui construisent la prochaine génération du commerce. Évolutif, sécurisé et prêt pour la croissance.",
         "testimonial": {
           "quote": "Passer sur Swekly a été la meilleure décision. Notre chiffre d’affaires a doublé en 3 mois.",
-          "name": "John Doe",
-          "role": "PDG, FashionNova"
+          "name": "Yanis M.",
+          "role": "Propriétaire, Dzair Fashion"
         },
         "copyright": "© {year} Swekly Inc."
       },
@@ -505,7 +522,7 @@
       "form": {
         "fullName": {
           "label": "Nom complet",
-          "placeholder": "ex : John Doe"
+          "placeholder": "ex : Yanis M."
         },
         "phone": {
           "label": "Téléphone",
@@ -934,6 +951,10 @@
           "subtitle": "Votre vitrine passera automatiquement en mode droite à gauche pour l’arabe."
         }
       },
+      "storefrontSearch": {
+        "title": "Barre de recherche (Storefront)",
+        "subtitle": "Afficher la barre de recherche sur la boutique (bientôt disponible)."
+      },
       "actions": {
         "discardChanges": "Annuler les modifications"
       },
@@ -1304,6 +1325,7 @@
       "delivery": "Livraison",
       "finance": "Finance",
       "cash": "Caisse",
+      "storeParameters": "Paramètres de la boutique",
       "settings": "Administration",
       "dashboard": "Tableau de bord",
       "products": "Produits",
@@ -1488,7 +1510,8 @@
           "order": "Commande {index}"
         },
         "customer": {
-          "addClient": "Ajouter client"
+          "addClient": "Ajouter client",
+          "defaultClient": "Client par défaut"
         },
         "variants": {
           "loading": "Chargement des variantes...",
@@ -2202,7 +2225,7 @@
           },
           "bundlesTab": {
             "title": "Offres en bundle",
-            "hint": "Créez des prix fixes comme « 2 pour 1800 DZD ». Le paiement choisira automatiquement la meilleure combinaison.",
+            "hint": "Créez des prix fixes pour vos offres en lots. Le paiement choisira automatiquement la meilleure combinaison.",
             "addBundle": "Ajouter un bundle",
             "table": {
               "qty": "Qté",
@@ -2234,8 +2257,7 @@
           "addCategory": "Ajouter une catégorie",
           "filters": {
             "searchLabel": "Rechercher",
-            "searchPlaceholder": "Rechercher des catégories…",
-            "sortHint": "Utilisez les puces au-dessus du tableau pour trier par date, titre, slug ou nombre de produits."
+            "searchPlaceholder": "Rechercher des catégories…"
           },
           "loading": "Chargement des catégories…",
           "empty": {
@@ -2438,7 +2460,7 @@
       "customers": {
         "index": {
           "title": "Clients",
-          "subtitle": "Dérivé de l’historique des ventes",
+          "subtitle": "Gérer vos clients",
           "addCustomer": "Ajouter un client",
           "count": "{count} clients",
           "loadingInline": "Chargement…",
@@ -2827,7 +2849,7 @@
       "sales": {
         "index": {
           "title": "Ventes",
-          "subtitle": "Commandes terminées (LIVRÉE)",
+          "subtitle": "Historique des ventes",
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher par nom, téléphone ou ID…",
@@ -2837,7 +2859,7 @@
           "loading": "Chargement des ventes…",
           "empty": {
             "title": "Aucune vente",
-            "hint": "Les commandes livrées apparaîtront ici",
+            "hint": "Les ventes apparaîtront ici",
             "hintFiltered": "Essayez d’ajuster votre recherche"
           },
           "table": {
@@ -2846,7 +2868,7 @@
             "phone": "Téléphone",
             "total": "Total",
             "user": "Utilisateur",
-            "completed": "Terminée",
+            "completed": "Vente",
             "actions": "Actions"
           }
         },
@@ -2912,7 +2934,6 @@
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher des fournisseurs…",
-            "sortHint": "Utilisez les boutons de tri pour ordonner les résultats.",
             "clear": "Effacer"
           },
           "loading": "Chargement des fournisseurs…",

@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div 
       v-if="modelValue" 
-      class="fixed inset-0 z-50 overflow-y-auto"
+      class="fixed inset-0 z-[100] overflow-y-auto"
       @click.self="handleCancel"
     >
       <div class="flex items-center justify-center min-h-screen px-4">

@@ -53,33 +53,33 @@ const startCounter = () => {
 // --- Features (Bento Grid) ---
 const features = [
   {
-    titleKey: 'saasLanding.features.items.storeBuilder.title',
-    descriptionKey: 'saasLanding.features.items.storeBuilder.description',
-    icon: 'lucide:layout-template',
+    titleKey: 'saasLanding.features.items.aiTools.title',
+    descriptionKey: 'saasLanding.features.items.aiTools.description',
+    icon: 'lucide:sparkles',
     colSpan: 'md:col-span-2', // Wide tile
     bgClass: 'bg-gradient-to-br from-teal-500/10 to-teal-600/5',
     borderClass: 'border-teal-500/20'
   },
   {
-    titleKey: 'saasLanding.features.items.globalPayments.title',
-    descriptionKey: 'saasLanding.features.items.globalPayments.description',
-    icon: 'lucide:credit-card',
+    titleKey: 'saasLanding.features.items.competitivePricing.title',
+    descriptionKey: 'saasLanding.features.items.competitivePricing.description',
+    icon: 'lucide:coins',
     colSpan: 'md:col-span-1',
     bgClass: 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/5',
     borderClass: 'border-emerald-500/20'
   },
   {
-    titleKey: 'saasLanding.features.items.analytics.title',
-    descriptionKey: 'saasLanding.features.items.analytics.description',
-    icon: 'lucide:bar-chart-3',
+    titleKey: 'saasLanding.features.items.templates.title',
+    descriptionKey: 'saasLanding.features.items.templates.description',
+    icon: 'lucide:layout-template',
     colSpan: 'md:col-span-1',
     bgClass: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5',
     borderClass: 'border-amber-500/20'
   },
   {
-    titleKey: 'saasLanding.features.items.automatedShipping.title',
-    descriptionKey: 'saasLanding.features.items.automatedShipping.description',
-    icon: 'lucide:truck',
+    titleKey: 'saasLanding.features.items.fastSupport.title',
+    descriptionKey: 'saasLanding.features.items.fastSupport.description',
+    icon: 'lucide:headset',
     colSpan: 'md:col-span-2',
     bgClass: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
     borderClass: 'border-blue-500/20'
@@ -114,12 +114,12 @@ const faqs = [
 
 
 const testimonials = [
-  { textKey: 'saasLanding.testimonials.items.sarah.text', name: 'Sarah Jenkins', roleKey: 'saasLanding.testimonials.items.sarah.role', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d' },
-  { textKey: 'saasLanding.testimonials.items.karim.text', name: 'Karim Ziad', roleKey: 'saasLanding.testimonials.items.karim.role', avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
-  { textKey: 'saasLanding.testimonials.items.emily.text', name: 'Emily Chen', roleKey: 'saasLanding.testimonials.items.emily.role', avatar: 'https://i.pravatar.cc/150?u=a04258114e29026302d' },
-  { textKey: 'saasLanding.testimonials.items.michael.text', name: 'Michael Ross', roleKey: 'saasLanding.testimonials.items.michael.role', avatar: 'https://i.pravatar.cc/150?u=4' },
-  { textKey: 'saasLanding.testimonials.items.lisa.text', name: 'Lisa Wong', roleKey: 'saasLanding.testimonials.items.lisa.role', avatar: 'https://i.pravatar.cc/150?u=5' },
-  { textKey: 'saasLanding.testimonials.items.david.text', name: 'David Miller', roleKey: 'saasLanding.testimonials.items.david.role', avatar: 'https://i.pravatar.cc/150?u=6' }
+  { textKey: 'saasLanding.testimonials.items.nassim.text', name: 'Nassim', roleKey: 'saasLanding.testimonials.items.nassim.role' },
+  { textKey: 'saasLanding.testimonials.items.amina.text', name: 'Amina', roleKey: 'saasLanding.testimonials.items.amina.role' },
+  { textKey: 'saasLanding.testimonials.items.yanis.text', name: 'Yanis', roleKey: 'saasLanding.testimonials.items.yanis.role' },
+  { textKey: 'saasLanding.testimonials.items.lyes.text', name: 'Lyes', roleKey: 'saasLanding.testimonials.items.lyes.role' },
+  { textKey: 'saasLanding.testimonials.items.meriem.text', name: 'Meriem', roleKey: 'saasLanding.testimonials.items.meriem.role' },
+  { textKey: 'saasLanding.testimonials.items.sofiane.text', name: 'Sofiane', roleKey: 'saasLanding.testimonials.items.sofiane.role' }
 ]
 
 onMounted(() => {
@@ -144,12 +144,10 @@ onMounted(() => {
     
     <!-- HERO SECTION -->
     <section class="relative min-h-screen flex items-center justify-center pt-20 pb-32 overflow-hidden bg-slate-950 text-white">
-      <!-- Animated Background Mesh -->
-      <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] bg-teal-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen" />
-        <div class="absolute top-[20%] -right-[10%] w-[60%] h-[60%] bg-emerald-600/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-screen" />
-        <div class="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-cyan-500/10 rounded-full blur-[100px] animate-blob animation-delay-4000 mix-blend-screen" />
-        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+      <!-- Static Background Mesh -->
+      <div class="absolute inset-0 overflow-hidden bg-slate-950">
+        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-teal-900/10 rounded-full blur-[100px]" />
+        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-emerald-900/10 rounded-full blur-[100px]" />
       </div>
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
@@ -196,31 +194,37 @@ onMounted(() => {
           </button>
         </div>
 
-        <!-- Dashboard Preview (Floating/Glassmorphism) -->
+        <!-- Dashboard Preview -->
         <div 
           v-motion-slide-visible-once-bottom
           :delay="400"
-          class="mt-20 p-2 rounded-2xl bg-gradient-to-b from-slate-700/20 to-slate-800/20 border border-slate-700/40 backdrop-blur-sm shadow-2xl shadow-teal-500/10 max-w-6xl w-full rotate-x"
+          class="mt-20 p-2 rounded-2xl bg-slate-800/50 border border-slate-700/40 shadow-xl max-w-6xl w-full"
         >
-          <div class="rounded-xl overflow-hidden bg-slate-900 border border-slate-800 relative aspect-[16/9] group">
-            <video 
+          <div class="rounded-xl overflow-hidden bg-slate-900 border border-slate-800 relative aspect-[16/9]">
+            <img 
               class="absolute inset-0 w-full h-full object-cover" 
-              autoplay 
-              muted 
-              loop 
-              playsinline 
-              poster="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop"
-            >
-              <source src="/placeholder-video.mp4" type="video/mp4" />
-            </video>
-            <div class="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-10" />
-            <!-- Interactive Dots mock -->
-            <div class="absolute top-4 left-4 flex gap-2">
+              src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop"
+              alt="Dashboard Preview"
+            />
+            <div class="absolute inset-0 bg-slate-900/10 pointer-events-none z-10" />
+            <!-- Browser Dots mock -->
+            <div class="absolute top-4 left-4 flex gap-2 z-20">
               <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
               <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
               <div class="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
             </div>
           </div>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div 
+          v-motion-slide-visible-once-bottom
+          :delay="500"
+          class="mt-16 flex flex-wrap justify-center items-center gap-8 md:gap-16 text-slate-400 font-medium text-sm"
+        >
+          <div class="flex items-center gap-2"><Icon name="lucide:shield-check" class="w-5 h-5 text-teal-500" />{{ t('saasLanding.trust.secure') }}</div>
+          <div class="flex items-center gap-2"><Icon name="lucide:lock" class="w-5 h-5 text-teal-500" />{{ t('saasLanding.trust.ssl') }}</div>
+          <div class="flex items-center gap-2"><Icon name="lucide:cloud" class="w-5 h-5 text-teal-500" />{{ t('saasLanding.trust.cloud') }}</div>
         </div>
       </div>
     </section>
@@ -287,6 +291,79 @@ onMounted(() => {
        </div>
     </section>
 
+    <!-- INTEGRATIONS MARQUEE -->
+    <section class="py-24 bg-white border-b border-slate-100 overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 mb-12 text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">{{ t('saasLanding.integrations.title') }}</h2>
+        <p class="text-slate-500 max-w-2xl mx-auto">{{ t('saasLanding.integrations.subtitle') }}</p>
+      </div>
+      <div class="relative flex w-full flex-col gap-6 mask-horizontal">
+        <ClientOnly>
+          <!-- Marquee 1 (Left) -->
+          <Vue3Marquee :duration="40" class="flex gap-8 overflow-hidden hover-slow">
+            <div v-for="i in 2" :key="'m1-'+i" class="flex items-center gap-6 shrink-0 px-3">
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Yalidine</div>
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Eckoz</div>
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Meta Pixel</div>
+            </div>
+          </Vue3Marquee>
+          <!-- Marquee 2 (Right) -->
+          <Vue3Marquee :duration="45" direction="reverse" class="flex gap-8 overflow-hidden hover-slow">
+            <div v-for="i in 2" :key="'m2-'+i" class="flex items-center gap-6 shrink-0 px-3">
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Mayestro</div>
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Google Analytics</div>
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">CIB / Edahabia</div>
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Mailchimp</div>
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">WhatsApp</div>
+            </div>
+          </Vue3Marquee>
+        </ClientOnly>
+      </div>
+    </section>
+
+    <!-- THEMES & MOBILE SHOWCASE -->
+    <section class="py-24 bg-slate-50 overflow-hidden relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+          
+          <!-- Text Content -->
+          <div>
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
+              {{ t('saasLanding.themes.title.prefix') }}
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">{{ t('saasLanding.themes.title.accent') }}</span>
+            </h2>
+            <p class="text-lg text-slate-600 mb-8 leading-relaxed">
+              {{ t('saasLanding.themes.subtitle') }}
+            </p>
+            <NuxtLink to="/themes" class="inline-flex items-center gap-2 font-bold text-teal-600 hover:text-teal-700 transition-colors group">
+              {{ t('saasLanding.themes.viewAll') }}
+              <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </NuxtLink>
+          </div>
+
+          <!-- Visuals (Mobile Mockup + Desktop Float) -->
+          <div class="relative h-[600px] w-full mt-12 lg:mt-0 flex justify-center lg:justify-end">
+             <!-- Desktop App Float -->
+             <div class="absolute top-20 right-10 w-[600px] h-[350px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden hidden md:block z-0 group hover:-translate-y-2 transition-transform duration-500 hover:shadow-3xl">
+                <div class="h-8 bg-slate-100 border-b border-slate-200 flex items-center px-4 gap-2">
+                   <div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                   <div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                   <div class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                </div>
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=2400&auto=format&fit=crop" class="w-full h-full object-cover" alt="Desktop Theme" />
+             </div>
+             
+             <!-- Mobile Phone Mockup -->
+             <div class="absolute top-10 left-10 lg:left-0 md:-ml-10 w-[280px] h-[580px] bg-slate-900 rounded-[3rem] shadow-2xl border-[8px] border-slate-900 overflow-hidden z-10 shadow-teal-900/20 group hover:-translate-y-2 transition-transform duration-500">
+               <!-- Dynamic Island -->
+               <div class="absolute top-0 inset-x-0 w-32 h-6 bg-slate-900 mx-auto rounded-b-3xl z-20"></div>
+               <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover" alt="Mobile Theme" />
+             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- PRICING -->
     <section class="py-24 bg-white relative">
        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -347,10 +424,10 @@ onMounted(() => {
            </p>
            <div class="flex items-center justify-center lg:justify-start gap-2">
               <div class="flex -space-x-4">
-                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=1" :alt="t('saasLanding.testimonials.avatarAlt')">
-                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=2" :alt="t('saasLanding.testimonials.avatarAlt')">
-                 <img class="w-12 h-12 rounded-full border-4 border-slate-50" src="https://i.pravatar.cc/150?u=3" :alt="t('saasLanding.testimonials.avatarAlt')">
-                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">+500</div>
+                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-teal-100 flex items-center justify-center text-xs font-bold text-teal-800">NS</div>
+                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-800">DC</div>
+                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-800">TA</div>
+                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">+50</div>
               </div>
            </div>
         </div>
@@ -368,8 +445,8 @@ onMounted(() => {
                   </div>
                   <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ t(testi.textKey) }}"</p>
                   <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
-                      <img :src="testi.avatar" :alt="t('saasLanding.testimonials.userAvatarAlt')" class="w-full h-full object-cover">
+                    <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold overflow-hidden">
+                      {{ testi.name.charAt(0) }}
                     </div>
                     <div>
                       <div class="font-bold text-slate-900 text-sm">{{ testi.name }}</div>
@@ -393,8 +470,8 @@ onMounted(() => {
                     <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ t(testi.textKey) }}"</p>
                   </div>
                   <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
-                      <img :src="testi.avatar" :alt="t('saasLanding.testimonials.userAvatarAlt')" class="w-full h-full object-cover">
+                    <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold overflow-hidden">
+                      {{ testi.name.charAt(0) }}
                     </div>
                     <div>
                       <div class="font-bold text-slate-900 text-sm">{{ testi.name }}</div>
@@ -455,35 +532,20 @@ onMounted(() => {
         </NuxtLink>
       </div>
       <!-- Decorative BG -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-teal-600/20 rounded-full blur-[120px]" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-900/30 rounded-full blur-[80px]" />
     </section>
 
   </div>
 </template>
 
 <style scoped>
-/* Keyframes & Utility Animations */
-.animate-blob {
-  animation: blob 10s infinite alternate;
-}
-.animation-delay-2000 { animation-delay: 2s; }
-.animation-delay-4000 { animation-delay: 4s; }
-
-@keyframes blob {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(20px, -20px) scale(1.1); }
-  100% { transform: translate(-20px, 20px) scale(0.9); }
+/* Utility Animations */
+.mask-horizontal {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
-
-
-/* 3D tilt effect attempt for dashboard */
-.rotate-x {
-  transform: perspective(1000px) rotateX(2deg) rotateY(0deg) scale(0.95);
-  transition: transform 0.5s ease;
-}
-.rotate-x:hover {
-  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1);
+.hover-slow:hover :deep(.vue3-marquee > .marquee) {
+  animation-duration: 200s !important;
 }
 
 @keyframes fadeIn {

@@ -100,23 +100,38 @@
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
-              <th class="ui-th">
-                {{ t('admin.pages.orders.index.table.orderId') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('id')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.orders.index.table.orderId') }}
+                  <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.orders.index.table.customer') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('customerName')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.orders.index.table.customer') }}
+                  <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
               <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.phone') }}
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.orders.index.table.total') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('totalAmount')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.orders.index.table.total') }}
+                  <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.orders.index.table.status') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('status')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.orders.index.table.status') }}
+                  <Icon v-if="sortBy === 'status'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.orders.index.table.date') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('createdAt')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.orders.index.table.date') }}
+                  <Icon v-if="sortBy === 'createdAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
               <th class="ui-th text-right">
                 {{ t('admin.pages.orders.index.table.actions') }}
@@ -310,6 +325,8 @@ const endDate = ref(today.toISOString().split('T')[0])
 
 const currentPage = ref(1)
 const itemsPerPage = 25
+const sortBy = ref('createdAt')
+const sortOrder = ref<'asc' | 'desc'>('desc')
 
 const emptyHint = computed(() => {
   if (searchQuery.value || selectedStatus.value) return t('admin.pages.orders.index.empty.hintFiltered')
@@ -324,6 +341,8 @@ async function fetchOrders() {
     if (searchQuery.value) params.append('search', searchQuery.value)
     if (startDate.value) params.append('startDate', startDate.value)
     if (endDate.value) params.append('endDate', endDate.value)
+    if (sortBy.value) params.append('sortBy', sortBy.value)
+    if (sortOrder.value) params.append('sortOrder', sortOrder.value)
     params.append('page', String(currentPage.value))
     params.append('limit', String(itemsPerPage))
 
@@ -340,6 +359,15 @@ async function fetchOrders() {
     console.error('Failed to fetch orders:', error)
   } finally {
     loading.value = false
+  }
+}
+
+function setSort(key: string) {
+  if (sortBy.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = key
+    sortOrder.value = 'asc'
   }
 }
 
@@ -360,7 +388,7 @@ onMounted(() => {
   fetchOrders()
 })
 
-watch([searchQuery, selectedStatus, startDate, endDate], () => {
+watch([searchQuery, selectedStatus, startDate, endDate, sortBy, sortOrder], () => {
   currentPage.value = 1
   fetchOrders()
 })

@@ -7,7 +7,8 @@ export class SuppliersController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            res.json(await service.list(tenant.id))
+            const { sortBy, sortOrder } = req.query
+            res.json(await service.list(tenant.id, sortBy as string, sortOrder as 'asc' | 'desc'))
         } catch (error) {
             console.error('List suppliers error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

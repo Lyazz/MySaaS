@@ -13,10 +13,25 @@ export class SupplierValidationError extends Error {
 }
 
 export class SuppliersService {
-    async list(tenantId: string) {
+    async list(tenantId: string, sortBy?: string, sortOrder: 'asc' | 'desc' = 'asc') {
+        const sortableFields: Record<string, string> = {
+            name: 'name',
+            email: 'email',
+            phone: 'phone',
+            address: 'address',
+            createdAt: 'createdAt'
+        }
+
+        const orderBy: any = {}
+        if (sortBy && sortableFields[sortBy]) {
+            orderBy[sortableFields[sortBy]] = sortOrder
+        } else {
+            orderBy.name = 'asc'
+        }
+
         return prisma.supplier.findMany({
             where: { tenantId },
-            orderBy: { name: 'asc' }
+            orderBy
         })
     }
 

@@ -42,9 +42,9 @@
         </div>
 
         <!-- Desktop Actions -->
-        <div class="hidden lg:flex items-center gap-3">
+        <div class="hidden lg:flex items-center gap-2">
           <button
-            class="h-10 px-4 rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2"
+            class="h-9 px-3 text-sm rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 shrink-0"
             :title="t('admin.pages.pos.catalog.actions.discount')"
             @click="openExampleDialog(t('admin.pages.pos.catalog.actions.discount'))"
           >
@@ -55,7 +55,7 @@
             <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.discount') }}</span>
           </button>
           <button
-             class="h-10 px-4 rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2"
+             class="h-9 px-3 text-sm rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 shrink-0"
              :title="t('admin.pages.pos.catalog.actions.reprintLastOrder')"
              @click="printLastSale"
           >
@@ -63,10 +63,10 @@
                name="lucide:printer"
                class="w-4 h-4"
              />
-             <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.reprint') }}</span>
+             <span class="hidden 2xl:inline">{{ t('admin.pages.pos.catalog.actions.reprint') }}</span>
           </button>
           <button
-            class="h-10 px-4 rounded-lg bg-teal-600 text-white font-medium hover:bg-teal-700 shadow-sm transition-all flex items-center gap-2 border border-transparent"
+            class="h-9 px-3 text-sm rounded-lg bg-teal-600 text-white font-medium hover:bg-teal-700 shadow-sm transition-all flex items-center gap-1.5 border border-transparent shrink-0"
             :title="t('admin.pages.pos.catalog.actions.quickCharge')"
             @click="openExampleDialog(t('admin.pages.pos.catalog.actions.quickCharge'))"
           >
@@ -77,12 +77,12 @@
             <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.quickCharge') }}</span>
           </button>
 
-          <div class="h-8 w-px bg-slate-200 mx-1" />
+          <div class="h-6 w-px bg-slate-200 mx-1 shrink-0" />
 
           <!-- Product View Controls -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5">
             <button
-              class="p-2.5 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              class="h-9 w-9 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-700 hover:bg-slate-50 shrink-0"
               :title="t('admin.pages.pos.catalog.actions.sort')"
             >
               <Icon
@@ -91,7 +91,7 @@
               />
             </button>
             <button
-              class="h-10 px-3 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-700 hover:bg-slate-50 text-sm font-medium flex items-center gap-1"
+              class="h-9 px-3 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-700 hover:bg-slate-50 text-sm font-medium flex items-center gap-1.5 shrink-0"
               :title="t('admin.pages.pos.catalog.actions.columns')"
               @click="cycleProductsPerRow"
             >
@@ -101,7 +101,7 @@
               />
               <span>{{ productsPerRow }}</span>
             </button>
-            <div class="flex bg-slate-100 p-1 rounded-lg">
+            <div class="flex bg-slate-100 p-0.5 rounded-lg shrink-0">
               <button
                 v-for="view in ['grid', 'list']"
                 :key="view"
@@ -200,19 +200,19 @@
            </div>
            
            <!-- Product Grid/List -->
-           <div
+            <div
              v-else
-             class="grid gap-3 md:gap-4 md:gap-6 content-start"
+             class="grid gap-3 md:gap-4 md:gap-5 content-start auto-rows-min"
              :class="productsView === 'list' ? 'grid-cols-1' : ''"
              :style="productsView === 'grid' ? { gridTemplateColumns: `repeat(${productsPerRow}, minmax(0, 1fr))` } : {}"
            >
              <!-- Back Card (Grid View Only) -->
              <button
                v-if="selectedCategoryId && productsView === 'grid'"
-               class="aspect-[3/4] rounded-xl bg-white shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-4 group"
+               class="h-full min-h-[160px] rounded-xl bg-white shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group p-4"
                @click="selectCategory(null)"
              >
-               <div class="w-14 h-14 rounded-full bg-teal-50 flex items-center justify-center group-hover:bg-teal-100 transition-colors">
+               <div class="w-12 h-12 rounded-full bg-teal-50 flex items-center justify-center group-hover:bg-teal-100 transition-colors">
                  <Icon
                    name="lucide:arrow-left"
                    class="w-6 h-6 text-teal-600"
@@ -240,8 +240,8 @@
              <button
                v-for="product in filteredProducts"
                :key="product.id"
-               class="relative group bg-white rounded-xl shadow-sm hover:shadow-md transition-all text-left overflow-hidden flex"
-               :class="productsView === 'grid' ? 'flex-col aspect-[3/4]' : 'flex-row items-center p-2 min-h-[80px]'"
+               class="relative group bg-white rounded-xl shadow-sm hover:shadow-md transition-all text-left overflow-hidden flex h-full min-h-[180px]"
+               :class="productsView === 'grid' ? 'flex-col' : 'flex-row items-center p-2 min-h-[80px]'"
                @click="handleAddProduct(product)"
              >
                <!-- Badge -->
@@ -255,10 +255,10 @@
   
                <!-- Image -->
                <div
-                 class="bg-white overflow-hidden shrink-0 relative"
-                 :class="productsView === 'grid' ? 'w-full aspect-square p-2 md:p-4' : 'w-16 h-16 rounded-xl'"
+                 class="bg-white overflow-hidden shrink-0 relative flex-1"
+                 :class="productsView === 'grid' ? 'w-full aspect-square p-2 md:p-3' : 'w-16 h-16 rounded-xl flex-none'"
                >
-                 <div class="w-full h-full rounded-lg overflow-hidden bg-slate-50 relative">
+                 <div class="w-full h-full rounded-lg overflow-hidden bg-slate-50 relative flex items-center justify-center">
                    <img
                      v-if="getProductMainImage(product)"
                      :src="getProductMainImage(product)"
@@ -359,7 +359,7 @@
               class="w-full text-sm pl-9 bg-slate-50 border-slate-100 hover:bg-slate-100 transition-colors"
             >
               <option value="">
-                Default Client
+                {{ t('admin.pages.pos.customer.defaultClient') }}
               </option>
               <option value="NEW" class="text-teal-600 font-bold">
                 + {{ t('admin.pages.pos.customer.addClient') }}
@@ -664,7 +664,7 @@ const loadingProducts = ref(true)
 const productSearch = ref('')
 const selectedCategoryId = ref<string | null>(null)
 const productsView = ref<'list' | 'grid'>('grid')
-const productsPerRow = ref(5)
+const productsPerRow = ref(4)
 
 // Session Management
 interface CartSession {
@@ -748,6 +748,7 @@ function selectCategory(id: string | null) {
 function cycleProductsPerRow() {
   if (productsPerRow.value === 3) productsPerRow.value = 4
   else if (productsPerRow.value === 4) productsPerRow.value = 5
+  else if (productsPerRow.value === 5) productsPerRow.value = 6
   else productsPerRow.value = 3
 }
 

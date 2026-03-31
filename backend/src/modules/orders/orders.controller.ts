@@ -7,12 +7,16 @@ export class OrdersController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { status, search, startDate, endDate, page: pageStr, limit: limitStr } = req.query as {
-                status?: string; search?: string; startDate?: string; endDate?: string; page?: string; limit?: string
+            const { status, search, startDate, endDate, page: pageStr, limit: limitStr, sortBy, sortOrder } = req.query as {
+                status?: string; search?: string; startDate?: string; endDate?: string; page?: string; limit?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'
             }
             const page = Math.max(1, parseInt(pageStr ?? '1', 10) || 1)
             const limit = Math.min(100, Math.max(1, parseInt(limitStr ?? '25', 10) || 25))
-            const result = await service.list(tenant.id, { status, search, startDate, endDate }, { page, limit })
+            const result = await service.list(
+                tenant.id,
+                { status, search, startDate, endDate, sortBy, sortOrder },
+                { page, limit }
+            )
             res.json(result)
         } catch (error) {
             console.error('List orders error:', error)

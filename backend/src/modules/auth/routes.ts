@@ -202,9 +202,10 @@ router.post('/login', async (req, res) => {
 
         const { passwordHash, ...userInfo } = user
 
+        const responseTenant = tenant || user.tenant
         let isOffline = false
-        if (tenant) {
-            isOffline = tenant.isOffline
+        if (responseTenant) {
+            isOffline = responseTenant.isOffline
         }
 
         let staffRole: { id: string; name: string } | null = null
@@ -223,7 +224,8 @@ router.post('/login', async (req, res) => {
         res.json({
             success: true,
             token,
-            user: { ...userInfo, tenant: { ...tenant, isOffline } },
+            user: { ...userInfo, tenant: responseTenant ? { ...responseTenant, isOffline } : null },
+            tenant: responseTenant ? { ...responseTenant, isOffline } : null,
             staffRole,
             staffPermissions
         })

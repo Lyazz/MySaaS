@@ -38,46 +38,46 @@
   },
   "saasLanding": {
     "seo": {
-      "title": "Swekly - The Future of Commerce",
-      "description": "The all-in-one platform to build, sell, and scale your B2B or B2C business with enterprise-grade tools."
+      "title": "Swekly - The Best E-commerce Platform to Build Your Store",
+      "description": "Start, run, and grow your e-commerce business with Swekly. The powerful, easy-to-use platform for online stores."
     },
     "hero": {
       "title": {
-        "buildSell": "Build. Sell.",
-        "scale": "Scale."
+        "buildSell": "Start. Sell.",
+        "scale": "Succeed."
       },
-      "subtitle": "The all-in-one platform engineered for modern commerce. Focus on your product, we handle the infrastructure, payments, and logistics.",
-      "ctaPrimary": "Start Building Free",
-      "ctaSecondary": "Watch Demo"
+      "subtitle": "The commerce platform built to turn your ideas into a thriving online store. Manage products, accept payments, and scale your business effortlessly.",
+      "ctaPrimary": "Start free trial",
+      "ctaSecondary": "Explore features"
     },
     "features": {
       "title": {
         "prefix": "Everything you need to",
-        "accent": "dominate"
+        "accent": "sell online"
       },
-      "subtitle": "Powerful tools designed for growth, packaged in a beautiful interface.",
+      "subtitle": "Powerful e-commerce tools designed for growth, packaged in a beautiful interface.",
       "items": {
-        "storeBuilder": {
-          "title": "Store Builder",
-          "description": "Drag-and-drop editor to create stunning storefronts in minutes."
+        "aiTools": {
+          "title": "Artificial Intelligence Tools",
+          "description": "AI-powered automatic generation of landing pages, product listings, and SEO."
         },
-        "globalPayments": {
-          "title": "Global Payments",
-          "description": "Accept payments from anywhere with integrated gateways."
+        "competitivePricing": {
+          "title": "Competitive Pricing",
+          "description": "Transparent and affordable plans to help you scale without limits."
         },
-        "analytics": {
-          "title": "Analytics & Insights",
-          "description": "Real-time data to optimize your conversion rates."
+        "templates": {
+          "title": "Multiple Store Templates",
+          "description": "A wide selection of beautiful, conversion-optimized themes that are fully customizable."
         },
-        "automatedShipping": {
-          "title": "Automated Shipping",
-          "description": "Connect with Yalidine, Eckoz, and more for auto-dispatching."
+        "fastSupport": {
+          "title": "Fast 24/7 Support",
+          "description": "A dedicated team ready to help you succeed at every stage of your growth."
         }
       }
     },
     "stats": {
-      "activeMerchants": "Active merchants",
-      "revenueGenerated": "Revenue generated",
+      "activeMerchants": "Active stores",
+      "revenueGenerated": "Sales processed",
       "uptime": "Uptime"
     },
     "faq": {
@@ -108,36 +108,53 @@
       "avatarAlt": "Avatar",
       "userAvatarAlt": "User avatar",
       "items": {
-        "sarah": {
-          "text": "I switched from Shopify and never looked back. The page load speeds are instant and my conversion rate went up 40% overnight.",
-          "role": "CEO, FashionNova"
+        "nassim": {
+          "text": "Swekly completely transformed how we manage Nokhba Store. It's so easy to list our stationery and books, and sales have never been better.",
+          "role": "Owner, Nokhba Store"
         },
-        "karim": {
-          "text": "The analytics dashboard is beautiful. Whatever data I need is just one click away. It feels like this tool was made for 2026.",
-          "role": "Founder, TechShop"
+        "amina": {
+          "text": "The custom domain and analytics features are incredible. My cosmetics brand looks so professional, and managing orders is a breeze.",
+          "role": "Founder, Dzair Cosmetics"
         },
-        "emily": {
-          "text": "Finally, a platform that doesn't charge ridiculous transaction fees. The custom domain support is seamless.",
-          "role": "CTO, GreenEarth"
+        "yanis": {
+          "text": "Swekly is the ultimate e-commerce solution in Algeria. The integrated local shipping options saved us hours of manual work every week.",
+          "role": "Director, TechAlgeria"
         },
-        "michael": {
-          "text": "The best decision we made for our business. Support is incredible and the features are exactly what we needed.",
-          "role": "COO, GearUp"
+        "lyes": {
+          "text": "We sell hundreds of fashion items daily, and the platform handles the traffic flawlessly. Best decision we made for our business.",
+          "role": "Owner, Oran Fashion"
         },
-        "lisa": {
-          "text": "Scaling to 10k orders a month was a breeze. No downtime, no issues. Highly recommended.",
-          "role": "Owner, Kicks"
+        "meriem": {
+          "text": "No more taking orders manually via social media. Our customers love the seamless checkout, and we love the automated inventory tracking.",
+          "role": "CEO, BioAtlas"
         },
-        "david": {
-          "text": "The drag and drop builder is actually usable. I built my store in an afternoon.",
-          "role": "Founder, ArtSpace"
+        "sofiane": {
+          "text": "Building the store was drag-and-drop simple. We had Casbah Gifts up and running in a single afternoon.",
+          "role": "Manager, Casbah Gifts"
         }
       }
     },
     "finalCta": {
-      "title": "Ready to launch?",
-      "subtitle": "Join the platform that grows with you.",
-      "cta": "Get Started Now"
+      "title": "Ready to launch your store?",
+      "subtitle": "Join thousands of merchants building the future of e-commerce.",
+      "cta": "Start your free trial"
+    },
+    "trust": {
+      "secure": "100% Secure Payments",
+      "ssl": "Free SSL Certificate",
+      "cloud": "Reliable Cloud Hosting"
+    },
+    "integrations": {
+      "title": "Works with your favorite tools",
+      "subtitle": "Connect with top payment gateways, shipping providers, and marketing tools."
+    },
+    "themes": {
+      "title": {
+        "prefix": "Beautiful",
+        "accent": "storefronts"
+      },
+      "subtitle": "Choose from high-converting templates or customize everything. Designed for mobile-first commerce.",
+      "viewAll": "Explore themes"
     }
   },
   "marketing": {
@@ -163,11 +180,11 @@
       "items": {
         "builder": {
           "title": "Drag & Drop Store Builder",
-          "description": "Create professional, responsive storefronts without writing a single line of code. Our intuitive builder lets you customize every pixel."
+          "description": "Create professional storefronts without writing a single line of code. Our intuitive builder lets you customize every detail."
         },
         "payments": {
           "title": "Global Payments",
-          "description": "Accept payments from anywhere with integrated gateways including Stripe, PayPal, and local providers."
+          "description": "Accept payments from anywhere with integrated gateways including CIB, Edahabia, and local providers."
         },
         "analytics": {
           "title": "Advanced Analytics",
@@ -251,8 +268,8 @@
         "subtitle": "Join thousands of merchants building the next generation of commerce. Scalable, secure, and ready for growth.",
         "testimonial": {
           "quote": "Moving to Swekly was the best decision we made. Our revenue doubled in 3 months.",
-          "name": "John Doe",
-          "role": "CEO, FashionNova"
+          "name": "Yanis M.",
+          "role": "Owner, Dzair Fashion"
         },
         "copyright": "© {year} Swekly Inc."
       },
@@ -505,7 +522,7 @@
       "form": {
         "fullName": {
           "label": "Full name",
-          "placeholder": "e.g. John Doe"
+          "placeholder": "e.g. Yanis M."
         },
         "phone": {
           "label": "Phone",
@@ -934,6 +951,10 @@
           "subtitle": "Your storefront will automatically switch to Right-to-Left layout for Arabic."
         }
       },
+      "storefrontSearch": {
+        "title": "Search Bar (Storefront)",
+        "subtitle": "Display the search bar on the storefront (coming soon)."
+      },
       "actions": {
         "discardChanges": "Discard changes"
       },
@@ -1304,6 +1325,7 @@
       "delivery": "Delivery",
       "finance": "Finance",
       "cash": "Cash",
+      "storeParameters": "Store Parameters",
       "settings": "Administration",
       "dashboard": "Dashboard",
       "products": "Products",
@@ -2215,7 +2237,7 @@
           },
           "bundlesTab": {
             "title": "Bundle deals",
-            "hint": "Create fixed bundle prices like “2 for 1800 DZD”. Checkout will automatically pick the best combination.",
+            "hint": "Create fixed prices for your bundle deals. Checkout will automatically pick the best combination.",
             "addBundle": "Add bundle",
             "table": {
               "qty": "Qty",
@@ -2247,8 +2269,7 @@
           "addCategory": "Add category",
           "filters": {
             "searchLabel": "Search",
-            "searchPlaceholder": "Search categories…",
-            "sortHint": "Use the chips above the table to sort by newest, title, slug, or product count."
+            "searchPlaceholder": "Search categories…"
           },
           "loading": "Loading categories…",
           "empty": {
@@ -2925,7 +2946,6 @@
           "filters": {
             "searchLabel": "Search",
             "searchPlaceholder": "Search suppliers…",
-            "sortHint": "Use the sort buttons to order results.",
             "clear": "Clear"
           },
           "loading": "Loading suppliers…",

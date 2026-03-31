@@ -184,7 +184,7 @@ export class ProductsService {
             return product
         })
 
-        return created
+        return await this.getProduct(tenantId, created.id) || created
     }
 
     async getProduct(tenantId: string, productId: string, opts?: { includeInactiveVariants?: boolean }) {

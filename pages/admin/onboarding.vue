@@ -95,31 +95,104 @@
           <h3 class="text-lg font-semibold text-slate-900">
             {{ t('admin.pages.onboarding.template.title') }}
           </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              v-for="t in templates"
-              :key="t.key"
-              type="button"
-              class="text-left p-4 rounded-xl border transition-all"
-              :class="form.templateKey === t.key ? 'border-teal-500 ring-2 ring-teal-200 bg-teal-50' : 'border-slate-200 hover:border-slate-300'"
-              @click="form.templateKey = t.key"
-            >
-              <div class="flex items-center justify-between">
-                <p class="font-semibold text-slate-900">
-                  {{ t.label }}
-                </p>
-                <span
-                  class="text-xs px-2 py-1 rounded-full"
-                  :class="form.templateKey === t.key ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'"
-                >
-                  {{ t.key }}
-                </span>
+          <p class="text-sm text-slate-500">
+            Sélectionnez le template à appliquer à votre boutique.
+          </p>
+
+           <!-- Thumbnails Grid -->
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div
+                v-for="tpl in templates"
+                :key="tpl.key"
+                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col overflow-hidden bg-white"
+                :class="form.templateKey === tpl.key ? 'border-teal-600 ring-4 ring-teal-600/20 shadow-md' : 'border-slate-200 hover:border-teal-300 shadow-sm hover:shadow'"
+                @click="form.templateKey = tpl.key"
+              >
+                 <!-- Style Swatch Preview -->
+                 <div
+                   class="relative w-full border-b overflow-hidden flex flex-col"
+                   style="height: 200px;"
+                   :style="{ background: tpl.bg, borderColor: tpl.border }"
+                 >
+                   <!-- Top accent strip -->
+                   <div class="h-1 w-full shrink-0" :style="{ background: tpl.color }"></div>
+
+                   <!-- Mock product card (centered) -->
+                   <div class="flex-1 flex items-center justify-center p-4">
+                     <div
+                       class="w-full max-w-[140px] overflow-hidden shadow-sm"
+                       :style="{ background: tpl.cardBg, borderRadius: tpl.radius, border: `1px solid ${tpl.border}` }"
+                     >
+                       <!-- Image zone -->
+                       <div
+                         class="w-full flex items-center justify-center text-3xl"
+                         style="height: 80px;"
+                         :style="{ background: tpl.imgBg }"
+                       >
+                         {{ tpl.emoji }}
+                       </div>
+                       <!-- Text body -->
+                       <div class="px-2.5 py-2" :style="{ fontFamily: tpl.fontStyle }">
+                         <p class="text-[11px] font-semibold leading-tight truncate" :style="{ color: tpl.textColor }">
+                           {{ tpl.sampleDesc }}
+                         </p>
+                         <p class="text-[11px] mt-0.5 font-bold" :style="{ color: tpl.color }">
+                           {{ tpl.samplePrice }}
+                         </p>
+                         <!-- Mini button -->
+                         <div
+                           class="mt-2 w-full text-center text-[9px] font-bold py-1 leading-none"
+                           :style="{ background: tpl.color, color: tpl.btnText, borderRadius: tpl.radius }"
+                         >
+                           BUY
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   <!-- Hover overlay with Prévisualiser button -->
+                   <div class="absolute inset-0 z-10 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col justify-end p-3">
+                     <NuxtLink
+                       :to="`/admin/preview?template=${tpl.key}`"
+                       target="_blank"
+                       class="pointer-events-auto py-2 px-4 bg-white/95 hover:bg-white backdrop-blur-sm text-slate-900 font-medium text-sm rounded-lg shadow border border-slate-200 flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300"
+                       @click.stop
+                     >
+                       <Icon name="lucide:external-link" class="w-4 h-4" />
+                       Prévisualiser
+                     </NuxtLink>
+                   </div>
+                 </div>
+
+                 <!-- Template Identity Footer -->
+                 <div class="p-3 bg-white flex flex-col gap-2">
+                   <div class="flex items-center justify-between">
+                     <span class="font-bold text-slate-800 text-sm" :class="tpl.fontClass">{{ tpl.label }}</span>
+                     <div v-if="form.templateKey === tpl.key" class="text-teal-600">
+                       <Icon name="lucide:check-circle-2" class="w-5 h-5" />
+                     </div>
+                   </div>
+                   <div class="flex flex-col gap-0.5">
+                     <p class="text-[11px] font-medium text-slate-600 leading-snug">{{ tpl.storeTypes }}</p>
+                     <p class="text-[11px] text-slate-500 leading-snug">{{ tpl.description }}</p>
+                   </div>
+                   <!-- Color + font pills -->
+                   <div class="flex items-center gap-1.5 flex-wrap">
+                     <span
+                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border"
+                       :style="{ borderColor: tpl.color + '40', background: tpl.color + '12', color: tpl.color }"
+                     >
+                       <span class="w-2 h-2 rounded-full inline-block" :style="{ background: tpl.color }"></span>
+                       {{ tpl.color.toUpperCase() }}
+                     </span>
+                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 border border-slate-200 text-slate-600">
+                       <Icon name="lucide:type" class="w-2.5 h-2.5" />
+                       {{ tpl.fontName }}
+                     </span>
+                   </div>
+                 </div>
               </div>
-              <p class="text-sm text-slate-600 mt-2">
-                {{ t.description }}
-              </p>
-            </button>
-          </div>
+           </div>
         </div>
 
         <!-- Language + Font -->
@@ -295,10 +368,250 @@ const steps = computed(() => ([
 ]))
 const progressPercent = computed(() => Math.round(((step.value + 1) / steps.value.length) * 100))
 
-const templates = computed(() => ([
-  { key: 'classic', label: t('admin.pages.onboarding.templates.classic.label'), description: t('admin.pages.onboarding.templates.classic.description') },
-  { key: 'modern', label: t('admin.pages.onboarding.templates.modern.label'), description: t('admin.pages.onboarding.templates.modern.description') }
-]))
+const templates = computed(() => [
+  { 
+    key: 'classic',
+    label: 'Classic',
+    description: t('admin.appearanceSettingsForm.templates.options.classic.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.classic.storeTypes'),
+    icon: 'lucide:layout-grid',
+    fontClass: 'font-serif',
+    fontName: 'Alice',
+    fontStyle: "'Alice', serif",
+    color: '#0f172a',
+    bg: '#f8fafc',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)',
+    border: '#e2e8f0',
+    textColor: '#0f172a',
+    subColor: '#64748b',
+    btnText: '#ffffff',
+    radius: '4px',
+    emoji: '🖼️',
+    sampleDesc: 'Élégant & intemporel',
+    samplePrice: '189 €',
+  },
+  { 
+    key: 'modern',
+    label: 'Modern',
+    description: t('admin.appearanceSettingsForm.templates.options.modern.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.modern.storeTypes'),
+    icon: 'lucide:layout-template',
+    fontClass: 'font-sans',
+    fontName: 'Outfit',
+    fontStyle: "'Outfit', ui-sans-serif, system-ui, sans-serif",
+    color: '#0d9488',
+    bg: '#f8fafc',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#ccfbf1,#99f6e4)',
+    border: '#e2e8f0',
+    textColor: '#475569',
+    subColor: '#64748b',
+    btnText: '#ffffff',
+    radius: '8px',
+    emoji: '🛍️',
+    sampleDesc: 'Minimaliste & moderne',
+    samplePrice: '129 €',
+  },
+  { 
+    key: 'street',
+    label: 'Street',
+    description: t('admin.appearanceSettingsForm.templates.options.street.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.street.storeTypes'),
+    icon: 'lucide:zap',
+    fontClass: 'font-street',
+    fontName: 'Anton',
+    fontStyle: "'Anton', sans-serif",
+    color: '#FACC15',
+    bg: '#ffffff',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#fef9c3,#fde68a)',
+    border: '#FACC15',
+    textColor: '#000000',
+    subColor: '#374151',
+    btnText: '#000000',
+    radius: '0px',
+    emoji: '👟',
+    sampleDesc: 'Limited drop',
+    samplePrice: '99 €',
+  },
+  { 
+    key: 'cozy',
+    label: 'Cozy',
+    description: t('admin.appearanceSettingsForm.templates.options.cozy.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.cozy.storeTypes'),
+    icon: 'lucide:coffee',
+    fontClass: 'font-cozy',
+    fontName: 'Nunito',
+    fontStyle: "'Nunito', sans-serif",
+    color: '#A4C3B2',
+    bg: '#F5F2EA',
+    cardBg: '#F5F2EA',
+    imgBg: 'linear-gradient(135deg,#d1fae5,#bbf7d0)',
+    border: '#e8f0eb',
+    textColor: '#475569',
+    subColor: '#6b7280',
+    btnText: '#ffffff',
+    radius: '16px',
+    emoji: '🕯️',
+    sampleDesc: 'Doux & chaleureux',
+    samplePrice: '24 €',
+  },
+  { 
+    key: 'cyber',
+    label: 'Cyber',
+    description: t('admin.appearanceSettingsForm.templates.options.cyber.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.cyber.storeTypes'),
+    icon: 'lucide:cpu',
+    fontClass: 'font-cyber',
+    fontName: 'Orbitron',
+    fontStyle: "'Orbitron', sans-serif",
+    color: '#F43F5E',
+    bg: '#0d0515',
+    cardBg: '#1a0a2e',
+    imgBg: 'linear-gradient(135deg,#2d1b5e,#1a0a2e)',
+    border: '#F43F5E',
+    textColor: '#e9d5ff',
+    subColor: '#c084fc',
+    btnText: '#ffffff',
+    radius: '4px',
+    emoji: '🤖',
+    sampleDesc: 'Next-gen tech',
+    samplePrice: '499 €',
+  },
+  { 
+    key: 'stationnery',
+    label: 'Stationery',
+    description: t('admin.appearanceSettingsForm.templates.options.stationnery.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.stationnery.storeTypes'),
+    icon: 'lucide:pen-tool',
+    fontClass: 'font-stationery',
+    fontName: 'Merriweather',
+    fontStyle: "'Merriweather', 'Playfair Display', serif",
+    color: '#334155',
+    bg: '#fdfbf7',
+    cardBg: '#fdfbf7',
+    imgBg: 'linear-gradient(135deg,#f8fafc,#e2e8f0)',
+    border: '#cbd5e1',
+    textColor: '#1e293b',
+    subColor: '#64748b',
+    btnText: '#fdfbf7',
+    radius: '2px',
+    emoji: '📓',
+    sampleDesc: 'Élégance papeterie',
+    samplePrice: '18 €',
+  },
+  { 
+    key: 'food',
+    label: 'Food',
+    description: t('admin.appearanceSettingsForm.templates.options.food.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.food.storeTypes'),
+    icon: 'lucide:utensils',
+    fontClass: 'font-food',
+    fontName: 'Nunito',
+    fontStyle: "'Nunito', sans-serif",
+    color: '#ea580c',
+    bg: '#f5f5f4',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#ffedd5,#fed7aa)',
+    border: '#e7e5e4',
+    textColor: '#292524',
+    subColor: '#78716c',
+    btnText: '#ffffff',
+    radius: '12px',
+    emoji: '🍕',
+    sampleDesc: 'Saveurs artisanales',
+    samplePrice: '14 €',
+  },
+  { 
+    key: 'wellness',
+    label: 'Wellness',
+    description: t('admin.appearanceSettingsForm.templates.options.wellness.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.wellness.storeTypes'),
+    icon: 'lucide:flower-2',
+    fontClass: 'font-wellness',
+    fontName: 'Solway',
+    fontStyle: "'Solway', ui-serif, Georgia, serif",
+    color: '#2A9D8F',
+    bg: '#f8fafc',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#ccfbf1,#a7f3d0)',
+    border: '#ccfbf1',
+    textColor: '#475569',
+    subColor: '#64748b',
+    btnText: '#ffffff',
+    radius: '12px',
+    emoji: '🌿',
+    sampleDesc: 'Bio & naturel',
+    samplePrice: '22 €',
+  },
+  { 
+    key: 'playful',
+    label: 'Playful',
+    description: t('admin.appearanceSettingsForm.templates.options.playful.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.playful.storeTypes'),
+    icon: 'lucide:smile',
+    fontClass: 'font-sans',
+    fontName: 'Nunito',
+    fontStyle: "'Nunito', 'Quicksand', sans-serif",
+    color: '#9333EA',
+    bg: '#faf5ff',
+    cardBg: '#ffffff',
+    imgBg: 'linear-gradient(135deg,#f3e8ff,#e9d5ff)',
+    border: '#e9d5ff',
+    textColor: '#334155',
+    subColor: '#7c3aed',
+    btnText: '#ffffff',
+    radius: '20px',
+    emoji: '🧸',
+    sampleDesc: 'Toys & Fun',
+    samplePrice: '15 €',
+  },
+  { 
+    key: 'activewear',
+    label: 'Activewear',
+    description: t('admin.appearanceSettingsForm.templates.options.activewear.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.activewear.storeTypes'),
+    icon: 'lucide:activity',
+    fontClass: 'font-activewear',
+    fontName: 'Teko',
+    fontStyle: "'Teko', sans-serif",
+    color: '#EAB308',
+    bg: '#000000',
+    cardBg: '#111111',
+    imgBg: 'linear-gradient(135deg,#1f2937,#000000)',
+    border: '#333333',
+    textColor: '#d1d5db',
+    subColor: '#9ca3af',
+    btnText: '#000000',
+    radius: '0px',
+    emoji: '⚡',
+    sampleDesc: 'High Performance',
+    samplePrice: '89 €',
+  },
+  { 
+    key: 'chrono',
+    label: 'Chrono Luxe',
+    description: t('admin.appearanceSettingsForm.templates.options.chrono.description'),
+    storeTypes: t('admin.appearanceSettingsForm.templates.options.chrono.storeTypes'),
+    icon: 'lucide:watch',
+    fontClass: 'font-serif',
+    fontName: 'Cormorant Garamond',
+    fontStyle: "'Cormorant Garamond', serif",
+    color: '#A67C52',
+    bg: '#0E1117',
+    cardBg: '#131720',
+    imgBg: 'linear-gradient(135deg,#1A1F2E,#0B0E16)',
+    border: 'rgba(212,197,169,0.18)',
+    textColor: '#E8E0D5',
+    subColor: '#8A8070',
+    btnText: '#ffffff',
+    radius: '2px',
+    emoji: '⌚',
+    sampleDesc: 'Luxury Accessories',
+    samplePrice: '3,500 €',
+  },
+])
 const languages = computed(() => ([
   { key: 'ar', label: `${t('i18n.locales.ar')} (AR)` },
   { key: 'fr', label: `${t('i18n.locales.fr')} (FR)` },

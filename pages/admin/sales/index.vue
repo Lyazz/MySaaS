@@ -64,6 +64,7 @@
       </p>
     </div>
 
+    <!-- Sales Table -->
     <div
       v-else
       class="ui-card overflow-hidden"
@@ -72,23 +73,35 @@
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
-              <th class="ui-th">
-                {{ t('admin.pages.sales.index.table.saleId') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('id')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.sales.index.table.saleId') }}
+                  <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.sales.index.table.customer') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('customerName')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.sales.index.table.customer') }}
+                  <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
               <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.phone') }}
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.sales.index.table.total') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('totalAmount')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.sales.index.table.total') }}
+                  <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
               <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.user') }}
               </th>
-              <th class="ui-th">
-                {{ t('admin.pages.sales.index.table.completed') }}
+              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('updatedAt')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.sales.index.table.completed') }}
+                  <Icon v-if="sortBy === 'updatedAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                </div>
               </th>
               <th class="ui-th text-right">
                 {{ t('admin.pages.sales.index.table.actions') }}
@@ -275,6 +288,8 @@ const itemsPerPage = 25
 const users = ref<{ id: string; email: string }[]>([])
 const selectedUser = ref('')
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const sortBy = ref('updatedAt')
+const sortOrder = ref<'asc' | 'desc'>('desc')
 const today = new Date()
 const lastWeek = new Date(today)
 lastWeek.setDate(lastWeek.getDate() - 7)
@@ -295,6 +310,8 @@ async function fetchSales() {
     if (startDate.value) params.append('startDate', startDate.value)
     if (endDate.value) params.append('endDate', endDate.value)
     if (selectedUser.value) params.append('userId', selectedUser.value)
+    if (sortBy.value) params.append('sortBy', sortBy.value)
+    if (sortOrder.value) params.append('sortOrder', sortOrder.value)
     params.append('page', String(currentPage.value))
     params.append('limit', String(itemsPerPage))
 
@@ -325,6 +342,15 @@ async function fetchUsers() {
   }
 }
 
+function setSort(key: string) {
+  if (sortBy.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = key
+    sortOrder.value = 'asc'
+  }
+}
+
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
@@ -342,7 +368,7 @@ onMounted(() => {
   fetchSales()
 })
 
-watch([searchQuery, startDate, endDate, selectedUser], () => {
+watch([searchQuery, startDate, endDate, selectedUser, sortBy, sortOrder], () => {
   currentPage.value = 1
   fetchSales()
 })

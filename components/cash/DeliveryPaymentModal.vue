@@ -1,14 +1,12 @@
 <template>
-  <div
-    v-if="modelValue"
-    class="fixed inset-0 z-50 overflow-y-auto"
-    @click.self="handleCancel"
-  >
-    <div class="flex min-h-screen items-center justify-center px-4">
-      <div class="fixed inset-0 bg-black/50" @click="handleCancel" />
-
-      <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-        <div class="flex items-start justify-between gap-4">
+  <Teleport to="body">
+    <div
+      v-if="modelValue"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 py-8"
+      @click.self="handleCancel"
+    >
+      <div class="relative w-full max-w-lg rounded-lg bg-white shadow-xl flex flex-col max-h-[90vh]">
+        <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-100 shrink-0">
           <div class="min-w-0">
             <h3 class="text-lg font-semibold text-gray-900">
               {{ title }}
@@ -26,7 +24,7 @@
           </button>
         </div>
 
-        <div class="mt-5 space-y-4">
+        <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
           <div class="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
               {{ t('admin.pages.cash.modals.delivery.amountLabel') }}
@@ -95,7 +93,7 @@
           </div>
         </div>
 
-        <div class="mt-6 flex items-center justify-end gap-3">
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-3 rounded-b-lg shrink-0">
           <button
             type="button"
             class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -115,7 +113,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">

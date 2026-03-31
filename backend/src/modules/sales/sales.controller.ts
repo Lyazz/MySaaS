@@ -14,8 +14,8 @@ export class SalesController {
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { search, startDate, endDate, userId, page: pageStr, limit: limitStr } = req.query as {
-                search?: string; startDate?: string; endDate?: string; userId?: string; page?: string; limit?: string
+            const { search, startDate, endDate, userId, page: pageStr, limit: limitStr, sortBy, sortOrder } = req.query as {
+                search?: string; startDate?: string; endDate?: string; userId?: string; page?: string; limit?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'
             }
 
             const start = parseOptionalDate(startDate)
@@ -37,7 +37,9 @@ export class SalesController {
                     search: typeof search === 'string' ? search : undefined,
                     startDate: start,
                     endDate: end,
-                    userId: typeof userId === 'string' ? userId : undefined
+                    userId: typeof userId === 'string' ? userId : undefined,
+                    sortBy,
+                    sortOrder
                 },
                 { page, limit }
             )

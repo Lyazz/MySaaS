@@ -7,8 +7,13 @@ export class InventoryController {
     async listVariants(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const { search, productId } = req.query as { search?: string; productId?: string }
-            const variants = await service.listVariants(tenant.id, { search: search ?? null, productId: productId ?? null })
+            const { search, productId, sortBy, sortOrder } = req.query as { search?: string; productId?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }
+            const variants = await service.listVariants(tenant.id, {
+                search: search ?? null,
+                productId: productId ?? null,
+                sortBy,
+                sortOrder
+            })
             res.json(variants)
         } catch (error) {
             console.error('List inventory variants error:', error)

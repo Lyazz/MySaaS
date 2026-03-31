@@ -80,6 +80,57 @@
         </div>
       </div>
 
+      <!-- Announcement Bar -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
+          <div class="md:col-span-1">
+            <h3 class="text-lg font-semibold text-slate-900">
+              {{ t('admin.appearanceSettingsForm.announcement.title') }}
+            </h3>
+            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+              {{ t('admin.appearanceSettingsForm.announcement.subtitle') }}
+            </p>
+          </div>
+          
+          <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
+            <!-- Announcement Bar -->
+            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-sm transition-all duration-200">
+              <div class="flex-1 pr-4">
+                <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Icon name="lucide:megaphone" class="w-4 h-4 text-teal-600" />
+                  {{ t('admin.appearanceSettingsForm.announcement.marquee') }}
+                </h4>
+              </div>
+              <BaseToggle v-model="form.announcementScrolling" :sr-label="t('admin.appearanceSettingsForm.announcement.marquee')" />
+            </div>
+
+            <div v-if="form.announcementScrolling" class="animate-fadeIn mt-4">
+               <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.announcement.message.label') }}</label>
+                <input
+                  v-model="form.announcementText"
+                  type="text"
+                  class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                  :placeholder="t('admin.appearanceSettingsForm.announcement.message.placeholder')"
+                >
+            </div>
+
+            <!-- Future Option Placeholder -->
+            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-sm transition-all duration-200 opacity-60">
+              <div class="flex-1 pr-4">
+                <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Icon name="lucide:search" class="w-4 h-4 text-teal-600" />
+                  {{ t('admin.functionalSettingsForm.storefrontSearch.title') }}
+                </h4>
+                <p class="text-sm text-slate-500 mt-1">
+                  {{ t('admin.functionalSettingsForm.storefrontSearch.subtitle') }}
+                </p>
+              </div>
+              <BaseToggle :model-value="false" disabled :sr-label="t('admin.functionalSettingsForm.storefrontSearch.title')" />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Currency -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
@@ -225,7 +276,9 @@ const form = reactive({
   codEnabled: true,
   currencyCode: 'DZD',
   currencyCountry: 'DZ',
-  language: 'en'
+  language: 'en',
+  announcementText: '',
+  announcementScrolling: false
 })
 
 const languages = computed(() => [
@@ -285,12 +338,14 @@ const updateForm = (data: any) => {
   form.currencyCode = data.currencyCode || 'DZD'
   form.currencyCountry = data.currencyCountry || 'DZ'
   form.language = data.language || 'en'
+  form.announcementText = data.announcementText || ''
+  form.announcementScrolling = data.announcementScrolling || false
 }
 
 const fetchSettings = async () => {
   loading.value = true
   try {
-    const data = await $fetch<any>('/api/admin/store-settings', {
+    const data = await $fetch('/api/admin/store-settings', {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
     updateForm(data)
@@ -307,7 +362,7 @@ const save = async () => {
   successMessage.value = ''
   errorMessage.value = ''
   try {
-    const updated = await $fetch<any>('/api/admin/store-settings', {
+    const updated = await $fetch('/api/admin/store-settings', {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: {
@@ -315,7 +370,9 @@ const save = async () => {
         codEnabled: form.codEnabled,
         currencyCode: form.currencyCode,
         currencyCountry: form.currencyCountry,
-        language: form.language
+        language: form.language,
+        announcementText: form.announcementText,
+        announcementScrolling: form.announcementScrolling
       }
     })
     useState<any>('storeSettings').value = updated

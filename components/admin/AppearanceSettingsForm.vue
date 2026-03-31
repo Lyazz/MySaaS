@@ -1,40 +1,20 @@
 <template>
   <div class="max-w-4xl mx-auto space-y-8 pb-24">
-    <!-- Header with Action Bar -->
+    <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
         <h2 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.appearance.title') || "Appearance Settings" }}</h2>
         <p class="text-slate-600 mt-1">{{ t('admin.pages.settings.appearance.subtitle') || "Manage your store's look and feel" }}</p>
-      </div>
-      <div class="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-          :disabled="loading || saving"
-          @click="reset"
-        >
-          {{ t('admin.common.reset') || 'Reset' }}
-        </button>
-        <button
-          type="button"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
-          :disabled="loading || saving"
-          @click="save"
-        >
-          <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-          {{ t('admin.common.saveChanges') || 'Save Changes' }}
-        </button>
       </div>
     </div>
 
     <div class="space-y-6">
       
       <!-- Store Identity -->
-      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.identity.title') }}</h3>
-          <p class="text-sm text-slate-500 mb-6">{{ t('admin.appearanceSettingsForm.identity.subtitle') }}</p>
+      <section class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-200 overflow-hidden">
+        <div class="p-6 md:p-8">
+          <h3 class="text-xl font-bold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.identity.title') }}</h3>
+          <p class="text-[13px] text-slate-500 mb-8">{{ t('admin.appearanceSettingsForm.identity.subtitle') }}</p>
           
           <div class="space-y-5">
             <div>
@@ -73,21 +53,30 @@
       </section>
 
       <!-- Brand Assets -->
-      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6">
-          <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.brandAssets.title') }}</h3>
-          <p class="text-sm text-slate-500 mb-6">{{ t('admin.appearanceSettingsForm.brandAssets.subtitle') }}</p>
+      <section class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-200 overflow-hidden">
+        <div class="p-6 md:p-8">
+          <h3 class="text-xl font-bold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.brandAssets.title') }}</h3>
+          <p class="text-[13px] text-slate-500 mb-8">{{ t('admin.appearanceSettingsForm.brandAssets.subtitle') }}</p>
 
-          <div class="grid md:grid-cols-2 gap-8">
+          <div class="grid md:grid-cols-2 gap-10">
             <!-- Logo Upload -->
              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.logo.label') }}</label>
-                <SingleImageUploader
-                  v-model="form.logoUrl"
-                  :label="t('admin.appearanceSettingsForm.brandAssets.logo.upload')"
-                  :hint="t('admin.appearanceSettingsForm.brandAssets.logo.hint')"
-                  class="w-full"
-                />
+                <div class="flex items-center justify-between mb-3">
+                   <label class="block text-sm font-medium text-slate-700">{{ t('admin.appearanceSettingsForm.brandAssets.logo.label') }}</label>
+                   <button type="button" @click="mockAiGenerate" class="text-xs font-bold px-2.5 py-1.5 bg-gradient-to-r from-violet-100 to-fuchsia-100 text-violet-700 rounded-lg hover:from-violet-200 hover:to-fuchsia-200 transition-colors flex items-center gap-1.5 border border-violet-200 shadow-sm">
+                     <Icon name="lucide:sparkles" class="w-3.5 h-3.5" />
+                     Magic Identity
+                   </button>
+                </div>
+                <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                  <div class="absolute top-0 left-0 w-full h-1.5" :style="{ background: form.primaryColor }"></div>
+                  <SingleImageUploader
+                    v-model="form.logoUrl"
+                    :label="t('admin.appearanceSettingsForm.brandAssets.logo.upload')"
+                    :hint="t('admin.appearanceSettingsForm.brandAssets.logo.hint')"
+                    class="w-full relative z-10"
+                  />
+                </div>
              </div>
  
              <!-- Favicon Upload -->
@@ -132,15 +121,20 @@
                  </div>
                  
                  <!-- Preset Colors -->
-                 <div class="flex flex-wrap gap-2">
-                    <button 
-                       v-for="color in presetColors" 
-                       :key="color"
-                       type="button"
-                       class="w-6 h-6 rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-slate-400 transition-transform hover:scale-110"
-                       :style="{ backgroundColor: color }"
-                       @click="form.primaryColor = color"
-                    ></button>
+                 <div class="mt-6">
+                    <p class="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">Suggested Palettes</p>
+                    <div class="flex flex-wrap gap-3">
+                       <button 
+                          v-for="color in presetColors" 
+                          :key="color"
+                          type="button"
+                          class="w-10 h-10 rounded-full border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 transition-all hover:scale-110 relative"
+                          :style="{ backgroundColor: color }"
+                          @click="form.primaryColor = color"
+                       >
+                          <Icon v-if="form.primaryColor === color" name="lucide:check" class="absolute inset-0 m-auto text-white drop-shadow-md w-5 h-5" />
+                       </button>
+                    </div>
                  </div>
               </div>
             </div>
@@ -148,55 +142,47 @@
         </div>
       </section>
 
-      <!-- Announcement Bar -->
-       <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.announcement.title') }}</h3>
-              <p class="text-sm text-slate-500">{{ t('admin.appearanceSettingsForm.announcement.subtitle') }}</p>
-            </div>
-            <div class="flex items-center">
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" v-model="form.announcementScrolling" class="sr-only peer">
-                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
-                <span class="ml-3 text-sm font-medium text-slate-700">{{ t('admin.appearanceSettingsForm.announcement.marquee') }}</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.announcement.message.label') }}</label>
-              <input
-                v-model="form.announcementText"
-                type="text"
-                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                :placeholder="t('admin.appearanceSettingsForm.announcement.message.placeholder')"
-              >
-          </div>
-        </div>
-      </section>
 
       <!-- Template Selection -->
-      <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6">
-           <h3 class="text-lg font-semibold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.templates.title') }}</h3>
-           <p class="text-sm text-slate-500 mb-6">{{ t('admin.appearanceSettingsForm.templates.subtitle') }}</p>
+      <section class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-200 overflow-hidden">
+        <div class="p-6 md:p-8">
+           <h3 class="text-xl font-bold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.templates.title') }}</h3>
+           <p class="text-[13px] text-slate-500 mb-8">{{ t('admin.appearanceSettingsForm.templates.subtitle') }}</p>
 
-           <div class="mb-4 flex items-center justify-between">
-              <h4 class="text-base font-bold text-slate-800">Sélectionner un modèle</h4>
-              <p class="text-sm text-slate-500">Sélectionnez le template à appliquer à votre boutique.</p>
+           <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                 <h4 class="text-base font-bold text-slate-800">Sélectionner un modèle</h4>
+                 <p class="text-[13px] text-slate-500 mt-1">Sélectionnez le template à appliquer à votre boutique.</p>
+              </div>
+              
+              <!-- Filter Chips -->
+              <div class="flex overflow-x-auto no-scrollbar gap-2 pb-2 md:pb-0">
+                 <button 
+                    v-for="cat in categories" 
+                    :key="cat"
+                    type="button"
+                    class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all"
+                    :class="selectedCategory === cat ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                    @click="selectedCategory = cat"
+                 >
+                    {{ cat }}
+                 </button>
+              </div>
            </div>
 
            <!-- Thumbnails Grid -->
            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div
-                v-for="tpl in templates"
+                v-for="tpl in filteredTemplates"
                 :key="tpl.key"
-                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col overflow-hidden bg-white"
-                :class="form.templateKey === tpl.key ? 'border-brand-600 ring-4 ring-brand-600/20 shadow-md' : 'border-slate-200 hover:border-brand-300 shadow-sm hover:shadow'"
+                class="group relative rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col overflow-hidden bg-white"
+                :class="form.templateKey === tpl.key ? 'scale-[1.02] md:scale-[1.05] border-teal-500 ring-4 ring-teal-500/20 shadow-xl z-20' : 'border-slate-200 hover:border-slate-300 shadow-sm hover:shadow'"
                 @click="form.templateKey = tpl.key"
               >
+                  <!-- Absolute Badge if Selected -->
+                  <div v-if="form.templateKey === tpl.key" class="absolute top-3 right-3 z-30 bg-teal-500 text-white shadow-md rounded-full w-7 h-7 flex items-center justify-center animate-fadeIn">
+                    <Icon name="lucide:check" class="w-4 h-4 font-bold" />
+                  </div>
                  <!-- Style Swatch Preview -->
                  <div
                    class="relative w-full border-b overflow-hidden flex flex-col"
@@ -238,19 +224,17 @@
                        </div>
                      </div>
                    </div>
-
-                   <!-- Hover overlay with Prévisualiser button -->
-                   <div class="absolute inset-0 z-10 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col justify-end p-3">
-                     <NuxtLink
-                       :to="`/admin/preview?template=${tpl.key}`"
-                       target="_blank"
-                       class="pointer-events-auto py-2 px-4 bg-white/95 hover:bg-white backdrop-blur-sm text-slate-900 font-medium text-sm rounded-lg shadow border border-slate-200 flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300"
-                       @click.stop
-                     >
-                       <Icon name="lucide:external-link" class="w-4 h-4" />
-                       Prévisualiser
-                     </NuxtLink>
-                   </div>
+                    <!-- Hover overlay with Quick View button -->
+                    <div class="absolute inset-0 z-20 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-[2px]">
+                      <button
+                        type="button"
+                        class="py-2.5 px-6 bg-white/95 hover:bg-white text-slate-900 font-bold text-sm rounded-full shadow-xl flex items-center justify-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105"
+                        @click.stop="openQuickView(tpl.key)"
+                      >
+                        <Icon name="lucide:eye" class="w-4 h-4" />
+                        Quick View
+                      </button>
+                    </div>
                  </div>
 
                  <!-- Template Identity Footer -->
@@ -287,37 +271,59 @@
 
     </div>
 
-      <!-- Form Actions -->
-      <div class="pt-4 flex items-center justify-end gap-6">
-         <div 
-           v-if="message.text" 
-           class="px-3 py-1.5 rounded-full text-sm font-medium animate-fadeIn"
-           :class="message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'"
-         >
-           {{ message.text }}
-         </div>
+      <!-- Quick View Modal Overlay -->
+      <transition name="fade">
+        <div v-if="showQuickView" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-sm">
+          <div class="bg-white w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+              <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                 <Icon name="lucide:monitor" class="w-5 h-5 text-slate-400" />
+                 Prévisualisation Rapide
+              </h3>
+              <button @click="showQuickView = false" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200 transition-colors">
+                <Icon name="lucide:x" class="w-5 h-5" />
+              </button>
+            </div>
+            <div class="flex-1 w-full bg-slate-100 overflow-hidden relative">
+               <div v-if="!quickViewUrl" class="absolute inset-0 flex items-center justify-center flex-col gap-3">
+                 <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin text-slate-400" />
+                 <p class="text-slate-500 text-sm">Chargement de la preview...</p>
+               </div>
+               <iframe v-if="quickViewUrl" :src="quickViewUrl" class="w-full h-full border-0 relative z-10 bg-white" />
+            </div>
+          </div>
+        </div>
+      </transition>
 
-         <div class="flex items-center gap-3">
-           <button
-             type="button"
-             class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-             :disabled="loading || saving"
-             @click="reset"
-           >
-             {{ t('admin.common.cancel') }}
-           </button>
-           
-           <button
-             @click="save"
-             class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-             :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
-             :disabled="loading || saving"
-           >
-             <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-             {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
-           </button>
-         </div>
-      </div>
+      <!-- Floating Action Bar for unsaved changes -->
+      <transition name="slide-up">
+        <div v-show="isDirty" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md shadow-2xl border border-slate-200 rounded-full px-6 py-4 flex flex-col md:flex-row items-center gap-4 md:gap-8 transform origin-bottom min-w-max">
+          <div class="flex flex-col items-center md:items-start">
+            <span class="text-sm font-bold text-slate-800">Modifications non enregistrées</span>
+            <span class="text-xs text-slate-500">N'oubliez pas de sauvegarder.</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all"
+              :disabled="loading || saving"
+              @click="reset"
+            >
+              {{ t('admin.common.cancel') || 'Annuler' }}
+            </button>
+            <button
+              @click="save"
+              class="px-6 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 font-medium transition-all shadow-md hover:shadow-lg hover:shadow-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
+              :disabled="loading || saving"
+            >
+              <Icon v-if="saving" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+              <Icon v-else name="lucide:save" class="w-4 h-4" />
+              {{ saving ? (t('admin.common.saving') || 'Sauvegarde...') : (t('admin.common.saveChanges') || 'Enregistrer') }}
+            </button>
+          </div>
+        </div>
+      </transition>
     </div>
 </template>
 
@@ -352,10 +358,17 @@ const form = reactive({
   logoUrl: null as string | null,
   faviconUrl: null as string | null,
   primaryColor: '#0F766E',
-  templateKey: 'classic',
-  announcementText: '',
-  announcementScrolling: false
+  templateKey: 'classic'
 })
+
+const initialFormString = ref(JSON.stringify(form))
+const isDirty = computed(() => initialFormString.value !== JSON.stringify(form))
+
+const categories = ['All', 'Minimalist', 'Bold', 'Tech', 'Luxury', 'Classic']
+const selectedCategory = ref('All')
+
+const showQuickView = ref(false)
+const quickViewUrl = ref('')
 
 const baseDomain = ref('')
 
@@ -369,6 +382,11 @@ const previewUrl = computed(() => {
 const getSelectedTemplateFont = computed(() => {
   const tpl = templates.value.find((tpl) => tpl.key === form.templateKey)
   return tpl ? tpl.fontClass : 'font-sans'
+})
+
+const filteredTemplates = computed(() => {
+  if (selectedCategory.value === 'All') return templates.value
+  return templates.value.filter(t => t.category === selectedCategory.value)
 })
 
 // -- Methods --
@@ -397,6 +415,7 @@ const templates = computed(() => [
   { 
     key: 'classic',
     label: 'Classic',
+    category: 'Classic',
     description: t('admin.appearanceSettingsForm.templates.options.classic.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.classic.storeTypes'),
     icon: 'lucide:layout-grid',
@@ -419,6 +438,7 @@ const templates = computed(() => [
   { 
     key: 'modern',
     label: 'Modern',
+    category: 'Minimalist',
     description: t('admin.appearanceSettingsForm.templates.options.modern.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.modern.storeTypes'),
     icon: 'lucide:layout-template',
@@ -441,6 +461,7 @@ const templates = computed(() => [
   { 
     key: 'street',
     label: 'Street',
+    category: 'Bold',
     description: t('admin.appearanceSettingsForm.templates.options.street.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.street.storeTypes'),
     icon: 'lucide:zap',
@@ -463,6 +484,7 @@ const templates = computed(() => [
   { 
     key: 'cozy',
     label: 'Cozy',
+    category: 'Minimalist',
     description: t('admin.appearanceSettingsForm.templates.options.cozy.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.cozy.storeTypes'),
     icon: 'lucide:coffee',
@@ -485,6 +507,7 @@ const templates = computed(() => [
   { 
     key: 'cyber',
     label: 'Cyber',
+    category: 'Tech',
     description: t('admin.appearanceSettingsForm.templates.options.cyber.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.cyber.storeTypes'),
     icon: 'lucide:cpu',
@@ -507,6 +530,7 @@ const templates = computed(() => [
   { 
     key: 'stationnery',
     label: 'Stationery',
+    category: 'Minimalist',
     description: t('admin.appearanceSettingsForm.templates.options.stationnery.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.stationnery.storeTypes'),
     icon: 'lucide:pen-tool',
@@ -529,6 +553,7 @@ const templates = computed(() => [
   { 
     key: 'food',
     label: 'Food',
+    category: 'Bold',
     description: t('admin.appearanceSettingsForm.templates.options.food.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.food.storeTypes'),
     icon: 'lucide:utensils',
@@ -551,6 +576,7 @@ const templates = computed(() => [
   { 
     key: 'wellness',
     label: 'Wellness',
+    category: 'Minimalist',
     description: t('admin.appearanceSettingsForm.templates.options.wellness.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.wellness.storeTypes'),
     icon: 'lucide:flower-2',
@@ -573,6 +599,7 @@ const templates = computed(() => [
   { 
     key: 'playful',
     label: 'Playful',
+    category: 'Bold',
     description: t('admin.appearanceSettingsForm.templates.options.playful.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.playful.storeTypes'),
     icon: 'lucide:smile',
@@ -595,6 +622,7 @@ const templates = computed(() => [
   { 
     key: 'activewear',
     label: 'Activewear',
+    category: 'Tech',
     description: t('admin.appearanceSettingsForm.templates.options.activewear.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.activewear.storeTypes'),
     icon: 'lucide:activity',
@@ -617,6 +645,7 @@ const templates = computed(() => [
   { 
     key: 'chrono',
     label: 'Chrono Luxe',
+    category: 'Luxury',
     description: t('admin.appearanceSettingsForm.templates.options.chrono.description'),
     storeTypes: t('admin.appearanceSettingsForm.templates.options.chrono.storeTypes'),
     icon: 'lucide:watch',
@@ -650,6 +679,27 @@ const showMessage = (type: 'success' | 'error', text: string) => {
    setTimeout(() => { message.text = '' }, 4000)
 }
 
+const openQuickView = (key: string) => {
+  quickViewUrl.value = previewUrl.value ? `${previewUrl.value}?template=${key}` : ''
+  showQuickView.value = true
+}
+
+const mockAiGenerate = () => {
+  if (!form.logoUrl) {
+    showMessage('error', "Please upload a logo first to generate a brand identity.")
+    return
+  }
+  loading.value = true
+  setTimeout(() => {
+    const color = presetColors[Math.floor(Math.random() * presetColors.length)]
+    const tpl = templates.value[Math.floor(Math.random() * templates.value.length)]
+    form.primaryColor = color
+    form.templateKey = tpl.key
+    loading.value = false
+    showMessage('success', "Magic Identity applied successfully! ✨")
+  }, 1200)
+}
+
 const updateForm = (data: any) => {
   if (!data) return
   form.name = data.name || ''
@@ -658,8 +708,8 @@ const updateForm = (data: any) => {
   form.faviconUrl = data.faviconUrl || null
   form.primaryColor = data.primaryColor || '#0F766E'
   form.templateKey = data.templateKey || 'classic'
-  form.announcementText = data.announcementText || ''
-  form.announcementScrolling = data.announcementScrolling || false
+  
+  initialFormString.value = JSON.stringify(form)
 }
 
 const fetchSettings = async () => {
@@ -690,9 +740,7 @@ const save = async () => {
         primaryColor: form.primaryColor,
         templateKey: form.templateKey,
         logoUrl: form.logoUrl,
-        faviconUrl: form.faviconUrl,
-        announcementText: form.announcementText,
-        announcementScrolling: form.announcementScrolling
+        faviconUrl: form.faviconUrl
       }
     })
     

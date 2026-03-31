@@ -1,8 +1,9 @@
 <template>
-  <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-    @click.self="$emit('close')"
-  >
+  <Teleport to="body">
+    <div
+      class="fixed inset-0 z-[100] flex items-center justify-center p-4 py-8 bg-black/60 backdrop-blur-sm"
+      @click.self="$emit('close')"
+    >
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
       <!-- Header -->
       <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
@@ -24,54 +25,54 @@
 
       <div class="flex flex-1 min-h-0 divide-x divide-gray-100">
         <!-- Left: Payment Details -->
-        <div class="flex-1 p-8 flex flex-col overflow-y-auto">
-          <div class="text-center mb-8">
-            <div class="text-sm text-gray-500 font-medium mb-1">
+        <div class="flex-1 p-4 lg:p-5 flex flex-col overflow-y-auto">
+          <div class="text-center mb-4">
+            <div class="text-sm text-gray-500 font-medium lg:mb-1">
               {{ t('admin.pages.pos.paymentModal.totalToPay') }}
             </div>
-            <div class="text-5xl font-extrabold text-gray-900 tracking-tight">
+            <div class="text-4xl font-extrabold text-gray-900 tracking-tight">
               {{ formatCurrency(total) }}
             </div>
           </div>
 
           <!-- Payment Methods -->
-          <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="grid grid-cols-2 gap-3 mb-4">
             <button
-              class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all"
+              class="flex flex-col items-center justify-center py-2.5 px-3 rounded-xl border-2 transition-all"
               :class="method === 'cash' ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'"
               @click="method = 'cash'"
             >
               <Icon
                 name="lucide:banknote"
-                class="w-8 h-8 mb-2"
+                class="w-5 h-5 mb-1"
               />
-              <span class="font-bold">{{ t('admin.pages.pos.paymentModal.methods.cash') }}</span>
+              <span class="font-bold text-sm">{{ t('admin.pages.pos.paymentModal.methods.cash') }}</span>
             </button>
             <button
-              class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all"
+              class="flex flex-col items-center justify-center py-2.5 px-3 rounded-xl border-2 transition-all"
               :class="method === 'card' ? 'border-teal-600 bg-teal-50 text-teal-700' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'"
               @click="method = 'card'"
             >
               <Icon
                 name="lucide:credit-card"
-                class="w-8 h-8 mb-2"
+                class="w-5 h-5 mb-1"
               />
-              <span class="font-bold">{{ t('admin.pages.pos.paymentModal.methods.card') }}</span>
+              <span class="font-bold text-sm">{{ t('admin.pages.pos.paymentModal.methods.card') }}</span>
             </button>
           </div>
 
           <!-- Cash Input View -->
           <template v-if="method === 'cash'">
-            <div class="mb-6">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('admin.pages.pos.paymentModal.cashReceived') }}</label>
+            <div class="mb-4">
+              <label class="block text-xs font-semibold text-gray-700 mb-1.5">{{ t('admin.pages.pos.paymentModal.cashReceived') }}</label>
               <div
-                class="flex items-center px-4 py-3 rounded-xl border-2 border-teal-600 bg-white shadow-sm ring-4 ring-teal-50"
+                class="flex items-center px-4 py-2 rounded-xl border-2 border-teal-600 bg-white shadow-sm ring-4 ring-teal-50"
               >
                 <Icon
                   name="lucide:banknote"
-                  class="w-6 h-6 text-teal-600 mr-3"
+                  class="w-5 h-5 text-teal-600 mr-3"
                 />
-                <div class="flex-1 text-3xl font-bold text-gray-900">
+                <div class="flex-1 text-2xl font-bold text-gray-900">
                   <span v-if="!cashReceivedString" class="text-gray-300">0</span>
                   {{ cashReceivedString }}
                 </div>
@@ -89,7 +90,7 @@
             </div>
 
             <!-- Smart Suggestions -->
-            <div class="flex flex-wrap gap-2 mb-8">
+            <div class="flex flex-wrap gap-2 mb-5">
               <button
                 v-for="amt in suggestions"
                 :key="amt"
@@ -142,9 +143,9 @@
         </div>
 
         <!-- Right: Numpad (Desktop Only) -->
-        <div class="w-80 bg-gray-50 p-6 flex flex-col justify-center border-l border-gray-100">
-          <div class="mb-4 text-center">
-             <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ t('admin.pages.pos.paymentModal.keypad') }}</span>
+        <div class="w-72 bg-gray-50 p-4 lg:p-5 flex flex-col justify-center border-l border-gray-100">
+          <div class="mb-2 text-center">
+             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ t('admin.pages.pos.paymentModal.keypad') }}</span>
           </div>
           <PosNumberPad
             :allow-decimal="true"
@@ -157,9 +158,9 @@
       </div>
 
       <!-- Footer Action -->
-      <div class="p-6 border-t border-gray-100 bg-white">
+      <div class="p-4 border-t border-gray-100 bg-white">
         <button
-          class="w-full h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
+          class="w-full h-12 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
           :class="canConfirm ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-lg hover:shadow-teal-500/30' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
           :disabled="!canConfirm"
           @click="confirmPayment"
@@ -167,13 +168,14 @@
           <Icon
             v-if="loading"
             name="lucide:loader-2"
-            class="w-6 h-6 animate-spin"
+            class="w-5 h-5 animate-spin"
           />
           <span v-else>{{ t('admin.pages.pos.paymentModal.actions.confirmPayment') }}</span>
         </button>
       </div>
     </div>
-  </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">

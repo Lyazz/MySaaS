@@ -18,7 +18,8 @@
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
             <span class="ml-1 text-gray-500">
-              {{ t('admin.pages.products.edit.breadcrumbEdit', { title: form.title || t('admin.pages.products.edit.fallbackTitle') }) }}
+              <span v-if="isNewProduct">{{ t('admin.pages.products.create.title', 'Créer un produit') }}</span>
+              <span v-else>{{ t('admin.pages.products.edit.breadcrumbEdit', { title: form.title || t('admin.pages.products.edit.fallbackTitle') }) }}</span>
             </span>
           </div>
         </li>
@@ -42,10 +43,12 @@
       <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
           <h2 class="text-2xl font-bold text-gray-800">
-            {{ t('admin.pages.products.edit.title') }}
+            <template v-if="isNewProduct">{{ t('admin.pages.products.create.title', 'Créer un produit') }}</template>
+            <template v-else>{{ t('admin.pages.products.edit.title') }}</template>
           </h2>
           <p class="text-gray-600 mt-1">
-            {{ t('admin.pages.products.edit.subtitle') }}
+            <template v-if="isNewProduct">{{ t('admin.pages.products.create.subtitle', 'Configurez les détails de votre nouveau produit') }}</template>
+            <template v-else>{{ t('admin.pages.products.edit.subtitle') }}</template>
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
@@ -621,6 +624,7 @@ const router = useRouter()
 const { t } = useI18n({ useScope: 'global' })
 
 const productId = route.params.id as string
+const isNewProduct = computed(() => route.query.isNew === 'true')
 
 interface Category {
   id: string
@@ -709,6 +713,10 @@ async function fetchProduct() {
         Authorization: `Bearer ${authStore.token}`
       }
     })
+
+    if (isNewProduct.value && data.title === 'Nouveau produit') {
+      data.title = ''
+    }
 
     form.value = {
       title: data.title,

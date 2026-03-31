@@ -80,7 +80,7 @@ async function register() {
           </div>
           <p class="text-slate-300 italic mb-4">"{{ t('auth.register.hero.testimonial.quote') }}"</p>
           <div class="flex items-center gap-3">
-             <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">JD</div>
+             <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold">YM</div>
              <div class="text-sm">
                <div class="font-bold text-white">{{ t('auth.register.hero.testimonial.name') }}</div>
                <div class="text-slate-500">{{ t('auth.register.hero.testimonial.role') }}</div>

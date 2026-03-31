@@ -3,7 +3,7 @@
     <button
       v-for="btn in buttons"
       :key="btn.label"
-      class="h-14 rounded-xl text-xl font-semibold transition-all duration-100 active:scale-95 flex items-center justify-center"
+      class="h-12 rounded-xl text-lg font-semibold transition-all duration-100 active:scale-95 flex items-center justify-center"
       :class="[
         btn.action === 'confirm' 
           ? 'bg-teal-600 text-white hover:bg-teal-700 col-span-1' 
@@ -14,7 +14,7 @@
       <Icon
         v-if="btn.icon"
         :name="btn.icon"
-        class="w-6 h-6"
+        class="w-5 h-5"
       />
       <span v-else>{{ btn.label }}</span>
     </button>

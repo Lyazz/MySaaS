@@ -103,7 +103,7 @@
       </div>
 
       <div
-        v-else-if="filteredVariants.length === 0"
+        v-else-if="variants.length === 0"
         class="p-10 text-center"
       >
         <Icon name="lucide:package-search" class="mx-auto h-10 w-10 text-slate-300" />
@@ -111,7 +111,7 @@
           {{ t('admin.pages.inventory.empty') }}
         </p>
       </div>
-
+ 
       <div
         v-else
         class="overflow-x-auto"
@@ -119,23 +119,59 @@
         <table class="min-w-full divide-y divide-slate-200/70">
           <thead class="bg-slate-50">
             <tr>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.inventory.table.variant') }}
+              <th
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                @click="setSort('productTitle')"
+              >
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.inventory.table.variant') }}
+                  <Icon v-if="sortBy === 'productTitle'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                </div>
               </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.inventory.table.track') }}
+              <th
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                @click="setSort('trackInventory')"
+              >
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.inventory.table.track') }}
+                  <Icon v-if="sortBy === 'trackInventory'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                </div>
               </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.inventory.table.onHand') }}
+              <th
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                @click="setSort('stock')"
+              >
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.inventory.table.onHand') }}
+                  <Icon v-if="sortBy === 'stock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                </div>
               </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.inventory.table.reserved') }}
+              <th
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                @click="setSort('reserved')"
+              >
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.inventory.table.reserved') }}
+                  <Icon v-if="sortBy === 'reserved'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                </div>
               </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.inventory.table.safety') }}
+              <th
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                @click="setSort('safetyStock')"
+              >
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.inventory.table.safety') }}
+                  <Icon v-if="sortBy === 'safetyStock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                </div>
               </th>
-              <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {{ t('admin.pages.inventory.table.available') }}
+              <th
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                @click="setSort('available')"
+              >
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.inventory.table.available') }}
+                  <Icon v-if="sortBy === 'available'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                </div>
               </th>
               <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
                 {{ t('admin.common.actions') }}
@@ -144,7 +180,7 @@
           </thead>
           <tbody class="divide-y divide-slate-200/70 bg-white">
             <tr
-              v-for="v in filteredVariants"
+              v-for="v in variants"
               :key="v.id"
               class="hover:bg-slate-50"
             >
@@ -221,12 +257,13 @@
     </div>
 
     <!-- Movements modal -->
-    <div
-      v-if="movementsVariant"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-    >
-      <div class="w-full max-w-3xl rounded-2xl bg-white shadow-xl">
-        <div class="flex items-start justify-between gap-4 border-b border-slate-200/70 px-6 py-4">
+    <Teleport to="body">
+      <div
+        v-if="movementsVariant"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8"
+      >
+        <div class="w-full max-w-3xl rounded-2xl bg-white shadow-xl flex flex-col max-h-[90vh]">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-200/70 px-6 py-4 shrink-0">
           <div class="min-w-0">
             <h3 class="truncate text-lg font-semibold text-slate-900">
               {{ t('admin.pages.inventory.movements.title', { product: movementsVariant.productTitle, option: movementsVariant.optionTitle }) }}
@@ -244,7 +281,7 @@
           </button>
         </div>
 
-        <div class="max-h-[70vh] overflow-y-auto p-6">
+        <div class="overflow-y-auto p-6 flex-1 min-h-0">
           <div
             v-if="movementsLoading"
             class="py-8 text-center text-sm text-slate-600"
@@ -336,7 +373,7 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-3 border-t border-slate-200/70 px-6 py-4">
+        <div class="flex justify-end gap-3 border-t border-slate-200/70 px-6 py-4 shrink-0">
           <button
             type="button"
             class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -347,6 +384,7 @@
         </div>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 
@@ -392,24 +430,19 @@ type Movement = {
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
-	const variants = ref<Variant[]>([])
-	const loading = ref(false)
-	const errorMessage = ref<string | null>(null)
-	const search = ref('')
-	const savingIds = ref<Set<string>>(new Set())
-	const importVariantsInput = ref<HTMLInputElement | null>(null)
+const variants = ref<Variant[]>([])
+const loading = ref(false)
+const errorMessage = ref<string | null>(null)
+const importVariantsInput = ref<HTMLInputElement | null>(null)
+const sortBy = ref('productTitle')
+const sortOrder = ref<'asc' | 'desc'>('asc')
 
 const movementsVariant = ref<Variant | null>(null)
 const movements = ref<Movement[]>([])
 const movementsLoading = ref(false)
 
-const filteredVariants = computed(() => {
-  if (!search.value.trim()) return variants.value
-  const q = search.value.trim().toLowerCase()
-  return variants.value.filter((v) =>
-    v.productTitle.toLowerCase().includes(q) || (v.sku || '').toLowerCase().includes(q)
-  )
-})
+const search = ref('')
+const savingIds = ref<Set<string>>(new Set())
 
 const recomputeAvailable = (v: Variant) => {
   v.available = v.trackInventory ? Math.max(v.stock - v.reserved - v.safetyStock, 0) : Number.POSITIVE_INFINITY
@@ -419,10 +452,15 @@ const fetchVariants = async () => {
   loading.value = true
   errorMessage.value = null
   try {
-    const data = await $fetch<Variant[]>('/api/admin/inventory/variants', {
+    const query: any = {}
+    if (search.value.trim()) query.search = search.value.trim()
+    if (sortBy.value) query.sortBy = sortBy.value
+    if (sortOrder.value) query.sortOrder = sortOrder.value
+
+    const data = await $fetch('/api/admin/inventory/variants', {
       headers: { Authorization: `Bearer ${authStore.token}` },
-      query: search.value.trim() ? { search: search.value.trim() } : undefined
-    })
+      query
+    }) as Variant[]
     variants.value = data
   } catch (e: any) {
     errorMessage.value = e?.data?.statusMessage || t('admin.pages.inventory.errors.loadFailed')
@@ -431,18 +469,18 @@ const fetchVariants = async () => {
   }
 }
 
-	const clearSearch = () => {
-	  search.value = ''
-	  fetchVariants()
-	}
+const clearSearch = () => {
+  search.value = ''
+  fetchVariants()
+}
 
-	const exportVariantsCsv = async () => {
-	  try {
-	    const csv = await $fetch<string>('/api/admin/inventory/variants/export.csv', {
-	      headers: { Authorization: `Bearer ${authStore.token}` },
-	      query: search.value.trim() ? { search: search.value.trim() } : undefined,
-	      responseType: 'text' as any
-	    })
+const exportVariantsCsv = async () => {
+  try {
+    const csv = await $fetch('/api/admin/inventory/variants/export.csv', {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      query: search.value.trim() ? { search: search.value.trim() } : undefined,
+      responseType: 'text' as any
+    }) as string
 
 	    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
 	    const url = URL.createObjectURL(blob)
@@ -495,18 +533,18 @@ const patchVariant = async (variantId: string, patch: Partial<Pick<Variant, 'saf
   savingIds.value.add(variantId)
   errorMessage.value = null
   try {
-	    const updated = await $fetch<Variant & Record<string, any>>(`/api/admin/inventory/variants/${variantId}`, {
-	      method: 'PATCH',
-	      headers: { Authorization: `Bearer ${authStore.token}` },
-	      body: {
-	        ...patch,
-	        reason: 'admin_ui'
-	      }
-	    })
+    const updated = await $fetch(`/api/admin/inventory/variants/${variantId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: {
+        ...patch,
+        reason: 'admin_ui'
+      }
+    }) as Variant & Record<string, any>
 
-	    if (typeof updated?.safetyStock === 'number') v.safetyStock = updated.safetyStock
-	    if (typeof updated?.trackInventory === 'boolean') v.trackInventory = updated.trackInventory
-	    recomputeAvailable(v)
+    if (typeof updated?.safetyStock === 'number') v.safetyStock = updated.safetyStock
+    if (typeof updated?.trackInventory === 'boolean') v.trackInventory = updated.trackInventory
+    recomputeAvailable(v)
   } catch (e: any) {
     errorMessage.value = e?.data?.statusMessage || t('admin.pages.inventory.errors.updateFailed')
     await fetchVariants()
@@ -520,9 +558,9 @@ const openMovements = async (v: Variant) => {
   movements.value = []
   movementsLoading.value = true
   try {
-    const data = await $fetch<Movement[]>(`/api/admin/inventory/variants/${v.id}/movements`, {
+    const data = await $fetch(`/api/admin/inventory/variants/${v.id}/movements`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    }) as Movement[]
     movements.value = data
   } catch {
     movements.value = []
@@ -536,10 +574,23 @@ const closeMovements = () => {
   movements.value = []
 }
 
+function setSort(key: string) {
+  if (sortBy.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = key
+    sortOrder.value = 'asc'
+  }
+}
+
 const formatDate = (iso: string) => {
   const d = new Date(iso)
   return d.toLocaleString()
 }
 
 onMounted(fetchVariants)
+
+watch([sortBy, sortOrder], () => {
+  fetchVariants()
+})
 </script>

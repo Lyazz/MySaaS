@@ -117,7 +117,7 @@ export class OrdersService {
         return created
     }
 
-    async list(tenantId: string, filters: { status?: string; search?: string; startDate?: string; endDate?: string }, pagination: { page: number; limit: number } = { page: 1, limit: 25 }) {
+    async list(tenantId: string, filters: { status?: string; search?: string; startDate?: string; endDate?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }, pagination: { page: number; limit: number } = { page: 1, limit: 25 }) {
         const where: any = { tenantId }
 
         if (filters.status) {
@@ -148,6 +148,21 @@ export class OrdersService {
         const { page, limit } = pagination
         const skip = (page - 1) * limit
 
+        const sortableFields: Record<string, string> = {
+            id: 'id',
+            customerName: 'customerName',
+            totalAmount: 'totalAmount',
+            status: 'status',
+            createdAt: 'createdAt'
+        }
+
+        const orderBy: any = {}
+        if (filters.sortBy && sortableFields[filters.sortBy]) {
+            orderBy[sortableFields[filters.sortBy]] = filters.sortOrder || 'desc'
+        } else {
+            orderBy.createdAt = 'desc'
+        }
+
         const [items, total] = await Promise.all([
             prisma.order.findMany({
                 where,
@@ -162,7 +177,7 @@ export class OrdersService {
                     createdAt: true,
                     updatedAt: true
                 },
-                orderBy: { createdAt: 'desc' },
+                orderBy,
                 skip,
                 take: limit
             }),
