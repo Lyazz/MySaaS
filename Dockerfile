@@ -3,13 +3,15 @@ FROM node:22-slim AS builder
 
 WORKDIR /app
 
-# Copy everything (source files needed for nuxt prepare)
 COPY . .
 
-# Delete Mac lockfile and install deps (no postinstall)
+# Install deps without postinstall
 RUN rm -f package-lock.json && npm install --ignore-scripts
 
-# Run nuxt prepare separately
+# Generate Prisma client
+RUN npx prisma generate
+
+# Run nuxt prepare
 RUN npx nuxt prepare
 
 # Build with increased memory
@@ -22,6 +24,8 @@ FROM node:22-slim AS runner
 WORKDIR /app
 
 COPY --from=builder /app/.output /app/.output
+COPY --from=builder /app/node_modules/.prisma /app/node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma /app/node_modules/@prisma
 COPY --from=builder /app/package.json /app/package.json
 
 ENV NODE_ENV=production
