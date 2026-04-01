@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Tenant" ADD COLUMN IF NOT EXISTS "isOffline" BOOLEAN NOT NULL DEFAULT true;
