@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
     if (
         url.startsWith('/_nuxt') ||
         url.startsWith('/_ipx') ||
+        url.startsWith('/_i18n') ||
         url.startsWith('/favicon') ||
         url.startsWith('/__nuxt_error')
     ) {
