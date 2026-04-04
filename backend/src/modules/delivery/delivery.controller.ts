@@ -1,28 +1,64 @@
 import type { Request, Response } from 'express'
-import { DeliveryService } from './delivery.service'
-import type { ShipmentProvider } from '@prisma/client'
+import { DeliveryConfigurationError, DeliveryService } from './delivery.service'
+import { ShipmentProvider } from '@prisma/client'
+import { getProviderCatalogItem } from './catalog'
 
 const service = new DeliveryService()
+
+const isShipmentProvider = (value: string): value is ShipmentProvider =>
+    (Object.values(ShipmentProvider) as string[]).includes(value)
 
 export class DeliveryController {
     async getOptions(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
-        const { provider, destination, codAmount, weight, serviceLevel } = req.body
-        if (!provider || !destination?.wilayaCode) {
-            return res.status(400).json({ statusCode: 400, statusMessage: 'provider and destination.wilayaCode are required' })
+        const { provider, destination, codAmount, weight, serviceLevel, deliveryMode } = req.body
+        if (!destination?.wilayaCode) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'destination.wilayaCode is required' })
+        }
+
+        const normalizedProvider =
+            typeof provider === 'string' && provider.trim().length > 0 ? provider.trim().toUpperCase() : undefined
+
+        if (normalizedProvider && !isShipmentProvider(normalizedProvider)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+        }
+
+        const rawDeliveryMode =
+            typeof deliveryMode === 'string' && deliveryMode.trim().length > 0
+                ? deliveryMode.trim().toLowerCase()
+                : undefined
+        const normalizedDeliveryMode: 'home' | 'office' | undefined =
+            rawDeliveryMode === 'pickup'
+                ? 'office'
+                : rawDeliveryMode === 'home' || rawDeliveryMode === 'office'
+                    ? rawDeliveryMode
+                    : undefined
+
+        if (rawDeliveryMode && !normalizedDeliveryMode) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'deliveryMode must be home or office' })
         }
 
         try {
-            const options = await service.listOptions({
-                tenantId: tenant.id,
-                provider,
-                destination,
-                codAmount,
-                weight,
-                serviceLevel
-            })
+            const options = normalizedProvider
+                ? await service.listOptions({
+                      tenantId: tenant.id,
+                      provider: normalizedProvider,
+                      destination,
+                      codAmount,
+                      weight,
+                      serviceLevel,
+                      deliveryMode: normalizedDeliveryMode
+                  })
+                : await service.rateShopOptions({
+                      tenantId: tenant.id,
+                      destination,
+                      codAmount,
+                      weight,
+                      serviceLevel,
+                      deliveryMode: normalizedDeliveryMode
+                  })
             res.json(options)
         } catch (error) {
             console.error('Delivery options error', error)
@@ -77,6 +113,11 @@ export class DeliveryController {
             if (error.message === 'Order not found for tenant') {
                 return res.status(404).json({ statusCode: 404, statusMessage: error.message })
             }
+            if (error instanceof DeliveryConfigurationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
             console.error('Create shipment error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
@@ -111,8 +152,11 @@ export class DeliveryController {
     }
 
     async maystroWebhook(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
         try {
-            const result = await service.handleMaystroWebhook(req.body?.payload || req.body)
+            const result = await service.handleMaystroWebhook(tenant.id, req.body?.payload || req.body)
             if (!result) return res.status(202).json({ received: true })
             res.json({ success: true, ...result })
         } catch (error) {
@@ -159,15 +203,81 @@ export class DeliveryController {
         }
     }
 
+    async getProviderLiveRates(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const provider = String(req.params.provider || '').toUpperCase()
+        if (!provider || !isShipmentProvider(provider)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+        }
+
+        try {
+            getProviderCatalogItem(provider)
+        } catch {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Unsupported provider' })
+        }
+
+        const { deliveryMode, serviceLevel, weight, codAmount, originWilayaCode, communeCode } = req.query as {
+            deliveryMode?: string
+            serviceLevel?: string
+            weight?: string
+            codAmount?: string
+            originWilayaCode?: string
+            communeCode?: string
+        }
+
+        const rawDeliveryMode =
+            typeof deliveryMode === 'string' && deliveryMode.trim().length > 0 ? deliveryMode.trim().toLowerCase() : undefined
+        const normalizedDeliveryMode: 'home' | 'office' | undefined =
+            rawDeliveryMode === 'pickup'
+                ? 'office'
+                : rawDeliveryMode === 'home' || rawDeliveryMode === 'office'
+                    ? rawDeliveryMode
+                    : undefined
+
+        if (rawDeliveryMode && !normalizedDeliveryMode) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'deliveryMode must be home or office' })
+        }
+
+        const parsedWeight = weight ? Number(weight) : undefined
+        const parsedCod = codAmount ? Number(codAmount) : undefined
+
+        try {
+            const rates = await service.getProviderLiveRatesByWilaya({
+                tenantId: tenant.id,
+                provider,
+                deliveryMode: normalizedDeliveryMode,
+                serviceLevel: typeof serviceLevel === 'string' ? serviceLevel : undefined,
+                weight: parsedWeight,
+                codAmount: parsedCod,
+                originWilayaCode: typeof originWilayaCode === 'string' ? originWilayaCode : undefined,
+                communeCode: typeof communeCode === 'string' ? communeCode : undefined
+            })
+            res.json(rates)
+        } catch (error: any) {
+            if (error instanceof DeliveryConfigurationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get provider live rates error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
 
 
     async getDeliveryRates(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
-        const { provider } = req.params
+        const provider = String(req.params.provider || '').toUpperCase()
+        if (!provider || !isShipmentProvider(provider)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+        }
 
         try {
-            const rates = await service.getDeliveryRates(tenant.id, provider as any)
+            const rates = await service.getDeliveryRates(tenant.id, provider)
             res.json(rates)
         } catch (error) {
             console.error('Get rates error', error)
@@ -178,11 +288,40 @@ export class DeliveryController {
     async updateDeliveryRates(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
-        const { provider } = req.params
-        const { rates } = req.body
+        const provider = String(req.params.provider || '').toUpperCase()
+        if (!provider || !isShipmentProvider(provider)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+        }
+
+        const { rates } = req.body as { rates?: unknown }
+        if (!Array.isArray(rates)) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'rates must be an array' })
+        }
+
+        const normalizedRates = rates.map((rate: any) => ({
+            wilayaCode: typeof rate?.wilayaCode === 'string' ? rate.wilayaCode : '',
+            communeCode: typeof rate?.communeCode === 'string' ? rate.communeCode : null,
+            serviceLevel: typeof rate?.serviceLevel === 'string' ? rate.serviceLevel : null,
+            price: typeof rate?.price === 'number' ? rate.price : Number(rate?.price),
+            currency: typeof rate?.currency === 'string' ? rate.currency : undefined,
+            isActive: typeof rate?.isActive === 'boolean' ? rate.isActive : undefined,
+            estimatedMinDays:
+                rate?.estimatedMinDays === null || rate?.estimatedMinDays === undefined
+                    ? undefined
+                    : Number(rate.estimatedMinDays),
+            estimatedMaxDays:
+                rate?.estimatedMaxDays === null || rate?.estimatedMaxDays === undefined
+                    ? undefined
+                    : Number(rate.estimatedMaxDays)
+        }))
+
+        const invalid = normalizedRates.find((r) => !r.wilayaCode || !Number.isFinite(r.price))
+        if (invalid) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Each rate requires wilayaCode and numeric price' })
+        }
 
         try {
-            await service.updateDeliveryRates(tenant.id, provider as any, rates)
+            await service.updateDeliveryRates(tenant.id, provider, normalizedRates as any)
             res.json({ success: true })
         } catch (error) {
             console.error('Update rates error', error)

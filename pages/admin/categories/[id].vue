@@ -163,6 +163,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import SingleImageUploader from '~/components/admin/SingleImageUploader.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 
@@ -202,7 +203,8 @@ const categoryUrl = computed(() => {
   const tenantSlugValue = tenantSlug.value
   if (!tenantSlugValue || !form.value.slug) return '/'
   const { protocol, host } = useRequestOrigin()
-  const tenantHost = toTenantHost(host, tenantSlugValue)
+  const platformBaseDomain = usePlatformBaseDomain()
+  const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
   return `${protocol}://${tenantHost}/c/${form.value.slug}`
 })
 

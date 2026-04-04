@@ -1,5 +1,6 @@
 import { useAuthStore } from '~/stores/auth'
 import { toSaasHost, useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
 export default defineNuxtRouteMiddleware((to, from) => {
     const authStore = useAuthStore()
@@ -9,7 +10,8 @@ export default defineNuxtRouteMiddleware((to, from) => {
         // Tenants must log in from the SaaS landing host (root domain).
         if (tenant.value) {
             const { protocol, host } = useRequestOrigin()
-            const saasHost = toSaasHost(host)
+            const platformBaseDomain = usePlatformBaseDomain()
+            const saasHost = toSaasHost(host, { platformBaseDomain })
             if (saasHost) {
                 const next = encodeURIComponent(to.fullPath)
                 const tenantSlug = encodeURIComponent(tenant.value.slug)

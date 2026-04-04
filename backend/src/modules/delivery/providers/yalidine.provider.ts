@@ -25,11 +25,13 @@ const statusFromYalidine = (status: string | number | undefined): ShipmentStatus
 export class YalidineProvider implements DeliveryProvider {
     provider: ShipmentProvider = 'YALIDINE'
     private http: AxiosInstance
+    private originWilayaCode?: string
 
-    constructor(opts?: { apiId?: string; apiToken?: string; baseURL?: string }) {
-        const apiId = opts?.apiId || process.env.YALIDINE_API_ID
-        const apiToken = opts?.apiToken || process.env.YALIDINE_API_TOKEN
+    constructor(opts?: { apiId?: string; apiToken?: string; baseURL?: string; originWilayaCode?: string }) {
+        const apiId = opts?.apiId ?? ''
+        const apiToken = opts?.apiToken ?? ''
         const baseURL = opts?.baseURL || process.env.YALIDINE_BASE_URL || DEFAULT_BASE_URL
+        this.originWilayaCode = opts?.originWilayaCode
         this.http = axios.create({
             baseURL,
             headers: {
@@ -44,7 +46,8 @@ export class YalidineProvider implements DeliveryProvider {
     async quote(input: QuoteRequest): Promise<QuoteOption[]> {
         try {
             const res = await this.http.post('/fees', {
-                from_wilaya_code: process.env.YALIDINE_ORIGIN_WILAYA || '16',
+                from_wilaya_code:
+                    input.originWilayaCode || this.originWilayaCode || process.env.YALIDINE_ORIGIN_WILAYA || '16',
                 to_wilaya_code: input.destination.wilayaCode,
                 to_commune_code: input.destination.communeCode,
                 weight: input.weight || 1

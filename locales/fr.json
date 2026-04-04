@@ -2618,22 +2618,58 @@
         "subtitle": "Gérez les transporteurs et les tarifs par wilaya",
         "providers": {
           "toggleLabel": "Activer",
+          "noCredentials": "Sans identifiants",
+          "connected": "Connecté",
+          "notConnected": "Non connecté",
           "wilayasSupported": "{count} wilayas prises en charge",
           "managePricing": "Gérer les tarifs"
+        },
+        "credentials": {
+          "title": "Identifiants API — {provider}",
+          "hint": "Connectez le transporteur pour activer les devis en temps réel et la création d’envois.",
+          "enableLabel": "Activer l’intégration API",
+          "enableHint": "Nécessite des identifiants valides pour les appels au transporteur.",
+          "noCredentials": "Ce transporteur ne nécessite pas d’identifiants.",
+          "secretSet": "Configuré",
+          "secretNotSet": "Non configuré",
+          "secretPlaceholderSet": "Configuré (saisir pour remplacer)",
+          "secretPlaceholderNotSet": "Saisir le token",
+          "errors": {
+            "saveFailed": "Impossible d’enregistrer les identifiants"
+          }
         },
         "pricing": {
           "title": "Configuration des tarifs : {provider}",
           "hint": "Définissez les tarifs standard de livraison pour chaque wilaya. Ces tarifs s’appliquent à toutes les communes de la wilaya.",
           "loading": "Chargement des tarifs…",
+          "modes": {
+            "home": "Domicile",
+            "office": "Bureau"
+          },
+          "searchPlaceholder": "Rechercher une wilaya (code ou nom)…",
+          "overridePlaceholder": "Laisser vide pour utiliser le transporteur",
+          "filters": {
+            "all": "Toutes",
+            "overrides": "Overrides",
+            "noOverrides": "Sans override",
+            "missingCarrier": "Tarif transporteur manquant"
+          },
+          "showingCount": "Affichage {shown} sur {total}",
+          "pageOf": "Page {page} / {pages}",
+          "fetchCarrierRates": "Récupérer les tarifs du transporteur",
+          "fetchingCarrierRates": "Récupération…",
           "table": {
             "code": "Code",
             "wilaya": "Wilaya",
-            "price": "Prix (DZD)"
+            "price": "Prix (DZD)",
+            "carrierPrice": "Tarif transporteur",
+            "overridePrice": "Votre tarif"
           }
         },
         "errors": {
           "updateProviderFailed": "Impossible de mettre à jour le statut du transporteur",
-          "saveFailed": "Impossible d’enregistrer les tarifs"
+          "saveFailed": "Impossible d’enregistrer les tarifs",
+          "fetchCarrierRatesFailed": "Impossible de récupérer les tarifs du transporteur"
         }
       },
       "onboarding": {

@@ -7,6 +7,16 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   ssr: ssrEnabled,
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      // Used by client-side redirects/URL builders (e.g. send tenant admins to root host).
+      // Must match your production base domain (e.g. "swekly.com").
+      platformBaseDomain:
+        process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN ||
+        process.env.PLATFORM_BASE_DOMAIN ||
+        'platform.com'
+    }
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',

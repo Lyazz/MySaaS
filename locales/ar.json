@@ -2617,22 +2617,58 @@
         "subtitle": "إدارة مزوّدي التوصيل والأسعار حسب الولاية",
         "providers": {
           "toggleLabel": "تفعيل الإعداد",
+          "noCredentials": "بدون بيانات اعتماد",
+          "connected": "متصل",
+          "notConnected": "غير متصل",
           "wilayasSupported": "{count} ولايات مدعومة",
           "managePricing": "إدارة الأسعار"
+        },
+        "credentials": {
+          "title": "بيانات اعتماد API — {provider}",
+          "hint": "اربط المزوّد لتفعيل التسعير الفوري وإنشاء الشحنات.",
+          "enableLabel": "تفعيل تكامل API",
+          "enableHint": "يتطلب بيانات اعتماد صالحة لاستدعاءات المزوّد.",
+          "noCredentials": "هذا المزوّد لا يحتاج بيانات اعتماد.",
+          "secretSet": "مُعدّ",
+          "secretNotSet": "غير مُعدّ",
+          "secretPlaceholderSet": "مُعدّ (اكتب للاستبدال)",
+          "secretPlaceholderNotSet": "أدخل التوكن",
+          "errors": {
+            "saveFailed": "تعذر حفظ بيانات الاعتماد"
+          }
         },
         "pricing": {
           "title": "إعداد التسعير: {provider}",
           "hint": "حدّد أسعار التوصيل القياسية لكل ولاية. تنطبق هذه الأسعار على جميع البلديات ضمن الولاية.",
           "loading": "جارٍ تحميل الأسعار…",
+          "modes": {
+            "home": "منزل",
+            "office": "مكتب"
+          },
+          "searchPlaceholder": "ابحث عن الولاية (الرمز أو الاسم)…",
+          "overridePlaceholder": "اتركه فارغًا لاستخدام سعر المزوّد",
+          "filters": {
+            "all": "الكل",
+            "overrides": "تعديلات",
+            "noOverrides": "بدون تعديل",
+            "missingCarrier": "سعر المزوّد غير متوفر"
+          },
+          "showingCount": "عرض {shown} من {total}",
+          "pageOf": "صفحة {page} / {pages}",
+          "fetchCarrierRates": "جلب أسعار المزوّد",
+          "fetchingCarrierRates": "جارٍ الجلب…",
           "table": {
             "code": "الرمز",
             "wilaya": "اسم الولاية",
-            "price": "السعر (DZD)"
+            "price": "السعر (DZD)",
+            "carrierPrice": "سعر المزوّد",
+            "overridePrice": "سعرك"
           }
         },
         "errors": {
           "updateProviderFailed": "تعذر تحديث حالة المزوّد",
-          "saveFailed": "تعذر حفظ التسعير"
+          "saveFailed": "تعذر حفظ التسعير",
+          "fetchCarrierRatesFailed": "تعذر جلب أسعار المزوّد"
         }
       },
       "onboarding": {

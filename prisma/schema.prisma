@@ -46,6 +46,7 @@ model Tenant {
   saleItems            SaleItem[]
   shipments            Shipment[]
   deliveryRates        DeliveryRate[]
+  deliveryAccounts     TenantDeliveryAccount[]
   storeSettings        StoreSettings?
   contactInfos         TenantContactInfo[]
   domains              TenantDomain[]
@@ -251,6 +252,21 @@ model TenantIntegration {
   provider String // TELEGRAM, FACEBOOK, TIKTOK, WHATSAPP, etc.
   config   Json? // Stores provider-specific settings, e.g. { botToken, chatId }
   isActive Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, provider])
+  @@index([tenantId])
+}
+
+model TenantDeliveryAccount {
+  id       String           @id @default(uuid())
+  tenantId String
+  tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider ShipmentProvider
+  config   Json?
+  isActive Boolean          @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

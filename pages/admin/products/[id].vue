@@ -605,6 +605,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import ProductImagesUploader from '~/components/admin/ProductImagesUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 import ProductOptionsEditor from '~/components/admin/ProductOptionsEditor.vue'
@@ -977,7 +978,8 @@ const productUrl = computed(() => {
   if (!slug) return '/'
   
   const { protocol, host } = useRequestOrigin()
-  const tenantHost = toTenantHost(host, slug)
+  const platformBaseDomain = usePlatformBaseDomain()
+  const tenantHost = toTenantHost(host, slug, { platformBaseDomain })
   return `${protocol}://${tenantHost}/p/${form.value.slug}`
 })
 
@@ -986,7 +988,8 @@ const landingUrl = computed(() => {
   if (!slug) return '/'
   
   const { protocol, host } = useRequestOrigin()
-  const tenantHost = toTenantHost(host, slug)
+  const platformBaseDomain = usePlatformBaseDomain()
+  const tenantHost = toTenantHost(host, slug, { platformBaseDomain })
   return `${protocol}://${tenantHost}/p/${form.value.slug}?mode=landing`
 })
 

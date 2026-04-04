@@ -28,7 +28,7 @@ export class MaystroProvider implements DeliveryProvider {
     private http: AxiosInstance
 
     constructor(opts?: { apiKey?: string; baseURL?: string }) {
-        const apiKey = opts?.apiKey || process.env.MAYSTRO_API_KEY
+        const apiKey = opts?.apiKey ?? ''
         const baseURL = opts?.baseURL || process.env.MAYSTRO_BASE_URL || DEFAULT_BASE_URL
         this.http = axios.create({
             baseURL,

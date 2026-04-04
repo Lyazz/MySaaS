@@ -10,6 +10,7 @@ export type QuoteRequest = {
     originWilayaCode?: string
     weight?: number
     codAmount?: number
+    deliveryMode?: 'home' | 'office'
     serviceLevel?: string
 }
 
@@ -20,7 +21,8 @@ export type QuoteOption = {
     currency: string
     estimatedMinDays?: number
     estimatedMaxDays?: number
-    source: 'provider' | 'fallback-rate'
+    providerPrice?: number
+    source: 'provider' | 'fallback-rate' | 'tenant-override'
 }
 
 export type CreateShipmentInput = {
@@ -37,6 +39,7 @@ export type CreateShipmentInput = {
     addressLine1: string
     addressLine2?: string
     notes?: string
+    deliveryMode?: 'home' | 'office'
     metadata?: Record<string, any>
 }
 

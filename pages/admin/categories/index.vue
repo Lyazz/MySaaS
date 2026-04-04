@@ -257,6 +257,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import BaseInput from '~/components/ui/BaseInput.vue'
 
 definePageMeta({
@@ -415,7 +416,8 @@ function getCategoryUrl(slug: string): string {
   if (!tenantSlugValue) return '/'
 
   const { protocol, host } = useRequestOrigin()
-  const tenantHost = toTenantHost(host, tenantSlugValue)
+  const platformBaseDomain = usePlatformBaseDomain()
+  const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
   return `${protocol}://${tenantHost}/c/${slug}`
 }
 
@@ -424,7 +426,8 @@ async function copyLink(path: string) {
   if (!tenantSlugValue) return
 
   const { protocol, host } = useRequestOrigin()
-  const tenantHost = toTenantHost(host, tenantSlugValue)
+  const platformBaseDomain = usePlatformBaseDomain()
+  const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
   const url = `${protocol}://${tenantHost}${path}`
 
   try {

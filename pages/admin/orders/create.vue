@@ -98,12 +98,10 @@
                      <label class="block text-sm font-medium text-slate-700 mb-1">
                        {{ t('admin.pages.orders.create.shippingProvider') }}
                      </label>
-                     <BaseSelect v-model="form.shippingProvider">
+                       <BaseSelect v-model="form.shippingProvider">
                        <option value="">{{ t('admin.common.noneSelected') }}</option>
                        <option value="YALIDINE">Yalidine</option>
                        <option value="MAYSTRO">Maystro</option>
-                       <option value="ECOTRACK">Ecotrack</option>
-                       <option value="ZR_EXPRESS">ZR Express</option>
                        <option value="SELF">{{ t('admin.pages.orders.create.selfDelivery') }}</option>
                      </BaseSelect>
                   </div>

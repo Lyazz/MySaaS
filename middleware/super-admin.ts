@@ -1,12 +1,14 @@
 import { useAuthStore } from '~/stores/auth'
 import { toSaasHost, useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
     const authStore = useAuthStore()
     const tenant = useState<any>('tenant')
     if (tenant.value) {
         const { protocol, host } = useRequestOrigin()
-        const saasHost = toSaasHost(host)
+        const platformBaseDomain = usePlatformBaseDomain()
+        const saasHost = toSaasHost(host, { platformBaseDomain })
         if (saasHost) {
             return navigateTo(`${protocol}://${saasHost}${to.fullPath}`, { external: true })
         }

@@ -2630,22 +2630,58 @@
         "subtitle": "Manage delivery providers and pricing per Wilaya",
         "providers": {
           "toggleLabel": "Use setting",
+          "noCredentials": "No credentials",
+          "connected": "Connected",
+          "notConnected": "Not connected",
           "wilayasSupported": "{count} Wilayas supported",
           "managePricing": "Manage pricing"
+        },
+        "credentials": {
+          "title": "API credentials — {provider}",
+          "hint": "Connect the provider to enable live quotes and shipment creation.",
+          "enableLabel": "Enable API integration",
+          "enableHint": "Requires valid credentials for provider calls.",
+          "noCredentials": "This provider does not require credentials.",
+          "secretSet": "Configured",
+          "secretNotSet": "Not configured",
+          "secretPlaceholderSet": "Configured (enter to replace)",
+          "secretPlaceholderNotSet": "Enter token",
+          "errors": {
+            "saveFailed": "Failed to save credentials"
+          }
         },
         "pricing": {
           "title": "Pricing configuration: {provider}",
           "hint": "Set standard delivery rates for each Wilaya. These rates apply to all communes within the Wilaya.",
           "loading": "Loading rates…",
+          "modes": {
+            "home": "Home",
+            "office": "Office"
+          },
+          "searchPlaceholder": "Search wilaya (code or name)…",
+          "overridePlaceholder": "Leave blank to use carrier",
+          "filters": {
+            "all": "All",
+            "overrides": "Overrides",
+            "noOverrides": "No override",
+            "missingCarrier": "Missing carrier rate"
+          },
+          "showingCount": "Showing {shown} of {total}",
+          "pageOf": "Page {page} / {pages}",
+          "fetchCarrierRates": "Fetch carrier rates",
+          "fetchingCarrierRates": "Fetching…",
           "table": {
             "code": "Code",
             "wilaya": "Wilaya name",
-            "price": "Price (DZD)"
+            "price": "Price (DZD)",
+            "carrierPrice": "Carrier rate",
+            "overridePrice": "Your rate"
           }
         },
         "errors": {
           "updateProviderFailed": "Failed to update provider status",
-          "saveFailed": "Failed to save pricing"
+          "saveFailed": "Failed to save pricing",
+          "fetchCarrierRatesFailed": "Failed to fetch carrier rates"
         }
       },
       "onboarding": {

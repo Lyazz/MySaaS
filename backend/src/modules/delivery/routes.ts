@@ -1,10 +1,12 @@
 import { Router } from 'express'
 import { DeliveryController } from './delivery.controller'
+import { DeliveryAccountsController } from './delivery-accounts.controller'
 import { requireTenantMember } from '../../middleware/rbac.middleware'
 import { requireStaffPermission } from '../../middleware/staff-permissions.middleware'
 
 const router = Router()
 const controller = new DeliveryController()
+const accountsController = new DeliveryAccountsController()
 
 // Public-ish: needs tenant context, no auth
 router.post('/delivery/options', controller.getOptions.bind(controller))
@@ -34,6 +36,27 @@ router.get(
     requireTenantMember,
     requireStaffPermission('delivery', 'read'),
     controller.track.bind(controller)
+)
+
+// Delivery providers + tenant accounts (admin)
+router.get(
+    '/admin/delivery/providers',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    accountsController.listProviders.bind(accountsController)
+)
+router.put(
+    '/admin/delivery/providers/:provider/account',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'update'),
+    accountsController.upsertProviderAccount.bind(accountsController)
+)
+
+router.get(
+    '/admin/delivery/providers/:provider/live-rates',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    controller.getProviderLiveRates.bind(controller)
 )
 
 

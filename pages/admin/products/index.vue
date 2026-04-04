@@ -662,6 +662,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
@@ -675,7 +676,6 @@ definePageMeta({
 })
  
 const authStore = useAuthStore()
-const config = useRuntimeConfig()
 const { format: formatCurrency } = useCurrency()
 const { showToast } = useToast()
 const { t } = useI18n({ useScope: 'global' })
@@ -1059,7 +1059,8 @@ function getProductUrl(slug: string): string {
     if (!tenantSlugValue) return '/'
     
     const { protocol, host } = useRequestOrigin()
-    const tenantHost = toTenantHost(host, tenantSlugValue)
+    const platformBaseDomain = usePlatformBaseDomain()
+    const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
     return `${protocol}://${tenantHost}/p/${slug}`
 }
 
@@ -1068,7 +1069,8 @@ function getLandingUrl(slug: string): string {
     if (!tenantSlugValue) return '/'
     
     const { protocol, host } = useRequestOrigin()
-    const tenantHost = toTenantHost(host, tenantSlugValue)
+    const platformBaseDomain = usePlatformBaseDomain()
+    const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
     return `${protocol}://${tenantHost}/p/${slug}?mode=landing`
 }
 
@@ -1077,7 +1079,8 @@ async function copyLink(path: string) {
     if (!tenantSlugValue) return
     
     const { protocol, host } = useRequestOrigin()
-    const tenantHost = toTenantHost(host, tenantSlugValue)
+    const platformBaseDomain = usePlatformBaseDomain()
+    const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
     const url = `${protocol}://${tenantHost}${path}`
     
     try {

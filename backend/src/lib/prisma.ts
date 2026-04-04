@@ -63,6 +63,7 @@ export const getTenantPrisma = (tenant: { id: string }) => {
                         'ShipmentEvent',
                         'StoreSettings',
                         'TenantDomain',
+                        'TenantDeliveryAccount',
                         'TenantSubscription',
                         'TenantStaffRole',
                         'TenantStaffRolePermission',

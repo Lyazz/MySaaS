@@ -883,7 +883,7 @@ export class OrdersService {
         let shippingProvider = null
         if (input.shippingProvider) {
             const providerUpper = input.shippingProvider.toUpperCase()
-            const validProviders = ['MAYSTRO', 'YALIDINE', 'ECOTRACK', 'ZR_EXPRESS', 'SELF']
+            const validProviders = ['MAYSTRO', 'YALIDINE', 'SELF']
             if (validProviders.includes(providerUpper)) {
                 shippingProvider = providerUpper as any
             }
@@ -1159,7 +1159,7 @@ export class OrdersService {
         let shippingProvider = null
         if (input.shippingProvider) {
             const providerUpper = input.shippingProvider.toUpperCase()
-            const validProviders = ['MAYSTRO', 'YALIDINE', 'ECOTRACK', 'ZR_EXPRESS', 'SELF']
+            const validProviders = ['MAYSTRO', 'YALIDINE', 'SELF']
             if (validProviders.includes(providerUpper)) {
                 shippingProvider = providerUpper as any
             }

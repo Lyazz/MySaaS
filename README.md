@@ -150,13 +150,17 @@ The platform is designed to start with **~100 tenants** and scale safely.
 - Adapter interface (`DeliveryProvider`) with providers: Maystro, Yalidine, Self.
 - Service/controller split; routes mounted under `/api`:
   - `POST /api/delivery/options`
+    - If `provider` is omitted, returns rate-shopping results across offered providers
   - `POST /api/shipments`
   - `GET  /api/shipments/:id`
   - `GET  /api/shipments/:id/tracking`
   - `POST /api/webhooks/maystro`
   - `POST /api/self/shipments/:id/status` (admin)
+  - `GET  /api/admin/delivery/providers` (admin)
+  - `PUT  /api/admin/delivery/providers/:provider/account` (admin)
 - Persistence: `Shipments`, `ShipmentEvents`, `DeliveryRate` (wilaya/commune pricing). Idempotent on `(tenantId, provider, orderId)`.
-- Tenant context resolved from Host or `x-tenant-id` header; admin routes enforce RBAC.
+- Per-tenant carrier credentials: `TenantDeliveryAccount` (secrets are never returned by the API).
+- Tenant context resolved from Host; admin routes can derive tenant from the authenticated user; RBAC enforced.
 
 ### Quick curl samples
 

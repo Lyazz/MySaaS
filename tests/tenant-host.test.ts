@@ -14,6 +14,13 @@ describe('tenant host parsing', () => {
     expect(parseHost('tenant-a.platform.com')).toEqual({ kind: 'tenant-subdomain', slug: 'tenant-a' })
   })
 
+  it('supports overriding platform base domain (e.g. swekly.com)', () => {
+    expect(parseHost('tenant-a.swekly.com', { platformBaseDomain: 'swekly.com' })).toEqual({
+      kind: 'tenant-subdomain',
+      slug: 'tenant-a'
+    })
+  })
+
   it('parses {slug}.{ip}.nip.io as tenant subdomain for LAN dev', () => {
     expect(parseHost('apple.192.168.1.5.nip.io')).toEqual({ kind: 'tenant-subdomain', slug: 'apple' })
   })
