@@ -13,6 +13,12 @@ import type {
 
 const DEFAULT_BASE_URL = 'https://backend.maystro-delivery.com/api'
 
+const normalizeWilayaCode = (code: string | undefined) => {
+    if (!code) return undefined
+    const n = Number.parseInt(code, 10)
+    return Number.isFinite(n) ? String(n) : code
+}
+
 const statusFromCode = (code: any): ShipmentStatus => {
     const n = typeof code === 'string' ? parseInt(code, 10) : code
     if (n === 50 || code === 'cancelled') return 'CANCELLED'
@@ -43,7 +49,7 @@ export class MaystroProvider implements DeliveryProvider {
     async quote(input: QuoteRequest): Promise<QuoteOption[]> {
         try {
             const response = await this.http.post('/shared/delivery_price/', {
-                wilaya_code: input.destination.wilayaCode,
+                wilaya_code: normalizeWilayaCode(input.destination.wilayaCode),
                 commune_code: input.destination.communeCode,
                 total_weight: input.weight || 1
             })
@@ -69,7 +75,7 @@ export class MaystroProvider implements DeliveryProvider {
             instance_uuid: input.orderId,
             receiver_name: input.contactName,
             receiver_phone: input.contactPhone,
-            wilaya_code: input.wilayaCode,
+            wilaya_code: normalizeWilayaCode(input.wilayaCode),
             commune_code: input.communeCode,
             address: input.addressLine1,
             address_complement: input.addressLine2,

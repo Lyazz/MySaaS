@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 const cartStore = useCartStore()
 const router = useRouter()
@@ -8,6 +9,7 @@ const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
+const wilayas = DZ_WILAYAS
 
 // Available delivery providers based on store settings
 const availableProviders = computed(() => {
@@ -221,8 +223,13 @@ async function handleSubmit() {
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none appearance-none cursor-pointer"
                   >
                     <option value="" disabled>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
-                    <option value="16">16 - Alger</option>
-                    <option value="31">31 - Oran</option>
+                    <option
+                      v-for="w in wilayas"
+                      :key="w.code"
+                      :value="w.code"
+                    >
+                      {{ w.code }} - {{ w.name }}
+                    </option>
                   </select>
                   <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                     <Icon name="lucide:chevron-down" class="w-5 h-5" />

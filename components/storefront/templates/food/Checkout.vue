@@ -60,45 +60,32 @@
                   <select
                     v-model="form.wilaya"
                     class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none appearance-none cursor-pointer font-medium"
-                  >
-                    <option
-                      value=""
-                      disabled
-                      selected
-                    >
-                      {{ storefrontContent.checkout.form.wilaya.placeholder }}
-                    </option>
-                    <option value="16">
-                      16 - Alger
-                    </option>
-                    <!-- Mock options -->
-                  </select>
+	                  >
+	                    <option value="" disabled>
+	                      {{ storefrontContent.checkout.form.wilaya.placeholder }}
+	                    </option>
+	                    <option
+	                      v-for="w in wilayas"
+	                      :key="w.code"
+	                      :value="w.code"
+	                    >
+	                      {{ w.code }} - {{ w.name }}
+	                    </option>
+	                  </select>
                   <div class="absolute right-5 rtl:right-auto rtl:left-5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
                     <Icon name="lucide:chevron-down" class="w-5 h-5" />
                   </div>
                 </div>
               </div>
-              <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
-                <div class="relative">
-                  <select
-                    v-model="form.commune"
-                    class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none appearance-none cursor-pointer font-medium"
-                  >
-                    <option
-                      value=""
-                      disabled
-                      selected
-                    >
-                      {{ storefrontContent.checkout.form.commune.placeholder }}
-                    </option>
-                    <!-- Mock options -->
-                  </select>
-                  <div class="absolute right-5 rtl:right-auto rtl:left-5 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-                    <Icon name="lucide:chevron-down" class="w-5 h-5" />
-                  </div>
-                </div>
-              </div>
+	              <div class="col-span-2 md:col-span-1 space-y-3">
+	                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
+	                <input
+	                  v-model="form.commune"
+	                  type="text"
+	                  class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 placeholder:text-stone-300 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium"
+	                  :placeholder="storefrontContent.checkout.form.commune.placeholder"
+	                >
+	              </div>
               <div class="col-span-2 space-y-3">
                 <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
@@ -294,12 +281,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const { currencyCode } = useCurrency()
 const { data: storeSettings } = await useFetch('/api/store/settings')
+const wilayas = DZ_WILAYAS
 
 // Form state
 const form = reactive({

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 const cartStore = useCartStore()
 const router = useRouter()
@@ -8,6 +9,7 @@ const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
+const wilayas = DZ_WILAYAS
 
 const availableProviders = computed(() => {
   const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
@@ -187,8 +189,15 @@ async function handleSubmit() {
                 <label class="block text-sm font-semibold text-[#A67C52] ml-1 rtl:ml-0 rtl:mr-1 tracking-wider uppercase text-xs">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <div class="relative">
                   <select v-model="form.wilaya" class="w-full h-12 bg-[#131720] border border-[#A67C52]/20 px-4 text-white focus:border-[#A67C52] focus:ring-2 focus:ring-[#A67C52]/20 transition-all outline-none appearance-none cursor-pointer" style="border-radius: 2px;">
-                    <option value="" disabled selected>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
-                    <option value="16">16 - Alger</option>
+                    <option value="" disabled>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
+                    <option
+                      v-for="w in wilayas"
+                      :key="w.code"
+                      :value="w.code"
+                      style="background:#0E1117;"
+                    >
+                      {{ w.code }} - {{ w.name }}
+                    </option>
                   </select>
                   <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                     <Icon name="lucide:chevron-down" class="w-4 h-4" />
@@ -197,14 +206,13 @@ async function handleSubmit() {
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
                 <label class="block text-sm font-semibold text-[#A67C52] ml-1 rtl:ml-0 rtl:mr-1 tracking-wider uppercase text-xs">{{ storefrontContent.checkout.form.commune.label }}</label>
-                <div class="relative">
-                  <select v-model="form.commune" class="w-full h-12 bg-[#131720] border border-[#A67C52]/20 px-4 text-white focus:border-[#A67C52] focus:ring-2 focus:ring-[#A67C52]/20 transition-all outline-none appearance-none cursor-pointer" style="border-radius: 2px;">
-                    <option value="" disabled selected>{{ storefrontContent.checkout.form.commune.placeholder }}</option>
-                  </select>
-                  <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                    <Icon name="lucide:chevron-down" class="w-4 h-4" />
-                  </div>
-                </div>
+                <input
+                  v-model="form.commune"
+                  type="text"
+                  class="w-full h-12 bg-[#131720] border border-[#A67C52]/20 px-4 text-white placeholder:text-gray-600 focus:border-[#A67C52] focus:ring-2 focus:ring-[#A67C52]/20 transition-all outline-none"
+                  style="border-radius: 2px;"
+                  :placeholder="storefrontContent.checkout.form.commune.placeholder"
+                >
               </div>
               <div class="col-span-2 space-y-2">
                 <label class="block text-sm font-semibold text-[#A67C52] ml-1 rtl:ml-0 rtl:mr-1 tracking-wider uppercase text-xs">{{ storefrontContent.checkout.form.address.label }}</label>

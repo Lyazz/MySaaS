@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import BundleDealsPicker from './BundleDealsPicker.vue'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 const props = defineProps<{
     product: any
@@ -18,6 +19,7 @@ const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
+const wilayas = DZ_WILAYAS
 
 const orderSubmitting = ref(false)
 const addToCartSubmitting = ref(false)
@@ -196,8 +198,14 @@ const scrollToForm = () => {
                         <div class="relative">
                             <select v-model="quickForm.wilaya" class="w-full h-11 px-4 text-sm appearance-none cursor-pointer focus:outline-none" style="background-color:#0E1117; border:1px solid rgba(212,197,169,0.12); color:#E8E0D5; border-radius:1px;">
                                 <option value="" disabled style="background:#0E1117;">{{ storefrontContent.common.selectPlaceholder }}</option>
-                                <option value="16" style="background:#0E1117;">{{ storefrontContent.algeria.wilayas[16] }}</option>
-                                <option value="31" style="background:#0E1117;">{{ storefrontContent.algeria.wilayas[31] }}</option>
+                                <option
+                                  v-for="w in wilayas"
+                                  :key="w.code"
+                                  :value="w.code"
+                                  style="background:#0E1117;"
+                                >
+                                  {{ w.code }} - {{ w.name }}
+                                </option>
                             </select>
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#5A5450;"><Icon name="lucide:chevron-down" class="w-4 h-4" /></div>
                         </div>

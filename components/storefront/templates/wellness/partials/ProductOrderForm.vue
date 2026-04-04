@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 const props = defineProps<{
     product: any
@@ -17,6 +18,7 @@ const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
+const wilayas = DZ_WILAYAS
 
 const orderSubmitting = ref(false)
 const addToCartSubmitting = ref(false)
@@ -349,8 +351,13 @@ const handleAddToCart = async () => {
                         class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
                     >
                         <option value="" disabled>{{ storefrontContent.common.selectPlaceholder }}</option>
-                        <option value="16">{{ storefrontContent.algeria.wilayas[16] }}</option>
-                        <option value="31">{{ storefrontContent.algeria.wilayas[31] }}</option>
+                        <option
+                          v-for="w in wilayas"
+                          :key="w.code"
+                          :value="w.code"
+                        >
+                          {{ w.code }} - {{ w.name }}
+                        </option>
                     </select>
                     <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
                         <Icon name="lucide:chevron-down" class="w-4 h-4 rtl:rotate-180" />

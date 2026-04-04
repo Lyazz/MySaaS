@@ -12,6 +12,12 @@ import type {
 
 const DEFAULT_BASE_URL = 'https://api.yalidine.app/v1'
 
+const normalizeWilayaCode = (code: string | undefined) => {
+    if (!code) return undefined
+    const n = Number.parseInt(code, 10)
+    return Number.isFinite(n) ? String(n) : code
+}
+
 const statusFromYalidine = (status: string | number | undefined): ShipmentStatus => {
     const value = typeof status === 'string' ? status.toLowerCase() : status
     if (value === 'delivered' || value === 40) return 'DELIVERED'
@@ -47,8 +53,10 @@ export class YalidineProvider implements DeliveryProvider {
         try {
             const res = await this.http.post('/fees', {
                 from_wilaya_code:
-                    input.originWilayaCode || this.originWilayaCode || process.env.YALIDINE_ORIGIN_WILAYA || '16',
-                to_wilaya_code: input.destination.wilayaCode,
+                    normalizeWilayaCode(
+                        input.originWilayaCode || this.originWilayaCode || process.env.YALIDINE_ORIGIN_WILAYA || '16'
+                    ),
+                to_wilaya_code: normalizeWilayaCode(input.destination.wilayaCode),
                 to_commune_code: input.destination.communeCode,
                 weight: input.weight || 1
             })
@@ -73,7 +81,7 @@ export class YalidineProvider implements DeliveryProvider {
             tracking_id: input.orderId,
             first_name: input.contactName,
             phone: input.contactPhone,
-            to_wilaya_code: input.wilayaCode,
+            to_wilaya_code: normalizeWilayaCode(input.wilayaCode),
             to_commune_code: input.communeCode,
             address: input.addressLine1,
             address_second: input.addressLine2,

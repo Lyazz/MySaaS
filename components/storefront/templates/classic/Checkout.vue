@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 const cartStore = useCartStore()
 const router = useRouter()
@@ -8,6 +9,7 @@ const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
+const wilayas = DZ_WILAYAS
 
 // Available delivery providers based on store settings
 const availableProviders = computed(() => {
@@ -225,17 +227,16 @@ async function handleSubmit() {
                     v-model="form.wilaya"
                     class="w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all outline-none appearance-none cursor-pointer rounded-none"
                   >
-                    <option
-                      value=""
-                      disabled
-                      selected
-                    >
+                    <option value="" disabled>
                       {{ storefrontContent.checkout.form.wilaya.placeholder }}
                     </option>
-                    <option value="16">
-                      16 - Alger
+                    <option
+                      v-for="w in wilayas"
+                      :key="w.code"
+                      :value="w.code"
+                    >
+                      {{ w.code }} - {{ w.name }}
                     </option>
-                    <!-- Mock options -->
                   </select>
                   <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
                     <Icon name="lucide:chevron-down" class="w-4 h-4" />
@@ -244,24 +245,12 @@ async function handleSubmit() {
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
                 <label class="block text-xs font-bold uppercase tracking-widest text-slate-500">{{ storefrontContent.checkout.form.commune.label }}</label>
-                <div class="relative">
-                  <select
-                    v-model="form.commune"
-                    class="w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all outline-none appearance-none cursor-pointer rounded-none"
-                  >
-                    <option
-                      value=""
-                      disabled
-                      selected
-                    >
-                      {{ storefrontContent.checkout.form.commune.placeholder }}
-                    </option>
-                    <!-- Mock options -->
-                  </select>
-                  <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                    <Icon name="lucide:chevron-down" class="w-4 h-4" />
-                  </div>
-                </div>
+                <input
+                  v-model="form.commune"
+                  type="text"
+                  class="w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-0 transition-all outline-none rounded-none"
+                  :placeholder="storefrontContent.checkout.form.commune.placeholder"
+                >
               </div>
               <div class="col-span-2 space-y-2">
                 <label class="block text-xs font-bold uppercase tracking-widest text-slate-500">{{ storefrontContent.checkout.form.address.label }}</label>

@@ -386,6 +386,7 @@ import { useAuthStore } from '~/stores/auth'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 definePageMeta({
   layout: 'admin',
@@ -400,12 +401,7 @@ const authStore = useAuthStore()
 // State
 const customers = ref<any[]>([])
 const products = ref<any[]>([])
-const wilayas = ref([
-    { code: '16', name: 'Alger' },
-    { code: '09', name: 'Blida' },
-    { code: '31', name: 'Oran' },
-    //... simple mock list for now or pull from api if we have it
-])
+const wilayas = ref(DZ_WILAYAS)
 
 const form = ref({
     customerId: '',
