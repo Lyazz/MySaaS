@@ -2,6 +2,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3'
 import crypto from 'crypto'
 import path from 'path'
 import { promises as fs } from 'fs'
+import { optimizeImage } from '../../lib/image-optimizer'
 import {
     buildPublicUrl,
     ensureBucketExists,
@@ -74,9 +75,16 @@ export class UploadService {
             throw new UploadValidationError('Only PNG, JPEG, and WebP uploads are allowed')
         }
 
+        const optimized = await optimizeImage({
+            buffer: args.buffer,
+            mimeType,
+            maxDimensionPx: 2000,
+            profile: 'product'
+        })
+
         const key = this.buildTenantKey({
             tenantId: args.tenantId,
-            mimeType,
+            mimeType: optimized.mimeType,
             originalName: args.originalName
         })
 
@@ -88,8 +96,9 @@ export class UploadService {
                 new PutObjectCommand({
                     Bucket: PUBLIC_BUCKET_NAME,
                     Key: key,
-                    Body: args.buffer,
-                    ContentType: mimeType
+                    Body: optimized.buffer,
+                    ContentType: optimized.mimeType,
+                    CacheControl: 'public, max-age=31536000, immutable'
                 })
             )
 
@@ -101,7 +110,7 @@ export class UploadService {
         } catch (cloudError) {
             const allowFallback = process.env.S3_FALLBACK_LOCAL !== 'false' && process.env.NODE_ENV !== 'production'
             if (allowFallback && isStorageUnavailableError(cloudError)) {
-                return this.uploadToLocal({ tenantId: args.tenantId, key, buffer: args.buffer })
+                return this.uploadToLocal({ tenantId: args.tenantId, key, buffer: optimized.buffer })
             }
 
             if (isStorageUnavailableError(cloudError)) {
@@ -114,4 +123,3 @@ export class UploadService {
         }
     }
 }
-

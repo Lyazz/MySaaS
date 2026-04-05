@@ -138,7 +138,7 @@
                 <!-- Proof -->
                 <td class="ui-td text-sm">
                   <a
-                    v-if="p.proofUrl"
+                    v-if="p.proofUrl && String(p.proofUrl).startsWith('http')"
                     :href="p.proofUrl"
                     target="_blank"
                     rel="noreferrer"
@@ -147,6 +147,15 @@
                     <Icon name="lucide:external-link" class="h-3.5 w-3.5" />
                     {{ t('superAdmin.paymentsPage.history.proof.open', 'Open') }}
                   </a>
+                  <button
+                    v-else-if="p.proofUrl"
+                    type="button"
+                    class="inline-flex items-center gap-1 text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                    @click="openProof(p)"
+                  >
+                    <Icon name="lucide:external-link" class="h-3.5 w-3.5" />
+                    {{ t('superAdmin.paymentsPage.history.proof.open', 'Open') }}
+                  </button>
                   <span v-else class="text-slate-300 text-xs italic">{{ t('superAdmin.pendingPayments.noProof', 'No file') }}</span>
                 </td>
 
@@ -249,6 +258,19 @@ async function review(payment: any, status: 'PAID' | 'REJECTED') {
     error.value = e?.data?.statusMessage || e?.message || 'Failed to review payment'
   } finally {
     reviewingId.value = null
+  }
+}
+
+async function openProof(payment: any) {
+  error.value = ''
+  try {
+    const res = await $fetch<{ url: string }>(
+      `/api/super-admin/billing/tenants/${encodeURIComponent(payment.tenantId)}/payments/${encodeURIComponent(payment.id)}/proof-url`,
+      { headers: { Authorization: `Bearer ${authStore.token}` } }
+    )
+    if (res?.url) window.open(res.url, '_blank', 'noopener,noreferrer')
+  } catch (e: any) {
+    error.value = e?.data?.statusMessage || e?.message || 'Failed to open proof'
   }
 }
 

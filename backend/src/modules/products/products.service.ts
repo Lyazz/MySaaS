@@ -2,6 +2,7 @@ import prisma from '../../lib/prisma'
 import { InventoryService } from '../inventory/inventory.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
+import { deletePublicAssetIfOwned } from '../../lib/public-assets'
 
 const normalizeImages = (images: unknown): string[] | undefined => {
     if (images === undefined) return undefined
@@ -376,6 +377,18 @@ export class ProductsService {
             throw new Error('Product not found')
         }
 
+        const urlsToMaybeDelete = Array.from(
+            new Set(
+                [
+                    ...((existing.images as any[]) || []),
+                    ...(((existing as any).productImages || []).map((img: any) => img?.url))
+                ]
+                    .filter((x) => typeof x === 'string')
+                    .map((x) => x.trim())
+                    .filter(Boolean)
+            )
+        ) as string[]
+
         // Block deletion if product has related sale items or purchase order items
         const variantIds = (existing.variants || []).map((v: any) => v.id)
         if (variantIds.length > 0) {
@@ -394,6 +407,17 @@ export class ProductsService {
         await prisma.product.deleteMany({
             where: { id: productId, tenantId }
         })
+
+        for (const url of urlsToMaybeDelete) {
+            const [imageCount, productArrayCount] = await Promise.all([
+                prisma.productImage.count({ where: { tenantId, url } }),
+                prisma.product.count({ where: { tenantId, images: { has: url } } })
+            ])
+            const stillReferenced = imageCount > 0 || productArrayCount > 0
+            if (!stillReferenced) {
+                await deletePublicAssetIfOwned({ tenantId, urlOrPath: url })
+            }
+        }
 
         return true
     }

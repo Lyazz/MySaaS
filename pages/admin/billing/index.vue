@@ -283,12 +283,12 @@
                         <p class="mb-1 text-sm font-semibold" :class="proofUrl ? 'text-green-700' : 'text-slate-600'">
                           {{ uploading ? t('admin.common.uploading', 'Uploading...') : proofUrl ? t('admin.pages.billing.payment.uploadSuccess', 'Receipt attached successfully') : t('admin.common.clickToUpload', 'Click to upload receipt') }}
                         </p>
-                        <p v-if="!proofUrl && !uploading" class="text-xs text-slate-500">PNG, JPG, WEBP (Max 5MB)</p>
+                        <p v-if="!proofUrl && !uploading" class="text-xs text-slate-500">PNG, JPG, WEBP, PDF (Max 10MB)</p>
                       </div>
                       <input 
                         type="file" 
                         class="hidden" 
-                        accept="image/png, image/jpeg, image/webp" 
+                        accept="image/png, image/jpeg, image/webp, application/pdf" 
                         @change="handleFileUpload" 
                         :disabled="uploading"
                       />
@@ -387,11 +387,15 @@
                   </span>
                 </td>
                 <td class="ui-td text-sm">
-                  <a v-if="pay.proofUrl" :href="pay.proofUrl" target="_blank" rel="noreferrer"
-                    class="text-teal-700 hover:underline font-semibold inline-flex items-center gap-1">
+                  <button
+                    v-if="pay.proofUrl"
+                    type="button"
+                    class="text-teal-700 hover:underline font-semibold inline-flex items-center gap-1"
+                    @click="openPaymentProof(pay)"
+                  >
                     <Icon name="lucide:external-link" class="w-3.5 h-3.5" />
                     {{ t('admin.pages.billing.history.viewProof', 'View') }}
-                  </a>
+                  </button>
                   <span v-else class="text-slate-300">—</span>
                 </td>
               </tr>
@@ -624,7 +628,7 @@ async function handleFileUpload(event: Event) {
     const formData = new FormData()
     formData.append('file', file)
     
-    const res = await $fetch('/api/upload', {
+    const res = await $fetch('/api/admin/billing/proofs/upload', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: formData
@@ -635,6 +639,27 @@ async function handleFileUpload(event: Event) {
     uploadError.value = e?.message || e?.data?.error || t('admin.pages.billing.payment.errors.uploadFailed')
   } finally {
     uploading.value = false
+  }
+}
+
+async function openPaymentProof(payment: any) {
+  const token = (authStore as any).token?.value ?? (authStore as any).token
+  if (!token || typeof token !== 'string') return
+  if (!payment?.id || !payment?.proofUrl) return
+
+  try {
+    if (typeof payment.proofUrl === 'string' && payment.proofUrl.startsWith('http')) {
+      window.open(payment.proofUrl, '_blank', 'noopener,noreferrer')
+      return
+    }
+
+    const res = await $fetch(`/api/admin/billing/payments/${payment.id}/proof-url`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }) as { url: string }
+
+    if (res?.url) window.open(res.url, '_blank', 'noopener,noreferrer')
+  } catch (e: any) {
+    submitError.value = e?.message || e?.data?.statusMessage || 'Failed to open proof'
   }
 }
 

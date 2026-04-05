@@ -1,6 +1,16 @@
 import prisma from '../../lib/prisma'
+import { deletePublicAssetIfOwned } from '../../lib/public-assets'
 
 export class ProductImagesService {
+    private async isUrlReferenced(tenantId: string, url: string) {
+        const [imageCount, productArrayCount] = await Promise.all([
+            prisma.productImage.count({ where: { tenantId, url } }),
+            prisma.product.count({ where: { tenantId, images: { has: url } } })
+        ])
+
+        return imageCount > 0 || productArrayCount > 0
+    }
+
     /**
      * Add a new image to a product
      */
@@ -52,10 +62,10 @@ export class ProductImagesService {
         data: { url?: string; alt?: string; position?: number; isMain?: boolean }
     ) {
         // Verify ownership
-        const image = await prisma.productImage.findFirst({
+        const existing = await prisma.productImage.findFirst({
             where: { id: imageId, tenantId, productId }
         })
-        if (!image) throw new Error('Image not found')
+        if (!existing) throw new Error('Image not found')
 
         // If setting as main, unset other main images
         if (data.isMain === true) {
@@ -65,7 +75,7 @@ export class ProductImagesService {
             })
         }
 
-        return await prisma.productImage.update({
+        const updated = await prisma.productImage.update({
             where: { id: imageId },
             data: {
                 url: data.url,
@@ -74,6 +84,15 @@ export class ProductImagesService {
                 isMain: data.isMain
             }
         })
+
+        if (existing.url && updated.url && existing.url !== updated.url) {
+            const stillReferenced = await this.isUrlReferenced(tenantId, existing.url)
+            if (!stillReferenced) {
+                await deletePublicAssetIfOwned({ tenantId, urlOrPath: existing.url })
+            }
+        }
+
+        return updated
     }
 
     /**
@@ -89,6 +108,11 @@ export class ProductImagesService {
         await prisma.productImage.delete({
             where: { id: imageId }
         })
+
+        const stillReferenced = await this.isUrlReferenced(tenantId, image.url)
+        if (!stillReferenced) {
+            await deletePublicAssetIfOwned({ tenantId, urlOrPath: image.url })
+        }
 
         return true
     }
@@ -184,6 +208,7 @@ export class ProductImagesService {
 
         // Delete images that are no longer in the list
         const toDelete = existingImages.filter(img => !incomingIds.has(img.id))
+        const removedUrls = Array.from(new Set(toDelete.map((img) => img.url).filter(Boolean)))
 
         // Prepare updates and creates
         const updates: any[] = []
@@ -231,6 +256,13 @@ export class ProductImagesService {
             // Create
             ...creates
         ])
+
+        for (const url of removedUrls) {
+            const stillReferenced = await this.isUrlReferenced(tenantId, url)
+            if (!stillReferenced) {
+                await deletePublicAssetIfOwned({ tenantId, urlOrPath: url })
+            }
+        }
 
         return await this.getProductImages(tenantId, productId)
     }

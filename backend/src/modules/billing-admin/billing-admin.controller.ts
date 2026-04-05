@@ -172,4 +172,40 @@ export class BillingAdminController {
             return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
     }
+
+    async getPaymentProofUrl(req: Request, res: Response) {
+        const user = req.user
+        const tenantId = firstString((req.params as any)?.tenantId)
+        const paymentId = firstString((req.params as any)?.paymentId)
+
+        if (!tenantId) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Missing tenantId' })
+        }
+        if (!paymentId) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Missing paymentId' })
+        }
+
+        try {
+            const result = await this.service.getPaymentProofUrl({ tenantId, paymentId })
+
+            await logAction({
+                action: 'VIEW_PAYMENT_PROOF',
+                details: `Viewed payment proof for tenant ${tenantId} payment ${paymentId}`,
+                userId: user?.id,
+                tenantId,
+                targetId: paymentId
+            })
+
+            return res.json(result)
+        } catch (error) {
+            if (error instanceof Error && error.message === 'Proof not found') {
+                return res.status(404).json({ statusCode: 404, statusMessage: 'Proof not found' })
+            }
+            if (error instanceof Error && error.message.startsWith('Invalid proof')) {
+                return res.status(400).json({ statusCode: 400, statusMessage: error.message })
+            }
+            console.error('Get payment proof url error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
 }

@@ -1,5 +1,10 @@
 import prisma from '../../lib/prisma'
 import { getPlanByCode, planPriceForInterval, type BillingInterval, type PlanCode } from '../../../../shared/pricing/plans'
+import { PRIVATE_BUCKET_NAME } from '../../lib/s3'
+import { parseStorageRef } from '../../lib/storage-ref'
+import { presignGetObject } from '../../lib/s3-presign'
+import { signLocalFileToken } from '../../lib/local-file-token'
+import path from 'path'
 
 const addUtcMonths = (date: Date, months: number) =>
     new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
@@ -109,6 +114,50 @@ export class BillingAdminService {
                 }
             }
         })
+    }
+
+    async getPaymentProofUrl(params: { tenantId: string; paymentId: string }) {
+        const payment = await prisma.billingPayment.findUnique({
+            where: { id: params.paymentId, tenantId: params.tenantId },
+            select: { proofUrl: true }
+        })
+
+        if (!payment?.proofUrl) {
+            throw new Error('Proof not found')
+        }
+
+        const ref = parseStorageRef(payment.proofUrl)
+        if (ref.kind === 'http') return { url: ref.url }
+
+        if (ref.kind === 'local') {
+            if (!ref.key.startsWith(`tenants/${params.tenantId}/`)) {
+                throw new Error('Invalid proof key')
+            }
+            const ext = path.extname(ref.key).toLowerCase()
+            const mimeType =
+                ext === '.png'
+                    ? 'image/png'
+                    : ext === '.jpg' || ext === '.jpeg'
+                      ? 'image/jpeg'
+                      : ext === '.webp'
+                        ? 'image/webp'
+                        : ext === '.pdf'
+                          ? 'application/pdf'
+                          : 'application/octet-stream'
+            const token = signLocalFileToken({ key: ref.key, mimeType })
+            return { url: `/api/files/local?token=${encodeURIComponent(token)}` }
+        }
+
+        if (ref.bucket !== PRIVATE_BUCKET_NAME) {
+            throw new Error('Invalid proof bucket')
+        }
+
+        if (!ref.key.startsWith(`tenants/${params.tenantId}/`)) {
+            throw new Error('Invalid proof key')
+        }
+
+        const url = await presignGetObject({ bucket: ref.bucket, key: ref.key })
+        return { url }
     }
 
     async reviewPayment(params: {

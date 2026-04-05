@@ -131,7 +131,7 @@
                   </td>
                   <td class="ui-td text-sm">
                     <a
-                      v-if="p.proofUrl"
+                      v-if="p.proofUrl && String(p.proofUrl).startsWith('http')"
                       :href="p.proofUrl"
                       target="_blank"
                       rel="noreferrer"
@@ -139,6 +139,14 @@
                     >
                       {{ t('superAdmin.paymentsPage.history.proof.open') }}
                     </a>
+                    <button
+                      v-else-if="p.proofUrl"
+                      type="button"
+                      class="text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                      @click="openProof(p)"
+                    >
+                      {{ t('superAdmin.paymentsPage.history.proof.open') }}
+                    </button>
                     <span v-else class="text-slate-400">—</span>
                   </td>
                   <td class="ui-td text-right">
@@ -290,6 +298,19 @@ async function reviewPayment(paymentId: string, status: 'PAID' | 'REJECTED') {
     error.value = e?.data?.statusMessage || e?.message || t('superAdmin.paymentsPage.errors.reviewFailed', 'Failed to review payment')
   } finally {
     reviewingId.value = null
+  }
+}
+
+async function openProof(payment: any) {
+  error.value = ''
+  try {
+    const res = await $fetch<{ url: string }>(
+      `/api/super-admin/billing/tenants/${encodeURIComponent(tenantId.value)}/payments/${encodeURIComponent(payment.id)}/proof-url`,
+      { headers: { Authorization: `Bearer ${authStore.token}` } }
+    )
+    if (res?.url) window.open(res.url, '_blank', 'noopener,noreferrer')
+  } catch (e: any) {
+    error.value = e?.data?.statusMessage || e?.message || 'Failed to open proof'
   }
 }
 

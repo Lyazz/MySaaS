@@ -33,11 +33,15 @@ import cashRouter from './modules/cash/routes'
 import usersRouter from './modules/users/routes'
 import adminAuditLogsRouter from './modules/audit-logs/routes'
 import staffRolesRouter from './modules/staff-roles/routes'
+import filesRouter from './modules/files/routes'
 
 const router = Router()
 
 // Public / Auth
 router.use('/', authRouter)
+
+// Token-based file downloads (local dev fallback)
+router.use('/files', filesRouter)
 
 // Public product/category routes (no auth required)
 router.use('/products', publicProductsRouter)
