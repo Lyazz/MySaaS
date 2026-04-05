@@ -12,5 +12,6 @@ router.use(requireStaffCrud('integrations'))
 router.get('/:provider', integrationsController.getIntegration.bind(integrationsController))
 router.post('/:provider', integrationsController.saveIntegration.bind(integrationsController))
 router.post('/:provider/test', integrationsController.testIntegration.bind(integrationsController))
+router.post('/:provider/detect-chats', integrationsController.detectTelegramChats.bind(integrationsController))
 
 export default router

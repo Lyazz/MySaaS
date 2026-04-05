@@ -84,18 +84,76 @@
           </button>
         </div>
         
-        <div class="p-6 space-y-4 overflow-y-auto">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.label') }}</label>
-            <input v-model="telegramForm.botToken" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.botToken.placeholder')" />
-            <p class="mt-1 text-xs text-gray-500">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.hint') }}</p>
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.label') }}</label>
-            <input v-model="telegramForm.chatId" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.chatId.placeholder')" />
-            <p class="mt-1 text-xs text-gray-500">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.hint') }}</p>
-          </div>
+	        <div class="p-6 space-y-4 overflow-y-auto">
+	          <div>
+	            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.label') }}</label>
+	            <input v-model="telegramForm.botToken" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.botToken.placeholder')" />
+	            <p class="mt-1 text-xs text-gray-500">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.hint') }}</p>
+	          </div>
+
+            <div class="rounded-lg border border-sky-100 bg-sky-50 p-4">
+              <div class="text-sm font-semibold text-sky-900">{{ t('admin.pages.integrations.telegram.modal.auto.title') }}</div>
+              <ol class="mt-2 list-decimal list-inside text-sm text-sky-900/90 space-y-1">
+                <li>{{ t('admin.pages.integrations.telegram.modal.auto.steps.pasteToken') }}</li>
+                <li>{{ t('admin.pages.integrations.telegram.modal.auto.steps.startBot') }}</li>
+                <li>{{ t('admin.pages.integrations.telegram.modal.auto.steps.clickDetect') }}</li>
+              </ol>
+
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  class="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg bg-sky-600 text-white hover:bg-sky-700 disabled:opacity-50"
+                  :disabled="detectingChats || !telegramForm.botToken"
+                  @click="detectTelegramChats"
+                >
+                  {{ detectingChats ? t('admin.pages.integrations.telegram.modal.auto.actions.detecting') : t('admin.pages.integrations.telegram.modal.auto.actions.detectChats') }}
+                </button>
+
+                <a
+                  v-if="detectedBot?.username"
+                  class="text-sm font-medium text-sky-700 hover:text-sky-800"
+                  :href="`https://t.me/${detectedBot.username}`"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {{ t('admin.pages.integrations.telegram.modal.auto.actions.openBot', { handle: `@${detectedBot.username}` }) }}
+                </a>
+              </div>
+
+              <p v-if="detectError" class="mt-2 text-xs text-red-600">{{ detectError }}</p>
+
+              <div v-if="detectedChats.length" class="mt-3 space-y-2">
+                <p class="text-xs text-sky-800">
+                  {{ t('admin.pages.integrations.telegram.modal.auto.found', { count: detectedChats.length }) }}
+                </p>
+                <div class="space-y-2">
+                  <button
+                    v-for="c in detectedChats"
+                    :key="c.chatId"
+                    type="button"
+                    class="w-full text-left rounded-lg border border-sky-100 bg-white px-3 py-2 hover:bg-sky-50"
+                    @click="selectDetectedChat(c.chatId)"
+                  >
+                    <div class="text-sm font-medium text-slate-900">{{ c.name || c.title || (c.username ? `@${c.username}` : '') || c.chatId }}</div>
+                    <div class="text-xs text-slate-600 font-mono">{{ c.chatId }}</div>
+                  </button>
+                </div>
+              </div>
+
+              <p v-else-if="detectedOnce && !detectingChats" class="mt-2 text-xs text-sky-800">
+                {{ t('admin.pages.integrations.telegram.modal.auto.noneFound') }}
+              </p>
+
+              <p class="mt-2 text-xs text-sky-900/80">
+                {{ t('admin.pages.integrations.telegram.modal.auto.groupNote') }}
+              </p>
+            </div>
+	          
+	          <div>
+	            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.label') }}</label>
+	            <input v-model="telegramForm.chatId" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.chatId.placeholder')" />
+	            <p class="mt-1 text-xs text-gray-500">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.hint') }}</p>
+	          </div>
 
           <div class="flex items-center gap-2">
             <input v-model="telegramForm.isActive" type="checkbox" id="tg-active" class="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500" />
@@ -300,6 +358,11 @@ const newPixelForm = reactive({
 })
 const saving = ref(false)
 const testing = ref(false)
+const detectingChats = ref(false)
+const detectedOnce = ref(false)
+const detectError = ref<string | null>(null)
+const detectedBot = ref<{ id: string; username: string | null; name: string } | null>(null)
+const detectedChats = ref<Array<{ chatId: string; type: string; title?: string; username?: string; name?: string }>>([])
 
 // Methods
 async function fetchIntegrations() {
@@ -332,6 +395,46 @@ function openTelegramModal() {
 
 function closeTelegramModal() {
   showTelegramModal.value = false
+}
+
+watch(
+  () => telegramForm.botToken,
+  () => {
+    detectedOnce.value = false
+    detectError.value = null
+    detectedBot.value = null
+    detectedChats.value = []
+  }
+)
+
+function selectDetectedChat(chatId: string) {
+  telegramForm.chatId = chatId
+}
+
+async function detectTelegramChats() {
+  detectingChats.value = true
+  detectedOnce.value = false
+  detectError.value = null
+  detectedChats.value = []
+  detectedBot.value = null
+  try {
+    const data = await $fetch('/api/admin/integrations/TELEGRAM/detect-chats', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { botToken: telegramForm.botToken }
+    })
+    detectedOnce.value = true
+    detectedBot.value = (data as any)?.bot || null
+    detectedChats.value = Array.isArray((data as any)?.chats) ? ((data as any).chats as any) : []
+    if (!telegramForm.chatId && detectedChats.value.length === 1) {
+      telegramForm.chatId = detectedChats.value[0]!.chatId
+    }
+  } catch (e: any) {
+    detectedOnce.value = true
+    detectError.value = e?.data?.error || e?.data?.statusMessage || e?.message || t('admin.common.error')
+  } finally {
+    detectingChats.value = false
+  }
 }
 
 function openFacebookModal() {

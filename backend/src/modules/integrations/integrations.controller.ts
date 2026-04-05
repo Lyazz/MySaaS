@@ -43,6 +43,22 @@ export class IntegrationsController {
                 normalizedConfig = pixelId ? { pixelId } : {}
             }
 
+            if (normalizedProvider === 'TELEGRAM') {
+                const botTokenRaw = (config as any)?.botToken
+                const chatIdRaw = (config as any)?.chatId
+                const botToken = typeof botTokenRaw === 'string' ? botTokenRaw.trim() : ''
+                const chatId = typeof chatIdRaw === 'string' ? chatIdRaw.trim() : ''
+
+                if (Boolean(isActive) && (!botToken || !chatId)) {
+                    return res.status(400).json({
+                        statusCode: 400,
+                        statusMessage: 'Telegram botToken and chatId are required when enabled'
+                    })
+                }
+
+                normalizedConfig = botToken || chatId ? { botToken, chatId } : {}
+            }
+
             const integration = await integrationsService.upsertIntegration(
                 tenant.id,
                 normalizedProvider,
@@ -75,6 +91,27 @@ export class IntegrationsController {
         } catch (error) {
             console.error(error)
             res.status(500).json({ error: 'Failed to test connection' })
+        }
+    }
+
+    async detectTelegramChats(req: Request, res: Response) {
+        try {
+            const { provider } = req.params
+            const normalizedProvider = String(provider || '').toUpperCase()
+            if (normalizedProvider !== 'TELEGRAM') {
+                return res.status(400).json({ error: 'Detect chats not supported for this provider' })
+            }
+
+            const botTokenRaw = req.body?.botToken
+            const botToken = typeof botTokenRaw === 'string' ? botTokenRaw.trim() : ''
+            if (!botToken) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'botToken is required' })
+            }
+
+            const result = await telegramService.detectChats(botToken)
+            res.json(result)
+        } catch (error: any) {
+            res.status(400).json({ error: error?.message || 'Failed to detect chats' })
         }
     }
 }

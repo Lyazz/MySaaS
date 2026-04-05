@@ -1783,26 +1783,42 @@
           "title": "Pixel Facebook",
           "description": "Suivez les conversions et créez des audiences pour vos publicités Facebook."
         },
-        "telegram": {
-          "title": "Notifications Telegram",
-          "description": "Recevez des notifications en temps réel pour vos nouvelles commandes directement sur Telegram.",
-          "modal": {
-            "title": "Configuration Telegram",
-            "fields": {
-              "botToken": {
-                "label": "Token du Bot",
-                "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
-                "hint": "Obtenez ceci via {'@'}BotFather sur Telegram."
+          "telegram": {
+            "title": "Notifications Telegram",
+            "description": "Recevez des notifications en temps réel pour vos nouvelles commandes directement sur Telegram.",
+            "modal": {
+              "title": "Configuration Telegram",
+              "auto": {
+                "title": "Détection automatique de l’ID de chat (recommandé)",
+                "steps": {
+                  "pasteToken": "Collez votre Token du Bot ci-dessus.",
+                  "startBot": "Sur Telegram, ouvrez le bot, appuyez sur Démarrer, puis envoyez un message (ex: salut).",
+                  "clickDetect": "Revenez ici et cliquez sur « Détecter les chats »."
+                },
+                "actions": {
+                  "detectChats": "Détecter les chats",
+                  "detecting": "Détection...",
+                  "openBot": "Ouvrir le bot : {handle}"
+                },
+                "found": "{count} chat(s) trouvé(s). Cliquez sur un chat pour l’utiliser.",
+                "noneFound": "Aucun chat trouvé pour le moment. Envoyez /start (ou un message) au bot, puis réessayez.",
+                "groupNote": "Pour un groupe : ajoutez le bot au groupe et envoyez un message. Pour une chaîne : ajoutez le bot comme admin et publiez un message."
               },
-              "chatId": {
-                "label": "ID du Chat",
-                "placeholder": "-1001234567890",
-                "hint": "Votre ID de chat ou de groupe où les notifications seront envoyées."
+              "fields": {
+                "botToken": {
+                  "label": "Token du Bot",
+                  "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                  "hint": "Obtenez ceci via {'@'}BotFather sur Telegram."
+                },
+                "chatId": {
+                  "label": "ID du Chat",
+                  "placeholder": "-1001234567890",
+                  "hint": "Où les notifications seront envoyées. Vous pouvez le détecter automatiquement ci-dessus."
+                },
+                "enableNotifications": "Activer les notifications Telegram"
               },
-              "enableNotifications": "Activer les notifications Telegram"
-            },
-            "actions": {
-              "sendTestMessage": "Envoyer un message de test",
+              "actions": {
+                "sendTestMessage": "Envoyer un message de test",
               "sending": "Envoi en cours...",
               "saveSettings": "Enregistrer les paramètres"
             }

@@ -1795,26 +1795,42 @@
           "title": "Facebook Pixel",
           "description": "Track conversions and build audiences for your Facebook ads."
         },
-        "telegram": {
-          "title": "Telegram Notifications",
-          "description": "Receive real-time notifications for new orders directly in Telegram.",
-          "modal": {
-            "title": "Telegram Configuration",
-            "fields": {
-              "botToken": {
-                "label": "Bot Token",
-                "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
-                "hint": "Get this from {'@'}BotFather on Telegram."
+          "telegram": {
+            "title": "Telegram Notifications",
+            "description": "Receive real-time notifications for new orders directly in Telegram.",
+            "modal": {
+              "title": "Telegram Configuration",
+              "auto": {
+                "title": "Auto-detect Chat ID (recommended)",
+                "steps": {
+                  "pasteToken": "Paste your Bot Token above.",
+                  "startBot": "On Telegram, open the bot and press Start, then send any message (example: hi).",
+                  "clickDetect": "Come back here and click “Detect chats”."
+                },
+                "actions": {
+                  "detectChats": "Detect chats",
+                  "detecting": "Detecting...",
+                  "openBot": "Open bot: {handle}"
+                },
+                "found": "Found {count} chat(s). Click one to use it.",
+                "noneFound": "No chat found yet. Send /start (or any message) to the bot, then click Detect again.",
+                "groupNote": "For a group: add the bot to the group and send a message. For a channel: add the bot as admin and post a message."
               },
-              "chatId": {
-                "label": "Chat ID",
-                "placeholder": "-1001234567890",
-                "hint": "Your chat or group ID where notifications will be sent."
+              "fields": {
+                "botToken": {
+                  "label": "Bot Token",
+                  "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                  "hint": "Get this from {'@'}BotFather on Telegram."
+                },
+                "chatId": {
+                  "label": "Chat ID",
+                  "placeholder": "-1001234567890",
+                  "hint": "Where notifications will be sent. You can auto-detect it above."
+                },
+                "enableNotifications": "Enable Telegram notifications"
               },
-              "enableNotifications": "Enable Telegram notifications"
-            },
-            "actions": {
-              "sendTestMessage": "Send test message",
+              "actions": {
+                "sendTestMessage": "Send test message",
               "sending": "Sending...",
               "saveSettings": "Save settings"
             }
