@@ -8,9 +8,12 @@ import {
 const REGION = process.env.AWS_REGION || 'us-east-1'
 const ENDPOINT = process.env.S3_ENDPOINT || 'http://localhost:9000'
 const FORCE_PATH_STYLE = process.env.S3_FORCE_PATH_STYLE !== 'false' // Default to true for MinIO
-const PUBLIC_READ = process.env.S3_PUBLIC_READ !== 'false' // default true for local/dev
+const PUBLIC_READ =
+    process.env.S3_PUBLIC_READ === 'true' ||
+    (process.env.S3_PUBLIC_READ !== 'false' && process.env.NODE_ENV !== 'production') // safe by default in prod
 
-export const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'products'
+export const PUBLIC_BUCKET_NAME = process.env.S3_PUBLIC_BUCKET_NAME || process.env.S3_BUCKET_NAME || 'products'
+export const PRIVATE_BUCKET_NAME = process.env.S3_PRIVATE_BUCKET_NAME || 'private'
 
 export const s3Client = new S3Client({
     region: REGION,
@@ -22,16 +25,21 @@ export const s3Client = new S3Client({
     }
 })
 
-let bucketReadyPromise: Promise<void> | null = null
-let bucketPolicyPromise: Promise<void> | null = null
+const bucketReadyPromises = new Map<string, Promise<void>>()
+const bucketPolicyPromises = new Map<string, Promise<void>>()
 
 // Ensure target bucket exists (helpful for local dev when MinIO bucket wasn't pre-created)
-export const ensureBucketExists = async () => {
-    if (bucketReadyPromise) return bucketReadyPromise
+export const ensureBucketExists = async (bucketName: string) => {
+    const existing = bucketReadyPromises.get(bucketName)
+    if (existing) return existing
 
-    bucketReadyPromise = (async () => {
+    const allowCreate =
+        process.env.S3_ALLOW_CREATE_BUCKET === 'true' ||
+        (process.env.S3_ALLOW_CREATE_BUCKET !== 'false' && process.env.NODE_ENV !== 'production')
+
+    const promise = (async () => {
         try {
-            await s3Client.send(new HeadBucketCommand({ Bucket: BUCKET_NAME }))
+            await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }))
             return
         } catch (error: any) {
             const notFound =
@@ -43,7 +51,15 @@ export const ensureBucketExists = async () => {
                 throw error
             }
 
-            const createParams: any = { Bucket: BUCKET_NAME }
+            if (!allowCreate) {
+                const err = new Error(
+                    `Bucket "${bucketName}" not found. Create it manually or set S3_ALLOW_CREATE_BUCKET=true (dev only).`
+                )
+                ;(err as any).code = 'NoSuchBucket'
+                throw err
+            }
+
+            const createParams: any = { Bucket: bucketName }
 
             if (REGION && REGION !== 'us-east-1') {
                 createParams.CreateBucketConfiguration = { LocationConstraint: REGION }
@@ -54,20 +70,24 @@ export const ensureBucketExists = async () => {
     })()
 
     try {
-        await bucketReadyPromise
+        bucketReadyPromises.set(bucketName, promise)
+        await promise
     } catch (err) {
-        bucketReadyPromise = null // allow retry on next request
+        bucketReadyPromises.delete(bucketName) // allow retry on next request
         throw err
     }
 
-    return bucketReadyPromise
+    return promise
 }
 
-export const ensureBucketPublicRead = async () => {
+export const ensureBucketPublicRead = async (bucketName: string) => {
     if (!PUBLIC_READ) return
-    if (bucketPolicyPromise) return bucketPolicyPromise
+    const existing = bucketPolicyPromises.get(bucketName)
+    if (existing) return existing
 
-    bucketPolicyPromise = (async () => {
+    const promise = (async () => {
+        // Important: Keep public read scoped to tenant-owned assets only.
+        // In production, set bucket policy manually (recommended) and keep S3_PUBLIC_READ=false.
         const policy = {
             Version: '2012-10-17',
             Statement: [
@@ -75,30 +95,45 @@ export const ensureBucketPublicRead = async () => {
                     Effect: 'Allow',
                     Principal: '*',
                     Action: ['s3:GetObject'],
-                    Resource: [`arn:aws:s3:::${BUCKET_NAME}/*`]
+                    Resource: [`arn:aws:s3:::${bucketName}/tenants/*`]
                 }
             ]
         }
 
         await s3Client.send(
             new PutBucketPolicyCommand({
-                Bucket: BUCKET_NAME,
+                Bucket: bucketName,
                 Policy: JSON.stringify(policy)
             })
         )
     })()
 
     try {
-        await bucketPolicyPromise
+        bucketPolicyPromises.set(bucketName, promise)
+        await promise
     } catch (err) {
-        bucketPolicyPromise = null
+        bucketPolicyPromises.delete(bucketName)
         throw err
     }
 
-    return bucketPolicyPromise
+    return promise
 }
 
-export const buildPublicUrl = (key: string) => {
+export const buildPublicUrl = (bucketName: string, key: string) => {
     const base = (process.env.S3_PUBLIC_URL || ENDPOINT).replace(/\/$/, '')
-    return `${base}/${BUCKET_NAME}/${key}`
+
+    try {
+        const url = new URL(base)
+        if (url.hostname.startsWith(`${bucketName}.`)) {
+            return `${base}/${key}`
+        }
+    } catch {
+        // ignore invalid URL
+    }
+
+    if (base.endsWith(`/${bucketName}`)) {
+        return `${base}/${key}`
+    }
+
+    return `${base}/${bucketName}/${key}`
 }

@@ -18,7 +18,7 @@ describe('S3 helpers', () => {
     it('buildPublicUrl uses S3_PUBLIC_URL when set and trims trailing slash', async () => {
         vi.stubEnv('S3_PUBLIC_URL', 'http://cdn.local/')
         const mod = await loadModule()
-        const url = mod.buildPublicUrl('tenant-a/image.png')
+        const url = mod.buildPublicUrl(mod.PUBLIC_BUCKET_NAME, 'tenant-a/image.png')
         expect(url).toBe('http://cdn.local/products/tenant-a/image.png')
     })
 
@@ -27,7 +27,7 @@ describe('S3 helpers', () => {
         const sendSpy = vi.spyOn(mod.s3Client, 'send')
         sendSpy.mockResolvedValueOnce({}) // HeadBucket success
 
-        await mod.ensureBucketExists()
+        await mod.ensureBucketExists(mod.PUBLIC_BUCKET_NAME)
 
         expect(sendSpy).toHaveBeenCalledTimes(1)
         expect(sendSpy.mock.calls[0][0].constructor.name).toBe('HeadBucketCommand')
@@ -39,7 +39,7 @@ describe('S3 helpers', () => {
         sendSpy.mockRejectedValueOnce({ name: 'NotFound' }) // HeadBucket failure
         sendSpy.mockResolvedValueOnce({}) // CreateBucket success
 
-        await mod.ensureBucketExists()
+        await mod.ensureBucketExists(mod.PUBLIC_BUCKET_NAME)
 
         expect(sendSpy).toHaveBeenCalledTimes(2)
         expect(sendSpy.mock.calls[0][0].constructor.name).toBe('HeadBucketCommand')
@@ -52,7 +52,7 @@ describe('S3 helpers', () => {
         const sendSpy = vi.spyOn(mod.s3Client, 'send')
         sendSpy.mockResolvedValueOnce({}) // PutBucketPolicy success
 
-        await mod.ensureBucketPublicRead()
+        await mod.ensureBucketPublicRead(mod.PUBLIC_BUCKET_NAME)
 
         expect(sendSpy).toHaveBeenCalledTimes(1)
         expect(sendSpy.mock.calls[0][0].constructor.name).toBe('PutBucketPolicyCommand')
