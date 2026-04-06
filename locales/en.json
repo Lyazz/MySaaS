@@ -1819,12 +1819,12 @@
               "fields": {
                 "botToken": {
                   "label": "Bot Token",
-                  "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                  "placeholder": "Paste bot token here",
                   "hint": "Get this from {'@'}BotFather on Telegram."
                 },
                 "chatId": {
                   "label": "Chat ID",
-                  "placeholder": "-1001234567890",
+                  "placeholder": "Paste chat ID here",
                   "hint": "Where notifications will be sent. You can auto-detect it above."
                 },
                 "enableNotifications": "Enable Telegram notifications"

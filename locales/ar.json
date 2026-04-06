@@ -1806,12 +1806,12 @@
             "fields": {
               "botToken": {
                 "label": "رمز البوت (Bot Token)",
-                "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                "placeholder": "ألصق رمز البوت هنا",
                 "hint": "احصل على هذا من {'@'}BotFather على تيليغرام."
               },
               "chatId": {
                 "label": "معرّف الدردشة (Chat ID)",
-                "placeholder": "-1001234567890",
+                "placeholder": "ألصق معرّف الدردشة هنا",
                 "hint": "أين سيتم إرسال التنبيهات. يمكنك اكتشافه تلقائياً أعلاه."
               },
               "enableNotifications": "تفعيل تنبيهات تيليغرام"

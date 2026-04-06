@@ -1807,12 +1807,12 @@
               "fields": {
                 "botToken": {
                   "label": "Token du Bot",
-                  "placeholder": "123456789:ABCDefghIJKLmnOpqrSTUvwxYZ123456789",
+                  "placeholder": "Collez le token du bot ici",
                   "hint": "Obtenez ceci via {'@'}BotFather sur Telegram."
                 },
                 "chatId": {
                   "label": "ID du Chat",
-                  "placeholder": "-1001234567890",
+                  "placeholder": "Collez l’ID du chat ici",
                   "hint": "Où les notifications seront envoyées. Vous pouvez le détecter automatiquement ci-dessus."
                 },
                 "enableNotifications": "Activer les notifications Telegram"
