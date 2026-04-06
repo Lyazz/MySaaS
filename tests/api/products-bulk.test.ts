@@ -157,6 +157,11 @@ describe('Admin products bulk ops', () => {
     })
 
     it('imports images and normalizes tenant-scoped upload links', async () => {
+        const prevPublicUrl = process.env.S3_PUBLIC_URL
+        const prevPublicBucket = process.env.S3_PUBLIC_BUCKET_NAME
+        process.env.S3_PUBLIC_URL = 'https://nbg1.your-objectstorage.com'
+        process.env.S3_PUBLIC_BUCKET_NAME = 'swekly-public'
+
         const slug = `import-img-${Date.now()}`
         const csv = [
             'slug,title,price,images',
@@ -189,7 +194,7 @@ describe('Admin products bulk ops', () => {
         expect(created).toBeTruthy()
 
         const images = (created as any)?.images as string[]
-        expect(images).toContain(`/uploads/${tenantAId}/a.jpg`)
+        expect(images).toContain(`https://nbg1.your-objectstorage.com/swekly-public/tenants/${tenantAId}/public/a.jpg`)
         expect(images).toContain(`/uploads/${tenantAId}/b.jpg`)
         expect(images).toContain(`/uploads/${tenantAId}/c.jpg`)
         expect(images).toContain(`/uploads/${tenantAId}/d.jpg`)
@@ -198,6 +203,9 @@ describe('Admin products bulk ops', () => {
 
         // Never persist cross-tenant upload paths.
         expect(images.some((u) => u.includes(`/uploads/${tenantBId}/`))).toBe(false)
+
+        process.env.S3_PUBLIC_URL = prevPublicUrl
+        process.env.S3_PUBLIC_BUCKET_NAME = prevPublicBucket
     })
 
     it('returns actionable messages for unsupported columns', async () => {

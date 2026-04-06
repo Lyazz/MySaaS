@@ -3,6 +3,7 @@ import { parseCsv, stringifyCsv } from '../../lib/csv'
 import { InventoryService } from '../inventory/inventory.service'
 import { ProductsService } from './products.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
+import { buildPublicUrl } from '../../lib/s3'
 
 type ImportSummary = {
     created: number
@@ -86,6 +87,11 @@ const normalizeImportedImage = (tenantId: string, value: string): string | null 
 
     // Bare filename => assume tenant-scoped upload.
     if (!path.startsWith('/') && !path.includes('/')) {
+        if (process.env.S3_PUBLIC_URL) {
+            const bucketName = process.env.S3_PUBLIC_BUCKET_NAME || process.env.S3_BUCKET_NAME || 'products'
+            const key = `tenants/${tenantId}/public/${path}`
+            return buildPublicUrl(bucketName, key)
+        }
         path = `/uploads/${tenantId}/${path}`
     }
 
