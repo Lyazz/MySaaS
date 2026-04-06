@@ -88,7 +88,15 @@ export class ProductImagesService {
         if (existing.url && updated.url && existing.url !== updated.url) {
             const stillReferenced = await this.isUrlReferenced(tenantId, existing.url)
             if (!stillReferenced) {
-                await deletePublicAssetIfOwned({ tenantId, urlOrPath: existing.url })
+                try {
+                    await deletePublicAssetIfOwned({ tenantId, urlOrPath: existing.url })
+                } catch (error) {
+                    console.warn('Failed to delete public asset for product image update', {
+                        tenantId,
+                        url: existing.url,
+                        error
+                    })
+                }
             }
         }
 
@@ -111,7 +119,15 @@ export class ProductImagesService {
 
         const stillReferenced = await this.isUrlReferenced(tenantId, image.url)
         if (!stillReferenced) {
-            await deletePublicAssetIfOwned({ tenantId, urlOrPath: image.url })
+            try {
+                await deletePublicAssetIfOwned({ tenantId, urlOrPath: image.url })
+            } catch (error) {
+                console.warn('Failed to delete public asset for product image delete', {
+                    tenantId,
+                    url: image.url,
+                    error
+                })
+            }
         }
 
         return true
@@ -260,7 +276,15 @@ export class ProductImagesService {
         for (const url of removedUrls) {
             const stillReferenced = await this.isUrlReferenced(tenantId, url)
             if (!stillReferenced) {
-                await deletePublicAssetIfOwned({ tenantId, urlOrPath: url })
+                try {
+                    await deletePublicAssetIfOwned({ tenantId, urlOrPath: url })
+                } catch (error) {
+                    console.warn('Failed to delete public asset for product images sync', {
+                        tenantId,
+                        url,
+                        error
+                    })
+                }
             }
         }
 

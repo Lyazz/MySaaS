@@ -415,7 +415,11 @@ export class ProductsService {
             ])
             const stillReferenced = imageCount > 0 || productArrayCount > 0
             if (!stillReferenced) {
-                await deletePublicAssetIfOwned({ tenantId, urlOrPath: url })
+                try {
+                    await deletePublicAssetIfOwned({ tenantId, urlOrPath: url })
+                } catch (error) {
+                    console.warn('Failed to delete public asset for product delete', { tenantId, url, error })
+                }
             }
         }
 

@@ -17,21 +17,40 @@ const resolveS3ObjectFromUrl = (url: string): { bucket: string; key: string } | 
         const pathname = urlPathnameSafe(u).replace(/^\/+/, '')
         if (!pathname) return null
 
-        // Virtual-hosted: https://<bucket>.<endpoint>/<key>
-        const hostParts = u.hostname.split('.')
-        if (hostParts.length >= 2) {
-            const bucketCandidate = hostParts[0]!
-            if (bucketCandidate) {
-                // If the URL is virtual-hosted style, key is full pathname.
-                // We cannot fully verify endpoint host here; we will verify bucket later.
-                return { bucket: bucketCandidate, key: pathname }
+        const endpointHost = (() => {
+            const raw = process.env.S3_ENDPOINT
+            if (!raw) return null
+            try {
+                return new URL(raw).hostname.toLowerCase()
+            } catch {
+                return null
             }
+        })()
+
+        // We only support resolving public assets to the *configured* public bucket.
+        // This prevents accidental deletions when a URL points to some other host/bucket.
+
+        // Virtual-hosted: https://<PUBLIC_BUCKET_NAME>.<endpoint>/<key>
+        if (u.hostname.toLowerCase().startsWith(`${PUBLIC_BUCKET_NAME.toLowerCase()}.`)) {
+            return { bucket: PUBLIC_BUCKET_NAME, key: pathname }
         }
 
-        // Path-style: https://<endpoint>/<bucket>/<key>
-        const [bucket, ...rest] = pathname.split('/')
-        if (!bucket || rest.length === 0) return null
-        return { bucket, key: rest.join('/') }
+        // Path-style: https://<endpoint>/<PUBLIC_BUCKET_NAME>/<key>
+        if (pathname.startsWith(`${PUBLIC_BUCKET_NAME}/`)) {
+            return { bucket: PUBLIC_BUCKET_NAME, key: pathname.slice(`${PUBLIC_BUCKET_NAME}/`.length) }
+        }
+
+        // CDN/custom domain: https://cdn.example.com/<key> where <key> is already bucket-relative.
+        // We only allow tenant-scoped keys for deletion later, so this stays safe.
+        const host = u.hostname.toLowerCase()
+        const looksLikeS3VirtualHosted =
+            endpointHost && host !== endpointHost && host.endsWith(`.${endpointHost}`)
+
+        if (!looksLikeS3VirtualHosted && pathname.startsWith('tenants/')) {
+            return { bucket: PUBLIC_BUCKET_NAME, key: pathname }
+        }
+
+        return null
     } catch {
         return null
     }
@@ -96,4 +115,3 @@ export const deletePublicAssetIfOwned = async (args: { tenantId: string; urlOrPa
     await s3Client.send(new DeleteObjectCommand({ Bucket: resolved.bucket, Key: resolved.key }))
     return true
 }
-
