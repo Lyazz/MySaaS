@@ -516,6 +516,28 @@
 	            @change="onImportCsvFileChange"
 	          >
 
+	          <div class="rounded-md border border-gray-200 bg-white p-4">
+	            <div class="flex items-start justify-between gap-3">
+	              <div class="min-w-0">
+	                <div class="text-sm font-semibold text-gray-900">
+	                  {{ t('admin.pages.products.index.bulk.importTemplateTitle') }}
+	                </div>
+	                <div class="mt-1 text-xs text-gray-600">
+	                  {{ t('admin.pages.products.index.bulk.importTemplateHint') }}
+	                </div>
+	              </div>
+	              <button
+	                type="button"
+	                class="shrink-0 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+	                @click="downloadProductsImportTemplate"
+	              >
+	                {{ t('admin.pages.products.index.bulk.importTemplateDownload') }}
+	              </button>
+	            </div>
+
+	            <pre class="mt-3 overflow-auto rounded-md bg-gray-50 p-3 text-xs text-gray-800"><code>{{ productsImportTemplateCsv }}</code></pre>
+	          </div>
+
 	          <div
 	            v-if="importCsvResult"
 	            class="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700"
@@ -716,6 +738,12 @@ const showImportCsvModal = ref(false)
 const importingCsv = ref(false)
 const importCsvResult = ref<any | null>(null)
 const importCsvInput = ref<HTMLInputElement | null>(null)
+
+const productsImportTemplateHeader =
+  'id,slug,title,price,stock,isActive,categoryId,categorySlug,description,miniDescription,images'
+const productsImportTemplateExample =
+  ',my-product,My product,1990,10,true,,,,"","image1.jpg|https://example.com/image2.jpg"'
+const productsImportTemplateCsv = `${productsImportTemplateHeader}\n${productsImportTemplateExample}\n`
 
 const showBulkUpdateModal = ref(false)
 const bulkPrice = ref('')
@@ -932,6 +960,18 @@ async function exportProductsCsv() {
     console.error('Failed to export CSV:', error)
     alert(t('admin.pages.products.index.bulk.exportError'))
   }
+}
+
+function downloadProductsImportTemplate() {
+  const blob = new Blob([productsImportTemplateCsv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'products-import-template.csv'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
 }
 
 function openImportModal() {
