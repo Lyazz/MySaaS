@@ -108,8 +108,25 @@ const normalizeImportedImage = (tenantId: string, value: string): string | null 
 }
 
 const normalizeImportedImages = (tenantId: string, raw: string): string[] | null => {
-    const parts = normalizeImages(raw)
-    if (!parts) return null
+    const trimmed = raw.trim()
+    if (!trimmed) return null
+
+    // Support JSON array input (common from other exporters), e.g. ["https://...","/uploads/..."]
+    // This keeps backwards compatibility with our `|`-separated format.
+    const parts = (() => {
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+            try {
+                const parsed = JSON.parse(trimmed)
+                if (Array.isArray(parsed)) {
+                    return parsed.map((v) => (typeof v === 'string' ? v : '')).filter(Boolean).slice(0, 10)
+                }
+            } catch {
+                // fall back to legacy parsing
+            }
+        }
+        return normalizeImages(trimmed) ?? []
+    })()
+    if (parts.length === 0) return null
 
     const normalized = parts
         .map((p) => normalizeImportedImage(tenantId, p))
@@ -186,12 +203,49 @@ export class BulkProductsService {
         const parsed = parseCsv(csvText)
         const summary: ImportSummary = { created: 0, updated: 0, skipped: 0, errors: [], warnings: [] }
 
+        const supportedColumns = new Set([
+            'id',
+            'title',
+            'slug',
+            'isActive',
+            'price',
+            'stock',
+            'categoryId',
+            'categorySlug',
+            'description',
+            'miniDescription',
+            'images'
+        ])
+
         const hasColumn = (name: string) => parsed.header.includes(name)
         if (!hasColumn('id') && !hasColumn('slug')) {
-            throw new Error('CSV must include id or slug column')
+            throw new Error(`CSV must include id or slug column. Found: ${parsed.header.join(', ')}`)
         }
         if (!hasColumn('title')) {
             summary.warnings.push({ row: 1, message: 'CSV does not include title; updates may be partial' })
+        }
+
+        const unknownColumns = parsed.header.filter((c) => !supportedColumns.has(c))
+        if (unknownColumns.length > 0) {
+            summary.warnings.push({
+                row: 1,
+                message: `Ignoring unsupported columns: ${unknownColumns.join(', ')}`
+            })
+        }
+
+        if (!hasColumn('title') && hasColumn('name_i18n')) {
+            summary.warnings.push({
+                row: 1,
+                message:
+                    'This CSV uses name_i18n, but the importer expects a title column. Rename name_i18n -> title (choose one language) to create new products.'
+            })
+        }
+        if (!hasColumn('description') && hasColumn('description_i18n')) {
+            summary.warnings.push({
+                row: 1,
+                message:
+                    'This CSV uses description_i18n, but the importer expects a description column. Rename description_i18n -> description (choose one language) if you want to import descriptions.'
+            })
         }
 
         for (let i = 0; i < parsed.records.length; i++) {

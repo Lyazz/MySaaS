@@ -543,11 +543,39 @@
 	            class="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700"
 	          >
 	            <div>{{ t('admin.pages.products.index.bulk.importResult', importCsvResult) }}</div>
-	            <div
-	              v-if="importCsvResult.errors?.length"
-	              class="mt-2 text-xs text-red-700"
-	            >
-	              {{ t('admin.pages.products.index.bulk.importErrors', { count: importCsvResult.errors.length }) }}
+	            <div v-if="importCsvResult.warnings?.length" class="mt-3">
+	              <details class="rounded-md border border-amber-200 bg-amber-50 p-3">
+	                <summary class="cursor-pointer text-xs font-semibold text-amber-900">
+	                  Warnings ({{ importCsvResult.warnings.length }})
+	                </summary>
+	                <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-900">
+	                  <li v-for="(w, idx) in importCsvResult.warnings.slice(0, 20)" :key="idx">
+	                    Row {{ w.row }}: {{ w.message }}
+	                  </li>
+	                  <li v-if="importCsvResult.warnings.length > 20" class="list-none text-amber-800">
+	                    …and {{ importCsvResult.warnings.length - 20 }} more
+	                  </li>
+	                </ul>
+	              </details>
+	            </div>
+
+	            <div v-if="importCsvResult.errors?.length" class="mt-3">
+	              <details open class="rounded-md border border-red-200 bg-red-50 p-3">
+	                <summary class="cursor-pointer text-xs font-semibold text-red-900">
+	                  Errors ({{ importCsvResult.errors.length }})
+	                </summary>
+	                <div class="mt-1 text-xs text-red-800">
+	                  {{ t('admin.pages.products.index.bulk.importErrors', { count: importCsvResult.errors.length }) }}
+	                </div>
+	                <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-red-900">
+	                  <li v-for="(e, idx) in importCsvResult.errors.slice(0, 50)" :key="idx">
+	                    Row {{ e.row }}: {{ e.message }}
+	                  </li>
+	                  <li v-if="importCsvResult.errors.length > 50" class="list-none text-red-800">
+	                    …and {{ importCsvResult.errors.length - 50 }} more
+	                  </li>
+	                </ul>
+	              </details>
 	            </div>
 	          </div>
 	        </div>
@@ -1009,7 +1037,19 @@ async function onImportCsvFileChange(event: Event) {
     await fetchCategories()
   } catch (error) {
     console.error('Failed to import CSV:', error)
-    alert(t('admin.pages.products.index.bulk.importError'))
+    const msg =
+      (error as any)?.data?.statusMessage ||
+      (error as any)?.data?.message ||
+      (error as any)?.message ||
+      t('admin.pages.products.index.bulk.importError')
+    showToast(String(msg), 'error')
+    importCsvResult.value = {
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      warnings: [],
+      errors: [{ row: 1, message: String(msg) }]
+    }
   } finally {
     importingCsv.value = false
   }

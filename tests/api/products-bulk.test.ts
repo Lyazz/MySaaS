@@ -200,6 +200,28 @@ describe('Admin products bulk ops', () => {
         expect(images.some((u) => u.includes(`/uploads/${tenantBId}/`))).toBe(false)
     })
 
+    it('returns actionable messages for unsupported columns', async () => {
+        const csv = [
+            'slug,name_i18n,description_i18n,price,sale_price',
+            'p-1,"{\\"ar\\":\\"x\\"}","{\\"ar\\":\\"y\\"}",10,9'
+        ].join('\n')
+
+        const res = await request(app)
+            .post('/api/admin/products/import.csv')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', Buffer.from(csv, 'utf8'), { filename: 'products.csv', contentType: 'text/csv' })
+
+        expect(res.status).toBe(200)
+        expect(res.body.errors?.length).toBe(1)
+        expect(res.body.errors?.[0]?.message).toMatch(/Missing title for create/i)
+
+        const warningsText = (res.body.warnings ?? []).map((w: any) => String(w.message)).join('\n')
+        expect(warningsText).toMatch(/Ignoring unsupported columns/i)
+        expect(warningsText).toMatch(/name_i18n/i)
+        expect(warningsText).toMatch(/description_i18n/i)
+    })
+
     it('bulk patches products and duplicates selected product', async () => {
         const patch = await request(app)
             .patch('/api/admin/products/bulk')
