@@ -98,7 +98,21 @@ export const parseCsv = (text: string, opts?: CsvParseOptions): ParsedCsv => {
 
     const header = (rows.shift() ?? []).map((h) => h.trim())
     if (header.length === 0 || header.every((h) => !h)) throw new Error('CSV header row is missing')
-    if (header.some((h) => !h)) throw new Error('CSV header contains empty column names')
+    if (header.some((h) => !h)) {
+        const emptyColumns = header
+            .map((h, idx) => ({ h, idx }))
+            .filter((x) => !x.h)
+            .map((x) => x.idx + 1) // 1-based for users
+
+        // This commonly happens when the header row has an extra comma:
+        // - leading comma: ",id,slug,..."  -> empty column 1
+        // - double comma:  "id,,slug,..."  -> some empty column
+        // - trailing comma:"id,slug,..." + "," -> empty last column
+        throw new Error(
+            `CSV header contains empty column names at column(s): ${emptyColumns.join(', ')}. ` +
+                `Fix: remove extra commas / empty header cells. Parsed header: ${JSON.stringify(header)}`
+        )
+    }
 
     const records = rows.map((row) => {
         const record: Record<string, string> = {}
@@ -131,4 +145,3 @@ export const stringifyCsv = (header: string[], rows: Array<Record<string, unknow
 
     return `${lines.join('\n')}\n`
 }
-
