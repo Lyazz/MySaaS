@@ -49,6 +49,76 @@ const normalizeImages = (raw: string): string[] | null => {
     return parts
 }
 
+const isUuidLike = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)
+
+const normalizeImportedImage = (tenantId: string, value: string): string | null => {
+    const trimmed = value.trim()
+    if (!trimmed) return null
+
+    if (/^https?:\/\//i.test(trimmed)) {
+        try {
+            const u = new URL(trimmed)
+
+            // If the URL points to an app upload, store it as a relative path so it stays valid across environments/hosts.
+            if (/^\/uploads\//i.test(u.pathname)) {
+                const segments = u.pathname.split('/').filter(Boolean) // uploads/<tenantId>/<file...>
+                const uploadIdx = segments.findIndex((s) => s.toLowerCase() === 'uploads')
+                if (uploadIdx === 0) {
+                    const maybeTenantOrFile = segments[1] || ''
+                    const rest = segments.slice(2).join('/')
+                    if (rest) return `/uploads/${tenantId}/${rest}`
+                    if (maybeTenantOrFile) return `/uploads/${tenantId}/${maybeTenantOrFile}`
+                }
+                return `/uploads/${tenantId}`
+            }
+
+            return trimmed
+        } catch {
+            return trimmed
+        }
+    }
+
+    let path = trimmed.replace(/\\/g, '/')
+    if (/^\.\//.test(path)) path = path.slice(2)
+    if (/^public\/uploads\//i.test(path)) path = path.replace(/^public/i, '')
+    if (/^uploads\//i.test(path)) path = `/${path}`
+    if (!path.startsWith('/') && path.includes('/')) path = `/${path}`
+
+    // Bare filename => assume tenant-scoped upload.
+    if (!path.startsWith('/') && !path.includes('/')) {
+        path = `/uploads/${tenantId}/${path}`
+    }
+
+    if (/^\/uploads\//i.test(path)) {
+        const match = path.match(/^\/uploads\/([^/]+)\/(.+)$/i)
+        if (match) {
+            const maybeTenant = match[1]!
+            const rest = match[2]!
+            if (isUuidLike(maybeTenant) && maybeTenant.toLowerCase() !== tenantId.toLowerCase()) {
+                return `/uploads/${tenantId}/${rest}`
+            }
+        } else {
+            // `/uploads/<file>` (missing tenant segment) => scope to tenant.
+            const rest = path.replace(/^\/uploads\/?/i, '')
+            if (rest) return `/uploads/${tenantId}/${rest.replace(/^\/+/, '')}`
+        }
+    }
+
+    return path
+}
+
+const normalizeImportedImages = (tenantId: string, raw: string): string[] | null => {
+    const parts = normalizeImages(raw)
+    if (!parts) return null
+
+    const normalized = parts
+        .map((p) => normalizeImportedImage(tenantId, p))
+        .filter((p): p is string => typeof p === 'string' && p.length > 0)
+        .slice(0, 10)
+
+    return normalized.length ? normalized : null
+}
+
 const buildUniqueSlug = async (tenantId: string, base: string) => {
     const cleanBase = base.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '')
     const root = cleanBase || `product-copy`
@@ -187,7 +257,7 @@ export class BulkProductsService {
 
                 const description = hasColumn('description') ? (record.description ?? '') : undefined
                 const miniDescription = hasColumn('miniDescription') ? (record.miniDescription ?? '') : undefined
-                const images = hasColumn('images') ? normalizeImages(record.images ?? '') : undefined
+                const images = hasColumn('images') ? normalizeImportedImages(tenantId, record.images ?? '') : undefined
 
                 if (!existing) {
                     if (!rawTitle.trim()) throw new Error('Missing title for create')

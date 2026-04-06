@@ -156,6 +156,50 @@ describe('Admin products bulk ops', () => {
         expect(move).toBeNull()
     })
 
+    it('imports images and normalizes tenant-scoped upload links', async () => {
+        const slug = `import-img-${Date.now()}`
+        const csv = [
+            'slug,title,price,images',
+            [
+                slug,
+                'Imported With Images',
+                '9.99',
+                [
+                    'a.jpg',
+                    `/uploads/${tenantBId}/b.jpg`,
+                    `uploads/${tenantBId}/c.jpg`,
+                    `public/uploads/${tenantBId}/d.jpg`,
+                    `https://example.com/remote.jpg`,
+                    `https://old-host.example/uploads/${tenantBId}/e.jpg`
+                ].join('|')
+            ].join(',')
+        ].join('\n')
+
+        const res = await request(app)
+            .post('/api/admin/products/import.csv')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', Buffer.from(csv, 'utf8'), { filename: 'products.csv', contentType: 'text/csv' })
+
+        expect(res.status).toBe(200)
+        expect(res.body.created).toBe(1)
+        expect(res.body.errors?.length || 0).toBe(0)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantAId, slug } })
+        expect(created).toBeTruthy()
+
+        const images = (created as any)?.images as string[]
+        expect(images).toContain(`/uploads/${tenantAId}/a.jpg`)
+        expect(images).toContain(`/uploads/${tenantAId}/b.jpg`)
+        expect(images).toContain(`/uploads/${tenantAId}/c.jpg`)
+        expect(images).toContain(`/uploads/${tenantAId}/d.jpg`)
+        expect(images).toContain('https://example.com/remote.jpg')
+        expect(images).toContain(`/uploads/${tenantAId}/e.jpg`)
+
+        // Never persist cross-tenant upload paths.
+        expect(images.some((u) => u.includes(`/uploads/${tenantBId}/`))).toBe(false)
+    })
+
     it('bulk patches products and duplicates selected product', async () => {
         const patch = await request(app)
             .patch('/api/admin/products/bulk')

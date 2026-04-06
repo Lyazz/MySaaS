@@ -31,7 +31,9 @@ export class BulkProductsController {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'CSV file is required' })
             }
 
-            const summary = await service.importProductsCsv(tenant.id, csvText, { actorUserId: user?.id ?? null })
+            const summary = await service.importProductsCsv(tenant.id, csvText, {
+                actorUserId: user?.id ?? null
+            })
             res.json(summary)
         } catch (error: any) {
             console.error('Import products CSV error:', error)
@@ -75,4 +77,3 @@ export class BulkProductsController {
         }
     }
 }
-
