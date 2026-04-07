@@ -12,7 +12,7 @@ export const STAFF_ROLE_PRESETS: StaffRolePreset[] = [
         name: 'Gestionnaire commandes',
         permissions: [
             { resource: 'dashboard', actions: ['read'] },
-            { resource: 'orders', actions: ['read', 'update'] },
+            { resource: 'orders', actions: ['read', 'update', 'delete'] },
             { resource: 'customers', actions: ['read'] },
             { resource: 'delivery', actions: ['read', 'update'] }
         ]
@@ -45,7 +45,7 @@ export const STAFF_ROLE_PRESETS: StaffRolePreset[] = [
             { resource: 'dashboard', actions: ['read'] },
             { resource: 'cash', actions: ['create', 'read', 'update'] },
             { resource: 'billing', actions: ['read'] },
-            { resource: 'orders', actions: ['read', 'update'] },
+            { resource: 'orders', actions: ['read', 'update', 'delete'] },
             { resource: 'customers', actions: ['read'] }
         ]
     },
@@ -111,4 +111,3 @@ export const seedStaffRolePresets = async (tx: Prisma.TransactionClient, tenantI
         }
     }
 }
-

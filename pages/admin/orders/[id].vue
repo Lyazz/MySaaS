@@ -1,5 +1,15 @@
 <template>
   <div class="max-w-5xl mx-auto">
+    <AdminConfirmModal
+      v-model="deleteOpen"
+      :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
+      :message="t('admin.pages.orders.detail.deleteConfirm', 'Delete this order? Only unconfirmed (PENDING) orders can be deleted.')"
+      :confirm-text="t('common.delete', 'Delete')"
+      :error="deleteError"
+      @confirm="confirmDelete"
+      @cancel="deleteError = null"
+    />
+
     <DeliveryPaymentModal
       v-model="deliveryModalOpen"
       :cashboxes="cashboxes"
@@ -56,6 +66,15 @@
               {{ t('admin.pages.orders.detail.sections.orderInfo') }}
             </h2>
             <div class="flex items-center gap-3">
+              <button
+                v-if="order.status === 'PENDING'"
+                type="button"
+                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-red-50 text-red-700 hover:bg-red-100"
+                @click="openDelete"
+              >
+                <Icon name="lucide:trash-2" class="w-4 h-4 mr-2" />
+                {{ t('common.delete', 'Delete') }}
+              </button>
               <NuxtLink
                 v-if="order.status === 'DELIVERED'"
                 :to="`/admin/sales/${order.id}`"
@@ -392,6 +411,7 @@ const authStore = useAuthStore()
 const storeSettings = useState<any>('storeSettings')
 const { format: formatCurrency } = useCurrency()
 const route = useRoute()
+const router = useRouter()
 const orderId = route.params.id as string
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -427,6 +447,9 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const deliveryModalOpen = ref(false)
 const cashboxes = ref<any[]>([])
+
+const deleteOpen = ref(false)
+const deleteError = ref<string | null>(null)
 
 const savingNotes = ref(false)
 const notesSavedMessage = ref('')
@@ -478,6 +501,29 @@ async function fetchOrder() {
     order.value = null
   } finally {
     loading.value = false
+  }
+}
+
+function openDelete() {
+  deleteError.value = null
+  deleteOpen.value = true
+}
+
+async function confirmDelete() {
+  if (!order.value) return
+  if (order.value.status !== 'PENDING') return
+
+  deleteError.value = null
+  try {
+    await $fetch(`/api/admin/orders/${encodeURIComponent(orderId)}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    deleteOpen.value = false
+    await router.push('/admin/orders')
+  } catch (error: any) {
+    console.error('Failed to delete order:', error)
+    deleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
   }
 }
 

@@ -11,6 +11,8 @@ describe('Admin products bulk ops', () => {
     let adminAToken: string
     let categoryAId: string
     let productAId: string
+    let deleteAProduct1Id: string
+    let deleteAProduct2Id: string
 
     const slugB = `bulk-b-${Date.now()}`
     const hostB = `${slugB}.localhost:3000`
@@ -61,6 +63,30 @@ describe('Admin products bulk ops', () => {
                 isActive: true
             }
         })
+
+        const toDelete1 = await prisma.product.create({
+            data: {
+                tenantId: tenantAId,
+                title: 'Bulk Delete A1',
+                slug: `bulk-delete-a1-${Date.now()}`,
+                price: 10,
+                stock: 1,
+                isActive: true
+            }
+        })
+        deleteAProduct1Id = toDelete1.id
+
+        const toDelete2 = await prisma.product.create({
+            data: {
+                tenantId: tenantAId,
+                title: 'Bulk Delete A2',
+                slug: `bulk-delete-a2-${Date.now()}`,
+                price: 20,
+                stock: 1,
+                isActive: true
+            }
+        })
+        deleteAProduct2Id = toDelete2.id
 
         const tenantB = await prisma.tenant.create({ data: { name: 'Bulk B', slug: slugB } })
         tenantBId = tenantB.id
@@ -271,5 +297,34 @@ describe('Admin products bulk ops', () => {
 
         expect(res.status).toBe(400)
         expect(res.body?.statusMessage).toMatch(/system-managed/i)
+    })
+
+    it('bulk deletes products and enforces tenancy', async () => {
+        const del = await request(app)
+            .delete('/api/admin/products/bulk')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .send({ ids: [deleteAProduct1Id, deleteAProduct2Id] })
+
+        expect(del.status).toBe(200)
+        expect(del.body?.success).toBe(true)
+        expect(del.body?.deletedCount).toBe(2)
+
+        const remaining = await prisma.product.findMany({
+            where: { tenantId: tenantAId, id: { in: [deleteAProduct1Id, deleteAProduct2Id] } },
+            select: { id: true }
+        })
+        expect(remaining.length).toBe(0)
+
+        const cross = await request(app)
+            .delete('/api/admin/products/bulk')
+            .set('X-Forwarded-Host', hostB)
+            .set('Authorization', `Bearer ${adminBToken}`)
+            .send({ ids: [productAId] })
+
+        expect(cross.status).toBe(404)
+
+        const stillThere = await prisma.product.findFirst({ where: { tenantId: tenantAId, id: productAId }, select: { id: true } })
+        expect(stillThere?.id).toBe(productAId)
     })
 })

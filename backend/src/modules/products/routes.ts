@@ -33,6 +33,7 @@ router.use(requireStaffCrud('products'))
 router.get('/export.csv', bulkController.exportCsv.bind(bulkController))
 router.post('/import.csv', csvUpload.single('file'), bulkController.importCsv.bind(bulkController))
 router.patch('/bulk', bulkController.bulkPatch.bind(bulkController))
+router.delete('/bulk', bulkController.bulkDelete.bind(bulkController))
 router.post('/:id/duplicate', bulkController.duplicate.bind(bulkController))
 
 // GET /products - List products

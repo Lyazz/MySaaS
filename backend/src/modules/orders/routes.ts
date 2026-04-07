@@ -1,17 +1,18 @@
 import { Router } from 'express'
 import { requireTenantMember } from '../../middleware/rbac.middleware'
-import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
+import { requireStaffCrud, requireStaffPermission } from '../../middleware/staff-permissions.middleware'
 import { OrdersController } from './orders.controller'
 
 const router = Router()
 const controller = new OrdersController()
 
 router.use(requireTenantMember)
-router.use(requireStaffCrud('orders'))
 
-router.get('/', controller.list.bind(controller))
-router.get('/:id', controller.getById.bind(controller))
-router.post('/', controller.createAdmin.bind(controller))
-router.patch('/:id', controller.updateStatus.bind(controller))
+router.get('/', requireStaffCrud('orders'), controller.list.bind(controller))
+router.get('/:id', requireStaffCrud('orders'), controller.getById.bind(controller))
+router.post('/', requireStaffCrud('orders'), controller.createAdmin.bind(controller))
+router.patch('/:id', requireStaffCrud('orders'), controller.updateStatus.bind(controller))
+router.delete('/:id', requireStaffCrud('orders'), controller.deleteUnconfirmed.bind(controller))
+router.post('/bulk-delete', requireStaffPermission('orders', 'delete'), controller.bulkDeleteUnconfirmed.bind(controller))
 
 export default router

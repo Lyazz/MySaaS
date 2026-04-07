@@ -460,6 +460,41 @@ export class BulkProductsService {
         return { success: true }
     }
 
+    async bulkDeleteProducts(tenantId: string, input: { ids: string[] }) {
+        const ids = Array.from(new Set((input.ids ?? []).filter((id) => typeof id === 'string' && id.trim()).map((id) => id.trim())))
+        if (ids.length === 0) throw new Error('ids is required')
+        if (ids.length > 200) throw new Error('Too many ids')
+
+        const existing = await prisma.product.findMany({
+            where: { tenantId, id: { in: ids } },
+            select: { id: true }
+        })
+        if (existing.length !== ids.length) {
+            const err: any = new Error('Product not found')
+            err.statusCode = 404
+            err.statusMessage = 'Product not found'
+            throw err
+        }
+
+        const [saleItemCount, purchaseItemCount] = await Promise.all([
+            prisma.saleItem.count({ where: { tenantId, productId: { in: ids } } }),
+            prisma.purchaseOrderItem.count({ where: { tenantId, variant: { productId: { in: ids } } } })
+        ])
+
+        if (saleItemCount > 0 || purchaseItemCount > 0) {
+            const err: any = new Error('HAS_TRANSACTIONS')
+            err.statusCode = 409
+            err.statusMessage = 'HAS_TRANSACTIONS'
+            throw err
+        }
+
+        for (const productId of ids) {
+            await this.products.deleteProduct(tenantId, productId)
+        }
+
+        return { success: true, deletedCount: ids.length }
+    }
+
     async duplicateProduct(
         tenantId: string,
         productId: string,

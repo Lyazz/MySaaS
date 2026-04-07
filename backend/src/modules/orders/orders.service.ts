@@ -203,6 +203,89 @@ export class OrdersService {
         })
     }
 
+    async deleteUnconfirmed(tenantId: string, id: string) {
+        return prisma.$transaction(async (tx) => {
+            const existing = await tx.order.findFirst({
+                where: { tenantId, id },
+                select: {
+                    id: true,
+                    status: true,
+                    sale: { select: { id: true } },
+                    _count: {
+                        select: {
+                            shipments: true,
+                            cashTransactions: true,
+                            inventoryMovements: true
+                        }
+                    }
+                }
+            })
+
+            if (!existing) throw new OrderValidationError(404, 'Order not found')
+            if (existing.status !== 'PENDING') {
+                throw new OrderValidationError(409, 'Only unconfirmed (PENDING) orders can be deleted')
+            }
+
+            if (
+                existing.sale ||
+                existing._count.shipments > 0 ||
+                existing._count.cashTransactions > 0 ||
+                existing._count.inventoryMovements > 0
+            ) {
+                throw new OrderValidationError(409, 'Order cannot be deleted because it has linked records')
+            }
+
+            await tx.orderItem.deleteMany({ where: { tenantId, orderId: id } })
+            const deleted = await tx.order.deleteMany({ where: { tenantId, id } })
+            if (deleted.count !== 1) throw new OrderValidationError(404, 'Order not found')
+
+            return { id }
+        })
+    }
+
+    async bulkDeleteUnconfirmed(tenantId: string, ids: string[]) {
+        const uniqueIds = Array.from(new Set(ids.filter((v) => typeof v === 'string' && v.trim()))).slice(0, 200)
+        if (uniqueIds.length === 0) throw new OrderValidationError(400, 'ids must be a non-empty array')
+
+        return prisma.$transaction(async (tx) => {
+            const orders = await tx.order.findMany({
+                where: { tenantId, id: { in: uniqueIds } },
+                select: {
+                    id: true,
+                    status: true,
+                    sale: { select: { id: true } },
+                    _count: {
+                        select: {
+                            shipments: true,
+                            cashTransactions: true,
+                            inventoryMovements: true
+                        }
+                    }
+                }
+            })
+
+            const foundIds = new Set(orders.map((o) => o.id))
+            const missing = uniqueIds.filter((id) => !foundIds.has(id))
+            if (missing.length) throw new OrderValidationError(404, 'Some orders were not found')
+
+            const notDeletable = orders.filter((o) =>
+                o.status !== 'PENDING' ||
+                Boolean(o.sale) ||
+                o._count.shipments > 0 ||
+                o._count.cashTransactions > 0 ||
+                o._count.inventoryMovements > 0
+            )
+            if (notDeletable.length) throw new OrderValidationError(409, 'Some orders cannot be deleted')
+
+            const deletableIds = orders.map((o) => o.id)
+
+            await tx.orderItem.deleteMany({ where: { tenantId, orderId: { in: deletableIds } } })
+            const deleted = await tx.order.deleteMany({ where: { tenantId, id: { in: deletableIds }, status: 'PENDING' } })
+
+            return { deletedCount: deleted.count, deletedIds: deletableIds }
+        })
+    }
+
     async getPublicPixelPayload(tenantId: string, orderId: string) {
         const order = await prisma.order.findFirst({
             where: { tenantId, id: orderId },

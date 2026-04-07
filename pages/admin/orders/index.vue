@@ -1,5 +1,25 @@
 <template>
   <div class="max-w-7xl mx-auto">
+    <AdminConfirmModal
+      v-model="singleDeleteOpen"
+      :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
+      :message="t('admin.pages.orders.index.deleteOneConfirm', 'Delete this order? Only unconfirmed (PENDING) orders can be deleted.')"
+      :confirm-text="t('common.delete', 'Delete')"
+      :error="singleDeleteError"
+      @confirm="confirmSingleDelete"
+      @cancel="singleDeleteError = null"
+    />
+
+    <AdminConfirmModal
+      v-model="bulkDeleteOpen"
+      :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
+      :message="t('admin.pages.orders.index.deleteManyConfirm', { count: selectedIds.length }, 'Delete {count} orders? Only unconfirmed (PENDING) orders can be deleted.')"
+      :confirm-text="t('common.delete', 'Delete')"
+      :error="bulkDeleteError"
+      @confirm="confirmBulkDelete"
+      @cancel="bulkDeleteError = null"
+    />
+
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
@@ -17,6 +37,19 @@
         <Icon name="lucide:plus" class="w-5 h-5" />
         {{ t('admin.pages.orders.index.addBtn') }}
       </NuxtLink>
+    </div>
+
+    <div v-if="selectedIds.length" class="mb-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+      <div class="text-sm text-red-800">
+        {{ t('admin.pages.orders.index.selectedCount', { count: selectedIds.length }, '{count} selected') }}
+      </div>
+      <button
+        class="ui-btn ui-btn--danger ui-btn--sm flex items-center gap-2"
+        @click="bulkDeleteOpen = true"
+      >
+        <Icon name="lucide:trash-2" class="w-4 h-4" />
+        {{ t('admin.pages.orders.index.bulkDeleteBtn', 'Delete selected') }}
+      </button>
     </div>
 
     <!-- Filters -->
@@ -100,6 +133,15 @@
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
+              <th class="ui-th w-10">
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  :checked="allPendingSelected"
+                  :disabled="pendingIdsOnPage.length === 0"
+                  @change="toggleSelectAllPending"
+                />
+              </th>
               <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('id')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.orderId') }}
@@ -144,6 +186,15 @@
               :key="order.id"
               class="ui-tr"
             >
+              <td class="ui-td whitespace-nowrap">
+                <input
+                  v-if="order.status === 'PENDING'"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  :checked="selectedIds.includes(order.id)"
+                  @change="toggleSelectOne(order.id)"
+                />
+              </td>
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
                   :to="`/admin/orders/${order.id}`"
@@ -204,6 +255,14 @@
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
+                  <button
+                    v-if="order.status === 'PENDING'"
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    :title="t('common.delete', 'Delete')"
+                    @click="openSingleDelete(order.id)"
+                  >
+                    <Icon name="lucide:trash-2" class="w-4 h-4" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -328,6 +387,16 @@ const itemsPerPage = 25
 const sortBy = ref('createdAt')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 
+const selectedIds = ref<string[]>([])
+const singleDeleteOpen = ref(false)
+const bulkDeleteOpen = ref(false)
+const singleDeleteError = ref<string | null>(null)
+const bulkDeleteError = ref<string | null>(null)
+const deleteTargetId = ref<string | null>(null)
+
+const pendingIdsOnPage = computed(() => orders.value.filter((o) => o.status === 'PENDING').map((o) => o.id))
+const allPendingSelected = computed(() => pendingIdsOnPage.value.length > 0 && pendingIdsOnPage.value.every((id) => selectedIds.value.includes(id)))
+
 const emptyHint = computed(() => {
   if (searchQuery.value || selectedStatus.value) return t('admin.pages.orders.index.empty.hintFiltered')
   return t('admin.pages.orders.index.empty.hint')
@@ -355,10 +424,71 @@ async function fetchOrders() {
     orders.value = data.items
     total.value = data.total
     totalPages.value = data.totalPages
+    selectedIds.value = []
   } catch (error) {
     console.error('Failed to fetch orders:', error)
   } finally {
     loading.value = false
+  }
+}
+
+function toggleSelectAllPending() {
+  if (allPendingSelected.value) {
+    selectedIds.value = []
+    return
+  }
+  selectedIds.value = [...pendingIdsOnPage.value]
+}
+
+function toggleSelectOne(id: string) {
+  if (selectedIds.value.includes(id)) {
+    selectedIds.value = selectedIds.value.filter((x) => x !== id)
+    return
+  }
+  selectedIds.value = [...selectedIds.value, id]
+}
+
+function openSingleDelete(id: string) {
+  singleDeleteError.value = null
+  deleteTargetId.value = id
+  singleDeleteOpen.value = true
+}
+
+async function confirmSingleDelete() {
+  if (!deleteTargetId.value) return
+  singleDeleteError.value = null
+
+  try {
+    await $fetch(`/api/admin/orders/${encodeURIComponent(deleteTargetId.value)}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    singleDeleteOpen.value = false
+    deleteTargetId.value = null
+    await fetchOrders()
+  } catch (error: any) {
+    console.error('Failed to delete order:', error)
+    singleDeleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+  }
+}
+
+async function confirmBulkDelete() {
+  bulkDeleteError.value = null
+  const ids = [...selectedIds.value]
+  if (!ids.length) return
+
+  try {
+    await $fetch('/api/admin/orders/bulk-delete', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { ids }
+    })
+    bulkDeleteOpen.value = false
+    selectedIds.value = []
+    await fetchOrders()
+  } catch (error: any) {
+    console.error('Failed to bulk delete orders:', error)
+    bulkDeleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
   }
 }
 

@@ -80,6 +80,60 @@ export class OrdersController {
         }
     }
 
+    async deleteUnconfirmed(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+            }
+
+            try {
+                const deleted = await service.deleteUnconfirmed(tenant.id, id)
+                res.json({ success: true, ...deleted })
+            } catch (err) {
+                if (err instanceof OrderValidationError) {
+                    return res.status(err.statusCode).json({
+                        statusCode: err.statusCode,
+                        statusMessage: err.statusMessage
+                    })
+                }
+                throw err
+            }
+        } catch (error) {
+            console.error('Delete order error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async bulkDeleteUnconfirmed(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const ids = req.body?.ids
+
+            if (!Array.isArray(ids)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'ids must be an array' })
+            }
+
+            try {
+                const result = await service.bulkDeleteUnconfirmed(tenant.id, ids)
+                res.json({ success: true, ...result })
+            } catch (err) {
+                if (err instanceof OrderValidationError) {
+                    return res.status(err.statusCode).json({
+                        statusCode: err.statusCode,
+                        statusMessage: err.statusMessage
+                    })
+                }
+                throw err
+            }
+        } catch (error) {
+            console.error('Bulk delete orders error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async createPublic(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) {

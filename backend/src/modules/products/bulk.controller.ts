@@ -60,6 +60,32 @@ export class BulkProductsController {
         }
     }
 
+    async bulkDelete(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const ids = Array.isArray(req.body?.ids) ? req.body.ids : []
+
+            try {
+                const result = await service.bulkDeleteProducts(tenant.id, { ids })
+                res.json(result)
+            } catch (e: any) {
+                if (e?.statusCode === 404 || e?.message === 'Product not found') {
+                    return res.status(404).json({ statusCode: 404, statusMessage: 'Product not found' })
+                }
+                if (e?.statusCode === 409 || e?.message === 'HAS_TRANSACTIONS') {
+                    return res.status(409).json({ statusCode: 409, statusMessage: 'HAS_TRANSACTIONS' })
+                }
+                if (typeof e?.statusCode === 'number') {
+                    return res.status(e.statusCode).json({ statusCode: e.statusCode, statusMessage: e.statusMessage || e.message })
+                }
+                throw e
+            }
+        } catch (error: any) {
+            console.error('Bulk delete products error:', error)
+            res.status(400).json({ statusCode: 400, statusMessage: error?.message || 'Bulk delete failed' })
+        }
+    }
+
     async duplicate(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
