@@ -226,7 +226,7 @@
   "auth": {
     "login": {
       "hero": {
-        "welcomeBack": "Bon retour,",
+        "welcomeBack": "Bon retour",
         "builder": "Builder",
         "builderSuffix": ".",
         "subtitle": "Votre tableau de bord est prêt. Continuez à gérer vos commandes, produits et analyses depuis un seul endroit.",
@@ -1783,42 +1783,42 @@
           "title": "Pixel Facebook",
           "description": "Suivez les conversions et créez des audiences pour vos publicités Facebook."
         },
-          "telegram": {
-            "title": "Notifications Telegram",
-            "description": "Recevez des notifications en temps réel pour vos nouvelles commandes directement sur Telegram.",
-            "modal": {
-              "title": "Configuration Telegram",
-              "auto": {
-                "title": "Détection automatique de l’ID de chat (recommandé)",
-                "steps": {
-                  "pasteToken": "Collez votre Token du Bot ci-dessus.",
-                  "startBot": "Sur Telegram, ouvrez le bot, appuyez sur Démarrer, puis envoyez un message (ex: salut).",
-                  "clickDetect": "Revenez ici et cliquez sur « Détecter les chats »."
-                },
-                "actions": {
-                  "detectChats": "Détecter les chats",
-                  "detecting": "Détection...",
-                  "openBot": "Ouvrir le bot : {handle}"
-                },
-                "found": "{count} chat(s) trouvé(s). Cliquez sur un chat pour l’utiliser.",
-                "noneFound": "Aucun chat trouvé pour le moment. Envoyez /start (ou un message) au bot, puis réessayez.",
-                "groupNote": "Pour un groupe : ajoutez le bot au groupe et envoyez un message. Pour une chaîne : ajoutez le bot comme admin et publiez un message."
-              },
-              "fields": {
-                "botToken": {
-                  "label": "Token du Bot",
-                  "placeholder": "Collez le token du bot ici",
-                  "hint": "Obtenez ceci via {'@'}BotFather sur Telegram."
-                },
-                "chatId": {
-                  "label": "ID du Chat",
-                  "placeholder": "Collez l’ID du chat ici",
-                  "hint": "Où les notifications seront envoyées. Vous pouvez le détecter automatiquement ci-dessus."
-                },
-                "enableNotifications": "Activer les notifications Telegram"
+        "telegram": {
+          "title": "Notifications Telegram",
+          "description": "Recevez des notifications en temps réel pour vos nouvelles commandes directement sur Telegram.",
+          "modal": {
+            "title": "Configuration Telegram",
+            "auto": {
+              "title": "Détection automatique de l’ID de chat (recommandé)",
+              "steps": {
+                "pasteToken": "Collez votre Token du Bot ci-dessus.",
+                "startBot": "Sur Telegram, ouvrez le bot, appuyez sur Démarrer, puis envoyez un message (ex: salut).",
+                "clickDetect": "Revenez ici et cliquez sur « Détecter les chats »."
               },
               "actions": {
-                "sendTestMessage": "Envoyer un message de test",
+                "detectChats": "Détecter les chats",
+                "detecting": "Détection...",
+                "openBot": "Ouvrir le bot : {handle}"
+              },
+              "found": "{count} chat(s) trouvé(s). Cliquez sur un chat pour l’utiliser.",
+              "noneFound": "Aucun chat trouvé pour le moment. Envoyez /start (ou un message) au bot, puis réessayez.",
+              "groupNote": "Pour un groupe : ajoutez le bot au groupe et envoyez un message. Pour une chaîne : ajoutez le bot comme admin et publiez un message."
+            },
+            "fields": {
+              "botToken": {
+                "label": "Token du Bot",
+                "placeholder": "Collez le token du bot ici",
+                "hint": "Obtenez ceci via {'@'}BotFather sur Telegram."
+              },
+              "chatId": {
+                "label": "ID du Chat",
+                "placeholder": "Collez l’ID du chat ici",
+                "hint": "Où les notifications seront envoyées. Vous pouvez le détecter automatiquement ci-dessus."
+              },
+              "enableNotifications": "Activer les notifications Telegram"
+            },
+            "actions": {
+              "sendTestMessage": "Envoyer un message de test",
               "sending": "Envoi en cours...",
               "saveSettings": "Enregistrer les paramètres"
             }
@@ -2168,23 +2168,23 @@
             "error": "Impossible de supprimer le produit. Veuillez réessayer.",
             "errorHasTransactions": "Impossible de supprimer ce produit car il est référencé par des ventes ou commandes fournisseur existantes."
           },
-		          "bulk": {
-		            "selected": "{count} sélectionné(s)",
-		            "export": "Exporter CSV",
-		            "import": "Importer CSV",
-		            "update": "Modification en masse",
-		            "duplicate": "Dupliquer",
-		            "delete": "Supprimer",
-		            "deleteTitle": "Supprimer des produits",
-		            "deleteMessage": "Voulez-vous vraiment supprimer {count} produit(s) sélectionné(s) ? Cette action est irréversible.",
-		            "exportError": "Échec de l’export CSV. Veuillez réessayer.",
-		            "importTitle": "Importer des produits (CSV)",
-		            "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock (création uniquement), isActive, categoryId/categorySlug, description, miniDescription, images.",
-		            "importTemplateTitle": "Modèle CSV",
-		            "importTemplateHint": "Utilisez “|” pour séparer plusieurs images. Les images peuvent être des noms de fichiers (téléversés dans votre boutique), des chemins /uploads, ou des URLs https complètes.",
-	            "importTemplateDownload": "Télécharger le modèle",
-	            "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez.",
-	            "importResult": "Créés {created}, mis à jour {updated}, ignorés {skipped}.",
+          "bulk": {
+            "selected": "{count} sélectionné(s)",
+            "export": "Exporter CSV",
+            "import": "Importer CSV",
+            "update": "Modification en masse",
+            "duplicate": "Dupliquer",
+            "delete": "Supprimer",
+            "deleteTitle": "Supprimer des produits",
+            "deleteMessage": "Voulez-vous vraiment supprimer {count} produit(s) sélectionné(s) ? Cette action est irréversible.",
+            "exportError": "Échec de l’export CSV. Veuillez réessayer.",
+            "importTitle": "Importer des produits (CSV)",
+            "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock (création uniquement), isActive, categoryId/categorySlug, description, miniDescription, images.",
+            "importTemplateTitle": "Modèle CSV",
+            "importTemplateHint": "Utilisez “|” pour séparer plusieurs images. Les images peuvent être des noms de fichiers (téléversés dans votre boutique), des chemins /uploads, ou des URLs https complètes.",
+            "importTemplateDownload": "Télécharger le modèle",
+            "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez.",
+            "importResult": "Créés {created}, mis à jour {updated}, ignorés {skipped}.",
             "importErrors": "{count} lignes contiennent des erreurs.",
             "updateTitle": "Mise à jour en masse",
             "updateHint": "Applique les changements aux produits sélectionnés.",

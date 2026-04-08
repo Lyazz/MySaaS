@@ -56,7 +56,6 @@ async function handleLogin() {
       <div class="relative z-10 max-w-lg">
         <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
           {{ t('auth.login.hero.welcomeBack') }} <br>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">{{ t('auth.login.hero.builder') }}</span>{{ t('auth.login.hero.builderSuffix') }}
         </h2>
         <p class="text-lg text-slate-400 mb-8 leading-relaxed">
           {{ t('auth.login.hero.subtitle') }}

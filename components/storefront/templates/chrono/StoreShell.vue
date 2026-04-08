@@ -33,19 +33,10 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 })
 
 const categories = computed(() => {
-    const base = [
+    return [
         { name: storefrontContent.value.nav.home, href: '/' },
-        { name: storefrontContent.value.nav.shop, href: '/products' },
+        { name: storefrontContent.value.nav.shop, href: '/products' }
     ]
-    
-    if (tenantCategories.value) {
-        tenantCategories.value.slice(0, 3).forEach(cat => {
-            base.push({ name: cat.title, href: `/c/${cat.slug}` })
-        })
-    }
-    
-    base.push({ name: storefrontContent.value.nav.contact, href: '/contact' })
-    return base
 })
 const props = defineProps<{
     hideNavigation?: boolean
@@ -93,18 +84,28 @@ const props = defineProps<{
             <div class="flex items-center gap-6">
               <!-- Desktop Menu -->
               <nav class="hidden lg:flex items-center gap-8">
-                <NuxtLink 
-                  v-for="item in categories" 
-                  :key="item.name" 
-                  :to="item.href"
-                  class="text-xs font-medium tracking-[0.2em] uppercase transition-colors duration-200"
-                  style="color: #A09080;"
-                  active-class="!text-[#D4C5A9]"
-                  @mouseover="($event.target as HTMLElement).style.color = '#D4C5A9'"
-                  @mouseleave="($event.target as HTMLElement).style.color = '#A09080'"
-                >
-                  {{ item.name }}
-                </NuxtLink>
+                <NuxtLink to="/" class="text-xs font-medium tracking-[0.2em] uppercase transition-colors duration-200" active-class="!text-[#D4C5A9]">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="text-xs font-medium tracking-[0.2em] uppercase transition-colors duration-200" active-class="!text-[#D4C5A9]">{{ storefrontContent.nav.shop }}</NuxtLink>
+
+              <!-- Categories Dropdown -->
+              <div class="relative group flex items-center h-full">
+                <button class="text-xs font-medium tracking-[0.2em] uppercase transition-colors duration-200 flex items-center gap-1 cursor-pointer">
+                  {{ storefrontContent.nav.categories || 'Categories' }}
+                  <Icon name="lucide:chevron-down" class="w-4 h-4" />
+                </button>
+                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
+                  <NuxtLink
+                    v-for="cat in tenantCategories"
+                    :key="cat.id"
+                    :to="`/c/${cat.slug}`"
+                    class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
+                  >
+                    {{ cat.title }}
+                  </NuxtLink>
+                </div>
+              </div>
+
+              <NuxtLink to="/contact" class="text-xs font-medium tracking-[0.2em] uppercase transition-colors duration-200" active-class="!text-[#D4C5A9]">{{ storefrontContent.nav.contact }}</NuxtLink>
               </nav>
 
               <div class="h-5 w-px bg-[#D4C5A9]/10 hidden lg:block" />

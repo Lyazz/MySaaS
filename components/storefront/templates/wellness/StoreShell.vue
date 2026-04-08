@@ -35,21 +35,10 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 
 // Build dynamic menu
 const categories = computed(() => {
-    const base = [
+    return [
         { name: storefrontContent.value.nav.home, href: '/' },
-        { name: storefrontContent.value.nav.shop, href: '/products' },
+        { name: storefrontContent.value.nav.shop, href: '/products' }
     ]
-    
-    // Add top 3 categories
-    if (tenantCategories.value) {
-        tenantCategories.value.slice(0, 3).forEach(cat => {
-            base.push({ name: cat.title, href: `/c/${cat.slug}` })
-        })
-    }
-    
-    // Add Contact at the end
-    base.push({ name: storefrontContent.value.nav.contact, href: '/contact' }) // contact is usually static or handled elsewhere
-    return base
 })
 const props = defineProps<{
     hideNavigation?: boolean
@@ -102,15 +91,28 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
             <!-- Center: Navigation (Pill Style) -->
             <nav class="hidden lg:flex items-center justify-center gap-2 flex-1">
-              <NuxtLink 
-                v-for="item in categories" 
-                :key="item.name" 
-                :to="item.href"
-                class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out"
-                active-class="bg-white text-brand-800 shadow-sm ring-1 ring-stone-200"
-              >
-                {{ item.name }}
-              </NuxtLink>
+              <NuxtLink to="/" class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out" active-class="bg-white text-brand-800 shadow-sm ring-1 ring-stone-200">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out" active-class="bg-white text-brand-800 shadow-sm ring-1 ring-stone-200">{{ storefrontContent.nav.shop }}</NuxtLink>
+
+              <!-- Categories Dropdown -->
+              <div class="relative group flex items-center h-full">
+                <button class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out flex items-center gap-1 cursor-pointer">
+                  {{ storefrontContent.nav.categories || 'Categories' }}
+                  <Icon name="lucide:chevron-down" class="w-4 h-4" />
+                </button>
+                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
+                  <NuxtLink
+                    v-for="cat in tenantCategories"
+                    :key="cat.id"
+                    :to="`/c/${cat.slug}`"
+                    class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
+                  >
+                    {{ cat.title }}
+                  </NuxtLink>
+                </div>
+              </div>
+
+              <NuxtLink to="/contact" class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out" active-class="bg-white text-brand-800 shadow-sm ring-1 ring-stone-200">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
 
             <!-- Right: Actions & Search -->
