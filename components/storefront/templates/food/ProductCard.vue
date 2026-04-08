@@ -149,6 +149,12 @@ function handleAddToCart() {
            viewMode === 'list' ? 'hidden' : 'translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100'
         ]"
       >
+        <StorefrontSharedFavoriteButton
+          :product-id="product.id"
+          button-class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-stone-700 hover:bg-red-50 hover:text-red-600 shadow-lg transition-all transform hover:scale-110"
+          icon-class="w-5 h-5"
+        />
+
         <button
            class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-stone-700 hover:bg-brand-500 hover:text-white shadow-lg transition-all transform hover:scale-110" 
            :title="storefrontContent.actions.quickView"

@@ -150,6 +150,14 @@ function handleAddToCart() {
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-10 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
         ]"
       >
+        <StorefrontSharedFavoriteButton
+          :product-id="product.id"
+          button-class="w-9 h-9 bg-white flex items-center justify-center hover:bg-red-50 hover:text-red-600 shadow-sm border border-stone-200 transition-colors"
+          icon-class="w-4 h-4"
+          inactive-class="text-stone-600"
+          active-class="text-red-600"
+        />
+
         <!-- Quick View -->
         <button
            class="w-9 h-9 bg-white flex items-center justify-center text-stone-600 hover:bg-white hover:text-brand-700 shadow-sm border border-stone-200 transition-colors" 

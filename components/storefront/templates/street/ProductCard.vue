@@ -93,6 +93,14 @@ function handleAddToCart() {
                     class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300"
                 >
             </NuxtLink>
+
+            <StorefrontSharedFavoriteButton
+                :product-id="product.id"
+                button-class="absolute top-2 right-2 w-10 h-10 bg-white border-2 border-black flex items-center justify-center hover:bg-red-50 transition-colors"
+                icon-class="w-5 h-5"
+                inactive-class="text-black"
+                active-class="text-red-600"
+            />
            
             <!-- Quick Add Overlay (Street Style) -->
             <button 

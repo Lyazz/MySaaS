@@ -80,6 +80,65 @@ export class OrdersController {
         }
     }
 
+    async updateUnconfirmed(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+            }
+
+            const {
+                customerId,
+                customerName,
+                customerPhone,
+                customerAddress,
+                deliveryMode,
+                shippingProvider,
+                shippingWilayaCode,
+                shippingCommuneCode,
+                shippingAddressLine1,
+                shippingNotes,
+                items
+            } = req.body ?? {}
+
+            try {
+                const updated = await service.updateUnconfirmed(
+                    tenant.id,
+                    id,
+                    {
+                        customerId,
+                        customerName,
+                        customerPhone,
+                        customerAddress,
+                        deliveryMode,
+                        shippingProvider,
+                        shippingWilayaCode,
+                        shippingCommuneCode,
+                        shippingAddressLine1,
+                        shippingNotes,
+                        items
+                    },
+                    { userId: user?.id ?? null }
+                )
+                res.json(updated)
+            } catch (err) {
+                if (err instanceof OrderValidationError) {
+                    return res.status(err.statusCode).json({
+                        statusCode: err.statusCode,
+                        statusMessage: err.statusMessage
+                    })
+                }
+                throw err
+            }
+        } catch (error) {
+            console.error('Update unconfirmed order error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async deleteUnconfirmed(req: Request, res: Response) {
         try {
             const tenant = req.tenant!

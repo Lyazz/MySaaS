@@ -56,6 +56,20 @@ export type AdminOrderInput = {
     items: PublicOrderItemInput[]
 }
 
+export type AdminOrderUpdateInput = {
+    customerId?: string | null
+    customerName?: string | null
+    customerPhone?: string | null
+    customerAddress?: string | null
+    deliveryMode?: string | null
+    shippingProvider?: string | null
+    shippingWilayaCode?: string | null
+    shippingCommuneCode?: string | null
+    shippingAddressLine1?: string | null
+    shippingNotes?: string | null
+    items?: PublicOrderItemInput[] | null
+}
+
 type SubscriptionContext = {
     planCode: string
     currentPeriodStart: Date
@@ -197,7 +211,16 @@ export class OrdersService {
             where: { id, tenantId },
             include: {
                 items: {
-                    include: { product: true, variant: true }
+                    include: {
+                        product: true,
+                        variant: {
+                            include: {
+                                optionValues: {
+                                    include: { optionValue: true }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         })
@@ -336,6 +359,367 @@ export class OrdersService {
             contents,
             pixelIds
         }
+    }
+
+    async updateUnconfirmed(tenantId: string, id: string, input: AdminOrderUpdateInput, actor?: { userId?: string | null }) {
+        const hasAnyField =
+            input.customerId !== undefined ||
+            input.customerName !== undefined ||
+            input.customerPhone !== undefined ||
+            input.customerAddress !== undefined ||
+            input.deliveryMode !== undefined ||
+            input.shippingProvider !== undefined ||
+            input.shippingWilayaCode !== undefined ||
+            input.shippingCommuneCode !== undefined ||
+            input.shippingAddressLine1 !== undefined ||
+            input.shippingNotes !== undefined ||
+            input.items !== undefined
+
+        if (!hasAnyField) throw new OrderValidationError(400, 'No fields to update')
+
+        const existing = await prisma.order.findFirst({
+            where: { tenantId, id },
+            select: {
+                id: true,
+                status: true,
+                customerId: true,
+                customerName: true,
+                customerPhone: true,
+                customerAddress: true,
+                deliveryMode: true,
+                shippingProvider: true,
+                shippingWilayaCode: true,
+                shippingCommuneCode: true,
+                shippingAddressLine1: true,
+                shippingNotes: true,
+                sale: { select: { id: true } },
+                _count: {
+                    select: {
+                        shipments: true,
+                        cashTransactions: true,
+                        inventoryMovements: true
+                    }
+                }
+            }
+        })
+
+        if (!existing) throw new OrderValidationError(404, 'Order not found')
+        if (existing.status !== 'PENDING') throw new OrderValidationError(409, 'Only unconfirmed (PENDING) orders can be edited')
+        if (
+            existing.sale ||
+            existing._count.shipments > 0 ||
+            existing._count.cashTransactions > 0 ||
+            existing._count.inventoryMovements > 0
+        ) {
+            throw new OrderValidationError(409, 'Order cannot be edited because it has linked records')
+        }
+
+        const nextCustomerName =
+            input.customerName === undefined ? existing.customerName : String(input.customerName ?? '').trim()
+        const nextCustomerPhone =
+            input.customerPhone === undefined ? existing.customerPhone : String(input.customerPhone ?? '').trim()
+
+        if (!nextCustomerName) throw new OrderValidationError(400, 'Customer name is required')
+        if (!nextCustomerPhone) throw new OrderValidationError(400, 'Customer phone is required')
+
+        const phoneRegex = /^(0|\\+213|00213)(5|6|7)[0-9]{8}$/
+        if (!phoneRegex.test(nextCustomerPhone.replace(/\\s+/g, ''))) {
+            throw new OrderValidationError(400, 'Invalid phone number format')
+        }
+
+        const nextDeliveryMode =
+            input.deliveryMode === undefined ? existing.deliveryMode : String(input.deliveryMode || 'home').toLowerCase()
+
+        let nextShippingProvider: any = existing.shippingProvider
+        if (input.shippingProvider !== undefined) {
+            nextShippingProvider = null
+            if (input.shippingProvider) {
+                const providerUpper = String(input.shippingProvider).toUpperCase()
+                const validProviders = ['MAYSTRO', 'YALIDINE', 'SELF']
+                if (validProviders.includes(providerUpper)) {
+                    nextShippingProvider = providerUpper as any
+                }
+            }
+        }
+
+        const nextShippingWilayaCode =
+            input.shippingWilayaCode === undefined ? existing.shippingWilayaCode : (input.shippingWilayaCode || null)
+        const nextShippingCommuneCode =
+            input.shippingCommuneCode === undefined ? existing.shippingCommuneCode : (input.shippingCommuneCode || null)
+        const nextCustomerAddress =
+            input.customerAddress === undefined ? existing.customerAddress : (input.customerAddress || null)
+
+        const customerAddressWasMirrored =
+            (existing.shippingAddressLine1 ?? null) === (existing.customerAddress ?? null)
+
+        const nextShippingAddressLine1 =
+            input.shippingAddressLine1 !== undefined
+                ? (input.shippingAddressLine1 || input.customerAddress || null)
+                : (input.customerAddress !== undefined && customerAddressWasMirrored)
+                    ? (input.customerAddress || null)
+                    : existing.shippingAddressLine1
+
+        const nextShippingNotes =
+            input.shippingNotes === undefined ? existing.shippingNotes : (input.shippingNotes || null)
+
+        const nextCustomerId = input.customerId === undefined ? existing.customerId : (input.customerId || null)
+        if (input.customerId !== undefined && nextCustomerId) {
+            const customer = await prisma.customer.findFirst({
+                where: { tenantId, id: nextCustomerId },
+                select: { id: true }
+            })
+            if (!customer) throw new OrderValidationError(400, 'Invalid customerId')
+        }
+
+        const shouldUpdateItems = input.items !== undefined
+        const itemsInput = input.items ?? null
+
+        let validatedItems: Array<{
+            productId: string
+            variantId: string
+            quantity: number
+            price: number
+            lineTotal: number
+            pricingBreakdown: any
+            trackInventory: boolean
+        }> = []
+        let totalCents = 0
+
+        if (shouldUpdateItems) {
+            if (!Array.isArray(itemsInput) || itemsInput.length === 0) {
+                throw new OrderValidationError(400, 'At least one item is required')
+            }
+
+            const normalizedItems = itemsInput.map((item) => ({
+                productId: (item as any)?.productId,
+                variantId: (item as any)?.variantId || undefined,
+                quantity: Number((item as any)?.quantity || 0)
+            }))
+
+            normalizedItems.forEach((item) => {
+                if (!item.productId) throw new OrderValidationError(400, 'Product ID is required for each item')
+                if (!Number.isFinite(item.quantity) || item.quantity < 1) {
+                    throw new OrderValidationError(400, 'Quantity must be at least 1')
+                }
+            })
+
+            const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
+            const variantIds = Array.from(
+                new Set(
+                    normalizedItems
+                        .map((item) => item.variantId)
+                        .filter((v): v is string => typeof v === 'string' && v.length > 0)
+                )
+            )
+            const productIdsWithoutVariant = Array.from(
+                new Set(normalizedItems.filter((item) => !item.variantId).map((item) => item.productId))
+            )
+
+            const products = await prisma.product.findMany({
+                where: { id: { in: productIds }, tenantId, isActive: true },
+                select: {
+                    id: true,
+                    slug: true,
+                    price: true,
+                    title: true,
+                    stock: true,
+                    isPromotionActive: true,
+                    promotionalPrice: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true
+                }
+            })
+            if (products.length !== productIds.length) throw new OrderValidationError(400, 'Some products are invalid or unavailable')
+            const productMap = new Map(products.map((p) => [p.id, p]))
+
+            const variantsById = variantIds.length
+                ? await prisma.productVariant.findMany({
+                    where: { id: { in: variantIds }, tenantId, isActive: true },
+                    select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                })
+                : []
+            if (variantsById.length !== variantIds.length) throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
+
+            const defaultVariants = productIdsWithoutVariant.length
+                ? await prisma.productVariant.findMany({
+                    where: { tenantId, productId: { in: productIdsWithoutVariant }, isActive: true, optionValues: { none: {} } },
+                    select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                })
+                : []
+
+            const variantMap = new Map(variantsById.map((v) => [v.id, v]))
+            const defaultVariantByProductId = new Map(defaultVariants.map((v) => [v.productId, v]))
+
+            if (productIdsWithoutVariant.length > 0) {
+                const optionRows = await prisma.productOption.findMany({
+                    where: { tenantId, productId: { in: productIdsWithoutVariant } },
+                    select: { productId: true },
+                    distinct: ['productId']
+                })
+                const productsWithOptions = new Set(optionRows.map((r) => r.productId))
+
+                for (const pid of productIdsWithoutVariant) {
+                    if (defaultVariantByProductId.has(pid)) continue
+                    if (productsWithOptions.has(pid)) continue
+
+                    const product = productMap.get(pid)
+                    if (!product) continue
+
+                    const created = await prisma.productVariant.create({
+                        data: {
+                            tenantId,
+                            productId: pid,
+                            sku: suggestSkuFromProduct(product.slug, ''),
+                            price: product.price,
+                            stock: product.stock,
+                            reserved: 0,
+                            safetyStock: 0,
+                            trackInventory: true,
+                            isActive: true
+                        }
+                    })
+                    defaultVariantByProductId.set(pid, created as any)
+                }
+            }
+
+            const now = new Date()
+            const activeBundleDeals = await prisma.productBundleDeal.findMany({
+                where: {
+                    tenantId,
+                    productId: { in: productIds },
+                    isActive: true,
+                    AND: [
+                        { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+                        { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }
+                    ]
+                },
+                select: { productId: true, bundleQty: true, bundlePrice: true }
+            })
+
+            const bundleDealsByProductId = new Map<string, { bundleQty: number; bundlePrice: number }[]>()
+            for (const d of activeBundleDeals) {
+                const arr = bundleDealsByProductId.get(d.productId) ?? []
+                arr.push({ bundleQty: d.bundleQty, bundlePrice: Number(d.bundlePrice) })
+                bundleDealsByProductId.set(d.productId, arr)
+            }
+
+            validatedItems = normalizedItems.map((item) => {
+                const product = productMap.get(item.productId)!
+                const variant =
+                    item.variantId
+                        ? variantMap.get(item.variantId)
+                        : defaultVariantByProductId.get(product.id)
+
+                if (!variant || variant.productId !== product.id) {
+                    throw new OrderValidationError(400, 'Variant selection is required for this product')
+                }
+
+                let price = Number(variant.price ?? product.price)
+                if (product.isPromotionActive && product.promotionalPrice) {
+                    const nowMs = new Date().getTime()
+                    const start = product.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
+                    const end = product.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
+                    if (nowMs >= start && nowMs <= end) {
+                        price = Number(product.promotionalPrice)
+                    }
+                }
+
+                const availableStock = variant.trackInventory
+                    ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
+                    : Number.POSITIVE_INFINITY
+                const trackInventory = Boolean(variant.trackInventory)
+                if (trackInventory && item.quantity > availableStock) {
+                    throw new OrderValidationError(409, `Insufficient stock for ${product.title}`)
+                }
+
+                const unitPriceCents = moneyToCents(price)
+                const bundleDeals = bundleDealsByProductId.get(product.id) ?? []
+                const pricing = computeBestBundleTotal({
+                    quantity: item.quantity,
+                    unitPriceCents,
+                    bundleDeals: bundleDeals.map((d) => ({
+                        bundleQty: d.bundleQty,
+                        bundlePriceCents: moneyToCents(d.bundlePrice)
+                    }))
+                })
+                totalCents += pricing.bestTotalCents
+
+                return {
+                    productId: product.id,
+                    variantId: variant.id,
+                    quantity: item.quantity,
+                    price,
+                    lineTotal: centsToMoney(pricing.bestTotalCents),
+                    pricingBreakdown: pricing,
+                    trackInventory
+                }
+            })
+        }
+
+        await prisma.$transaction(async (tx) => {
+            if (shouldUpdateItems) {
+                await tx.orderItem.deleteMany({ where: { tenantId, orderId: id } })
+                await tx.orderItem.createMany({
+                    data: validatedItems.map((item) => ({
+                        tenantId,
+                        orderId: id,
+                        productId: item.productId,
+                        variantId: item.variantId,
+                        quantity: item.quantity,
+                        price: item.price,
+                        lineTotal: item.lineTotal,
+                        pricingBreakdown: item.pricingBreakdown as any
+                    }))
+                })
+
+                await tx.productVariant.updateMany({
+                    where: { tenantId, id: { in: validatedItems.map((i) => i.variantId) } },
+                    data: { skuLocked: true }
+                })
+
+                for (const item of validatedItems) {
+                    if (!item.trackInventory) continue
+                    const current = await tx.productVariant.findFirst({
+                        where: { id: item.variantId, tenantId },
+                        select: { stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    })
+                    if (!current) throw new OrderValidationError(409, 'Insufficient stock')
+                    if (current.trackInventory === false) continue
+                    if (current.stock < item.quantity + current.reserved + current.safetyStock) {
+                        throw new OrderValidationError(409, 'Insufficient stock')
+                    }
+                }
+            }
+
+            const updateData: any = {
+                customerId: nextCustomerId,
+                customerName: nextCustomerName,
+                customerPhone: nextCustomerPhone,
+                customerAddress: nextCustomerAddress,
+                deliveryMode: nextDeliveryMode,
+                shippingProvider: nextShippingProvider,
+                shippingWilayaCode: nextShippingWilayaCode,
+                shippingCommuneCode: nextShippingCommuneCode,
+                shippingAddressLine1: nextShippingAddressLine1,
+                shippingNotes: nextShippingNotes
+            }
+            if (shouldUpdateItems) updateData.totalAmount = centsToMoney(totalCents)
+
+            const updated = await tx.order.updateMany({ where: { tenantId, id, status: 'PENDING' }, data: updateData })
+            if (updated.count !== 1) throw new OrderValidationError(409, 'Order can no longer be edited')
+
+            await tx.auditLog.create({
+                data: {
+                    action: 'order_edit_unconfirmed',
+                    tenantId,
+                    userId: actor?.userId ?? null,
+                    targetId: id,
+                    details: JSON.stringify({ editedItems: shouldUpdateItems })
+                }
+            })
+        })
+
+        return this.findById(tenantId, id)
     }
 
     async updateStatus(

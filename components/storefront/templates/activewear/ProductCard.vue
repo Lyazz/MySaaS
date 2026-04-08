@@ -151,6 +151,14 @@ function handleAddToCart() {
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-12 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
         ]"
       >
+        <StorefrontSharedFavoriteButton
+          :product-id="product.id"
+          button-class="w-10 h-10 bg-black border-2 border-[#333] flex items-center justify-center hover:border-brand-500 uppercase font-bold skew-x-[-10deg] transition-colors shadow-[2px_2px_0_#222] hover:shadow-[2px_2px_0_theme(colors.brand.500)]"
+          icon-class="w-4 h-4 skew-x-[10deg]"
+          inactive-class="text-white"
+          active-class="text-brand-500"
+        />
+
         <!-- Quick View -->
         <button
            class="w-10 h-10 bg-black border-2 border-[#333] flex items-center justify-center text-white hover:border-brand-500 hover:text-brand-500 uppercase font-bold skew-x-[-10deg] transition-colors shadow-[2px_2px_0_#222] hover:shadow-[2px_2px_0_theme(colors.brand.500)]" 

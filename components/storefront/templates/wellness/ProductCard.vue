@@ -147,6 +147,14 @@ function handleAddToCart() {
         class="absolute inset-x-0 bottom-4 flex justify-center gap-3 transition-all duration-500 pointer-events-none"
         :class="[ viewMode !== 'list' ? 'translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100' : 'hidden' ]"
       >
+         <StorefrontSharedFavoriteButton
+            :product-id="product.id"
+            button-class="pointer-events-auto h-11 w-11 bg-white rounded-full flex items-center justify-center hover:bg-red-50 shadow-soft transition-colors"
+            icon-class="w-5 h-5"
+            inactive-class="text-stone-700"
+            active-class="text-red-600"
+         />
+
          <button
             class="pointer-events-auto h-11 w-11 bg-white rounded-full flex items-center justify-center text-stone-700 hover:text-brand-700 hover:bg-stone-50 shadow-soft transition-colors" 
             :title="storefrontContent.actions.quickView"
@@ -230,9 +238,13 @@ function handleAddToCart() {
           >
              {{ storefrontContent.actions.addToCart }}
           </button>
-          <button class="px-5 py-3 rounded-full border border-stone-200 text-stone-600 text-sm font-medium hover:bg-stone-50 transition-colors">
-              <Icon name="lucide:heart" class="w-4 h-4" />
-          </button>
+          <StorefrontSharedFavoriteButton
+            :product-id="product.id"
+            button-class="px-5 py-3 rounded-full border border-stone-200 text-sm font-medium hover:bg-stone-50 transition-colors"
+            icon-class="w-4 h-4"
+            inactive-class="text-stone-600"
+            active-class="text-red-600"
+          />
        </div>
     </div>
     

@@ -24,6 +24,8 @@ export function useStorefrontContent() {
       adding: i18n.t('storefront.actions.adding'),
       outOfStock: i18n.t('storefront.actions.outOfStock'),
       quickView: i18n.t('storefront.actions.quickView'),
+      addToWishlist: i18n.t('storefront.actions.addToWishlist'),
+      removeFromWishlist: i18n.t('storefront.actions.removeFromWishlist'),
       viewCart: i18n.t('storefront.actions.viewCart'),
       checkout: i18n.t('storefront.actions.checkout'),
       continueShopping: i18n.t('storefront.actions.continueShopping'),
@@ -244,6 +246,12 @@ export function useStorefrontContent() {
         title: i18n.t('storefront.toasts.addedToCart.title'),
         message: i18n.t('storefront.toasts.addedToCart.message')
       },
+      addedToWishlist: {
+        message: i18n.t('storefront.toasts.addedToWishlist.message')
+      },
+      removedFromWishlist: {
+        message: i18n.t('storefront.toasts.removedFromWishlist.message')
+      },
       outOfStock: {
         message: i18n.t('storefront.toasts.outOfStock.message')
       }
@@ -256,6 +264,11 @@ export function useStorefrontContent() {
     },
     search: {
       placeholder: i18n.t('storefront.search.placeholder')
+    },
+    wishlist: {
+      title: i18n.t('storefront.wishlist.title'),
+      emptyTitle: i18n.t('storefront.wishlist.emptyTitle'),
+      emptySubtitle: i18n.t('storefront.wishlist.emptySubtitle')
     },
     header: {
       wishlistTitle: i18n.t('storefront.header.wishlistTitle'),

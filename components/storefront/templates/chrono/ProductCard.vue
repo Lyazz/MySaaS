@@ -138,6 +138,19 @@ function handleAddToCart() {
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-8 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
         ]"
       >
+        <StorefrontSharedFavoriteButton
+          :product-id="product.id"
+          button-class="w-9 h-9 backdrop-blur-md flex items-center justify-center shadow-md transition-all duration-200"
+          :button-style="{
+            backgroundColor: 'rgba(14,17,23,0.85)',
+            border: '1px solid rgba(212,197,169,0.2)',
+            borderRadius: '1px'
+          }"
+          icon-class="w-4 h-4"
+          inactive-class="text-[#D4C5A9]"
+          active-class="text-red-400"
+        />
+
         <button
            class="w-9 h-9 backdrop-blur-md flex items-center justify-center shadow-md transition-all duration-200" 
            style="background-color: rgba(14,17,23,0.85); border: 1px solid rgba(212,197,169,0.2); color: #D4C5A9; border-radius: 1px;"

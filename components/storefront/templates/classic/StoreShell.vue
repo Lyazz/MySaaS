@@ -4,6 +4,7 @@ import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 
 const cartStore = useCartStore()
+const favorites = useFavorites()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
@@ -125,10 +126,17 @@ const props = defineProps<{
               <div class="flex items-center gap-4">
                 <LocaleSwitcher class="hidden lg:inline-flex" />
                 <button
-                  class="text-slate-900 hover:text-slate-600 transition-colors"
+                  class="relative text-slate-900 hover:text-slate-600 transition-colors"
                   :title="storefrontContent.header.wishlistTitle"
+                  @click="navigateTo('/wishlist')"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
+                  <ClientOnly>
+                    <span
+                      v-if="favorites.count.value > 0"
+                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white absolute -top-1 -right-1"
+                    >{{ favorites.count.value }}</span>
+                  </ClientOnly>
                 </button>
                 <button
                   class="text-slate-900 hover:text-slate-600 transition-colors"

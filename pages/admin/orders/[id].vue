@@ -18,6 +18,89 @@
       @confirm="confirmDelivered"
     />
 
+    <TransitionRoot
+      appear
+      :show="variantModalOpen"
+      as="template"
+    >
+      <Dialog
+        as="div"
+        class="relative z-50"
+        @close="variantModalOpen = false"
+      >
+        <TransitionChild
+          as="template"
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4 text-center">
+            <TransitionChild
+              as="template"
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle
+                  as="h3"
+                  class="text-lg font-bold leading-6 text-slate-900 flex justify-between items-center"
+                >
+                  {{ selectedProductForVariant?.title || t('admin.pages.orders.detail.variantSelect', 'Select Variant') }}
+                  <button
+                    class="p-1 rounded-full hover:bg-slate-100 text-slate-400"
+                    @click="variantModalOpen = false"
+                  >
+                    <Icon
+                      name="lucide:x"
+                      class="w-5 h-5"
+                    />
+                  </button>
+                </DialogTitle>
+                <div class="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
+                  <div
+                    v-if="loadingVariants"
+                    class="py-8 text-center text-slate-500"
+                  >
+                    {{ t('admin.common.loading', 'Loading...') }}
+                  </div>
+                  <button
+                    v-for="v in availableVariantsForSelection"
+                    :key="v.id"
+                    type="button"
+                    class="w-full p-4 rounded-xl border border-slate-100 hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group"
+                    @click="onVariantSelected(v)"
+                  >
+                    <div class="text-left">
+                      <div class="font-semibold text-slate-900 group-hover:text-teal-800">
+                        {{ v.label }}
+                      </div>
+                      <div class="text-xs text-slate-500 mt-0.5">
+                        {{ v.availableStock }} {{ t('admin.pages.orders.create.inStock', 'in stock') }}
+                      </div>
+                    </div>
+                    <div class="font-bold text-teal-600">
+                      {{ formatCurrency(v.price) }}
+                    </div>
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
+
     <!-- Breadcrumb -->
     <nav
       class="flex mb-6"
@@ -69,7 +152,17 @@
               <button
                 v-if="order.status === 'PENDING'"
                 type="button"
-                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-red-50 text-red-700 hover:bg-red-100"
+                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100"
+                @click="editing ? cancelEdit() : startEdit()"
+              >
+                <Icon :name="editing ? 'lucide:x' : 'lucide:pencil'" class="w-4 h-4 mr-2" />
+                {{ editing ? t('common.cancel', 'Cancel') : t('common.edit', 'Edit') }}
+              </button>
+              <button
+                v-if="order.status === 'PENDING'"
+                type="button"
+                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="editing"
                 @click="openDelete"
               >
                 <Icon name="lucide:trash-2" class="w-4 h-4 mr-2" />
@@ -111,10 +204,147 @@
 
         <!-- Order Items -->
         <div class="ui-card p-6">
-          <h2 class="text-lg font-semibold text-slate-900 mb-4">
-            {{ t('admin.pages.orders.detail.sections.orderItems') }}
-          </h2>
-          <div class="overflow-x-auto">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h2 class="text-lg font-semibold text-slate-900">
+              {{ t('admin.pages.orders.detail.sections.orderItems') }}
+            </h2>
+            <div v-if="editing" class="flex items-center gap-2">
+              <button
+                type="button"
+                class="px-3 py-1.5 rounded-md text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100"
+                :disabled="editSaving"
+                @click="cancelEdit"
+              >
+                {{ t('common.cancel', 'Cancel') }}
+              </button>
+              <button
+                type="button"
+                class="px-3 py-1.5 rounded-md text-sm font-semibold bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+                :disabled="editSaving || cartItems.length === 0"
+                @click="saveEdit"
+              >
+                <span v-if="editSaving" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                {{ t('common.save', 'Save') }}
+              </button>
+            </div>
+          </div>
+
+          <div v-if="editing" class="space-y-4">
+            <div class="relative">
+              <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <input
+                v-model="productSearch"
+                type="text"
+                :placeholder="t('admin.pages.pos.catalog.searchPlaceholder', 'Search products…')"
+                class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm"
+              >
+
+              <div
+                v-if="productSearch.trim().length > 0"
+                class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-xl rounded-lg z-50 max-h-64 overflow-y-auto"
+              >
+                <div
+                  v-for="product in searchedProducts"
+                  :key="product.id"
+                  class="p-2 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-center gap-3"
+                  @click="addProductToCart(product)"
+                >
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium text-sm text-slate-800 truncate">{{ product.title }}</div>
+                    <div class="text-xs text-slate-500">{{ formatCurrency(product.price) }}</div>
+                  </div>
+                  <Icon name="lucide:plus" class="w-4 h-4 text-slate-400" />
+                </div>
+                <div v-if="searchedProducts.length === 0" class="p-4 text-center text-sm text-slate-500">
+                  {{ t('admin.pages.pos.catalog.noProducts', 'No products found') }}
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="editErrorMessage"
+              class="p-3 bg-red-50 border border-red-200 rounded-md"
+            >
+              <p class="text-sm text-red-800">
+                {{ editErrorMessage }}
+              </p>
+            </div>
+
+            <div class="space-y-3">
+              <div
+                v-if="cartItems.length === 0"
+                class="text-center text-sm text-slate-500 py-10"
+              >
+                {{ t('admin.pages.orders.create.emptyCart', 'No items yet') }}
+              </div>
+
+              <div
+                v-for="(item, index) in cartItems"
+                :key="`${item.productId}:${item.variantId || 'default'}:${index}`"
+                class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col gap-2"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium text-slate-800 line-clamp-2 leading-tight">
+                      {{ item.title }}
+                    </div>
+                    <div v-if="item.variantLabel" class="text-xs text-slate-500 mt-0.5">
+                      {{ item.variantLabel }}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="text-slate-400 hover:text-red-500 p-1 -m-1 transition-colors"
+                    @click="removeCartItem(index)"
+                    :title="t('common.delete', 'Delete')"
+                  >
+                    <Icon name="lucide:x" class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+                  <div class="font-semibold text-slate-700">
+                    {{ formatCurrency(item.price * item.quantity) }}
+                  </div>
+
+                  <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                    <button
+                      type="button"
+                      class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm disabled:opacity-50 transition-all"
+                      @click="item.quantity--"
+                      :disabled="item.quantity <= 1"
+                    >
+                      <Icon name="lucide:minus" class="w-3 h-3" />
+                    </button>
+                    <input
+                      v-model.number="item.quantity"
+                      type="number"
+                      min="1"
+                      class="w-12 text-center text-sm font-semibold text-slate-700 bg-transparent focus:outline-none"
+                    >
+                    <button
+                      type="button"
+                      class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm transition-all"
+                      @click="item.quantity++"
+                    >
+                      <Icon name="lucide:plus" class="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div class="text-sm text-slate-500">
+                {{ t('admin.common.total', 'Total') }}
+              </div>
+              <div class="text-lg font-bold text-teal-700">
+                {{ formatCurrency(cartTotal) }}
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="overflow-x-auto">
             <table class="ui-table">
               <thead class="ui-thead">
                 <tr>
@@ -139,7 +369,12 @@
                   class="ui-tr"
                 >
                   <td class="ui-td text-sm text-slate-900">
-                    {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct') }}
+                    <div class="font-medium">
+                      {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product') }}
+                    </div>
+                    <div v-if="variantLabelFromOrderItem(item)" class="text-xs text-slate-500 mt-0.5">
+                      {{ variantLabelFromOrderItem(item) }}
+                    </div>
                   </td>
                   <td class="ui-td text-sm text-slate-900">
                     {{ formatCurrency(item.price) }}
@@ -179,6 +414,7 @@
               v-model="order.internalNotes"
               rows="4"
               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+              :disabled="editing"
               :placeholder="t('admin.pages.orders.detail.fields.internalNotesPlaceholder', 'Add private remarks about this order...')"
               @blur="handleUpdateInternalNotes"
             ></textarea>
@@ -217,7 +453,7 @@
               <BaseSelect
                 id="status"
                 v-model="newStatus"
-                :disabled="order.status === 'DELIVERED'"
+                :disabled="editing || order.status === 'DELIVERED'"
               >
                 <option
                   v-for="s in selectableStatuses"
@@ -250,7 +486,7 @@
             <div class="flex justify-end space-x-3 pt-2">
               <button
                 type="submit"
-                :disabled="updating || newStatus === order.status || order.status === 'DELIVERED'"
+                :disabled="editing || updating || newStatus === order.status || order.status === 'DELIVERED'"
                 class="w-full px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center"
               >
                 {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
@@ -264,7 +500,31 @@
           <h2 class="text-lg font-semibold text-gray-900 mb-4">
             {{ t('admin.pages.orders.detail.sections.customerInfo') }}
           </h2>
-          <div class="space-y-3">
+          <div v-if="editing" class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                {{ t('admin.pages.orders.detail.fields.customerName', 'Customer Name') }}
+              </label>
+              <BaseInput v-model="editCustomerName" type="text" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                {{ t('admin.pages.orders.detail.fields.customerPhone', 'Customer Phone') }}
+              </label>
+              <BaseInput v-model="editCustomerPhone" type="tel" dir="ltr" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                {{ t('admin.pages.orders.detail.fields.deliveryAddress', 'Address') }}
+              </label>
+              <BaseInput v-model="editCustomerAddress" type="text" />
+            </div>
+            <p class="text-xs text-slate-500">
+              {{ t('admin.pages.orders.detail.editHint', 'Save from the items section to apply changes.') }}
+            </p>
+          </div>
+
+          <div v-else class="space-y-3">
             <div>
               <p class="text-sm font-medium text-gray-500">
                 {{ t('admin.pages.orders.detail.fields.customerName') }}
@@ -310,6 +570,7 @@
             <div class="w-48">
               <BaseSelect
                 v-model="order.callStatus"
+                :disabled="editing"
                 @change="handleUpdateCallStatus"
               >
                 <option value="not_called">{{ t('admin.pages.orders.detail.fields.callStatusValues.not_called', 'Not Called') }}</option>
@@ -399,7 +660,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import BaseInput from '~/components/ui/BaseInput.vue'
 import DeliveryPaymentModal from '~/components/cash/DeliveryPaymentModal.vue'
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -418,25 +681,38 @@ const { t, locale } = useI18n({ useScope: 'global' })
 interface OrderItem {
   id: string
   productId: string
+  variantId?: string | null
   quantity: number
   price: number
   lineTotal?: number
   product?: {
     title: string
   }
+  variant?: {
+    optionValues?: Array<{ optionValue?: { label?: string | null } | null }> | null
+  } | null
 }
 
 interface Order {
   id: string
   customerName: string
   customerPhone: string
-  customerAddress: string
+  customerAddress: string | null
   totalAmount: number
   status: string
   callStatus: string
   internalNotes: string | null
   createdAt: string
   items: OrderItem[]
+}
+
+type CartItem = {
+  productId: string
+  variantId?: string
+  title: string
+  variantLabel?: string
+  price: number
+  quantity: number
 }
 
 const loading = ref(true)
@@ -456,6 +732,23 @@ const notesSavedMessage = ref('')
 
 const savingCallStatus = ref(false)
 const callStatusSavedMessage = ref('')
+
+const editing = ref(false)
+const editSaving = ref(false)
+const editErrorMessage = ref('')
+
+const products = ref<any[]>([])
+const productSearch = ref('')
+const cartItems = ref<CartItem[]>([])
+
+const editCustomerName = ref('')
+const editCustomerPhone = ref('')
+const editCustomerAddress = ref('')
+
+const variantModalOpen = ref(false)
+const loadingVariants = ref(false)
+const selectedProductForVariant = ref<any>(null)
+const availableVariantsForSelection = ref<any[]>([])
 
 const statusLabelKeyByCode: Record<string, string> = {
   PENDING: 'admin.orderStatus.pending',
@@ -485,6 +778,27 @@ const selectableStatuses = computed(() => {
   return Array.from(new Set([current, ...next]))
 })
 
+function variantLabelFromOrderItem(item: OrderItem): string | undefined {
+  const labels =
+    item.variant?.optionValues
+      ?.map((ov) => ov?.optionValue?.label)
+      .filter((v): v is string => typeof v === 'string' && v.trim().length > 0) ?? []
+  if (labels.length === 0) return undefined
+  return labels.join(' / ')
+}
+
+const searchedProducts = computed(() => {
+  if (!productSearch.value.trim()) return []
+  const q = productSearch.value.toLowerCase()
+  return products.value
+    .filter((p: any) => (p?.title || '').toLowerCase().includes(q) || (p?.sku || '').toLowerCase().includes(q))
+    .slice(0, 6)
+})
+
+const cartTotal = computed(() => {
+  return cartItems.value.reduce((total, item) => total + item.price * item.quantity, 0)
+})
+
 async function fetchOrder() {
   loading.value = true
   try {
@@ -496,6 +810,8 @@ async function fetchOrder() {
     
     order.value = data
     newStatus.value = data.status
+    editing.value = false
+    editErrorMessage.value = ''
   } catch (error: any) {
     console.error('Failed to fetch order:', error)
     order.value = null
@@ -527,8 +843,164 @@ async function confirmDelete() {
   }
 }
 
+async function ensureProductsLoaded() {
+  if (products.value.length > 0) return
+  try {
+    const prodRes = await $fetch('/api/admin/products', {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      query: { limit: 200 }
+    })
+    products.value = prodRes as any[]
+  } catch (e) {
+    console.error('Failed to load products for order edit:', e)
+  }
+}
+
+async function startEdit() {
+  if (!order.value) return
+  if (order.value.status !== 'PENDING') return
+  if (updating.value) return
+
+  editing.value = true
+  editSaving.value = false
+  editErrorMessage.value = ''
+  productSearch.value = ''
+
+  editCustomerName.value = order.value.customerName || ''
+  editCustomerPhone.value = order.value.customerPhone || ''
+  editCustomerAddress.value = order.value.customerAddress || ''
+
+  cartItems.value = (order.value.items || []).map((i) => ({
+    productId: i.productId,
+    variantId: i.variantId || undefined,
+    title: i.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product'),
+    variantLabel: variantLabelFromOrderItem(i),
+    price: Number(i.price || 0),
+    quantity: Number(i.quantity || 1)
+  }))
+
+  await ensureProductsLoaded()
+}
+
+function cancelEdit() {
+  editing.value = false
+  editErrorMessage.value = ''
+  productSearch.value = ''
+  variantModalOpen.value = false
+}
+
+async function addProductToCart(product: any) {
+  productSearch.value = ''
+
+  if (product?.options && product.options.length > 0) {
+    selectedProductForVariant.value = product
+    variantModalOpen.value = true
+    loadingVariants.value = true
+    availableVariantsForSelection.value = []
+    try {
+      const response = await $fetch(`/api/admin/products/${product.id}`, {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      }) as any
+
+      availableVariantsForSelection.value = (response.variants || []).map((v: any) => {
+        const label = v.optionValues
+          ? v.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ')
+          : 'Default'
+        return {
+          ...v,
+          label,
+          availableStock: v.stock - (v.reserved || 0)
+        }
+      })
+    } catch (e) {
+      console.error(e)
+      variantModalOpen.value = false
+    } finally {
+      loadingVariants.value = false
+    }
+    return
+  }
+
+  const existing = cartItems.value.find((i) => i.productId === product.id && !i.variantId)
+  if (existing) {
+    existing.quantity++
+    return
+  }
+
+  cartItems.value.push({
+    productId: product.id,
+    title: product.title,
+    price: Number(product.price || 0),
+    quantity: 1
+  })
+}
+
+function onVariantSelected(variant: any) {
+  const product = selectedProductForVariant.value
+  if (!product) return
+
+  const existing = cartItems.value.find((i) => i.productId === product.id && i.variantId === variant.id)
+  if (existing) {
+    existing.quantity++
+  } else {
+    cartItems.value.push({
+      productId: product.id,
+      variantId: variant.id,
+      title: product.title,
+      variantLabel: variant.label,
+      price: Number(variant.price || 0),
+      quantity: 1
+    })
+  }
+
+  variantModalOpen.value = false
+}
+
+function removeCartItem(index: number) {
+  cartItems.value.splice(index, 1)
+}
+
+async function saveEdit() {
+  if (!order.value) return
+  if (order.value.status !== 'PENDING') return
+  if (cartItems.value.length === 0) return
+
+  editErrorMessage.value = ''
+  editSaving.value = true
+
+  try {
+    const payload = {
+      customerName: editCustomerName.value,
+      customerPhone: editCustomerPhone.value,
+      customerAddress: editCustomerAddress.value,
+      shippingAddressLine1: editCustomerAddress.value,
+      items: cartItems.value.map((i) => ({
+        productId: i.productId,
+        variantId: i.variantId || null,
+        quantity: i.quantity
+      }))
+    }
+
+    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: payload
+    }) as any
+
+    order.value = updated
+    newStatus.value = updated.status
+    editing.value = false
+  } catch (error: any) {
+    console.error('Failed to update order:', error)
+    editErrorMessage.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+  } finally {
+    editSaving.value = false
+  }
+}
+
 async function handleStatusUpdate() {
   if (!order.value) return
+  if (editing.value) return
   if (newStatus.value === 'DELIVERED') {
     errorMessage.value = ''
     successMessage.value = ''
@@ -580,6 +1052,7 @@ async function handleStatusUpdate() {
 
 async function confirmDelivered(payload: { cashboxId: string; method: string; reference: string | null; note: string | null }) {
   if (!order.value) return
+  if (editing.value) return
   errorMessage.value = ''
   successMessage.value = ''
   updating.value = true
@@ -615,6 +1088,7 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
 
 async function handleUpdateCallStatus() {
   if (!order.value) return
+  if (editing.value) return
   savingCallStatus.value = true
   callStatusSavedMessage.value = ''
   
@@ -638,6 +1112,7 @@ async function handleUpdateCallStatus() {
 
 async function handleUpdateInternalNotes() {
   if (!order.value) return
+  if (editing.value) return
   savingNotes.value = true
   notesSavedMessage.value = ''
   try {

@@ -84,6 +84,12 @@ function handleAddToCart() {
                 >
             </NuxtLink>
             
+            <StorefrontSharedFavoriteButton
+                :product-id="product.id"
+                button-class="absolute top-4 left-4 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+                icon-class="w-6 h-6"
+            />
+
             <!-- Floating Add Button -->
             <button 
                 @click.prevent="handleAddToCart"

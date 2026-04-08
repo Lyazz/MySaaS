@@ -377,6 +377,8 @@
       "adding": "Ajout…",
       "outOfStock": "Rupture de stock",
       "quickView": "Aperçu rapide",
+      "addToWishlist": "Ajouter aux favoris",
+      "removeFromWishlist": "Retirer des favoris",
       "viewCart": "Voir le panier",
       "checkout": "Paiement",
       "continueShopping": "Continuer vos achats",
@@ -386,6 +388,10 @@
       "clearAll": "Tout effacer",
       "filters": "Filtres",
       "search": "Rechercher"
+    },
+    "cartTip": {
+      "message": "Astuce : vous pouvez ajouter plusieurs produits — ajoutez ce que vous voulez au panier avant de passer commande.",
+      "close": "Fermer"
     },
     "badges": {
       "new": "Nouveau"
@@ -617,6 +623,12 @@
         "title": "Ajouté au panier",
         "message": "Consultez votre panier pour finaliser votre achat."
       },
+      "addedToWishlist": {
+        "message": "Ajouté aux favoris."
+      },
+      "removedFromWishlist": {
+        "message": "Retiré des favoris."
+      },
       "outOfStock": {
         "message": "Veuillez sélectionner une option disponible."
       }
@@ -678,6 +690,11 @@
       "wishlistTitle": "Favoris",
       "accountTitle": "Compte"
     },
+    "wishlist": {
+      "title": "Favoris",
+      "emptyTitle": "Aucun favori pour le moment",
+      "emptySubtitle": "Appuyez sur le cœur d’un produit pour l’enregistrer ici."
+    },
     "footer": {
       "contact": "Contact",
       "contactUs": "Nous contacter",
@@ -703,7 +720,9 @@
       "toggleSidebar": "Afficher/masquer le menu",
       "closeSidebar": "Fermer le menu",
       "viewStore": "Voir la boutique",
-      "logout": "Se déconnecter"
+      "logout": "Se déconnecter",
+      "logoutConfirmTitle": "Se déconnecter ?",
+      "logoutConfirmMessage": "Vous devrez vous reconnecter pour accéder au panneau d’administration."
     },
     "common": {
       "name": "Nom",

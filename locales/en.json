@@ -377,6 +377,8 @@
       "adding": "Adding…",
       "outOfStock": "Out of stock",
       "quickView": "Quick view",
+      "addToWishlist": "Add to favorites",
+      "removeFromWishlist": "Remove from favorites",
       "viewCart": "View cart",
       "checkout": "Checkout",
       "continueShopping": "Continue shopping",
@@ -386,6 +388,10 @@
       "clearAll": "Clear all",
       "filters": "Filters",
       "search": "Search"
+    },
+    "cartTip": {
+      "message": "Tip: you can add multiple products—add what you want to your cart before placing the order.",
+      "close": "Close"
     },
     "badges": {
       "new": "New"
@@ -617,6 +623,12 @@
         "title": "Added to cart",
         "message": "Review your cart to complete checkout."
       },
+      "addedToWishlist": {
+        "message": "Added to favorites."
+      },
+      "removedFromWishlist": {
+        "message": "Removed from favorites."
+      },
       "outOfStock": {
         "message": "Please select an in-stock option."
       }
@@ -678,6 +690,11 @@
       "wishlistTitle": "Wishlist",
       "accountTitle": "Account"
     },
+    "wishlist": {
+      "title": "Wishlist",
+      "emptyTitle": "No favorites yet",
+      "emptySubtitle": "Tap the heart on a product to save it here."
+    },
     "footer": {
       "contact": "Contact",
       "contactUs": "Contact us",
@@ -703,7 +720,9 @@
       "toggleSidebar": "Toggle sidebar",
       "closeSidebar": "Close sidebar",
       "viewStore": "View Store",
-      "logout": "Logout"
+      "logout": "Logout",
+      "logoutConfirmTitle": "Log out?",
+      "logoutConfirmMessage": "You will need to sign in again to access the admin panel."
     },
     "common": {
       "name": "Name",

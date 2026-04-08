@@ -4,6 +4,7 @@ import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 
 const cartStore = useCartStore()
+const favorites = useFavorites()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
@@ -114,13 +115,20 @@ const props = defineProps<{
               <div class="flex items-center gap-2">
                 <LocaleSwitcher class="hidden lg:inline-flex" />
                 <button
-                  class="h-10 w-10 flex items-center justify-center transition-colors"
+                  class="relative h-10 w-10 flex items-center justify-center transition-colors"
                   style="color: #6B7280;"
                   :title="storefrontContent.header.wishlistTitle"
+                  @click="navigateTo('/wishlist')"
                   @mouseover="($event.target as HTMLElement).closest('button')!.style.color = '#D4C5A9'"
                   @mouseleave="($event.target as HTMLElement).closest('button')!.style.color = '#6B7280'"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
+                  <ClientOnly>
+                    <span
+                      v-if="favorites.count.value > 0"
+                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#0E1117] text-[10px] font-bold text-[#D4C5A9] absolute -top-1 -right-1"
+                    >{{ favorites.count.value }}</span>
+                  </ClientOnly>
                 </button>
                 <button
                   class="h-10 w-10 flex items-center justify-center transition-colors"

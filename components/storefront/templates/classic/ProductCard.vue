@@ -145,6 +145,12 @@ function handleAddToCart() {
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'
         ]"
       >
+        <StorefrontSharedFavoriteButton
+          :product-id="product.id"
+          button-class="w-8 h-8 bg-white flex items-center justify-center hover:bg-red-50 hover:text-red-600 transition-colors"
+          icon-class="w-4 h-4"
+        />
+
         <!-- Quick View -->
         <button
            class="w-8 h-8 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-900 hover:text-white transition-colors" 

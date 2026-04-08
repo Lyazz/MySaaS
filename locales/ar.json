@@ -377,6 +377,8 @@
       "adding": "جارٍ الإضافة…",
       "outOfStock": "غير متوفر",
       "quickView": "عرض سريع",
+      "addToWishlist": "أضف إلى المفضلة",
+      "removeFromWishlist": "إزالة من المفضلة",
       "viewCart": "عرض السلة",
       "checkout": "الدفع",
       "continueShopping": "متابعة التسوق",
@@ -386,6 +388,10 @@
       "clearAll": "مسح الكل",
       "filters": "الفلاتر",
       "search": "بحث"
+    },
+    "cartTip": {
+      "message": "تنبيه: يمكنك إضافة عدة منتجات — أضف ما تريد إلى سلتك قبل إتمام الطلب.",
+      "close": "إغلاق"
     },
     "badges": {
       "new": "جديد"
@@ -617,6 +623,12 @@
         "title": "تمت الإضافة إلى السلة",
         "message": "راجع سلتك لإتمام عملية الشراء."
       },
+      "addedToWishlist": {
+        "message": "تمت الإضافة إلى المفضلة."
+      },
+      "removedFromWishlist": {
+        "message": "تمت الإزالة من المفضلة."
+      },
       "outOfStock": {
         "message": "يرجى اختيار خيار متوفر."
       }
@@ -678,6 +690,11 @@
       "wishlistTitle": "المفضلة",
       "accountTitle": "الحساب"
     },
+    "wishlist": {
+      "title": "المفضلة",
+      "emptyTitle": "لا توجد عناصر مفضلة بعد",
+      "emptySubtitle": "اضغط على زر القلب في المنتج لحفظه هنا."
+    },
     "footer": {
       "contact": "اتصل بنا",
       "contactUs": "تواصل معنا",
@@ -703,7 +720,9 @@
       "toggleSidebar": "إظهار/إخفاء القائمة",
       "closeSidebar": "إغلاق القائمة",
       "viewStore": "عرض المتجر",
-      "logout": "تسجيل الخروج"
+      "logout": "تسجيل الخروج",
+      "logoutConfirmTitle": "تسجيل الخروج؟",
+      "logoutConfirmMessage": "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى لوحة الإدارة."
     },
     "common": {
       "name": "الاسم",
