@@ -67,7 +67,7 @@ const images = computed(() => {
         return props.product.images.filter(Boolean)
     }
     // 4. Placeholder
-    return ['https://placehold.co/600x600/f8fafc/64748b?text=No+Image']
+    return ['/blank.svg']
 })
 
 // Main image for cart (first image)

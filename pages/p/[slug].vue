@@ -62,13 +62,13 @@ if (error.value || !product.value) {
     })
 }
 
-const mainImage = computed(() => {
+const mainImage = computed<string | undefined>(() => {
   const productImages = (product.value as any)?.productImages
   if (Array.isArray(productImages) && productImages.length > 0) {
     const main = productImages.find((img: any) => img?.isMain)
-    return (main?.url || productImages[0]?.url) ?? 'https://placehold.co/600x400'
+    return main?.url || productImages[0]?.url || undefined
   }
-  return product.value?.images?.[0] || 'https://placehold.co/600x400'
+  return product.value?.images?.[0] || undefined
 })
 
 useTenantSeo({

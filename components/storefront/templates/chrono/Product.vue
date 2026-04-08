@@ -69,7 +69,7 @@ const images = computed(() => {
     if (props.product?.images && props.product.images.length > 0) {
         return props.product.images
     }
-    return ['https://placehold.co/600x400', 'https://placehold.co/600x400?text=View+2']
+    return ['/blank.svg']
 })
 
 const cartImage = computed(() => images.value[0])

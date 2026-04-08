@@ -439,7 +439,7 @@ const closeQuickView = () => {
               <!-- Image Side -->
               <div class="w-full md:w-1/2 bg-stone-100 relative group overflow-hidden">
                   <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : 'https://placehold.co/600x600'" 
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
                     class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   >
                    <div class="absolute bottom-6 left-6 rtl:left-auto rtl:right-6 inline-block px-4 py-2 bg-white/90 backdrop-blur rounded-full text-xs font-bold uppercase tracking-widest text-brand-700 shadow-lg">

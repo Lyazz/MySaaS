@@ -12,7 +12,7 @@ const getProductMainImage = (product: any) => {
     const main = product.productImages.find((img: any) => img?.isMain)
     return main?.url || product.productImages[0]?.url
   }
-  return product?.images?.[0] || 'https://placehold.co/600x400'
+  return product?.images?.[0] || '/blank.svg'
 }
 </script>
 

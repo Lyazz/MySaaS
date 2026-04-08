@@ -54,7 +54,7 @@ const mainImage = computed(() => {
     if (props.product.images && props.product.images.length > 0) {
         return props.product.images[0]
     }
-    return 'https://placehold.co/400x550'
+    return '/blank.svg'
 })
 
 // TODO: Replace with real discount logic when available in backend

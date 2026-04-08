@@ -136,6 +136,10 @@
 }
 
 @layer utilities {
+  .img-fallback {
+    @apply bg-slate-100;
+  }
+
   .bg-brand {
     background-color: var(--brand);
   }

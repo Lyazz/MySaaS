@@ -41,7 +41,7 @@ const primaryImage = computed(() => {
     if (props.product?.images?.length > 0) {
         return props.product.images[0]
     }
-    return 'https://placehold.co/400x400?text=No+Image'
+    return '/blank.svg'
 })
 
 const productPrice = computed(() => {

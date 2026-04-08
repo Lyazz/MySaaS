@@ -297,7 +297,7 @@ const closeQuickView = () => {
               >
                 <div class="w-16 h-20 bg-slate-100 overflow-hidden flex-shrink-0">
                   <img
-                    :src="p.images && p.images[0] ? p.images[0] : 'https://placehold.co/100x125'"
+                    :src="p.images && p.images[0] ? p.images[0] : '/blank.svg'"
                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                     :alt="p.title"
                   >
@@ -488,7 +488,7 @@ const closeQuickView = () => {
               
               <div class="w-full md:w-1/2 bg-gray-100 relative min-h-[40vh]">
                   <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : 'https://placehold.co/600x600'" 
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
                     class="absolute inset-0 w-full h-full object-cover"
                   >
               </div>

@@ -35,7 +35,7 @@ const storefrontContent = useStorefrontContent()
 const mainImage = computed(() => {
     if (props.product?.productImages?.length > 0) return props.product.productImages[0].url
     if (props.product?.images?.length > 0) return props.product.images[0]
-    return 'https://placehold.co/600x600/black/yellow?text=NO+IMAGE'
+    return '/blank.svg'
 })
 
 const isHovered = ref(false)

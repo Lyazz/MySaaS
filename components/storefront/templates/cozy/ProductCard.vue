@@ -33,7 +33,7 @@ const { format: formatPrice } = useCurrency()
 const mainImage = computed(() => {
     if (props.product?.productImages?.length > 0) return props.product.productImages[0].url
     if (props.product?.images?.length > 0) return props.product.images[0]
-    return 'https://placehold.co/600x600/e2e8f0/64748b?text=Cozy'
+    return '/blank.svg'
 })
 
 const isHovered = ref(false)

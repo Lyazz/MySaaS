@@ -309,7 +309,7 @@ const closeQuickView = () => {
                 >
                   <div class="w-16 h-16 bg-stone-100 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-50">
                     <img
-                      :src="p.images && p.images[0] ? p.images[0] : 'https://placehold.co/100x100'"
+                      :src="p.images && p.images[0] ? p.images[0] : '/blank.svg'"
                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       :alt="p.title"
                     >
@@ -500,7 +500,7 @@ const closeQuickView = () => {
               
               <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-stone-50 relative">
                   <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : 'https://placehold.co/600x600'" 
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
                     class="w-full h-full object-cover"
                   >
               </div>

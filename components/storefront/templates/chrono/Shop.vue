@@ -207,7 +207,7 @@ const closeQuickView = () => {
             <div class="space-y-4">
               <NuxtLink v-for="p in sidebarProducts" :key="p.id" :to="`/p/${p.slug}`" class="flex gap-3 group">
                 <div class="w-16 h-16 bg-[#131720] overflow-hidden flex-shrink-0 border border-[#A67C52]/10" style="border-radius: 2px;">
-                  <img :src="p.images && p.images[0] ? p.images[0] : 'https://placehold.co/100x100'" class="w-full h-full object-cover group-hover:scale-110 transition-transform" :alt="p.title" >
+                  <img :src="p.images && p.images[0] ? p.images[0] : '/blank.svg'" class="w-full h-full object-cover group-hover:scale-110 transition-transform" :alt="p.title" >
                 </div>
                 <div>
                   <h5 class="text-sm font-bold text-gray-300 line-clamp-2 group-hover:text-[#A67C52] transition-colors">{{ p.title }}</h5>
@@ -295,7 +295,7 @@ const closeQuickView = () => {
               </button>
               
               <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-[#131720] relative">
-                  <img :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : 'https://placehold.co/600x600'" class="w-full h-full object-cover" >
+                  <img :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" class="w-full h-full object-cover" >
               </div>
               <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col" style="background-color:#0E1117; font-family:'Cormorant Garamond',serif;">
                   <div>

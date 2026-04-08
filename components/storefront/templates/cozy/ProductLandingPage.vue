@@ -61,7 +61,7 @@ const images = computed(() => {
     if (props.product?.images?.length > 0) {
         return props.product.images.filter(Boolean)
     }
-    return ['https://placehold.co/600x600/f8fafc/64748b?text=No+Image']
+  return ['/blank.svg']
 })
 
 const cartImage = computed(() => images.value[0])

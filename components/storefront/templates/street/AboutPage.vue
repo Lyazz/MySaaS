@@ -44,7 +44,7 @@ const year = new Date().getFullYear()
     
     <!-- Big Image Area -->
     <div class="h-96 w-full bg-black border-y-4 border-black relative overflow-hidden group">
-         <img src="https://placehold.co/1920x600/111/333?text=STUDIO" class="w-full h-full object-cover opacity-50 grayscale group-hover:scale-105 transition-transform duration-1000" />
+         <img src="/blank.svg" class="w-full h-full object-cover opacity-50 grayscale group-hover:scale-105 transition-transform duration-1000" />
          <div class="absolute inset-0 flex items-center justify-center">
              <span class="font-street text-white text-[10vw] uppercase opacity-20 group-hover:opacity-40 transition-opacity select-none">{{ t('storefront.templates.street.about.heroText') }}</span>
          </div>

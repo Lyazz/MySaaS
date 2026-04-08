@@ -6,7 +6,7 @@ const props = defineProps<{
 
 const activeIndex = ref(0)
 
-const activeImage = computed(() => props.images[activeIndex.value] || props.images[0] || 'https://placehold.co/600x600')
+const activeImage = computed(() => props.images[activeIndex.value] || props.images[0] || '/blank.svg')
 
 const nextImage = () => {
     activeIndex.value = (activeIndex.value + 1) % props.images.length

@@ -10,7 +10,7 @@ const currentImage = computed(() => {
     if (props.images && props.images.length > 0) {
         return props.images[activeImageIndex.value]
     }
-    return 'https://placehold.co/600x400'
+    return '/blank.svg'
 })
 
 const setActiveImage = (index: number) => {

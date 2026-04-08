@@ -8,7 +8,7 @@ const getProductMainImage = (product: any) => {
         const main = product.productImages.find((img: any) => img?.isMain)
         return main?.url || product.productImages[0]?.url
     }
-    return product?.images?.[0] || 'https://placehold.co/600x600/131720/D4C5A9?text=Chrono'
+    return product?.images?.[0] || '/blank.svg'
 }
 </script>
 

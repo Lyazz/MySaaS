@@ -375,7 +375,7 @@ const closeQuickView = () => {
                 
                 <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-gray-100 relative border-r-4 border-black">
                     <img 
-                      :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : 'https://placehold.co/600x600'" 
+                      :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
                       class="w-full h-full object-cover"
                     >
                 </div>

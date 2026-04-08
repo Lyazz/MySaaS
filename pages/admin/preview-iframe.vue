@@ -47,7 +47,7 @@ const fetchSampleProduct = async () => {
     if (products.length > 0) {
       const p = products[Math.floor(Math.random() * products.length)]
       const imgs = p.productImages?.map((i:any) => i.url) || p.images || []
-      const mainImg = imgs.length > 0 ? imgs[0] : (p.images?.[0] || 'https://placehold.co/400x500')
+      const mainImg = imgs.length > 0 ? imgs[0] : (p.images?.[0] || '/blank.svg')
       sampleProduct.value = {
         id: p.id || 'sample-id',
         title: p.title || p.name || 'Sample Product',

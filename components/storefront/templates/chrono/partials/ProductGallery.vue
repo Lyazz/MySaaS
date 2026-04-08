@@ -11,7 +11,7 @@ const touchEndX = ref(0)
 
 const currentImage = computed(() => {
     if (props.images && props.images.length > 0) return props.images[activeImageIndex.value]
-    return 'https://placehold.co/600x600/131720/D4C5A9?text=Chrono'
+    return '/blank.svg'
 })
 
 const setActiveImage = (index: number) => { activeImageIndex.value = index; resetAutoplay() }

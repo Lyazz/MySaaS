@@ -31,10 +31,10 @@ const { currencyCode } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
-    if (props.product.images && props.product.images.length > 0) {
-        return props.product.images[0]
-    }
-    return 'https://placehold.co/400x550/1A1F2E/D4C5A9?text=Chrono'
+  if (props.product.images && props.product.images.length > 0) {
+    return props.product.images[0]
+  }
+  return '/blank.svg'
 })
 
 const isPromoValid = computed(() => {

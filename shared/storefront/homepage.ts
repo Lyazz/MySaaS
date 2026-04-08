@@ -32,21 +32,21 @@ export const DEFAULT_STOREFRONT_HOME_CONFIG: StorefrontHomeConfig = {
             subtitle: 'Discover the latest trends in books and stationery.',
             buttonText: 'Shop Now',
             buttonHref: '/products',
-            imageUrl: 'https://placehold.co/1920x800/0f172a/ffffff?text=New+Collection+2026'
+            imageUrl: '/blank.svg'
         },
         {
             title: 'Best Sellers',
             subtitle: 'Get your hands on the most popular items this week.',
             buttonText: 'Browse',
             buttonHref: '/products',
-            imageUrl: 'https://placehold.co/1920x800/334155/ffffff?text=Best+Sellers'
+            imageUrl: '/blank.svg'
         },
         {
             title: 'Special Offers',
             subtitle: 'Up to 50% off on selected items.',
             buttonText: 'View Deals',
             buttonHref: '/products',
-            imageUrl: 'https://placehold.co/1920x800/475569/ffffff?text=Special+Offers'
+            imageUrl: '/blank.svg'
         }
     ],
     sections: {
