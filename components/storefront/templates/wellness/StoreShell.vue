@@ -34,6 +34,41 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
    // lazy: true
 })
 
+// Search Logic
+const searchQuery = ref('')
+const searchResults = ref<any[]>([])
+const searchLoading = ref(false)
+const isSearchDropdownOpen = ref(false)
+let searchTimeout: any
+
+watch(searchQuery, (newVal) => {
+    if (newVal.length >= 3) {
+        searchLoading.value = true
+        isSearchDropdownOpen.value = true
+        clearTimeout(searchTimeout)
+        searchTimeout = setTimeout(async () => {
+            try {
+                const url = useTenantApiUrl('/api/products')
+                const data = await $fetch<any[]>(url, {
+                    headers: useTenantApiHeaders(),
+                    query: { q: newVal }
+                })
+                searchResults.value = (data || []).slice(0, 5)
+            } catch (e) {
+                console.error('Search error:', e)
+            } finally {
+                searchLoading.value = false
+            }
+        }, 500)
+    } else {
+        searchResults.value = []
+        isSearchDropdownOpen.value = false
+    }
+})
+
+
+// Mobile menu
+const mobileMenuOpen = ref(false)
 // Build dynamic menu
 const categories = computed(() => {
     return [
@@ -118,10 +153,49 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
             <!-- Right: Actions & Search -->
             <div class="flex items-center justify-end gap-4 flex-shrink-0">
-               <!-- Search (Minimal Icon) -->
-               <button class="p-3 text-stone-500 hover:text-brand-700 hover:bg-white rounded-full transition-all">
-                  <Icon name="lucide:search" class="w-5 h-5" />
+               <!-- Hamburger (Mobile) -->
+               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
+                 <Icon name="lucide:menu" class="w-6 h-6" />
                </button>
+               <!-- Search Box with Live Feed -->
+               <div class="relative group flex items-center">
+                  <input
+                    type="text"
+                    v-model="searchQuery"
+                    :placeholder="storefrontContent.search?.placeholder || 'Search...'"
+                    class="w-[120px] sm:w-[160px] p-2 pl-4 pr-10 text-sm text-stone-800 bg-white/60 focus:bg-white border border-stone-200 focus:border-brand-500 rounded-full outline-none transition-all placeholder:text-stone-400"
+                    @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
+                    @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  >
+                  <Icon name="lucide:search" class="w-4 h-4 text-stone-400 absolute right-3 pointer-events-none" />
+
+                  <!-- Search Dropdown -->
+                  <div
+                    v-show="isSearchDropdownOpen"
+                    class="absolute top-[100%] right-0 mt-2 w-64 bg-white border border-stone-100 shadow-xl z-50 rounded-[1.5rem] p-2 overflow-hidden text-left"
+                  >
+                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-stone-500">Searching...</div>
+                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-stone-500">No products found.</div>
+                    <div v-else class="flex flex-col gap-1">
+                      <NuxtLink
+                        v-for="product in searchResults"
+                        :key="product.id"
+                        :to="`/p/${product.slug}`"
+                        class="flex items-center gap-3 px-3 py-2 hover:bg-stone-50 rounded-[1.2rem] transition-colors"
+                        @click="isSearchDropdownOpen = false"
+                      >
+                        <img v-if="product.images && product.images.length > 0" :src="product.images[0]" class="w-10 h-10 object-cover rounded-[1rem] shadow-sm" />
+                        <div v-else class="w-10 h-10 bg-stone-100 rounded-[1rem] flex items-center justify-center">
+                           <Icon name="lucide:image" class="w-4 h-4 text-stone-300" />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
+                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
+                        </div>
+                      </NuxtLink>
+                    </div>
+                  </div>
+               </div>
 
                <div class="h-6 w-px bg-stone-200 hidden lg:block" />
 
@@ -162,6 +236,88 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
           </div>
         </div>
       </header>
+
+      <!-- Mobile Drawer -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
+        </Transition>
+        <Transition name="slide">
+          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
+            <!-- Drawer header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <span class="text-lg font-bold text-slate-900">{{ tenantName }}</span>
+              <button @click="mobileMenuOpen = false" class="p-1 text-slate-500 hover:text-slate-900">
+                <Icon name="lucide:x" class="w-5 h-5" />
+              </button>
+            </div>
+
+            <!-- Search -->
+            <div class="px-5 py-3">
+              <div class="relative">
+                <input
+                  type="text"
+                  v-model="searchQuery"
+                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
+                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                >
+                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+
+                <div
+                  v-show="isSearchDropdownOpen"
+                  class="absolute top-[100%] left-0 right-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden"
+                >
+                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
+                  <div v-else class="flex flex-col">
+                    <NuxtLink
+                      v-for="product in searchResults"
+                      :key="product.id"
+                      :to="'/p/' + product.slug"
+                      class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+                      @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
+                    >
+                      <img v-if="product.images && product.images.length > 0" :src="product.images[0]" class="w-10 h-10 object-cover rounded shadow-sm" />
+                      <div v-else class="w-10 h-10 bg-slate-100 rounded flex items-center justify-center">
+                         <Icon name="lucide:image" class="w-4 h-4 text-slate-300" />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
+                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
+                      </div>
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nav links -->
+            <nav class="flex flex-col px-5 py-2 gap-1">
+              <NuxtLink to="/" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
+              <NuxtLink to="/contact" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
+            </nav>
+
+            <!-- Categories -->
+            <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">{{ storefrontContent.nav.categories || 'Categories' }}</h4>
+              <div class="flex flex-col gap-1">
+                <NuxtLink
+                  v-for="cat in tenantCategories"
+                  :key="cat.id"
+                  :to="'/c/' + cat.slug"
+                  class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
+                  @click="mobileMenuOpen = false"
+                >
+                  {{ cat.title }}
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
 
       <!-- Main Content -->
       <main class="flex-grow">
@@ -254,3 +410,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
     </div>
   </StoreThemeProvider>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+.slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
+.slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+</style>

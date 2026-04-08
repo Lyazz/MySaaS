@@ -16,10 +16,19 @@ const coalesceImages = (legacyImages: any, productImages: any[]): string[] => {
 }
 
 export class PublicProductsService {
-    async listProducts(tenantId: string) {
+    async listProducts(tenantId: string, search?: string) {
         const now = new Date()
+
+        const where: any = { tenantId, isActive: true }
+        if (search) {
+            where.OR = [
+                { title: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } }
+            ]
+        }
+
         const products = await prisma.product.findMany({
-            where: { tenantId, isActive: true },
+            where,
             include: {
                 category: true,
                 productImages: { orderBy: [{ isMain: 'desc' }, { position: 'asc' }] },

@@ -33,6 +33,41 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
     headers: useTenantApiHeaders(),
 })
 
+// Search Logic
+const searchQuery = ref('')
+const searchResults = ref<any[]>([])
+const searchLoading = ref(false)
+const isSearchDropdownOpen = ref(false)
+let searchTimeout: any
+
+watch(searchQuery, (newVal) => {
+    if (newVal.length >= 3) {
+        searchLoading.value = true
+        isSearchDropdownOpen.value = true
+        clearTimeout(searchTimeout)
+        searchTimeout = setTimeout(async () => {
+            try {
+                const url = useTenantApiUrl('/api/products')
+                const data = await $fetch<any[]>(url, {
+                    headers: useTenantApiHeaders(),
+                    query: { q: newVal }
+                })
+                searchResults.value = (data || []).slice(0, 5)
+            } catch (e) {
+                console.error('Search error:', e)
+            } finally {
+                searchLoading.value = false
+            }
+        }, 500)
+    } else {
+        searchResults.value = []
+        isSearchDropdownOpen.value = false
+    }
+})
+
+// Mobile menu
+const mobileMenuOpen = ref(false)
+
 const categories = computed(() => {
     return [
         { name: storefrontContent.value.nav.home, href: '/' },
@@ -83,6 +118,10 @@ const props = defineProps<{
 
             <!-- Navigation & Actions -->
             <div class="flex items-center gap-6">
+              <!-- Hamburger (Mobile) -->
+              <button class="lg:hidden p-1" style="color: #E8E0D5;" @click="mobileMenuOpen = true">
+                <Icon name="lucide:menu" class="w-6 h-6" />
+              </button>
               <!-- Desktop Menu -->
               <nav class="hidden lg:flex items-center gap-8">
                 <NuxtLink to="/" class="text-xs font-medium tracking-[0.2em] uppercase transition-colors duration-200" active-class="!text-[#D4C5A9]">{{ storefrontContent.nav.home }}</NuxtLink>
@@ -157,6 +196,91 @@ const props = defineProps<{
           </div>
         </div>
       </header>
+
+      <!-- Mobile Drawer -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
+        </Transition>
+        <Transition name="slide">
+          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs z-[61] shadow-2xl flex flex-col overflow-y-auto" style="background-color: #0E1117;">
+            <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color: rgba(212,197,169,0.12);">
+              <span class="text-lg font-bold" style="color: #E8E0D5;">{{ tenantName }}</span>
+              <button @click="mobileMenuOpen = false" class="p-1" style="color: #6B7280;">
+                <Icon name="lucide:x" class="w-5 h-5" />
+              </button>
+            </div>
+
+            <!-- Search -->
+            <div class="px-5 py-3">
+              <div class="relative">
+                <input
+                  type="text"
+                  v-model="searchQuery"
+                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  class="w-full rounded-lg py-2.5 pl-4 pr-10 text-sm outline-none"
+                  style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.15); color: #E8E0D5;"
+                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
+                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                >
+                <Icon name="lucide:search" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color: #6B7280;" />
+
+                <div
+                  v-show="isSearchDropdownOpen"
+                  class="absolute top-[100%] left-0 right-0 mt-1 shadow-xl z-50 rounded-lg overflow-hidden"
+                  style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.12);"
+                >
+                  <div v-if="searchLoading" class="px-4 py-3 text-sm" style="color: #7A7060;">Searching...</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm" style="color: #7A7060;">No products found.</div>
+                  <div v-else class="flex flex-col">
+                    <NuxtLink
+                      v-for="product in searchResults"
+                      :key="product.id"
+                      :to="`/p/${product.slug}`"
+                      class="flex items-center gap-3 px-4 py-3 transition-colors"
+                      style="border-bottom: 1px solid rgba(212,197,169,0.06);"
+                      @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
+                    >
+                      <img v-if="product.images && product.images.length > 0" :src="product.images[0]" class="w-10 h-10 object-cover rounded shadow-sm" />
+                      <div v-else class="w-10 h-10 rounded flex items-center justify-center" style="background-color: #252B3B;">
+                         <Icon name="lucide:image" class="w-4 h-4" style="color: #6B7280;" />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium truncate" style="color: #E8E0D5;">{{ product.title }}</div>
+                        <div class="text-xs font-bold mt-0.5" style="color: #A67C52;">{{ product.price }} {{ currencyCode }}</div>
+                      </div>
+                    </NuxtLink>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nav links -->
+            <nav class="flex flex-col px-5 py-2 gap-1">
+              <NuxtLink to="/" class="py-3 text-sm font-medium" style="color: #D4C5A9; border-bottom: 1px solid rgba(212,197,169,0.06);" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="py-3 text-sm font-medium" style="color: #D4C5A9; border-bottom: 1px solid rgba(212,197,169,0.06);" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
+              <NuxtLink to="/contact" class="py-3 text-sm font-medium" style="color: #D4C5A9; border-bottom: 1px solid rgba(212,197,169,0.06);" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
+            </nav>
+
+            <!-- Categories -->
+            <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider mb-2" style="color: #A67C52;">{{ storefrontContent.nav.categories || 'Categories' }}</h4>
+              <div class="flex flex-col gap-1">
+                <NuxtLink
+                  v-for="cat in tenantCategories"
+                  :key="cat.id"
+                  :to="`/c/${cat.slug}`"
+                  class="py-2 text-sm transition-colors"
+                  style="color: #7A7060;"
+                  @click="mobileMenuOpen = false"
+                >
+                  {{ cat.title }}
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
 
       <!-- Main Content -->
       <main class="flex-grow">
@@ -246,3 +370,10 @@ const props = defineProps<{
     </div>
   </StoreThemeProvider>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+.slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
+.slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+</style>

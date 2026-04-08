@@ -422,9 +422,8 @@ export class OrdersService {
         if (!nextCustomerName) throw new OrderValidationError(400, 'Customer name is required')
         if (!nextCustomerPhone) throw new OrderValidationError(400, 'Customer phone is required')
 
-        const phoneRegex = /^(0|\\+213|00213)(5|6|7)[0-9]{8}$/
-        if (!phoneRegex.test(nextCustomerPhone.replace(/\\s+/g, ''))) {
-            throw new OrderValidationError(400, 'Invalid phone number format')
+        if (!/^\d+$/.test(nextCustomerPhone)) {
+            throw new OrderValidationError(400, 'Phone number must contain only digits')
         }
 
         const nextDeliveryMode =
@@ -1149,6 +1148,10 @@ export class OrdersService {
             throw new OrderValidationError(400, 'Customer phone is required')
         }
 
+        if (!/^\d+$/.test(customerPhone)) {
+            throw new OrderValidationError(400, 'Phone number must contain only digits')
+        }
+
         if (!customerName) {
             throw new OrderValidationError(400, 'Customer name is required')
         }
@@ -1436,6 +1439,10 @@ export class OrdersService {
         const customerName = (input.customerName || '').trim()
         const customerPhone = (input.customerPhone || '').trim()
         const deliveryMode = (input.deliveryMode || 'home').toLowerCase()
+
+        if (customerPhone && !/^\d+$/.test(customerPhone)) {
+            throw new OrderValidationError(400, 'Phone number must contain only digits')
+        }
 
         // For admin orders, we can make customer info optional if they just want to create a quick order,
         // but typically an order has a customer. Let's enforce name if phone is missing, or vice versa,

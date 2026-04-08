@@ -11,7 +11,8 @@ export class PublicProductsController {
         }
 
         try {
-            const products = await this.service.listProducts(tenant.id)
+            const search = typeof req.query.q === 'string' ? req.query.q : undefined
+            const products = await this.service.listProducts(tenant.id, search)
             res.json(products)
         } catch (error) {
             console.error('Public products list error:', error)
@@ -27,7 +28,7 @@ export class PublicProductsController {
         }
 
         try {
-            const product = await this.service.getProductBySlug(tenant.id, slug)
+            const product = await this.service.getProductBySlug(tenant.id, slug as string)
             if (!product) {
                 return res.status(404).json({ statusCode: 404, statusMessage: 'Product not found' })
             }
