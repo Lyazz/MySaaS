@@ -26,7 +26,7 @@ watch(() => props.images, () => {
 <template>
     <div class="bg-white rounded-3xl p-6 shadow-soft border border-stone-100 mb-8 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-left">
         <!-- Main Image -->
-        <div class="aspect-[4/3] rounded-2xl overflow-hidden bg-stone-50 relative group cursor-zoom-in mb-4 border border-stone-100">
+        <div class="aspect-[4/5] rounded-2xl overflow-hidden bg-stone-50 relative group cursor-zoom-in mb-4 border border-stone-100">
         <img 
             :src="currentImage" 
             :alt="title" 

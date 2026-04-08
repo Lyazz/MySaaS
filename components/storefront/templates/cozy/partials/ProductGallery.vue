@@ -19,7 +19,7 @@ watch(() => props.images, () => {
 <template>
   <div class="space-y-4">
     <!-- Main Image -->
-    <div class="relative w-full aspect-square bg-slate-50 rounded-[2rem] overflow-hidden shadow-soft">
+    <div class="relative w-full aspect-[4/5] bg-slate-50 rounded-[2rem] overflow-hidden shadow-soft">
       <img
         v-if="images && images.length > 0"
         :src="images[selectedImage]"

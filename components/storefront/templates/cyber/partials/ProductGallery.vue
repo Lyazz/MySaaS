@@ -20,7 +20,7 @@ const prevImage = () => {
 <template>
   <div class="product-gallery">
     <!-- Main Image -->
-    <div class="relative aspect-square overflow-hidden rounded-xl bg-purple-900/30 group">
+    <div class="relative aspect-[4/5] overflow-hidden rounded-xl bg-purple-900/30 group">
       <img
         :src="activeImage"
         :alt="title || 'Product image'"

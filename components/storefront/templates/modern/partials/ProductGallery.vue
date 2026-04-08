@@ -89,7 +89,7 @@ watch(() => props.images, () => {
     <div class="bg-white md:rounded-3xl p-0 md:p-6 md:shadow-soft md:border border-slate-100 mb-8 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-left">
         <!-- Main Image Carousel Area -->
         <div 
-            class="aspect-square md:aspect-[4/3] rounded-none md:rounded-2xl overflow-hidden bg-slate-50 relative group cursor-zoom-in mb-4 md:border border-slate-100"
+            class="aspect-[4/5] rounded-none md:rounded-2xl overflow-hidden bg-slate-50 relative group cursor-zoom-in mb-4 md:border border-slate-100"
             @touchstart="handleTouchStart"
             @touchend="handleTouchEnd"
             @mouseenter="stopAutoplay"

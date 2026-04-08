@@ -19,7 +19,7 @@ watch(() => props.images, () => {
 <template>
   <div class="flex flex-col gap-4">
     <!-- Main Image -->
-    <div class="relative w-full aspect-square border-4 border-black bg-gray-100 overflow-hidden shadow-[8px_8px_0px_0px_#000]">
+    <div class="relative w-full aspect-[4/5] border-4 border-black bg-gray-100 overflow-hidden shadow-[8px_8px_0px_0px_#000]">
       <img
         v-if="images && images.length > 0"
         :src="images[selectedImage]"

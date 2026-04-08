@@ -93,7 +93,7 @@ watch(() => props.images, () => {
 
         <!-- Main Image Carousel Area (Polaroid Style) -->
         <div 
-            class="aspect-square md:aspect-[4/3] bg-white p-3 md:p-6 pb-12 md:pb-20 rounded-sm shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] relative group cursor-zoom-in mb-8 md:mb-12 transform -rotate-2 hover:rotate-1 transition-transform duration-500 z-10 border-b-[12px] md:border-b-[20px] border-white"
+            class="aspect-[4/5] bg-white p-3 md:p-6 pb-12 md:pb-20 rounded-sm shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] relative group cursor-zoom-in mb-8 md:mb-12 transform -rotate-2 hover:rotate-1 transition-transform duration-500 z-10 border-b-[12px] md:border-b-[20px] border-white"
             @touchstart="handleTouchStart"
             @touchend="handleTouchEnd"
             @mouseenter="stopAutoplay"

@@ -26,7 +26,7 @@ watch(() => props.images, () => {
 <template>
     <div class="animate-fade-in-left">
         <!-- Main Image -->
-        <div class="aspect-[4/3] bg-slate-50 relative group cursor-zoom-in mb-4 overflow-hidden">
+        <div class="aspect-[4/5] bg-slate-50 relative group cursor-zoom-in mb-4 overflow-hidden">
         <img 
             :src="currentImage" 
             :alt="title" 

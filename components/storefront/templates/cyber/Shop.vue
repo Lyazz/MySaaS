@@ -28,8 +28,8 @@ const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
 const priceRange = ref({ min: 0, max: 200000 })
-const minPriceInput = ref(0)
-const maxPriceInput = ref(200000)
+const minPriceInput = ref<number | null>(null)
+const maxPriceInput = ref<number | null>(null)
 
 // Quick View State
 const isQuickViewOpen = ref(false)
@@ -53,7 +53,9 @@ const filteredProducts = computed(() => {
     // Filter by Price
     result = result.filter(p => {
         const price = Number(p.price)
-        return price >= minPriceInput.value && price <= maxPriceInput.value
+        const minMatches = minPriceInput.value === null || minPriceInput.value === '' ? true : price >= Number(minPriceInput.value)
+        const maxMatches = maxPriceInput.value === null || maxPriceInput.value === '' ? true : price <= Number(maxPriceInput.value)
+        return minMatches && maxMatches
     })
 
     // Sort
@@ -97,8 +99,8 @@ const resetFilters = () => {
     selectedCategories.value = []
     searchQuery.value = ''
     sortOption.value = 'relevance'
-    minPriceInput.value = 0
-    maxPriceInput.value = 200000
+    minPriceInput.value = null
+    maxPriceInput.value = null
 }
 
 const openQuickView = (product: any) => {

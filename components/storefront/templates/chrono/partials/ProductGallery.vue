@@ -38,7 +38,7 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
     <div class="mb-8 lg:mb-0 lg:sticky lg:top-8" style="animation: fadeInLeft 0.6s ease forwards;">
         <!-- Main Image -->
         <div 
-            class="aspect-square overflow-hidden relative group cursor-zoom-in mb-4 border"
+            class="aspect-[4/5] overflow-hidden relative group cursor-zoom-in mb-4 border"
             style="background-color: #131720; border-color: rgba(212,197,169,0.1); border-radius: 2px;"
             @touchstart="handleTouchStart"
             @touchend="handleTouchEnd"

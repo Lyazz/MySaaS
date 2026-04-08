@@ -24,8 +24,8 @@ const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 const priceRange = ref({ min: 0, max: 200000 })
-const minPriceInput = ref(0)
-const maxPriceInput = ref(200000)
+const minPriceInput = ref<number | null>(null)
+const maxPriceInput = ref<number | null>(null)
 
 const isQuickViewOpen = ref(false)
 const quickViewProduct = ref<any>(null)
@@ -80,8 +80,8 @@ const resetFilters = () => {
     selectedCategories.value = []
     searchQuery.value = ''
     sortOption.value = 'relevance'
-    minPriceInput.value = 0
-    maxPriceInput.value = 200000
+    minPriceInput.value = null
+    maxPriceInput.value = null
 }
 
 const openQuickView = (product: any) => {
