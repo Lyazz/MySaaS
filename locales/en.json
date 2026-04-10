@@ -38,16 +38,16 @@
   },
   "saasLanding": {
     "seo": {
-      "title": "Swekly - The Best E-commerce Platform to Build Your Store",
-      "description": "Start, run, and grow your e-commerce business with Swekly. The powerful, easy-to-use platform for online stores."
+      "title": "Swekly — Sell online, simply",
+      "description": "Build your store, take orders, and manage payments and shipping from one dashboard."
     },
     "hero": {
       "title": {
-        "buildSell": "Start. Sell.",
-        "scale": "Succeed."
+        "buildSell": "Launch. Run.",
+        "scale": "Grow."
       },
-      "subtitle": "The commerce platform built to turn your ideas into a thriving online store. Manage products, accept payments, and scale your business effortlessly.",
-      "ctaPrimary": "Start free trial",
+      "subtitle": "Launch your store in minutes. We handle the website, payments, and shipping.",
+      "ctaPrimary": "Try it free",
       "ctaSecondary": "Explore features"
     },
     "features": {
@@ -55,23 +55,23 @@
         "prefix": "Everything you need to",
         "accent": "sell online"
       },
-      "subtitle": "Powerful e-commerce tools designed for growth, packaged in a beautiful interface.",
+      "subtitle": "Everything you need to sell online—without the headache.",
       "items": {
         "aiTools": {
-          "title": "Artificial Intelligence Tools",
-          "description": "AI-powered automatic generation of landing pages, product listings, and SEO."
+          "title": "AI help",
+          "description": "Generate product descriptions, text, and SEO in seconds."
         },
         "competitivePricing": {
-          "title": "Competitive Pricing",
-          "description": "Transparent and affordable plans to help you scale without limits."
+          "title": "Clear pricing",
+          "description": "Simple plans with no surprises. Change anytime."
         },
         "templates": {
-          "title": "Multiple Store Templates",
-          "description": "A wide selection of beautiful, conversion-optimized themes that are fully customizable."
+          "title": "Ready-made themes",
+          "description": "Fast, mobile-friendly templates you can customize."
         },
         "fastSupport": {
-          "title": "Fast 24/7 Support",
-          "description": "A dedicated team ready to help you succeed at every stage of your growth."
+          "title": "Responsive support",
+          "description": "Quick answers when you need help."
         }
       }
     },
@@ -86,75 +86,100 @@
       "items": {
         "noCard": {
           "question": "Do I need a credit card to start?",
-          "answer": "No. You can start right away and upgrade/downgrade later."
+          "answer": "No. You can start now and choose a plan later."
         },
         "changePlan": {
           "question": "Can I change my plan later?",
-          "answer": "Yes. You can change your plan anytime from the admin Billing page."
+          "answer": "Yes. You can change your plan anytime from the Billing section in the admin."
         },
         "planDifferences": {
           "question": "What changes between plans right now?",
-          "answer": "For now (testing), plans only differ by the number of orders allowed per month."
+          "answer": "Right now, the main difference is how many orders are included per month."
         }
       }
     },
     "testimonials": {
       "heading": {
-        "prefix": "Loved by",
-        "accent": "Founders",
+        "prefix": "Made for",
+        "accent": "people",
         "suffix": "like you."
       },
-      "subtitle": "Join thousands of merchants who have switched to a platform built for growth, speed, and reliability.",
+      "subtitle": "Merchants in Algeria who want a fast store and simple operations.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "User avatar",
       "items": {
         "nassim": {
-          "text": "Swekly completely transformed how we manage Nokhba Store. It's so easy to list our stationery and books, and sales have never been better.",
+          "text": "We put our products online quickly. Orders come in, and everything stays in one place.",
           "role": "Owner, Nokhba Store"
         },
         "amina": {
-          "text": "The custom domain and analytics features are incredible. My cosmetics brand looks so professional, and managing orders is a breeze.",
+          "text": "Custom domains were easy to set up, and sales are clear in the dashboard.",
           "role": "Founder, Dzair Cosmetics"
         },
         "yanis": {
-          "text": "Swekly is the ultimate e-commerce solution in Algeria. The integrated local shipping options saved us hours of manual work every week.",
+          "text": "Local shipping integrations save us time every day. Dispatching became a habit.",
           "role": "Director, TechAlgeria"
         },
         "lyes": {
-          "text": "We sell hundreds of fashion items daily, and the platform handles the traffic flawlessly. Best decision we made for our business.",
+          "text": "Even with high traffic, the store stays fast. We can focus on selling.",
           "role": "Owner, Oran Fashion"
         },
         "meriem": {
-          "text": "No more taking orders manually via social media. Our customers love the seamless checkout, and we love the automated inventory tracking.",
+          "text": "No more lost orders in DMs. Customers order and pay easily.",
           "role": "CEO, BioAtlas"
         },
         "sofiane": {
-          "text": "Building the store was drag-and-drop simple. We had Casbah Gifts up and running in a single afternoon.",
+          "text": "We launched the store in an afternoon. Simple, clean, and ready to sell.",
           "role": "Manager, Casbah Gifts"
         }
       }
     },
     "finalCta": {
-      "title": "Ready to launch your store?",
-      "subtitle": "Join thousands of merchants building the future of e-commerce.",
-      "cta": "Start your free trial"
+      "title": "Ready to get started?",
+      "subtitle": "Create your store and take your first orders today.",
+      "cta": "Create my store"
     },
     "trust": {
-      "secure": "100% Secure Payments",
-      "ssl": "Free SSL Certificate",
-      "cloud": "Reliable Cloud Hosting"
+      "secure": "Secure payments",
+      "ssl": "SSL included",
+      "cloud": "Reliable hosting"
     },
     "integrations": {
-      "title": "Works with your favorite tools",
-      "subtitle": "Connect with top payment gateways, shipping providers, and marketing tools."
+      "title": "Works with your tools",
+      "subtitle": "Payments, shipping, and marketing—plug in what you use."
     },
     "themes": {
       "title": {
-        "prefix": "Beautiful",
-        "accent": "storefronts"
+        "prefix": "Storefronts that",
+        "accent": "sell"
       },
-      "subtitle": "Choose from high-converting templates or customize everything. Designed for mobile-first commerce.",
-      "viewAll": "Explore themes"
+      "subtitle": "Pick a fast, mobile-first theme and customize it your way.",
+      "viewAll": "View themes"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "subtitle": "We're here to help and answer any question you might have. We look forward to hearing from you.",
+      "cards": {
+        "sales": {
+          "title": "Talk to Sales",
+          "description": "Interested in our enterprise plans? Just pick up the phone to chat with a member of our sales team.",
+          "contact": "+213 550 00 00 00"
+        },
+        "support": {
+          "title": "Contact Support",
+          "description": "Sometimes you need a little help from your friends. Or a support rep. Don't worry... we're here for you.",
+          "contact": "support{'@'}swekly.com"
+        }
+      },
+      "form": {
+        "title": "Send us a message",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "subject": "Subject",
+        "message": "Message",
+        "submit": "Send Message"
+      }
     }
   },
   "marketing": {
@@ -226,19 +251,35 @@
   "auth": {
     "login": {
       "hero": {
-        "welcomeBack": "Welcome back",
-        "builder": "Builder",
-        "builderSuffix": ".",
-        "subtitle": "Your dashboard is ready. Continue managing your orders, products, and analytics from one central hub.",
-        "feature": {
-          "title": "Revenue Tracking",
-          "description": "Real-time insights into your store's performance at a glance."
-        },
-        "copyright": "© {year} Swekly Inc."
+        "title": "Your store, fully in control.",
+        "tagline": "Manage orders, products, shipping, and analytics — all from one powerful dashboard.",
+        "copyright": "© {year} Swekly Inc.",
+        "carousel": {
+          "revenue": {
+            "title": "Revenue Tracking",
+            "description": "Real-time insights into your store's performance at a glance."
+          },
+          "orders": {
+            "title": "Order Management",
+            "description": "Process, track, and fulfill customer orders with ease."
+          },
+          "catalog": {
+            "title": "Product Catalog",
+            "description": "Manage variants, inventory, and pricing from a single place."
+          },
+          "shipping": {
+            "title": "Smart Shipping",
+            "description": "Auto-dispatch to Yalidine, Eckoz, and 50+ Algerian carriers."
+          },
+          "analytics": {
+            "title": "Deep Analytics",
+            "description": "Track sales funnels, conversion rates, and customer behavior."
+          }
+        }
       },
       "form": {
         "title": "Log in to your account",
-        "subtitle": "Access your tenant workspace.",
+        "subtitle": "Access your workspace.",
         "orContinueWith": "Or continue with",
         "email": {
           "label": "Email Address",
@@ -294,7 +335,7 @@
         },
         "submit": {
           "creating": "Creating Account...",
-          "register": "Register & Create Tenant"
+          "register": "Register & Create Store"
         },
         "haveAccount": "Already have an account?",
         "logIn": "Log in"

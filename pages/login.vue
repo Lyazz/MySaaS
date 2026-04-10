@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -37,6 +37,76 @@ async function handleLogin() {
     loading.value = false
   }
 }
+
+// ── Carousel ──────────────────────────────────────────────────────────────────
+const features = [
+  {
+    icon: 'lucide:trending-up',
+    color: 'emerald',
+    titleKey: 'auth.login.hero.carousel.revenue.title',
+    descKey:  'auth.login.hero.carousel.revenue.description',
+  },
+  {
+    icon: 'lucide:package',
+    color: 'teal',
+    titleKey: 'auth.login.hero.carousel.orders.title',
+    descKey:  'auth.login.hero.carousel.orders.description',
+  },
+  {
+    icon: 'lucide:layers',
+    color: 'violet',
+    titleKey: 'auth.login.hero.carousel.catalog.title',
+    descKey:  'auth.login.hero.carousel.catalog.description',
+  },
+  {
+    icon: 'lucide:truck',
+    color: 'sky',
+    titleKey: 'auth.login.hero.carousel.shipping.title',
+    descKey:  'auth.login.hero.carousel.shipping.description',
+  },
+  {
+    icon: 'lucide:bar-chart-2',
+    color: 'amber',
+    titleKey: 'auth.login.hero.carousel.analytics.title',
+    descKey:  'auth.login.hero.carousel.analytics.description',
+  },
+]
+
+const activeIndex = ref(0)
+const isTransitioning = ref(false)
+let timer: ReturnType<typeof setInterval> | null = null
+
+function goTo(index: number) {
+  if (isTransitioning.value || index === activeIndex.value) return
+  isTransitioning.value = true
+  setTimeout(() => {
+    activeIndex.value = index
+    isTransitioning.value = false
+  }, 300)
+}
+
+function next() {
+  goTo((activeIndex.value + 1) % features.length)
+}
+
+function startTimer() {
+  timer = setInterval(next, 4000)
+}
+
+function stopTimer() {
+  if (timer) clearInterval(timer)
+}
+
+onMounted(startTimer)
+onUnmounted(stopTimer)
+
+const colorMap: Record<string, { bg: string; icon: string; dot: string }> = {
+  emerald: { bg: 'bg-emerald-500/20', icon: 'text-emerald-400', dot: 'bg-emerald-400' },
+  teal:    { bg: 'bg-teal-500/20',    icon: 'text-teal-400',    dot: 'bg-teal-400'    },
+  violet:  { bg: 'bg-violet-500/20',  icon: 'text-violet-400',  dot: 'bg-violet-400'  },
+  sky:     { bg: 'bg-sky-500/20',     icon: 'text-sky-400',     dot: 'bg-sky-400'     },
+  amber:   { bg: 'bg-amber-500/20',   icon: 'text-amber-400',   dot: 'bg-amber-400'   },
+}
 </script>
 
 <template>
@@ -51,29 +121,92 @@ async function handleLogin() {
         <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
       </div>
 
-
-
-      <div class="relative z-10 max-w-lg">
-        <h2 class="text-5xl font-bold tracking-tight mb-6 leading-tight">
-          {{ t('auth.login.hero.welcomeBack') }} <br>
-        </h2>
-        <p class="text-lg text-slate-400 mb-8 leading-relaxed">
-          {{ t('auth.login.hero.subtitle') }}
-        </p>
-
-    <!-- Mini Feature Highlight -->
-        <div class="flex items-start gap-4 p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
-          <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-             <Icon name="lucide:trending-up" class="w-6 h-6" />
+      <!-- Brand / Headline -->
+      <div class="relative z-10">
+        <div class="flex items-center gap-2 mb-8">
+          <div class="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center">
+            <Icon name="lucide:zap" class="w-4 h-4 text-white" />
           </div>
-          <div>
-            <h4 class="font-bold text-white mb-1">{{ t('auth.login.hero.feature.title') }}</h4>
-            <p class="text-sm text-slate-400">{{ t('auth.login.hero.feature.description') }}</p>
-          </div>
+          <span class="font-bold text-white text-lg tracking-tight">Swekly</span>
         </div>
+        <h2 class="text-4xl font-bold tracking-tight leading-tight mb-3">
+          {{ t('auth.login.hero.title') }}
+        </h2>
+        <p class="text-slate-400 text-base leading-relaxed">
+          {{ t('auth.login.hero.tagline') }}
+        </p>
       </div>
 
-      <div class="relative z-10 text-xs text-slate-500">
+      <!-- Feature Carousel -->
+      <div
+        class="relative z-10 flex-1 flex flex-col justify-center"
+        @mouseenter="stopTimer"
+        @mouseleave="startTimer"
+      >
+        <!-- Slide -->
+        <Transition name="slide-fade" mode="out-in">
+          <div
+            :key="activeIndex"
+            class="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10"
+          >
+            <div class="flex items-start gap-5">
+              <div
+                class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                :class="colorMap[features[activeIndex].color].bg"
+              >
+                <Icon
+                  :name="features[activeIndex].icon"
+                  class="w-7 h-7"
+                  :class="colorMap[features[activeIndex].color].icon"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-bold text-white text-lg mb-2 leading-snug">
+                  {{ t(features[activeIndex].titleKey) }}
+                </h4>
+                <p class="text-sm text-slate-400 leading-relaxed">
+                  {{ t(features[activeIndex].descKey) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Transition>
+
+        <!-- Dot indicators + arrows -->
+        <div class="flex items-center justify-between mt-6">
+          <div class="flex items-center gap-2">
+            <button
+              v-for="(f, i) in features"
+              :key="i"
+              class="carousel-dot"
+              :class="[
+                i === activeIndex
+                  ? `w-6 h-2 ${colorMap[f.color].dot} opacity-100`
+                  : 'w-2 h-2 bg-slate-600 hover:bg-slate-400 opacity-60'
+              ]"
+              @click="() => { stopTimer(); goTo(i); startTimer() }"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              @click="() => { stopTimer(); goTo((activeIndex - 1 + features.length) % features.length); startTimer() }"
+            >
+              <Icon name="lucide:chevron-left" class="w-4 h-4 text-slate-300" />
+            </button>
+            <button
+              class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              @click="() => { stopTimer(); next(); startTimer() }"
+            >
+              <Icon name="lucide:chevron-right" class="w-4 h-4 text-slate-300" />
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="relative z-10 text-xs text-slate-500 mt-6">
         {{ t('auth.login.hero.copyright', { year }) }}
       </div>
     </div>
@@ -83,7 +216,6 @@ async function handleLogin() {
       <div class="max-w-md w-full space-y-8">
         
         <div class="text-center lg:text-left">
-
           <h2 class="text-3xl font-bold text-slate-900 tracking-tight">{{ t('auth.login.form.title') }}</h2>
           <p class="mt-2 text-slate-500">{{ t('auth.login.form.subtitle') }}</p>
         </div>
@@ -190,13 +322,29 @@ async function handleLogin() {
   100% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
+/* Carousel dot */
+.carousel-dot {
+  border-radius: 9999px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  flex-shrink: 0;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+/* Carousel slide transition */
+.slide-fade-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
+.slide-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+
 </style>
+

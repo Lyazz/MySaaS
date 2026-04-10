@@ -302,19 +302,20 @@ onMounted(() => {
           <!-- Marquee 1 (Left) -->
           <Vue3Marquee :duration="40" class="flex gap-8 overflow-hidden hover-slow">
             <div v-for="i in 2" :key="'m1-'+i" class="flex items-center gap-6 shrink-0 px-3">
-              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Yalidine</div>
-              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Eckoz</div>
-              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Meta Pixel</div>
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Meta/Tiktok Pixels</div>
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">APIs</div>
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Google Sheet</div>
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Realtime notifications</div>
+              <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Image generation</div>
             </div>
           </Vue3Marquee>
           <!-- Marquee 2 (Right) -->
           <Vue3Marquee :duration="45" direction="reverse" class="flex gap-8 overflow-hidden hover-slow">
             <div v-for="i in 2" :key="'m2-'+i" class="flex items-center gap-6 shrink-0 px-3">
-               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Mayestro</div>
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">DZ Delivery Companies</div>
                <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Google Analytics</div>
-               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">CIB / Edahabia</div>
-               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Mailchimp</div>
-               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">WhatsApp</div>
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Artificial Intelligence</div>
+               <div class="w-40 h-16 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 font-bold hover:bg-slate-100 hover:text-slate-600 transition-colors shadow-sm">Quick Support</div>
             </div>
           </Vue3Marquee>
         </ClientOnly>

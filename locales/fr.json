@@ -38,40 +38,40 @@
   },
   "saasLanding": {
     "seo": {
-      "title": "Swekly - La meilleure plateforme e-commerce pour votre boutique",
-      "description": "Lancez, gérez et développez votre activité e-commerce avec Swekly. La plateforme puissante et intuitive pour les boutiques en ligne."
+      "title": "Swekly — Vendez en ligne, simplement",
+      "description": "Créez votre boutique, recevez des commandes, et gérez paiements et livraison depuis un seul tableau de bord."
     },
     "hero": {
       "title": {
-        "buildSell": "Lancez. Vendez.",
-        "scale": "Réussissez."
+        "buildSell": "Lancez. Pilotez.",
+        "scale": "Grandissez."
       },
-      "subtitle": "La plateforme e-commerce conçue pour transformer vos idées en une boutique en ligne florissante. Gérez vos produits, acceptez les paiements et développez votre activité sans effort.",
-      "ctaPrimary": "Démarrer l'essai gratuit",
-      "ctaSecondary": "Explorer les fonctionnalités"
+      "subtitle": "Avec Swekly, lancez votre boutique en quelques minutes. Nous nous occupons du site, des paiements et de la livraison.",
+      "ctaPrimary": "Essayer gratuitement",
+      "ctaSecondary": "Découvrir les fonctionnalités"
     },
     "features": {
       "title": {
         "prefix": "Tout ce qu'il vous faut pour",
         "accent": "vendre en ligne"
       },
-      "subtitle": "Des outils e-commerce puissants conçus pour la croissance, réunis dans une interface élégante.",
+      "subtitle": "Tout ce qu’il faut pour vendre en ligne, sans prise de tête.",
       "items": {
         "aiTools": {
-          "title": "Outils d'Intelligence Artificielle",
-          "description": "Génération automatique par l'IA de landing pages, fiches produits et SEO."
+          "title": "Aide IA",
+          "description": "Générez des fiches produits, des textes et du SEO en quelques secondes."
         },
         "competitivePricing": {
-          "title": "Tarifs Concurrentiels",
-          "description": "Des offres transparentes et abordables pour vous aider à croître sans limites."
+          "title": "Tarifs clairs",
+          "description": "Des offres simples, sans surprise. Changez quand vous voulez."
         },
         "templates": {
-          "title": "Multi-Templates de Boutique",
-          "description": "Un large choix de thèmes optimisés pour la conversion et entièrement personnalisables."
+          "title": "Thèmes prêts à l’emploi",
+          "description": "Des modèles rapides, pensés mobile, faciles à personnaliser."
         },
         "fastSupport": {
-          "title": "Assistance Rapide 24/7",
-          "description": "Une équipe dédiée pour vous accompagner à chaque étape de votre croissance."
+          "title": "Support réactif",
+          "description": "On vous répond vite quand vous avez besoin d’aide."
         }
       }
     },
@@ -86,75 +86,100 @@
       "items": {
         "noCard": {
           "question": "Ai-je besoin d’une carte bancaire pour commencer ?",
-          "answer": "Non. Vous pouvez commencer immédiatement et changer d’offre plus tard."
+          "answer": "Non. Vous pouvez commencer tout de suite et choisir une offre plus tard."
         },
         "changePlan": {
           "question": "Puis-je changer d’offre plus tard ?",
-          "answer": "Oui. Vous pouvez changer d’offre à tout moment depuis la page Facturation de l’admin."
+          "answer": "Oui. Vous pouvez changer d’offre à tout moment dans l’admin, rubrique Facturation."
         },
         "planDifferences": {
           "question": "Qu’est-ce qui change entre les offres pour le moment ?",
-          "answer": "Pour l’instant (test), les offres diffèrent uniquement par le nombre de commandes autorisées par mois."
+          "answer": "Pour l’instant, le principal changement est le nombre de commandes incluses par mois."
         }
       }
     },
     "testimonials": {
       "heading": {
-        "prefix": "Adopté par",
-        "accent": "les fondateurs",
+        "prefix": "Fait pour",
+        "accent": "des gens",
         "suffix": "comme vous."
       },
-      "subtitle": "Rejoignez des milliers de commerçants qui sont passés à une plateforme pensée pour la croissance, la vitesse et la fiabilité.",
+      "subtitle": "Des commerçants en Algérie qui veulent un site rapide et une gestion simple.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "Avatar utilisateur",
       "items": {
         "nassim": {
-          "text": "Swekly a complètement transformé la gestion de Nokhba Store. C'est si simple de lister notre papeterie et nos livres, et les ventes n'ont jamais été aussi bonnes.",
+          "text": "On a mis nos produits en ligne rapidement. Les commandes arrivent, et tout est centralisé.",
           "role": "Propriétaire, Nokhba Store"
         },
         "amina": {
-          "text": "Les fonctionnalités de domaine personnalisé et d'analyse sont incroyables. Ma marque de cosmétiques a l'air si professionnelle.",
+          "text": "Le domaine personnalisé a été simple à configurer, et je vois mes ventes clairement.",
           "role": "Fondatrice, Dzair Cosmetics"
         },
         "yanis": {
-          "text": "Swekly est la solution e-commerce ultime en Algérie. Les options d'expédition locale intégrées nous ont fait gagner des heures de travail.",
+          "text": "Les intégrations de livraison nous font gagner du temps chaque jour. Expédier devient un réflexe.",
           "role": "Directeur, TechAlgeria"
         },
         "lyes": {
-          "text": "Nous vendons des centaines d'articles de mode chaque jour, et la plateforme gère le trafic sans faille. La meilleure décision pour nous.",
+          "text": "Même quand il y a beaucoup de trafic, la boutique reste rapide. On peut se concentrer sur la vente.",
           "role": "Propriétaire, Oran Fashion"
         },
         "meriem": {
-          "text": "Fini la prise de commandes manuelle sur les réseaux sociaux. Nos clients adorent la fluidité du paiement.",
+          "text": "Fini les commandes perdues sur les réseaux. Les clients commandent et paient facilement.",
           "role": "PDG, BioAtlas"
         },
         "sofiane": {
-          "text": "Créer la boutique a été un jeu d'enfant. Nous avons lancé Casbah Gifts en une seule après-midi.",
+          "text": "On a lancé la boutique en une après‑midi. Simple, propre, et prêt à vendre.",
           "role": "Gérant, Casbah Gifts"
         }
       }
     },
     "finalCta": {
-      "title": "Prêt à lancer votre boutique ?",
-      "subtitle": "Rejoignez des milliers de marchands qui construisent le futur du e-commerce.",
-      "cta": "Démarrer l'essai gratuit"
+      "title": "Prêt à commencer ?",
+      "subtitle": "Créez votre boutique et prenez vos premières commandes dès aujourd’hui.",
+      "cta": "Créer ma boutique"
     },
     "trust": {
-      "secure": "Paiements 100% sécurisés",
-      "ssl": "Certificat SSL inclus",
-      "cloud": "Hébergement Cloud fiable"
+      "secure": "Paiements sécurisés",
+      "ssl": "SSL inclus",
+      "cloud": "Hébergement fiable"
     },
     "integrations": {
-      "title": "Compatible avec vos outils préférés",
-      "subtitle": "Connectez-vous aux meilleures solutions de paiement, d'expédition et de marketing."
+      "title": "Connecté à vos outils",
+      "subtitle": "Paiement, livraison et marketing : tout se branche facilement."
     },
     "themes": {
       "title": {
         "prefix": "Des vitrines",
-        "accent": "magnifiques"
+        "accent": "prêtes à vendre"
       },
-      "subtitle": "Choisissez parmi des modèles optimisés pour la conversion ou personnalisez tout. Pensé pour le mobile.",
-      "viewAll": "Explorer les thèmes"
+      "subtitle": "Choisissez un modèle rapide, pensé mobile, et personnalisez‑le à votre goût.",
+      "viewAll": "Voir les thèmes"
+    },
+    "contact": {
+      "title": "Contactez-nous",
+      "subtitle": "Nous sommes là pour vous aider. N'hésitez pas à nous contacter si vous avez des questions.",
+      "cards": {
+        "sales": {
+          "title": "Parler aux ventes",
+          "description": "Intéressé par nos forfaits d'entreprise ? Appelez-nous pour discuter avec un conseiller.",
+          "contact": "+213 550 00 00 00"
+        },
+        "support": {
+          "title": "Contacter le support",
+          "description": "Besoin d'aide ? Notre équipe de support est là pour vous accompagner.",
+          "contact": "support{'@'}swekly.com"
+        }
+      },
+      "form": {
+        "title": "Envoyez-nous un message",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "E-mail",
+        "subject": "Sujet",
+        "message": "Message",
+        "submit": "Envoyer le message"
+      }
     }
   },
   "marketing": {
@@ -238,7 +263,7 @@
       },
       "form": {
         "title": "Connectez-vous à votre compte",
-        "subtitle": "Accédez à votre espace tenant.",
+        "subtitle": "Accédez à votre workplace.",
         "orContinueWith": "Ou continuer avec",
         "email": {
           "label": "Adresse e-mail",
@@ -294,7 +319,7 @@
         },
         "submit": {
           "creating": "Création du compte...",
-          "register": "S’inscrire et créer l’espace"
+          "register": "S’inscrire et créer la boutique"
         },
         "haveAccount": "Vous avez déjà un compte ?",
         "logIn": "Se connecter"

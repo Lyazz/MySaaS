@@ -63,7 +63,10 @@ const features = computed(() => [
        <div class="relative z-10 max-w-3xl mx-auto">
          <h1 class="text-4xl md:text-5xl font-black mb-6">
            {{ t('marketing.featuresPage.hero.title.prefix') }}
-           <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">{{ t('marketing.featuresPage.hero.title.accent') }}</span>
+           <span class="text-teal-400 inline-block relative">
+              {{ t('marketing.featuresPage.hero.title.accent') }}
+              <svg class="absolute w-full h-3 -bottom-1 left-0 text-teal-400 opacity-60" viewBox="0 0 200 9" fill="none"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
+            </span>
          </h1>
          <p class="text-slate-400 text-lg">{{ t('marketing.featuresPage.hero.subtitle') }}</p>
        </div>

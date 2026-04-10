@@ -33,40 +33,40 @@
   },
   "saasLanding": {
     "seo": {
-      "title": "Swekly - Le futur du commerce",
-      "description": "La plateforme tout-en-un pour créer, vendre et développer votre activité B2B ou B2C avec des outils de niveau entreprise."
+      "title": "Swekly — Vendez en ligne, simplement",
+      "description": "Créez votre boutique, recevez des commandes, et gérez paiements et livraison au même endroit."
     },
     "hero": {
       "title": {
-        "buildSell": "Créez. Vendez.",
-        "scale": "Développez."
+        "buildSell": "Lancez. Pilotez.",
+        "scale": "Grandissez."
       },
-      "subtitle": "La plateforme tout-en-un pensée pour le commerce moderne. Concentrez-vous sur votre produit, nous gérons l’infrastructure, les paiements et la logistique.",
-      "ctaPrimary": "Commencer gratuitement",
-      "ctaSecondary": "Voir la démo"
+      "subtitle": "Avec Swekly, lancez votre boutique en quelques minutes. Nous nous occupons du site, des paiements et de la livraison.",
+      "ctaPrimary": "Essayer gratuitement",
+      "ctaSecondary": "Voir comment ça marche"
     },
     "features": {
       "title": {
         "prefix": "Tout ce qu’il vous faut pour",
-        "accent": "dominer"
+        "accent": "vendre en ligne"
       },
-      "subtitle": "Des outils puissants conçus pour la croissance, réunis dans une interface élégante.",
+      "subtitle": "Des outils simples pour gérer votre boutique au quotidien.",
       "items": {
         "storeBuilder": {
           "title": "Créateur de boutique",
-          "description": "Éditeur glisser-déposer pour créer des vitrines superbes en quelques minutes."
+          "description": "Glisser‑déposer pour créer des pages propres, sans code."
         },
         "globalPayments": {
           "title": "Paiements globaux",
-          "description": "Acceptez des paiements partout grâce à des passerelles intégrées."
+          "description": "Encaissez vos clients avec des solutions de paiement intégrées."
         },
         "analytics": {
           "title": "Analytique & insights",
-          "description": "Données en temps réel pour optimiser vos conversions."
+          "description": "Suivez vos ventes et prenez de meilleures décisions."
         },
         "automatedShipping": {
           "title": "Livraison automatisée",
-          "description": "Connectez Yalidine, Eckoz et plus pour l’expédition automatique."
+          "description": "Connectez Yalidine, Eckoz… et expédiez en un clic."
         }
       }
     },
@@ -81,58 +81,58 @@
       "items": {
         "noCard": {
           "question": "Ai-je besoin d’une carte bancaire pour commencer ?",
-          "answer": "Non. Vous pouvez commencer immédiatement et changer d’offre plus tard."
+          "answer": "Non. Vous pouvez commencer tout de suite et choisir une offre plus tard."
         },
         "changePlan": {
           "question": "Puis-je changer d’offre plus tard ?",
-          "answer": "Oui. Vous pouvez changer d’offre à tout moment depuis la page Facturation de l’admin."
+          "answer": "Oui. Vous pouvez changer d’offre à tout moment dans l’admin, rubrique Facturation."
         },
         "planDifferences": {
           "question": "Qu’est-ce qui change entre les offres pour le moment ?",
-          "answer": "Pour l’instant (test), les offres diffèrent uniquement par le nombre de commandes autorisées par mois."
+          "answer": "Pour l’instant, le principal changement est le nombre de commandes incluses par mois."
         }
       }
     },
     "testimonials": {
       "heading": {
-        "prefix": "Adopté par",
-        "accent": "les fondateurs",
+        "prefix": "Fait pour",
+        "accent": "des gens",
         "suffix": "comme vous."
       },
-      "subtitle": "Rejoignez des milliers de commerçants qui sont passés à une plateforme pensée pour la croissance, la vitesse et la fiabilité.",
+      "subtitle": "Des commerçants et des équipes qui veulent un site rapide et une gestion simple.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "Avatar utilisateur",
       "items": {
         "sarah": {
-          "text": "J’ai quitté Shopify et je ne suis jamais revenue en arrière. Les pages se chargent instantanément et mon taux de conversion a augmenté de 40% du jour au lendemain.",
+          "text": "J’ai migré ma boutique sans stress. Le site est rapide, et mes clients vont au paiement plus facilement.",
           "role": "PDG, FashionNova"
         },
         "karim": {
-          "text": "Le tableau de bord analytique est superbe. Les données dont j’ai besoin sont à un clic. On dirait que cet outil a été conçu pour 2026.",
+          "text": "Tout est clair dans le tableau de bord. Je vois mes ventes et mes produits qui marchent en un coup d’œil.",
           "role": "Fondateur, TechShop"
         },
         "emily": {
-          "text": "Enfin une plateforme qui n’applique pas des frais de transaction abusifs. Le support des domaines personnalisés est fluide.",
+          "text": "Le domaine personnalisé a été configuré facilement. Le support répond vite et ça fait la différence.",
           "role": "CTO, GreenEarth"
         },
         "michael": {
-          "text": "La meilleure décision pour notre entreprise. Le support est incroyable et les fonctionnalités correspondent exactement à nos besoins.",
+          "text": "On a tout ce qu’il faut, sans se compliquer la vie. L’équipe support est vraiment réactive.",
           "role": "COO, GearUp"
         },
         "lisa": {
-          "text": "Passer à 10 000 commandes par mois a été simple. Aucun downtime, aucun souci. Je recommande vivement.",
+          "text": "Quand les commandes ont augmenté, la plateforme a suivi. Aucun blocage, tout est resté stable.",
           "role": "Propriétaire, Kicks"
         },
         "david": {
-          "text": "L’éditeur glisser-déposer est réellement utilisable. J’ai construit ma boutique en un après‑midi.",
+          "text": "J’ai créé ma page d’accueil avec le glisser‑déposer, sans appeler un développeur.",
           "role": "Fondateur, ArtSpace"
         }
       }
     },
     "finalCta": {
-      "title": "Prêt à lancer ?",
-      "subtitle": "Rejoignez la plateforme qui évolue avec vous.",
-      "cta": "Commencer maintenant"
+      "title": "Prêt à commencer ?",
+      "subtitle": "Créez votre boutique et prenez vos premières commandes dès aujourd’hui.",
+      "cta": "Créer ma boutique"
     }
   },
   "marketing": {
@@ -216,7 +216,7 @@
       },
       "form": {
         "title": "Connectez-vous à votre compte",
-        "subtitle": "Accédez à votre espace tenant.",
+        "subtitle": "Accédez à votre workplace.",
         "orContinueWith": "Ou continuer avec",
         "email": {
           "label": "Adresse e-mail",
@@ -272,7 +272,7 @@
         },
         "submit": {
           "creating": "Création du compte...",
-          "register": "S’inscrire et créer l’espace"
+          "register": "S’inscrire et créer la boutique"
         },
         "haveAccount": "Vous avez déjà un compte ?",
         "logIn": "Se connecter"

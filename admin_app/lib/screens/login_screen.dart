@@ -303,7 +303,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Access your tenant workspace.',
+                            'Access your xxxxxxx workspace.',
                             style: GoogleFonts.outfit(
                               fontSize: 16,
                               color: slate500,

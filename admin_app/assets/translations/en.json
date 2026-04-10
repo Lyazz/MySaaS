@@ -33,40 +33,40 @@
   },
   "saasLanding": {
     "seo": {
-      "title": "Swekly - The Future of Commerce",
-      "description": "The all-in-one platform to build, sell, and scale your B2B or B2C business with enterprise-grade tools."
+      "title": "Swekly — Sell online, simply",
+      "description": "Build your store, take orders, and manage payments and shipping in one place."
     },
     "hero": {
       "title": {
-        "buildSell": "Build. Sell.",
-        "scale": "Scale."
+        "buildSell": "Launch. Run.",
+        "scale": "Grow."
       },
-      "subtitle": "The all-in-one platform engineered for modern commerce. Focus on your product, we handle the infrastructure, payments, and logistics.",
-      "ctaPrimary": "Start Building Free",
-      "ctaSecondary": "Watch Demo"
+      "subtitle": "Launch your store in minutes. We handle the website, payments, and shipping.",
+      "ctaPrimary": "Try it free",
+      "ctaSecondary": "See how it works"
     },
     "features": {
       "title": {
         "prefix": "Everything you need to",
-        "accent": "dominate"
+        "accent": "sell online"
       },
-      "subtitle": "Powerful tools designed for growth, packaged in a beautiful interface.",
+      "subtitle": "Simple tools to run your store day to day.",
       "items": {
         "storeBuilder": {
           "title": "Store Builder",
-          "description": "Drag-and-drop editor to create stunning storefronts in minutes."
+          "description": "Drag and drop to create clean pages—no code needed."
         },
         "globalPayments": {
           "title": "Global Payments",
-          "description": "Accept payments from anywhere with integrated gateways."
+          "description": "Get paid with built-in payment options."
         },
         "analytics": {
           "title": "Analytics & Insights",
-          "description": "Real-time data to optimize your conversion rates."
+          "description": "Track sales and make better decisions."
         },
         "automatedShipping": {
           "title": "Automated Shipping",
-          "description": "Connect with Yalidine, Eckoz, and more for auto-dispatching."
+          "description": "Connect Yalidine, Eckoz, and more—ship in one click."
         }
       }
     },
@@ -81,58 +81,58 @@
       "items": {
         "noCard": {
           "question": "Do I need a credit card to start?",
-          "answer": "No. You can start right away and upgrade/downgrade later."
+          "answer": "No. You can start now and choose a plan later."
         },
         "changePlan": {
           "question": "Can I change my plan later?",
-          "answer": "Yes. You can change your plan anytime from the admin Billing page."
+          "answer": "Yes. You can change your plan anytime from the Billing section in the admin."
         },
         "planDifferences": {
           "question": "What changes between plans right now?",
-          "answer": "For now (testing), plans only differ by the number of orders allowed per month."
+          "answer": "Right now, the main difference is how many orders are included per month."
         }
       }
     },
     "testimonials": {
       "heading": {
-        "prefix": "Loved by",
-        "accent": "Founders",
+        "prefix": "Made for",
+        "accent": "people",
         "suffix": "like you."
       },
-      "subtitle": "Join thousands of merchants who have switched to a platform built for growth, speed, and reliability.",
+      "subtitle": "Merchants and teams who want a fast store and simple operations.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "User avatar",
       "items": {
         "sarah": {
-          "text": "I switched from Shopify and never looked back. The page load speeds are instant and my conversion rate went up 40% overnight.",
+          "text": "I moved my store without stress. The site is fast, and checkout feels smoother for customers.",
           "role": "CEO, FashionNova"
         },
         "karim": {
-          "text": "The analytics dashboard is beautiful. Whatever data I need is just one click away. It feels like this tool was made for 2026.",
+          "text": "The dashboard is clear. I can see sales and best-sellers at a glance.",
           "role": "Founder, TechShop"
         },
         "emily": {
-          "text": "Finally, a platform that doesn't charge ridiculous transaction fees. The custom domain support is seamless.",
+          "text": "Custom domains were easy to set up. Support is responsive when we need help.",
           "role": "CTO, GreenEarth"
         },
         "michael": {
-          "text": "The best decision we made for our business. Support is incredible and the features are exactly what we needed.",
+          "text": "We got what we need without overcomplicating things. Support is genuinely helpful.",
           "role": "COO, GearUp"
         },
         "lisa": {
-          "text": "Scaling to 10k orders a month was a breeze. No downtime, no issues. Highly recommended.",
+          "text": "When orders picked up, the platform kept up. Stable and reliable.",
           "role": "Owner, Kicks"
         },
         "david": {
-          "text": "The drag and drop builder is actually usable. I built my store in an afternoon.",
+          "text": "I built my homepage with drag and drop—no developer needed.",
           "role": "Founder, ArtSpace"
         }
       }
     },
     "finalCta": {
-      "title": "Ready to launch?",
-      "subtitle": "Join the platform that grows with you.",
-      "cta": "Get Started Now"
+      "title": "Ready to get started?",
+      "subtitle": "Create your store and take your first orders today.",
+      "cta": "Create my store"
     }
   },
   "marketing": {
@@ -216,7 +216,7 @@
       },
       "form": {
         "title": "Log in to your account",
-        "subtitle": "Access your tenant workspace.",
+        "subtitle": "Access your workspace.",
         "orContinueWith": "Or continue with",
         "email": {
           "label": "Email Address",
@@ -272,7 +272,7 @@
         },
         "submit": {
           "creating": "Creating Account...",
-          "register": "Register & Create Tenant"
+          "register": "Register & Create Store"
         },
         "haveAccount": "Already have an account?",
         "logIn": "Log in"
