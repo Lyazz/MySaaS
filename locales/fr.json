@@ -553,7 +553,7 @@
       "form": {
         "fullName": {
           "label": "Nom complet",
-          "placeholder": "ex : Yanis M."
+          "placeholder": ""
         },
         "phone": {
           "label": "Téléphone",

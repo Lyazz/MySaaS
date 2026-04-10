@@ -569,7 +569,7 @@
       "form": {
         "fullName": {
           "label": "Full name",
-          "placeholder": "e.g. Yanis M."
+          "placeholder": ""
         },
         "phone": {
           "label": "Phone",

@@ -500,7 +500,7 @@
       "form": {
         "fullName": {
           "label": "الاسم الكامل",
-          "placeholder": "مثال: يانيس م."
+          "placeholder": ""
         },
         "phone": {
           "label": "الهاتف",
