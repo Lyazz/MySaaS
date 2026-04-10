@@ -54,6 +54,9 @@ model Tenant {
   integrations         TenantIntegration[]
   metaPixels           TenantMetaPixel[]
   productMetaPixels    ProductMetaPixel[]
+  maystroProductMaps   MaystroProductMapping[]
+  maystroOrderMaps     MaystroOrderMapping[]
+  maystroInventoryLogs MaystroInventoryEvent[]
 }
 
 model Cashbox {
@@ -451,6 +454,7 @@ model Product {
 
   orderItems OrderItem[]
   saleItems  SaleItem[]
+  maystroMappings MaystroProductMapping[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -873,6 +877,7 @@ model Order {
 
   items              OrderItem[]
   shipments          Shipment[]
+  maystroMappings    MaystroOrderMapping[]
   inventoryMovements InventoryMovement[]
   cashTransactions   CashTransaction[]   @relation("CashTxOrder")
   sale               Sale?               @relation("SaleOrder")
@@ -995,6 +1000,74 @@ enum ShipmentStatus {
   DELIVERED
   CANCELLED
   RETURNED
+}
+
+enum MaystroSyncStatus {
+  PENDING
+  SYNCED
+  ERROR
+}
+
+model MaystroProductMapping {
+  id             String           @id @default(uuid())
+  tenantId       String
+  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  localProductId String
+  product        Product          @relation(fields: [tenantId, localProductId], references: [tenantId, id], onDelete: Cascade)
+
+  maystroProductId String
+  maystroUuid      String?
+
+  syncStatus   MaystroSyncStatus @default(PENDING)
+  lastSyncedAt DateTime?
+  lastError    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, localProductId])
+  @@unique([tenantId, maystroProductId])
+  @@index([tenantId])
+}
+
+model MaystroOrderMapping {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  localOrderId String
+  order       Order    @relation(fields: [tenantId, localOrderId], references: [tenantId, id], onDelete: Cascade)
+
+  externalId    String
+  maystroOrderId String?
+  tracking      String?
+  deliveryPrice Decimal?
+  success       Boolean  @default(false)
+
+  lastSyncedAt DateTime?
+  lastError    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, localOrderId])
+  @@unique([tenantId, externalId])
+  @@index([tenantId])
+}
+
+model MaystroInventoryEvent {
+  id        String @id @default(uuid())
+  tenantId  String
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  maystroProductId String?
+  direction        String?
+  quantity         Int?
+  rawPayload       Json
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
 }
 
 model DeliveryRate {

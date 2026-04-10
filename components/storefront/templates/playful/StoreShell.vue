@@ -138,7 +138,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   class="w-full h-12 bg-slate-50 border-2 border-brand-100 text-slate-900 text-sm rounded-full focus:ring-4 focus:ring-brand-100 focus:border-brand-300 block pl-5 pr-10 transition-all shadow-sm focus:shadow-md hover:border-brand-200" 
                 >
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <Icon name="lucide:search" class="w-5 h-5 text-slate-400 group-hover:text-brand-500 transition-colors" />\n
+                  <Icon name="lucide:search" class="w-5 h-5 text-slate-400 group-hover:text-brand-500 transition-colors" />
                   <!-- Search Dropdown -->
                   <div
                     v-show="isSearchDropdownOpen"

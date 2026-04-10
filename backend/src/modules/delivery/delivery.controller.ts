@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { DeliveryConfigurationError, DeliveryService } from './delivery.service'
 import { ShipmentProvider } from '@prisma/client'
 import { getProviderCatalogItem } from './catalog'
+import { MaystroIntegrationError } from './maystro/maystro.errors'
 
 const service = new DeliveryService()
 
@@ -23,6 +24,13 @@ export class DeliveryController {
 
         if (normalizedProvider && !isShipmentProvider(normalizedProvider)) {
             return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+        }
+
+        if (normalizedProvider === 'MAYSTRO' && !destination?.communeCode) {
+            return res.status(400).json({
+                statusCode: 400,
+                statusMessage: 'destination.communeCode is required for Maystro pricing'
+            })
         }
 
         const rawDeliveryMode =
@@ -118,6 +126,11 @@ export class DeliveryController {
                     .status(error.statusCode)
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
+            if (error instanceof MaystroIntegrationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
+            }
             console.error('Create shipment error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
@@ -160,6 +173,11 @@ export class DeliveryController {
             if (!result) return res.status(202).json({ received: true })
             res.json({ success: true, ...result })
         } catch (error) {
+            if (error instanceof MaystroIntegrationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
+            }
             console.error('Maystro webhook error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }

@@ -79,12 +79,13 @@
               </div>
 	              <div class="col-span-2 md:col-span-1 space-y-3">
 	                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
-	                <input
+	                <CommuneField
 	                  v-model="form.commune"
-	                  type="text"
-	                  class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 placeholder:text-stone-300 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium"
+	                  :wilaya-code="form.wilaya"
 	                  :placeholder="storefrontContent.checkout.form.commune.placeholder"
-	                >
+	                  :input-class="'w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 placeholder:text-stone-300 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium'"
+	                  :select-class="'w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium'"
+	                />
 	              </div>
               <div class="col-span-2 space-y-3">
                 <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
@@ -149,7 +150,13 @@
                   <div class="flex items-center gap-4 flex-shrink-0">
                     <div class="text-right">
                       <div class="font-bold text-stone-900 text-base">
-                        {{ option.price === 'Free' ? option.price : `${option.price} ${currencyCode}` }}
+                        {{
+                          option.price === 'FREE'
+                            ? storefrontContent.checkout.delivery.free
+                            : option.price === '—'
+                              ? '—'
+                              : `${option.price} ${currencyCode}`
+                        }}
                       </div>
                     </div>
                     <div
@@ -279,100 +286,210 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
+import { useCartStore } from '~/stores/cart'
+import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode } = useCurrency()
-const { data: storeSettings } = await useFetch('/api/store/settings')
+const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
-// Form state
+const availableProviders = computed(() => {
+  const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
+  const providerMeta = {
+    MAYSTRO: { label: 'Maystro', icon: 'lucide:truck', color: 'emerald' },
+    YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
+    ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
+    ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'teal' }
+  }
+  return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
+})
+
 const form = reactive({
   fullName: '',
   phone: '',
   wilaya: '',
   commune: '',
   address: '',
-  selectedDeliveryOption: 1 // Default to first option
+  selectedDeliveryOption: ''
+})
+
+const maystroPrices = useMaystroDeliveryPrices({
+  wilayaCode: () => form.wilaya,
+  communeCode: () => form.commune
+})
+
+const deliveryOptions = computed(() => {
+  const options: any[] = []
+
+  availableProviders.value.forEach((provider: any) => {
+    const homePrice =
+      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
+        ? String(Math.round(maystroPrices.homePrice.value))
+        : provider.key === 'MAYSTRO'
+          ? '—'
+          : '350'
+    const officePrice =
+      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
+        ? String(Math.round(maystroPrices.officePrice.value))
+        : provider.key === 'MAYSTRO'
+          ? '—'
+          : '300'
+
+    options.push({
+      id: `${provider.key}-home`,
+      provider: provider.key,
+      providerLabel: provider.label,
+      mode: 'home',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
+      price: homePrice,
+      description: storefrontContent.value.checkout.delivery.description.homeDelivery,
+      icon: provider.icon,
+      color: provider.color
+    })
+
+    options.push({
+      id: `${provider.key}-pickup`,
+      provider: provider.key,
+      providerLabel: provider.label,
+      mode: 'pickup',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
+      price: officePrice,
+      description: storefrontContent.value.checkout.delivery.description.pickupPoint,
+      icon: provider.icon,
+      color: provider.color
+    })
+  })
+
+  options.push({
+    id: 'store-pickup',
+    provider: null,
+    providerLabel: 'Store',
+    mode: 'store',
+    modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
+    price: 'FREE',
+    description: storefrontContent.value.checkout.delivery.description.storePickup,
+    icon: 'lucide:store',
+    color: 'green'
+  })
+
+  return options
+})
+
+watchEffect(() => {
+  if (!form.selectedDeliveryOption && deliveryOptions.value.length) {
+    form.selectedDeliveryOption = deliveryOptions.value[0].id
+  }
 })
 
 const couponCode = ref('')
 const submitting = ref(false)
 const errorMessage = ref('')
-const cartEnabled = computed(() => storeSettings.value?.cartEnabled ?? true)
 
-	// Delivery Options Mock Data
-	const deliveryOptions = [
-	  {
-	    id: 1,
-	    provider: 'yalidine',
-	    providerLabel: 'Yalidine',
-	    mode: 'home',
-	    modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
-	    price: 500,
-	    description: storefrontContent.value.checkout.delivery.description.homeDelivery,
-	    icon: 'lucide:truck',
-	    color: 'emerald'
-	  },
-	  {
-	    id: 2,
-	    provider: 'yalidine',
-	    providerLabel: 'Yalidine',
-	    mode: 'desk',
-	    modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
-	    price: 300,
-	    description: storefrontContent.value.checkout.delivery.description.pickupPoint,
-	    icon: 'lucide:package',
-	    color: 'blue'
-	  },
-	  {
-	    id: 3,
-	    provider: 'zr_express',
-	    providerLabel: 'ZR Express',
-	    mode: 'home',
-	    modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
-	    price: 550,
-	    description: storefrontContent.value.checkout.delivery.description.homeDelivery,
-	    icon: 'lucide:truck',
-	    color: 'emerald'
-	  }
-	]
+const selectedDelivery = computed(() => deliveryOptions.value.find((opt: any) => opt.id === form.selectedDeliveryOption))
 
-const selectedDelivery = computed(() => {
-  return deliveryOptions.find(opt => opt.id === form.selectedDeliveryOption)
-})
-
-const hasRequiredFields = computed(() => {
-  return form.fullName && form.phone && form.wilaya && form.commune
-})
+const hasRequiredFields = computed(() => Boolean(form.fullName.trim() && form.phone.trim() && cartStore.hasItems && form.selectedDeliveryOption))
 
 const handleSubmit = async () => {
-	    if (!cartEnabled.value) return
-	    if (!hasRequiredFields.value) {
-	        errorMessage.value = storefrontContent.value.checkout.errors.requiredFields
-	        return
-	    }
+  if (!cartEnabled.value) return
+  errorMessage.value = ''
 
-    submitting.value = true
-    errorMessage.value = ''
+  cartStore.loadFromLocalStorage()
+  if (!cartStore.hasItems) {
+    errorMessage.value = storefrontContent.value.checkout.errors.emptyCart
+    return
+  }
 
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+  if (!form.fullName.trim()) {
+    errorMessage.value = storefrontContent.value.checkout.errors.fullNameRequired
+    return
+  }
+  if (!form.phone.trim()) {
+    errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
+    return
+  }
+  if (!form.selectedDeliveryOption) {
+    errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
+    return
+  }
+  if (!hasRequiredFields.value) {
+    errorMessage.value = storefrontContent.value.checkout.errors.requiredFields
+    return
+  }
 
-    // Success logic
+  submitting.value = true
+  try {
+    const delivery = selectedDelivery.value
+    const isMaystro = delivery?.provider === 'MAYSTRO'
+    const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
+    const maystroShippingAmount =
+      isMaystro
+        ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
+        : null
+
+    if (isMaystro) {
+      if (!form.wilaya || !form.commune) {
+        errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
+        return
+      }
+      if (maystroShippingAmount == null) {
+        errorMessage.value = 'Maystro shipping price unavailable for selected commune'
+        return
+      }
+    }
+
+    const url = useTenantApiUrl('/api/orders')
+    const payload = {
+      customerName: form.fullName.trim(),
+      customerPhone: form.phone.trim(),
+      customerAddress: form.address?.trim() || undefined,
+      shippingAddressLine1: form.address?.trim() || undefined,
+      shippingWilayaCode: form.wilaya || undefined,
+      shippingCommuneCode: form.commune || undefined,
+      deliveryMode: delivery?.mode,
+      shippingProvider: delivery?.provider || undefined,
+      shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
+      shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
+      shippingCurrency: isMaystro ? currencyCode.value : undefined,
+      items: cartStore.items.map(item => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity
+      }))
+    }
+
+    const response = await $fetch<{ orderId: string }>(url, {
+      method: 'POST',
+      body: payload,
+      headers: {
+        ...(useTenantApiHeaders() || {})
+      }
+    })
+
     cartStore.clearCart()
-    router.push('/thank-you')
+    router.push({
+      path: '/order-success',
+      query: { orderId: response.orderId }
+    })
+  } catch (error: any) {
+    console.error('Checkout submission failed:', error)
+    errorMessage.value =
+      error?.data?.statusMessage ||
+      error?.data?.message ||
+      storefrontContent.value.checkout.errors.submitFailed
+  } finally {
     submitting.value = false
+  }
 }
 
-// Redirect if empty
 onMounted(() => {
-    if (cartStore.items.length === 0) {
-        router.push('/')
-    }
+  cartStore.loadFromLocalStorage()
+  if (!cartStore.hasItems) router.push('/')
 })
 </script>

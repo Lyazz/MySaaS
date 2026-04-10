@@ -130,7 +130,7 @@ const props = defineProps<{
                   class="w-full h-10 bg-purple-900/30 border border-purple-500/30 text-white text-sm rounded-full focus:ring-2 focus:ring-pink-500 focus:border-transparent block pl-5 pr-10 transition-all shadow-sm group-hover:bg-purple-900/50 placeholder:text-purple-400/50" 
                 >
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <Icon name="lucide:search" class="w-5 h-5 text-purple-400 group-hover:text-pink-400 transition-colors" />\n
+                  <Icon name="lucide:search" class="w-5 h-5 text-purple-400 group-hover:text-pink-400 transition-colors" />
                   <!-- Search Dropdown -->
                   <div
                     v-show="isSearchDropdownOpen"

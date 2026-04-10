@@ -34,6 +34,9 @@ export type PublicOrderInput = {
     customerAddress?: string | null
     shippingWilayaCode?: string | null
     shippingCommuneCode?: string | null
+    shippingServiceLevel?: string | null
+    shippingAmount?: number | null
+    shippingCurrency?: string | null
     shippingAddressLine1?: string | null
     shippingNotes?: string | null
     deliveryMode?: string | null
@@ -49,6 +52,9 @@ export type AdminOrderInput = {
     customerAddress?: string | null
     shippingWilayaCode?: string | null
     shippingCommuneCode?: string | null
+    shippingServiceLevel?: string | null
+    shippingAmount?: number | null
+    shippingCurrency?: string | null
     shippingAddressLine1?: string | null
     shippingNotes?: string | null
     deliveryMode?: string | null
@@ -1175,6 +1181,24 @@ export class OrdersService {
             }
         })
 
+        const shippingServiceLevel =
+            input.shippingServiceLevel == null ? null : String(input.shippingServiceLevel || '').trim()
+        if (shippingServiceLevel && shippingServiceLevel.length > 64) {
+            throw new OrderValidationError(400, 'shippingServiceLevel is too long')
+        }
+
+        const shippingCurrency =
+            input.shippingCurrency == null ? null : String(input.shippingCurrency || '').trim().toUpperCase()
+        if (shippingCurrency && shippingCurrency.length > 8) {
+            throw new OrderValidationError(400, 'shippingCurrency is too long')
+        }
+
+        const shippingAmount =
+            input.shippingAmount == null ? null : Number((input as any).shippingAmount)
+        if (shippingAmount != null && (!Number.isFinite(shippingAmount) || shippingAmount < 0)) {
+            throw new OrderValidationError(400, 'shippingAmount must be a positive number')
+        }
+
         const storeSettings = await prisma.storeSettings.upsert({
             where: { tenantId: input.tenantId },
             create: { tenantId: input.tenantId },
@@ -1373,6 +1397,9 @@ export class OrdersService {
                     shippingProvider,
                     shippingWilayaCode: input.shippingWilayaCode || null,
                     shippingCommuneCode: input.shippingCommuneCode || null,
+                    shippingServiceLevel: shippingServiceLevel || null,
+                    shippingAmount,
+                    shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
                     shippingNotes: input.shippingNotes || null,
                     totalAmount: centsToMoney(totalCents),
@@ -1469,6 +1496,24 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Quantity must be at least 1')
             }
         })
+
+        const shippingServiceLevel =
+            input.shippingServiceLevel == null ? null : String(input.shippingServiceLevel || '').trim()
+        if (shippingServiceLevel && shippingServiceLevel.length > 64) {
+            throw new OrderValidationError(400, 'shippingServiceLevel is too long')
+        }
+
+        const shippingCurrency =
+            input.shippingCurrency == null ? null : String(input.shippingCurrency || '').trim().toUpperCase()
+        if (shippingCurrency && shippingCurrency.length > 8) {
+            throw new OrderValidationError(400, 'shippingCurrency is too long')
+        }
+
+        const shippingAmount =
+            input.shippingAmount == null ? null : Number((input as any).shippingAmount)
+        if (shippingAmount != null && (!Number.isFinite(shippingAmount) || shippingAmount < 0)) {
+            throw new OrderValidationError(400, 'shippingAmount must be a positive number')
+        }
 
         const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
         const variantIds = Array.from(
@@ -1665,6 +1710,9 @@ export class OrdersService {
                     shippingProvider,
                     shippingWilayaCode: input.shippingWilayaCode || null,
                     shippingCommuneCode: input.shippingCommuneCode || null,
+                    shippingServiceLevel: shippingServiceLevel || null,
+                    shippingAmount,
+                    shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
                     shippingNotes: input.shippingNotes || null,
                     totalAmount: centsToMoney(totalCents),

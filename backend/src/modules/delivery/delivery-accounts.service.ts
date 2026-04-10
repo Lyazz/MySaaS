@@ -62,6 +62,7 @@ const applyConfigPatch = (existing: Record<string, unknown>, patch: Record<strin
 
 const pickAllowedKeys = (provider: ShipmentProvider, config: Record<string, unknown>) => {
     const allowedKeys = new Set(getProviderCatalogItem(provider).credentialFields.map((f) => f.key))
+    if (provider === 'MAYSTRO') allowedKeys.add('apiKey') // legacy alias for apiToken
     const picked: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(config)) {
         if (!allowedKeys.has(key)) continue
@@ -72,12 +73,19 @@ const pickAllowedKeys = (provider: ShipmentProvider, config: Record<string, unkn
 
 const normalizeProviderConfigPatch = (provider: ShipmentProvider, patch: Record<string, unknown>) => {
     const allowedKeys = new Set(getProviderCatalogItem(provider).credentialFields.map((f) => f.key))
+    if (provider === 'MAYSTRO') allowedKeys.add('apiKey') // legacy alias for apiToken
     const normalized: Record<string, unknown> = {}
 
     for (const [key, rawValue] of Object.entries(patch)) {
         if (!allowedKeys.has(key)) continue
 
         if (rawValue === null || rawValue === undefined || rawValue === '') {
+            normalized[key] = rawValue
+            continue
+        }
+
+        // Allow boolean flags for specific providers.
+        if (key === 'inventorySyncEnabled' && typeof rawValue === 'boolean') {
             normalized[key] = rawValue
             continue
         }
@@ -101,7 +109,10 @@ const toPublicAccount = (provider: ShipmentProvider, account: TenantDeliveryAcco
     const secrets: Record<string, boolean> = {}
 
     for (const field of item.credentialFields) {
-        const value = raw[field.key]
+        const value =
+            provider === 'MAYSTRO' && field.key === 'apiToken'
+                ? (raw.apiToken ?? raw.apiKey)
+                : raw[field.key]
         if (field.secret) {
             secrets[field.key] = typeof value === 'string' ? value.trim().length > 0 : value != null
         } else if (value !== undefined) {
@@ -122,7 +133,10 @@ const assertRequiredConfig = (provider: ShipmentProvider, config: Record<string,
     const missing = item.credentialFields
         .filter((f) => f.required)
         .filter((f) => {
-            const value = config[f.key]
+            const value =
+                provider === 'MAYSTRO' && f.key === 'apiToken'
+                    ? (config.apiToken ?? (config as any).apiKey)
+                    : config[f.key]
             if (typeof value === 'string') return value.trim().length === 0
             return value == null
         })
@@ -184,11 +198,20 @@ export class DeliveryAccountsService {
         })
 
         const allowedKeys = new Set(getProviderCatalogItem(provider).credentialFields.map((f) => f.key))
-        const existingConfig = isRecord(existingAccount?.config) ? existingAccount!.config : {}
+        if (provider === 'MAYSTRO') allowedKeys.add('apiKey') // legacy alias for apiToken
+        const rawExistingConfig = isRecord(existingAccount?.config) ? existingAccount!.config : {}
+        const existingConfig =
+            provider === 'MAYSTRO' && typeof (rawExistingConfig as any).apiToken !== 'string'
+                ? { ...rawExistingConfig, apiToken: (rawExistingConfig as any).apiKey }
+                : rawExistingConfig
         const patch =
             input.config === null
                 ? null
                 : normalizeProviderConfigPatch(provider, pickAllowedKeys(provider, normalizeConfigUpdate(input.config)))
+
+        if (provider === 'MAYSTRO' && patch && (patch.apiToken === '' || patch.apiToken == null)) {
+            ;(patch as any).apiKey = ''
+        }
 
         const nextConfig =
             patch === null

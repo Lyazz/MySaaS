@@ -1,16 +1,23 @@
 import { Router } from 'express'
 import { DeliveryController } from './delivery.controller'
 import { DeliveryAccountsController } from './delivery-accounts.controller'
+import { MaystroController } from './maystro/maystro.controller'
 import { requireTenantMember } from '../../middleware/rbac.middleware'
 import { requireStaffPermission } from '../../middleware/staff-permissions.middleware'
 
 const router = Router()
 const controller = new DeliveryController()
 const accountsController = new DeliveryAccountsController()
+const maystroController = new MaystroController()
 
 // Public-ish: needs tenant context, no auth
 router.post('/delivery/options', controller.getOptions.bind(controller))
 router.get('/delivery/companies', controller.listCompanies.bind(controller))
+router.get('/delivery/maystro/wilayas', maystroController.listWilayas.bind(maystroController))
+router.get('/delivery/maystro/communes', maystroController.listCommunes.bind(maystroController))
+router.get('/delivery/maystro/pickup-points', maystroController.listPickupPoints.bind(maystroController))
+router.get('/delivery/maystro/delivery-options', maystroController.listDeliveryOptions.bind(maystroController))
+router.get('/delivery/maystro/delivery-prices', maystroController.getDeliveryPrice.bind(maystroController))
 
 // Admin required
 router.post(
@@ -57,6 +64,38 @@ router.get(
     requireTenantMember,
     requireStaffPermission('delivery', 'read'),
     controller.getProviderLiveRates.bind(controller)
+)
+
+// Maystro management (admin)
+router.get(
+    '/admin/delivery/providers/MAYSTRO/hooks/types',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    maystroController.listHookTypes.bind(maystroController)
+)
+router.get(
+    '/admin/delivery/providers/MAYSTRO/hooks',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    maystroController.listHooks.bind(maystroController)
+)
+router.post(
+    '/admin/delivery/providers/MAYSTRO/hooks',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'update'),
+    maystroController.createHook.bind(maystroController)
+)
+router.delete(
+    '/admin/delivery/providers/MAYSTRO/hooks/:id',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'update'),
+    maystroController.deleteHook.bind(maystroController)
+)
+router.post(
+    '/admin/delivery/providers/MAYSTRO/bordereau',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    maystroController.createBordereau.bind(maystroController)
 )
 
 

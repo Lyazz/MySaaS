@@ -1,6 +1,3 @@
-import { Buffer } from 'node:buffer'
-import axios from 'axios'
-import type { AxiosInstance } from 'axios'
 import type { ShipmentProvider, ShipmentStatus } from '@prisma/client'
 import type {
     CreateShipmentInput,
@@ -10,51 +7,106 @@ import type {
     QuoteRequest,
     TrackingEvent
 } from '../types'
-
-const DEFAULT_BASE_URL = 'https://backend.maystro-delivery.com/api'
-
-const normalizeWilayaCode = (code: string | undefined) => {
-    if (!code) return undefined
-    const n = Number.parseInt(code, 10)
-    return Number.isFinite(n) ? String(n) : code
-}
-
-const statusFromCode = (code: any): ShipmentStatus => {
-    const n = typeof code === 'string' ? parseInt(code, 10) : code
-    if (n === 50 || code === 'cancelled') return 'CANCELLED'
-    if (n === 40 || code === 'delivered') return 'DELIVERED'
-    if (n === 30 || code === 'in_transit' || code === 'in-transit') return 'IN_TRANSIT'
-    if (n === 20 || code === 'confirmed') return 'CONFIRMED'
-    if (n === 10 || code === 'requested') return 'REQUESTED'
-    return 'PENDING'
-}
+import { MaystroClient } from '../maystro/maystro.client'
 
 export class MaystroProvider implements DeliveryProvider {
     provider: ShipmentProvider = 'MAYSTRO'
-    private http: AxiosInstance
+    private client: MaystroClient | null
+    private sampleCommuneByWilaya = new Map<string, string>()
+    private wilayaIdByInput = new Map<string, number>()
+    private communesByWilayaId = new Map<number, Array<{ id: number; name: string }>>()
 
-    constructor(opts?: { apiKey?: string; baseURL?: string }) {
-        const apiKey = opts?.apiKey ?? ''
-        const baseURL = opts?.baseURL || process.env.MAYSTRO_BASE_URL || DEFAULT_BASE_URL
-        this.http = axios.create({
-            baseURL,
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            timeout: 10_000
+    constructor(opts?: { apiToken?: string }) {
+        const apiToken = typeof opts?.apiToken === 'string' ? opts.apiToken.trim() : ''
+        this.client = apiToken ? new MaystroClient({ apiToken }) : null
+    }
+
+    private async resolveWilayaId(wilayaInput: string): Promise<number | null> {
+        const trimmed = String(wilayaInput || '').trim()
+        if (!trimmed) return null
+
+        const cached = this.wilayaIdByInput.get(trimmed.toLowerCase())
+        if (cached) return cached
+
+        const numeric = Number.parseInt(trimmed, 10)
+        if (Number.isFinite(numeric)) {
+            this.wilayaIdByInput.set(trimmed.toLowerCase(), numeric)
+            return numeric
+        }
+
+        if (!this.client) return null
+        const wilayas = await this.client.request<any[]>({ method: 'GET', path: '/base/wilayas/' })
+        const match = (Array.isArray(wilayas) ? wilayas : []).find(
+            (w) => String(w?.name ?? w?.name_lt ?? w?.name_ar ?? '').toLowerCase() === trimmed.toLowerCase()
+        )
+        const id = match?.id != null ? Number(match.id) : NaN
+        if (!Number.isFinite(id)) return null
+        this.wilayaIdByInput.set(trimmed.toLowerCase(), id)
+        return id
+    }
+
+    private async listCommunesForWilaya(wilayaId: number): Promise<Array<{ id: number; name: string }>> {
+        const cached = this.communesByWilayaId.get(wilayaId)
+        if (cached) return cached
+        if (!this.client) return []
+        const communes = await this.client.request<any[]>({
+            method: 'GET',
+            path: '/base/communes/',
+            params: { wilaya: wilayaId }
         })
+        const normalized = (Array.isArray(communes) ? communes : [])
+            .map((c) => ({ id: Number(c?.id), name: String(c?.name ?? '') }))
+            .filter((c) => Number.isFinite(c.id) && c.name.trim().length > 0)
+        this.communesByWilayaId.set(wilayaId, normalized)
+        return normalized
     }
 
     async quote(input: QuoteRequest): Promise<QuoteOption[]> {
+        if (!this.client) return []
+
+        const deliveryType = input.deliveryMode === 'home' ? 1 : 2
+
         try {
-            const response = await this.http.post('/shared/delivery_price/', {
-                wilaya_code: normalizeWilayaCode(input.destination.wilayaCode),
-                commune_code: input.destination.communeCode,
-                total_weight: input.weight || 1
+            const wilayaKey = String(input.destination.wilayaCode || '').trim()
+            const wilayaId = await this.resolveWilayaId(wilayaKey)
+            if (!wilayaId) return []
+
+            let communeId: string | null = null
+
+            const rawCommune = typeof input.destination.communeCode === 'string' ? input.destination.communeCode.trim() : ''
+            if (rawCommune) {
+                const numericCommune = Number.parseInt(rawCommune, 10)
+                if (Number.isFinite(numericCommune)) {
+                    communeId = String(numericCommune)
+                } else {
+                    const communes = await this.listCommunesForWilaya(wilayaId)
+                    const match = communes.find((c) => c.name.toLowerCase() === rawCommune.toLowerCase())
+                    if (match) communeId = String(match.id)
+                }
+            }
+
+            if (!communeId) {
+                const cached = this.sampleCommuneByWilaya.get(wilayaKey)
+                if (cached) {
+                    communeId = cached
+                } else {
+                    const communes = await this.listCommunesForWilaya(wilayaId)
+                    const firstId = communes[0]?.id != null ? String(communes[0].id) : ''
+                    if (!firstId) return []
+                    this.sampleCommuneByWilaya.set(wilayaKey, firstId)
+                    communeId = firstId
+                }
+            }
+
+            const data = await this.client.request<any>({
+                method: 'GET',
+                path: '/base/delivery-prices/',
+                params: { commune: communeId, delivery_type: deliveryType }
             })
 
-            const price = Number(response.data?.delivery_price ?? response.data?.price ?? 0)
+            const price = Number(data?.delivery_price ?? data?.price ?? 0)
+            if (!Number.isFinite(price) || price <= 0) return []
+
             return [
                 {
                     provider: this.provider,
@@ -64,72 +116,23 @@ export class MaystroProvider implements DeliveryProvider {
                     source: 'provider'
                 }
             ]
-        } catch (error) {
-            // Swallow errors to allow caller to fall back to local rates
+        } catch {
             return []
         }
     }
 
     async createShipment(input: CreateShipmentInput): Promise<CreateShipmentResult> {
-        const payload = {
-            instance_uuid: input.orderId,
-            receiver_name: input.contactName,
-            receiver_phone: input.contactPhone,
-            wilaya_code: normalizeWilayaCode(input.wilayaCode),
-            commune_code: input.communeCode,
-            address: input.addressLine1,
-            address_complement: input.addressLine2,
-            notes: input.notes,
-            // Optionally include service level mapping if supported
-            service_level: input.serviceLevel
-        }
-
-        const response = await this.http.post('/stores/orders/', payload)
-        const data = response.data || {}
-
+        // Shipment creation is handled via the Orders Management API with product sync.
+        // The DeliveryService orchestrates this flow to enforce tenant/product mapping rules.
         return {
-            providerShipmentId: data.instance_uuid || data.id,
-            status: statusFromCode(data.status),
-            labelUrl: data.label_url,
-            trackingUrl: data.tracking_url,
-            price: data.delivery_price ? Number(data.delivery_price) : input.price,
-            currency: 'DZD',
-            raw: data
+            providerShipmentId: undefined,
+            status: 'PENDING' as ShipmentStatus,
+            raw: { error: 'Maystro shipment creation is orchestrated by DeliveryService' }
         }
     }
 
     async track(): Promise<TrackingEvent[]> {
-        // Maystro does not expose a simple tracking endpoint in the provided docs; rely on stored events + webhooks.
+        // Maystro does not expose a simple tracking endpoint; rely on stored events + webhooks.
         return []
-    }
-
-    async handleWebhook(payload: any) {
-        // Maystro webhooks arrive as base64 twice per docs. Accept already-decoded JSON as well.
-        let decoded: any = payload
-        if (typeof payload === 'string') {
-            try {
-                const once = Buffer.from(payload, 'base64').toString('utf8')
-                decoded = JSON.parse(Buffer.from(once, 'base64').toString('utf8'))
-            } catch (error) {
-                return null
-            }
-        }
-
-        const eventStatus = statusFromCode(decoded?.payload?.status ?? decoded?.status)
-        const shipmentId = decoded?.instance_uuid || decoded?.payload?.instance_uuid
-
-        return {
-            shipmentId,
-            status: eventStatus,
-            events: [
-                {
-                    status: eventStatus,
-                    code: decoded?.event || decoded?.payload?.status?.toString(),
-                    description: decoded?.payload?.status_label || 'Status updated',
-                    raw: decoded,
-                    eventTime: decoded?.payload?.updated_at ? new Date(decoded.payload.updated_at) : new Date()
-                }
-            ]
-        }
     }
 }

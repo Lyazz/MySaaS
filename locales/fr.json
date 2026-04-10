@@ -539,7 +539,7 @@
           "placeholder": "Sélectionner une wilaya…"
         },
         "commune": {
-          "label": "Ville",
+          "label": "Commune",
           "placeholder": "Sélectionner une commune…"
         },
         "address": {

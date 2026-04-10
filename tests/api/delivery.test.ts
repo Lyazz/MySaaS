@@ -84,11 +84,13 @@ describe('Delivery API', () => {
 
     afterAll(async () => {
         vi.restoreAllMocks()
+        if (!tenantA?.id || !tenantB?.id) return
         const tenantIds = [tenantA.id, tenantB.id]
         await prisma.shipmentEvent.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.shipment.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.deliveryRate.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.tenantDeliveryAccount.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.maystroOrderMapping.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.orderItem.deleteMany({ where: { order: { tenantId: { in: tenantIds } } } })
         await prisma.order.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.product.deleteMany({ where: { tenantId: { in: tenantIds } } })
@@ -225,11 +227,20 @@ describe('Delivery API', () => {
             }
         })
 
+        await prisma.maystroOrderMapping.create({
+            data: {
+                tenantId: tenantA.id,
+                localOrderId: orderA.id,
+                externalId: orderA.id,
+                maystroOrderId: 'mx-123',
+                success: true
+            }
+        })
+
         const inner = Buffer.from(
             JSON.stringify({
-                event: 'order_status_changed',
-                instance_uuid: 'mx-123',
-                payload: { status: 30, status_label: 'In transit' }
+                event: 'OrderStatusChanged',
+                payload: { id: 'mx-123', external_id: orderA.id, status: 41, status_label: 'Delivered' }
             }),
             'utf8'
         ).toString('base64')
@@ -243,7 +254,10 @@ describe('Delivery API', () => {
         expect(res.body.success).toBe(true)
 
         const updated = await prisma.shipment.findUnique({ where: { id: maystroShipment.id } })
-        expect(updated?.status).toBe('IN_TRANSIT')
+        expect(updated?.status).toBe('DELIVERED')
+
+        const updatedOrder = await prisma.order.findUnique({ where: { id: orderA.id } })
+        expect(updatedOrder?.status).toBe('DELIVERED')
     })
 
     it('allows tenant admins to configure carrier credentials without leaking secrets', async () => {
@@ -263,15 +277,16 @@ describe('Delivery API', () => {
             .send({
                 offered: true,
                 isActive: true,
-                config: { apiKey: 'tenant-maystro-key', baseURL: 'https://evil.example.com' }
+                config: { apiToken: 'tenant-maystro-token', storeId: 'store-123', baseURL: 'https://evil.example.com' }
             })
 
         expect(upsert.status).toBe(200)
         expect(upsert.body.provider).toBe('MAYSTRO')
         expect(upsert.body.offered).toBe(true)
         expect(upsert.body.account?.isActive).toBe(true)
-        expect(upsert.body.account?.secrets?.apiKey).toBe(true)
-        expect(upsert.body.account?.config?.apiKey).toBeUndefined()
+        expect(upsert.body.account?.secrets?.apiToken).toBe(true)
+        expect(upsert.body.account?.config?.apiToken).toBeUndefined()
+        expect(upsert.body.account?.config?.storeId).toBe('store-123')
 
         const stored = await prisma.tenantDeliveryAccount.findUnique({
             where: { tenantId_provider: { tenantId: tenantA.id, provider: 'MAYSTRO' } }
@@ -287,7 +302,7 @@ describe('Delivery API', () => {
             .send({
                 offered: true,
                 isActive: true,
-                config: { apiKey: 'tenant-maystro-key' }
+                config: { apiToken: 'tenant-maystro-token', storeId: 'store-123' }
             })
 
         vi.spyOn(MaystroProvider.prototype, 'quote').mockImplementation(async (input: any) => [
@@ -315,7 +330,7 @@ describe('Delivery API', () => {
             .set('Host', `${tenantA.slug}.platform.com`)
             .send({
                 provider: 'MAYSTRO',
-                destination: { wilayaCode: '16' },
+                destination: { wilayaCode: '16', communeCode: '575' },
                 deliveryMode: 'home'
             })
 
@@ -343,7 +358,7 @@ describe('Delivery API', () => {
             .send({
                 offered: true,
                 isActive: true,
-                config: { apiKey: 'tenant-maystro-key' }
+                config: { apiToken: 'tenant-maystro-token', storeId: 'store-123' }
             })
 
         vi.spyOn(MaystroProvider.prototype, 'quote').mockImplementation(async (input: any) => {

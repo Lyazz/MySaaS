@@ -436,12 +436,13 @@ const scrollToForm = () => {
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
-                    <input
+                    <CommuneField
                         v-model="quickForm.commune"
-                        type="text"
+                        :wilaya-code="quickForm.wilaya"
                         :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                        class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
-                    >
+                        :input-class="'block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
+                        :select-class="'block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
+                    />
                 </div>
                 </div>
 

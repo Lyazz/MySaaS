@@ -224,6 +224,78 @@
       </div>
 
       <div class="px-6 pb-4 flex flex-col gap-3">
+        <!-- Maystro: test exact commune price -->
+        <div
+          v-if="selectedProvider?.provider === 'MAYSTRO'"
+          class="rounded-lg border border-slate-200 bg-slate-50 p-4"
+        >
+          <div class="flex flex-col md:flex-row md:items-end gap-3">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Wilaya</label>
+              <select
+                v-model="maystroTest.wilayaCode"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
+              >
+                <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
+              </select>
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Commune (Maystro)</label>
+              <select
+                v-model="maystroTest.communeId"
+                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
+                :disabled="maystroTest.loadingCommunes || maystroTest.communes.length === 0"
+              >
+                <option value="" disabled>
+                  {{ maystroTest.loadingCommunes ? 'Loading communes...' : maystroTest.communes.length ? 'Select commune' : 'No communes' }}
+                </option>
+                <option
+                  v-for="c in maystroTest.communes"
+                  :key="c.id"
+                  :value="String(c.id)"
+                >
+                  {{ c.id }} - {{ c.name }}
+                </option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="ui-btn ui-btn--secondary ui-btn--md"
+                :disabled="maystroTest.loadingPrices || !maystroTest.communeId"
+                @click="fetchMaystroCommunePrices"
+              >
+                {{ maystroTest.loadingPrices ? 'Fetching…' : 'Test prix commune' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <div class="rounded-md bg-white border border-slate-200 px-3 py-2">
+              <div class="text-slate-500">Home (delivery_type=1)</div>
+              <div class="font-semibold text-slate-900">
+                {{ maystroTest.priceHome == null ? '—' : `${maystroTest.priceHome} DZD` }}
+              </div>
+            </div>
+            <div class="rounded-md bg-white border border-slate-200 px-3 py-2">
+              <div class="text-slate-500">Office (delivery_type=2)</div>
+              <div class="font-semibold text-slate-900">
+                {{ maystroTest.priceOffice == null ? '—' : `${maystroTest.priceOffice} DZD` }}
+              </div>
+            </div>
+            <div
+              v-if="maystroTest.error"
+              class="rounded-md bg-rose-50 border border-rose-200 px-3 py-2 text-rose-800"
+            >
+              {{ maystroTest.error }}
+            </div>
+          </div>
+
+          <p class="mt-2 text-xs text-slate-500">
+            Note: les “tarifs transporteur” du tableau sont calculés par wilaya (commune échantillon). Pour un prix exact, tester une commune ici.
+          </p>
+        </div>
+
         <div class="flex flex-col md:flex-row md:items-center gap-3">
           <div class="flex-1">
             <input
@@ -511,6 +583,26 @@ const clearSecrets = ref<Record<string, boolean>>({})
 const accountMessage = ref<string | null>(null)
 const accountMessageKind = ref<'success' | 'error'>('success')
 
+const maystroTest = reactive<{
+  wilayaCode: string
+  communes: Array<{ id: number; name: string }>
+  communeId: string
+  loadingCommunes: boolean
+  loadingPrices: boolean
+  priceHome: number | null
+  priceOffice: number | null
+  error: string
+}>({
+  wilayaCode: '16',
+  communes: [],
+  communeId: '',
+  loadingCommunes: false,
+  loadingPrices: false,
+  priceHome: null,
+  priceOffice: null,
+  error: ''
+})
+
 // Static list of Wilayas
 const wilayas = [
   { code: '01', name: 'Adrar' }, { code: '02', name: 'Chlef' }, { code: '03', name: 'Laghouat' }, { code: '04', name: 'Oum El Bouaghi' },
@@ -533,6 +625,79 @@ const wilayas = [
 onMounted(async () => {
   await loadProviders()
 })
+
+watch(
+  () => selectedProvider.value?.provider,
+  async (provider) => {
+    if (provider !== 'MAYSTRO') return
+    await loadMaystroCommunes()
+  }
+)
+
+watch(
+  () => maystroTest.wilayaCode,
+  async () => {
+    if (selectedProvider.value?.provider !== 'MAYSTRO') return
+    await loadMaystroCommunes()
+  }
+)
+
+async function loadMaystroCommunes() {
+  maystroTest.loadingCommunes = true
+  maystroTest.error = ''
+  maystroTest.priceHome = null
+  maystroTest.priceOffice = null
+  maystroTest.communes = []
+  maystroTest.communeId = ''
+
+  try {
+    const data = await $fetch<Array<{ id: number; name: string }>>(
+      `/api/delivery/maystro/communes?wilaya=${encodeURIComponent(maystroTest.wilayaCode)}`,
+      { headers: { Authorization: `Bearer ${authStore.token}` } }
+    )
+    maystroTest.communes = Array.isArray(data) ? data : []
+    const first = maystroTest.communes[0]
+    if (first?.id != null) maystroTest.communeId = String(first.id)
+  } catch (e: any) {
+    maystroTest.error = e?.data?.statusMessage || 'Failed to load communes (check Maystro credentials)'
+  } finally {
+    maystroTest.loadingCommunes = false
+  }
+}
+
+async function fetchMaystroCommunePrices() {
+  if (!maystroTest.communeId) return
+  maystroTest.loadingPrices = true
+  maystroTest.error = ''
+
+  const commune = maystroTest.communeId
+
+  const parsePrice = (value: any): number | null => {
+    const raw = value?.delivery_price ?? value?.deliveryPrice ?? value?.price
+    const n = typeof raw === 'number' ? raw : Number(raw)
+    return Number.isFinite(n) ? n : null
+  }
+
+  try {
+    const [home, office] = await Promise.all([
+      $fetch<any>(
+        `/api/delivery/maystro/delivery-prices?commune=${encodeURIComponent(commune)}&deliveryType=1`,
+        { headers: { Authorization: `Bearer ${authStore.token}` } }
+      ),
+      $fetch<any>(
+        `/api/delivery/maystro/delivery-prices?commune=${encodeURIComponent(commune)}&deliveryType=2`,
+        { headers: { Authorization: `Bearer ${authStore.token}` } }
+      )
+    ])
+
+    maystroTest.priceHome = parsePrice(home)
+    maystroTest.priceOffice = parsePrice(office)
+  } catch (e: any) {
+    maystroTest.error = e?.data?.statusMessage || 'Failed to fetch Maystro delivery prices'
+  } finally {
+    maystroTest.loadingPrices = false
+  }
+}
 
 watch([wilayaQuery, wilayaFilter], () => {
   page.value = 1

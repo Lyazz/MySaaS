@@ -356,12 +356,13 @@ const handleAddToCart = async () => {
               </div>
               <div class="space-y-2">
                   <label class="block font-street text-lg uppercase">{{ storefrontContent.checkout.form.commune.label }}</label>
-                  <input
+                  <CommuneField
                     v-model="quickForm.commune"
-                    type="text"
+                    :wilaya-code="quickForm.wilaya"
                     :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                    class="block w-full bg-gray-100 border-2 border-black p-3 font-mono focus:shadow-[4px_4px_0_0_var(--brand)] outline-none"
-                  >
+                    :input-class="'block w-full bg-gray-100 border-2 border-black p-3 font-mono focus:shadow-[4px_4px_0_0_var(--brand)] outline-none'"
+                    :select-class="'block w-full bg-gray-100 border-2 border-black p-3 font-mono focus:shadow-[4px_4px_0_0_var(--brand)] outline-none'"
+                  />
               </div>
             </div>
 

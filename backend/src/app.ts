@@ -2,6 +2,7 @@ import express from 'express'
 
 import { expressTenantMiddleware } from './middleware/tenant.middleware'
 import { expressAuthMiddleware } from './middleware/auth.middleware'
+import { expressTenantFromUserMiddleware } from './middleware/tenant-from-user.middleware'
 import { expressAuditMiddleware } from './middleware/audit.middleware'
 import { expressSubscriptionMiddleware } from './middleware/subscription.middleware'
 import routes from './routes'
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
 
 app.use(expressTenantMiddleware)
 app.use(expressAuthMiddleware)
+app.use(expressTenantFromUserMiddleware)
 app.use(expressAuditMiddleware)
 app.use(expressSubscriptionMiddleware)
 

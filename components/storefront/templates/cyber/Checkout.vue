@@ -29,6 +29,19 @@ const deliveryOptions = computed(() => {
   const options: any[] = []
   
   availableProviders.value.forEach((provider: any) => {
+    const homePrice =
+      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
+        ? String(Math.round(maystroPrices.homePrice.value))
+        : provider.key === 'MAYSTRO'
+          ? '—'
+          : '350'
+    const officePrice =
+      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
+        ? String(Math.round(maystroPrices.officePrice.value))
+        : provider.key === 'MAYSTRO'
+          ? '—'
+          : '300'
+
     options.push({
       id: `${provider.key}-home`,
       provider: provider.key,
@@ -37,7 +50,7 @@ const deliveryOptions = computed(() => {
       modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
       icon: provider.icon,
       color: provider.color,
-      price: '350',
+      price: homePrice,
       description: storefrontContent.value.checkout.delivery.description.homeDelivery
     })
     
@@ -49,7 +62,7 @@ const deliveryOptions = computed(() => {
       modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
       icon: provider.icon,
       color: provider.color,
-      price: '300',
+      price: officePrice,
       description: storefrontContent.value.checkout.delivery.description.pickupPoint
     })
   })
@@ -75,7 +88,18 @@ const form = ref({
   wilaya: '',
   commune: '',
   address: '',
-  selectedDeliveryOption: deliveryOptions.value[0]?.id || 'store-pickup'
+  selectedDeliveryOption: ''
+})
+
+const maystroPrices = useMaystroDeliveryPrices({
+  wilayaCode: () => form.value.wilaya,
+  communeCode: () => form.value.commune
+})
+
+watchEffect(() => {
+  if (!form.value.selectedDeliveryOption && deliveryOptions.value.length) {
+    form.value.selectedDeliveryOption = deliveryOptions.value[0].id
+  }
 })
 
 const submitting = ref(false)
@@ -128,6 +152,23 @@ async function handleSubmit() {
     try {
         const delivery = selectedDelivery.value
         const url = useTenantApiUrl('/api/orders')
+        const isMaystro = delivery?.provider === 'MAYSTRO'
+        const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
+        const maystroShippingAmount =
+          isMaystro
+            ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
+            : null
+
+        if (isMaystro) {
+          if (!form.value.wilaya || !form.value.commune) {
+            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
+            return
+          }
+          if (maystroShippingAmount == null) {
+            errorMessage.value = 'Maystro shipping price unavailable for selected commune'
+            return
+          }
+        }
         const payload = {
           customerName: form.value.fullName.trim(),
           customerPhone: form.value.phone.trim(),
@@ -137,6 +178,9 @@ async function handleSubmit() {
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
+          shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
+          shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
+          shippingCurrency: isMaystro ? currencyCode.value : undefined,
           items: cartStore.items.map(item => ({
             productId: item.productId,
             variantId: item.variantId,
@@ -245,12 +289,13 @@ async function handleSubmit() {
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
                   <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
-                  <input
+                  <CommuneField
                     v-model="form.commune"
-                    type="text"
-                    class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white placeholder:text-purple-400/50 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none"
+                    :wilaya-code="form.wilaya"
                     :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                  >
+                    :input-class="'w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white placeholder:text-purple-400/50 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none'"
+                    :select-class="'w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none'"
+                  />
                 </div>
                 <div class="col-span-2 space-y-2">
                   <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>

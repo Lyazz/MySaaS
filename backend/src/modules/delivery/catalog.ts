@@ -25,7 +25,9 @@ export const DELIVERY_PROVIDER_CATALOG: DeliveryProviderCatalogItem[] = [
         name: 'Maystro',
         supports: { quote: true, createShipment: true, track: false, webhooks: true },
         credentialFields: [
-            { key: 'apiKey', label: 'API Key', required: true, secret: true }
+            { key: 'apiToken', label: 'API Token', required: true, secret: true },
+            { key: 'storeId', label: 'Store ID', required: true, secret: false },
+            { key: 'inventorySyncEnabled', label: 'Inventory Sync Enabled', required: false, secret: false }
         ]
     },
     {

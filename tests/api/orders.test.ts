@@ -155,6 +155,9 @@ describe('Public checkout order flow', () => {
                 customerPhone: '0550123456',
                 shippingWilayaCode: '16',
                 shippingCommuneCode: 'Algiers',
+                shippingServiceLevel: 'home',
+                shippingAmount: 499,
+                shippingCurrency: 'DZD',
                 items: [
                     {
                         productId,
@@ -177,6 +180,9 @@ describe('Public checkout order flow', () => {
         expect(saved?.items[0].quantity).toBe(2)
 
         expect(saved?.customerId).toBeNull()
+        expect(saved?.shippingServiceLevel).toBe('home')
+        expect(saved?.shippingAmount).toBe(499)
+        expect(saved?.shippingCurrency).toBe('DZD')
 
         const variantAfter = await prisma.productVariant.findUnique({ where: { id: variantId } })
         expect(variantAfter?.stock).toBe(variantStockBefore)

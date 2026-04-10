@@ -4,6 +4,8 @@ import { MaystroProvider } from './providers/maystro.provider'
 import { YalidineProvider } from './providers/yalidine.provider'
 import { SelfDeliveryProvider } from './providers/self.provider'
 import { DELIVERY_PROVIDER_CATALOG, getProviderCatalogItem } from './catalog'
+import { MaystroOrderService } from './maystro/maystro-order.service'
+import { MaystroWebhookService } from './maystro/maystro-webhook.service'
 import type {
     CreateShipmentInput,
     QuoteOption,
@@ -13,9 +15,14 @@ import type {
 } from './types'
 
 type ProviderApiConfig = {
-    apiKey?: string
-    apiId?: string
+    // Maystro Orders Management API
     apiToken?: string
+    storeId?: string
+    inventorySyncEnabled?: boolean
+
+    // Yalidine
+    apiId?: string
+    yalidineApiToken?: string
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -68,15 +75,23 @@ export class DeliveryService {
         const raw = isRecord(accountConfig) ? accountConfig : {}
 
         if (provider === 'MAYSTRO') {
+            const token =
+                typeof raw.apiToken === 'string'
+                    ? raw.apiToken.trim()
+                    : typeof raw.apiKey === 'string'
+                        ? raw.apiKey.trim()
+                        : undefined
             return {
-                apiKey: typeof raw.apiKey === 'string' ? raw.apiKey.trim() : undefined
+                apiToken: token,
+                storeId: typeof raw.storeId === 'string' ? raw.storeId.trim() : undefined,
+                inventorySyncEnabled: raw.inventorySyncEnabled === true
             }
         }
 
         if (provider === 'YALIDINE') {
             return {
                 apiId: typeof raw.apiId === 'string' ? raw.apiId.trim() : undefined,
-                apiToken: typeof raw.apiToken === 'string' ? raw.apiToken.trim() : undefined
+                yalidineApiToken: typeof raw.apiToken === 'string' ? raw.apiToken.trim() : undefined
             }
         }
 
@@ -92,8 +107,8 @@ export class DeliveryService {
         if (account) {
             if (!account.isActive) return null
             const cfg = this.parseProviderAccountConfig(provider, account.config)
-            if (provider === 'MAYSTRO') return cfg.apiKey ? cfg : null
-            if (provider === 'YALIDINE') return cfg.apiId && cfg.apiToken ? cfg : null
+            if (provider === 'MAYSTRO') return cfg.apiToken && cfg.storeId ? cfg : null
+            if (provider === 'YALIDINE') return cfg.apiId && cfg.yalidineApiToken ? cfg : null
             return cfg
         }
 
@@ -110,7 +125,7 @@ export class DeliveryService {
         if (provider === 'MAYSTRO') {
             const cfg = await this.getProviderApiConfig(tenantId, provider)
             return {
-                impl: new MaystroProvider(cfg ? { apiKey: cfg.apiKey } : undefined),
+                impl: new MaystroProvider(cfg ? { apiToken: cfg.apiToken } : undefined),
                 apiConfig: cfg
             }
         }
@@ -120,7 +135,7 @@ export class DeliveryService {
             return {
                 impl: new YalidineProvider({
                     apiId: cfg?.apiId,
-                    apiToken: cfg?.apiToken
+                    apiToken: cfg?.yalidineApiToken
                 }),
                 apiConfig: cfg
             }
@@ -472,7 +487,23 @@ export class DeliveryService {
             throw new DeliveryConfigurationError(400, 'Delivery provider credentials are not configured')
         }
 
-        const result = await impl.createShipment({ ...input, serviceLevel: effectiveServiceLevel })
+        const result =
+            input.provider === 'MAYSTRO'
+                ? await this.createMaystroShipment({
+                    ...input,
+                    serviceLevel: effectiveServiceLevel,
+                    apiToken: apiConfig!.apiToken!,
+                    storeId: apiConfig!.storeId!
+                })
+                : await impl.createShipment({ ...input, serviceLevel: effectiveServiceLevel })
+
+        const mergedMetadata =
+            input.provider === 'MAYSTRO'
+                ? {
+                    ...(input.metadata || {}),
+                    maystro: result.raw ?? null
+                }
+                : input.metadata ?? result.raw ?? undefined
 
         const shipment = await this.prisma.shipment.create({
             data: {
@@ -493,7 +524,7 @@ export class DeliveryService {
                 notes: input.notes,
                 labelUrl: result.labelUrl ?? undefined,
                 trackingUrl: result.trackingUrl ?? undefined,
-                metadata: input.metadata ?? result.raw ?? undefined
+                metadata: mergedMetadata as any
             }
         })
 
@@ -510,6 +541,70 @@ export class DeliveryService {
         }
 
         return shipment
+    }
+
+    private async createMaystroShipment(
+        input: CreateShipmentInput & {
+            apiToken: string
+            storeId: string
+        }
+    ) {
+        if (!input.communeCode || !input.wilayaCode) {
+            throw new DeliveryConfigurationError(400, 'wilayaCode and communeCode are required for Maystro shipments')
+        }
+
+        const rawDeliveryType =
+            input.metadata?.maystroDeliveryType ??
+            input.metadata?.deliveryType ??
+            input.metadata?.maystro?.deliveryType ??
+            undefined
+        const parsedDeliveryType = typeof rawDeliveryType === 'number' ? rawDeliveryType : Number(rawDeliveryType)
+        const deliveryType: 1 | 2 | 3 =
+            parsedDeliveryType === 1 || parsedDeliveryType === 2 || parsedDeliveryType === 3
+                ? (parsedDeliveryType as 1 | 2 | 3)
+                : input.deliveryMode === 'home'
+                    ? 1
+                    : 2
+
+        const rawPickupPoint =
+            input.metadata?.pickupPoint ??
+            input.metadata?.maystroPickupPoint ??
+            input.metadata?.maystro?.pickupPoint ??
+            undefined
+        const pickupPoint = rawPickupPoint == null ? undefined : Number(rawPickupPoint)
+
+        const orderService = new MaystroOrderService(this.prisma)
+
+        const destinationText = [input.addressLine1, input.addressLine2].filter(Boolean).join(', ')
+
+        const mapping = await orderService.createOrderFromLocalOrder({
+            tenantId: input.tenantId,
+            apiToken: input.apiToken,
+            storeId: input.storeId,
+            localOrderId: input.orderId,
+            customerName: input.contactName,
+            customerPhone: input.contactPhone,
+            customerPhone2: typeof input.metadata?.customerPhone2 === 'string' ? input.metadata.customerPhone2 : undefined,
+            destinationText,
+            noteToDriver: input.notes,
+            express: input.metadata?.express === true,
+            wilaya: input.wilayaCode,
+            commune: input.communeCode,
+            deliveryType,
+            pickupPoint: Number.isFinite(pickupPoint as any) ? (pickupPoint as number) : undefined
+        })
+
+        return {
+            providerShipmentId: mapping.maystroOrderId ?? undefined,
+            status: mapping.success ? ShipmentStatus.REQUESTED : ShipmentStatus.PENDING,
+            price: mapping.deliveryPrice != null ? Number(mapping.deliveryPrice) : undefined,
+            currency: 'DZD',
+            raw: {
+                maystroOrderId: mapping.maystroOrderId,
+                tracking: mapping.tracking,
+                success: mapping.success
+            }
+        }
     }
 
     async getShipment(tenantId: string, shipmentId: string) {
@@ -553,43 +648,15 @@ export class DeliveryService {
     }
 
     async handleMaystroWebhook(tenantId: string, rawPayload: any) {
-        const provider = new MaystroProvider()
-        if (!provider.handleWebhook) return null
-
-        const parsed = await provider.handleWebhook(rawPayload)
-        if (!parsed?.shipmentId) return null
-
-        const shipment = await this.prisma.shipment.findFirst({
-            where: {
-                tenantId,
-                providerShipmentId: parsed.shipmentId,
-                provider: 'MAYSTRO'
-            }
+        const account = await this.prisma.tenantDeliveryAccount.findUnique({
+            where: { tenantId_provider: { tenantId, provider: 'MAYSTRO' } },
+            select: { config: true }
         })
-        if (!shipment) return null
+        const raw = typeof account?.config === 'object' && account?.config !== null ? (account.config as any) : {}
+        const inventorySyncEnabled = raw?.inventorySyncEnabled === true
 
-        const status = parsed.status || ShipmentStatus.PENDING
-
-        await this.prisma.shipment.update({
-            where: { tenantId_id: { tenantId, id: shipment.id } },
-            data: { status }
-        })
-
-        if (parsed.events?.length) {
-            await this.prisma.shipmentEvent.createMany({
-                data: parsed.events.map((ev) => ({
-                    tenantId,
-                    shipmentId: shipment.id,
-                    status: ev.status,
-                    code: ev.code,
-                    description: ev.description,
-                    rawPayload: ev.raw,
-                    eventTime: ev.eventTime || new Date()
-                }))
-            })
-        }
-
-        return { shipmentId: shipment.id, status }
+        const webhook = new MaystroWebhookService(this.prisma)
+        return webhook.handleWebhook({ tenantId, raw: rawPayload, inventorySyncEnabled })
     }
 
     async updateSelfStatus(tenantId: string, shipmentId: string, status: ShipmentStatus) {

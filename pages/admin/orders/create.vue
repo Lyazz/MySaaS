@@ -130,7 +130,35 @@
                      <label class="block text-sm font-medium text-slate-700 mb-1">
                        {{ t('admin.pages.orders.create.commune') }}
                      </label>
-                     <BaseInput v-model="form.shippingCommuneCode" type="text" />
+                     <BaseSelect
+                       v-if="form.shippingProvider === 'MAYSTRO'"
+                       v-model="form.shippingCommuneCode"
+                       :disabled="!form.shippingWilayaCode || maystroCommuneLoading"
+                     >
+                       <option value="">
+                         {{
+                           !form.shippingWilayaCode
+                             ? t('admin.pages.orders.create.wilaya')
+                             : maystroCommuneLoading
+                               ? t('admin.common.loading')
+                               : t('admin.common.noneSelected')
+                         }}
+                       </option>
+                       <option
+                         v-for="c in maystroCommunes"
+                         :key="String(c.id)"
+                         :value="String(c.id)"
+                       >
+                         {{ c.id }} - {{ c.name }}
+                       </option>
+                     </BaseSelect>
+                     <BaseInput v-else v-model="form.shippingCommuneCode" type="text" />
+                     <p
+                       v-if="form.shippingProvider === 'MAYSTRO' && maystroCommuneError"
+                       class="mt-1 text-xs text-amber-700"
+                     >
+                       {{ maystroCommuneError }}
+                     </p>
                   </div>
                </div>
 
@@ -379,7 +407,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCurrency } from '~/composables/useCurrency'
 import { useAuthStore } from '~/stores/auth'
@@ -414,6 +442,10 @@ const form = ref({
     shippingAddressLine1: '',
     shippingNotes: ''
 })
+
+const maystroCommunes = ref<Array<{ id: number; name: string }>>([])
+const maystroCommuneLoading = ref(false)
+const maystroCommuneError = ref<string | null>(null)
 
 type CartItem = {
     productId: string
@@ -467,7 +499,8 @@ onMounted(async () => {
     }
 })
 
-function onCustomerSelected(id: string) {
+function onCustomerSelected(value: string | number | boolean | null) {
+    const id = value == null ? '' : String(value)
     if (!id) {
         form.value.customerName = ''
         form.value.customerPhone = ''
@@ -551,6 +584,49 @@ function onVariantSelected(variant: any) {
 function removeCartItem(index: number) {
     cartItems.value.splice(index, 1)
 }
+
+watch(
+  () => [form.value.shippingProvider, form.value.shippingWilayaCode] as const,
+  async ([provider, wilaya], prev) => {
+    const [prevProvider, prevWilaya] = prev || ['', '']
+    if (process.server) return
+
+    if (provider !== 'MAYSTRO') {
+      maystroCommunes.value = []
+      maystroCommuneError.value = null
+      maystroCommuneLoading.value = false
+      return
+    }
+
+    if (wilaya !== prevWilaya || provider !== prevProvider) {
+      form.value.shippingCommuneCode = ''
+    }
+
+    const normalizedWilaya = String(wilaya || '').trim()
+    if (!normalizedWilaya) {
+      maystroCommunes.value = []
+      maystroCommuneError.value = null
+      maystroCommuneLoading.value = false
+      return
+    }
+
+    maystroCommuneLoading.value = true
+    maystroCommuneError.value = null
+    try {
+      const data = await $fetch('/api/delivery/maystro/communes', {
+        query: { wilaya: normalizedWilaya },
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      }) as any
+      maystroCommunes.value = Array.isArray(data) ? data.map((c: any) => ({ id: Number(c.id), name: String(c.name) })) : []
+    } catch (e: any) {
+      maystroCommunes.value = []
+      maystroCommuneError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load communes'
+    } finally {
+      maystroCommuneLoading.value = false
+    }
+  },
+  { immediate: true }
+)
 
 async function submitOrder() {
     if (!canSubmit.value) return
