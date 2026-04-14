@@ -118,10 +118,6 @@ const props = defineProps<{
 
             <!-- Navigation & Actions -->
             <div class="flex items-center gap-6">
-              <!-- Hamburger (Mobile) -->
-              <button class="lg:hidden p-1" style="color: #E8E0D5;" @click="mobileMenuOpen = true">
-                <Icon name="lucide:menu" class="w-6 h-6" />
-              </button>
               <!-- Desktop Menu -->
               <nav class="hidden lg:flex items-center gap-8">
                 <NuxtLink to="/" class="text-xs font-medium tracking-[0.2em] uppercase transition-colors duration-200" active-class="!text-[#D4C5A9]">{{ storefrontContent.nav.home }}</NuxtLink>
@@ -169,16 +165,6 @@ const props = defineProps<{
                     >{{ favorites.count.value }}</span>
                   </ClientOnly>
                 </button>
-                <button
-                  class="h-10 w-10 flex items-center justify-center transition-colors"
-                  style="color: #6B7280;"
-                  :title="storefrontContent.header.accountTitle"
-                  @mouseover="($event.target as HTMLElement).closest('button')!.style.color = '#D4C5A9'"
-                  @mouseleave="($event.target as HTMLElement).closest('button')!.style.color = '#6B7280'"
-                >
-                  <Icon name="lucide:user" class="w-5 h-5" />
-                </button>
-
                 <!-- Cart -->
                 <NuxtLink
                   v-if="storeSettings?.cartEnabled !== false"
@@ -191,6 +177,11 @@ const props = defineProps<{
                   <Icon name="lucide:shopping-bag" class="w-4 h-4" />
                   <span v-if="cartStore.itemCount > 0" class="ml-1.5 text-xs font-bold">{{ cartStore.itemCount }}</span>
                 </NuxtLink>
+                <!-- Hamburger (Mobile) -->
+              <button class="lg:hidden p-1" style="color: #E8E0D5;" @click="mobileMenuOpen = true">
+                <Icon name="lucide:menu" class="w-6 h-6" />
+              </button>
+
               </div>
             </div>
           </div>

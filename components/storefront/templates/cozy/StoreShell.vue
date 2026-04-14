@@ -106,10 +106,6 @@ const currentYear = new Date().getFullYear()
 
           <!-- Actions -->
           <div class="flex items-center gap-3">
-               <!-- Hamburger (Mobile) -->
-               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
-                 <Icon name="lucide:menu" class="w-6 h-6" />
-               </button>
             <!-- Icons -->
             <LocaleSwitcher class="hidden lg:inline-flex" />
             <button
@@ -125,13 +121,6 @@ const currentYear = new Date().getFullYear()
                 >{{ favorites.count.value }}</span>
               </ClientOnly>
             </button>
-            <button
-              class="h-10 w-10 flex items-center justify-center text-slate-400 hover:text-brand-500 hover:bg-slate-50 rounded-full transition-colors"
-              :title="storefrontContent.header.accountTitle"
-            >
-              <Icon name="lucide:user" class="w-5 h-5" />
-            </button>
-
             <!-- Cart -->
             <NuxtLink
               v-if="storeSettings?.cartEnabled !== false"
@@ -144,6 +133,11 @@ const currentYear = new Date().getFullYear()
                 class="ml-1 text-xs font-bold"
               >{{ cartStore.itemCount }}</span>
             </NuxtLink>
+                <!-- Hamburger (Mobile) -->
+               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
+                 <Icon name="lucide:menu" class="w-6 h-6" />
+               </button>
+
           </div>
         </div>
       </header>

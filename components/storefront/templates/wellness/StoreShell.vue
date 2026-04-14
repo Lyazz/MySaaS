@@ -153,12 +153,8 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
             <!-- Right: Actions & Search -->
             <div class="flex items-center justify-end gap-4 flex-shrink-0">
-               <!-- Hamburger (Mobile) -->
-               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
-                 <Icon name="lucide:menu" class="w-6 h-6" />
-               </button>
                <!-- Search Box with Live Feed -->
-               <div class="relative group flex items-center">
+               <div class="relative group hidden lg:flex items-center">
                   <input
                     type="text"
                     v-model="searchQuery"
@@ -214,13 +210,6 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                       >{{ favorites.count.value }}</span>
                     </ClientOnly>
                   </button>
-                  <button
-                    class="p-3 text-stone-500 hover:text-brand-700 hover:bg-white rounded-full transition-all"
-                    :title="storefrontContent.header.accountTitle"
-                  >
-                    <Icon name="lucide:user" class="w-5 h-5" />
-                  </button>
-
                   <!-- Cart (Organic Pill) -->
                   <NuxtLink
                     v-if="storeSettings?.cartEnabled !== false"

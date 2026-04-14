@@ -126,11 +126,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             </NuxtLink>
 
             <!-- Search Bar (Centered & Rounded) -->
-                           <!-- Hamburger (Mobile) -->
-               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
-                 <Icon name="lucide:menu" class="w-6 h-6" />
-               </button>
-               <div class="flex-1 max-w-lg">
+               <div class="flex-1 max-w-lg hidden lg:block">
               <div class="relative group">
                 <input 
                   type="text" 
@@ -223,13 +219,6 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     >{{ favorites.count.value }}</span>
                   </ClientOnly>
                 </button>
-                <button
-                  class="h-12 w-12 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-full transition-all hover:scale-110 active:scale-95"
-                  :title="storefrontContent.header.accountTitle"
-                >
-                  <Icon name="lucide:user" class="w-6 h-6" />
-                </button>
-
                 <!-- Cart -->
                 <NuxtLink
                   v-if="storeSettings?.cartEnabled !== false"
@@ -242,6 +231,11 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     class="ml-2 bg-white text-brand-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
                   >{{ cartStore.itemCount }}</span>
                 </NuxtLink>
+                <!-- Hamburger (Mobile) -->
+               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
+                 <Icon name="lucide:menu" class="w-6 h-6" />
+               </button>
+
               </div>
             </div>
           </div>

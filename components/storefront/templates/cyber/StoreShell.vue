@@ -118,11 +118,7 @@ const props = defineProps<{
             </NuxtLink>
 
             <!-- Search Bar (Centered & Rounded) -->
-                           <!-- Hamburger (Mobile) -->
-               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
-                 <Icon name="lucide:menu" class="w-6 h-6" />
-               </button>
-               <div class="flex-1 max-w-lg">
+               <div class="flex-1 max-w-lg hidden lg:block">
               <div class="relative group">
                 <input 
                   type="text" 
@@ -208,13 +204,6 @@ const props = defineProps<{
                     >{{ favorites.count.value }}</span>
                   </ClientOnly>
                 </button>
-                <button
-                  class="h-10 w-10 flex items-center justify-center text-purple-300 hover:text-pink-400 hover:bg-purple-900/50 rounded-full transition-colors"
-                  :title="storefrontContent.header.accountTitle"
-                >
-                  <Icon name="lucide:user" class="w-5 h-5" />
-                </button>
-
                 <!-- Cart -->
                 <NuxtLink
                   v-if="storeSettings?.cartEnabled !== false"
@@ -227,6 +216,11 @@ const props = defineProps<{
                     class="ml-1 text-xs font-bold"
                   >{{ cartStore.itemCount }}</span>
                 </NuxtLink>
+                <!-- Hamburger (Mobile) -->
+               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
+                 <Icon name="lucide:menu" class="w-6 h-6" />
+               </button>
+
               </div>
             </div>
           </div>
