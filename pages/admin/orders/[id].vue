@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-5xl mx-auto">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6">
     <AdminConfirmModal
       v-model="deleteOpen"
       :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
@@ -103,22 +103,25 @@
 
     <!-- Breadcrumb -->
     <nav
-      class="flex mb-6"
+      class="mb-5 flex"
       aria-label="Breadcrumb"
     >
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/orders"
-            class="text-gray-700 hover:text-teal-600"
+            class="text-sm font-medium text-slate-700 hover:text-teal-700"
           >
             {{ t('admin.nav.orders') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">{{ t('admin.pages.orders.detail.breadcrumb', { id: orderId.substring(0, 8) }) }}</span>
+            <Icon
+              name="lucide:chevron-right"
+              class="w-5 h-5 text-slate-400"
+            />
+            <span class="ml-1 text-sm text-slate-500">{{ t('admin.pages.orders.detail.breadcrumb', { id: orderId.substring(0, 8) }) }}</span>
           </div>
         </li>
       </ol>
@@ -127,589 +130,849 @@
     <!-- Loading State -->
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
-        {{ t('admin.pages.orders.detail.loading') }}
-      </p>
+      <div class="p-6">
+        <div class="animate-pulse space-y-6">
+          <div class="flex items-start justify-between gap-6">
+            <div class="space-y-3 flex-1">
+              <div class="h-6 w-52 rounded bg-slate-200" />
+              <div class="h-4 w-80 max-w-full rounded bg-slate-100" />
+            </div>
+            <div class="hidden sm:flex gap-2">
+              <div class="h-9 w-24 rounded-lg bg-slate-100" />
+              <div class="h-9 w-24 rounded-lg bg-slate-100" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="h-16 rounded-xl bg-slate-100" />
+            <div class="h-16 rounded-xl bg-slate-100" />
+            <div class="h-16 rounded-xl bg-slate-100" />
+            <div class="h-16 rounded-xl bg-slate-100" />
+          </div>
+          <div class="h-48 rounded-xl bg-slate-100" />
+        </div>
+        <p class="mt-6 text-center text-sm text-slate-500">
+          {{ t('admin.pages.orders.detail.loading') }}
+        </p>
+      </div>
     </div>
 
     <!-- Order Detail -->
     <div
       v-else-if="order"
-      class="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      class="space-y-6"
     >
-      <!-- LEFT COLUMN -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Order Info Card -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">
-              {{ t('admin.pages.orders.detail.sections.orderInfo') }}
-            </h2>
-            <div class="flex items-center gap-3">
+      <!-- Header -->
+      <div class="ui-card">
+        <div class="p-4 sm:p-6">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-3">
+                <h1 class="min-w-0 truncate text-xl font-semibold text-slate-900">
+                  {{ t('admin.pages.orders.detail.breadcrumb', { id: order.id.substring(0, 8) }) }}
+                </h1>
+                <AdminOrderStatusBadge :status="order.status" />
+              </div>
+
+              <div class="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600">
+                <div class="flex items-center gap-2">
+                  <Icon
+                    name="lucide:calendar"
+                    class="h-4 w-4 text-slate-400"
+                  />
+                  <span>{{ formatDate(order.createdAt) }}</span>
+                </div>
+                <div class="flex items-center gap-2 min-w-0">
+                  <Icon
+                    name="lucide:user"
+                    class="h-4 w-4 text-slate-400"
+                  />
+                  <span class="truncate font-medium text-slate-900">{{ order.customerName }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <Icon
+                    name="lucide:phone"
+                    class="h-4 w-4 text-slate-400"
+                  />
+                  <a
+                    :href="`tel:${order.customerPhone}`"
+                    class="font-medium text-teal-700 hover:text-teal-900"
+                    dir="ltr"
+                  >
+                    {{ order.customerPhone }}
+                  </a>
+                  <button
+                    type="button"
+                    class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors"
+                    :aria-label="t('common.copy', 'Copy')"
+                    @click="copyToClipboard(order.customerPhone)"
+                  >
+                    <Icon
+                      name="lucide:copy"
+                      class="h-4 w-4"
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                <span class="font-mono">{{ order.id }}</span>
+                <button
+                  type="button"
+                  class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors"
+                  :aria-label="t('common.copy', 'Copy')"
+                  @click="copyToClipboard(order.id)"
+                >
+                  <Icon
+                    name="lucide:copy"
+                    class="h-4 w-4"
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 justify-end">
               <button
                 v-if="order.status === 'PENDING'"
                 type="button"
-                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100"
+                class="ui-btn ui-btn--secondary ui-btn--sm"
                 @click="editing ? cancelEdit() : startEdit()"
               >
-                <Icon :name="editing ? 'lucide:x' : 'lucide:pencil'" class="w-4 h-4 mr-2" />
+                <Icon
+                  :name="editing ? 'lucide:x' : 'lucide:pencil'"
+                  class="w-4 h-4"
+                />
                 {{ editing ? t('common.cancel', 'Cancel') : t('common.edit', 'Edit') }}
               </button>
               <button
                 v-if="order.status === 'PENDING'"
                 type="button"
-                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="ui-btn ui-btn--danger ui-btn--sm"
                 :disabled="editing"
                 @click="openDelete"
               >
-                <Icon name="lucide:trash-2" class="w-4 h-4 mr-2" />
+                <Icon
+                  name="lucide:trash-2"
+                  class="w-4 h-4"
+                />
                 {{ t('common.delete', 'Delete') }}
               </button>
               <NuxtLink
                 v-if="order.status === 'DELIVERED'"
                 :to="`/admin/sales/${order.id}`"
-                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-teal-50 text-teal-700 hover:bg-teal-100"
+                class="ui-btn ui-btn--secondary ui-btn--sm"
               >
-                <Icon name="lucide:badge-dollar-sign" class="w-4 h-4 mr-2" />
+                <Icon
+                  name="lucide:badge-dollar-sign"
+                  class="w-4 h-4"
+                />
                 {{ t('admin.pages.orders.detail.viewSale') }}
               </NuxtLink>
               <button
                 v-if="canPrintBordereau"
                 type="button"
-                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100"
+                class="ui-btn ui-btn--secondary ui-btn--sm"
                 @click="printBordereau"
               >
-                <Icon name="lucide:printer" class="w-4 h-4 mr-2" />
+                <Icon
+                  name="lucide:printer"
+                  class="w-4 h-4"
+                />
                 {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
               </button>
-              <AdminOrderStatusBadge :status="order.status" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <p class="text-sm font-medium text-gray-500">
-                {{ t('admin.pages.orders.detail.fields.orderId') }}
-              </p>
-              <div class="mt-1 flex items-center">
-                <p class="text-sm text-gray-900 mr-2">{{ order.id }}</p>
-                <button @click="copyToClipboard(order.id)" class="text-gray-400 hover:text-teal-600 transition-colors" title="Copy ID">
-                  <Icon name="lucide:copy" class="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-gray-500">
-                {{ t('admin.pages.orders.detail.fields.orderDate') }}
-              </p>
-              <p class="mt-1 text-sm text-gray-900">
-                {{ formatDate(order.createdAt) }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Order Items -->
-        <div class="ui-card p-6">
-          <div class="flex items-center justify-between gap-3 mb-4">
-            <h2 class="text-lg font-semibold text-slate-900">
-              {{ t('admin.pages.orders.detail.sections.orderItems') }}
-            </h2>
-            <div v-if="editing" class="flex items-center gap-2">
-              <button
-                type="button"
-                class="px-3 py-1.5 rounded-md text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100"
-                :disabled="editSaving"
-                @click="cancelEdit"
-              >
-                {{ t('common.cancel', 'Cancel') }}
-              </button>
-              <button
-                type="button"
-                class="px-3 py-1.5 rounded-md text-sm font-semibold bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
-                :disabled="editSaving || cartItems.length === 0"
-                @click="saveEdit"
-              >
-                <span v-if="editSaving" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                {{ t('common.save', 'Save') }}
-              </button>
             </div>
           </div>
 
-          <div v-if="editing" class="space-y-4">
-            <div class="relative">
-              <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input
-                v-model="productSearch"
-                type="text"
-                :placeholder="t('admin.pages.pos.catalog.searchPlaceholder', 'Search products…')"
-                class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm"
-              >
-
-              <div
-                v-if="productSearch.trim().length > 0"
-                class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-xl rounded-lg z-50 max-h-64 overflow-y-auto"
-              >
-                <div
-                  v-for="product in searchedProducts"
-                  :key="product.id"
-                  class="p-2 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-center gap-3"
-                  @click="addProductToCart(product)"
-                >
-                  <div class="flex-1 min-w-0">
-                    <div class="font-medium text-sm text-slate-800 truncate">{{ product.title }}</div>
-                    <div class="text-xs text-slate-500">{{ formatCurrency(product.price) }}</div>
-                  </div>
-                  <Icon name="lucide:plus" class="w-4 h-4 text-slate-400" />
-                </div>
-                <div v-if="searchedProducts.length === 0" class="p-4 text-center text-sm text-slate-500">
-                  {{ t('admin.pages.pos.catalog.noProducts', 'No products found') }}
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-if="editErrorMessage"
-              class="p-3 bg-red-50 border border-red-200 rounded-md"
-            >
-              <p class="text-sm text-red-800">
-                {{ editErrorMessage }}
-              </p>
-            </div>
-
-            <div class="space-y-3">
-              <div
-                v-if="cartItems.length === 0"
-                class="text-center text-sm text-slate-500 py-10"
-              >
-                {{ t('admin.pages.orders.create.emptyCart', 'No items yet') }}
-              </div>
-
-              <div
-                v-for="(item, index) in cartItems"
-                :key="`${item.productId}:${item.variantId || 'default'}:${index}`"
-                class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col gap-2"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex-1 min-w-0">
-                    <div class="font-medium text-slate-800 line-clamp-2 leading-tight">
-                      {{ item.title }}
-                    </div>
-                    <div v-if="item.variantLabel" class="text-xs text-slate-500 mt-0.5">
-                      {{ item.variantLabel }}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    class="text-slate-400 hover:text-red-500 p-1 -m-1 transition-colors"
-                    @click="removeCartItem(index)"
-                    :title="t('common.delete', 'Delete')"
-                  >
-                    <Icon name="lucide:x" class="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div class="flex items-center justify-between pt-2 border-t border-slate-50">
-                  <div class="font-semibold text-slate-700">
-                    {{ formatCurrency(item.price * item.quantity) }}
-                  </div>
-
-                  <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5 shadow-sm">
-                    <button
-                      type="button"
-                      class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm disabled:opacity-50 transition-all"
-                      @click="item.quantity--"
-                      :disabled="item.quantity <= 1"
-                    >
-                      <Icon name="lucide:minus" class="w-3 h-3" />
-                    </button>
-                    <input
-                      v-model.number="item.quantity"
-                      type="number"
-                      min="1"
-                      class="w-12 text-center text-sm font-semibold text-slate-700 bg-transparent focus:outline-none"
-                    >
-                    <button
-                      type="button"
-                      class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm transition-all"
-                      @click="item.quantity++"
-                    >
-                      <Icon name="lucide:plus" class="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-              <div class="text-sm text-slate-500">
+          <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div class="text-xs text-slate-500">
                 {{ t('admin.common.total', 'Total') }}
               </div>
-              <div class="text-lg font-bold text-teal-700">
-                {{ formatCurrency(cartTotal) }}
+              <div class="mt-1 text-base font-semibold text-slate-900">
+                {{ formatCurrency(order.totalAmount) }}
               </div>
             </div>
-          </div>
-
-          <div v-else class="overflow-x-auto">
-            <table class="ui-table">
-              <thead class="ui-thead">
-                <tr>
-                  <th class="ui-th">
-                    {{ t('admin.pages.orders.detail.itemsTable.product') }}
-                  </th>
-                  <th class="ui-th">
-                    {{ t('admin.pages.orders.detail.itemsTable.price') }}
-                  </th>
-                  <th class="ui-th">
-                    {{ t('admin.pages.orders.detail.itemsTable.quantity') }}
-                  </th>
-                  <th class="ui-th text-right">
-                    {{ t('admin.pages.orders.detail.itemsTable.subtotal') }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="ui-tbody">
-                <tr
-                  v-for="item in order.items"
-                  :key="item.id"
-                  class="ui-tr"
-                >
-                  <td class="ui-td text-sm text-slate-900">
-                    <div class="font-medium">
-                      {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product') }}
-                    </div>
-                    <div v-if="variantLabelFromOrderItem(item)" class="text-xs text-slate-500 mt-0.5">
-                      {{ variantLabelFromOrderItem(item) }}
-                    </div>
-                  </td>
-                  <td class="ui-td text-sm text-slate-900">
-                    {{ formatCurrency(item.price) }}
-                  </td>
-                  <td class="ui-td text-sm text-slate-900">
-                    {{ item.quantity }}
-                  </td>
-                  <td class="ui-td text-sm text-slate-900 text-right">
-                    {{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td
-                    colspan="3"
-                    class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
-                  >
-                    {{ t('admin.pages.orders.detail.itemsTable.total') }}
-                  </td>
-                  <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
-                    {{ formatCurrency(order.totalAmount) }}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <!-- Internal Notes (New) -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">
-            {{ t('admin.pages.orders.detail.sections.internalNotes', 'Internal Notes') }}
-          </h2>
-          <div class="space-y-3">
-            <textarea
-              v-model="order.internalNotes"
-              rows="4"
-              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-              :disabled="editing"
-              :placeholder="t('admin.pages.orders.detail.fields.internalNotesPlaceholder', 'Add private remarks about this order...')"
-              @blur="handleUpdateInternalNotes"
-            ></textarea>
-            <div class="flex justify-end h-5 items-center">
-              <span v-if="savingNotes" class="text-xs text-gray-500 flex items-center">
-                <div class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
-                {{ t('admin.common.saving', 'Saving...') }}
-              </span>
-              <span v-else-if="notesSavedMessage" class="text-xs text-green-600 flex items-center">
-                <Icon name="lucide:check" class="w-3 h-3 mr-1" />
-                {{ notesSavedMessage }}
-              </span>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div class="text-xs text-slate-500">
+                {{ t('admin.pages.orders.detail.fields.shippingFee', 'Shipping') }}
+              </div>
+              <div class="mt-1 text-base font-semibold text-slate-900">
+                {{ order.shippingAmount != null ? formatCurrency(Number(order.shippingAmount)) : '—' }}
+              </div>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div class="text-xs text-slate-500">
+                {{ t('admin.pages.orders.detail.fields.totalWithDelivery', 'Total (with delivery)') }}
+              </div>
+              <div class="mt-1 text-base font-semibold text-slate-900">
+                {{ formatCurrency(orderTotalWithShipping) }}
+              </div>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div class="text-xs text-slate-500">
+                {{ t('admin.pages.orders.detail.sections.orderItems') }}
+              </div>
+              <div class="mt-1 text-base font-semibold text-slate-900">
+                {{ order.items?.length ?? 0 }}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN -->
-      <div class="space-y-6">
-        <!-- Status Update -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">
-            {{ t('admin.pages.orders.detail.statusUpdate.title') }}
-          </h2>
-          <div
-            v-if="statusLocked"
-            class="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
-          >
-            {{ t('admin.pages.orders.detail.statusUpdate.lockedByCarrier', 'Status is controlled by the delivery carrier. You cannot change it manually.') }}
-          </div>
-          <form
-            class="space-y-4"
-            @submit.prevent="handleStatusUpdate"
-          >
-            <div>
-              <label
-                for="status"
-                class="block text-sm font-medium text-gray-700 mb-1"
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- LEFT COLUMN -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Order Items -->
+          <div class="ui-card">
+            <div class="ui-card-header flex items-center justify-between gap-3">
+              <h2 class="text-base font-semibold text-slate-900">
+                {{ t('admin.pages.orders.detail.sections.orderItems') }}
+              </h2>
+              <div
+                v-if="editing"
+                class="flex items-center gap-2"
               >
-                {{ t('admin.pages.orders.detail.statusUpdate.statusLabel') }}
-              </label>
-              <BaseSelect
-                id="status"
-                v-model="newStatus"
-                :disabled="editing || statusLocked || order.status === 'DELIVERED'"
-              >
-                <option
-                  v-for="s in selectableStatuses"
-                  :key="s"
-                  :value="s"
+                <button
+                  type="button"
+                  class="ui-btn ui-btn--secondary ui-btn--sm"
+                  :disabled="editSaving"
+                  @click="cancelEdit"
                 >
-                  {{ orderStatusLabel(s) }}
-                </option>
-              </BaseSelect>
-            </div>
-
-            <div
-              v-if="errorMessage"
-              class="p-3 bg-red-50 border border-red-200 rounded-md"
-            >
-              <p class="text-sm text-red-800">
-                {{ errorMessage }}
-              </p>
-            </div>
-
-            <div
-              v-if="successMessage"
-              class="p-3 bg-green-50 border border-green-200 rounded-md"
-            >
-              <p class="text-sm text-green-800">
-                {{ successMessage }}
-              </p>
-            </div>
-
-            <div class="flex justify-end space-x-3 pt-2">
-              <button
-                type="submit"
-                :disabled="editing || statusLocked || updating || newStatus === order.status || order.status === 'DELIVERED'"
-                class="w-full px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center"
-              >
-                {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Delivery Info -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">
-            {{ t('admin.pages.orders.detail.sections.deliveryInfo', 'Delivery') }}
-          </h2>
-          <div class="space-y-2 text-sm">
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.deliveryCompany', 'Company') }}</span>
-              <span class="text-gray-900 font-medium">{{ order.shippingProvider || order.shipments?.[0]?.provider || '—' }}</span>
-            </div>
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.deliveryMode', 'Type') }}</span>
-              <span class="text-gray-900 font-medium">{{ deliveryModeLabel(order.deliveryMode) }}</span>
-            </div>
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.shippingFee', 'Shipping') }}</span>
-              <span class="text-gray-900 font-medium">
-                {{ order.shippingAmount != null ? formatCurrency(Number(order.shippingAmount)) : '—' }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.totalWithDelivery', 'Total (with delivery)') }}</span>
-              <span class="text-gray-900 font-semibold">{{ formatCurrency(orderTotalWithShipping) }}</span>
-            </div>
-            <div v-if="order.shippingPickupPoint" class="flex items-center justify-between gap-3">
-              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.pickupPoint', 'Stop desk') }}</span>
-              <span class="text-gray-900 font-medium">{{ order.shippingPickupPoint }}</span>
-            </div>
-            <div v-if="order.shippingWilayaCode || order.shippingCommuneCode" class="flex items-center justify-between gap-3">
-              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.wilayaCommune', 'Wilaya/Commune') }}</span>
-              <span class="text-gray-900 font-medium">{{ [order.shippingWilayaCode, order.shippingCommuneCode].filter(Boolean).join(' / ') }}</span>
-            </div>
-          </div>
-          <div class="mt-4 space-y-2">
-            <button
-              v-if="canPrintBordereau"
-              type="button"
-              class="ui-btn ui-btn--secondary ui-btn--md w-full flex items-center justify-center gap-2"
-              @click="printBordereau"
-            >
-              <Icon name="lucide:printer" class="w-4 h-4" />
-              {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
-            </button>
-            <button
-              v-if="canRetryMaystro"
-              type="button"
-              :disabled="updating"
-              class="ui-btn ui-btn--secondary ui-btn--md w-full flex items-center justify-center gap-2 border-orange-300 text-orange-700 hover:bg-orange-50 disabled:opacity-50"
-              @click="retryMaystro"
-            >
-              <Icon name="lucide:send" class="w-4 h-4" />
-              Push to Maystro
-            </button>
-          </div>
-        </div>
-
-        <!-- Customer Info Card -->
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">
-            {{ t('admin.pages.orders.detail.sections.customerInfo') }}
-          </h2>
-          <div v-if="editing" class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                {{ t('admin.pages.orders.detail.fields.customerName', 'Customer Name') }}
-              </label>
-              <BaseInput v-model="editCustomerName" type="text" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                {{ t('admin.pages.orders.detail.fields.customerPhone', 'Customer Phone') }}
-              </label>
-              <BaseInput v-model="editCustomerPhone" type="tel" dir="ltr" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                {{ t('admin.pages.orders.detail.fields.deliveryAddress', 'Address') }}
-              </label>
-              <BaseInput v-model="editCustomerAddress" type="text" />
-            </div>
-            <p class="text-xs text-slate-500">
-              {{ t('admin.pages.orders.detail.editHint', 'Save from the items section to apply changes.') }}
-            </p>
-          </div>
-
-          <div v-else class="space-y-3">
-            <div>
-              <p class="text-sm font-medium text-gray-500">
-                {{ t('admin.pages.orders.detail.fields.customerName') }}
-              </p>
-              <p class="mt-1 text-sm text-gray-900">
-                {{ order.customerName }}
-              </p>
-            </div>
-            <div>
-              <p class="text-sm font-medium text-gray-500">
-                {{ t('admin.pages.orders.detail.fields.customerPhone') }}
-              </p>
-              <div class="mt-1 flex items-center">
-                <a
-                  :href="`tel:${order.customerPhone}`"
-                  class="text-teal-600 hover:text-teal-800 text-sm mr-2"
+                  {{ t('common.cancel', 'Cancel') }}
+                </button>
+                <button
+                  type="button"
+                  class="ui-btn ui-btn--primary ui-btn--sm"
+                  :disabled="editSaving || cartItems.length === 0"
+                  @click="saveEdit"
                 >
-                  {{ order.customerPhone }}
-                </a>
-                <button @click="copyToClipboard(order.customerPhone)" class="text-gray-400 hover:text-teal-600 transition-colors" title="Copy Phone">
-                  <Icon name="lucide:copy" class="w-4 h-4" />
+                  <span
+                    v-if="editSaving"
+                    class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+                  />
+                  {{ t('common.save', 'Save') }}
                 </button>
               </div>
             </div>
-            <div>
-              <p class="text-sm font-medium text-gray-500">
-                {{ t('admin.pages.orders.detail.fields.deliveryAddress') }}
-              </p>
-              <div class="mt-1 flex items-start">
-                <p class="text-sm text-gray-900 mr-2 flex-1">
-                  {{ order.customerAddress || 'N/A' }}
+
+            <div
+              v-if="editing"
+              class="ui-card-body space-y-4"
+            >
+              <div class="relative">
+                <Icon
+                  name="lucide:search"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
+                />
+                <input
+                  v-model="productSearch"
+                  type="text"
+                  :placeholder="t('admin.pages.pos.catalog.searchPlaceholder', 'Search products…')"
+                  class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm"
+                >
+
+                <div
+                  v-if="productSearch.trim().length > 0"
+                  class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-xl rounded-lg z-50 max-h-64 overflow-y-auto"
+                >
+                  <div
+                    v-for="product in searchedProducts"
+                    :key="product.id"
+                    class="p-2 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-center gap-3"
+                    @click="addProductToCart(product)"
+                  >
+                    <div class="flex-1 min-w-0">
+                      <div class="font-medium text-sm text-slate-800 truncate">
+                        {{ product.title }}
+                      </div>
+                      <div class="text-xs text-slate-500">
+                        {{ formatCurrency(product.price) }}
+                      </div>
+                    </div>
+                    <Icon
+                      name="lucide:plus"
+                      class="w-4 h-4 text-slate-400"
+                    />
+                  </div>
+                  <div
+                    v-if="searchedProducts.length === 0"
+                    class="p-4 text-center text-sm text-slate-500"
+                  >
+                    {{ t('admin.pages.pos.catalog.noProducts', 'No products found') }}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                v-if="editErrorMessage"
+                class="p-3 bg-red-50 border border-red-200 rounded-md"
+              >
+                <p class="text-sm text-red-800">
+                  {{ editErrorMessage }}
                 </p>
-                <button v-if="order.customerAddress" @click="copyToClipboard(order.customerAddress)" class="text-gray-400 hover:text-teal-600 transition-colors mt-0.5" title="Copy Address">
-                  <Icon name="lucide:copy" class="w-4 h-4" />
+              </div>
+
+              <div class="space-y-3">
+                <div
+                  v-if="cartItems.length === 0"
+                  class="text-center text-sm text-slate-500 py-10"
+                >
+                  {{ t('admin.pages.orders.create.emptyCart', 'No items yet') }}
+                </div>
+
+                <div
+                  v-for="(item, index) in cartItems"
+                  :key="`${item.productId}:${item.variantId || 'default'}:${index}`"
+                  class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col gap-2"
+                >
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                      <div class="font-medium text-slate-800 line-clamp-2 leading-tight">
+                        {{ item.title }}
+                      </div>
+                      <div
+                        v-if="item.variantLabel"
+                        class="text-xs text-slate-500 mt-0.5"
+                      >
+                        {{ item.variantLabel }}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="text-slate-400 hover:text-red-500 p-1 -m-1 transition-colors"
+                      :title="t('common.delete', 'Delete')"
+                      @click="removeCartItem(index)"
+                    >
+                      <Icon
+                        name="lucide:x"
+                        class="w-4 h-4"
+                      />
+                    </button>
+                  </div>
+
+                  <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+                    <div class="font-semibold text-slate-700">
+                      {{ formatCurrency(item.price * item.quantity) }}
+                    </div>
+
+                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                      <button
+                        type="button"
+                        class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm disabled:opacity-50 transition-all"
+                        :disabled="item.quantity <= 1"
+                        @click="item.quantity--"
+                      >
+                        <Icon
+                          name="lucide:minus"
+                          class="w-3 h-3"
+                        />
+                      </button>
+                      <input
+                        v-model.number="item.quantity"
+                        type="number"
+                        min="1"
+                        class="w-12 text-center text-sm font-semibold text-slate-700 bg-transparent focus:outline-none"
+                      >
+                      <button
+                        type="button"
+                        class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm transition-all"
+                        @click="item.quantity++"
+                      >
+                        <Icon
+                          name="lucide:plus"
+                          class="w-3 h-3"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                <div class="text-sm text-slate-500">
+                  {{ t('admin.common.total', 'Total') }}
+                </div>
+                <div class="text-lg font-bold text-teal-700">
+                  {{ formatCurrency(cartTotal) }}
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-else
+              class="ui-card-body overflow-x-auto"
+            >
+              <table class="ui-table">
+                <thead class="ui-thead">
+                  <tr>
+                    <th class="ui-th">
+                      {{ t('admin.pages.orders.detail.itemsTable.product') }}
+                    </th>
+                    <th class="ui-th">
+                      {{ t('admin.pages.orders.detail.itemsTable.price') }}
+                    </th>
+                    <th class="ui-th">
+                      {{ t('admin.pages.orders.detail.itemsTable.quantity') }}
+                    </th>
+                    <th class="ui-th text-right">
+                      {{ t('admin.pages.orders.detail.itemsTable.subtotal') }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="ui-tbody">
+                  <tr
+                    v-for="item in order.items"
+                    :key="item.id"
+                    class="ui-tr"
+                  >
+                    <td class="ui-td text-sm text-slate-900">
+                      <div class="font-medium">
+                        {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product') }}
+                      </div>
+                      <div
+                        v-if="variantLabelFromOrderItem(item)"
+                        class="text-xs text-slate-500 mt-0.5"
+                      >
+                        {{ variantLabelFromOrderItem(item) }}
+                      </div>
+                    </td>
+                    <td class="ui-td text-sm text-slate-900">
+                      {{ formatCurrency(item.price) }}
+                    </td>
+                    <td class="ui-td text-sm text-slate-900">
+                      {{ item.quantity }}
+                    </td>
+                    <td class="ui-td text-sm text-slate-900 text-right">
+                      {{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td
+                      colspan="3"
+                      class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
+                    >
+                      {{ t('admin.pages.orders.detail.itemsTable.total') }}
+                    </td>
+                    <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
+                      {{ formatCurrency(order.totalAmount) }}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Internal Notes (New) -->
+          <div class="ui-card">
+            <div class="ui-card-header flex items-center justify-between gap-3">
+              <h2 class="text-base font-semibold text-slate-900">
+                {{ t('admin.pages.orders.detail.sections.internalNotes', 'Internal Notes') }}
+              </h2>
+              <div class="flex justify-end h-5 items-center">
+                <span
+                  v-if="savingNotes"
+                  class="text-xs text-slate-500 flex items-center"
+                >
+                  <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
+                  {{ t('admin.common.saving', 'Saving...') }}
+                </span>
+                <span
+                  v-else-if="notesSavedMessage"
+                  class="text-xs text-emerald-700 flex items-center"
+                >
+                  <Icon
+                    name="lucide:check"
+                    class="w-3 h-3 mr-1"
+                  />
+                  {{ notesSavedMessage }}
+                </span>
+              </div>
+            </div>
+            <div class="ui-card-body space-y-3">
+              <textarea
+                v-model="order.internalNotes"
+                rows="4"
+                class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 shadow-sm focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-60"
+                :disabled="editing"
+                :placeholder="t('admin.pages.orders.detail.fields.internalNotesPlaceholder', 'Add private remarks about this order...')"
+                @blur="handleUpdateInternalNotes"
+              />
+              <p class="text-xs text-slate-500">
+                {{ t('admin.pages.orders.detail.internalNotesHelp', 'Notes are only visible to your team.') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="space-y-6">
+          <!-- Status Update -->
+          <div class="ui-card">
+            <div class="ui-card-header">
+              <h2 class="text-base font-semibold text-slate-900">
+                {{ t('admin.pages.orders.detail.statusUpdate.title') }}
+              </h2>
+            </div>
+            <div
+              v-if="statusLocked"
+              class="mx-4 mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+            >
+              {{ t('admin.pages.orders.detail.statusUpdate.lockedByCarrier', 'Status is controlled by the delivery carrier. You cannot change it manually.') }}
+            </div>
+            <form
+              class="ui-card-body space-y-4"
+              @submit.prevent="handleStatusUpdate"
+            >
+              <div>
+                <label
+                  for="status"
+                  class="block text-sm font-medium text-slate-700 mb-1"
+                >
+                  {{ t('admin.pages.orders.detail.statusUpdate.statusLabel') }}
+                </label>
+                <BaseSelect
+                  id="status"
+                  v-model="newStatus"
+                  :disabled="editing || statusLocked || order.status === 'DELIVERED'"
+                >
+                  <option
+                    v-for="s in selectableStatuses"
+                    :key="s"
+                    :value="s"
+                  >
+                    {{ orderStatusLabel(s) }}
+                  </option>
+                </BaseSelect>
+              </div>
+
+              <div
+                v-if="errorMessage"
+                class="p-3 bg-red-50 border border-red-200 rounded-xl"
+              >
+                <p class="text-sm text-red-800">
+                  {{ errorMessage }}
+                </p>
+              </div>
+
+              <div
+                v-if="successMessage"
+                class="p-3 bg-green-50 border border-green-200 rounded-xl"
+              >
+                <p class="text-sm text-green-800">
+                  {{ successMessage }}
+                </p>
+              </div>
+
+              <div class="flex justify-end space-x-3 pt-2">
+                <button
+                  type="submit"
+                  :disabled="editing || statusLocked || updating || newStatus === order.status || order.status === 'DELIVERED'"
+                  class="ui-btn ui-btn--primary ui-btn--md w-full"
+                >
+                  {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Delivery Info -->
+          <div class="ui-card">
+            <div class="ui-card-header">
+              <h2 class="text-base font-semibold text-slate-900">
+                {{ t('admin.pages.orders.detail.sections.deliveryInfo', 'Delivery') }}
+              </h2>
+            </div>
+            <div class="ui-card-body">
+              <dl class="text-sm divide-y divide-slate-100">
+                <div class="flex items-center justify-between gap-3 py-2">
+                  <dt class="text-slate-500">
+                    {{ t('admin.pages.orders.detail.fields.deliveryCompany', 'Company') }}
+                  </dt>
+                  <dd class="text-slate-900 font-medium">
+                    {{ order.shippingProvider || order.shipments?.[0]?.provider || '—' }}
+                  </dd>
+                </div>
+                <div class="flex items-center justify-between gap-3 py-2">
+                  <dt class="text-slate-500">
+                    {{ t('admin.pages.orders.detail.fields.deliveryMode', 'Type') }}
+                  </dt>
+                  <dd class="text-slate-900 font-medium">
+                    {{ deliveryModeLabel(order.deliveryMode) }}
+                  </dd>
+                </div>
+                <div
+                  v-if="order.shippingPickupPoint"
+                  class="flex items-center justify-between gap-3 py-2"
+                >
+                  <dt class="text-slate-500">
+                    {{ t('admin.pages.orders.detail.fields.pickupPoint', 'Stop desk') }}
+                  </dt>
+                  <dd class="text-slate-900 font-medium">
+                    {{ order.shippingPickupPoint }}
+                  </dd>
+                </div>
+                <div
+                  v-if="order.shippingWilayaCode || order.shippingCommuneCode"
+                  class="flex items-center justify-between gap-3 py-2"
+                >
+                  <dt class="text-slate-500">
+                    {{ t('admin.pages.orders.detail.fields.wilayaCommune', 'Wilaya/Commune') }}
+                  </dt>
+                  <dd class="text-slate-900 font-medium">
+                    {{ [order.shippingWilayaCode, order.shippingCommuneCode].filter(Boolean).join(' / ') }}
+                  </dd>
+                </div>
+              </dl>
+
+              <div
+                v-if="canRetryMaystro"
+                class="mt-4"
+              >
+                <button
+                  type="button"
+                  :disabled="updating"
+                  class="ui-btn ui-btn--secondary ui-btn--md w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                  @click="retryMaystro"
+                >
+                  <Icon
+                    name="lucide:send"
+                    class="w-4 h-4"
+                  />
+                  Push to Maystro
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Contact Trace Toggle -->
-          <div class="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700">{{ t('admin.pages.orders.detail.fields.callStatus', 'Call Status') }}</span>
-            <div class="w-48">
-              <BaseSelect
-                v-model="order.callStatus"
-                :disabled="editing"
-                @change="handleUpdateCallStatus"
-              >
-                <option value="not_called">{{ t('admin.pages.orders.detail.fields.callStatusValues.not_called', 'Not Called') }}</option>
-                <option value="called">{{ t('admin.pages.orders.detail.fields.callStatusValues.called', 'Called') }}</option>
-                <option value="no_answer">{{ t('admin.pages.orders.detail.fields.callStatusValues.no_answer', 'No Answer') }}</option>
-                <option value="attempt_1">{{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_1', '1st Attempt') }}</option>
-                <option value="attempt_2">{{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_2', '2nd Attempt') }}</option>
-                <option value="attempt_3">{{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_3', '3rd Attempt') }}</option>
-                <option value="switched_off">{{ t('admin.pages.orders.detail.fields.callStatusValues.switched_off', 'Switched Off') }}</option>
-              </BaseSelect>
+          <!-- Customer Info Card -->
+          <div class="ui-card">
+            <div class="ui-card-header">
+              <h2 class="text-base font-semibold text-slate-900">
+                {{ t('admin.pages.orders.detail.sections.customerInfo') }}
+              </h2>
             </div>
-            <div class="flex justify-end h-5 ml-2 items-center min-w-[3rem]">
-              <span v-if="savingCallStatus" class="text-xs text-gray-500 flex items-center">
-                <div class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
+            <div
+              v-if="editing"
+              class="ui-card-body space-y-3"
+            >
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  {{ t('admin.pages.orders.detail.fields.customerName', 'Customer Name') }}
+                </label>
+                <BaseInput
+                  v-model="editCustomerName"
+                  type="text"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  {{ t('admin.pages.orders.detail.fields.customerPhone', 'Customer Phone') }}
+                </label>
+                <BaseInput
+                  v-model="editCustomerPhone"
+                  type="tel"
+                  dir="ltr"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                  {{ t('admin.pages.orders.detail.fields.deliveryAddress', 'Address') }}
+                </label>
+                <BaseInput
+                  v-model="editCustomerAddress"
+                  type="text"
+                />
+              </div>
+              <p class="text-xs text-slate-500">
+                {{ t('admin.pages.orders.detail.editHint', 'Save from the items section to apply changes.') }}
+              </p>
+            </div>
+
+            <div
+              v-else
+              class="ui-card-body space-y-3"
+            >
+              <div>
+                <p class="text-sm font-medium text-slate-500">
+                  {{ t('admin.pages.orders.detail.fields.customerName') }}
+                </p>
+                <p class="mt-1 text-sm text-slate-900 font-medium">
+                  {{ order.customerName }}
+                </p>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-slate-500">
+                  {{ t('admin.pages.orders.detail.fields.customerPhone') }}
+                </p>
+                <div class="mt-1 flex items-center">
+                  <a
+                    :href="`tel:${order.customerPhone}`"
+                    class="text-teal-700 hover:text-teal-900 text-sm mr-2 font-medium"
+                    dir="ltr"
+                  >
+                    {{ order.customerPhone }}
+                  </a>
+                  <button
+                    type="button"
+                    class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors"
+                    :aria-label="t('common.copy', 'Copy')"
+                    @click="copyToClipboard(order.customerPhone)"
+                  >
+                    <Icon
+                      name="lucide:copy"
+                      class="w-4 h-4"
+                    />
+                  </button>
+                </div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-slate-500">
+                  {{ t('admin.pages.orders.detail.fields.deliveryAddress') }}
+                </p>
+                <div class="mt-1 flex items-start">
+                  <p class="text-sm text-slate-900 mr-2 flex-1">
+                    {{ order.customerAddress || 'N/A' }}
+                  </p>
+                  <button
+                    v-if="order.customerAddress"
+                    type="button"
+                    class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors mt-0.5"
+                    :aria-label="t('common.copy', 'Copy')"
+                    @click="copyToClipboard(order.customerAddress)"
+                  >
+                    <Icon
+                      name="lucide:copy"
+                      class="w-4 h-4"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Trace Toggle -->
+            <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-700">{{ t('admin.pages.orders.detail.fields.callStatus', 'Call Status') }}</span>
+              <div class="w-48">
+                <BaseSelect
+                  v-model="order.callStatus"
+                  :disabled="editing"
+                  @change="handleUpdateCallStatus"
+                >
+                  <option value="not_called">
+                    {{ t('admin.pages.orders.detail.fields.callStatusValues.not_called', 'Not Called') }}
+                  </option>
+                  <option value="called">
+                    {{ t('admin.pages.orders.detail.fields.callStatusValues.called', 'Called') }}
+                  </option>
+                  <option value="no_answer">
+                    {{ t('admin.pages.orders.detail.fields.callStatusValues.no_answer', 'No Answer') }}
+                  </option>
+                  <option value="attempt_1">
+                    {{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_1', '1st Attempt') }}
+                  </option>
+                  <option value="attempt_2">
+                    {{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_2', '2nd Attempt') }}
+                  </option>
+                  <option value="attempt_3">
+                    {{ t('admin.pages.orders.detail.fields.callStatusValues.attempt_3', '3rd Attempt') }}
+                  </option>
+                  <option value="switched_off">
+                    {{ t('admin.pages.orders.detail.fields.callStatusValues.switched_off', 'Switched Off') }}
+                  </option>
+                </BaseSelect>
+              </div>
+              <div class="flex justify-end h-5 ml-2 items-center min-w-[3rem]">
+                <span
+                  v-if="savingCallStatus"
+                  class="text-xs text-slate-500 flex items-center"
+                >
+                  <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
+                </span>
+                <span
+                  v-else-if="callStatusSavedMessage"
+                  class="text-xs text-emerald-700 flex items-center"
+                >
+                  <Icon
+                    name="lucide:check"
+                    class="w-3 h-3 mr-1"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security & Fraud Placeholders -->
+          <div class="ui-card">
+            <div class="ui-card-header flex items-center gap-2">
+              <Icon
+                name="lucide:shield-alert"
+                class="w-5 h-5 text-red-500"
+              />
+              <h2 class="text-base font-semibold text-slate-900">
+                {{ t('admin.pages.orders.detail.sections.securityAndFraud', 'Security & Fraud') }}
+              </h2>
+              <span class="ui-badge ui-badge--red ml-auto">
+                {{ t('common.comingSoon', 'Coming soon') }}
               </span>
-              <span v-else-if="callStatusSavedMessage" class="text-xs text-green-600 flex items-center">
-                <Icon name="lucide:check" class="w-3 h-3 mr-1" />
-              </span>
+            </div>
+            <div class="ui-card-body space-y-3">
+              <p class="text-xs text-slate-500">
+                {{ t('admin.pages.orders.detail.securityHelp', 'Advanced actions to manage risky behavior.') }}
+              </p>
+              <div class="space-y-2">
+                <button
+                  type="button"
+                  class="ui-btn ui-btn--danger ui-btn--md w-full justify-start"
+                  @click="handleBlacklistPlaceholder('customer')"
+                >
+                  <Icon
+                    name="lucide:user-x"
+                    class="w-4 h-4"
+                  />
+                  {{ t('admin.pages.orders.detail.actions.blacklistCustomer', 'Blacklist Customer') }}
+                </button>
+                <button
+                  type="button"
+                  class="ui-btn ui-btn--danger ui-btn--md w-full justify-start"
+                  @click="handleBlacklistPlaceholder('ip')"
+                >
+                  <Icon
+                    name="lucide:globe-lock"
+                    class="w-4 h-4"
+                  />
+                  {{ t('admin.pages.orders.detail.actions.blacklistIp', 'Blacklist IP Address') }}
+                </button>
+                <button
+                  type="button"
+                  class="ui-btn ui-btn--danger ui-btn--md w-full justify-start"
+                  @click="handleBlacklistPlaceholder('phone')"
+                >
+                  <Icon
+                    name="lucide:phone-off"
+                    class="w-4 h-4"
+                  />
+                  {{ t('admin.pages.orders.detail.actions.blacklistPhone', 'Blacklist Phone Number') }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-        <!-- Security & Fraud Placeholders -->
-        <div class="bg-white rounded-lg shadow p-6 border border-red-50">
-          <div class="flex items-center gap-2 mb-4">
-            <Icon name="lucide:shield-alert" class="w-5 h-5 text-red-500" />
-            <h2 class="text-lg font-semibold text-gray-900">
-              {{ t('admin.pages.orders.detail.sections.securityAndFraud', 'Security & Fraud') }}
-            </h2>
-          </div>
-          <p class="text-xs text-gray-500 mb-3">{{ t('admin.pages.orders.detail.securityHelp', 'Advanced actions to manage risky behavior.') }}</p>
-          <div class="space-y-2">
-            <button
-              type="button"
-              class="w-full text-left px-3 py-2 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-100 transition-colors"
-              @click="handleBlacklistPlaceholder('customer')"
-            >
-              <Icon name="lucide:user-x" class="w-4 h-4 inline mr-2 text-red-500" />
-              {{ t('admin.pages.orders.detail.actions.blacklistCustomer', 'Blacklist Customer') }}
-            </button>
-            <button
-              type="button"
-              class="w-full text-left px-3 py-2 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-100 transition-colors"
-              @click="handleBlacklistPlaceholder('ip')"
-            >
-              <Icon name="lucide:globe-lock" class="w-4 h-4 inline mr-2 text-red-500" />
-              {{ t('admin.pages.orders.detail.actions.blacklistIp', 'Blacklist IP Address') }}
-            </button>
-            <button
-              type="button"
-              class="w-full text-left px-3 py-2 text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-100 transition-colors"
-              @click="handleBlacklistPlaceholder('phone')"
-            >
-              <Icon name="lucide:phone-off" class="w-4 h-4 inline mr-2 text-red-500" />
-              {{ t('admin.pages.orders.detail.actions.blacklistPhone', 'Blacklist Phone Number') }}
-            </button>
-          </div>
-        </div>
-
       </div>
     </div>
 
     <!-- Error State -->
     <div
       v-else
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:alert-circle" class="mx-auto h-12 w-12 text-red-400" />
+      <Icon
+        name="lucide:alert-circle"
+        class="mx-auto h-12 w-12 text-red-400"
+      />
       <h3 class="mt-2 text-sm font-medium text-gray-900">
         {{ t('admin.pages.orders.detail.notFound.title') }}
       </h3>
@@ -719,7 +982,7 @@
       <div class="mt-6">
         <NuxtLink
           to="/admin/orders"
-          class="text-teal-600 hover:text-teal-800"
+          class="text-teal-700 hover:text-teal-900 font-medium"
         >
           {{ t('admin.pages.orders.detail.backToOrders') }}
         </NuxtLink>
@@ -742,7 +1005,7 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
-const storeSettings = useState<any>('storeSettings')
+const { showToast } = useToast()
 const { format: formatCurrency } = useCurrency()
 const route = useRoute()
 const router = useRouter()
@@ -764,37 +1027,37 @@ interface OrderItem {
   } | null
 }
 
-	interface Order {
-	  id: string
-	  customerName: string
-	  customerPhone: string
-	  customerAddress: string | null
-	  totalAmount: number
-	  totalWithShippingAmount?: number | null
-	  shippingAmount?: number | null
-	  shippingCurrency?: string | null
-	  shippingProvider?: string | null
-	  deliveryMode?: string | null
-	  shippingServiceLevel?: string | null
-	  shippingPickupPoint?: number | null
-	  shippingWilayaCode?: string | null
-	  shippingCommuneCode?: string | null
-	  shippingAddressLine1?: string | null
-	  shippingNotes?: string | null
-	  shipments?: Array<{
-	    id: string
-	    provider: string
-	    providerShipmentId?: string | null
-	    status: string
-	    serviceLevel?: string | null
-	    createdAt: string
-	  }>
-	  status: string
-	  callStatus: string
-	  internalNotes: string | null
-	  createdAt: string
-	  items: OrderItem[]
-	}
+  interface Order {
+    id: string
+    customerName: string
+    customerPhone: string
+    customerAddress: string | null
+    totalAmount: number
+    totalWithShippingAmount?: number | null
+    shippingAmount?: number | null
+    shippingCurrency?: string | null
+    shippingProvider?: string | null
+    deliveryMode?: string | null
+    shippingServiceLevel?: string | null
+    shippingPickupPoint?: number | null
+    shippingWilayaCode?: string | null
+    shippingCommuneCode?: string | null
+    shippingAddressLine1?: string | null
+    shippingNotes?: string | null
+    shipments?: Array<{
+      id: string
+      provider: string
+      providerShipmentId?: string | null
+      status: string
+      serviceLevel?: string | null
+      createdAt: string
+    }>
+    status: string
+    callStatus: string
+    internalNotes: string | null
+    createdAt: string
+    items: OrderItem[]
+  }
 
 type CartItem = {
   productId: string
@@ -854,7 +1117,7 @@ function orderStatusLabel(code: string) {
   return key ? t(key) : code
 }
 
-	const selectableStatuses = computed(() => {
+  const selectableStatuses = computed(() => {
   const current = order.value?.status
   if (!current) return []
 
@@ -866,30 +1129,30 @@ function orderStatusLabel(code: string) {
   })()
 
   return Array.from(new Set([current, ...next]))
-	})
+  })
 
-	const orderTotalWithShipping = computed(() => {
-	  const o = order.value
-	  if (!o) return 0
-	  if (o.totalWithShippingAmount != null && Number.isFinite(Number(o.totalWithShippingAmount))) {
-	    return Number(o.totalWithShippingAmount)
-	  }
-	  const shipping = o.shippingAmount == null ? 0 : Number(o.shippingAmount)
-	  return Number(o.totalAmount || 0) + (Number.isFinite(shipping) ? shipping : 0)
-	})
+  const orderTotalWithShipping = computed(() => {
+    const o = order.value
+    if (!o) return 0
+    if (o.totalWithShippingAmount != null && Number.isFinite(Number(o.totalWithShippingAmount))) {
+      return Number(o.totalWithShippingAmount)
+    }
+    const shipping = o.shippingAmount == null ? 0 : Number(o.shippingAmount)
+    return Number(o.totalAmount || 0) + (Number.isFinite(shipping) ? shipping : 0)
+  })
 
-	const statusLocked = computed(() => {
-	  const o = order.value
-	  if (!o) return false
-	  const hasCarrier = Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
-	  return hasCarrier && o.status !== 'PENDING'
-	})
+  const statusLocked = computed(() => {
+    const o = order.value
+    if (!o) return false
+    const hasCarrier = Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
+    return hasCarrier && o.status !== 'PENDING'
+  })
 
-	const canPrintBordereau = computed(() => {
-	  const o = order.value
-	  if (!o) return false
-	  return Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
-	})
+  const canPrintBordereau = computed(() => {
+    const o = order.value
+    if (!o) return false
+    return Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
+  })
 
   // Show "Push to Maystro" retry button when order is confirmed with Maystro but no shipment was created yet
   const canRetryMaystro = computed(() => {
@@ -898,12 +1161,12 @@ function orderStatusLabel(code: string) {
     return o.shippingProvider === 'MAYSTRO' && o.status === 'CONFIRMED' && (!o.shipments || o.shipments.length === 0)
   })
 
-	function deliveryModeLabel(mode: any) {
-	  const raw = typeof mode === 'string' ? mode.trim().toLowerCase() : ''
-	  if (raw === 'store') return t('admin.pages.orders.index.deliveryModes.store', 'Store pickup')
-	  if (raw === 'pickup' || raw === 'desk' || raw === 'office') return t('admin.pages.orders.index.deliveryModes.pickup', 'Stop desk')
-	  return t('admin.pages.orders.index.deliveryModes.home', 'Home delivery')
-	}
+  function deliveryModeLabel(mode: any) {
+    const raw = typeof mode === 'string' ? mode.trim().toLowerCase() : ''
+    if (raw === 'store') return t('admin.pages.orders.index.deliveryModes.store', 'Store pickup')
+    if (raw === 'pickup' || raw === 'desk' || raw === 'office') return t('admin.pages.orders.index.deliveryModes.pickup', 'Stop desk')
+    return t('admin.pages.orders.index.deliveryModes.home', 'Home delivery')
+  }
 
   async function retryMaystro() {
     if (!order.value) return
@@ -925,7 +1188,7 @@ function orderStatusLabel(code: string) {
           addressLine1: o.shippingAddressLine1 || o.customerAddress,
           notes: o.shippingNotes,
           deliveryMode: o.deliveryMode === 'pickup' ? 'office' : 'home',
-          metadata: o.shippingPickupPoint ? { pickupPoint: o.shippingPickupPoint, maystroDeliveryType: 3 } : undefined
+          metadata: o.shippingPickupPoint ? { pickupPoint: o.shippingPickupPoint } : undefined
         }
       })
       successMessage.value = 'Order pushed to Maystro successfully'
@@ -939,22 +1202,22 @@ function orderStatusLabel(code: string) {
     }
   }
 
-	async function printBordereau() {
-	  if (!order.value) return
-	  errorMessage.value = ''
-	  try {
-	    const blob = await $fetch<Blob>(`/api/admin/orders/${encodeURIComponent(orderId)}/bordereau`, {
-	      headers: { Authorization: `Bearer ${authStore.token}` },
-	      responseType: 'blob' as any
-	    })
-	    const url = URL.createObjectURL(blob)
-	    window.open(url, '_blank', 'noopener,noreferrer')
-	    setTimeout(() => URL.revokeObjectURL(url), 60_000)
-	  } catch (e: any) {
-	    console.error('Failed to print bordereau', e)
-	    errorMessage.value = e?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
-	  }
-	}
+  async function printBordereau() {
+    if (!order.value) return
+    errorMessage.value = ''
+    try {
+      const blob = await $fetch(`/api/admin/orders/${encodeURIComponent(orderId)}/bordereau`, {
+        headers: { Authorization: `Bearer ${authStore.token}` },
+        responseType: 'blob' as any
+      }) as unknown as Blob
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank', 'noopener,noreferrer')
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch (e: any) {
+      console.error('Failed to print bordereau', e)
+      errorMessage.value = e?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    }
+  }
 
 function variantLabelFromOrderItem(item: OrderItem): string | undefined {
   const labels =
@@ -1314,16 +1577,23 @@ async function handleUpdateInternalNotes() {
 }
 
 function handleBlacklistPlaceholder(type: string) {
-  // Just show an alert acting as a placeholder
-  alert(`This is a placeholder for ${type} blacklisting. Feature coming soon!`)
+  const target =
+    type === 'customer'
+      ? t('admin.pages.orders.detail.actions.blacklistCustomer', 'Blacklist Customer')
+      : type === 'ip'
+        ? t('admin.pages.orders.detail.actions.blacklistIp', 'Blacklist IP Address')
+        : t('admin.pages.orders.detail.actions.blacklistPhone', 'Blacklist Phone Number')
+
+  showToast(`${target}: ${t('common.comingSoon', 'Coming soon')}`, 'info')
 }
 
 async function copyToClipboard(text: string) {
   try {
     await navigator.clipboard.writeText(text)
-    // Optional: add a quick toast or alert, or it's implicitly successful
+    showToast(t('common.copied', 'Copied'), 'success')
   } catch (err) {
     console.error('Failed to copy text: ', err)
+    showToast(t('common.error', 'An error occurred. Please try again.'), 'error')
   }
 }
 

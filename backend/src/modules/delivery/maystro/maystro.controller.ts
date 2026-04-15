@@ -75,6 +75,33 @@ export class MaystroController {
         }
     }
 
+    async listStopDeskCommunes(req: Request, res: Response) {
+        const tenantId = req.tenant?.id || req.user?.tenantId
+        if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya : ''
+        if (!wilaya.trim()) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+
+        const deliveryTypeRaw = typeof req.query.deliveryType === 'string' ? Number(req.query.deliveryType) : null
+        const deliveryType = deliveryTypeRaw === 2 || deliveryTypeRaw === 3 ? (deliveryTypeRaw as 2 | 3) : 3
+
+        try {
+            const creds = await getMaystroCredentials(tenantId)
+            const communes = await this.pickupPoints.listStopDeskCommunes({
+                apiToken: creds.apiToken,
+                wilaya,
+                deliveryType
+            })
+            return res.json(communes)
+        } catch (error: any) {
+            if (error instanceof MaystroIntegrationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Maystro stop desk communes error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
     async listDeliveryOptions(req: Request, res: Response) {
         const tenantId = req.tenant?.id || req.user?.tenantId
         if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })

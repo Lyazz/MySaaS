@@ -1,6 +1,11 @@
+import { randomBytes } from 'node:crypto'
 import type { PrismaClient, ShipmentProvider, TenantDeliveryAccount } from '@prisma/client'
 import prisma from '../../lib/prisma'
 import { DELIVERY_PROVIDER_CATALOG, getProviderCatalogItem } from './catalog'
+import { MaystroHooksService } from './maystro/maystro-hooks.service'
+
+// Keys managed by the system (auto-generated) that must survive user credential updates.
+const SYSTEM_MANAGED_KEYS = new Set(['webhookSecret'])
 
 export class DeliveryAccountsValidationError extends Error {
     statusCode = 400
@@ -213,13 +218,21 @@ export class DeliveryAccountsService {
             ;(patch as any).apiKey = ''
         }
 
+        // Carry forward system-managed keys (e.g. webhookSecret) regardless of what the user sends.
+        const systemPreserved = Object.fromEntries(
+            Object.entries(rawExistingConfig).filter(([k]) => SYSTEM_MANAGED_KEYS.has(k))
+        )
+
         const nextConfig =
             patch === null
-                ? {}
-                : applyConfigPatch(
-                    Object.fromEntries(Object.entries(existingConfig).filter(([k]) => allowedKeys.has(k))),
-                    patch
-                )
+                ? { ...systemPreserved }
+                : {
+                    ...applyConfigPatch(
+                        Object.fromEntries(Object.entries(existingConfig).filter(([k]) => allowedKeys.has(k))),
+                        patch
+                    ),
+                    ...systemPreserved
+                  }
 
         const configUpdate =
             input.config === undefined ? undefined : Object.keys(nextConfig).length ? nextConfig : null
@@ -268,7 +281,81 @@ export class DeliveryAccountsService {
             await this.prisma.$transaction(ops)
         }
 
+        // Auto-register Maystro webhook when credentials are activated.
+        // Best-effort: a failure here must not block the credential save.
+        if (provider === 'MAYSTRO' && isActive && Object.keys(nextConfig).length > 0) {
+            try {
+                await this.ensureMaystroWebhookRegistered(tenantId, nextConfig)
+            } catch (err) {
+                console.warn('[delivery-accounts] Maystro webhook auto-registration failed:', err)
+            }
+        }
+
         const updated = await this.listProviders(tenantId)
         return updated.find((p) => p.provider === provider) ?? updated
+    }
+
+    private async ensureMaystroWebhookRegistered(tenantId: string, config: Record<string, unknown>) {
+        const apiToken =
+            typeof config.apiToken === 'string' ? config.apiToken.trim() :
+            typeof config.apiKey === 'string' ? config.apiKey.trim() : ''
+        if (!apiToken) return
+
+        const platformDomain = (process.env.PLATFORM_BASE_DOMAIN ?? process.env.PLATFORM_DOMAIN ?? '').trim()
+        if (!platformDomain) return  // not configured — skip silently
+
+        const tenant = await this.prisma.tenant.findUnique({
+            where: { id: tenantId },
+            select: { slug: true, domains: { take: 1, select: { domain: true } } }
+        })
+        if (!tenant) return
+
+        const host = tenant.domains[0]?.domain?.trim() || `${tenant.slug}.${platformDomain}`
+
+        // Generate a per-tenant secret if not already stored. This secret is embedded
+        // in the registered webhook URL so only Maystro (which received the URL from us)
+        // can send requests that pass validation.
+        let webhookSecret = typeof config.webhookSecret === 'string' ? config.webhookSecret : ''
+        if (!webhookSecret) {
+            webhookSecret = randomBytes(32).toString('hex')
+            await this.prisma.tenantDeliveryAccount.update({
+                where: { tenantId_provider: { tenantId, provider: 'MAYSTRO' } },
+                data: { config: { ...config, webhookSecret } }
+            })
+        }
+
+        const webhookUrl = `https://${host}/api/webhooks/maystro?secret=${webhookSecret}`
+
+        const hooks = new MaystroHooksService()
+
+        // Per Maystro docs, the "all" trigger type catches every event (orderCreated,
+        // OrderStatusChanged, InventoryMovement). Prefer it; fall back to first available.
+        const types = await hooks.listTypes({ apiToken })
+        const allType = types.find((t) => String(t.name ?? t.code ?? '').toLowerCase() === 'all')
+            ?? types[0]
+        if (!allType) return
+
+        const existing = await hooks.listHooks({ apiToken })
+
+        // Remove any stale registrations pointing to our host without the correct secret.
+        // This handles the migration from the previous secret-less URL.
+        for (const h of existing) {
+            const url = typeof h.endpoint === 'string' ? h.endpoint : ''
+            if (url.includes(`${host}/api/webhooks/maystro`) && url !== webhookUrl) {
+                try {
+                    await hooks.deleteHook({ apiToken, id: h.id })
+                    console.log(`[delivery-accounts] Removed stale Maystro webhook for tenant ${tenantId}: ${url}`)
+                } catch {
+                    // best-effort: log but don't block registration
+                }
+            }
+        }
+
+        // Check if the correct URL is already registered to avoid duplicates.
+        const alreadyRegistered = existing.some((h) => h.endpoint === webhookUrl)
+        if (alreadyRegistered) return
+
+        await hooks.createHook({ apiToken, endpoint: webhookUrl, triggerTypeId: allType.id })
+        console.log(`[delivery-accounts] Maystro webhook registered for tenant ${tenantId}: ${webhookUrl}`)
     }
 }

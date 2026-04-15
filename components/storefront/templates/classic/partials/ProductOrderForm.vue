@@ -174,14 +174,14 @@ const selectedDelivery = computed(() =>
 )
 
 const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name_lt?: string; name_ar?: string }>>([])
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
 const pickupPointsLoading = ref(false)
 const pickupPointsError = ref('')
 
 const syncPickupPointCommune = () => {
-  const selected = String(quickForm.pickupPoint || '').trim()
-  if (!selected) return
-  const point = pickupPoints.value.find((p) => String(p.pickup_point) === selected)
+  const name = (quickForm.pickupPoint || '').trim()
+  if (!name) return
+  const point = pickupPoints.value.find((p) => (p.name_lt || p.name_ar || '') === name)
   if (!point?.commune) return
   const nextCommune = String(point.commune)
   if (nextCommune && quickForm.commune !== nextCommune) {
@@ -214,7 +214,7 @@ watch(
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune)}&wilaya=${encodeURIComponent(wilaya)}&deliveryType=3&nearby=true`
+        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune)}&wilaya=${encodeURIComponent(wilaya)}&deliveryType=2&nearby=true`
       )
       const data = await $fetch<any[]>(url, {
         headers: {
@@ -226,16 +226,17 @@ watch(
             .map((p: any) => ({
               pickup_point: Number(p?.pickup_point),
               commune: Number(p?.commune),
+              name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
               name_lt: p?.name_lt ? String(p.name_lt) : undefined,
               name_ar: p?.name_ar ? String(p.name_ar) : undefined
             }))
-            .filter((p) => Number.isFinite(p.pickup_point) && p.pickup_point > 0 && Number.isFinite(p.commune))
+            .filter((p) => Number.isFinite(p.commune) && p.commune > 0)
         : []
 
       if (pickupPoints.value.length > 0) {
-        const current = String(quickForm.pickupPoint || '').trim()
-        if (!current || !pickupPoints.value.some((p) => String(p.pickup_point) === current)) {
-          quickForm.pickupPoint = String(pickupPoints.value[0].pickup_point)
+        const current = (quickForm.pickupPoint || '').trim()
+        if (!current || !pickupPoints.value.some((p) => (p.name_lt || p.name_ar || '') === current)) {
+          quickForm.pickupPoint = pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
           syncPickupPointCommune()
         }
       }
@@ -651,30 +652,24 @@ const handleAddToCart = async () => {
                         <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
                             {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
                         </label>
-                        <div class="relative">
-                            <select
-                                v-model="quickForm.pickupPoint"
-                                class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm disabled:opacity-70"
-                                :disabled="!quickForm.commune || !quickForm.wilaya || pickupPointsLoading"
-                                @change="syncPickupPointCommune"
-                            >
-                                <option value="" disabled>
-                                {{ pickupPointsLoading ? 'Loading…' : 'Select stop desk…' }}
-                                </option>
-                                <option
-                                v-for="p in pickupPoints"
-                                :key="String(p.pickup_point)"
-                                :value="String(p.pickup_point)"
-                                >
-                                {{ p.pickup_point }} - {{ p.name_lt || p.name_ar || `Commune ${p.commune}` }}
-                                </option>
-                            </select>
-                            <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                                <Icon name="lucide:chevron-down" class="w-4 h-4" />
-                            </div>
+                        <div
+                            v-if="pickupPointsLoading"
+                            class="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
+                        >
+                            <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
+                            Loading…
+                        </div>
+                        <div
+                            v-else-if="quickForm.pickupPoint"
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50"
+                        >
+                            <Icon name="lucide:map-pin" class="w-4 h-4 text-blue-600 shrink-0" />
+                            <span class="text-sm font-semibold text-slate-900">
+                                {{ quickForm.pickupPoint }}
+                            </span>
                         </div>
                         <p v-if="pickupPointsError" class="text-xs text-amber-700">
-                        {{ pickupPointsError }}
+                            {{ pickupPointsError }}
                         </p>
                     </div>
                 </div>

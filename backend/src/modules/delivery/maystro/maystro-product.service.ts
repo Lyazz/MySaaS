@@ -159,7 +159,7 @@ export class MaystroProductService {
         const productId = mapping?.maystroProductId ?? input.localProductId
         await client.request<void>({
             method: 'DELETE',
-            path: `/stock/products/${encodeURIComponent(productId)}`
+            path: `/stock/products/${encodeURIComponent(productId)}/`
         })
 
         if (mapping) {

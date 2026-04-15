@@ -39,7 +39,7 @@ export class MaystroProvider implements DeliveryProvider {
         const match = (Array.isArray(wilayas) ? wilayas : []).find(
             (w) => String(w?.name ?? w?.name_lt ?? w?.name_ar ?? '').toLowerCase() === trimmed.toLowerCase()
         )
-        const id = match?.id != null ? Number(match.id) : NaN
+        const id = Number(match?.id ?? match?.code ?? match?.display_id ?? NaN)
         if (!Number.isFinite(id)) return null
         this.wilayaIdByInput.set(trimmed.toLowerCase(), id)
         return id

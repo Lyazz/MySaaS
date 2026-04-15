@@ -113,15 +113,25 @@ export class MaystroWebhookService {
             }
         })
 
-        const shipment = maystroOrderId
+        // providerShipmentId stores tracking (display_id), not the UUID.
+        // Prefer looking up by orderId via the mapping; fall back to providerShipmentId search.
+        const shipment = mapping?.localOrderId
             ? await this.prisma.shipment.findFirst({
                 where: {
                     tenantId: input.tenantId,
                     provider: 'MAYSTRO',
-                    providerShipmentId: String(maystroOrderId)
+                    orderId: mapping.localOrderId
                 }
             })
-            : null
+            : maystroOrderId
+                ? await this.prisma.shipment.findFirst({
+                    where: {
+                        tenantId: input.tenantId,
+                        provider: 'MAYSTRO',
+                        providerShipmentId: String(maystroOrderId)
+                    }
+                })
+                : null
 
         if (shipment) {
             await this.prisma.shipment.update({

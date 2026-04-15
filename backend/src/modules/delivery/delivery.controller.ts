@@ -1,8 +1,10 @@
+import { timingSafeEqual } from 'node:crypto'
 import type { Request, Response } from 'express'
 import { DeliveryConfigurationError, DeliveryService } from './delivery.service'
 import { ShipmentProvider } from '@prisma/client'
 import { getProviderCatalogItem } from './catalog'
 import { MaystroIntegrationError } from './maystro/maystro.errors'
+import prisma from '../../lib/prisma'
 
 const service = new DeliveryService()
 
@@ -169,6 +171,29 @@ export class DeliveryController {
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         try {
+            // Validate the per-tenant webhook secret embedded in the URL query param.
+            // Since Maystro provides no request signing, this secret-in-URL pattern is the
+            // standard mitigation: only Maystro (which received the registered URL from us)
+            // knows the correct secret value.
+            const incoming = typeof req.query.secret === 'string' ? req.query.secret : ''
+            const account = await prisma.tenantDeliveryAccount.findUnique({
+                where: { tenantId_provider: { tenantId: tenant.id, provider: 'MAYSTRO' } },
+                select: { config: true }
+            })
+            const config = (account?.config && typeof account.config === 'object' ? account.config : {}) as Record<string, unknown>
+            const storedSecret = typeof config.webhookSecret === 'string' ? config.webhookSecret : ''
+
+            if (!storedSecret || !incoming) {
+                return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
+            }
+
+            // timingSafeEqual prevents timing-based secret enumeration.
+            const incomingBuf = Buffer.from(incoming)
+            const storedBuf = Buffer.from(storedSecret)
+            if (incomingBuf.length !== storedBuf.length || !timingSafeEqual(incomingBuf, storedBuf)) {
+                return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
+            }
+
             const result = await service.handleMaystroWebhook(tenant.id, req.body?.payload || req.body)
             if (!result) return res.status(202).json({ received: true })
             res.json({ success: true, ...result })

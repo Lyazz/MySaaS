@@ -16,6 +16,7 @@ router.get('/delivery/companies', controller.listCompanies.bind(controller))
 router.get('/delivery/maystro/wilayas', maystroController.listWilayas.bind(maystroController))
 router.get('/delivery/maystro/communes', maystroController.listCommunes.bind(maystroController))
 router.get('/delivery/maystro/pickup-points', maystroController.listPickupPoints.bind(maystroController))
+router.get('/delivery/maystro/stop-desk-communes', maystroController.listStopDeskCommunes.bind(maystroController))
 router.get('/delivery/maystro/delivery-options', maystroController.listDeliveryOptions.bind(maystroController))
 router.get('/delivery/maystro/delivery-prices', maystroController.getDeliveryPrice.bind(maystroController))
 
