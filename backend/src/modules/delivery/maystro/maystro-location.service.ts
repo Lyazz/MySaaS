@@ -51,7 +51,8 @@ export class MaystroLocationService {
         }
 
         const wilayas: MaystroWilaya[] = data.map((w: any) => ({
-            id: Number(w?.id),
+            // Maystro wilayas API returns "code" and "display_id", not "id"
+            id: Number(w?.id ?? w?.code ?? w?.display_id),
             name: String(w?.name ?? w?.name_lt ?? w?.name_ar ?? '')
         }))
 

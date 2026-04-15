@@ -1,7 +1,10 @@
 import type { Request, Response } from 'express'
 import { OrdersService, OrderValidationError } from './orders.service'
+import { DeliveryService } from '../delivery/delivery.service'
+import { MaystroIntegrationError } from '../delivery/maystro/maystro.errors'
 
 const service = new OrdersService()
+const deliveryService = new DeliveryService()
 
 export class OrdersController {
     async list(req: Request, res: Response) {
@@ -93,6 +96,41 @@ export class OrdersController {
                     { userId: user?.id ?? null },
                     { cashboxId, method, reference, note, callStatus, internalNotes }
                 )
+
+                // When an order is confirmed and has Maystro as the shipping provider,
+                // automatically push the order to Maystro so the admin doesn't need a separate step.
+                if (status === 'CONFIRMED' && (updated as any)?.shippingProvider === 'MAYSTRO') {
+                    const order = updated as any
+                    try {
+                        await deliveryService.createShipment({
+                            tenantId: tenant.id,
+                            provider: 'MAYSTRO',
+                            orderId: order.id,
+                            contactName: order.customerName ?? '',
+                            contactPhone: order.customerPhone ?? '',
+                            wilayaCode: order.shippingWilayaCode ?? '',
+                            communeCode: order.shippingCommuneCode ?? undefined,
+                            addressLine1: order.shippingAddressLine1 ?? order.customerAddress ?? '',
+                            addressLine2: undefined,
+                            notes: order.shippingNotes ?? undefined,
+                            deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
+                            metadata: order.shippingPickupPoint
+                                ? { pickupPoint: order.shippingPickupPoint, maystroDeliveryType: 3 }
+                                : undefined
+                        })
+                        return res.json(updated)
+                    } catch (shipmentErr: any) {
+                        // The order status was successfully changed; report the Maystro error
+                        // as a warning so the admin can see it and retry.
+                        console.error('Auto Maystro shipment failed after confirm:', shipmentErr)
+                        const msg =
+                            shipmentErr instanceof MaystroIntegrationError
+                                ? shipmentErr.statusMessage
+                                : String(shipmentErr?.message || 'Failed to push order to Maystro')
+                        return res.json({ ...order, _maystroError: msg })
+                    }
+                }
+
                 res.json(updated)
             } catch (err) {
                 if (err instanceof OrderValidationError) {

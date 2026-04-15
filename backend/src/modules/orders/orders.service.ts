@@ -175,13 +175,17 @@ export class OrdersService {
 
         if (provider === 'MAYSTRO') {
             const creds = await getMaystroCredentials(tenantId)
-            const maystroOrderId =
+            // Bordereau requires display_id (= tracking), not the UUID.
+            // providerShipmentId is now stored as tracking since the delivery service fix.
+            // Fall back through: shipment.providerShipmentId → mapping.tracking → mapping.maystroOrderId
+            const bordereauId =
                 shipment?.providerShipmentId ??
+                order.maystroMappings.find((m) => typeof m.tracking === 'string' && m.tracking)?.tracking ??
                 order.maystroMappings.find((m) => typeof m.maystroOrderId === 'string' && m.maystroOrderId)?.maystroOrderId ??
                 null
-            if (!maystroOrderId) throw new OrderValidationError(409, 'Maystro order id not found for this order')
+            if (!bordereauId) throw new OrderValidationError(409, 'Maystro order id not found for this order')
 
-            const pdf = await this.maystroBordereau.createBordereauPdf({ apiToken: creds.apiToken, ordersIds: [maystroOrderId] })
+            const pdf = await this.maystroBordereau.createBordereauPdf({ apiToken: creds.apiToken, ordersIds: [bordereauId] })
             return { filename: `bordereau-${order.id}.pdf`, pdf: Buffer.from(pdf) }
         }
 

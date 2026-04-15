@@ -38,7 +38,7 @@ export class MaystroProductService {
                     method: 'POST',
                     path: '/stock/products/',
                     data: {
-                        store_id: input.storeId,
+                        store: input.storeId,
                         logistical_description: input.logisticalDescription,
                         product_id: productId
                     }
@@ -62,7 +62,7 @@ export class MaystroProductService {
                 try {
                     const updated = await client.request<MaystroProduct>({
                         method: 'PATCH',
-                        path: `/stock/products/${encodeURIComponent(productId)}`,
+                        path: `/stock/products/${encodeURIComponent(productId)}/`,
                         data: { logistical_description: input.logisticalDescription }
                     })
 
@@ -111,7 +111,7 @@ export class MaystroProductService {
         try {
             const updated = await client.request<MaystroProduct>({
                 method: 'PATCH',
-                path: `/stock/products/${encodeURIComponent(existing.maystroProductId)}`,
+                path: `/stock/products/${encodeURIComponent(existing.maystroProductId)}/`,
                 data: {
                     logistical_description: input.logisticalDescription
                 }

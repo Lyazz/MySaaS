@@ -6,6 +6,7 @@ import { MaystroDeliveryService } from './maystro-delivery.service'
 import { MaystroHooksService } from './maystro-hooks.service'
 import { MaystroBordereauService } from './maystro-bordereau.service'
 import { MaystroIntegrationError } from './maystro.errors'
+import { getMaystroCredentials } from './maystro.credentials'
 
 export class MaystroController {
     private location = new MaystroLocationService()
@@ -219,11 +220,14 @@ export class MaystroController {
                 })
                 ordersIds = shipments.map((s) => s.providerShipmentId).filter((id): id is string => Boolean(id))
                 if (ordersIds.length === 0) {
+                    // Bordereau requires display_id (= tracking), not the UUID (maystroOrderId)
                     const mappings = await prisma.maystroOrderMapping.findMany({
-                        where: { tenantId, localOrderId: { in: ids }, maystroOrderId: { not: null } },
-                        select: { maystroOrderId: true }
+                        where: { tenantId, localOrderId: { in: ids }, tracking: { not: null } },
+                        select: { tracking: true, maystroOrderId: true }
                     })
-                    ordersIds = mappings.map((m) => m.maystroOrderId!).filter(Boolean)
+                    ordersIds = mappings
+                        .map((m) => m.tracking ?? m.maystroOrderId)
+                        .filter((id): id is string => Boolean(id))
                 }
             }
 

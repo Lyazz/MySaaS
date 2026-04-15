@@ -38,11 +38,20 @@ export class MaystroClient {
         this.http = axios.create({
             baseURL,
             headers: {
-                Authorization: input.apiToken,
+                // Maystro requires "Token <token>" scheme. Auto-prepend if no scheme given.
+                Authorization: this.buildAuthHeader(input.apiToken),
                 'Content-Type': 'application/json'
             },
-            timeout: input.timeoutMs ?? 15_000
+            timeout: input.timeoutMs ?? 15_000,
+            // Follow redirects automatically (e.g. /orders → /orders/)
+            maxRedirects: 5
         })
+    }
+
+    private buildAuthHeader(token: string): string {
+        const t = token.trim()
+        if (this.hasAuthScheme(t)) return t
+        return `Token ${t}`
     }
 
     private hasAuthScheme(token: string) {
@@ -74,49 +83,6 @@ export class MaystroClient {
                 const error = err as AxiosError
                 lastError = error
 
-                // Some Maystro deployments expect `Authorization: Bearer <token>`.
-                // If the token was provided without a scheme and we get a 401, try once with Bearer.
-                const status = axios.isAxiosError(error) ? error.response?.status : undefined
-                if (
-                    status === 401 &&
-                    typeof this.apiTokenRaw === 'string' &&
-                    this.apiTokenRaw.trim().length > 0 &&
-                    !this.hasAuthScheme(this.apiTokenRaw)
-                ) {
-                    try {
-                        const res = await this.http.request({
-                            method: opts.method,
-                            url: opts.path,
-                            params: opts.params,
-                            data: opts.data,
-                            responseType: opts.responseType,
-                            headers: {
-                                Authorization: `Bearer ${this.apiTokenRaw.trim()}`
-                            }
-                        })
-                        return res.data as T
-                    } catch (bearerErr: any) {
-                        lastError = bearerErr
-                    }
-
-                    // Some APIs use `Authorization: Token <token>`
-                    try {
-                        const res = await this.http.request({
-                            method: opts.method,
-                            url: opts.path,
-                            params: opts.params,
-                            data: opts.data,
-                            responseType: opts.responseType,
-                            headers: {
-                                Authorization: `Token ${this.apiTokenRaw.trim()}`
-                            }
-                        })
-                        return res.data as T
-                    } catch (tokenErr: any) {
-                        lastError = tokenErr
-                    }
-                }
-
                 const retryable = axios.isAxiosError(error) && isRetryableAxiosError(error)
                 const isLast = attempt === maxAttempts - 1
                 if (!retryable || isLast) break
@@ -136,7 +102,7 @@ export class MaystroClient {
                 throw new MaystroIntegrationError({
                     statusCode: mapped.statusCode,
                     statusMessage: mapped.statusMessage,
-                    code,
+                    code: code as import('./maystro.errors').MaystroOrderErrorCode,
                     details: data
                 })
             }

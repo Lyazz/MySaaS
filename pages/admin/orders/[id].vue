@@ -543,7 +543,7 @@
               <span class="text-gray-900 font-medium">{{ [order.shippingWilayaCode, order.shippingCommuneCode].filter(Boolean).join(' / ') }}</span>
             </div>
           </div>
-          <div class="mt-4">
+          <div class="mt-4 space-y-2">
             <button
               v-if="canPrintBordereau"
               type="button"
@@ -552,6 +552,16 @@
             >
               <Icon name="lucide:printer" class="w-4 h-4" />
               {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
+            </button>
+            <button
+              v-if="canRetryMaystro"
+              type="button"
+              :disabled="updating"
+              class="ui-btn ui-btn--secondary ui-btn--md w-full flex items-center justify-center gap-2 border-orange-300 text-orange-700 hover:bg-orange-50 disabled:opacity-50"
+              @click="retryMaystro"
+            >
+              <Icon name="lucide:send" class="w-4 h-4" />
+              Push to Maystro
             </button>
           </div>
         </div>
@@ -881,12 +891,53 @@ function orderStatusLabel(code: string) {
 	  return Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
 	})
 
+  // Show "Push to Maystro" retry button when order is confirmed with Maystro but no shipment was created yet
+  const canRetryMaystro = computed(() => {
+    const o = order.value
+    if (!o) return false
+    return o.shippingProvider === 'MAYSTRO' && o.status === 'CONFIRMED' && (!o.shipments || o.shipments.length === 0)
+  })
+
 	function deliveryModeLabel(mode: any) {
 	  const raw = typeof mode === 'string' ? mode.trim().toLowerCase() : ''
 	  if (raw === 'store') return t('admin.pages.orders.index.deliveryModes.store', 'Store pickup')
 	  if (raw === 'pickup' || raw === 'desk' || raw === 'office') return t('admin.pages.orders.index.deliveryModes.pickup', 'Stop desk')
 	  return t('admin.pages.orders.index.deliveryModes.home', 'Home delivery')
 	}
+
+  async function retryMaystro() {
+    if (!order.value) return
+    errorMessage.value = ''
+    successMessage.value = ''
+    updating.value = true
+    try {
+      const o = order.value as any
+      await $fetch('/api/shipments', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authStore.token}` },
+        body: {
+          provider: 'MAYSTRO',
+          orderId: o.id,
+          contactName: o.customerName,
+          contactPhone: o.customerPhone,
+          wilayaCode: o.shippingWilayaCode,
+          communeCode: o.shippingCommuneCode,
+          addressLine1: o.shippingAddressLine1 || o.customerAddress,
+          notes: o.shippingNotes,
+          deliveryMode: o.deliveryMode === 'pickup' ? 'office' : 'home',
+          metadata: o.shippingPickupPoint ? { pickupPoint: o.shippingPickupPoint, maystroDeliveryType: 3 } : undefined
+        }
+      })
+      successMessage.value = 'Order pushed to Maystro successfully'
+      setTimeout(() => { successMessage.value = '' }, 3000)
+      await fetchOrder()
+    } catch (e: any) {
+      console.error('Maystro retry failed', e)
+      errorMessage.value = e?.data?.statusMessage || e?.data?.message || 'Failed to push to Maystro'
+    } finally {
+      updating.value = false
+    }
+  }
 
 	async function printBordereau() {
 	  if (!order.value) return
@@ -1160,15 +1211,17 @@ async function handleStatusUpdate() {
       body: {
         status: newStatus.value
       }
-    })
+    }) as any
 
-    order.value.status = updated.status
-    successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
-    
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      successMessage.value = ''
-    }, 3000)
+    order.value = { ...order.value, ...updated }
+    newStatus.value = updated.status
+
+    if (updated._maystroError) {
+      errorMessage.value = `Order confirmed but Maystro submission failed: ${updated._maystroError}`
+    } else {
+      successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
+      setTimeout(() => { successMessage.value = '' }, 3000)
+    }
   } catch (error: any) {
     console.error('Failed to update order:', error)
     errorMessage.value = error.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')

@@ -16,7 +16,7 @@ export class MaystroPickupPointService {
         const client = new MaystroClient({ apiToken: input.apiToken })
         const data = await client.request<any[]>({
             method: 'GET',
-            path: '/base/pickup-points',
+            path: '/base/pickup-points/',
             params: { commune: input.commune }
         })
 

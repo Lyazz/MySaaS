@@ -226,7 +226,7 @@ export class MaystroOrderService {
         try {
             const response = await client.request<MaystroOrderResponse>({
                 method: 'POST',
-                path: '/orders',
+                path: '/orders/',
                 data: payload
             })
             return this.persistOrderMapping({
@@ -322,7 +322,7 @@ export class MaystroOrderService {
         try {
             rawResponse = await client.request<any>({
                 method: 'POST',
-                path: '/orders',
+                path: '/orders/',
                 data: payloads
             })
         } catch (error: any) {
@@ -333,7 +333,7 @@ export class MaystroOrderService {
             if (shouldTryAlternateShape) {
                 rawResponse = await client.request<any>({
                     method: 'POST',
-                    path: '/orders',
+                    path: '/orders/',
                     data: { orders: payloads }
                 })
             } else {

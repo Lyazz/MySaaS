@@ -646,10 +646,14 @@ export class DeliveryService {
         })
 
         return {
-            providerShipmentId: mapping.maystroOrderId ?? undefined,
+            // Use tracking (= display_id) as providerShipmentId — required by the bordereau endpoint.
+            // The UUID (maystroOrderId) is preserved in raw for reference.
+            providerShipmentId: mapping.tracking ?? mapping.maystroOrderId ?? undefined,
             status: mapping.success ? ShipmentStatus.REQUESTED : ShipmentStatus.PENDING,
             price: mapping.deliveryPrice != null ? Number(mapping.deliveryPrice) : undefined,
             currency: 'DZD',
+            labelUrl: undefined as string | undefined,
+            trackingUrl: undefined as string | undefined,
             raw: {
                 maystroOrderId: mapping.maystroOrderId,
                 tracking: mapping.tracking,
