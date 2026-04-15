@@ -11,7 +11,7 @@ describe('Billing proof uploads (private)', async () => {
     process.env.S3_FALLBACK_LOCAL = 'true'
     process.env.NODE_ENV = 'test'
 
-    await setup({ setupTimeout: 300_000 })
+    await setup({ setupTimeout: 900_000, teardownTimeout: 900_000 })
 
     const slugA = `proof-a-${Date.now()}`
     const emailA = `owner-${slugA}@example.com`

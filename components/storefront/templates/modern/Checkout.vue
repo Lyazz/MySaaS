@@ -71,17 +71,19 @@ const deliveryOptions = computed(() => {
   })
   
   // Store pickup as last option
-  options.push({
-    id: 'store-pickup',
-    provider: null,
-    providerLabel: 'Store',
-    mode: 'store',
-    modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
-    icon: 'lucide:store',
-    color: 'green',
-    price: 'FREE',
-    description: storefrontContent.value.checkout.delivery.description.storePickup
-  })
+  if (storeSettings.value?.storePickupEnabled === true) {
+    options.push({
+      id: 'store-pickup',
+      provider: null,
+      providerLabel: 'Store',
+      mode: 'store',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
+      icon: 'lucide:store',
+      color: 'green',
+      price: 'FREE',
+      description: storefrontContent.value.checkout.delivery.description.storePickup
+    })
+  }
   
   return options
 })
@@ -92,6 +94,7 @@ const form = ref({
   wilaya: '',
   commune: '',
   address: '',
+  pickupPoint: '',
   selectedDeliveryOption: ''
 })
 
@@ -101,8 +104,11 @@ const maystroPrices = useMaystroDeliveryPrices({
 })
 
 watchEffect(() => {
-  if (!form.value.selectedDeliveryOption && deliveryOptions.value.length) {
-    form.value.selectedDeliveryOption = deliveryOptions.value[0].id
+  const options = deliveryOptions.value
+  if (!options.length) return
+  const selected = form.value.selectedDeliveryOption
+  if (!selected || !options.some((opt: any) => opt.id === selected)) {
+    form.value.selectedDeliveryOption = options[0].id
   }
 })
 
@@ -112,6 +118,76 @@ const couponCode = ref('')
 
 const selectedDelivery = computed(() => 
   deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption)
+)
+
+const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name_lt?: string; name_ar?: string }>>([])
+const pickupPointsLoading = ref(false)
+const pickupPointsError = ref('')
+
+const syncPickupPointCommune = () => {
+  const selected = String(form.value.pickupPoint || '').trim()
+  if (!selected) return
+  const point = pickupPoints.value.find((p) => String(p.pickup_point) === selected)
+  if (!point?.commune) return
+  const nextCommune = String(point.commune)
+  if (nextCommune && form.value.commune !== nextCommune) {
+    form.value.commune = nextCommune
+  }
+}
+
+watch(
+  [isMaystroPickup, () => form.value.commune, () => form.value.wilaya],
+  async ([enabled, commune, wilaya]) => {
+    pickupPointsError.value = ''
+    pickupPoints.value = []
+
+    if (!enabled) {
+      form.value.pickupPoint = ''
+      return
+    }
+
+    if (!wilaya || !commune) return
+
+    pickupPointsLoading.value = true
+    try {
+      const url = useTenantApiUrl(
+        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune)}&wilaya=${encodeURIComponent(wilaya)}&deliveryType=3&nearby=true`
+      )
+      const data = await $fetch<any[]>(url, {
+        headers: {
+          ...(useTenantApiHeaders() || {})
+        }
+      })
+      pickupPoints.value = Array.isArray(data)
+        ? data
+            .map((p: any) => ({
+              pickup_point: Number(p?.pickup_point),
+              commune: Number(p?.commune),
+              name_lt: p?.name_lt ? String(p.name_lt) : undefined,
+              name_ar: p?.name_ar ? String(p.name_ar) : undefined
+            }))
+            .filter((p) => Number.isFinite(p.pickup_point) && p.pickup_point > 0 && Number.isFinite(p.commune))
+        : []
+
+      if (pickupPoints.value.length > 0) {
+        const current = String(form.value.pickupPoint || '').trim()
+        if (!current || !pickupPoints.value.some((p) => String(p.pickup_point) === current)) {
+          form.value.pickupPoint = String(pickupPoints.value[0].pickup_point)
+          syncPickupPointCommune()
+        }
+      }
+    } catch (e: any) {
+      pickupPoints.value = []
+      pickupPointsError.value =
+        e?.data?.statusMessage ||
+        e?.data?.message ||
+        'Failed to load pickup points'
+    } finally {
+      pickupPointsLoading.value = false
+    }
+  },
+  { immediate: true }
 )
 
 const hasRequiredFields = computed(() => Boolean(
@@ -169,6 +245,10 @@ async function handleSubmit() {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
           }
+          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim()) {
+            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
+            return
+          }
           if (maystroShippingAmount == null) {
             errorMessage.value = 'Maystro shipping price unavailable for selected commune'
             return
@@ -183,6 +263,7 @@ async function handleSubmit() {
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
+          shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
           shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
           shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
           shippingCurrency: isMaystro ? currencyCode.value : undefined,
@@ -293,6 +374,39 @@ async function handleSubmit() {
                   :input-class="'w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
                   :select-class="'w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
                 />
+              </div>
+              <div
+                v-if="isMaystroPickup"
+                class="col-span-2 space-y-2"
+              >
+                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                  {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
+                </label>
+                <div class="relative">
+                  <select
+                    v-model="form.pickupPoint"
+                    class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm disabled:opacity-70"
+                    :disabled="!form.commune || !form.wilaya || pickupPointsLoading"
+                    @change="syncPickupPointCommune"
+                  >
+                    <option value="" disabled>
+                      {{ pickupPointsLoading ? 'Loading…' : 'Select stop desk…' }}
+                    </option>
+                    <option
+                      v-for="p in pickupPoints"
+                      :key="String(p.pickup_point)"
+                      :value="String(p.pickup_point)"
+                    >
+                      {{ p.pickup_point }} - {{ p.name_lt || p.name_ar || `Commune ${p.commune}` }}
+                    </option>
+                  </select>
+                  <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                    <Icon name="lucide:chevron-down" class="w-4 h-4" />
+                  </div>
+                </div>
+                <p v-if="pickupPointsError" class="text-xs text-amber-700">
+                  {{ pickupPointsError }}
+                </p>
               </div>
               <div class="col-span-2 space-y-2">
                 <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>

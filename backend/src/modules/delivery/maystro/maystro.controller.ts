@@ -53,12 +53,17 @@ export class MaystroController {
         const commune = typeof req.query.commune === 'string' ? req.query.commune : ''
         if (!commune.trim()) return res.status(400).json({ statusCode: 400, statusMessage: 'commune is required' })
 
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya : ''
+        const nearby = String(req.query.nearby || '').toLowerCase() === 'true'
+
         const deliveryTypeRaw = typeof req.query.deliveryType === 'string' ? Number(req.query.deliveryType) : null
         const deliveryType = deliveryTypeRaw === 2 || deliveryTypeRaw === 3 ? (deliveryTypeRaw as 2 | 3) : undefined
 
         try {
             const creds = await getMaystroCredentials(tenantId)
-            const points = await this.pickupPoints.listActivePickupPoints({ apiToken: creds.apiToken, commune, deliveryType })
+            const points = nearby && wilaya.trim()
+                ? await this.pickupPoints.listActivePickupPointsNearby({ apiToken: creds.apiToken, commune, wilaya, deliveryType })
+                : await this.pickupPoints.listActivePickupPoints({ apiToken: creds.apiToken, commune, deliveryType })
             return res.json(points)
         } catch (error: any) {
             if (error instanceof MaystroIntegrationError) {

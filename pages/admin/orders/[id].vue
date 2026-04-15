@@ -13,7 +13,7 @@
     <DeliveryPaymentModal
       v-model="deliveryModalOpen"
       :cashboxes="cashboxes"
-      :amount="order?.totalAmount ?? 0"
+      :amount="orderTotalWithShipping"
       :loading="updating"
       @confirm="confirmDelivered"
     />
@@ -176,6 +176,15 @@
                 <Icon name="lucide:badge-dollar-sign" class="w-4 h-4 mr-2" />
                 {{ t('admin.pages.orders.detail.viewSale') }}
               </NuxtLink>
+              <button
+                v-if="canPrintBordereau"
+                type="button"
+                class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold bg-slate-50 text-slate-700 hover:bg-slate-100"
+                @click="printBordereau"
+              >
+                <Icon name="lucide:printer" class="w-4 h-4 mr-2" />
+                {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
+              </button>
               <AdminOrderStatusBadge :status="order.status" />
             </div>
           </div>
@@ -439,6 +448,12 @@
           <h2 class="text-lg font-semibold text-gray-900 mb-4">
             {{ t('admin.pages.orders.detail.statusUpdate.title') }}
           </h2>
+          <div
+            v-if="statusLocked"
+            class="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800"
+          >
+            {{ t('admin.pages.orders.detail.statusUpdate.lockedByCarrier', 'Status is controlled by the delivery carrier. You cannot change it manually.') }}
+          </div>
           <form
             class="space-y-4"
             @submit.prevent="handleStatusUpdate"
@@ -453,7 +468,7 @@
               <BaseSelect
                 id="status"
                 v-model="newStatus"
-                :disabled="editing || order.status === 'DELIVERED'"
+                :disabled="editing || statusLocked || order.status === 'DELIVERED'"
               >
                 <option
                   v-for="s in selectableStatuses"
@@ -486,13 +501,59 @@
             <div class="flex justify-end space-x-3 pt-2">
               <button
                 type="submit"
-                :disabled="editing || updating || newStatus === order.status || order.status === 'DELIVERED'"
+                :disabled="editing || statusLocked || updating || newStatus === order.status || order.status === 'DELIVERED'"
                 class="w-full px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center"
               >
                 {{ updating ? t('admin.common.updating') : t('admin.pages.orders.detail.statusUpdate.submit') }}
               </button>
             </div>
           </form>
+        </div>
+
+        <!-- Delivery Info -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            {{ t('admin.pages.orders.detail.sections.deliveryInfo', 'Delivery') }}
+          </h2>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.deliveryCompany', 'Company') }}</span>
+              <span class="text-gray-900 font-medium">{{ order.shippingProvider || order.shipments?.[0]?.provider || '—' }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.deliveryMode', 'Type') }}</span>
+              <span class="text-gray-900 font-medium">{{ deliveryModeLabel(order.deliveryMode) }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.shippingFee', 'Shipping') }}</span>
+              <span class="text-gray-900 font-medium">
+                {{ order.shippingAmount != null ? formatCurrency(Number(order.shippingAmount)) : '—' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.totalWithDelivery', 'Total (with delivery)') }}</span>
+              <span class="text-gray-900 font-semibold">{{ formatCurrency(orderTotalWithShipping) }}</span>
+            </div>
+            <div v-if="order.shippingPickupPoint" class="flex items-center justify-between gap-3">
+              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.pickupPoint', 'Stop desk') }}</span>
+              <span class="text-gray-900 font-medium">{{ order.shippingPickupPoint }}</span>
+            </div>
+            <div v-if="order.shippingWilayaCode || order.shippingCommuneCode" class="flex items-center justify-between gap-3">
+              <span class="text-gray-500">{{ t('admin.pages.orders.detail.fields.wilayaCommune', 'Wilaya/Commune') }}</span>
+              <span class="text-gray-900 font-medium">{{ [order.shippingWilayaCode, order.shippingCommuneCode].filter(Boolean).join(' / ') }}</span>
+            </div>
+          </div>
+          <div class="mt-4">
+            <button
+              v-if="canPrintBordereau"
+              type="button"
+              class="ui-btn ui-btn--secondary ui-btn--md w-full flex items-center justify-center gap-2"
+              @click="printBordereau"
+            >
+              <Icon name="lucide:printer" class="w-4 h-4" />
+              {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
+            </button>
+          </div>
         </div>
 
         <!-- Customer Info Card -->
@@ -693,18 +754,37 @@ interface OrderItem {
   } | null
 }
 
-interface Order {
-  id: string
-  customerName: string
-  customerPhone: string
-  customerAddress: string | null
-  totalAmount: number
-  status: string
-  callStatus: string
-  internalNotes: string | null
-  createdAt: string
-  items: OrderItem[]
-}
+	interface Order {
+	  id: string
+	  customerName: string
+	  customerPhone: string
+	  customerAddress: string | null
+	  totalAmount: number
+	  totalWithShippingAmount?: number | null
+	  shippingAmount?: number | null
+	  shippingCurrency?: string | null
+	  shippingProvider?: string | null
+	  deliveryMode?: string | null
+	  shippingServiceLevel?: string | null
+	  shippingPickupPoint?: number | null
+	  shippingWilayaCode?: string | null
+	  shippingCommuneCode?: string | null
+	  shippingAddressLine1?: string | null
+	  shippingNotes?: string | null
+	  shipments?: Array<{
+	    id: string
+	    provider: string
+	    providerShipmentId?: string | null
+	    status: string
+	    serviceLevel?: string | null
+	    createdAt: string
+	  }>
+	  status: string
+	  callStatus: string
+	  internalNotes: string | null
+	  createdAt: string
+	  items: OrderItem[]
+	}
 
 type CartItem = {
   productId: string
@@ -764,7 +844,7 @@ function orderStatusLabel(code: string) {
   return key ? t(key) : code
 }
 
-const selectableStatuses = computed(() => {
+	const selectableStatuses = computed(() => {
   const current = order.value?.status
   if (!current) return []
 
@@ -776,7 +856,54 @@ const selectableStatuses = computed(() => {
   })()
 
   return Array.from(new Set([current, ...next]))
-})
+	})
+
+	const orderTotalWithShipping = computed(() => {
+	  const o = order.value
+	  if (!o) return 0
+	  if (o.totalWithShippingAmount != null && Number.isFinite(Number(o.totalWithShippingAmount))) {
+	    return Number(o.totalWithShippingAmount)
+	  }
+	  const shipping = o.shippingAmount == null ? 0 : Number(o.shippingAmount)
+	  return Number(o.totalAmount || 0) + (Number.isFinite(shipping) ? shipping : 0)
+	})
+
+	const statusLocked = computed(() => {
+	  const o = order.value
+	  if (!o) return false
+	  const hasCarrier = Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
+	  return hasCarrier && o.status !== 'PENDING'
+	})
+
+	const canPrintBordereau = computed(() => {
+	  const o = order.value
+	  if (!o) return false
+	  return Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
+	})
+
+	function deliveryModeLabel(mode: any) {
+	  const raw = typeof mode === 'string' ? mode.trim().toLowerCase() : ''
+	  if (raw === 'store') return t('admin.pages.orders.index.deliveryModes.store', 'Store pickup')
+	  if (raw === 'pickup' || raw === 'desk' || raw === 'office') return t('admin.pages.orders.index.deliveryModes.pickup', 'Stop desk')
+	  return t('admin.pages.orders.index.deliveryModes.home', 'Home delivery')
+	}
+
+	async function printBordereau() {
+	  if (!order.value) return
+	  errorMessage.value = ''
+	  try {
+	    const blob = await $fetch<Blob>(`/api/admin/orders/${encodeURIComponent(orderId)}/bordereau`, {
+	      headers: { Authorization: `Bearer ${authStore.token}` },
+	      responseType: 'blob' as any
+	    })
+	    const url = URL.createObjectURL(blob)
+	    window.open(url, '_blank', 'noopener,noreferrer')
+	    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+	  } catch (e: any) {
+	    console.error('Failed to print bordereau', e)
+	    errorMessage.value = e?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+	  }
+	}
 
 function variantLabelFromOrderItem(item: OrderItem): string | undefined {
   const labels =

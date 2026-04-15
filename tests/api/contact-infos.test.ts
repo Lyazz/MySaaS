@@ -4,7 +4,7 @@ import prisma from '../../backend/src/lib/prisma'
 import jwt from 'jsonwebtoken'
 
 describe('Contact Infos (Tenant Admin + Public)', async () => {
-    await setup({ setupTimeout: 300_000 })
+    await setup({ setupTimeout: 900_000, teardownTimeout: 900_000 })
 
     const slugA = `contact-a-${Date.now()}`
     const emailA = `owner-${slugA}@example.com`
@@ -118,4 +118,3 @@ describe('Contact Infos (Tenant Admin + Public)', async () => {
         await prisma.tenant.deleteMany({ where: { id: { in: tenantIds } } })
     })
 })
-

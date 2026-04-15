@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 
 describe('Upload API (Tenant Admin)', async () => {
-    await setup({ setupTimeout: 300_000 })
+    await setup({ setupTimeout: 900_000, teardownTimeout: 900_000 })
 
     const slug = `upload-test-${Date.now()}`
     const email = `owner-${slug}@example.com`

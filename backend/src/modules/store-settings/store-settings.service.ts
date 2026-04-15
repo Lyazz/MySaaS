@@ -62,6 +62,7 @@ export type StoreSettingsPatchInput = Partial<{
     currencyCountry: string
     isCompleted: boolean
     allowedDeliveryProviders: string[]
+    storePickupEnabled: boolean
 }>
 
 export class StoreSettingsService {
@@ -197,6 +198,13 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('allowedDeliveryProviders must be an array of strings')
             }
             updateSettings.allowedDeliveryProviders = input.allowedDeliveryProviders
+        }
+
+        if (input.storePickupEnabled !== undefined) {
+            if (typeof input.storePickupEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('storePickupEnabled must be a boolean')
+            }
+            updateSettings.storePickupEnabled = input.storePickupEnabled
         }
 
         // Execute Transaction if tenant fields need updating

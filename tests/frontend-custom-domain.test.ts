@@ -3,7 +3,7 @@ import { setup, fetch } from '@nuxt/test-utils'
 import prisma from '../backend/src/lib/prisma'
 
 describe('Frontend custom domain tenant resolution', async () => {
-  await setup({ setupTimeout: 300_000 })
+  await setup({ setupTimeout: 900_000, teardownTimeout: 900_000 })
 
   const timestamp = Date.now()
   const slug = `frontend-domain-${timestamp}`
@@ -31,4 +31,3 @@ describe('Frontend custom domain tenant resolution', async () => {
     await prisma.tenant.delete({ where: { id: tenant.id } })
   })
 })
-

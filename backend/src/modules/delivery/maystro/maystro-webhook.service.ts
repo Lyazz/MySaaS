@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer'
 import type { PrismaClient } from '@prisma/client'
 import prisma from '../../../lib/prisma'
 import { maystroOrderStatusToLocalOrderStatus, maystroOrderStatusToShipmentStatus } from './maystro-status'
+import { OrdersService } from '../../orders/orders.service'
 
 const isProbablyBase64 = (value: string) => /^[A-Za-z0-9+/=]+$/.test(value) && value.length % 4 === 0
 
@@ -142,13 +143,10 @@ export class MaystroWebhookService {
         }
 
         if (mapping?.localOrderId && localOrderStatus) {
-            await this.prisma.order.update({
-                where: { tenantId_id: { tenantId: input.tenantId, id: mapping.localOrderId } },
-                data: { status: localOrderStatus }
-            })
+            const orders = new OrdersService()
+            await orders.applyCarrierStatus(input.tenantId, mapping.localOrderId, localOrderStatus, { userId: null })
         }
 
         return { event: event || 'OrderStatusChanged', handled: true, shipmentId: shipment?.id, status: shipmentStatus }
     }
 }
-

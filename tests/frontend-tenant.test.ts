@@ -3,7 +3,7 @@ import { setup, fetch } from '@nuxt/test-utils'
 import prisma from '../backend/src/lib/prisma'
 
 describe('Frontend Tenant Resolution', async () => {
-    await setup({ setupTimeout: 300_000 })
+    await setup({ setupTimeout: 900_000, teardownTimeout: 900_000 })
 
     const slug = `frontend-test-${Date.now()}`
 

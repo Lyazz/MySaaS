@@ -367,24 +367,29 @@ const deliveryOptions = computed(() => {
     })
   })
 
-  options.push({
-    id: 'store-pickup',
-    provider: null,
-    providerLabel: 'Store',
-    mode: 'store',
-    modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
-    price: 'FREE',
-    description: storefrontContent.value.checkout.delivery.description.storePickup,
-    icon: 'lucide:store',
-    color: 'green'
-  })
+  if (storeSettings.value?.storePickupEnabled === true) {
+    options.push({
+      id: 'store-pickup',
+      provider: null,
+      providerLabel: 'Store',
+      mode: 'store',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
+      price: 'FREE',
+      description: storefrontContent.value.checkout.delivery.description.storePickup,
+      icon: 'lucide:store',
+      color: 'green'
+    })
+  }
 
   return options
 })
 
 watchEffect(() => {
-  if (!form.selectedDeliveryOption && deliveryOptions.value.length) {
-    form.selectedDeliveryOption = deliveryOptions.value[0].id
+  const options = deliveryOptions.value
+  if (!options.length) return
+  const selected = form.selectedDeliveryOption
+  if (!selected || !options.some((opt: any) => opt.id === selected)) {
+    form.selectedDeliveryOption = options[0].id
   }
 })
 

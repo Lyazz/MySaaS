@@ -136,9 +136,11 @@
             <button 
               @click="handleLogout" 
               class="ui-btn ui-btn--danger ui-btn--md"
+              :aria-label="t('superAdmin.actions.logout')"
+              :title="t('superAdmin.actions.logout')"
             >
               <Icon name="lucide:log-out" class="w-4 h-4" />
-              <span>{{ t('superAdmin.actions.logout') }}</span>
+              <span class="hidden sm:inline">{{ t('superAdmin.actions.logout') }}</span>
             </button>
           </div>
         </div>

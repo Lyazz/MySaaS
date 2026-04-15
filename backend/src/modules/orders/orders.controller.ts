@@ -45,6 +45,35 @@ export class OrdersController {
         }
     }
 
+    async bordereauPdf(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+            }
+
+            try {
+                const out = await service.getBordereauPdf(tenant.id, id, tenant.name)
+                res.setHeader('Content-Type', 'application/pdf')
+                res.setHeader('Content-Disposition', `inline; filename="${out.filename}"`)
+                return res.send(out.pdf)
+            } catch (err) {
+                if (err instanceof OrderValidationError) {
+                    return res.status(err.statusCode).json({
+                        statusCode: err.statusCode,
+                        statusMessage: err.statusMessage
+                    })
+                }
+                throw err
+            }
+        } catch (error) {
+            console.error('Order bordereau error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async updateStatus(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
@@ -101,6 +130,7 @@ export class OrdersController {
                 shippingCommuneCode,
                 shippingAddressLine1,
                 shippingNotes,
+                shippingPickupPoint,
                 items
             } = req.body ?? {}
 
@@ -119,6 +149,7 @@ export class OrdersController {
                         shippingCommuneCode,
                         shippingAddressLine1,
                         shippingNotes,
+                        shippingPickupPoint,
                         items
                     },
                     { userId: user?.id ?? null }
@@ -214,6 +245,7 @@ export class OrdersController {
                 shippingNotes: req.body?.shippingNotes || req.body?.notes,
                 deliveryMode: req.body?.deliveryMode,
                 shippingProvider: req.body?.shippingProvider,
+                shippingPickupPoint: req.body?.shippingPickupPoint,
                 items: req.body?.items ?? []
             }, req.subscription ? {
                 planCode: req.subscription.planCode,
@@ -260,6 +292,7 @@ export class OrdersController {
                 shippingNotes: req.body?.shippingNotes || req.body?.notes,
                 deliveryMode: req.body?.deliveryMode,
                 shippingProvider: req.body?.shippingProvider,
+                shippingPickupPoint: req.body?.shippingPickupPoint,
                 items: req.body?.items ?? []
             }, { userId: user?.id })
 

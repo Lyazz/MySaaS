@@ -157,9 +157,12 @@
               <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.phone') }}
               </th>
+              <th class="ui-th">
+                {{ t('admin.pages.orders.index.table.delivery', 'Delivery') }}
+              </th>
               <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('totalAmount')">
                 <div class="flex items-center gap-1">
-                  {{ t('admin.pages.orders.index.table.total') }}
+                  {{ t('admin.pages.orders.index.table.total', 'Total') }}
                   <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
@@ -228,8 +231,21 @@
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
+                <div class="flex flex-col gap-1">
+                  <div class="text-sm text-slate-900">
+                    {{ order.shippingProvider || '—' }}
+                  </div>
+                  <div class="text-xs text-slate-500">
+                    {{ deliveryModeLabel(order.deliveryMode) }}
+                  </div>
+                </div>
+              </td>
+              <td class="ui-td whitespace-nowrap">
                 <div class="font-medium text-slate-900">
-                  {{ formatCurrency(order.totalAmount) }}
+                  {{ formatCurrency(order.totalWithShippingAmount ?? order.totalAmount) }}
+                </div>
+                <div v-if="order.shippingAmount != null && Number(order.shippingAmount) > 0" class="text-xs text-slate-500">
+                  +{{ formatCurrency(Number(order.shippingAmount)) }}
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
@@ -363,6 +379,10 @@ interface Order {
   customerAddress: string
   customerId?: string
   totalAmount: number
+  totalWithShippingAmount?: number | null
+  shippingAmount?: number | null
+  shippingProvider?: string | null
+  deliveryMode?: string | null
   status: string
   callStatus?: string
   createdAt: string
@@ -511,6 +531,13 @@ function formatDate(dateString: string) {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+function deliveryModeLabel(mode: any) {
+  const raw = typeof mode === 'string' ? mode.trim().toLowerCase() : ''
+  if (raw === 'store') return t('admin.pages.orders.index.deliveryModes.store', 'Store pickup')
+  if (raw === 'pickup' || raw === 'desk' || raw === 'office') return t('admin.pages.orders.index.deliveryModes.pickup', 'Stop desk')
+  return t('admin.pages.orders.index.deliveryModes.home', 'Home delivery')
 }
 
 // Fetch orders on mount and when filters change

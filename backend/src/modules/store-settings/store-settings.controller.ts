@@ -45,6 +45,7 @@ export class StoreSettingsController {
                 tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
                 settings: {
                     logoUrl: settings.logoUrl,
+                    faviconUrl: settings.faviconUrl,
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
                     announcementText: settings.announcementText,
@@ -76,6 +77,7 @@ export class StoreSettingsController {
                 tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
                 storeSettings: {
                     logoUrl: settings.logoUrl,
+                    faviconUrl: settings.faviconUrl,
                     primaryColor: settings.primaryColor,
                     templateKey: settings.templateKey,
                     announcementText: settings.announcementText,
@@ -84,7 +86,9 @@ export class StoreSettingsController {
                     cartEnabled: settings.cartEnabled,
                     codEnabled: settings.codEnabled,
                     currencyCode: settings.currencyCode,
-                    currencyCountry: settings.currencyCountry
+                    currencyCountry: settings.currencyCountry,
+                    allowedDeliveryProviders: settings.allowedDeliveryProviders,
+                    storePickupEnabled: settings.storePickupEnabled
                 }
             })
         } catch (error) {

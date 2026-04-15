@@ -186,12 +186,13 @@ export class DeliveryController {
     async updateSelfStatus(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+        const user = req.user
         const { id } = req.params
         const { status } = req.body as { status: string }
         if (!status) return res.status(400).json({ statusCode: 400, statusMessage: 'status required' })
 
         try {
-            const updated = await service.updateSelfStatus(tenant.id, id, status as any)
+            const updated = await service.updateSelfStatus(tenant.id, id, status as any, { userId: user?.id ?? null })
             res.json(updated)
         } catch (error) {
             console.error('Self status update error', error)

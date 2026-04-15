@@ -111,7 +111,7 @@
                      </label>
                      <BaseSelect v-model="form.deliveryMode">
                         <option value="home">{{ t('admin.pages.orders.create.modes.home') }}</option>
-                        <option value="desk">{{ t('admin.pages.orders.create.modes.desk') }}</option>
+                        <option value="pickup">{{ t('admin.pages.orders.create.modes.desk') }}</option>
                      </BaseSelect>
                   </div>
                </div>
@@ -160,6 +160,44 @@
                        {{ maystroCommuneError }}
                      </p>
                   </div>
+               </div>
+
+               <div
+                 v-if="form.shippingProvider === 'MAYSTRO' && form.deliveryMode === 'pickup'"
+                 class="grid grid-cols-1 md:grid-cols-2 gap-4"
+               >
+                 <div class="md:col-span-2">
+                   <label class="block text-sm font-medium text-slate-700 mb-1">
+                     {{ t('admin.pages.orders.create.pickupPoint', 'Stop desk') }}
+                   </label>
+                   <BaseSelect
+                     v-model="form.shippingPickupPoint"
+                     :disabled="!form.shippingCommuneCode || maystroPickupPointsLoading"
+                   >
+                     <option value="">
+                       {{
+                         !form.shippingCommuneCode
+                           ? t('admin.pages.orders.create.commune')
+                           : maystroPickupPointsLoading
+                             ? t('admin.common.loading')
+                             : t('admin.common.noneSelected')
+                       }}
+                     </option>
+                     <option
+                       v-for="p in maystroPickupPoints"
+                       :key="String(p.pickup_point)"
+                       :value="String(p.pickup_point)"
+                     >
+                       {{ p.pickup_point }} - {{ p.name_lt || p.name_ar || `Commune ${p.commune}` }}
+                     </option>
+                   </BaseSelect>
+                   <p
+                     v-if="maystroPickupPointsError"
+                     class="mt-1 text-xs text-amber-700"
+                   >
+                     {{ maystroPickupPointsError }}
+                   </p>
+                 </div>
                </div>
 
                <div>
@@ -431,21 +469,26 @@ const customers = ref<any[]>([])
 const products = ref<any[]>([])
 const wilayas = ref(DZ_WILAYAS)
 
-const form = ref({
-    customerId: '',
-    customerName: '',
-    customerPhone: '',
-    deliveryMode: 'home',
-    shippingProvider: '',
-    shippingWilayaCode: '',
-    shippingCommuneCode: '',
-    shippingAddressLine1: '',
-    shippingNotes: ''
-})
+	const form = ref({
+	    customerId: '',
+	    customerName: '',
+	    customerPhone: '',
+	    deliveryMode: 'home',
+	    shippingProvider: '',
+	    shippingWilayaCode: '',
+	    shippingCommuneCode: '',
+	    shippingPickupPoint: '',
+	    shippingAddressLine1: '',
+	    shippingNotes: ''
+	})
 
-const maystroCommunes = ref<Array<{ id: number; name: string }>>([])
-const maystroCommuneLoading = ref(false)
-const maystroCommuneError = ref<string | null>(null)
+	const maystroCommunes = ref<Array<{ id: number; name: string }>>([])
+	const maystroCommuneLoading = ref(false)
+	const maystroCommuneError = ref<string | null>(null)
+
+	const maystroPickupPoints = ref<Array<{ pickup_point: number; commune: number; name_lt?: string; name_ar?: string }>>([])
+	const maystroPickupPointsLoading = ref(false)
+	const maystroPickupPointsError = ref<string | null>(null)
 
 type CartItem = {
     productId: string
@@ -585,9 +628,9 @@ function removeCartItem(index: number) {
     cartItems.value.splice(index, 1)
 }
 
-watch(
-  () => [form.value.shippingProvider, form.value.shippingWilayaCode] as const,
-  async ([provider, wilaya], prev) => {
+	watch(
+	  () => [form.value.shippingProvider, form.value.shippingWilayaCode] as const,
+	  async ([provider, wilaya], prev) => {
     const [prevProvider, prevWilaya] = prev || ['', '']
     if (process.server) return
 
@@ -625,8 +668,49 @@ watch(
       maystroCommuneLoading.value = false
     }
   },
-  { immediate: true }
-)
+	  { immediate: true }
+	)
+
+	watch(
+	  () => [form.value.shippingProvider, form.value.deliveryMode, form.value.shippingCommuneCode, form.value.shippingWilayaCode] as const,
+	  async ([provider, mode, commune, wilaya]) => {
+	    if (process.server) return
+
+	    maystroPickupPointsError.value = null
+	    maystroPickupPoints.value = []
+
+	    if (provider !== 'MAYSTRO') return
+	    if (mode !== 'pickup') return
+
+	    const normalizedCommune = String(commune || '').trim()
+	    const normalizedWilaya = String(wilaya || '').trim()
+	    if (!normalizedCommune || !normalizedWilaya) return
+
+	    maystroPickupPointsLoading.value = true
+	    try {
+	      const data = await $fetch<any[]>(
+	        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(normalizedCommune)}&wilaya=${encodeURIComponent(normalizedWilaya)}&deliveryType=3&nearby=true`,
+	        { headers: { Authorization: `Bearer ${authStore.token}` } }
+	      )
+	      maystroPickupPoints.value = Array.isArray(data)
+	        ? data
+	            .map((p: any) => ({
+	              pickup_point: Number(p?.pickup_point),
+	              commune: Number(p?.commune),
+	              name_lt: p?.name_lt ? String(p.name_lt) : undefined,
+	              name_ar: p?.name_ar ? String(p.name_ar) : undefined
+	            }))
+	            .filter((p) => Number.isFinite(p.pickup_point) && p.pickup_point > 0)
+	        : []
+	    } catch (e: any) {
+	      maystroPickupPoints.value = []
+	      maystroPickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
+	    } finally {
+	      maystroPickupPointsLoading.value = false
+	    }
+	  },
+	  { immediate: true }
+	)
 
 async function submitOrder() {
     if (!canSubmit.value) return

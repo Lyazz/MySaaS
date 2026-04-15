@@ -183,6 +183,7 @@ describe('Public checkout order flow', () => {
         expect(saved?.shippingServiceLevel).toBe('home')
         expect(saved?.shippingAmount).toBe(499)
         expect(saved?.shippingCurrency).toBe('DZD')
+        expect(Number(saved?.totalWithShippingAmount)).toBeCloseTo(Number(saved?.totalAmount) + 499)
 
         const variantAfter = await prisma.productVariant.findUnique({ where: { id: variantId } })
         expect(variantAfter?.stock).toBe(variantStockBefore)
@@ -205,6 +206,51 @@ describe('Public checkout order flow', () => {
         const afterCancel = await prisma.productVariant.findUnique({ where: { id: variantId } })
         expect(afterCancel?.stock).toBe(variantStockBefore)
         expect(afterCancel?.reserved).toBe(0)
+    })
+
+    it('rejects store pickup checkout when store pickup is disabled', async () => {
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Store Pickup Buyer',
+                customerPhone: '0550123499',
+                deliveryMode: 'store',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(res.status).toBe(403)
+        expect(res.body.statusMessage).toContain('Store pickup is disabled')
+    })
+
+    it('allows store pickup checkout when enabled and stores delivery totals', async () => {
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { storePickupEnabled: true }
+        })
+
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Store Pickup Buyer Enabled',
+                customerPhone: '0550123488',
+                deliveryMode: 'store',
+                items: [{ productId: simpleProductId, variantId: simpleVariantId, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+        const orderId = res.body.orderId as string
+
+        const saved = await prisma.order.findUnique({ where: { id: orderId } })
+        expect(saved?.deliveryMode).toBe('store')
+        expect(saved?.shippingAmount).toBe(0)
+        expect(Number(saved?.totalWithShippingAmount)).toBeCloseTo(Number(saved?.totalAmount))
+
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { storePickupEnabled: false }
+        })
     })
 
     it('returns a public Meta Pixel payload for the order (tenant-scoped)', async () => {

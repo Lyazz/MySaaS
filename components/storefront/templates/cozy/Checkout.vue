@@ -67,17 +67,19 @@ const deliveryOptions = computed(() => {
     })
   })
   
-  options.push({
-    id: 'store-pickup',
-    provider: null,
-    providerLabel: 'Store',
-    mode: 'store',
-    modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
-    icon: 'lucide:store',
-    color: 'green',
-    price: 'FREE',
-    description: storefrontContent.value.checkout.delivery.description.storePickup
-  })
+  if (storeSettings.value?.storePickupEnabled === true) {
+    options.push({
+      id: 'store-pickup',
+      provider: null,
+      providerLabel: 'Store',
+      mode: 'store',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
+      icon: 'lucide:store',
+      color: 'green',
+      price: 'FREE',
+      description: storefrontContent.value.checkout.delivery.description.storePickup
+    })
+  }
   
   return options
 })
@@ -97,8 +99,11 @@ const maystroPrices = useMaystroDeliveryPrices({
 })
 
 watchEffect(() => {
-  if (!form.value.selectedDeliveryOption && deliveryOptions.value.length) {
-    form.value.selectedDeliveryOption = deliveryOptions.value[0].id
+  const options = deliveryOptions.value
+  if (!options.length) return
+  const selected = form.value.selectedDeliveryOption
+  if (!selected || !options.some((opt: any) => opt.id === selected)) {
+    form.value.selectedDeliveryOption = options[0].id
   }
 })
 

@@ -15,6 +15,7 @@ describe('Delivery API', () => {
     let orderA: any
     let orderB: any
     let shipmentSelfId: string
+    let inactiveCashboxAId: string
 
     beforeAll(async () => {
         tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: `tenant-a-${Date.now()}` } })
@@ -42,6 +43,8 @@ describe('Delivery API', () => {
                 tenantId: tenantA.id,
                 status: 'PENDING',
                 totalAmount: 220,
+                shippingAmount: 500,
+                shippingCurrency: 'DZD',
                 customerName: 'Alice',
                 customerPhone: '0550123456',
                 items: {
@@ -80,12 +83,29 @@ describe('Delivery API', () => {
                 { tenantId: tenantA.id, provider: 'SELF', wilayaCode: '16', serviceLevel: 'office', price: 400 }
             ]
         })
+
+        const cashbox = await prisma.cashbox.create({
+            data: {
+                tenantId: tenantA.id,
+                name: 'Inactive Cashbox',
+                isActive: false
+            }
+        })
+        inactiveCashboxAId = cashbox.id
     })
 
     afterAll(async () => {
         vi.restoreAllMocks()
         if (!tenantA?.id || !tenantB?.id) return
         const tenantIds = [tenantA.id, tenantB.id]
+        await prisma.customerPayment.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.supplierPayment.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.cashTransaction.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.cashSession.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.cashbox.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.saleItem.deleteMany({ where: { sale: { tenantId: { in: tenantIds } } } })
+        await prisma.sale.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.inventoryMovement.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.shipmentEvent.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.shipment.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.deliveryRate.deleteMany({ where: { tenantId: { in: tenantIds } } })
@@ -200,6 +220,26 @@ describe('Delivery API', () => {
         expect(res.status).toBe(404)
     })
 
+    it('blocks manual status changes after confirmation for carrier-controlled orders', async () => {
+        const confirm = await request(app)
+            .patch(`/api/admin/orders/${orderA.id}`)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .send({ status: 'CONFIRMED' })
+
+        expect(confirm.status).toBe(200)
+        expect(confirm.body.status).toBe('CONFIRMED')
+
+        const ship = await request(app)
+            .patch(`/api/admin/orders/${orderA.id}`)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .send({ status: 'SHIPPED' })
+
+        expect(ship.status).toBe(409)
+        expect(ship.body.statusMessage).toContain('controlled by the delivery carrier')
+    })
+
     it('updates self delivery status (admin protected)', async () => {
         const res = await request(app)
             .post(`/api/self/shipments/${shipmentSelfId}/status`)
@@ -209,6 +249,27 @@ describe('Delivery API', () => {
 
         expect(res.status).toBe(200)
         expect(res.body.status).toBe('DELIVERED')
+
+        const cashboxAfter = await prisma.cashbox.findUnique({ where: { id: inactiveCashboxAId } })
+        expect(cashboxAfter?.isActive).toBe(true)
+
+        const session = await prisma.cashSession.findFirst({
+            where: { tenantId: tenantA.id, cashboxId: inactiveCashboxAId, status: 'OPEN' },
+            orderBy: { openedAt: 'desc' }
+        })
+        expect(session?.id).toBeTruthy()
+
+        const cashTx = await prisma.cashTransaction.findFirst({
+            where: {
+                tenantId: tenantA.id,
+                orderId: orderA.id,
+                direction: 'IN',
+                type: 'SALE_PAYMENT'
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+        expect(cashTx?.cashboxId).toBe(inactiveCashboxAId)
+        expect(String(cashTx?.amount)).toBe('720')
     })
 
     it('handles Maystro webhook decoding and status update', async () => {

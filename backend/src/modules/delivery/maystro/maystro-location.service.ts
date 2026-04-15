@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import axios from 'axios'
 import prisma from '../../../lib/prisma'
+import { MaystroClient } from './maystro.client'
 import { MaystroIntegrationError } from './maystro.errors'
 
 export type MaystroWilaya = { id: number; name: string }
@@ -32,13 +33,24 @@ export class MaystroLocationService {
     async listWilayas(input: { apiToken?: string; language?: string; country?: string } = {}): Promise<MaystroWilaya[]> {
         if (this.wilayasCache && this.wilayasCache.expiresAt > nowMs()) return this.wilayasCache.value
 
-        const { data } = await axios.get<any[]>(`${this.baseUrl()}/base/wilayas/`, {
-            params: { language: input.language, country: input.country },
-            headers: input.apiToken ? { Authorization: input.apiToken } : undefined,
-            timeout: 15_000
-        })
+        const data = input.apiToken
+            ? await new MaystroClient({ apiToken: input.apiToken, baseURL: this.baseUrl() }).request<any[]>({
+                method: 'GET',
+                path: '/base/wilayas/',
+                params: { language: input.language, country: input.country }
+            })
+            : (
+                await axios.get<any[]>(`${this.baseUrl()}/base/wilayas/`, {
+                    params: { language: input.language, country: input.country },
+                    timeout: 15_000
+                })
+            ).data
 
-        const wilayas: MaystroWilaya[] = (Array.isArray(data) ? data : []).map((w: any) => ({
+        if (!Array.isArray(data)) {
+            throw new MaystroIntegrationError({ statusCode: 502, statusMessage: 'Maystro: invalid wilayas response' })
+        }
+
+        const wilayas: MaystroWilaya[] = data.map((w: any) => ({
             id: Number(w?.id),
             name: String(w?.name ?? w?.name_lt ?? w?.name_ar ?? '')
         }))
@@ -52,13 +64,24 @@ export class MaystroLocationService {
         const cached = this.communesCache.get(key)
         if (cached && cached.expiresAt > nowMs()) return cached.value
 
-        const { data } = await axios.get<any[]>(`${this.baseUrl()}/base/communes/`, {
-            params: { wilaya: input.wilaya },
-            headers: input.apiToken ? { Authorization: input.apiToken } : undefined,
-            timeout: 15_000
-        })
+        const data = input.apiToken
+            ? await new MaystroClient({ apiToken: input.apiToken, baseURL: this.baseUrl() }).request<any[]>({
+                method: 'GET',
+                path: '/base/communes/',
+                params: { wilaya: input.wilaya }
+            })
+            : (
+                await axios.get<any[]>(`${this.baseUrl()}/base/communes/`, {
+                    params: { wilaya: input.wilaya },
+                    timeout: 15_000
+                })
+            ).data
 
-        const communes: MaystroCommune[] = (Array.isArray(data) ? data : []).map((c: any) => ({
+        if (!Array.isArray(data)) {
+            throw new MaystroIntegrationError({ statusCode: 502, statusMessage: 'Maystro: invalid communes response' })
+        }
+
+        const communes: MaystroCommune[] = data.map((c: any) => ({
             id: Number(c?.id),
             wilaya: Number(c?.wilaya),
             name: String(c?.name ?? ''),

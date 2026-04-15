@@ -156,16 +156,18 @@
               <span>{{ t('admin.actions.viewStore') }}</span>
             </a>
 
-            <LocaleSwitcher class="inline-flex" />
+            <LocaleSwitcher class="hidden sm:inline-flex" />
             
             <div class="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
             <button 
               @click="handleLogout" 
               class="ui-btn ui-btn--secondary ui-btn--md"
+              :aria-label="t('admin.actions.logout')"
+              :title="t('admin.actions.logout')"
             >
               <Icon name="lucide:log-out" class="w-4 h-4 text-slate-500" />
-              <span>{{ t('admin.actions.logout') }}</span>
+              <span class="hidden sm:inline">{{ t('admin.actions.logout') }}</span>
             </button>
           </div>
         </div>

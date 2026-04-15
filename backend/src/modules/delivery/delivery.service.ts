@@ -6,6 +6,8 @@ import { SelfDeliveryProvider } from './providers/self.provider'
 import { DELIVERY_PROVIDER_CATALOG, getProviderCatalogItem } from './catalog'
 import { MaystroOrderService } from './maystro/maystro-order.service'
 import { MaystroWebhookService } from './maystro/maystro-webhook.service'
+import { moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
+import { OrdersService } from '../orders/orders.service'
 import type {
     CreateShipmentInput,
     QuoteOption,
@@ -27,6 +29,13 @@ type ProviderApiConfig = {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const normalizeOrderDeliveryMode = (value: unknown): 'home' | 'office' | undefined => {
+    const raw = typeof value === 'string' ? value.trim().toLowerCase() : ''
+    if (raw === 'home') return 'home'
+    if (raw === 'pickup' || raw === 'desk' || raw === 'office') return 'office'
+    return undefined
+}
 
 export class DeliveryConfigurationError extends Error {
     statusCode: number
@@ -475,53 +484,67 @@ export class DeliveryService {
         })
         if (!order) throw new Error('Order not found for tenant')
 
+        const inferredDeliveryMode = input.deliveryMode ?? normalizeOrderDeliveryMode((order as any).deliveryMode)
+        const baseInput: CreateShipmentInput = { ...input, deliveryMode: inferredDeliveryMode }
+
+        const orderPickupPoint =
+            typeof (order as any).shippingPickupPoint === 'number' && Number.isFinite((order as any).shippingPickupPoint)
+                ? Math.trunc((order as any).shippingPickupPoint)
+                : null
+
         const offeredProviders = await this.getOfferedProviders(input.tenantId)
-        if (!offeredProviders.includes(input.provider)) {
+        if (!offeredProviders.includes(baseInput.provider)) {
             throw new DeliveryConfigurationError(403, 'Delivery provider is not enabled for this store')
         }
 
-        const effectiveServiceLevel = this.resolveServiceLevel(input)
-        const { impl, apiConfig } = await this.resolveProvider(input.tenantId, input.provider)
-        const requiresCredentials = getProviderCatalogItem(input.provider).credentialFields.some((f) => f.required)
+        const effectiveServiceLevel = this.resolveServiceLevel(baseInput)
+        const { impl, apiConfig } = await this.resolveProvider(baseInput.tenantId, baseInput.provider)
+        const requiresCredentials = getProviderCatalogItem(baseInput.provider).credentialFields.some((f) => f.required)
         if (requiresCredentials && !apiConfig) {
             throw new DeliveryConfigurationError(400, 'Delivery provider credentials are not configured')
         }
 
+        const maybeAugmentedMetadata =
+            baseInput.provider === 'MAYSTRO' && orderPickupPoint && baseInput.metadata?.pickupPoint == null
+                ? { ...(baseInput.metadata || {}), pickupPoint: orderPickupPoint, maystroDeliveryType: 3 }
+                : baseInput.metadata
+
         const result =
-            input.provider === 'MAYSTRO'
+            baseInput.provider === 'MAYSTRO'
                 ? await this.createMaystroShipment({
-                    ...input,
+                    ...baseInput,
                     serviceLevel: effectiveServiceLevel,
                     apiToken: apiConfig!.apiToken!,
-                    storeId: apiConfig!.storeId!
+                    storeId: apiConfig!.storeId!,
+                    metadata: maybeAugmentedMetadata
                 })
-                : await impl.createShipment({ ...input, serviceLevel: effectiveServiceLevel })
+                : await impl.createShipment({ ...baseInput, serviceLevel: effectiveServiceLevel, metadata: maybeAugmentedMetadata })
 
         const mergedMetadata =
-            input.provider === 'MAYSTRO'
+            baseInput.provider === 'MAYSTRO'
                 ? {
-                    ...(input.metadata || {}),
+                    ...(maybeAugmentedMetadata || {}),
                     maystro: result.raw ?? null
                 }
-                : input.metadata ?? result.raw ?? undefined
+                : maybeAugmentedMetadata ?? result.raw ?? undefined
 
         const shipment = await this.prisma.shipment.create({
             data: {
-                tenantId: input.tenantId,
-                orderId: input.orderId,
-                provider: input.provider,
+                tenantId: baseInput.tenantId,
+                orderId: baseInput.orderId,
+                provider: baseInput.provider,
                 providerShipmentId: result.providerShipmentId,
                 status: result.status || ShipmentStatus.PENDING,
                 serviceLevel: effectiveServiceLevel,
-                price: result.price ?? input.price ?? undefined,
-                currency: result.currency || input.currency || 'DZD',
-                contactName: input.contactName,
-                contactPhone: input.contactPhone,
-                wilayaCode: input.wilayaCode,
-                communeCode: input.communeCode,
-                addressLine1: input.addressLine1,
-                addressLine2: input.addressLine2,
-                notes: input.notes,
+                price: result.price ?? baseInput.price ?? undefined,
+                currency: result.currency || baseInput.currency || 'DZD',
+                contactName: baseInput.contactName,
+                contactPhone: baseInput.contactPhone,
+                wilayaCode: baseInput.wilayaCode,
+                communeCode: baseInput.communeCode,
+                addressLine1: baseInput.addressLine1,
+                addressLine2: baseInput.addressLine2,
+                notes: baseInput.notes,
                 labelUrl: result.labelUrl ?? undefined,
                 trackingUrl: result.trackingUrl ?? undefined,
                 metadata: mergedMetadata as any
@@ -531,7 +554,7 @@ export class DeliveryService {
         if (result.status) {
             await this.prisma.shipmentEvent.create({
                 data: {
-                    tenantId: input.tenantId,
+                    tenantId: baseInput.tenantId,
                     shipmentId: shipment.id,
                     status: result.status,
                     description: 'Shipment created',
@@ -539,6 +562,34 @@ export class DeliveryService {
                 }
             })
         }
+
+        // Mirror the chosen carrier and shipping price on the order for admin UIs / invoices.
+        const shippingAmount = shipment.price != null ? Number(shipment.price) : null
+        const totalWithShippingAmount =
+            shippingAmount == null
+                ? (order as any).totalWithShippingAmount ?? null
+                : centsToMoney(moneyToCents(Number((order as any).totalAmount || 0)) + moneyToCents(shippingAmount))
+
+        await this.prisma.order.updateMany({
+            where: { tenantId: baseInput.tenantId, id: baseInput.orderId },
+            data: {
+                shippingProvider: baseInput.provider,
+                shippingServiceLevel: effectiveServiceLevel ?? undefined,
+                shippingAmount: shippingAmount ?? undefined,
+                shippingCurrency: shipment.currency || undefined,
+                shippingWilayaCode: baseInput.wilayaCode || undefined,
+                shippingCommuneCode: baseInput.communeCode || undefined,
+                shippingAddressLine1: baseInput.addressLine1 || undefined,
+                shippingAddressLine2: baseInput.addressLine2 || undefined,
+                shippingNotes: baseInput.notes || undefined,
+                deliveryMode: inferredDeliveryMode === 'office' ? 'pickup' : inferredDeliveryMode ?? (order as any).deliveryMode,
+                totalWithShippingAmount: totalWithShippingAmount ?? undefined,
+                shippingPickupPoint:
+                    typeof (maybeAugmentedMetadata as any)?.pickupPoint === 'number'
+                        ? Math.trunc((maybeAugmentedMetadata as any).pickupPoint)
+                        : undefined
+            } as any
+        })
 
         return shipment
     }
@@ -659,7 +710,7 @@ export class DeliveryService {
         return webhook.handleWebhook({ tenantId, raw: rawPayload, inventorySyncEnabled })
     }
 
-    async updateSelfStatus(tenantId: string, shipmentId: string, status: ShipmentStatus) {
+    async updateSelfStatus(tenantId: string, shipmentId: string, status: ShipmentStatus, actor?: { userId?: string | null }) {
         const shipment = await this.prisma.shipment.findFirst({
             where: { id: shipmentId, tenantId, provider: 'SELF' }
         })
@@ -676,6 +727,22 @@ export class DeliveryService {
                 description: 'Self delivery status update'
             }
         })
+
+        const orderStatus =
+            status === 'DELIVERED'
+                ? 'DELIVERED'
+                : status === 'IN_TRANSIT'
+                    ? 'SHIPPED'
+                    : status === 'CANCELLED'
+                        ? 'CANCELLED'
+                        : status === 'RETURNED'
+                            ? 'RETURNED'
+                            : null
+        if (orderStatus) {
+            const orders = new OrdersService()
+            await orders.applyCarrierStatus(tenantId, shipment.orderId, orderStatus, actor)
+        }
+
         return updated
     }
 

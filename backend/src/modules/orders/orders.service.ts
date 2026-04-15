@@ -6,7 +6,10 @@ import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
-import { resolveCashboxId } from '../cash/cashbox-resolver'
+import { ensureActiveCashboxAndOpenSession } from '../cash/cashbox-resolver'
+import { renderGenericBordereauPdf } from './bordereau-pdf'
+import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
+import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
 
 const telegramService = new TelegramService()
 
@@ -41,6 +44,7 @@ export type PublicOrderInput = {
     shippingNotes?: string | null
     deliveryMode?: string | null
     shippingProvider?: string | null
+    shippingPickupPoint?: number | string | null
     items: PublicOrderItemInput[]
 }
 
@@ -59,6 +63,7 @@ export type AdminOrderInput = {
     shippingNotes?: string | null
     deliveryMode?: string | null
     shippingProvider?: string | null
+    shippingPickupPoint?: number | string | null
     items: PublicOrderItemInput[]
 }
 
@@ -73,6 +78,7 @@ export type AdminOrderUpdateInput = {
     shippingCommuneCode?: string | null
     shippingAddressLine1?: string | null
     shippingNotes?: string | null
+    shippingPickupPoint?: number | string | null
     items?: PublicOrderItemInput[] | null
 }
 
@@ -85,6 +91,27 @@ type SubscriptionContext = {
 
 const ORDER_STATUSES = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURNED'] as const
 
+const normalizeDeliveryMode = (value: unknown): 'home' | 'pickup' | 'store' => {
+    const raw = typeof value === 'string' ? value.trim().toLowerCase() : ''
+    if (raw === 'store') return 'store'
+    if (raw === 'pickup' || raw === 'desk' || raw === 'office') return 'pickup'
+    return 'home'
+}
+
+const toOptionalPickupPoint = (value: unknown): number | null => {
+    if (value === undefined || value === null) return null
+    const n = typeof value === 'number' ? value : Number(String(value).trim())
+    if (!Number.isFinite(n)) return null
+    const i = Math.trunc(n)
+    return i > 0 ? i : null
+}
+
+const computeTotalWithShipping = (itemsTotal: number, shippingAmount: number | null | undefined) => {
+    const itemsCents = moneyToCents(itemsTotal || 0)
+    const shippingCents = moneyToCents(shippingAmount || 0)
+    return centsToMoney(itemsCents + shippingCents)
+}
+
 const addUtcMonths = (date: Date, months: number) =>
     new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
 
@@ -92,6 +119,105 @@ const addUtcYears = (date: Date, years: number) =>
     new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
 
 export class OrdersService {
+    private maystroBordereau = new MaystroBordereauService()
+
+    async getBordereauPdf(tenantId: string, orderId: string, tenantName: string) {
+        const order = await prisma.order.findFirst({
+            where: { tenantId, id: orderId },
+            select: {
+                id: true,
+                createdAt: true,
+                customerName: true,
+                customerPhone: true,
+                customerAddress: true,
+                deliveryMode: true,
+                shippingProvider: true,
+                shippingServiceLevel: true,
+                shippingAmount: true,
+                shippingCurrency: true,
+                totalAmount: true,
+                totalWithShippingAmount: true,
+                shippingAddressLine1: true,
+                shippingWilayaCode: true,
+                shippingCommuneCode: true,
+                shippingPickupPoint: true,
+                shippingNotes: true,
+                items: {
+                    select: {
+                        quantity: true,
+                        price: true,
+                        lineTotal: true,
+                        product: { select: { title: true } },
+                        variant: { select: { sku: true } }
+                    }
+                },
+                shipments: {
+                    orderBy: { createdAt: 'desc' },
+                    select: { provider: true, providerShipmentId: true }
+                },
+                maystroMappings: {
+                    orderBy: { createdAt: 'desc' },
+                    select: { maystroOrderId: true, tracking: true }
+                }
+            }
+        })
+        if (!order) throw new OrderValidationError(404, 'Order not found')
+
+        const currency = (order.shippingCurrency || 'DZD').toUpperCase()
+        const computedTotalWithShipping =
+            typeof order.totalWithShippingAmount === 'number' && Number.isFinite(order.totalWithShippingAmount)
+                ? order.totalWithShippingAmount
+                : computeTotalWithShipping(order.totalAmount || 0, order.shippingAmount ?? null)
+
+        const shipment = order.shipments?.[0] ?? null
+        const provider = shipment?.provider ?? order.shippingProvider ?? null
+        const providerShipmentId = shipment?.providerShipmentId ?? order.maystroMappings?.[0]?.tracking ?? null
+
+        if (provider === 'MAYSTRO') {
+            const creds = await getMaystroCredentials(tenantId)
+            const maystroOrderId =
+                shipment?.providerShipmentId ??
+                order.maystroMappings.find((m) => typeof m.maystroOrderId === 'string' && m.maystroOrderId)?.maystroOrderId ??
+                null
+            if (!maystroOrderId) throw new OrderValidationError(409, 'Maystro order id not found for this order')
+
+            const pdf = await this.maystroBordereau.createBordereauPdf({ apiToken: creds.apiToken, ordersIds: [maystroOrderId] })
+            return { filename: `bordereau-${order.id}.pdf`, pdf: Buffer.from(pdf) }
+        }
+
+        const pdf = await renderGenericBordereauPdf({
+            tenantName,
+            order: {
+                id: order.id,
+                createdAt: order.createdAt,
+                customerName: order.customerName,
+                customerPhone: order.customerPhone,
+                customerAddress: order.customerAddress ?? null,
+                deliveryMode: order.deliveryMode ?? null,
+                shippingProvider: provider ? String(provider) : null,
+                shippingServiceLevel: order.shippingServiceLevel ?? null,
+                shippingAmount: order.shippingAmount == null ? null : Number(order.shippingAmount),
+                shippingCurrency: currency,
+                totalAmount: Number(order.totalAmount || 0),
+                totalWithShippingAmount: Number(computedTotalWithShipping || 0),
+                shippingAddressLine1: order.shippingAddressLine1 ?? null,
+                shippingWilayaCode: order.shippingWilayaCode ?? null,
+                shippingCommuneCode: order.shippingCommuneCode ?? null,
+                shippingPickupPoint: order.shippingPickupPoint ?? null,
+                shippingNotes: order.shippingNotes ?? null,
+                providerShipmentId: providerShipmentId ? String(providerShipmentId) : null,
+                items: (order.items || []).map((i) => ({
+                    title: i.product?.title || i.variant?.sku || 'Item',
+                    quantity: Number(i.quantity || 0),
+                    unitPrice: Number(i.price || 0),
+                    lineTotal: Number(i.lineTotal ?? (i.price || 0) * (i.quantity || 0))
+                }))
+            }
+        })
+
+        return { filename: `bordereau-${order.id}.pdf`, pdf }
+    }
+
     private async ensureDeliveredOrderSale(
         tx: any,
         tenantId: string,
@@ -191,6 +317,12 @@ export class OrdersService {
                     status: true,
                     callStatus: true,
                     totalAmount: true,
+                    totalWithShippingAmount: true,
+                    shippingAmount: true,
+                    shippingCurrency: true,
+                    shippingProvider: true,
+                    deliveryMode: true,
+                    shippingServiceLevel: true,
                     customerName: true,
                     customerPhone: true,
                     customerId: true,
@@ -226,6 +358,22 @@ export class OrdersService {
                                 }
                             }
                         }
+                    }
+                },
+                shipments: {
+                    orderBy: { createdAt: 'desc' },
+                    select: {
+                        id: true,
+                        provider: true,
+                        providerShipmentId: true,
+                        status: true,
+                        serviceLevel: true,
+                        price: true,
+                        currency: true,
+                        labelUrl: true,
+                        trackingUrl: true,
+                        createdAt: true,
+                        updatedAt: true
                     }
                 }
             }
@@ -379,6 +527,7 @@ export class OrdersService {
             input.shippingCommuneCode !== undefined ||
             input.shippingAddressLine1 !== undefined ||
             input.shippingNotes !== undefined ||
+            input.shippingPickupPoint !== undefined ||
             input.items !== undefined
 
         if (!hasAnyField) throw new OrderValidationError(400, 'No fields to update')
@@ -388,16 +537,20 @@ export class OrdersService {
             select: {
                 id: true,
                 status: true,
+                totalAmount: true,
+                totalWithShippingAmount: true,
                 customerId: true,
                 customerName: true,
                 customerPhone: true,
                 customerAddress: true,
                 deliveryMode: true,
                 shippingProvider: true,
+                shippingAmount: true,
                 shippingWilayaCode: true,
                 shippingCommuneCode: true,
                 shippingAddressLine1: true,
                 shippingNotes: true,
+                shippingPickupPoint: true,
                 sale: { select: { id: true } },
                 _count: {
                     select: {
@@ -433,7 +586,7 @@ export class OrdersService {
         }
 
         const nextDeliveryMode =
-            input.deliveryMode === undefined ? existing.deliveryMode : String(input.deliveryMode || 'home').toLowerCase()
+            input.deliveryMode === undefined ? normalizeDeliveryMode(existing.deliveryMode) : normalizeDeliveryMode(input.deliveryMode)
 
         let nextShippingProvider: any = existing.shippingProvider
         if (input.shippingProvider !== undefined) {
@@ -445,6 +598,18 @@ export class OrdersService {
                     nextShippingProvider = providerUpper as any
                 }
             }
+        }
+
+        if (nextDeliveryMode === 'store') {
+            const settings = await prisma.storeSettings.upsert({
+                where: { tenantId },
+                create: { tenantId },
+                update: {}
+            })
+            if (settings.storePickupEnabled !== true) {
+                throw new OrderValidationError(403, 'Store pickup is disabled for this store')
+            }
+            nextShippingProvider = null
         }
 
         const nextShippingWilayaCode =
@@ -466,6 +631,11 @@ export class OrdersService {
 
         const nextShippingNotes =
             input.shippingNotes === undefined ? existing.shippingNotes : (input.shippingNotes || null)
+
+        const nextShippingPickupPoint =
+            input.shippingPickupPoint === undefined
+                ? (existing.shippingPickupPoint ?? null)
+                : toOptionalPickupPoint(input.shippingPickupPoint)
 
         const nextCustomerId = input.customerId === undefined ? existing.customerId : (input.customerId || null)
         if (input.customerId !== undefined && nextCustomerId) {
@@ -703,12 +873,18 @@ export class OrdersService {
                 customerAddress: nextCustomerAddress,
                 deliveryMode: nextDeliveryMode,
                 shippingProvider: nextShippingProvider,
+                shippingPickupPoint: nextShippingPickupPoint,
                 shippingWilayaCode: nextShippingWilayaCode,
                 shippingCommuneCode: nextShippingCommuneCode,
                 shippingAddressLine1: nextShippingAddressLine1,
                 shippingNotes: nextShippingNotes
             }
-            if (shouldUpdateItems) updateData.totalAmount = centsToMoney(totalCents)
+            const nextTotalAmount = shouldUpdateItems ? centsToMoney(totalCents) : existing.totalAmount
+            updateData.totalAmount = nextTotalAmount
+
+            const nextShippingAmount = nextDeliveryMode === 'store' ? 0 : (existing.shippingAmount ?? null)
+            if (nextDeliveryMode === 'store') updateData.shippingAmount = 0
+            updateData.totalWithShippingAmount = computeTotalWithShipping(nextTotalAmount, nextShippingAmount)
 
             const updated = await tx.order.updateMany({ where: { tenantId, id, status: 'PENDING' }, data: updateData })
             if (updated.count !== 1) throw new OrderValidationError(409, 'Order can no longer be edited')
@@ -732,7 +908,15 @@ export class OrdersService {
         id: string,
         status?: string,
         actor?: { userId?: string | null },
-        opts?: { cashboxId?: string | null; method?: string | null; reference?: string | null; note?: string | null; callStatus?: string; internalNotes?: string | null }
+        opts?: {
+            cashboxId?: string | null
+            method?: string | null
+            reference?: string | null
+            note?: string | null
+            callStatus?: string
+            internalNotes?: string | null
+            source?: 'admin' | 'carrier'
+        }
     ) {
         if (status && !ORDER_STATUSES.includes(status as any)) {
             throw new OrderValidationError(400, 'Invalid status value')
@@ -740,7 +924,7 @@ export class OrdersService {
 
         const existing = await prisma.order.findFirst({
             where: { id, tenantId },
-            include: { items: true }
+            include: { items: true, shipments: { select: { id: true, provider: true } } }
         })
         if (!existing) throw new OrderValidationError(404, 'Order not found')
 
@@ -760,7 +944,12 @@ export class OrdersService {
             return prisma.order.findFirst({ where: { id, tenantId } })
         }
 
-        // cashboxId is resolved inside the DELIVERED transition when needed.
+        const isCarrierControlled =
+            (existing as any).shippingProvider != null ||
+            (Array.isArray((existing as any).shipments) && (existing as any).shipments.length > 0)
+        if (opts?.source !== 'carrier' && isCarrierControlled && fromStatus !== 'PENDING') {
+            throw new OrderValidationError(409, 'Order status is controlled by the delivery carrier and cannot be changed manually')
+        }
 
         await prisma.$transaction(async (tx) => {
             const touchedProductIds = new Set<string>()
@@ -1050,7 +1239,10 @@ export class OrdersService {
                     {
                         id: existing.id,
                         tenantId: existing.tenantId,
-                        totalAmount: existing.totalAmount,
+                        totalAmount:
+                            typeof (existing as any).totalWithShippingAmount === 'number' && Number.isFinite((existing as any).totalWithShippingAmount)
+                                ? (existing as any).totalWithShippingAmount
+                                : computeTotalWithShipping(existing.totalAmount, (existing as any).shippingAmount ?? null),
                         customerId: existing.customerId ?? null,
                         customerName: existing.customerName,
                         customerPhone: existing.customerPhone,
@@ -1065,15 +1257,15 @@ export class OrdersService {
                     actor
                 )
 
-                const cashboxId = await resolveCashboxId(tx, tenantId, opts?.cashboxId, actor?.userId ?? null)
-                if (!cashboxId) throw new OrderValidationError(400, 'cashboxId is required to mark an order DELIVERED')
-
-                const openSession = await tx.cashSession.findFirst({
-                    where: { tenantId, cashboxId, status: 'OPEN' },
-                    orderBy: { openedAt: 'desc' },
-                    select: { id: true }
-                })
-                if (!openSession) throw new OrderValidationError(409, 'Cashbox has no open session')
+                let cashboxId: string
+                let sessionId: string
+                try {
+                    const ensured = await ensureActiveCashboxAndOpenSession(tx, tenantId, opts?.cashboxId, actor?.userId ?? null)
+                    cashboxId = ensured.cashboxId
+                    sessionId = ensured.sessionId
+                } catch {
+                    throw new OrderValidationError(400, 'Invalid cashboxId')
+                }
 
                 const storeSettings = await tx.storeSettings.findUnique({
                     where: { tenantId },
@@ -1085,14 +1277,18 @@ export class OrdersService {
                 const reference = typeof opts?.reference === 'string' && opts.reference.trim() ? opts.reference.trim().slice(0, 64) : null
                 const note = typeof opts?.note === 'string' && opts.note.trim() ? opts.note.trim().slice(0, 500) : 'Order delivered payment'
 
-                const amount = new Prisma.Decimal(String(existing.totalAmount || 0))
-                if (!amount.isFinite() || amount.lte(0)) throw new OrderValidationError(400, 'Order totalAmount must be > 0')
+                const amountNumber =
+                    typeof (existing as any).totalWithShippingAmount === 'number' && Number.isFinite((existing as any).totalWithShippingAmount)
+                        ? (existing as any).totalWithShippingAmount
+                        : computeTotalWithShipping(existing.totalAmount, (existing as any).shippingAmount ?? null)
+                const amount = new Prisma.Decimal(String(amountNumber || 0))
+                if (!amount.isFinite() || amount.lte(0)) throw new OrderValidationError(400, 'Order total must be > 0')
 
                 const cashTx = await tx.cashTransaction.create({
                     data: {
                         tenantId,
                         cashboxId,
-                        sessionId: openSession.id,
+                        sessionId,
                         direction: 'IN',
                         type: 'SALE_PAYMENT',
                         amount,
@@ -1119,6 +1315,44 @@ export class OrdersService {
         })
 
         return prisma.order.findFirst({ where: { id, tenantId } })
+    }
+
+    async applyCarrierStatus(tenantId: string, orderId: string, toStatus: string, actor?: { userId?: string | null }) {
+        if (!ORDER_STATUSES.includes(toStatus as any)) {
+            throw new OrderValidationError(400, 'Invalid status value')
+        }
+
+        const existing = await prisma.order.findFirst({
+            where: { tenantId, id: orderId },
+            select: { id: true, status: true }
+        })
+        if (!existing) return null
+        if (existing.status === toStatus) return prisma.order.findFirst({ where: { tenantId, id: orderId } })
+
+        const planSequence = (from: string, to: string) => {
+            if (from === to) return []
+            if (to === 'CONFIRMED') return ['CONFIRMED']
+            if (to === 'SHIPPED') return from === 'PENDING' ? ['CONFIRMED', 'SHIPPED'] : ['SHIPPED']
+            if (to === 'DELIVERED') {
+                if (from === 'PENDING') return ['CONFIRMED', 'SHIPPED', 'DELIVERED']
+                if (from === 'CONFIRMED') return ['SHIPPED', 'DELIVERED']
+                return ['DELIVERED']
+            }
+            if (to === 'RETURNED') {
+                if (from === 'PENDING') return ['CONFIRMED', 'SHIPPED', 'RETURNED']
+                if (from === 'CONFIRMED') return ['SHIPPED', 'RETURNED']
+                return ['RETURNED']
+            }
+            if (to === 'CANCELLED') return ['CANCELLED']
+            return [to]
+        }
+
+        const sequence = planSequence(existing.status, toStatus)
+        for (const status of sequence) {
+            await this.updateStatus(tenantId, orderId, status, actor, { source: 'carrier' })
+        }
+
+        return prisma.order.findFirst({ where: { tenantId, id: orderId } })
     }
 
     async createPublicOrder(input: PublicOrderInput, subscription?: SubscriptionContext | null) {
@@ -1148,7 +1382,7 @@ export class OrdersService {
 
         const customerName = (input.customerName || '').trim()
         const customerPhone = (input.customerPhone || '').trim()
-        const deliveryMode = (input.deliveryMode || 'home').toLowerCase()
+        const deliveryMode = normalizeDeliveryMode(input.deliveryMode)
 
         if (!customerPhone) {
             throw new OrderValidationError(400, 'Customer phone is required')
@@ -1199,6 +1433,8 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
         }
 
+        const shippingPickupPoint = toOptionalPickupPoint(input.shippingPickupPoint)
+
         const storeSettings = await prisma.storeSettings.upsert({
             where: { tenantId: input.tenantId },
             create: { tenantId: input.tenantId },
@@ -1211,6 +1447,10 @@ export class OrdersService {
 
         if (storeSettings.codEnabled === false) {
             throw new OrderValidationError(403, 'Cash on delivery is disabled for this store')
+        }
+
+        if (deliveryMode === 'store' && storeSettings.storePickupEnabled !== true) {
+            throw new OrderValidationError(403, 'Store pickup is disabled for this store')
         }
 
         const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
@@ -1383,6 +1623,14 @@ export class OrdersService {
             }
         }
 
+        if (deliveryMode === 'store') {
+            shippingProvider = null
+        }
+
+        const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
+        const totalAmount = centsToMoney(totalCents)
+        const totalWithShippingAmount = computeTotalWithShipping(totalAmount, effectiveShippingAmount)
+
         const order = await prisma.$transaction(async (tx) => {
             const createdOrder = await tx.order.create({
                 data: {
@@ -1398,11 +1646,13 @@ export class OrdersService {
                     shippingWilayaCode: input.shippingWilayaCode || null,
                     shippingCommuneCode: input.shippingCommuneCode || null,
                     shippingServiceLevel: shippingServiceLevel || null,
-                    shippingAmount,
+                    shippingAmount: effectiveShippingAmount,
                     shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
                     shippingNotes: input.shippingNotes || null,
-                    totalAmount: centsToMoney(totalCents),
+                    shippingPickupPoint: shippingPickupPoint ?? undefined,
+                    totalAmount,
+                    totalWithShippingAmount,
                     status: 'PENDING'
                 }
             })
@@ -1465,7 +1715,7 @@ export class OrdersService {
 
         const customerName = (input.customerName || '').trim()
         const customerPhone = (input.customerPhone || '').trim()
-        const deliveryMode = (input.deliveryMode || 'home').toLowerCase()
+        const deliveryMode = normalizeDeliveryMode(input.deliveryMode)
 
         if (customerPhone && !/^\d+$/.test(customerPhone)) {
             throw new OrderValidationError(400, 'Phone number must contain only digits')
@@ -1513,6 +1763,19 @@ export class OrdersService {
             input.shippingAmount == null ? null : Number((input as any).shippingAmount)
         if (shippingAmount != null && (!Number.isFinite(shippingAmount) || shippingAmount < 0)) {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
+        }
+
+        const shippingPickupPoint = toOptionalPickupPoint(input.shippingPickupPoint)
+
+        if (deliveryMode === 'store') {
+            const settings = await prisma.storeSettings.upsert({
+                where: { tenantId },
+                create: { tenantId },
+                update: {}
+            })
+            if (settings.storePickupEnabled !== true) {
+                throw new OrderValidationError(403, 'Store pickup is disabled for this store')
+            }
         }
 
         const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
@@ -1684,6 +1947,14 @@ export class OrdersService {
             }
         }
 
+        if (deliveryMode === 'store') {
+            shippingProvider = null
+        }
+
+        const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
+        const totalAmount = centsToMoney(totalCents)
+        const totalWithShippingAmount = computeTotalWithShipping(totalAmount, effectiveShippingAmount)
+
         let actualCustomerName = customerName
         let actualCustomerPhone = customerPhone
 
@@ -1711,11 +1982,13 @@ export class OrdersService {
                     shippingWilayaCode: input.shippingWilayaCode || null,
                     shippingCommuneCode: input.shippingCommuneCode || null,
                     shippingServiceLevel: shippingServiceLevel || null,
-                    shippingAmount,
+                    shippingAmount: effectiveShippingAmount,
                     shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
                     shippingNotes: input.shippingNotes || null,
-                    totalAmount: centsToMoney(totalCents),
+                    shippingPickupPoint: shippingPickupPoint ?? undefined,
+                    totalAmount,
+                    totalWithShippingAmount,
                     status: 'PENDING'
                 }
             })

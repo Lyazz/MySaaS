@@ -17,6 +17,7 @@ const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
+const { currencyCode } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -48,7 +49,9 @@ const incrementQuantity = () => { if (!canPurchase.value) return; if (maxQuantit
 const decrementQuantity = () => { if (!canPurchase.value) return; if (quantity.value > 1) quantity.value-- }
 const selectBundleQty = (qty: number) => { if (!canPurchase.value) return; quantity.value = Math.max(1, Math.min(qty, maxQuantity.value || qty)) }
 
-const quickForm = reactive({ fullName: '', phone: '', wilaya: '', commune: '', address: '' })
+const quickForm = reactive({ fullName: '', phone: '', wilaya: '', commune: '', address: '',
+    pickupPoint: '',
+    selectedDeliveryOption: '' })
 
 onMounted(() => cartStore.loadFromLocalStorage())
 watch(() => props.currentVariant, () => { quantity.value = 1 })
@@ -78,9 +81,52 @@ const handleOrderSubmit = async () => {
     if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
     if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
     if (codEnabled.value && !quickForm.phone.trim()) { orderError.value = storefrontContent.value.checkout.errors.phoneRequired; return }
+    if (codEnabled.value && !quickForm.selectedDeliveryOption) {
+        orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
+        return
+    }
+
     orderSubmitting.value = true
+
     try {
-        const payload = { customerName: quickForm.fullName.trim(), customerPhone: quickForm.phone.trim(), customerAddress: quickForm.address?.trim() || undefined, shippingAddressLine1: quickForm.address?.trim() || undefined, shippingWilayaCode: quickForm.wilaya || undefined, shippingCommuneCode: quickForm.commune || undefined, deliveryMode: 'home', items: [{ productId: props.product.id, variantId: props.currentVariant?.id, quantity: quantity.value }] }
+        const delivery = selectedDelivery.value
+        const isMaystro = delivery?.provider === 'MAYSTRO'
+        const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
+        const maystroShippingAmount =
+          isMaystro
+            ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
+            : null
+
+        if (isMaystro) {
+          if (!quickForm.wilaya || !quickForm.commune) {
+            orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
+            orderSubmitting.value = false
+            return
+          }
+          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim()) {
+            orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
+            orderSubmitting.value = false
+            return
+          }
+          if (maystroShippingAmount == null) {
+            orderError.value = 'Maystro shipping price unavailable for selected commune'
+            orderSubmitting.value = false
+            return
+          }
+        }        const payload = {
+            customerName: quickForm.fullName.trim(),
+            customerPhone: quickForm.phone.trim(),
+            customerAddress: quickForm.address?.trim() || undefined,
+            shippingAddressLine1: quickForm.address?.trim() || undefined,
+            shippingWilayaCode: quickForm.wilaya || undefined,
+            shippingCommuneCode: quickForm.commune || undefined,
+            deliveryMode: delivery?.mode,
+            shippingProvider: delivery?.provider || undefined,
+            shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
+            shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
+            shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
+            shippingCurrency: isMaystro ? currencyCode.value : undefined,
+            items: [{ productId: props.product.id, variantId: props.currentVariant?.id, quantity: quantity.value }] }
         metaPixel.initiateCheckout({ contents: [{ id: props.product.id, quantity: quantity.value, item_price: Number(props.currentPrice || 0) }], numItems: quantity.value, value: totalPrice.value, currency: storeSettings.value?.currencyCode || 'DZD', pixelIds: (props.product as any)?.metaPixelIds })
         const response = await $fetch<{ orderId: string }>(useTenantApiUrl('/api/orders'), { method: 'POST', body: payload, headers: { ...(useTenantApiHeaders() || {}) } })
         triggerSuccessToast(storefrontContent.value.toasts.orderReceived.title, storefrontContent.value.toasts.orderReceived.message)
@@ -103,6 +149,168 @@ const handleAddToCart = async () => {
 
 const mainOrderFormRef = ref<HTMLElement | null>(null)
 const showStickyBar = ref(false)
+
+// Available delivery providers based on store settings
+const availableProviders = computed(() => {
+  const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
+  const providerMeta = {
+    MAYSTRO: { label: 'Maystro', icon: 'lucide:truck', color: 'emerald' },
+    YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
+    ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
+    ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'teal' }
+  }
+  return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
+})
+
+const maystroPrices = useMaystroDeliveryPrices({
+  wilayaCode: () => quickForm.wilaya,
+  communeCode: () => quickForm.commune
+})
+
+// Unified delivery options combining provider and mode
+const deliveryOptions = computed(() => {
+  const options: any[] = []
+  
+  availableProviders.value.forEach((provider: any) => {
+    const homePrice =
+      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
+        ? String(Math.round(maystroPrices.homePrice.value))
+        : provider.key === 'MAYSTRO'
+          ? '—'
+          : '350'
+    const officePrice =
+      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
+        ? String(Math.round(maystroPrices.officePrice.value))
+        : provider.key === 'MAYSTRO'
+          ? '—'
+          : '300'
+
+    options.push({
+      id: `${provider.key}-home`,
+      provider: provider.key,
+      providerLabel: provider.label,
+      mode: 'home',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
+      icon: provider.icon,
+      color: provider.color,
+      price: homePrice,
+      description: storefrontContent.value.checkout.delivery.description.homeDelivery
+    })
+    
+    options.push({
+      id: `${provider.key}-pickup`,
+      provider: provider.key,
+      providerLabel: provider.label,
+      mode: 'pickup',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
+      icon: provider.icon,
+      color: provider.color,
+      price: officePrice,
+      description: storefrontContent.value.checkout.delivery.description.pickupPoint
+    })
+  })
+  
+  if (storeSettings.value?.storePickupEnabled === true) {
+    options.push({
+      id: 'store-pickup',
+      provider: null,
+      providerLabel: 'Store',
+      mode: 'store',
+      modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
+      icon: 'lucide:store',
+      color: 'green',
+      price: 'FREE',
+      description: storefrontContent.value.checkout.delivery.description.storePickup
+    })
+  }
+  
+  return options
+})
+
+const selectedDelivery = computed(() => 
+  deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption)
+)
+
+const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name_lt?: string; name_ar?: string }>>([])
+const pickupPointsLoading = ref(false)
+const pickupPointsError = ref('')
+
+const syncPickupPointCommune = () => {
+  const selected = String(quickForm.pickupPoint || '').trim()
+  if (!selected) return
+  const point = pickupPoints.value.find((p) => String(p.pickup_point) === selected)
+  if (!point?.commune) return
+  const nextCommune = String(point.commune)
+  if (nextCommune && quickForm.commune !== nextCommune) {
+    quickForm.commune = nextCommune
+  }
+}
+
+watchEffect(() => {
+  const options = deliveryOptions.value
+  if (!options.length) return
+  const selected = quickForm.selectedDeliveryOption
+  if (!selected || !options.some((opt: any) => opt.id === selected)) {
+    quickForm.selectedDeliveryOption = options[0].id
+  }
+})
+
+watch(
+  [isMaystroPickup, () => quickForm.commune, () => quickForm.wilaya],
+  async ([enabled, commune, wilaya]) => {
+    pickupPointsError.value = ''
+    pickupPoints.value = []
+
+    if (!enabled) {
+      quickForm.pickupPoint = ''
+      return
+    }
+
+    if (!wilaya || !commune) return
+
+    pickupPointsLoading.value = true
+    try {
+      const url = useTenantApiUrl(
+        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune)}&wilaya=${encodeURIComponent(wilaya)}&deliveryType=3&nearby=true`
+      )
+      const data = await $fetch<any[]>(url, {
+        headers: {
+          ...(useTenantApiHeaders() || {})
+        }
+      })
+      pickupPoints.value = Array.isArray(data)
+        ? data
+            .map((p: any) => ({
+              pickup_point: Number(p?.pickup_point),
+              commune: Number(p?.commune),
+              name_lt: p?.name_lt ? String(p.name_lt) : undefined,
+              name_ar: p?.name_ar ? String(p.name_ar) : undefined
+            }))
+            .filter((p) => Number.isFinite(p.pickup_point) && p.pickup_point > 0 && Number.isFinite(p.commune))
+        : []
+
+      if (pickupPoints.value.length > 0) {
+        const current = String(quickForm.pickupPoint || '').trim()
+        if (!current || !pickupPoints.value.some((p) => String(p.pickup_point) === current)) {
+          quickForm.pickupPoint = String(pickupPoints.value[0].pickup_point)
+          syncPickupPointCommune()
+        }
+      }
+    } catch (e: any) {
+      pickupPoints.value = []
+      pickupPointsError.value =
+        e?.data?.statusMessage ||
+        e?.data?.message ||
+        'Failed to load pickup points'
+    } finally {
+      pickupPointsLoading.value = false
+    }
+  },
+  { immediate: true }
+)
+
 
 onMounted(() => {
     const observer = new IntersectionObserver((entries) => { showStickyBar.value = !entries[0].isIntersecting }, { threshold: 0.1, rootMargin: '0px 0px -20% 0px' })
@@ -226,6 +434,110 @@ const scrollToForm = () => {
                     <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input v-model="quickForm.address" type="text" :placeholder="storefrontContent.checkout.form.address.placeholder" class="block w-full h-11 px-4 text-sm placeholder:text-[#3A3530] focus:outline-none" style="background-color:#0E1117; border:1px solid rgba(212,197,169,0.12); color:#E8E0D5; border-radius:1px;">
                 </div>
+                <div class="space-y-3 mt-6">
+                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                        {{ storefrontContent.checkout.sections.deliveryOptions }}
+                    </label>
+                    <div 
+                        v-for="option in deliveryOptions"
+                        :key="option.id"
+                        class="cursor-pointer relative rounded-2xl p-4 border-2 transition-all duration-300 group hover:scale-[1.005]"
+                        :class="quickForm.selectedDeliveryOption === option.id 
+                        ? 'border-brand-500 bg-brand-50/50 shadow-md' 
+                        : 'border-slate-100 hover:border-brand-200 hover:shadow-sm'"
+                        @click="quickForm.selectedDeliveryOption = option.id"
+                    >
+                        <div class="flex items-center gap-4">
+                        <div 
+                            class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
+                            :class="quickForm.selectedDeliveryOption === option.id 
+                            ? `bg-${option.color}-100` 
+                            : 'bg-slate-100 group-hover:bg-slate-200'"
+                        >
+                            <Icon 
+                            :name="option.icon" 
+                            class="w-7 h-7 transition-colors duration-300"
+                            :class="quickForm.selectedDeliveryOption === option.id 
+                                ? `text-${option.color}-600` 
+                                : 'text-slate-400 group-hover:text-slate-600'"
+                            />
+                        </div>
+                        
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-bold text-slate-900 text-sm">
+                                {{ option.providerLabel }}
+                            </h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                                :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
+                            >
+                                {{ option.modeLabel }}
+                            </span>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                            {{ option.description }}
+                            </p>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                            <div class="text-right">
+                            <div class="font-bold text-brand-600 text-base">
+                                {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
+                            </div>
+                            </div>
+                            <span
+                            class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
+                            :class="quickForm.selectedDeliveryOption === option.id 
+                                ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
+                                : 'border-slate-300'"
+                            >
+                            <span 
+                                v-if="quickForm.selectedDeliveryOption === option.id"
+                                class="block w-full h-full rounded-full flex items-center justify-center"
+                            >
+                                <Icon name="lucide:check" class="w-3 h-3 text-white" />
+                            </span>
+                            </span>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div
+                        v-if="isMaystroPickup"
+                        class="space-y-2 mt-4"
+                    >
+                        <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                            {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
+                        </label>
+                        <div class="relative">
+                            <select
+                                v-model="quickForm.pickupPoint"
+                                class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm disabled:opacity-70"
+                                :disabled="!quickForm.commune || !quickForm.wilaya || pickupPointsLoading"
+                                @change="syncPickupPointCommune"
+                            >
+                                <option value="" disabled>
+                                {{ pickupPointsLoading ? 'Loading…' : 'Select stop desk…' }}
+                                </option>
+                                <option
+                                v-for="p in pickupPoints"
+                                :key="String(p.pickup_point)"
+                                :value="String(p.pickup_point)"
+                                >
+                                {{ p.pickup_point }} - {{ p.name_lt || p.name_ar || `Commune ${p.commune}` }}
+                                </option>
+                            </select>
+                            <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                                <Icon name="lucide:chevron-down" class="w-4 h-4" />
+                            </div>
+                        </div>
+                        <p v-if="pickupPointsError" class="text-xs text-amber-700">
+                        {{ pickupPointsError }}
+                        </p>
+                    </div>
+                </div>
+
+
 
                 <div v-if="orderError" class="p-3 border text-sm" style="background-color:rgba(139,20,20,0.2); border-color:rgba(200,80,80,0.25); color:#FCA5A5; border-radius:1px;">
                     {{ orderError }}
@@ -234,7 +546,7 @@ const scrollToForm = () => {
                 <!-- Total Price -->
                 <div class="flex items-center justify-between px-4 py-3 border" style="background-color:#0E1117; border-color:rgba(212,197,169,0.1); border-radius:1px;">
                     <span class="text-sm font-medium" style="color:#8A8070;">{{ storefrontContent.productForm.totalPrice }}</span>
-                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ totalPrice }} {{ storeSettings?.currencyCode || 'DZD' }}</span>
+                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0) }} {{ currencyCode }}</span>
                 </div>
 
                 <button 
@@ -307,7 +619,7 @@ const scrollToForm = () => {
             <div v-if="showStickyBar && codEnabled" class="fixed bottom-0 left-0 right-0 z-40 p-4 md:hidden flex items-center justify-between gap-4 border-t" style="background-color:#111620; border-color:rgba(166,124,82,0.15);">
                 <div class="flex flex-col">
                     <span class="text-xs" style="color:#5A5450;">Total</span>
-                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ totalPrice }} {{ storeSettings?.currencyCode || 'DZD' }}</span>
+                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0) }} {{ currencyCode }}</span>
                 </div>
                 <button type="button" :disabled="!canPurchase" class="flex-1 h-12 font-medium text-sm tracking-[0.15em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-40" style="background-color:#A67C52; color:#fff; border-radius:1px;" @click="scrollToForm">
                     <span>{{ storefrontContent.productForm.cod.submit }}</span>

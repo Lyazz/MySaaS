@@ -12,6 +12,41 @@
       </div>
     </div>
 
+    <!-- Store Pickup Toggle -->
+    <div class="ui-card mb-8">
+      <div class="ui-card-header flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900">
+            {{ t('admin.pages.delivery.storePickup.title', 'Store pickup') }}
+          </h3>
+          <p class="text-sm text-slate-600">
+            {{ t('admin.pages.delivery.storePickup.hint', 'Enable/disable “pickup at store” as a checkout delivery option.') }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-60"
+          :class="[storePickupEnabled ? 'bg-green-500' : 'bg-gray-200']"
+          role="switch"
+          :aria-checked="storePickupEnabled"
+          :disabled="storePickupSaving"
+          @click="toggleStorePickup"
+        >
+          <span class="sr-only">{{ t('admin.pages.delivery.storePickup.toggleLabel', 'Toggle store pickup') }}</span>
+          <span
+            aria-hidden="true"
+            class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+            :class="[storePickupEnabled ? 'translate-x-5' : 'translate-x-0']"
+          />
+        </button>
+      </div>
+      <div v-if="storePickupMessage" class="ui-card-body pt-0">
+        <p class="text-sm" :class="storePickupMessageKind === 'error' ? 'text-red-600' : 'text-emerald-700'">
+          {{ storePickupMessage }}
+        </p>
+      </div>
+    </div>
+
     <!-- Providers List -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div 
@@ -583,6 +618,11 @@ const clearSecrets = ref<Record<string, boolean>>({})
 const accountMessage = ref<string | null>(null)
 const accountMessageKind = ref<'success' | 'error'>('success')
 
+const storePickupEnabled = ref(false)
+const storePickupSaving = ref(false)
+const storePickupMessage = ref<string | null>(null)
+const storePickupMessageKind = ref<'success' | 'error'>('success')
+
 const maystroTest = reactive<{
   wilayaCode: string
   communes: Array<{ id: number; name: string }>
@@ -623,6 +663,7 @@ const wilayas = [
 ]
 
 onMounted(async () => {
+  await loadStorePickupSetting()
   await loadProviders()
 })
 
@@ -761,6 +802,42 @@ async function loadProviders() {
     providers.value = list
   } catch (e) {
     console.error('Failed to load delivery providers', e)
+  }
+}
+
+async function loadStorePickupSetting() {
+  storePickupMessage.value = null
+  try {
+    const settings = await $fetch<any>('/api/admin/store-settings', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    storePickupEnabled.value = settings?.storePickupEnabled === true
+  } catch (e) {
+    console.error('Failed to load store pickup setting', e)
+  }
+}
+
+async function toggleStorePickup() {
+  if (storePickupSaving.value) return
+  storePickupSaving.value = true
+  storePickupMessage.value = null
+  const next = !storePickupEnabled.value
+
+  try {
+    const updated = await $fetch<any>('/api/admin/store-settings', {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { storePickupEnabled: next }
+    })
+    storePickupEnabled.value = updated?.storePickupEnabled === true
+    storePickupMessageKind.value = 'success'
+    storePickupMessage.value = t('admin.common.saved', 'Saved')
+  } catch (e: any) {
+    console.error('Failed to update store pickup setting', e)
+    storePickupMessageKind.value = 'error'
+    storePickupMessage.value = e?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+  } finally {
+    storePickupSaving.value = false
   }
 }
 

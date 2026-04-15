@@ -286,7 +286,8 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
             .set('Authorization', `Bearer ${tokenA}`)
 
         expect(byUserRes.status).toBe(200)
-        expect((byUserRes.body as any[]).every((t) => t.createdByUserId === userA2Id)).toBe(true)
+        expect(Array.isArray(byUserRes.body.items)).toBe(true)
+        expect((byUserRes.body.items as any[]).every((t) => t.createdByUserId === userA2Id)).toBe(true)
 
         const byMethodRes = await request(app)
             .get(`/api/admin/cash-transactions?cashboxId=${cashboxId}&method=CARD`)
@@ -294,7 +295,8 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
             .set('Authorization', `Bearer ${tokenA}`)
 
         expect(byMethodRes.status).toBe(200)
-        expect((byMethodRes.body as any[]).every((t) => String(t.method).toUpperCase() === 'CARD')).toBe(true)
+        expect(Array.isArray(byMethodRes.body.items)).toBe(true)
+        expect((byMethodRes.body.items as any[]).every((t) => String(t.method).toUpperCase() === 'CARD')).toBe(true)
     })
 
     it('filters sessions by userId (opened or closed by user)', async () => {
@@ -330,7 +332,8 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
             .set('Authorization', `Bearer ${tokenA}`)
 
         expect(byOpenedRes.status).toBe(200)
-        expect((byOpenedRes.body as any[]).some((s) => s.id === sessionId)).toBe(true)
+        expect(Array.isArray(byOpenedRes.body.items)).toBe(true)
+        expect((byOpenedRes.body.items as any[]).some((s) => s.id === sessionId)).toBe(true)
 
         const byClosedRes = await request(app)
             .get(`/api/admin/cash-sessions?cashboxId=${cashboxId}&userId=${userA2Id}`)
@@ -338,7 +341,8 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
             .set('Authorization', `Bearer ${tokenA}`)
 
         expect(byClosedRes.status).toBe(200)
-        expect((byClosedRes.body as any[]).some((s) => s.id === sessionId)).toBe(true)
+        expect(Array.isArray(byClosedRes.body.items)).toBe(true)
+        expect((byClosedRes.body.items as any[]).some((s) => s.id === sessionId)).toBe(true)
     })
 
     it('returns 404 when updating a cashbox from another tenant', async () => {

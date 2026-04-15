@@ -307,6 +307,7 @@ model StoreSettings {
 
   isCompleted              Boolean  @default(false)
   allowedDeliveryProviders String[] @default(["SELF"])
+  storePickupEnabled       Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -850,6 +851,7 @@ model Order {
   tenant      Tenant @relation(fields: [tenantId], references: [id])
   status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
   totalAmount Float
+  totalWithShippingAmount Float?
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
@@ -874,6 +876,7 @@ model Order {
   shippingNotes        String?
   shippingEtaMinDays   Int?
   shippingEtaMaxDays   Int?
+  shippingPickupPoint  Int?
 
   items              OrderItem[]
   shipments          Shipment[]
