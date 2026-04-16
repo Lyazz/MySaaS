@@ -83,7 +83,7 @@ export class MaystroController {
         if (!wilaya.trim()) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
 
         const deliveryTypeRaw = typeof req.query.deliveryType === 'string' ? Number(req.query.deliveryType) : null
-        const deliveryType = deliveryTypeRaw === 2 || deliveryTypeRaw === 3 ? (deliveryTypeRaw as 2 | 3) : 3
+        const deliveryType = deliveryTypeRaw === 2 || deliveryTypeRaw === 3 ? (deliveryTypeRaw as 2 | 3) : 2
 
         try {
             const creds = await getMaystroCredentials(tenantId)

@@ -143,11 +143,24 @@ import ChronoProductCard from './chrono/ProductCard.vue'
 import ChronoShop from './chrono/Shop.vue'
 import ChronoCart from './chrono/Cart.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono'
+// Maison Imports
+import MaisonHome from './maison/Home.vue'
+import MaisonStoreShell from './maison/StoreShell.vue'
+import MaisonThemeProvider from './maison/ThemeProvider.vue'
+import MaisonCategory from './maison/Category.vue'
+import MaisonContact from './maison/ContactPage.vue'
+import MaisonAbout from './maison/AboutPage.vue'
+import MaisonCheckout from './maison/Checkout.vue'
+import MaisonProduct from './maison/Product.vue'
+import MaisonProductCard from './maison/ProductCard.vue'
+import MaisonShop from './maison/Shop.vue'
+import MaisonCart from './maison/Cart.vue'
+
+export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
@@ -160,7 +173,8 @@ export const homeTemplates = {
   wellness: WellnessHome,
   playful: PlayfulHome,
   activewear: ActivewearHome,
-  chrono: ChronoHome
+  chrono: ChronoHome,
+  maison: MaisonHome
 } satisfies Record<TemplateKey, Component>
 
 export const productTemplates = {
@@ -174,7 +188,8 @@ export const productTemplates = {
   wellness: WellnessProduct,
   playful: PlayfulProduct,
   activewear: ActivewearProduct,
-  chrono: ChronoProduct
+  chrono: ChronoProduct,
+  maison: MaisonProduct
 } satisfies Record<TemplateKey, Component>
 
 export const productCardTemplates = {
@@ -188,7 +203,8 @@ export const productCardTemplates = {
   wellness: WellnessProductCard,
   playful: PlayfulProductCard,
   activewear: ActivewearProductCard,
-  chrono: ChronoProductCard
+  chrono: ChronoProductCard,
+  maison: MaisonProductCard
 } satisfies Record<TemplateKey, Component>
 
 export const categoryTemplates = {
@@ -202,7 +218,8 @@ export const categoryTemplates = {
   wellness: WellnessCategory,
   playful: PlayfulCategory,
   activewear: ActivewearCategory,
-  chrono: ChronoCategory
+  chrono: ChronoCategory,
+  maison: MaisonCategory
 } satisfies Record<TemplateKey, Component>
 
 export const storeShellTemplates = {
@@ -216,7 +233,8 @@ export const storeShellTemplates = {
   wellness: WellnessStoreShell,
   playful: PlayfulStoreShell,
   activewear: ActivewearStoreShell,
-  chrono: ChronoStoreShell
+  chrono: ChronoStoreShell,
+  maison: MaisonStoreShell
 } satisfies Record<TemplateKey, Component>
 
 export const shopTemplates = {
@@ -230,7 +248,8 @@ export const shopTemplates = {
   wellness: WellnessShop,
   playful: PlayfulShop,
   activewear: ActivewearShop,
-  chrono: ChronoShop
+  chrono: ChronoShop,
+  maison: MaisonShop
 } satisfies Record<TemplateKey, Component>
 
 export const checkoutTemplates = {
@@ -244,7 +263,8 @@ export const checkoutTemplates = {
   wellness: WellnessCheckout,
   playful: PlayfulCheckout,
   activewear: ActivewearCheckout,
-  chrono: ChronoCheckout
+  chrono: ChronoCheckout,
+  maison: MaisonCheckout
 } satisfies Record<TemplateKey, Component>
 
 export const cartTemplates = {
@@ -258,7 +278,8 @@ export const cartTemplates = {
   wellness: WellnessCart,
   playful: PlayfulCart,
   activewear: ActivewearCart,
-  chrono: ChronoCart
+  chrono: ChronoCart,
+  maison: MaisonCart
 } satisfies Record<TemplateKey, Component>
 
 export const aboutPageTemplates = {
@@ -272,7 +293,8 @@ export const aboutPageTemplates = {
   wellness: WellnessAbout,
   playful: PlayfulAbout,
   activewear: ActivewearAbout,
-  chrono: ChronoAbout
+  chrono: ChronoAbout,
+  maison: MaisonAbout
 } satisfies Record<TemplateKey, Component>
 
 export const contactPageTemplates = {
@@ -286,7 +308,8 @@ export const contactPageTemplates = {
   wellness: WellnessContact,
   playful: PlayfulContact,
   activewear: ActivewearContact,
-  chrono: ChronoContact
+  chrono: ChronoContact,
+  maison: MaisonContact
 } satisfies Record<TemplateKey, Component>
 
 export const themeProviderTemplates = {
@@ -300,7 +323,8 @@ export const themeProviderTemplates = {
   wellness: WellnessThemeProvider,
   playful: PlayfulThemeProvider,
   activewear: ActivewearThemeProvider,
-  chrono: ChronoThemeProvider
+  chrono: ChronoThemeProvider,
+  maison: MaisonThemeProvider
 } satisfies Record<TemplateKey, Component>
 
 export const selectTemplate = (

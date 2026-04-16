@@ -44,7 +44,7 @@ onMounted(() => {
 
 definePageMeta({
   title: 'Checkout',
-  middleware: 'tenant-only',
+  middleware: ['tenant-only', 'checkout-nonempty'],
   layout: 'store'
 })
 </script>

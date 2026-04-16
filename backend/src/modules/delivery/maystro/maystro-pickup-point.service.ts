@@ -106,7 +106,7 @@ export class MaystroPickupPointService {
         wilaya: string | number
         deliveryType?: 2 | 3
     }): Promise<StopDeskCommune[]> {
-        const dt = input.deliveryType ?? 3
+        const dt = input.deliveryType ?? 2
         const cacheKey = `${input.wilaya}:${dt}`
         const cached = stopDeskCommunesCache.get(cacheKey)
         if (cached && cached.expiresAt > Date.now()) return cached.value

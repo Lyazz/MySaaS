@@ -181,7 +181,7 @@ const pickupPointsError = ref('')
 const syncPickupPointCommune = () => {
   const name = (quickForm.pickupPoint || '').trim()
   if (!name) return
-  const point = pickupPoints.value.find((p) => (p.name_lt || p.name_ar || '') === name)
+  const point = pickupPoints.value.find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
   if (!point?.commune) return
   const nextCommune = String(point.commune)
   if (nextCommune && quickForm.commune !== nextCommune) {
@@ -214,7 +214,7 @@ watch(
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune)}&wilaya=${encodeURIComponent(wilaya)}&deliveryType=2&nearby=true`
+        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune)}&wilaya=${encodeURIComponent(wilaya)}&nearby=true`
       )
       const data = await $fetch<any[]>(url, {
         headers: {
@@ -235,8 +235,8 @@ watch(
 
       if (pickupPoints.value.length > 0) {
         const current = (quickForm.pickupPoint || '').trim()
-        if (!current || !pickupPoints.value.some((p) => (p.name_lt || p.name_ar || '') === current)) {
-          quickForm.pickupPoint = pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
+        if (!current || !pickupPoints.value.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
+          quickForm.pickupPoint = pickupPoints.value[0].name || pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
           syncPickupPointCommune()
         }
       }

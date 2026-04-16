@@ -60,6 +60,12 @@ export const useCartStore = defineStore('cart', {
     },
 
     actions: {
+        syncCartCountCookie() {
+            if (!process.client) return
+            const cartItemCount = useCookie<number>('cart_item_count', { default: () => 0, path: '/' })
+            cartItemCount.value = this.itemCount
+        },
+
         addItem(product: Omit<CartItem, 'quantity'> & { quantity?: number }) {
             const metaPixel = useMetaPixel()
             const storeSettings = useState<any>('storeSettings')
@@ -166,6 +172,7 @@ export const useCartStore = defineStore('cart', {
         saveToLocalStorage() {
             if (process.client) {
                 localStorage.setItem('cart', JSON.stringify(this.items))
+                this.syncCartCountCookie()
             }
         },
 
@@ -186,6 +193,7 @@ export const useCartStore = defineStore('cart', {
                         this.items = []
                     }
                 }
+                this.syncCartCountCookie()
             }
         }
     }

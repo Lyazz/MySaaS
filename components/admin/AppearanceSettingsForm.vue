@@ -665,6 +665,29 @@ const templates = computed(() => [
     sampleDesc: 'Luxury Accessories',
     samplePrice: '3,500 €',
   },
+  {
+    key: 'maison',
+    label: 'Maison',
+    category: 'Minimalist',
+    description: 'Template éditorial chaleureux dédié à la décoration intérieure et aux accessoires maison. Typographie serif élégante, palette terracotta.',
+    storeTypes: 'Déco, Maison, Art de vivre, Accessoires intérieur',
+    icon: 'lucide:home',
+    fontClass: 'font-serif',
+    fontName: 'Cormorant Garamond',
+    fontStyle: "'Cormorant Garamond', 'DM Sans', serif",
+    color: '#C17B4E', // Terracotta
+    bg: '#FAF8F5', // Warm cream
+    cardBg: '#FFFFFF',
+    imgBg: 'linear-gradient(135deg,#F5F0EA,#EDE4D8)',
+    border: 'rgba(212,196,180,0.5)',
+    textColor: '#2C2420',
+    subColor: '#7A6558',
+    btnText: '#ffffff',
+    radius: '0px',
+    emoji: '🏡',
+    sampleDesc: 'Home & Déco',
+    samplePrice: '2,800 DA',
+  },
 ])
 
 // -- Methods --
