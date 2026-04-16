@@ -237,6 +237,7 @@
                 v-if="order.status === 'PENDING'"
                 type="button"
                 class="ui-btn ui-btn--secondary ui-btn--sm"
+                :disabled="editingCustomer"
                 @click="editing ? cancelEdit() : startEdit()"
               >
                 <Icon
@@ -750,13 +751,27 @@
 
           <!-- Customer Info Card -->
           <div class="ui-card">
-            <div class="ui-card-header">
+            <div class="ui-card-header flex items-center justify-between gap-3">
               <h2 class="text-base font-semibold text-slate-900">
                 {{ t('admin.pages.orders.detail.sections.customerInfo') }}
               </h2>
+              <button
+                v-if="order.status === 'PENDING' && !editing && !editingCustomer"
+                type="button"
+                class="ui-btn ui-btn--secondary ui-btn--sm"
+                @click="startEditCustomer"
+              >
+                <Icon
+                  name="lucide:pencil"
+                  class="w-3.5 h-3.5"
+                />
+                {{ t('common.edit', 'Edit') }}
+              </button>
             </div>
+
+            <!-- Inline customer edit form -->
             <div
-              v-if="editing"
+              v-if="editing || editingCustomer"
               class="ui-card-body space-y-3"
             >
               <div>
@@ -787,7 +802,44 @@
                   type="text"
                 />
               </div>
-              <p class="text-xs text-slate-500">
+
+              <!-- Save/cancel buttons shown only in customer-only edit mode -->
+              <template v-if="editingCustomer">
+                <div
+                  v-if="customerSaveError"
+                  class="p-3 bg-red-50 border border-red-200 rounded-md"
+                >
+                  <p class="text-sm text-red-800">
+                    {{ customerSaveError }}
+                  </p>
+                </div>
+                <div class="flex gap-2 pt-1">
+                  <button
+                    type="button"
+                    class="ui-btn ui-btn--secondary ui-btn--sm flex-1"
+                    :disabled="savingCustomer"
+                    @click="cancelEditCustomer"
+                  >
+                    {{ t('common.cancel', 'Cancel') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="ui-btn ui-btn--primary ui-btn--sm flex-1"
+                    :disabled="savingCustomer"
+                    @click="saveCustomerInfo"
+                  >
+                    <span
+                      v-if="savingCustomer"
+                      class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+                    />
+                    {{ t('common.save', 'Save') }}
+                  </button>
+                </div>
+              </template>
+              <p
+                v-else
+                class="text-xs text-slate-500"
+              >
                 {{ t('admin.pages.orders.detail.editHint', 'Save from the items section to apply changes.') }}
               </p>
             </div>
@@ -859,7 +911,7 @@
               <div class="w-48">
                 <BaseSelect
                   v-model="order.callStatus"
-                  :disabled="editing"
+                  :disabled="editing || editingCustomer"
                   @change="handleUpdateCallStatus"
                 >
                   <option value="not_called">
@@ -1089,6 +1141,10 @@ const callStatusSavedMessage = ref('')
 const editing = ref(false)
 const editSaving = ref(false)
 const editErrorMessage = ref('')
+
+const editingCustomer = ref(false)
+const savingCustomer = ref(false)
+const customerSaveError = ref('')
 
 const products = ref<any[]>([])
 const productSearch = ref('')
@@ -1328,6 +1384,8 @@ function cancelEdit() {
   editErrorMessage.value = ''
   productSearch.value = ''
   variantModalOpen.value = false
+  editingCustomer.value = false
+  customerSaveError.value = ''
 }
 
 async function addProductToCart(product: any) {
@@ -1436,6 +1494,46 @@ async function saveEdit() {
     editErrorMessage.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
   } finally {
     editSaving.value = false
+  }
+}
+
+function startEditCustomer() {
+  if (!order.value || order.value.status !== 'PENDING' || editing.value) return
+  editCustomerName.value = order.value.customerName || ''
+  editCustomerPhone.value = order.value.customerPhone || ''
+  editCustomerAddress.value = order.value.customerAddress || ''
+  customerSaveError.value = ''
+  editingCustomer.value = true
+}
+
+function cancelEditCustomer() {
+  editingCustomer.value = false
+  customerSaveError.value = ''
+}
+
+async function saveCustomerInfo() {
+  if (!order.value || order.value.status !== 'PENDING') return
+  customerSaveError.value = ''
+  savingCustomer.value = true
+  try {
+    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: {
+        customerName: editCustomerName.value,
+        customerPhone: editCustomerPhone.value,
+        customerAddress: editCustomerAddress.value,
+        shippingAddressLine1: editCustomerAddress.value
+      }
+    }) as any
+    order.value = updated
+    newStatus.value = updated.status
+    editingCustomer.value = false
+    showToast(t('admin.common.saved', 'Saved'), 'success')
+  } catch (error: any) {
+    customerSaveError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+  } finally {
+    savingCustomer.value = false
   }
 }
 

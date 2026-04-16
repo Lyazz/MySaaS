@@ -193,6 +193,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 import HelpCenterWidget from '~/components/admin/HelpCenterWidget.vue'
 
@@ -240,7 +241,8 @@ const storefrontUrl = computed(() => {
   if (!slug) return '/'
 
   const { protocol, host } = useRequestOrigin()
-  const tenantHost = toTenantHost(host, slug)
+  const platformBaseDomain = usePlatformBaseDomain()
+  const tenantHost = toTenantHost(host, slug, { platformBaseDomain })
   return `${protocol}://${tenantHost}/`
 })
 

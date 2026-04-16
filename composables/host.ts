@@ -58,9 +58,23 @@ export const toTenantHost = (
   const { hostname, port } = splitHost(saasHostWithPort)
   const lower = hostname.toLowerCase()
 
-  const baseHostname = lower === `www.${platformBaseDomain}` ? platformBaseDomain : hostname
+  // Normalize to the base domain, stripping any existing tenant subdomain.
+  // e.g. nokhba.swekly.com → swekly.com before prepending the new slug.
+  let baseHostname: string
+  if (lower === 'localhost' || lower.endsWith('.localhost')) {
+    baseHostname = 'localhost'
+  } else if (
+    lower === platformBaseDomain ||
+    lower === `www.${platformBaseDomain}` ||
+    lower.endsWith(`.${platformBaseDomain}`)
+  ) {
+    baseHostname = platformBaseDomain
+  } else {
+    baseHostname = hostname
+  }
+
   const tenantHostname =
-    baseHostname.toLowerCase() === 'localhost' ? `${tenantSlug}.localhost` : `${tenantSlug}.${baseHostname}`
+    baseHostname === 'localhost' ? `${tenantSlug}.localhost` : `${tenantSlug}.${baseHostname}`
 
   return port ? `${tenantHostname}:${port}` : tenantHostname
 }

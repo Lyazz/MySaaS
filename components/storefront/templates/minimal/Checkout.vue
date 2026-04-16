@@ -94,6 +94,7 @@ const form = ref({
   wilaya: '',
   commune: '',
   address: '',
+  pickupPoint: '',
   selectedDeliveryOption: ''
 })
 
@@ -115,14 +116,73 @@ const submitting = ref(false)
 const errorMessage = ref('')
 const couponCode = ref('')
 
-const selectedDelivery = computed(() => 
+const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption)
 )
 
+const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
+const pickupPointsLoading = ref(false)
+const pickupPointsError = ref('')
+
+const syncPickupPointCommune = () => {
+  const name = (form.value.pickupPoint || '').trim()
+  if (!name) return
+  const point = pickupPoints.value.find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
+  if (!point?.commune) return
+  const nextCommune = String(point.commune)
+  if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
+}
+
+watch(
+  [isMaystroPickup, () => form.value.commune, () => form.value.wilaya],
+  async ([enabled, commune, wilaya]) => {
+    pickupPointsError.value = ''
+    pickupPoints.value = []
+    if (!enabled) { form.value.pickupPoint = ''; return }
+    if (!wilaya || !commune) return
+    pickupPointsLoading.value = true
+    try {
+      const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
+      const data = await $fetch<any[]>(url, { headers: { ...(useTenantApiHeaders() || {}) } })
+      pickupPoints.value = Array.isArray(data)
+        ? data.map((p: any) => ({
+            pickup_point: Number(p?.pickup_point),
+            commune: Number(p?.commune),
+            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
+            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
+            name_ar: p?.name_ar ? String(p.name_ar) : undefined
+          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
+        : []
+      if (pickupPoints.value.length > 0) {
+        const current = (form.value.pickupPoint || '').trim()
+        if (!current || !pickupPoints.value.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
+          form.value.pickupPoint = pickupPoints.value[0].name || pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
+          syncPickupPointCommune()
+        }
+      }
+    } catch (e: any) {
+      pickupPoints.value = []
+      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
+    } finally {
+      pickupPointsLoading.value = false
+    }
+  },
+  { immediate: true }
+)
+
+const grandTotal = computed(() => {
+  const delivery = selectedDelivery.value
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return cartStore.total
+  const deliveryPrice = Number(delivery.price)
+  return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
+})
+
 const hasRequiredFields = computed(() => Boolean(
-  form.value.fullName.trim() && 
-  form.value.phone.trim() && 
+  form.value.fullName.trim() &&
+  form.value.phone.trim() &&
   cartStore.hasItems &&
+  cartStore.total >= 1000 &&
   form.value.selectedDeliveryOption
 ))
 
@@ -174,6 +234,10 @@ async function handleSubmit() {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
           }
+          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim()) {
+            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
+            return
+          }
           if (maystroShippingAmount == null) {
             errorMessage.value = 'Maystro shipping price unavailable for selected commune'
             return
@@ -188,6 +252,7 @@ async function handleSubmit() {
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
+          shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
           shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
           shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
           shippingCurrency: isMaystro ? currencyCode.value : undefined,
@@ -312,7 +377,7 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery Options -->
-          <div class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
+          <div v-if="form.wilaya && form.commune" class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
                 {{ storefrontContent.checkout.sections.deliveryOptions }}
@@ -378,11 +443,11 @@ async function handleSubmit() {
                     </div>
                     <span
                       class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
-                      :class="form.selectedDeliveryOption === option.id 
-                        ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
+                      :class="form.selectedDeliveryOption === option.id
+                        ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100'
                         : 'border-slate-300'"
                     >
-                      <span 
+                      <span
                         v-if="form.selectedDeliveryOption === option.id"
                         class="block w-full h-full rounded-full flex items-center justify-center"
                       >
@@ -391,8 +456,23 @@ async function handleSubmit() {
                     </span>
                   </div>
                 </div>
+                <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="mt-3 pt-3 border-t border-slate-100">
+                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-slate-500">
+                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
+                    Loading...
+                  </div>
+                  <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs">
+                    <Icon name="lucide:map-pin" class="w-3 h-3 text-blue-600" />
+                    <span class="font-semibold text-slate-800">{{ form.pickupPoint }}</span>
+                  </div>
+                  <p v-if="pickupPointsError" class="text-xs text-amber-600 mt-1">{{ pickupPointsError }}</p>
+                </div>
               </div>
             </div>
+          </div>
+          <div v-else class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 text-center text-sm text-slate-400">
+            <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-slate-300" />
+            {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
 
         </div>
@@ -491,7 +571,7 @@ async function handleSubmit() {
                         
               <div class="flex justify-between items-end pt-4 border-t border-slate-100 mt-4">
                 <span class="font-bold text-xl text-slate-900">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-bold text-xl text-slate-900">{{ cartStore.total }} {{ currencyCode }}</span>
+                <span class="font-bold text-xl text-slate-900">{{ grandTotal }} {{ currencyCode }}</span>
               </div>
               <p class="text-xs text-slate-400 mt-1">
                 {{ storefrontContent.checkout.minimumOrder('1,000', currencyCode) }}

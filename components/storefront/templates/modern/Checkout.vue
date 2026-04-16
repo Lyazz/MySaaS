@@ -191,10 +191,18 @@ watch(
   { immediate: true }
 )
 
+const grandTotal = computed(() => {
+  const delivery = selectedDelivery.value
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return cartStore.total
+  const deliveryPrice = Number(delivery.price)
+  return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
+})
+
 const hasRequiredFields = computed(() => Boolean(
-  form.value.fullName.trim() && 
-  form.value.phone.trim() && 
+  form.value.fullName.trim() &&
+  form.value.phone.trim() &&
   cartStore.hasItems &&
+  cartStore.total >= 1000 &&
   form.value.selectedDeliveryOption
 ))
 

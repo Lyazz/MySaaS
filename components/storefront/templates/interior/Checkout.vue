@@ -191,10 +191,18 @@ watch(
   { immediate: true }
 )
 
+const grandTotal = computed(() => {
+  const delivery = selectedDelivery.value
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return cartStore.total
+  const deliveryPrice = Number(delivery.price)
+  return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
+})
+
 const hasRequiredFields = computed(() => Boolean(
-  form.value.fullName.trim() && 
-  form.value.phone.trim() && 
+  form.value.fullName.trim() &&
+  form.value.phone.trim() &&
   cartStore.hasItems &&
+  cartStore.total >= 1000 &&
   form.value.selectedDeliveryOption
 ))
 
@@ -416,7 +424,7 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery Options -->
-          <div class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
+          <div v-if="form.wilaya && form.commune" class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
                 {{ storefrontContent.checkout.sections.deliveryOptions }}
@@ -482,11 +490,11 @@ async function handleSubmit() {
                     </div>
                     <span
                       class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
-                      :class="form.selectedDeliveryOption === option.id 
-                        ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
+                      :class="form.selectedDeliveryOption === option.id
+                        ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100'
                         : 'border-slate-300'"
                     >
-                      <span 
+                      <span
                         v-if="form.selectedDeliveryOption === option.id"
                         class="block w-full h-full rounded-full flex items-center justify-center"
                       >
@@ -495,8 +503,23 @@ async function handleSubmit() {
                     </span>
                   </div>
                 </div>
+                <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="mt-3 pt-3 border-t border-slate-100">
+                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-slate-500">
+                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
+                    Loading...
+                  </div>
+                  <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs">
+                    <Icon name="lucide:map-pin" class="w-3 h-3 text-blue-600" />
+                    <span class="font-semibold text-slate-800">{{ form.pickupPoint }}</span>
+                  </div>
+                  <p v-if="pickupPointsError" class="text-xs text-amber-600 mt-1">{{ pickupPointsError }}</p>
+                </div>
               </div>
             </div>
+          </div>
+          <div v-else class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 text-center text-sm text-slate-400">
+            <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-slate-300" />
+            {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
 
         </div>

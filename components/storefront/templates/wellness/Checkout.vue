@@ -94,6 +94,7 @@ const form = ref({
   wilaya: '',
   commune: '',
   address: '',
+  pickupPoint: '',
   selectedDeliveryOption: ''
 })
 
@@ -115,14 +116,73 @@ const submitting = ref(false)
 const errorMessage = ref('')
 const couponCode = ref('')
 
-const selectedDelivery = computed(() => 
+const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption)
 )
 
+const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
+const pickupPointsLoading = ref(false)
+const pickupPointsError = ref('')
+
+const syncPickupPointCommune = () => {
+  const name = (form.value.pickupPoint || '').trim()
+  if (!name) return
+  const point = pickupPoints.value.find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
+  if (!point?.commune) return
+  const nextCommune = String(point.commune)
+  if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
+}
+
+watch(
+  [isMaystroPickup, () => form.value.commune, () => form.value.wilaya],
+  async ([enabled, commune, wilaya]) => {
+    pickupPointsError.value = ''
+    pickupPoints.value = []
+    if (!enabled) { form.value.pickupPoint = ''; return }
+    if (!wilaya || !commune) return
+    pickupPointsLoading.value = true
+    try {
+      const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
+      const data = await $fetch<any[]>(url, { headers: { ...(useTenantApiHeaders() || {}) } })
+      pickupPoints.value = Array.isArray(data)
+        ? data.map((p: any) => ({
+            pickup_point: Number(p?.pickup_point),
+            commune: Number(p?.commune),
+            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
+            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
+            name_ar: p?.name_ar ? String(p.name_ar) : undefined
+          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
+        : []
+      if (pickupPoints.value.length > 0) {
+        const current = (form.value.pickupPoint || '').trim()
+        if (!current || !pickupPoints.value.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
+          form.value.pickupPoint = pickupPoints.value[0].name || pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
+          syncPickupPointCommune()
+        }
+      }
+    } catch (e: any) {
+      pickupPoints.value = []
+      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
+    } finally {
+      pickupPointsLoading.value = false
+    }
+  },
+  { immediate: true }
+)
+
+const grandTotal = computed(() => {
+  const delivery = selectedDelivery.value
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return cartStore.total
+  const deliveryPrice = Number(delivery.price)
+  return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
+})
+
 const hasRequiredFields = computed(() => Boolean(
-  form.value.fullName.trim() && 
-  form.value.phone.trim() && 
+  form.value.fullName.trim() &&
+  form.value.phone.trim() &&
   cartStore.hasItems &&
+  cartStore.total >= 1000 &&
   form.value.selectedDeliveryOption
 ))
 
@@ -174,6 +234,10 @@ async function handleSubmit() {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
           }
+          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim()) {
+            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
+            return
+          }
           if (maystroShippingAmount == null) {
             errorMessage.value = 'Maystro shipping price unavailable for selected commune'
             return
@@ -188,6 +252,7 @@ async function handleSubmit() {
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
+          shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
           shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
           shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
           shippingCurrency: isMaystro ? currencyCode.value : undefined,
