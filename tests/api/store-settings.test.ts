@@ -86,6 +86,22 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(patchBody.isCompleted).toBe(true)
     })
 
+    it('allows selecting the "maison" template', async () => {
+        const patchRes = await fetch('/api/admin/store-settings', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokenA}`
+            },
+            body: JSON.stringify({
+                templateKey: 'maison'
+            })
+        })
+        const patchBody = await patchRes.json()
+        expect(patchRes.status).toBe(200)
+        expect(patchBody.templateKey).toBe('maison')
+    })
+
     it('denies cross-tenant access when host tenant mismatches token tenant', async () => {
         // Create tenant B
         const res = await fetch('/api/register', {

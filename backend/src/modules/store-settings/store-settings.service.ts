@@ -1,6 +1,18 @@
 import prisma from '../../lib/prisma'
 
-export type StoreTemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono'
+export type StoreTemplateKey =
+    | 'classic'
+    | 'modern'
+    | 'street'
+    | 'cozy'
+    | 'cyber'
+    | 'stationnery'
+    | 'food'
+    | 'wellness'
+    | 'playful'
+    | 'activewear'
+    | 'chrono'
+    | 'maison'
 export type StoreLanguage = 'ar' | 'fr' | 'en'
 
 
@@ -15,7 +27,8 @@ export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; descriptio
     { key: 'wellness', label: 'Wellness', description: 'Organic, health-focused design with Sage Green tones.' },
     { key: 'playful', label: 'Playful', description: 'Kids & fun' },
     { key: 'activewear', label: 'Activewear', description: 'Bold, aggressive typography and neon colors for sports.' },
-    { key: 'chrono', label: 'Chrono Luxe', description: 'Luxury dark theme with gold accents for premium accessories.' }
+    { key: 'chrono', label: 'Chrono Luxe', description: 'Luxury dark theme with gold accents for premium accessories.' },
+    { key: 'maison', label: 'Maison', description: 'Warm editorial theme for home decor and interior accessories.' }
 ]
 
 export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [
