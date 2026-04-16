@@ -32,6 +32,14 @@ const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSli
 
 // Auto-advance slider
 let slideInterval: any
+const pauseSlideAutoplay = () => {
+    clearInterval(slideInterval)
+}
+const resumeSlideAutoplay = () => {
+    clearInterval(slideInterval)
+    slideInterval = setInterval(nextSlide, 6000)
+}
+
 onMounted(() => {
     slideInterval = setInterval(nextSlide, 6000)
 })
@@ -81,7 +89,10 @@ const {
 <template>
   <div class="bg-[#f8faf9] min-h-screen pb-24 font-sans selection:bg-brand-100 selection:text-brand-900">
     <!-- Hero Section (Bistro Style) -->
-    <div class="relative w-full overflow-hidden">
+    <div class="relative w-full overflow-hidden"
+      @touchstart.passive="pauseSlideAutoplay"
+      @touchend.passive="resumeSlideAutoplay"
+    >
       <!-- Organic Background Blob -->
       <div class="absolute top-0 right-0 w-[80%] h-[120%] bg-brand-50/50 rounded-bl-[10rem] -z-10 transform translate-x-20 -translate-y-20 pointer-events-none" />
 

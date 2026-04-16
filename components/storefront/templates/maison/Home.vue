@@ -28,6 +28,14 @@ const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSl
 const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
 let slideInterval: any
+const pauseSlideAutoplay = () => {
+    clearInterval(slideInterval)
+}
+const resumeSlideAutoplay = () => {
+    clearInterval(slideInterval)
+    slideInterval = setInterval(nextSlide, 7000)
+}
+
 onMounted(() => { slideInterval = setInterval(nextSlide, 7000) })
 onUnmounted(() => { clearInterval(slideInterval) })
 
@@ -59,7 +67,10 @@ const {
 <template>
   <div class="min-h-screen pb-24">
     <!-- Hero Slider — Editorial Full Width -->
-    <div class="relative w-full h-[520px] md:h-[680px] lg:h-[85vh] overflow-hidden">
+    <div class="relative w-full h-[520px] md:h-[680px] lg:h-[85vh] overflow-hidden"
+      @touchstart.passive="pauseSlideAutoplay"
+      @touchend.passive="resumeSlideAutoplay"
+    >
       <div
         v-for="(slide, index) in heroSlides"
         :key="index"

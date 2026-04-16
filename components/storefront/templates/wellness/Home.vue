@@ -33,6 +33,14 @@ const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSli
 
 // Auto-advance slider
 let slideInterval: any
+const pauseSlideAutoplay = () => {
+    clearInterval(slideInterval)
+}
+const resumeSlideAutoplay = () => {
+    clearInterval(slideInterval)
+    slideInterval = setInterval(nextSlide, 6000)
+}
+
 
 // Auto-scroll for Featured Products
 const { 
@@ -91,7 +99,10 @@ const displayedProducts = computed(() => {
 <template>
   <div class="bg-stone-50 min-h-screen pb-24 font-wellness text-stone-700">
     <!-- Hero Slider (Editorial Style) -->
-    <div class="relative w-full h-[600px] md:h-[700px] overflow-hidden group">
+    <div class="relative w-full h-[600px] md:h-[700px] overflow-hidden group"
+      @touchstart.passive="pauseSlideAutoplay"
+      @touchend.passive="resumeSlideAutoplay"
+    >
       <!-- Slides -->
       <div 
         v-for="(slide, index) in heroSlides" 

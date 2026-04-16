@@ -31,6 +31,14 @@ const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSl
 const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
 let slideInterval: any
+const pauseSlideAutoplay = () => {
+    clearInterval(slideInterval)
+}
+const resumeSlideAutoplay = () => {
+    clearInterval(slideInterval)
+    slideInterval = setInterval(nextSlide, 6000)
+}
+
 
 const { 
   scrollContainer: featuredScrollContainer, 
@@ -76,7 +84,10 @@ const displayedProducts = computed(() => {
 <template>
   <div class="min-h-screen pb-24" style="background-color: #0E1117; font-family: 'Cormorant Garamond', serif;">
     <!-- Hero Slider -->
-    <div class="relative w-full h-[450px] md:h-[560px] lg:h-[720px] overflow-hidden">
+    <div class="relative w-full h-[450px] md:h-[560px] lg:h-[720px] overflow-hidden"
+      @touchstart.passive="pauseSlideAutoplay"
+      @touchend.passive="resumeSlideAutoplay"
+    >
       <div 
         v-for="(slide, index) in heroSlides" 
         :key="index"

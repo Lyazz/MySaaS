@@ -32,6 +32,14 @@ const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSli
 
 // Auto-advance slider
 let slideInterval: any
+const pauseSlideAutoplay = () => {
+    clearInterval(slideInterval)
+}
+const resumeSlideAutoplay = () => {
+    clearInterval(slideInterval)
+    slideInterval = setInterval(nextSlide, 6000)
+}
+
 onMounted(() => {
     slideInterval = setInterval(nextSlide, 6000)
 })
@@ -81,7 +89,10 @@ const {
 <template>
   <div class="bg-white min-h-screen pb-24 font-serif">
     <!-- Hero Slider -->
-    <div class="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden group">
+    <div class="relative w-full h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden group"
+      @touchstart.passive="pauseSlideAutoplay"
+      @touchend.passive="resumeSlideAutoplay"
+    >
       <!-- Slides -->
       <div 
         v-for="(slide, index) in heroSlides" 
