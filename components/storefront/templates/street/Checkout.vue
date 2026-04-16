@@ -117,26 +117,29 @@ const selectedDelivery = computed(() =>
 )
 
 const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
+const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
 const pickupPointsLoading = ref(false)
 const pickupPointsError = ref('')
+const stopDeskName = ref('')
 
 const syncPickupPointCommune = () => {
   const name = (form.value.pickupPoint || '').trim()
   if (!name) return
-  const point = pickupPoints.value.find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
+  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
   if (!point?.commune) return
   const nextCommune = String(point.commune)
   if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
 }
 
 watch(
-  [isMaystroPickup, () => form.value.commune, () => form.value.wilaya],
-  async ([enabled, commune, wilaya]) => {
+  [isMaystroPickup, isMaystroAvailable, () => form.value.commune, () => form.value.wilaya],
+  async ([isPickup, maystroEnabled, commune, wilaya]) => {
     pickupPointsError.value = ''
     pickupPoints.value = []
-    if (!enabled) { form.value.pickupPoint = ''; return }
-    if (!wilaya || !commune) return
+    stopDeskName.value = ''
+    if (!isPickup) form.value.pickupPoint = ''
+    if (!maystroEnabled || !wilaya || !commune) return
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
@@ -147,14 +150,20 @@ watch(
             commune: Number(p?.commune),
             name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
             name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined
+            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
+            delivery_type: Number(p?.delivery_type)
           })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
         : []
-      if (pickupPoints.value.length > 0) {
-        const current = (form.value.pickupPoint || '').trim()
-        if (!current || !pickupPoints.value.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-          form.value.pickupPoint = pickupPoints.value[0].name || pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
-          syncPickupPointCommune()
+      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
+      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
+      if (isPickup) {
+        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
+        if (relaisPoints.length > 0) {
+          const current = (form.value.pickupPoint || '').trim()
+          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
+            form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
+            syncPickupPointCommune()
+          }
         }
       }
     } catch (e: any) {
@@ -365,7 +374,7 @@ async function handleSubmit() {
             </div>
 
             <!-- Delivery Options -->
-            <div class="space-y-6 mb-12">
+            <div v-if="form.wilaya && form.commune" class="space-y-6 mb-12">
                 <h2 class="font-street text-2xl uppercase border-b-4 border-black pb-2">{{ storefrontContent.checkout.sections.deliveryMethod }}</h2>
                 
                 <div class="space-y-4">
@@ -394,8 +403,26 @@ async function handleSubmit() {
                                 </span>
                             </div>
                         </div>
+                        <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="mt-3 pt-3 border-t-2 border-black">
+                          <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-gray-500 font-mono">
+                            <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
+                            Loading...
+                          </div>
+                          <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs font-mono">
+                            <Icon name="lucide:map-pin" class="w-3 h-3" />
+                            <span class="font-bold uppercase">{{ form.pickupPoint }}</span>
+                          </div>
+                          <p v-if="pickupPointsError" class="text-xs text-red-600 mt-1 font-mono">{{ pickupPointsError }}</p>
+                        </div>
                     </div>
                 </div>
+            </div>
+            <div v-else class="space-y-6 mb-12">
+              <h2 class="font-street text-2xl uppercase border-b-4 border-black pb-2">{{ storefrontContent.checkout.sections.deliveryMethod }}</h2>
+              <div class="border-2 border-black p-4 bg-white text-center font-mono text-sm text-gray-500">
+                <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-gray-400" />
+                {{ storefrontContent.checkout.help.deliveryOptions }}
+              </div>
             </div>
 
             <!-- Error Message -->
@@ -479,7 +506,7 @@ async function handleSubmit() {
                     </div>
                     <div class="flex justify-between text-xl font-bold pt-4 text-black border-t-2 border-gray-300">
                         <span>{{ storefrontContent.cart.summary.total }}</span>
-                        <span>{{ formatCurrency(cartStore.total) }}</span>
+                        <span>{{ formatCurrency(grandTotal) }}</span>
                     </div>
                 </div>
             </div>

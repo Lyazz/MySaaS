@@ -117,26 +117,29 @@ const selectedDelivery = computed(() =>
 )
 
 const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
+const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
 const pickupPointsLoading = ref(false)
 const pickupPointsError = ref('')
+const stopDeskName = ref('')
 
 const syncPickupPointCommune = () => {
   const name = (form.value.pickupPoint || '').trim()
   if (!name) return
-  const point = pickupPoints.value.find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
+  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
   if (!point?.commune) return
   const nextCommune = String(point.commune)
   if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
 }
 
 watch(
-  [isMaystroPickup, () => form.value.commune, () => form.value.wilaya],
-  async ([enabled, commune, wilaya]) => {
+  [isMaystroPickup, isMaystroAvailable, () => form.value.commune, () => form.value.wilaya],
+  async ([isPickup, maystroEnabled, commune, wilaya]) => {
     pickupPointsError.value = ''
     pickupPoints.value = []
-    if (!enabled) { form.value.pickupPoint = ''; return }
-    if (!wilaya || !commune) return
+    stopDeskName.value = ''
+    if (!isPickup) form.value.pickupPoint = ''
+    if (!maystroEnabled || !wilaya || !commune) return
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
@@ -147,14 +150,20 @@ watch(
             commune: Number(p?.commune),
             name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
             name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined
+            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
+            delivery_type: Number(p?.delivery_type)
           })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
         : []
-      if (pickupPoints.value.length > 0) {
-        const current = (form.value.pickupPoint || '').trim()
-        if (!current || !pickupPoints.value.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-          form.value.pickupPoint = pickupPoints.value[0].name || pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
-          syncPickupPointCommune()
+      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
+      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
+      if (isPickup) {
+        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
+        if (relaisPoints.length > 0) {
+          const current = (form.value.pickupPoint || '').trim()
+          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
+            form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
+            syncPickupPointCommune()
+          }
         }
       }
     } catch (e: any) {
@@ -373,7 +382,7 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery Options -->
-          <div class="bg-white p-8 rounded-[2rem] shadow-soft">
+          <div v-if="form.wilaya && form.commune" class="bg-white p-8 rounded-[2rem] shadow-soft">
             <h2 class="font-bold text-slate-800 text-xl mb-6 flex items-center gap-3">
               <div class="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-500">
                 <Icon name="lucide:truck" class="w-4 h-4" />
@@ -407,8 +416,23 @@ async function handleSubmit() {
                     </span>
                   </div>
                 </div>
+                <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="mt-3 pt-3 border-t border-slate-100">
+                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-slate-500">
+                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
+                    Loading...
+                  </div>
+                  <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs">
+                    <Icon name="lucide:map-pin" class="w-3 h-3 text-blue-600" />
+                    <span class="font-semibold text-slate-800">{{ form.pickupPoint }}</span>
+                  </div>
+                  <p v-if="pickupPointsError" class="text-xs text-amber-600 mt-1">{{ pickupPointsError }}</p>
+                </div>
               </div>
             </div>
+          </div>
+          <div v-else class="bg-white p-8 rounded-[2rem] shadow-soft text-center text-sm text-slate-400">
+            <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-slate-300" />
+            {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
 
           <!-- Error Message -->
@@ -478,7 +502,7 @@ async function handleSubmit() {
               </div>
               <div class="flex justify-between text-lg font-bold pt-4 border-t border-slate-100">
                 <dt class="text-slate-800">{{ storefrontContent.cart.summary.total }}</dt>
-                <dd class="text-brand-500">{{ formatCurrency(cartStore.total) }}</dd>
+                <dd class="text-brand-500">{{ formatCurrency(grandTotal) }}</dd>
               </div>
             </dl>
 

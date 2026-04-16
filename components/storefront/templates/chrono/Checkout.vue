@@ -111,26 +111,29 @@ const selectedDelivery = computed(() =>
 )
 
 const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
+const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
 const pickupPointsLoading = ref(false)
 const pickupPointsError = ref('')
+const stopDeskName = ref('')
 
 const syncPickupPointCommune = () => {
   const name = (form.value.pickupPoint || '').trim()
   if (!name) return
-  const point = pickupPoints.value.find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
+  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
   if (!point?.commune) return
   const nextCommune = String(point.commune)
   if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
 }
 
 watch(
-  [isMaystroPickup, () => form.value.commune, () => form.value.wilaya],
-  async ([enabled, commune, wilaya]) => {
+  [isMaystroPickup, isMaystroAvailable, () => form.value.commune, () => form.value.wilaya],
+  async ([isPickup, maystroEnabled, commune, wilaya]) => {
     pickupPointsError.value = ''
     pickupPoints.value = []
-    if (!enabled) { form.value.pickupPoint = ''; return }
-    if (!wilaya || !commune) return
+    stopDeskName.value = ''
+    if (!isPickup) form.value.pickupPoint = ''
+    if (!maystroEnabled || !wilaya || !commune) return
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
@@ -141,14 +144,20 @@ watch(
             commune: Number(p?.commune),
             name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
             name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined
+            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
+            delivery_type: Number(p?.delivery_type)
           })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
         : []
-      if (pickupPoints.value.length > 0) {
-        const current = (form.value.pickupPoint || '').trim()
-        if (!current || !pickupPoints.value.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-          form.value.pickupPoint = pickupPoints.value[0].name || pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
-          syncPickupPointCommune()
+      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
+      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
+      if (isPickup) {
+        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
+        if (relaisPoints.length > 0) {
+          const current = (form.value.pickupPoint || '').trim()
+          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
+            form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
+            syncPickupPointCommune()
+          }
         }
       }
     } catch (e: any) {

@@ -111,3 +111,8 @@ See `.env.example` for the full list. Key vars:
 - Architecture specs: `spec/` (01-overview, 03-tenancy, 04-roles-permissions, 05-data-model, 07-apis, 10-acceptance-tests)
 - Implementation tickets: `tickets/`
 - Architecture decisions: `DECISIONS.md`
+
+
+
+
+---Always respond in a very concise and direct manner, providing only relevant information.

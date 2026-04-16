@@ -100,7 +100,7 @@
           </div>
 
           <!-- Delivery Options -->
-          <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100">
+          <div v-if="form.wilaya && form.commune" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100">
             <div class="flex items-center justify-between mb-8">
               <h3 class="text-xl font-bold text-stone-900 flex items-center gap-3">
                 <span class="w-8 h-8 rounded-full bg-stone-900 text-white flex items-center justify-center text-sm font-sans font-bold shadow-lg">2</span>
@@ -161,16 +161,31 @@
                     </div>
                     <div
                       class="w-6 h-6 rounded-full border-2 transition-all duration-300 flex items-center justify-center"
-                      :class="form.selectedDeliveryOption === option.id 
-                        ? 'border-stone-900 bg-stone-900' 
+                      :class="form.selectedDeliveryOption === option.id
+                        ? 'border-stone-900 bg-stone-900'
                         : 'border-stone-300'"
                     >
                       <Icon v-if="form.selectedDeliveryOption === option.id" name="lucide:check" class="w-3.5 h-3.5 text-white" />
                     </div>
                   </div>
                 </div>
+                <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="mt-3 pt-3 border-t border-stone-200">
+                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-stone-500">
+                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
+                    Loading...
+                  </div>
+                  <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs">
+                    <Icon name="lucide:map-pin" class="w-3 h-3 text-stone-700" />
+                    <span class="font-bold uppercase text-stone-900">{{ form.pickupPoint }}</span>
+                  </div>
+                  <p v-if="pickupPointsError" class="text-xs text-red-600 mt-1">{{ pickupPointsError }}</p>
+                </div>
               </div>
             </div>
+          </div>
+          <div v-else class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100 text-center text-sm text-stone-400">
+            <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-stone-300" />
+            {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
 
         </div>
@@ -241,7 +256,7 @@
                         
               <div class="flex justify-between items-end pt-6 mt-4 border-t-2 border-stone-900">
                 <span class="font-bold text-xl text-stone-900 uppercase">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-bold text-2xl text-stone-900">{{ cartStore.total }} {{ currencyCode }}</span>
+                <span class="font-bold text-2xl text-stone-900">{{ grandTotal }} {{ currencyCode }}</span>
               </div>
             </div>
 

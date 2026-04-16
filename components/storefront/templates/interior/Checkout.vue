@@ -618,7 +618,7 @@ async function handleSubmit() {
                         
               <div class="flex justify-between items-end pt-4 border-t border-slate-100 mt-4">
                 <span class="font-bold text-xl text-slate-900">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-bold text-xl text-slate-900">{{ cartStore.total }} {{ currencyCode }}</span>
+                <span class="font-bold text-xl text-slate-900">{{ grandTotal }} {{ currencyCode }}</span>
               </div>
               <p class="text-xs text-slate-400 mt-1">
                 {{ storefrontContent.checkout.minimumOrder('1,000', currencyCode) }}

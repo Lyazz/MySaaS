@@ -424,7 +424,7 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery Options -->
-          <div class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
+          <div v-if="form.wilaya && form.commune" class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
                 {{ storefrontContent.checkout.sections.deliveryOptions }}
@@ -436,34 +436,34 @@ async function handleSubmit() {
             <p class="text-xs text-slate-500 mb-6 font-medium">
               {{ storefrontContent.checkout.help.deliveryOptions }}
             </p>
-                    
+
             <div class="space-y-3">
-              <div 
+              <div
                 v-for="option in deliveryOptions"
                 :key="option.id"
                 class="cursor-pointer relative rounded-2xl p-4 border-2 transition-all duration-300 group hover:scale-[1.005]"
-                :class="form.selectedDeliveryOption === option.id 
-                  ? 'border-brand-500 bg-brand-50/50 shadow-md' 
+                :class="form.selectedDeliveryOption === option.id
+                  ? 'border-brand-500 bg-brand-50/50 shadow-md'
                   : 'border-slate-100 hover:border-brand-200 hover:shadow-sm'"
                 @click="form.selectedDeliveryOption = option.id"
               >
                 <div class="flex items-center gap-4">
                   <!-- Icon -->
-                  <div 
+                  <div
                     class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
-                    :class="form.selectedDeliveryOption === option.id 
-                      ? `bg-${option.color}-100` 
+                    :class="form.selectedDeliveryOption === option.id
+                      ? `bg-${option.color}-100`
                       : 'bg-slate-100 group-hover:bg-slate-200'"
                   >
-                    <Icon 
-                      :name="option.icon" 
+                    <Icon
+                      :name="option.icon"
                       class="w-7 h-7 transition-colors duration-300"
-                      :class="form.selectedDeliveryOption === option.id 
-                        ? `text-${option.color}-600` 
+                      :class="form.selectedDeliveryOption === option.id
+                        ? `text-${option.color}-600`
                         : 'text-slate-400 group-hover:text-slate-600'"
                     />
                   </div>
-                  
+
                   <!-- Details -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
@@ -480,7 +480,7 @@ async function handleSubmit() {
                       {{ option.description }}
                     </p>
                   </div>
-                  
+
                   <!-- Price & Radio -->
                   <div class="flex items-center gap-3 flex-shrink-0">
                     <div class="text-right">
@@ -490,11 +490,11 @@ async function handleSubmit() {
                     </div>
                     <span
                       class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
-                      :class="form.selectedDeliveryOption === option.id 
-                        ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
+                      :class="form.selectedDeliveryOption === option.id
+                        ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100'
                         : 'border-slate-300'"
                     >
-                      <span 
+                      <span
                         v-if="form.selectedDeliveryOption === option.id"
                         class="block w-full h-full rounded-full flex items-center justify-center"
                       >
@@ -503,8 +503,23 @@ async function handleSubmit() {
                     </span>
                   </div>
                 </div>
+                <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="mt-3 pt-3 border-t border-slate-100">
+                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-slate-500">
+                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
+                    Loading...
+                  </div>
+                  <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs">
+                    <Icon name="lucide:map-pin" class="w-3 h-3 text-blue-600" />
+                    <span class="font-semibold text-slate-800">{{ form.pickupPoint }}</span>
+                  </div>
+                  <p v-if="pickupPointsError" class="text-xs text-amber-600 mt-1">{{ pickupPointsError }}</p>
+                </div>
               </div>
             </div>
+          </div>
+          <div v-else class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 text-center text-sm text-slate-400">
+            <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-slate-300" />
+            {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
 
         </div>
@@ -603,7 +618,7 @@ async function handleSubmit() {
                         
               <div class="flex justify-between items-end pt-4 border-t border-slate-100 mt-4">
                 <span class="font-bold text-xl text-slate-900">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-bold text-xl text-slate-900">{{ cartStore.total }} {{ currencyCode }}</span>
+                <span class="font-bold text-xl text-slate-900">{{ grandTotal }} {{ currencyCode }}</span>
               </div>
               <p class="text-xs text-slate-400 mt-1">
                 {{ storefrontContent.checkout.minimumOrder('1,000', currencyCode) }}
