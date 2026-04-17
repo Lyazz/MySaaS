@@ -174,19 +174,19 @@ const selectedDelivery = computed(() =>
 )
 
 const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
+const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
+const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
 const pickupPointsLoading = ref(false)
 const pickupPointsError = ref('')
+const stopDeskName = ref('')
 
 const syncPickupPointCommune = () => {
   const name = (quickForm.pickupPoint || '').trim()
   if (!name) return
-  const point = pickupPoints.value.find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
+  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
   if (!point?.commune) return
   const nextCommune = String(point.commune)
-  if (nextCommune && quickForm.commune !== nextCommune) {
-    quickForm.commune = nextCommune
-  }
+  if (nextCommune && quickForm.commune !== nextCommune) quickForm.commune = nextCommune
 }
 
 watchEffect(() => {
@@ -199,53 +199,47 @@ watchEffect(() => {
 })
 
 watch(
-  [isMaystroPickup, () => quickForm.commune, () => quickForm.wilaya],
-  async ([enabled, commune, wilaya]) => {
+  [isMaystroPickup, isMaystroAvailable, () => quickForm.commune, () => quickForm.wilaya],
+  async ([isPickup, maystroEnabled, commune, wilaya]) => {
     pickupPointsError.value = ''
     pickupPoints.value = []
-
-    if (!enabled) {
-      quickForm.pickupPoint = ''
-      return
-    }
-
-    if (!wilaya || !commune) return
+    stopDeskName.value = ''
+    if (!isPickup) quickForm.pickupPoint = ''
+    if (!maystroEnabled || !wilaya || !commune) return
 
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune)}&wilaya=${encodeURIComponent(wilaya)}&nearby=true`
+        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`
       )
       const data = await $fetch<any[]>(url, {
-        headers: {
-          ...(useTenantApiHeaders() || {})
-        }
+        headers: { ...(useTenantApiHeaders() || {}) }
       })
       pickupPoints.value = Array.isArray(data)
-        ? data
-            .map((p: any) => ({
-              pickup_point: Number(p?.pickup_point),
-              commune: Number(p?.commune),
-              name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-              name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-              name_ar: p?.name_ar ? String(p.name_ar) : undefined
-            }))
-            .filter((p) => Number.isFinite(p.commune) && p.commune > 0)
+        ? data.map((p: any) => ({
+            pickup_point: Number(p?.pickup_point),
+            commune: Number(p?.commune),
+            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
+            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
+            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
+            delivery_type: Number(p?.delivery_type)
+          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
         : []
-
-      if (pickupPoints.value.length > 0) {
-        const current = (quickForm.pickupPoint || '').trim()
-        if (!current || !pickupPoints.value.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-          quickForm.pickupPoint = pickupPoints.value[0].name || pickupPoints.value[0].name_lt || pickupPoints.value[0].name_ar || ''
-          syncPickupPointCommune()
+      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
+      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
+      if (isPickup) {
+        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
+        if (relaisPoints.length > 0) {
+          const current = (quickForm.pickupPoint || '').trim()
+          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
+            quickForm.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
+            syncPickupPointCommune()
+          }
         }
       }
     } catch (e: any) {
       pickupPoints.value = []
-      pickupPointsError.value =
-        e?.data?.statusMessage ||
-        e?.data?.message ||
-        'Failed to load pickup points'
+      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
     } finally {
       pickupPointsLoading.value = false
     }
@@ -654,7 +648,7 @@ const scrollToForm = () => {
                         class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
                     >
                 </div>
-                <div class="space-y-3 mt-6">
+                <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
                     <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
                         {{ storefrontContent.checkout.sections.deliveryOptions }}
                     </label>
@@ -723,7 +717,7 @@ const scrollToForm = () => {
                     </div>
 
                     <div
-                        v-if="isMaystroPickup"
+                        v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
                         class="space-y-2 mt-4"
                     >
                         <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
@@ -736,19 +730,32 @@ const scrollToForm = () => {
                             <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
                             Loading…
                         </div>
-                        <div
-                            v-else-if="quickForm.pickupPoint"
-                            class="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50"
-                        >
-                            <Icon name="lucide:map-pin" class="w-4 h-4 text-blue-600 shrink-0" />
-                            <span class="text-sm font-semibold text-slate-900">
-                                {{ quickForm.pickupPoint }}
-                            </span>
-                        </div>
+                        <template v-else>
+                            <div
+                                v-if="stopDeskName"
+                                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
+                            >
+                                <Icon name="lucide:building-2" class="w-4 h-4 text-slate-400 shrink-0" />
+                                <span>{{ stopDeskName }}</span>
+                            </div>
+                            <div
+                                v-if="isMaystroPickup && quickForm.pickupPoint"
+                                class="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50"
+                            >
+                                <Icon name="lucide:map-pin" class="w-4 h-4 text-blue-600 shrink-0" />
+                                <span class="text-sm font-semibold text-slate-900">
+                                    {{ quickForm.pickupPoint }}
+                                </span>
+                            </div>
+                        </template>
                         <p v-if="pickupPointsError" class="text-xs text-amber-700">
                             {{ pickupPointsError }}
                         </p>
                     </div>
+                </div>
+                <div v-else class="mt-6 px-4 py-3 border border-dashed border-slate-200 text-center text-xs text-slate-400">
+                    <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-slate-300" />
+                    {{ storefrontContent.checkout.help.deliveryOptions }}
                 </div>
 
 

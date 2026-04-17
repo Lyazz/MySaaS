@@ -193,208 +193,181 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen py-12 md:py-16">
-    <div class="max-w-6xl mx-auto px-6">
-      <!-- Header -->
-      <div class="mb-12">
-        <p class="text-[10px] tracking-[0.3em] uppercase text-[#C17B4E] mb-3">Finaliser</p>
-        <h1 class="font-maison-serif text-4xl font-semibold text-[#2C2420]">{{ storefrontContent.checkout.title }}</h1>
+  <div class="co">
+    <div class="co__header">
+      <div class="co__header-inner">
+        <span class="at-label">Finaliser</span>
+        <h1 class="co__title">{{ storefrontContent.checkout.title }}</h1>
       </div>
+    </div>
 
-      <div v-if="!cartEnabled" class="mb-8 p-5 border border-amber-200 bg-amber-50 text-amber-700 text-sm">
+    <div class="co__body">
+      <div v-if="!cartEnabled" class="co__disabled">
         {{ storefrontContent.checkout.disabled }}
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <!-- Left: Form -->
-        <div class="lg:col-span-7 space-y-6">
+      <div class="co__layout">
+        <!-- ── Left: Form ──────────────────────────────── -->
+        <div class="co__form-col">
           <!-- Customer info -->
-          <div class="bg-white border border-[#E8E0D4] p-8">
-            <h2 class="text-[10px] tracking-[0.25em] uppercase font-bold text-[#B0A090] mb-6">
-              {{ storefrontContent.checkout.sections.customerInformation }}
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="block text-xs text-[#7A6558] mb-2">{{ storefrontContent.checkout.form.fullName.label }}</label>
-                <input
-                  v-model="form.fullName"
-                  type="text"
-                  :placeholder="storefrontContent.checkout.form.fullName.placeholder"
-                  class="w-full border border-[#E8E0D4] bg-[#FAF8F5] py-3 px-4 text-sm text-[#2C2420] placeholder:text-[#B0A090] focus:border-[#C17B4E] focus:ring-1 focus:ring-[#C17B4E]/20 outline-none transition-colors"
-                >
+          <div class="co__card">
+            <span class="at-label co__card-label">{{ storefrontContent.checkout.sections.customerInformation }}</span>
+            <div class="co__grid2">
+              <div class="co__field">
+                <label class="co__label">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                <input v-model="form.fullName" type="text" :placeholder="storefrontContent.checkout.form.fullName.placeholder" class="co__input">
               </div>
-              <div>
-                <label class="block text-xs text-[#7A6558] mb-2">{{ storefrontContent.checkout.form.phone.label }}</label>
-                <input
-                  v-model="form.phone"
-                  type="tel"
-                  :placeholder="storefrontContent.checkout.form.phone.placeholder"
-                  class="w-full border border-[#E8E0D4] bg-[#FAF8F5] py-3 px-4 text-sm text-[#2C2420] placeholder:text-[#B0A090] focus:border-[#C17B4E] focus:ring-1 focus:ring-[#C17B4E]/20 outline-none transition-colors"
-                >
+              <div class="co__field">
+                <label class="co__label">{{ storefrontContent.checkout.form.phone.label }}</label>
+                <input v-model="form.phone" type="tel" :placeholder="storefrontContent.checkout.form.phone.placeholder" class="co__input">
               </div>
-              <div>
-                <label class="block text-xs text-[#7A6558] mb-2">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                <div class="relative">
-                  <select
-                    v-model="form.wilaya"
-                    class="w-full border border-[#E8E0D4] bg-[#FAF8F5] py-3 px-4 text-sm text-[#2C2420] focus:border-[#C17B4E] outline-none appearance-none cursor-pointer"
-                  >
+              <div class="co__field">
+                <label class="co__label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                <div class="co__select-wrap">
+                  <select v-model="form.wilaya" class="co__select">
                     <option value="" disabled>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
                     <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
                   </select>
-                  <Icon name="lucide:chevron-down" class="w-4 h-4 text-[#B0A090] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="co__select-arrow">
+                    <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
+                  </svg>
                 </div>
               </div>
-              <div>
-                <label class="block text-xs text-[#7A6558] mb-2">{{ storefrontContent.checkout.form.commune.label }}</label>
+              <div class="co__field">
+                <label class="co__label">{{ storefrontContent.checkout.form.commune.label }}</label>
                 <CommuneField
                   v-model="form.commune"
                   :wilaya-code="form.wilaya"
                   :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                  :input-class="'w-full border border-[#E8E0D4] bg-[#FAF8F5] py-3 px-4 text-sm text-[#2C2420] placeholder:text-[#B0A090] focus:border-[#C17B4E] outline-none transition-colors'"
-                  :select-class="'w-full border border-[#E8E0D4] bg-[#FAF8F5] py-3 px-4 text-sm text-[#2C2420] focus:border-[#C17B4E] outline-none transition-colors'"
+                  :input-class="'co__input'"
+                  :select-class="'co__select'"
                 />
               </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs text-[#7A6558] mb-2">{{ storefrontContent.checkout.form.address.label }}</label>
-                <input
-                  v-model="form.address"
-                  type="text"
-                  :placeholder="storefrontContent.checkout.form.address.placeholder"
-                  class="w-full border border-[#E8E0D4] bg-[#FAF8F5] py-3 px-4 text-sm text-[#2C2420] placeholder:text-[#B0A090] focus:border-[#C17B4E] focus:ring-1 focus:ring-[#C17B4E]/20 outline-none transition-colors"
-                >
+              <div class="co__field co__field--full">
+                <label class="co__label">{{ storefrontContent.checkout.form.address.label }}</label>
+                <input v-model="form.address" type="text" :placeholder="storefrontContent.checkout.form.address.placeholder" class="co__input">
               </div>
             </div>
           </div>
 
           <!-- Delivery options -->
-          <div v-if="form.wilaya && form.commune" class="bg-white border border-[#E8E0D4] p-8">
-            <h2 class="text-[10px] tracking-[0.25em] uppercase font-bold text-[#B0A090] mb-6">
-              {{ storefrontContent.checkout.sections.deliveryMethod }}
-            </h2>
-            <div class="space-y-3">
+          <div v-if="form.wilaya && form.commune" class="co__card">
+            <span class="at-label co__card-label">{{ storefrontContent.checkout.sections.deliveryMethod }}</span>
+            <div class="co__delivery-list">
               <div
                 v-for="option in deliveryOptions"
                 :key="option.id"
-                class="p-4 border cursor-pointer transition-all flex flex-wrap items-center justify-between gap-4"
-                :class="form.selectedDeliveryOption === option.id
-                  ? 'border-[#C17B4E] bg-[#C17B4E]/5'
-                  : 'border-[#E8E0D4] hover:border-[#D4C4B4]'"
+                class="co__delivery-opt"
+                :class="form.selectedDeliveryOption === option.id && 'is-selected'"
                 @click="form.selectedDeliveryOption = option.id"
               >
-                <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 bg-[#F0EBE3] flex items-center justify-center shrink-0">
-                    <Icon :name="option.icon" class="w-5 h-5 text-[#7A6558]" />
+                <div class="co__delivery-left">
+                  <div class="co__delivery-icon">
+                    <Icon :name="option.icon" style="width:13px;height:13px" />
                   </div>
                   <div>
-                    <h3 class="text-sm font-medium text-[#2C2420]">{{ option.providerLabel }}</h3>
-                    <p class="text-xs text-[#B0A090]">{{ option.modeLabel }}</p>
+                    <p class="co__delivery-name">{{ option.providerLabel }}</p>
+                    <p class="co__delivery-mode">{{ option.modeLabel }}</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
-                  <span class="font-semibold text-[#C17B4E] text-sm">
+                <div class="co__delivery-right">
+                  <span class="co__delivery-price">
                     {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                   </span>
-                  <span
-                    class="w-4 h-4 border-2 rounded-full shrink-0 flex items-center justify-center transition-colors"
-                    :class="form.selectedDeliveryOption === option.id ? 'border-[#C17B4E] bg-[#C17B4E]' : 'border-[#D4C4B4]'"
-                  >
-                    <Icon v-if="form.selectedDeliveryOption === option.id" name="lucide:check" class="w-2.5 h-2.5 text-white" />
-                  </span>
+                  <span class="co__radio" :class="form.selectedDeliveryOption === option.id && 'is-checked'" />
                 </div>
-                <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="basis-full pt-3 border-t border-[#E8E0D4]">
-                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-[#B0A090]">
-                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
-                    Loading...
+
+                <!-- Maystro pickup info -->
+                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || pickupPointsError)" class="co__pickup-info">
+                  <div v-if="pickupPointsLoading" class="co__pickup-loading">
+                    <Icon name="lucide:loader-2" style="width:11px;height:11px" /> Chargement…
                   </div>
-                  <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs">
-                    <Icon name="lucide:map-pin" class="w-3 h-3 text-[#C17B4E]" />
-                    <span class="font-semibold text-[#2C2420]">{{ form.pickupPoint }}</span>
-                  </div>
-                  <p v-if="pickupPointsError" class="text-xs text-amber-600 mt-1">{{ pickupPointsError }}</p>
+                  <template v-else>
+                    <div v-if="stopDeskName" class="co__pickup-desk">
+                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/><circle cx="5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="0.75"/></svg>
+                      {{ stopDeskName }}
+                    </div>
+                    <div v-if="form.selectedDeliveryOption === option.id && form.pickupPoint" class="co__pickup-point">
+                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/><circle cx="5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="0.75"/></svg>
+                      {{ form.pickupPoint }}
+                    </div>
+                  </template>
+                  <p v-if="pickupPointsError" class="co__pickup-error">{{ pickupPointsError }}</p>
                 </div>
               </div>
             </div>
           </div>
-          <div v-else class="bg-white border border-[#E8E0D4] p-8 text-center text-sm text-[#B0A090]">
-            <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-[#D4C4B4]" />
+          <div v-else class="co__card co__delivery-hint">
+            <svg width="16" height="20" viewBox="0 0 10 12" fill="none" style="color:var(--at-muted)">
+              <path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/>
+            </svg>
             {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
 
           <!-- Error -->
-          <div v-if="errorMessage" class="p-4 border border-red-200 bg-red-50 text-red-600 text-sm">
+          <div v-if="errorMessage" class="co__error">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0">
+              <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="0.75"/>
+              <path d="M6 3v4M6 9v.5" stroke="currentColor" stroke-width="0.75"/>
+            </svg>
             {{ errorMessage }}
           </div>
         </div>
 
-        <!-- Right: Summary -->
-        <div class="lg:col-span-5">
-          <div class="bg-white border border-[#E8E0D4] p-8 sticky top-24">
-            <h2 class="text-[10px] tracking-[0.25em] uppercase font-bold text-[#B0A090] mb-6">
-              {{ storefrontContent.checkout.sections.orderSummary }}
-            </h2>
+        <!-- ── Right: Summary ─────────────────────────── -->
+        <div class="co__summary-col">
+          <div class="co__summary-card">
+            <span class="at-label co__card-label">{{ storefrontContent.checkout.sections.orderSummary }}</span>
 
             <!-- Items -->
-            <div class="space-y-4 mb-6 pb-6 border-b border-[#E8E0D4]">
-              <div v-for="item in cartStore.items" :key="item.variantId || item.productId" class="flex gap-4">
-                <div class="w-14 h-14 bg-[#F5F0EA] flex-shrink-0 relative overflow-hidden">
-                  <img v-if="item.image" :src="item.image" :alt="item.title" class="w-full h-full object-cover">
-                  <span class="absolute -top-0.5 -right-0.5 bg-[#C17B4E] text-white w-4 h-4 text-[9px] font-bold rounded-full flex items-center justify-center">{{ item.quantity }}</span>
+            <div class="co__summary-items">
+              <div v-for="item in cartStore.items" :key="item.variantId || item.productId" class="co__summary-item">
+                <div class="co__item-img">
+                  <img v-if="item.image" :src="item.image" :alt="item.title" class="co__item-photo">
+                  <span class="co__item-qty">{{ item.quantity }}</span>
                 </div>
-                <div class="flex-grow min-w-0">
-                  <p class="text-sm text-[#2C2420] font-medium truncate">{{ item.title }}</p>
-                </div>
-                <p class="font-semibold text-[#2C2420] text-sm shrink-0">{{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}</p>
+                <span class="co__item-name">{{ item.title }}</span>
+                <span class="co__item-price">{{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}</span>
               </div>
             </div>
 
             <!-- Coupon -->
-            <div class="mb-6">
-              <div class="flex gap-2">
-                <input
-                  v-model="couponCode"
-                  type="text"
-                  :placeholder="storefrontContent.checkout.coupon.placeholder"
-                  class="flex-1 border border-[#E8E0D4] bg-[#FAF8F5] py-2.5 px-3 text-xs text-[#2C2420] placeholder:text-[#B0A090] focus:border-[#C17B4E] outline-none"
-                >
-                <button class="px-4 py-2.5 bg-[#2C2420] text-white text-xs tracking-[0.12em] uppercase hover:bg-[#C17B4E] transition-colors">
-                  {{ storefrontContent.actions.apply }}
-                </button>
-              </div>
+            <div class="co__coupon">
+              <input v-model="couponCode" type="text" :placeholder="storefrontContent.checkout.coupon.placeholder" class="co__input co__coupon-input">
+              <button class="co__coupon-btn">{{ storefrontContent.actions.apply }}</button>
             </div>
 
             <!-- Totals -->
-            <dl class="space-y-3 text-sm text-[#7A6558] mb-8">
-              <div v-if="selectedDelivery" class="flex justify-between">
+            <dl class="co__totals">
+              <div v-if="selectedDelivery" class="co__total-row">
                 <dt>{{ storefrontContent.checkout.summary.deliveryOption }}</dt>
-                <dd class="text-[#2C2420] text-xs">{{ selectedDelivery.providerLabel }} — {{ selectedDelivery.modeLabel }}</dd>
+                <dd class="co__total-detail">{{ selectedDelivery.providerLabel }} — {{ selectedDelivery.modeLabel }}</dd>
               </div>
-              <div class="flex justify-between">
+              <div class="co__total-row">
                 <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
-                <dd class="font-medium text-[#2C2420]">{{ formatCurrency(cartStore.total) }}</dd>
+                <dd>{{ formatCurrency(cartStore.total) }}</dd>
               </div>
-              <div v-if="selectedDelivery" class="flex justify-between">
+              <div v-if="selectedDelivery" class="co__total-row">
                 <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
                 <dd>{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</dd>
               </div>
-              <div class="flex justify-between pt-4 border-t border-[#E8E0D4] text-base">
-                <dt class="font-semibold text-[#2C2420]">{{ storefrontContent.cart.summary.total }}</dt>
-                <dd class="font-bold text-[#C17B4E]">{{ formatCurrency(grandTotal) }}</dd>
+              <div class="co__total-row co__total-row--grand">
+                <dt>{{ storefrontContent.cart.summary.total }}</dt>
+                <dd class="co__grand-price">{{ formatCurrency(grandTotal) }}</dd>
               </div>
             </dl>
 
             <button
               type="button"
+              class="at-btn-solid"
               :disabled="submitting || !cartEnabled || !hasRequiredFields"
-              class="w-full py-4 bg-[#2C2420] text-white text-xs tracking-[0.2em] uppercase hover:bg-[#C17B4E] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               @click="handleSubmit"
             >
-              <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+              <Icon v-if="submitting" name="lucide:loader-2" style="width:14px;height:14px" />
               {{ submitting ? storefrontContent.checkout.actions.placingOrder : storefrontContent.checkout.actions.placeOrder }}
             </button>
 
-            <NuxtLink to="/cart" class="block text-center text-xs tracking-[0.12em] uppercase text-[#7A6558] hover:text-[#C17B4E] py-3 mt-3 transition-colors">
+            <NuxtLink to="/cart" class="co__back-link">
               {{ storefrontContent.checkout.actions.returnToCart }}
             </NuxtLink>
           </div>
@@ -403,3 +376,265 @@ async function handleSubmit() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.co { min-height: 100vh; }
+
+/* Header */
+.co__header {
+  border-bottom: 1px solid var(--at-border);
+  background: var(--at-surface);
+  padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 80px) clamp(32px, 5vw, 56px);
+}
+.co__header-inner { max-width: 1200px; margin: 0 auto; }
+.co__title {
+  font-family: var(--at-f-display);
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.0;
+  color: var(--at-cream);
+  margin-top: 10px;
+}
+
+/* Body */
+.co__body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(32px, 5vw, 56px) clamp(20px, 5vw, 80px);
+}
+
+.co__disabled {
+  padding: 14px 18px;
+  border: 1px solid rgba(201,150,42,0.4);
+  background: rgba(201,150,42,0.06);
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: #C9962A;
+  margin-bottom: 24px;
+}
+
+.co__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+@media (min-width: 1024px) {
+  .co__layout { grid-template-columns: 1fr 380px; gap: 32px; }
+}
+
+/* Cards */
+.co__form-col { display: flex; flex-direction: column; gap: 16px; }
+.co__card {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border);
+  padding: clamp(20px, 3vw, 32px);
+}
+.co__card-label { display: block; margin-bottom: 20px; }
+.co__delivery-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: var(--at-muted);
+}
+
+/* Form fields */
+.co__grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 640px) { .co__grid2 { grid-template-columns: 1fr; } }
+.co__field { display: flex; flex-direction: column; gap: 7px; }
+.co__field--full { grid-column: 1 / -1; }
+.co__label {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+}
+
+/* Inputs — explicit overrides for browser default white bg */
+.co__input {
+  display: block;
+  width: 100%;
+  background: var(--at-bg) !important;
+  border: 1px solid var(--at-border);
+  padding: 12px 14px;
+  font-family: var(--at-f-mono);
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--at-text) !important;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+}
+.co__input::placeholder { color: var(--at-muted) !important; }
+.co__input:focus { border-color: var(--at-gold); }
+
+.co__select-wrap { position: relative; }
+.co__select {
+  display: block;
+  width: 100%;
+  background: var(--at-bg) !important;
+  border: 1px solid var(--at-border);
+  padding: 12px 36px 12px 14px;
+  font-family: var(--at-f-mono);
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--at-text) !important;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.co__select:focus { border-color: var(--at-gold); }
+/* Dark options for select elements */
+.co__select option { background: var(--at-surface); color: var(--at-text); }
+.co__select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--at-muted); pointer-events: none; }
+
+/* Delivery options */
+.co__delivery-list { display: flex; flex-direction: column; gap: 1px; background: var(--at-border); }
+.co__delivery-opt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--at-surface);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.co__delivery-opt:hover { background: var(--at-surface-2); }
+.co__delivery-opt.is-selected { background: rgba(184,146,74,0.07); }
+.co__delivery-left { display: flex; align-items: center; gap: 12px; }
+.co__delivery-icon {
+  width: 32px; height: 32px;
+  background: var(--at-surface-2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--at-sub); flex-shrink: 0;
+}
+.co__delivery-name { font-family: var(--at-f-mono); font-size: 11px; color: var(--at-text); margin-bottom: 2px; }
+.co__delivery-mode { font-family: var(--at-f-mono); font-size: 9px; color: var(--at-muted); }
+.co__delivery-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.co__delivery-price { font-family: var(--at-f-mono); font-size: 12px; font-weight: 400; color: var(--at-gold); }
+.co__radio { width: 12px; height: 12px; border: 1px solid var(--at-border-2); border-radius: 50%; transition: background 0.15s, border-color 0.15s; }
+.co__radio.is-checked { background: var(--at-gold); border-color: var(--at-gold); }
+
+.co__pickup-info { flex-basis: 100%; padding-top: 10px; border-top: 1px solid var(--at-border); }
+.co__pickup-loading { display: flex; align-items: center; gap: 8px; font-family: var(--at-f-mono); font-size: 10px; color: var(--at-sub); }
+.co__pickup-desk { display: flex; align-items: center; gap: 8px; font-family: var(--at-f-mono); font-size: 10px; color: var(--at-sub); }
+.co__pickup-desk svg { color: var(--at-muted); }
+.co__pickup-point { display: flex; align-items: center; gap: 8px; font-family: var(--at-f-mono); font-size: 11px; color: var(--at-text); margin-top: 4px; }
+.co__pickup-point svg { color: var(--at-gold); }
+.co__pickup-error { font-family: var(--at-f-mono); font-size: 10px; color: var(--at-error); margin-top: 6px; }
+
+/* Error */
+.co__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(192,57,43,0.35);
+  background: rgba(192,57,43,0.06);
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: var(--at-error);
+}
+
+/* Summary */
+.co__summary-col {}
+.co__summary-card {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border);
+  padding: clamp(20px, 3vw, 32px);
+  position: sticky;
+  top: 80px;
+}
+
+.co__summary-items { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--at-border); }
+.co__summary-item { display: flex; align-items: center; gap: 12px; }
+.co__item-img { position: relative; width: 48px; height: 48px; background: var(--at-surface-2); flex-shrink: 0; overflow: hidden; }
+.co__item-photo { width: 100%; height: 100%; object-fit: cover; }
+.co__item-qty {
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 16px; height: 16px;
+  background: var(--at-gold);
+  color: var(--at-bg);
+  font-family: var(--at-f-mono);
+  font-size: 8px;
+  font-weight: 400;
+  display: flex; align-items: center; justify-content: center;
+}
+.co__item-name { flex: 1; font-family: var(--at-f-mono); font-size: 11px; color: var(--at-text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.co__item-price { font-family: var(--at-f-mono); font-size: 11px; color: var(--at-sub); flex-shrink: 0; }
+
+/* Coupon */
+.co__coupon { display: flex; gap: 8px; margin-bottom: 20px; }
+.co__coupon-input { flex: 1; }
+.co__coupon-btn {
+  background: var(--at-surface-2);
+  border: 1px solid var(--at-border-2);
+  padding: 0 16px;
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+}
+.co__coupon-btn:hover { border-color: var(--at-gold); color: var(--at-gold); }
+
+/* Totals */
+.co__totals { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.co__total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: var(--at-sub);
+}
+.co__total-row dt { }
+.co__total-row dd { color: var(--at-text); margin: 0; }
+.co__total-detail { font-size: 9px !important; color: var(--at-muted) !important; }
+.co__total-row--grand {
+  padding-top: 14px;
+  border-top: 1px solid var(--at-border);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.co__grand-price {
+  font-family: var(--at-f-display) !important;
+  font-size: 1.6rem !important;
+  font-weight: 400;
+  color: var(--at-gold) !important;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.co__back-link {
+  display: block;
+  text-align: center;
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--at-muted);
+  text-decoration: none;
+  padding: 14px;
+  margin-top: 8px;
+  transition: color 0.2s;
+}
+.co__back-link:hover { color: var(--at-gold); }
+</style>

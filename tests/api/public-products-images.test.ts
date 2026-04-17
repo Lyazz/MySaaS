@@ -9,6 +9,7 @@ describe('Public products images payload', () => {
 
     let tenantId: string
     let productSlug: string
+    let noImageProductSlug: string
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({ data: { name: 'Images Tenant', slug } })
@@ -45,6 +46,19 @@ describe('Public products images payload', () => {
                 }
             ]
         })
+
+        noImageProductSlug = `prod-no-image-${Date.now()}`
+        await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'No Image Product',
+                slug: noImageProductSlug,
+                price: 15,
+                stock: 5,
+                isActive: true,
+                images: []
+            }
+        })
     })
 
     afterAll(async () => {
@@ -70,6 +84,11 @@ describe('Public products images payload', () => {
         expect(p.productImages[0].url).toBe('https://example.com/img-main.jpg')
         expect(Array.isArray(p.images)).toBe(true)
         expect(p.images[0]).toBe('https://example.com/img-main.jpg')
+
+        const noImage = res.body.find((x: any) => x?.slug === noImageProductSlug)
+        expect(noImage).toBeTruthy()
+        expect(Array.isArray(noImage.images)).toBe(true)
+        expect(noImage.images[0]).toBe('/blank.svg')
     })
 
     it('GET /api/products/:slug includes productImages and derives images when legacy images empty', async () => {
@@ -81,5 +100,11 @@ describe('Public products images payload', () => {
         expect(Array.isArray(res.body.images)).toBe(true)
         expect(res.body.images[0]).toBe('https://example.com/img-main.jpg')
     })
-})
 
+    it('GET /api/products/:slug returns placeholder when no images exist', async () => {
+        const res = await request(app).get(`/api/products/${encodeURIComponent(noImageProductSlug)}`).set('Host', host)
+        expect(res.status).toBe(200)
+        expect(Array.isArray(res.body.images)).toBe(true)
+        expect(res.body.images[0]).toBe('/blank.svg')
+    })
+})

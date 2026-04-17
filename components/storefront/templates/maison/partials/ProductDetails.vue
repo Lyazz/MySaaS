@@ -35,108 +35,99 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="details">
     <!-- Title block -->
-    <div>
-      <p class="text-[10px] tracking-[0.25em] uppercase text-[#B0A090] mb-3">
-        {{ product?.category?.title || 'Maison & Déco' }}
-      </p>
-      <h1 class="font-maison-serif text-3xl md:text-4xl font-semibold text-[#2C2420] leading-tight mb-4">
-        {{ product?.title }}
-      </h1>
+    <div class="details__head">
+      <span class="at-label">{{ product?.category?.title || 'Maison & Déco' }}</span>
+      <h1 class="details__title">{{ product?.title }}</h1>
 
       <StorefrontSharedCountdownTimer
         v-if="product?.showCountdown && product?.promotionEndDate"
         :end-date="product.promotionEndDate"
         theme="danger"
         show-icon
-        class="mb-4"
+        class="details__countdown"
       />
 
-      <div class="flex items-center gap-3">
-        <span class="text-2xl font-bold text-[#C17B4E]">
-          {{ formatPrice(currentPrice) }}
-        </span>
-        <span v-if="product?.compareAtPrice" class="text-lg text-[#B0A090] line-through">
+      <div class="details__price-row">
+        <span class="details__price">{{ formatPrice(currentPrice) }}</span>
+        <span v-if="product?.compareAtPrice" class="details__price-compare">
           {{ formatPrice(product.compareAtPrice) }}
         </span>
       </div>
     </div>
 
     <!-- Options -->
-    <div
-      v-if="product?.options && product.options.length > 0"
-      class="space-y-5 pt-5 border-t border-[#E8E0D4]"
-    >
-      <div v-for="option in product.options" :key="option.id">
-        <label class="block text-xs tracking-[0.15em] uppercase text-[#7A6558] mb-3">{{ option.name }}</label>
+    <div v-if="product?.options && product.options.length > 0" class="details__options">
+      <div v-for="option in product.options" :key="option.id" class="details__option">
+        <label class="details__option-label">{{ option.name }}</label>
 
         <!-- Dropdown -->
-        <div v-if="option.displayType === 'dropdown'" class="relative max-w-xs">
+        <div v-if="option.displayType === 'dropdown'" class="details__select-wrap">
           <select
             :value="selectedOptions[option.id]"
-            class="block w-full border border-[#E8E0D4] bg-[#FAF8F5] px-4 py-3 text-sm text-[#2C2420] focus:border-[#C17B4E] outline-none appearance-none cursor-pointer"
+            class="at-select"
             @change="setOption(option.id, ($event.target as HTMLSelectElement).value)"
           >
             <option v-for="value in option.values" :key="value.id" :value="value.id" :disabled="isOptionValueUnavailable(option.id, value.id)">
               {{ value.label }} {{ optionValueSuffix(option.id, value.id) }}
             </option>
           </select>
-          <Icon name="lucide:chevron-down" class="w-4 h-4 text-[#B0A090] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="details__select-arrow">
+            <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
+          </svg>
         </div>
 
         <!-- Color swatch -->
-        <div v-else-if="option.displayType === 'color'" class="flex flex-wrap gap-2.5">
+        <div v-else-if="option.displayType === 'color'" class="details__swatches">
           <button
             v-for="value in option.values"
             :key="value.id"
             type="button"
-            class="w-9 h-9 border-2 flex items-center justify-center relative transition-all"
+            class="details__color-swatch"
             :class="[
-              optionValueState(option.id, value.id) === 'unavailable' ? 'opacity-30 cursor-not-allowed border-transparent' : 'cursor-pointer',
-              selectedOptions[option.id] === value.id ? 'border-[#C17B4E] scale-110' : 'border-transparent hover:border-[#D4C4B4]'
+              optionValueState(option.id, value.id) === 'unavailable' ? 'is-unavailable' : '',
+              selectedOptions[option.id] === value.id ? 'is-selected' : ''
             ]"
-            :style="{ backgroundColor: value.meta || '#eee' }"
+            :style="{ backgroundColor: value.meta || '#555' }"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
             @click="setOptionIfAllowed(option.id, value.id)"
           >
-            <Icon v-if="selectedOptions[option.id] === value.id" name="lucide:check" class="w-4 h-4 text-white drop-shadow" />
+            <svg v-if="selectedOptions[option.id] === value.id" width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4l3 3 5-6" stroke="white" stroke-width="1" filter="drop-shadow(0 0 1px rgba(0,0,0,0.6))"/>
+            </svg>
           </button>
         </div>
 
         <!-- Image swatch -->
-        <div v-else-if="option.displayType === 'image'" class="flex flex-wrap gap-2">
+        <div v-else-if="option.displayType === 'image'" class="details__img-swatches">
           <button
             v-for="value in option.values"
             :key="value.id"
             type="button"
-            class="w-14 h-14 border overflow-hidden relative transition-all"
+            class="details__img-swatch"
             :class="[
-              optionValueState(option.id, value.id) === 'unavailable' ? 'opacity-40 grayscale cursor-not-allowed' : 'cursor-pointer',
-              selectedOptions[option.id] === value.id ? 'border-[#C17B4E]' : 'border-transparent hover:border-[#D4C4B4]'
+              optionValueState(option.id, value.id) === 'unavailable' ? 'is-unavailable' : '',
+              selectedOptions[option.id] === value.id ? 'is-selected' : ''
             ]"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
             @click="setOptionIfAllowed(option.id, value.id)"
           >
-            <img v-if="value.meta" :src="value.meta" class="w-full h-full object-cover">
-            <span v-else class="text-xs text-[#B0A090] flex items-center justify-center h-full">{{ value.label }}</span>
+            <img v-if="value.meta" :src="value.meta" class="details__img-swatch-img">
+            <span v-else class="details__img-swatch-label">{{ value.label }}</span>
           </button>
         </div>
 
         <!-- Default buttons -->
-        <div v-else class="flex flex-wrap gap-2">
+        <div v-else class="details__option-btns">
           <button
             v-for="value in option.values"
             :key="value.id"
-            class="px-4 py-2 text-xs tracking-[0.1em] uppercase border transition-all"
+            class="details__option-btn"
             :class="[
-              optionValueState(option.id, value.id) === 'unavailable'
-                ? 'border-[#E8E0D4] text-[#D4C4B4] cursor-not-allowed line-through'
-                : selectedOptions[option.id] === value.id
-                  ? 'border-[#2C2420] bg-[#2C2420] text-white'
-                  : optionValueState(option.id, value.id) === 'out_of_stock'
-                    ? 'border-[#E8E0D4] text-red-400'
-                    : 'border-[#E8E0D4] text-[#7A6558] hover:border-[#C17B4E] hover:text-[#C17B4E]'
+              optionValueState(option.id, value.id) === 'unavailable' ? 'is-unavailable' : '',
+              selectedOptions[option.id] === value.id ? 'is-selected' : '',
+              optionValueState(option.id, value.id) === 'out_of_stock' ? 'is-oos' : ''
             ]"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
             @click="setOptionIfAllowed(option.id, value.id)"
@@ -148,11 +139,135 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     </div>
 
     <!-- Mini description -->
-    <p
-      v-if="product?.miniDescription"
-      class="text-sm text-[#7A6558] leading-relaxed pt-5 border-t border-[#E8E0D4]"
-    >
+    <p v-if="product?.miniDescription" class="details__mini-desc">
       {{ product.miniDescription }}
     </p>
   </div>
 </template>
+
+<style scoped>
+.details { display: flex; flex-direction: column; gap: 0; }
+
+.details__head { margin-bottom: 24px; }
+.details__title {
+  font-family: var(--at-f-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--at-cream);
+  margin: 8px 0 16px;
+}
+.details__countdown { margin-bottom: 12px; }
+.details__price-row { display: flex; align-items: baseline; gap: 12px; }
+.details__price {
+  font-family: var(--at-f-display);
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--at-gold);
+}
+.details__price-compare {
+  font-family: var(--at-f-mono);
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--at-muted);
+  text-decoration: line-through;
+}
+
+/* Options */
+.details__options {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--at-border);
+}
+.details__option { display: flex; flex-direction: column; gap: 10px; }
+.details__option-label {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+}
+
+.details__select-wrap { position: relative; max-width: 280px; }
+.details__select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--at-muted);
+  pointer-events: none;
+}
+
+.details__swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.details__color-swatch {
+  width: 32px;
+  height: 32px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, opacity 0.15s, transform 0.15s;
+}
+.details__color-swatch.is-selected { border-color: var(--at-gold); transform: scale(1.1); }
+.details__color-swatch.is-unavailable { opacity: 0.25; cursor: not-allowed; }
+
+.details__img-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.details__img-swatch {
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--at-border);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  background: none;
+  padding: 0;
+  transition: border-color 0.15s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.details__img-swatch.is-selected { border-color: var(--at-gold); }
+.details__img-swatch.is-unavailable { opacity: 0.35; filter: grayscale(1); cursor: not-allowed; }
+.details__img-swatch-img { width: 100%; height: 100%; object-fit: cover; }
+.details__img-swatch-label {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  color: var(--at-sub);
+}
+
+.details__option-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.details__option-btn {
+  padding: 8px 14px;
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid var(--at-border-2);
+  background: transparent;
+  color: var(--at-sub);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.details__option-btn:hover { border-color: var(--at-gold); color: var(--at-gold); }
+.details__option-btn.is-selected { border-color: var(--at-cream); background: var(--at-cream); color: var(--at-bg); }
+.details__option-btn.is-unavailable { opacity: 0.25; cursor: not-allowed; text-decoration: line-through; }
+.details__option-btn.is-oos { color: #C0392B; border-color: rgba(192,57,43,0.3); }
+
+/* Mini desc */
+.details__mini-desc {
+  padding-top: 20px;
+  border-top: 1px solid var(--at-border);
+  font-family: var(--at-f-mono);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--at-sub);
+  margin-top: 4px;
+}
+</style>

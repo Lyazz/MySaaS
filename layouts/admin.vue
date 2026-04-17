@@ -1,106 +1,121 @@
 <template>
-  <div class="h-screen overflow-hidden bg-slate-100 flex font-sans text-slate-600" :style="adminStyle">
-    <!-- Sidebar -->
+  <div class="h-screen overflow-hidden flex font-sans text-slate-600" style="background: var(--admin-content-bg)" :style="adminStyle">
     <!-- Mobile Backdrop -->
-    <div 
-      v-if="sidebarOpen" 
-      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 lg:hidden transition-opacity"
+    <div
+      v-if="sidebarOpen"
+      class="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-20 lg:hidden"
       @click="sidebarOpen = false"
     ></div>
 
     <!-- Sidebar -->
     <aside :class="[
-      'bg-slate-950 text-white transition-all duration-300 flex flex-col shadow-2xl z-30',
-      'fixed inset-y-0 left-0 lg:static', // Mobile fixed, Desktop static
-      sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'
-    ]">
+      'text-white transition-all duration-300 flex flex-col z-30 relative',
+      'fixed inset-y-0 left-0 lg:static',
+      sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0 lg:w-[68px]'
+    ]" style="background: var(--admin-sidebar-bg)">
+      <!-- Subtle gradient overlay for depth -->
+      <div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 40%); border-right: 1px solid var(--admin-sidebar-border);"></div>
+
       <!-- Logo/Brand -->
-      <div class="h-16 flex items-center justify-between px-6 bg-slate-950 border-b border-white/5">
-        <div class="flex items-center gap-3 overflow-hidden">
+      <div class="h-[60px] flex items-center justify-between px-4 shrink-0 relative">
+        <div class="flex items-center gap-3 overflow-hidden min-w-0">
           <template v-if="storeSettings?.logoUrl">
-            <img 
-              :src="storeSettings.logoUrl" 
-              :alt="tenantName" 
-              class="h-8 max-w-[32px] object-contain shrink-0"
-              :class="sidebarOpen ? 'max-w-[120px]' : 'max-w-[32px]'"
+            <img
+              :src="storeSettings.logoUrl"
+              :alt="tenantName"
+              class="h-7 object-contain shrink-0 transition-all duration-300"
+              :class="sidebarOpen ? 'max-w-[100px]' : 'max-w-[28px]'"
             >
           </template>
           <template v-else>
-            <div 
-              class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors bg-teal-600"
+            <div
+              class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
+              style="background: var(--brand); box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 2px 8px rgba(0,0,0,0.3)"
             >
               {{ tenantInitial }}
             </div>
           </template>
-          <span 
-            class="font-sans font-semibold text-lg tracking-wide truncate transition-all duration-300"
-            :class="sidebarOpen ? 'opacity-100' : 'opacity-0 lg:hidden'"
+          <span
+            class="font-semibold text-[15px] tracking-tight text-white/90 truncate transition-all duration-300"
+            :class="sidebarOpen ? 'opacity-100 max-w-[140px]' : 'opacity-0 max-w-0'"
           >
             {{ tenantName }}
           </span>
         </div>
-        <button 
-          @click="toggleSidebar" 
-          class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors lg:hidden"
+        <button
+          @click="toggleSidebar"
+          class="p-1 text-slate-500 hover:text-white rounded-lg transition-colors lg:hidden shrink-0"
           :aria-label="t('admin.actions.closeSidebar')"
         >
-          <Icon name="lucide:x" class="w-5 h-5" />
+          <Icon name="lucide:x" class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 py-6 px-3 overflow-y-auto custom-scrollbar">
-        <div v-for="entry in visibleNavGroups" :key="entry.originalIndex" class="mb-6 last:mb-0">
-          <button 
-            v-if="entry.group.titleKey" 
-            @click="toggleGroup(entry.originalIndex)"
-            class="w-full flex items-center justify-between px-3 mb-1 text-xs font-semibold text-slate-500 uppercase tracking-wider transition-opacity duration-300 hover:text-slate-300 group/header"
-            :class="sidebarOpen ? 'opacity-100' : 'opacity-0 hidden'"
-          >
-            <span>{{ t(entry.group.titleKey) }}</span>
-            <Icon 
-              name="lucide:chevron-down" 
-              class="w-3 h-3 transition-transform duration-200"
-              :class="entry.group.collapsed ? '-rotate-90' : 'rotate-0'"
-            />
-          </button>
-          
-          <div 
-            class="space-y-1 transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden"
-            :class="[
-              (!entry.group.collapsed || !sidebarOpen) ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-            ]"
+      <nav class="flex-1 py-3 px-2.5 overflow-y-auto custom-scrollbar space-y-5">
+        <div v-for="entry in visibleNavGroups" :key="entry.originalIndex">
+          <!-- Group Header -->
+          <div v-if="entry.group.titleKey && sidebarOpen" class="px-2 mb-1.5">
+            <button
+              @click="toggleGroup(entry.originalIndex)"
+              class="w-full flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-slate-300 transition-colors"
+            >
+              <span>{{ t(entry.group.titleKey) }}</span>
+              <Icon
+                name="lucide:chevron-down"
+                class="w-3 h-3 transition-transform duration-200"
+                :class="entry.group.collapsed ? '-rotate-90' : 'rotate-0'"
+              />
+            </button>
+          </div>
+          <!-- Collapsed group divider -->
+          <div v-else-if="entry.group.titleKey && !sidebarOpen" class="mx-2 h-px bg-white/5 my-1"></div>
+
+          <div
+            class="space-y-0.5 transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden"
+            :class="[(!entry.group.collapsed || !sidebarOpen) ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0']"
           >
             <NuxtLink
               v-for="item in entry.items"
               :key="item.path"
               :to="item.path"
-              class="group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden h-11"
-              active-class="text-white bg-white/10 shadow-sm ring-1 ring-white/20"
-              :class="['text-slate-400 hover:text-white hover:bg-white/5', sidebarOpen ? 'justify-start gap-3' : 'justify-center gap-0']"
+              :class="[
+                'group flex items-center rounded-xl transition-all duration-150 relative h-10',
+                sidebarOpen ? 'px-3 gap-3' : 'px-0 justify-center',
+                route.path === item.path
+                  ? 'text-white'
+                  : 'text-slate-400 hover:text-white'
+              ]"
+              :style="route.path === item.path
+                ? `background: rgba(var(--brand-rgb) / 0.2); box-shadow: inset 0 0 0 1px rgba(var(--brand-rgb) / 0.3)`
+                : ''"
+              @mouseenter="(e: MouseEvent) => { if (route.path !== item.path) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)' }"
+              @mouseleave="(e: MouseEvent) => { if (route.path !== item.path) (e.currentTarget as HTMLElement).style.background = '' }"
             >
-              <!-- Active Indicator Strip -->
-              <div 
+              <!-- Active left accent -->
+              <div
                 v-if="route.path === item.path"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-teal-600"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full"
+                style="background: var(--brand)"
               ></div>
 
-              <Icon 
-                :name="item.icon" 
-                class="w-5 h-5 transition-transform duration-300 group-hover:scale-110 shrink-0"
-                :class="{ 'text-teal-600': route.path === item.path }"
+              <Icon
+                :name="item.icon"
+                class="w-[18px] h-[18px] shrink-0 transition-transform duration-200 group-hover:scale-105"
+                :style="route.path === item.path ? `color: var(--brand)` : ''"
               />
-              <span 
-                class="font-medium text-sm transition-all duration-300 whitespace-nowrap overflow-hidden"
+              <span
+                class="font-medium text-[13.5px] transition-all duration-300 whitespace-nowrap overflow-hidden leading-none"
                 :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
               >
                 {{ t(item.labelKey) }}
               </span>
-              
-              <!-- Tooltip for collapsed state -->
-              <div 
-                v-if="!sidebarOpen" 
-                class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
+
+              <!-- Tooltip (collapsed) -->
+              <div
+                v-if="!sidebarOpen"
+                class="fixed left-[72px] px-2.5 py-1.5 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl ml-1"
+                style="background: #1e2533; border: 1px solid rgba(255,255,255,0.1)"
               >
                 {{ t(item.labelKey) }}
               </div>
@@ -110,74 +125,83 @@
       </nav>
 
       <!-- User Section -->
-      <div class="p-5 border-t border-slate-800 bg-black/20">
-        <div 
-          class="flex items-center rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
-          :class="sidebarOpen ? 'gap-3 p-2' : 'gap-0 justify-center p-2'"
+      <div class="p-2.5 shrink-0" style="border-top: 1px solid var(--admin-sidebar-border)">
+        <div
+          class="flex items-center rounded-xl p-2 cursor-pointer transition-colors hover:bg-white/6 group"
+          :class="sidebarOpen ? 'gap-3' : 'justify-center'"
+          style="--tw-hover-bg: rgba(255,255,255,0.06)"
+          @mouseenter="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'"
+          @mouseleave="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = ''"
         >
-          <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-300 ring-2 ring-transparent group-hover:ring-white/20 transition-all shrink-0">
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold text-white shrink-0"
+            style="background: rgba(var(--brand-rgb) / 0.25); box-shadow: 0 0 0 1px rgba(var(--brand-rgb) / 0.4)"
+          >
             {{ userInitial }}
           </div>
-          <div 
+          <div
             class="min-w-0 transition-all duration-300 overflow-hidden"
-            :class="sidebarOpen ? 'w-auto opacity-100 ml-3' : 'w-0 opacity-0 ml-0'"
+            :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
           >
-            <p class="text-sm font-medium text-slate-200 truncate">{{ authStore.user?.email }}</p>
-            <p class="text-xs text-slate-500 truncate mt-0.5">{{ authStore.user?.role }}</p>
+            <p class="text-[13px] font-medium text-slate-200 truncate leading-tight">{{ authStore.user?.email }}</p>
+            <p class="text-[11px] text-slate-500 truncate mt-0.5 capitalize">{{ authStore.user?.role }}</p>
           </div>
         </div>
       </div>
     </aside>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden relative">
+    <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Top Bar -->
-      <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200/60 shadow-sm">
-        <div class="px-6 h-16 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button 
-              @click="toggleSidebar" 
-              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+      <header class="shrink-0 bg-white sticky top-0 z-10" style="border-bottom: 1px solid #eaecf0; box-shadow: 0 1px 3px rgba(0,0,0,0.04)">
+        <div class="px-5 h-[60px] flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <button
+              @click="toggleSidebar"
+              class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors shrink-0"
               :aria-label="t('admin.actions.toggleSidebar')"
             >
-              <Icon name="lucide:menu" class="w-6 h-6" />
+              <Icon name="lucide:panel-left" class="w-5 h-5" />
             </button>
-            <h1 class="text-xl font-sans font-semibold text-slate-800 tracking-tight">{{ pageTitle }}</h1>
+            <div class="h-5 w-px bg-slate-200 shrink-0"></div>
+            <h1 class="text-[15px] font-semibold text-slate-800 tracking-tight truncate">{{ pageTitle }}</h1>
           </div>
-          
-          <div class="flex items-center gap-4">
+
+          <div class="flex items-center gap-2 shrink-0">
             <a
               :href="storefrontUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="hidden sm:flex ui-btn ui-btn--secondary ui-btn--md !text-teal-600 !border-teal-200 hover:!bg-teal-50 !shadow-none"
+              class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-lg border transition-all duration-150 hover:bg-slate-50"
+              style="color: var(--brand); border-color: rgba(var(--brand-rgb) / 0.3); background: rgba(var(--brand-rgb) / 0.04)"
             >
-              <Icon name="lucide:eye" class="w-4 h-4" />
+              <Icon name="lucide:external-link" class="w-3.5 h-3.5" />
               <span>{{ t('admin.actions.viewStore') }}</span>
             </a>
 
             <LocaleSwitcher class="hidden sm:inline-flex" />
-            
-            <div class="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
-            <button 
-              @click="handleLogout" 
-              class="ui-btn ui-btn--secondary ui-btn--md"
+            <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
+            <button
+              @click="handleLogout"
+              class="ui-btn ui-btn--secondary ui-btn--sm text-slate-500"
               :aria-label="t('admin.actions.logout')"
               :title="t('admin.actions.logout')"
             >
-              <Icon name="lucide:log-out" class="w-4 h-4 text-slate-500" />
-              <span class="hidden sm:inline">{{ t('admin.actions.logout') }}</span>
+              <Icon name="lucide:log-out" class="w-3.5 h-3.5" />
+              <span class="hidden sm:inline text-[13px]">{{ t('admin.actions.logout') }}</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main 
-        class="flex-1 overflow-y-auto bg-slate-100 custom-scrollbar"
-        :class="route.path.startsWith('/admin/pos') ? 'p-0' : 'p-6 md:p-8'"
+      <main
+        class="flex-1 overflow-y-auto custom-scrollbar"
+        style="background: var(--admin-content-bg)"
+        :class="route.path.startsWith('/admin/pos') ? 'p-0' : 'p-5 md:p-7'"
       >
-        <div 
+        <div
           class="animate-fadeIn"
           :class="route.path.startsWith('/admin/pos') ? 'h-full max-w-none' : 'max-w-7xl mx-auto'"
         >
@@ -185,7 +209,7 @@
         </div>
       </main>
     </div>
-    
+
     <HelpCenterWidget />
   </div>
 </template>

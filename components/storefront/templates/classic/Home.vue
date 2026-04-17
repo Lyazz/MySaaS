@@ -27,6 +27,7 @@ const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
 
 const currentSlide = ref(0)
+const hasMultipleSlides = computed(() => heroSlides.value.length > 1)
 const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length }
 const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
@@ -133,7 +134,7 @@ const {
       </div>
 
       <!-- Navigation Points (Classic Style) -->
-      <div class="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-4">
+      <div v-if="hasMultipleSlides" class="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-4">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -145,13 +146,13 @@ const {
       
       <!-- Arrows (Minimal) -->
       <button 
-        class="absolute left-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
+        v-if="hasMultipleSlides" class="absolute left-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
         @click="prevSlide"
       >
          <Icon name="lucide:arrow-left" class="w-8 h-8 font-light" />
       </button>
       <button 
-        class="absolute right-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
+        v-if="hasMultipleSlides" class="absolute right-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
         @click="nextSlide"
       >
          <Icon name="lucide:arrow-right" class="w-8 h-8 font-light" />

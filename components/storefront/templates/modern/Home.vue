@@ -27,6 +27,7 @@ const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
 
 const currentSlide = ref(0)
+const hasMultipleSlides = computed(() => heroSlides.value.length > 1)
 const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length }
 const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
@@ -141,7 +142,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Arrows -->
-      <div class="hidden md:flex absolute bottom-8 right-8 z-20 gap-4">
+      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-4">
         <button
           class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-slate-900 transition-all backdrop-blur-sm"
           @click="prevSlide"
@@ -157,7 +158,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Dots -->
-      <div class="absolute bottom-6 md:bottom-8 left-6 md:left-8 z-20 flex space-x-2">
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 left-6 md:left-8 z-20 flex space-x-2">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 

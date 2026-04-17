@@ -1,18 +1,11 @@
 import prisma from '../../lib/prisma'
+import { coalesceProductImageUrls } from '../../lib/product-images'
 
 const extractMetaPixelIds = (metaPixels: any[]): string[] => {
     return (metaPixels || [])
         .filter((mp: any) => mp?.metaPixel?.isActive)
         .map((mp: any) => mp?.metaPixel?.pixelId)
         .filter((id: any) => typeof id === 'string' && /^[0-9]+$/.test(id))
-}
-
-const coalesceImages = (legacyImages: any, productImages: any[]): string[] => {
-    const legacy = Array.isArray(legacyImages) ? legacyImages.filter((v) => typeof v === 'string' && v.length > 0) : []
-    if (legacy.length > 0) return legacy
-    return (productImages || [])
-        .map((pi: any) => pi?.url)
-        .filter((v: any) => typeof v === 'string' && v.length > 0)
 }
 
 export class PublicProductsService {
@@ -50,7 +43,7 @@ export class PublicProductsService {
         return products.map(({ metaPixels, productImages, images, ...rest }: any) => ({
             ...rest,
             productImages,
-            images: coalesceImages(images, productImages),
+            images: coalesceProductImageUrls(images, productImages),
             metaPixelIds: extractMetaPixelIds(metaPixels)
         }))
     }
@@ -94,7 +87,7 @@ export class PublicProductsService {
         return {
             ...rest,
             productImages,
-            images: coalesceImages(images, productImages),
+            images: coalesceProductImageUrls(images, productImages),
             metaPixelIds: extractMetaPixelIds(metaPixels)
         }
     }

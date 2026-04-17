@@ -10,34 +10,40 @@
   }
 
   body {
-    @apply font-sans text-slate-600 bg-slate-100;
+    @apply font-sans text-slate-600;
+    background-color: #f5f6f8;
   }
 
   :root {
     --brand: #0F766E;
     --brand-rgb: 15 118 110;
+    --admin-sidebar-bg: #0d1117;
+    --admin-sidebar-border: rgba(255,255,255,0.06);
+    --admin-content-bg: #f5f6f8;
   }
 }
 
 @layer components {
+  /* ── Cards ── */
   .ui-card {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm;
   }
 
   .ui-card-header {
-    @apply border-b border-slate-200 p-4;
+    @apply border-b border-slate-100 px-5 py-4;
   }
 
   .ui-card-body {
-    @apply p-4;
+    @apply px-5 py-4;
   }
 
+  /* ── Buttons ── */
   .ui-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .ui-btn--sm {
-    @apply px-3 py-2 text-xs;
+    @apply px-3 py-1.5 text-xs;
   }
 
   .ui-btn--md {
@@ -45,77 +51,80 @@
   }
 
   .ui-btn--primary {
-    @apply bg-teal-600 text-white shadow-sm hover:opacity-95;
+    background-color: var(--brand);
+    @apply text-white shadow-sm hover:opacity-90 active:scale-[0.98];
   }
 
   .ui-btn--secondary {
-    @apply border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50;
+    @apply border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98];
   }
 
   .ui-btn--danger {
-    @apply border border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100;
+    @apply border border-red-200 bg-red-50 text-red-700 shadow-sm hover:bg-red-100 active:scale-[0.98];
   }
 
   .ui-btn--success {
-    @apply border border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm hover:bg-emerald-100;
+    @apply border border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm hover:bg-emerald-100 active:scale-[0.98];
   }
 
+  /* ── Badges ── */
   .ui-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium tracking-wide;
   }
 
   .ui-badge--slate {
-    @apply bg-slate-100 text-slate-700;
+    @apply bg-slate-100 text-slate-600 ring-1 ring-slate-200/80;
   }
 
   .ui-badge--emerald {
-    @apply bg-emerald-50 text-emerald-700;
+    @apply bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80;
   }
 
   .ui-badge--indigo {
-    @apply bg-indigo-50 text-indigo-700;
+    @apply bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/80;
   }
 
   .ui-badge--teal {
-    @apply bg-teal-50 text-teal-700;
+    @apply bg-teal-50 text-teal-700 ring-1 ring-teal-200/80;
   }
 
   .ui-badge--amber {
-    @apply bg-amber-50 text-amber-700;
+    @apply bg-amber-50 text-amber-700 ring-1 ring-amber-200/80;
   }
 
   .ui-badge--red {
-    @apply bg-red-50 text-red-700;
+    @apply bg-red-50 text-red-700 ring-1 ring-red-200/80;
   }
 
+  /* ── Tables ── */
   .ui-table {
-    @apply min-w-full divide-y divide-slate-200 text-sm;
+    @apply min-w-full divide-y divide-slate-100 text-sm;
   }
 
   .ui-thead {
-    @apply bg-slate-50 text-slate-600;
+    @apply bg-slate-50/70 text-slate-500;
   }
 
   .ui-tbody {
-    @apply divide-y divide-slate-200 bg-white;
+    @apply divide-y divide-slate-100 bg-white;
   }
 
   .ui-th {
-    @apply px-4 py-3 text-left font-medium;
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider;
   }
 
   .ui-td {
-    @apply px-4 py-3;
+    @apply px-4 py-3.5;
   }
 
   .ui-tr {
-    @apply hover:bg-slate-50/60;
+    @apply transition-colors hover:bg-slate-50/70;
   }
 
-  /* Custom Professional Scrollbar for Admin/Shared Interfaces */
+  /* ── Scrollbars ── */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 5px;
+    height: 5px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -123,15 +132,34 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-teal-600/20 rounded-full border-2 border-transparent bg-clip-padding transition-colors;
+    background-color: rgba(var(--brand-rgb) / 0.15);
+    border-radius: 999px;
+    transition: background-color 0.2s;
   }
 
   .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-    @apply bg-teal-600/40;
+    background-color: rgba(var(--brand-rgb) / 0.35);
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-teal-600/60;
+    background-color: rgba(var(--brand-rgb) / 0.55);
+  }
+
+  /* ── Admin Sidebar Nav Item ── */
+  .admin-nav-item {
+    @apply group flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 relative overflow-hidden;
+    color: rgba(148, 163, 184, 1);
+  }
+
+  .admin-nav-item:hover {
+    background: rgba(255,255,255,0.07);
+    color: white;
+  }
+
+  .admin-nav-item.active {
+    background: rgba(var(--brand-rgb) / 0.18);
+    color: white;
+    box-shadow: inset 0 0 0 1px rgba(var(--brand-rgb) / 0.25);
   }
 }
 
@@ -181,33 +209,27 @@
   }
 
   .animate-fadeIn {
-    animation: fadeIn 0.8s ease-out forwards;
+    animation: fadeIn 0.5s ease-out forwards;
     opacity: 0;
   }
 
   .animate-slideUp {
-    animation: slideUp 0.8s ease-out forwards;
+    animation: slideUp 0.5s ease-out forwards;
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);

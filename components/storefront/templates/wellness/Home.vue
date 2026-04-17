@@ -28,6 +28,7 @@ const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
 
 const currentSlide = ref(0)
+const hasMultipleSlides = computed(() => heroSlides.value.length > 1)
 const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length }
 const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
@@ -152,7 +153,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Navigation Sprinkles -->
-      <div class="absolute bottom-10 right-10 z-20 flex space-x-3">
+      <div v-if="hasMultipleSlides" class="absolute bottom-10 right-10 z-20 flex space-x-3">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 

@@ -27,6 +27,7 @@ const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
 
 const currentSlide = ref(0)
+const hasMultipleSlides = computed(() => heroSlides.value.length > 1)
 const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length }
 const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
@@ -116,7 +117,7 @@ const {
                     </NuxtLink>
                     
                     <!-- Navigation Dots (Inline) -->
-                    <div class="flex space-x-2 ml-4">
+                    <div v-if="hasMultipleSlides" class="flex space-x-2 ml-4">
                         <button 
                         v-for="(slide, index) in heroSlides" 
                         :key="index" 

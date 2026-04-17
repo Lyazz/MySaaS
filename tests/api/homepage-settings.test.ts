@@ -173,6 +173,11 @@ describe('Homepage Settings (Tenant Admin + Public)', async () => {
         const ids = bodyAHome.bestSellers.map((p: any) => p.id)
         expect(ids).toContain(productA.id)
         expect(ids).not.toContain(productB.id)
+
+        const topSeller = bodyAHome.bestSellers.find((p: any) => p.id === productA.id)
+        expect(topSeller).toBeTruthy()
+        expect(Array.isArray(topSeller.images)).toBe(true)
+        expect(topSeller.images[0]).toBe('/blank.svg')
     })
 
     it('denies cross-tenant admin access when host tenant mismatches token tenant', async () => {

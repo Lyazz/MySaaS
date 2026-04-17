@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { coalesceProductImageUrls } from '../../lib/product-images'
 import {
     DEFAULT_STOREFRONT_HOME_CONFIG,
     type StorefrontHomeCarouselSlide,
@@ -211,10 +212,19 @@ export class HomepageSettingsService {
                 isActive: true,
                 id: { in: productIds }
             },
-            include: { category: true },
+            include: {
+                category: true,
+                productImages: { orderBy: [{ isMain: 'desc' }, { position: 'asc' }] }
+            },
         })
 
         const byId = new Map(products.map((p) => [p.id, p]))
-        return productIds.map((id) => byId.get(id)).filter(Boolean)
+        return productIds
+            .map((id) => byId.get(id))
+            .filter((product): product is (typeof products)[number] => Boolean(product))
+            .map((product) => ({
+                ...product,
+                images: coalesceProductImageUrls((product as any).images, (product as any).productImages)
+            }))
     }
 }

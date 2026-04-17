@@ -65,24 +65,24 @@ watch([() => props.product, selectedOptions], ([product]) => {
 </script>
 
 <template>
-  <div v-if="product" class="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-16">
-    <!-- Breadcrumbs -->
-    <nav class="flex items-center gap-2 text-xs tracking-[0.12em] uppercase text-[#B0A090] mb-10">
-      <NuxtLink to="/" class="hover:text-[#C17B4E] transition-colors">{{ storefrontContent.nav.home }}</NuxtLink>
-      <span class="text-[#D4C4B4]">/</span>
-      <NuxtLink to="/products" class="hover:text-[#C17B4E] transition-colors">{{ storefrontContent.nav.shop }}</NuxtLink>
-      <span class="text-[#D4C4B4]">/</span>
-      <span class="text-[#7A6558] font-medium">{{ product.title }}</span>
+  <div v-if="product" class="pdp">
+    <!-- Breadcrumb -->
+    <nav class="pdp__breadcrumb">
+      <div class="pdp__breadcrumb-inner">
+        <NuxtLink to="/" class="pdp__bc-link">{{ storefrontContent.nav.home }}</NuxtLink>
+        <span class="pdp__bc-sep">/</span>
+        <NuxtLink to="/products" class="pdp__bc-link">{{ storefrontContent.nav.shop }}</NuxtLink>
+        <span class="pdp__bc-sep">/</span>
+        <span class="pdp__bc-current">{{ product.title }}</span>
+      </div>
     </nav>
 
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
-      <!-- Gallery — 3/5 width -->
-      <div class="lg:col-span-3">
+    <!-- Main content -->
+    <div class="pdp__layout">
+      <div class="pdp__gallery">
         <ProductGallery :images="images" :title="product.title" />
       </div>
-
-      <!-- Details — 2/5 width, sticky -->
-      <div class="lg:col-span-2 lg:sticky lg:top-24 h-fit space-y-8">
+      <div class="pdp__sidebar">
         <ProductDetails
           :product="product"
           :current-price="currentPrice"
@@ -98,19 +98,131 @@ watch([() => props.product, selectedOptions], ([product]) => {
       </div>
     </div>
 
-    <!-- Full Description -->
-    <div class="mt-20 pt-10 border-t border-[#E8E0D4]">
-      <h2 class="font-maison-serif text-2xl md:text-3xl font-semibold text-[#2C2420] mb-8">
-        {{ storefrontContent.product.detailsTitle }}
-      </h2>
-      <div
-        v-if="product?.description"
-        class="prose prose-lg max-w-none bg-white p-8 md:p-10 border border-[#E8E0D4] prose-headings:font-maison-serif prose-headings:text-[#2C2420] prose-p:text-[#7A6558] prose-a:text-[#C17B4E]"
-        v-html="product.description"
-      />
-      <div v-else class="bg-white p-8 border border-[#E8E0D4]">
-        <p class="text-[#7A6558]">{{ storefrontContent.product.descriptionFallback }}</p>
+    <!-- Full description -->
+    <div class="pdp__desc">
+      <div class="pdp__desc-inner">
+        <h2 class="pdp__desc-title">{{ storefrontContent.product.detailsTitle }}</h2>
+        <div
+          v-if="product?.description"
+          class="pdp__desc-content"
+          v-html="product.description"
+        />
+        <p v-else class="pdp__desc-fallback">{{ storefrontContent.product.descriptionFallback }}</p>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.pdp { min-height: 100vh; }
+
+.pdp__breadcrumb {
+  border-bottom: 1px solid var(--at-border);
+  background: var(--at-surface);
+}
+.pdp__breadcrumb-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 14px clamp(20px, 5vw, 80px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pdp__bc-link {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--at-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.pdp__bc-link:hover { color: var(--at-gold); }
+.pdp__bc-sep {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  color: var(--at-border-2);
+}
+.pdp__bc-current {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: var(--at-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.pdp__layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(32px, 5vw, 64px) clamp(20px, 5vw, 80px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+@media (min-width: 1024px) {
+  .pdp__layout {
+    grid-template-columns: 1.4fr 1fr;
+    gap: clamp(40px, 5vw, 80px);
+  }
+}
+
+.pdp__gallery { /* nothing extra */ }
+.pdp__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+@media (min-width: 1024px) {
+  .pdp__sidebar {
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+  }
+}
+
+/* Description section */
+.pdp__desc {
+  border-top: 1px solid var(--at-border);
+  padding: clamp(40px, 6vw, 80px) clamp(20px, 5vw, 80px);
+}
+.pdp__desc-inner { max-width: 1400px; margin: 0 auto; }
+.pdp__desc-title {
+  font-family: var(--at-f-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 300;
+  color: var(--at-cream);
+  margin-bottom: 32px;
+}
+.pdp__desc-content {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border);
+  padding: clamp(24px, 4vw, 48px);
+  font-family: var(--at-f-mono);
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--at-sub);
+  max-width: 72ch;
+}
+:deep(.pdp__desc-content h1),
+:deep(.pdp__desc-content h2),
+:deep(.pdp__desc-content h3) {
+  font-family: var(--at-f-display);
+  font-weight: 300;
+  color: var(--at-text);
+  margin: 1.5em 0 0.5em;
+}
+:deep(.pdp__desc-content a) { color: var(--at-gold); }
+:deep(.pdp__desc-content p) { margin-bottom: 1em; }
+
+.pdp__desc-fallback {
+  font-family: var(--at-f-mono);
+  font-size: 12px;
+  color: var(--at-sub);
+}
+</style>

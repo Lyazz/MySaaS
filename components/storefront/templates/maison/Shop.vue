@@ -11,9 +11,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
   lazy: true
 })
 
-const { currencyCode } = useCurrency()
 const storefrontContent = useStorefrontContent()
-
 const filters = computed(() => ({ categories: categoryData.value || [] }))
 
 const selectedCategories = ref<string[]>([])
@@ -64,139 +62,135 @@ const resetFilters = () => {
 </script>
 
 <template>
-  <div class="min-h-screen pb-24">
+  <div class="shop">
     <!-- Page header -->
-    <div class="bg-[#F0EBE3] py-12 mb-12 text-center">
-      <p class="text-[10px] tracking-[0.3em] uppercase text-[#C17B4E] mb-3">Notre boutique</p>
-      <h1 class="font-maison-serif text-4xl md:text-5xl font-semibold text-[#2C2420]">{{ storefrontContent.shop.catalogTitle }}</h1>
+    <div class="shop__header">
+      <div class="shop__header-inner">
+        <span class="at-label" style="--delay:0ms;animation:at-fade-up 0.6s ease forwards">Notre boutique</span>
+        <h1 class="shop__title">{{ storefrontContent.shop.catalogTitle }}</h1>
+      </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-6">
-      <!-- Mobile filter button -->
-      <button
-        class="lg:hidden w-full flex items-center justify-center gap-2 px-4 py-3 border border-[#E8E0D4] bg-white text-[#7A6558] text-xs tracking-[0.15em] uppercase mb-6 hover:border-[#C17B4E] transition-colors"
-        @click="isFilterDrawerOpen = true"
-      >
-        <Icon name="lucide:sliders-horizontal" class="w-4 h-4" />
+    <div class="shop__body">
+      <!-- Mobile filter toggle -->
+      <button class="shop__filter-toggle" @click="isFilterDrawerOpen = true">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" stroke-width="0.85"/>
+        </svg>
         {{ storefrontContent.actions.filters }}
+        <span v-if="selectedCategories.length" class="shop__filter-count">{{ selectedCategories.length }}</span>
       </button>
 
-      <div class="flex gap-10">
+      <div class="shop__layout">
         <!-- Desktop sidebar -->
-        <aside class="hidden lg:block w-56 flex-shrink-0 sticky top-24 h-fit space-y-8">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="text-[10px] tracking-[0.25em] uppercase font-bold text-[#B0A090]">{{ storefrontContent.actions.filters }}</h3>
-            <button class="text-[10px] uppercase tracking-wider text-[#C17B4E] hover:underline" @click="resetFilters">
-              {{ storefrontContent.actions.reset }}
-            </button>
+        <aside class="shop__sidebar">
+          <div class="shop__sidebar-head">
+            <span class="at-label">{{ storefrontContent.actions.filters }}</span>
+            <button class="shop__reset-btn" @click="resetFilters">{{ storefrontContent.actions.reset }}</button>
           </div>
 
-          <!-- Categories -->
-          <div>
-            <h4 class="text-xs font-medium text-[#2C2420] mb-4">{{ storefrontContent.shop.categories }}</h4>
-            <div class="space-y-2">
+          <div class="shop__filter-section">
+            <h4 class="shop__filter-title">{{ storefrontContent.shop.categories }}</h4>
+            <div class="shop__filter-list">
               <label
                 v-for="cat in filters.categories"
                 :key="cat.id"
-                class="flex items-center gap-3 cursor-pointer group select-none"
+                class="shop__filter-item"
               >
                 <input
                   v-model="selectedCategories"
                   type="checkbox"
                   :value="cat.id"
-                  class="w-4 h-4 border-[#D4C4B4] text-[#C17B4E] focus:ring-[#C17B4E]/30 rounded-none"
+                  class="shop__checkbox"
                 >
-                <span class="text-sm text-[#7A6558] group-hover:text-[#2C2420] transition-colors">{{ cat.title }}</span>
+                <span class="shop__filter-label">{{ cat.title }}</span>
               </label>
             </div>
           </div>
 
-          <!-- Price -->
-          <div>
-            <h4 class="text-xs font-medium text-[#2C2420] mb-4">{{ storefrontContent.shop.priceRange.label }}</h4>
-            <div class="flex items-center gap-2">
+          <div class="shop__filter-section">
+            <h4 class="shop__filter-title">{{ storefrontContent.shop.priceRange.label }}</h4>
+            <div class="shop__price-inputs">
               <input
                 v-model.number="minPriceInput"
                 type="number"
                 :placeholder="storefrontContent.shop.priceRange.min"
-                class="w-full border border-[#E8E0D4] bg-white text-sm py-2 px-3 focus:border-[#C17B4E] outline-none transition-colors"
+                class="at-input shop__price-input"
               >
-              <span class="text-[#B0A090] text-xs">—</span>
+              <span class="shop__price-sep">—</span>
               <input
                 v-model.number="maxPriceInput"
                 type="number"
                 :placeholder="storefrontContent.shop.priceRange.max"
-                class="w-full border border-[#E8E0D4] bg-white text-sm py-2 px-3 focus:border-[#C17B4E] outline-none transition-colors"
+                class="at-input shop__price-input"
               >
             </div>
           </div>
         </aside>
 
-        <!-- Main -->
-        <div class="flex-1">
-          <!-- Active filters + toolbar -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div class="flex flex-wrap gap-2">
+        <!-- Main grid area -->
+        <div class="shop__main">
+          <!-- Toolbar -->
+          <div class="shop__toolbar">
+            <div class="shop__active-filters">
               <div
                 v-for="catId in selectedCategories"
                 :key="catId"
-                class="flex items-center gap-2 px-3 py-1 bg-[#F0EBE3] text-[#7A6558] text-xs tracking-wider uppercase"
+                class="shop__active-tag"
               >
                 <span>{{ filters.categories.find(c => c.id === catId)?.title }}</span>
-                <button @click="removeCategory(catId)" class="hover:text-[#C17B4E]">
-                  <Icon name="lucide:x" class="w-3 h-3" />
+                <button class="shop__active-tag-remove" @click="removeCategory(catId)">
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                    <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="0.85"/>
+                  </svg>
                 </button>
               </div>
             </div>
 
-            <div class="flex items-center gap-4 shrink-0">
-              <!-- Search -->
-              <div class="relative">
+            <div class="shop__toolbar-right">
+              <div class="shop__search-wrap">
                 <input
                   v-model="searchQuery"
                   type="text"
                   :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder"
-                  class="border border-[#E8E0D4] bg-white text-sm py-2 pl-4 pr-9 focus:border-[#C17B4E] outline-none transition-colors"
+                  class="at-input shop__search"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-[#B0A090] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" class="shop__search-icon">
+                  <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="0.85"/>
+                  <path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="0.85"/>
+                </svg>
               </div>
 
-              <!-- Sort -->
-              <div class="relative">
-                <select
-                  v-model="sortOption"
-                  class="appearance-none border border-[#E8E0D4] bg-white text-xs tracking-wider uppercase py-2 pl-3 pr-8 focus:border-[#C17B4E] outline-none cursor-pointer text-[#7A6558]"
-                >
+              <div class="shop__sort-wrap">
+                <select v-model="sortOption" class="at-select shop__sort">
                   <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <Icon name="lucide:chevron-down" class="w-3 h-3 text-[#B0A090] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="shop__sort-icon">
+                  <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
+                </svg>
               </div>
             </div>
           </div>
 
-          <p class="text-xs text-[#B0A090] tracking-wider mb-6">{{ filteredProducts.length }} produits</p>
+          <p class="shop__count">{{ filteredProducts.length }} produits</p>
 
           <!-- Empty -->
-          <div v-if="filteredProducts.length === 0" class="border border-[#E8E0D4] bg-white p-16 text-center">
-            <Icon name="lucide:sofa" class="w-12 h-12 text-[#D4C4B4] mx-auto mb-4" />
-            <p class="font-maison-serif text-xl text-[#2C2420] mb-2">{{ storefrontContent.shop.results.noResults }}</p>
-            <p class="text-sm text-[#7A6558] mb-6">{{ storefrontContent.shop.results.noResultsHint }}</p>
-            <button
-              class="px-6 py-2.5 bg-[#2C2420] text-white text-xs tracking-[0.15em] uppercase hover:bg-[#C17B4E] transition-colors"
-              @click="resetFilters"
-            >
+          <div v-if="filteredProducts.length === 0" class="shop__empty">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" class="shop__empty-icon">
+              <rect x="4" y="4" width="32" height="32" stroke="currentColor" stroke-width="0.75"/>
+              <path d="M12 20h16M20 12v16" stroke="currentColor" stroke-width="0.75"/>
+            </svg>
+            <p class="shop__empty-title">{{ storefrontContent.shop.results.noResults }}</p>
+            <p class="shop__empty-sub">{{ storefrontContent.shop.results.noResultsHint }}</p>
+            <button class="at-btn-ghost" style="width:auto;padding:12px 24px" @click="resetFilters">
               {{ storefrontContent.actions.clearAll }}
             </button>
           </div>
 
-          <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
-            <ProductCard
-              v-for="product in filteredProducts"
-              :key="product.id"
-              :product="product"
-            />
+          <div v-else class="shop__grid">
+            <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product" />
           </div>
         </div>
       </div>
@@ -204,31 +198,34 @@ const resetFilters = () => {
 
     <!-- Mobile filter drawer -->
     <Teleport to="body">
-      <Transition name="fade">
-        <div v-if="isFilterDrawerOpen" class="fixed inset-0 bg-black/40 z-[60] lg:hidden" @click="isFilterDrawerOpen = false" />
+      <Transition name="overlay">
+        <div v-if="isFilterDrawerOpen" class="shop__overlay" @click="isFilterDrawerOpen = false" />
       </Transition>
-      <Transition name="slide-right">
-        <aside v-if="isFilterDrawerOpen" class="fixed inset-y-0 right-0 w-80 max-w-full bg-[#FAF8F5] z-[61] p-6 overflow-y-auto lg:hidden shadow-2xl">
-          <div class="flex items-center justify-between mb-8">
-            <h3 class="text-[10px] tracking-[0.25em] uppercase font-bold text-[#B0A090]">{{ storefrontContent.actions.filters }}</h3>
-            <button @click="isFilterDrawerOpen = false" class="text-[#7A6558] hover:text-[#2C2420]">
-              <Icon name="lucide:x" class="w-5 h-5" />
+      <Transition name="drawer-right">
+        <aside v-if="isFilterDrawerOpen" class="shop__drawer">
+          <div class="shop__drawer-head">
+            <span class="at-label">{{ storefrontContent.actions.filters }}</span>
+            <button class="shop__drawer-close" @click="isFilterDrawerOpen = false">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="0.85"/>
+              </svg>
             </button>
           </div>
-          <div class="space-y-8">
-            <div>
-              <h4 class="text-xs font-medium text-[#2C2420] mb-4">{{ storefrontContent.shop.categories }}</h4>
-              <div class="space-y-3">
-                <label v-for="cat in filters.categories" :key="cat.id" class="flex items-center gap-3 cursor-pointer">
-                  <input v-model="selectedCategories" type="checkbox" :value="cat.id" class="w-4 h-4 border-[#D4C4B4] text-[#C17B4E] focus:ring-[#C17B4E]/30">
-                  <span class="text-sm text-[#7A6558]">{{ cat.title }}</span>
+
+          <div class="shop__drawer-body">
+            <div class="shop__filter-section">
+              <h4 class="shop__filter-title">{{ storefrontContent.shop.categories }}</h4>
+              <div class="shop__filter-list">
+                <label v-for="cat in filters.categories" :key="cat.id" class="shop__filter-item">
+                  <input v-model="selectedCategories" type="checkbox" :value="cat.id" class="shop__checkbox">
+                  <span class="shop__filter-label">{{ cat.title }}</span>
                 </label>
               </div>
             </div>
-            <button
-              class="w-full py-3 bg-[#2C2420] text-white text-xs tracking-[0.15em] uppercase hover:bg-[#C17B4E] transition-colors"
-              @click="isFilterDrawerOpen = false"
-            >
+          </div>
+
+          <div class="shop__drawer-footer">
+            <button class="at-btn-solid" @click="isFilterDrawerOpen = false">
               {{ storefrontContent.shop.showResults(filteredProducts.length) }}
             </button>
           </div>
@@ -239,8 +236,294 @@ const resetFilters = () => {
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-.slide-right-enter-active, .slide-right-leave-active { transition: transform 0.3s ease; }
-.slide-right-enter-from, .slide-right-leave-to { transform: translateX(100%); }
+.shop { min-height: 100vh; }
+
+.shop__header {
+  border-bottom: 1px solid var(--at-border);
+  padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 80px) clamp(32px, 5vw, 56px);
+}
+.shop__header-inner { max-width: 1400px; margin: 0 auto; }
+.shop__title {
+  font-family: var(--at-f-display);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--at-cream);
+  margin-top: 10px;
+  line-height: 1.0;
+}
+
+.shop__body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 48px) clamp(20px, 5vw, 80px);
+}
+
+.shop__filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid var(--at-border);
+  color: var(--at-sub);
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.shop__filter-toggle:hover { border-color: var(--at-gold); color: var(--at-gold); }
+@media (min-width: 1024px) { .shop__filter-toggle { display: none; } }
+
+.shop__filter-count {
+  background: var(--at-gold);
+  color: var(--at-bg);
+  font-size: 8px;
+  padding: 1px 5px;
+  font-weight: 400;
+}
+
+.shop__layout {
+  display: flex;
+  gap: 40px;
+}
+
+/* Sidebar */
+.shop__sidebar {
+  display: none;
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+  height: fit-content;
+}
+@media (min-width: 1024px) { .shop__sidebar { display: block; } }
+
+.shop__sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--at-border);
+}
+.shop__reset-btn {
+  background: none;
+  border: none;
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--at-gold);
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+.shop__reset-btn:hover { opacity: 0.7; }
+
+.shop__filter-section { margin-bottom: 28px; }
+.shop__filter-title {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+  margin-bottom: 14px;
+}
+.shop__filter-list { display: flex; flex-direction: column; gap: 10px; }
+.shop__filter-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.shop__checkbox {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--at-border-2);
+  background: var(--at-surface);
+  appearance: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+}
+.shop__checkbox:checked { background: var(--at-gold); border-color: var(--at-gold); }
+.shop__checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  width: 4px;
+  height: 7px;
+  border: 1px solid var(--at-bg);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+.shop__filter-label {
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: var(--at-sub);
+  transition: color 0.15s;
+}
+.shop__filter-item:hover .shop__filter-label { color: var(--at-text); }
+
+.shop__price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.shop__price-input { padding: 8px 10px; font-size: 11px; }
+.shop__price-sep {
+  font-family: var(--at-f-mono);
+  font-size: 10px;
+  color: var(--at-muted);
+  flex-shrink: 0;
+}
+
+/* Main */
+.shop__main { flex: 1; min-width: 0; }
+
+.shop__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.shop__active-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.shop__active-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border: 1px solid var(--at-border-2);
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+}
+.shop__active-tag-remove {
+  background: none;
+  border: none;
+  color: var(--at-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+  display: flex;
+}
+.shop__active-tag-remove:hover { color: var(--at-gold); }
+
+.shop__toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.shop__search-wrap { position: relative; }
+.shop__search { padding-right: 32px; font-size: 11px; min-width: 180px; }
+.shop__search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--at-muted);
+  pointer-events: none;
+}
+.shop__sort-wrap { position: relative; }
+.shop__sort { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; min-width: 140px; }
+.shop__sort option { text-transform: none; font-size: 12px; }
+.shop__sort-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--at-muted);
+  pointer-events: none;
+}
+
+.shop__count {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--at-muted);
+  margin-bottom: 20px;
+}
+
+.shop__empty {
+  border: 1px solid var(--at-border);
+  padding: clamp(48px, 8vw, 96px) 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.shop__empty-icon { color: var(--at-muted); margin-bottom: 8px; }
+.shop__empty-title {
+  font-family: var(--at-f-display);
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: var(--at-text);
+}
+.shop__empty-sub {
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: var(--at-sub);
+  margin-bottom: 8px;
+}
+
+.shop__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--at-border);
+}
+@media (min-width: 768px) { .shop__grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1280px) { .shop__grid { grid-template-columns: repeat(4, 1fr); } }
+
+/* Drawer */
+.shop__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 60;
+}
+.shop__drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 90vw);
+  background: var(--at-surface);
+  border-left: 1px solid var(--at-border);
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+}
+.shop__drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--at-border);
+}
+.shop__drawer-close {
+  background: none;
+  border: none;
+  color: var(--at-sub);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+.shop__drawer-close:hover { color: var(--at-gold); }
+.shop__drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+.shop__drawer-footer { padding: 16px 24px; border-top: 1px solid var(--at-border); }
+
+.overlay-enter-active, .overlay-leave-active { transition: opacity 0.25s; }
+.overlay-enter-from, .overlay-leave-to { opacity: 0; }
+.drawer-right-enter-active, .drawer-right-leave-active { transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1); }
+.drawer-right-enter-from, .drawer-right-leave-to { transform: translateX(100%); }
 </style>

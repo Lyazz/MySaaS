@@ -408,15 +408,21 @@ async function handleSubmit() {
                     </span>
                   </div>
                 </div>
-                <div v-if="form.selectedDeliveryOption === option.id && option.mode === 'pickup' && isMaystroPickup" class="mt-3 pt-3 border-t border-[#A67C52]/10">
+                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || pickupPointsError)" class="mt-3 pt-3 border-t border-[#A67C52]/10">
                   <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-gray-500">
                     <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
                     Loading...
                   </div>
-                  <div v-else-if="form.pickupPoint" class="flex items-center gap-2 text-xs">
-                    <Icon name="lucide:map-pin" class="w-3 h-3 text-[#A67C52]" />
-                    <span class="font-semibold text-white">{{ form.pickupPoint }}</span>
-                  </div>
+                  <template v-else>
+                    <div v-if="stopDeskName" class="flex items-center gap-2 text-xs text-gray-400">
+                      <Icon name="lucide:building-2" class="w-3 h-3 text-[#A67C52]/60 flex-shrink-0" />
+                      <span>{{ stopDeskName }}</span>
+                    </div>
+                    <div v-if="form.selectedDeliveryOption === option.id && form.pickupPoint" class="flex items-center gap-2 text-xs mt-1">
+                      <Icon name="lucide:map-pin" class="w-3 h-3 text-[#A67C52]" />
+                      <span class="font-semibold text-white">{{ form.pickupPoint }}</span>
+                    </div>
+                  </template>
                   <p v-if="pickupPointsError" class="text-xs text-amber-400 mt-1">{{ pickupPointsError }}</p>
                 </div>
               </div>

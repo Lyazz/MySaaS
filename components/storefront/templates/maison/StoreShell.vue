@@ -37,6 +37,7 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const searchOpen = ref(false)
 
 const props = defineProps<{
     hideNavigation?: boolean
@@ -67,278 +68,249 @@ watch(searchQuery, async (q) => {
 
 <template>
   <StoreThemeProvider>
-    <div class="min-h-screen flex flex-col">
-      <!-- Announcement Bar -->
+    <div class="shell">
       <StorefrontSharedAnnouncementBar v-if="!hideNavigation && !hideAnnouncementBar" />
 
-      <!-- Header -->
+      <!-- ── Header ───────────────────────────────────────────── -->
       <header
         v-if="!hideNavigation"
-        :class="[
-          'sticky top-0 z-50 transition-all duration-500',
-          scrolled
-            ? 'bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E8E0D4] shadow-sm'
-            : 'bg-transparent',
-          { 'hidden md:block': mobileHeaderHidden }
-        ]"
+        class="shell-header"
+        :class="[scrolled && 'is-scrolled', mobileHeaderHidden && 'mobile-hidden']"
       >
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+        <div class="shell-header__inner">
           <!-- Logo -->
-          <NuxtLink to="/" class="flex-shrink-0 flex items-center gap-3 group">
-            <template v-if="storeSettings?.logoUrl">
-              <img
-                :src="storeSettings.logoUrl"
-                :alt="tenantName"
-                class="h-9 max-w-[130px] object-contain"
-              >
-            </template>
-            <template v-else>
-              <span class="font-maison-serif text-2xl font-semibold text-[#2C2420] tracking-wide group-hover:text-[#C17B4E] transition-colors">
-                {{ tenantName }}
-              </span>
-            </template>
+          <NuxtLink to="/" class="shell-logo">
+            <img v-if="storeSettings?.logoUrl" :src="storeSettings.logoUrl" :alt="tenantName" class="shell-logo__img">
+            <span v-else class="shell-logo__text">{{ tenantName }}</span>
           </NuxtLink>
 
-          <!-- Desktop Nav -->
-          <nav class="hidden lg:flex items-center gap-8">
-            <NuxtLink
-              to="/"
-              class="text-xs tracking-[0.18em] uppercase font-medium text-[#7A6558] hover:text-[#C17B4E] transition-colors"
-              active-class="text-[#C17B4E]"
-            >
+          <!-- Desktop nav -->
+          <nav class="shell-nav">
+            <NuxtLink to="/" class="shell-nav__link" active-class="is-active">
               {{ storefrontContent.nav.home }}
             </NuxtLink>
-            <NuxtLink
-              to="/products"
-              class="text-xs tracking-[0.18em] uppercase font-medium text-[#7A6558] hover:text-[#C17B4E] transition-colors"
-              active-class="text-[#C17B4E]"
-            >
+            <NuxtLink to="/products" class="shell-nav__link" active-class="is-active">
               {{ storefrontContent.nav.shop }}
             </NuxtLink>
 
-            <!-- Categories dropdown -->
-            <div class="relative group flex items-center">
-              <button class="text-xs tracking-[0.18em] uppercase font-medium text-[#7A6558] hover:text-[#C17B4E] transition-colors flex items-center gap-1 cursor-pointer">
+            <div class="shell-nav__dropdown-wrap">
+              <button class="shell-nav__link shell-nav__dropdown-trigger">
                 {{ storefrontContent.nav.categories || 'Collections' }}
-                <Icon name="lucide:chevron-down" class="w-3 h-3 mt-0.5" />
+                <svg width="8" height="5" viewBox="0 0 8 5" fill="none">
+                  <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
+                </svg>
               </button>
-              <div class="absolute top-full left-0 mt-3 w-52 bg-[#FAF8F5] border border-[#E8E0D4] shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div class="shell-nav__dropdown">
                 <NuxtLink
                   v-for="cat in tenantCategories"
                   :key="cat.id"
                   :to="`/c/${cat.slug}`"
-                  class="block px-5 py-3 text-xs tracking-wider uppercase text-[#7A6558] hover:bg-[#F0EBE3] hover:text-[#C17B4E] transition-colors border-b border-[#F0EBE3] last:border-0"
-                >
-                  {{ cat.title }}
-                </NuxtLink>
+                  class="shell-nav__dropdown-item"
+                >{{ cat.title }}</NuxtLink>
               </div>
             </div>
 
-            <NuxtLink
-              to="/contact"
-              class="text-xs tracking-[0.18em] uppercase font-medium text-[#7A6558] hover:text-[#C17B4E] transition-colors"
-              active-class="text-[#C17B4E]"
-            >
+            <NuxtLink to="/contact" class="shell-nav__link" active-class="is-active">
               {{ storefrontContent.nav.contact }}
             </NuxtLink>
           </nav>
 
           <!-- Actions -->
-          <div class="flex items-center gap-4">
-            <LocaleSwitcher class="hidden lg:inline-flex" />
-            <button
-              class="relative h-9 w-9 flex items-center justify-center text-[#7A6558] hover:text-[#C17B4E] transition-colors"
-              :title="storefrontContent.header.wishlistTitle"
-              @click="navigateTo('/wishlist')"
-            >
-              <Icon name="lucide:heart" class="w-5 h-5" />
+          <div class="shell-actions">
+            <LocaleSwitcher class="shell-actions__locale" />
+
+            <!-- Search -->
+            <button class="shell-icon-btn" @click="searchOpen = !searchOpen">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="0.85"/>
+                <path d="M11 11l3 3" stroke="currentColor" stroke-width="0.85"/>
+              </svg>
+            </button>
+
+            <!-- Wishlist -->
+            <button class="shell-icon-btn" :title="storefrontContent.header.wishlistTitle" @click="navigateTo('/wishlist')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 015.5-1.7A3 3 0 0114.5 5.5C14.5 9.5 8 13.5 8 13.5z" stroke="currentColor" stroke-width="0.85"/>
+              </svg>
               <ClientOnly>
-                <span
-                  v-if="favorites.count.value > 0"
-                  class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#C17B4E] text-[10px] font-bold text-white absolute -top-1 -right-1"
-                >{{ favorites.count.value }}</span>
+                <span v-if="favorites.count.value > 0" class="shell-icon-btn__badge">{{ favorites.count.value }}</span>
               </ClientOnly>
             </button>
 
-            <NuxtLink
-              v-if="storeSettings?.cartEnabled !== false"
-              to="/cart"
-              class="relative h-9 w-9 flex items-center justify-center text-[#7A6558] hover:text-[#C17B4E] transition-colors"
-            >
-              <Icon name="lucide:shopping-bag" class="w-5 h-5" />
+            <!-- Cart -->
+            <NuxtLink v-if="storeSettings?.cartEnabled !== false" to="/cart" class="shell-icon-btn">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 2h1.5l2 8h7l1.5-5H4.5" stroke="currentColor" stroke-width="0.85"/>
+                <circle cx="7" cy="13" r="1" fill="currentColor"/>
+                <circle cx="12" cy="13" r="1" fill="currentColor"/>
+              </svg>
               <ClientOnly>
-                <span
-                  v-if="cartStore.itemCount > 0"
-                  class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#C17B4E] text-[10px] font-bold text-white absolute -top-1 -right-1"
-                >{{ cartStore.itemCount }}</span>
+                <span v-if="cartStore.itemCount > 0" class="shell-icon-btn__badge">{{ cartStore.itemCount }}</span>
               </ClientOnly>
             </NuxtLink>
 
-            <!-- Hamburger mobile -->
-            <button class="lg:hidden p-1 text-[#7A6558]" @click="mobileMenuOpen = true">
-              <Icon name="lucide:menu" class="w-6 h-6" />
+            <!-- Hamburger -->
+            <button class="shell-hamburger" @click="mobileMenuOpen = true">
+              <span /><span /><span />
             </button>
           </div>
         </div>
+
+        <!-- Search bar slide-down -->
+        <Transition name="search-bar">
+          <div v-if="searchOpen" class="shell-search-bar">
+            <div class="shell-search-bar__inner">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="shell-search-bar__icon">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="0.85"/>
+                <path d="M11 11l3 3" stroke="currentColor" stroke-width="0.85"/>
+              </svg>
+              <input
+                v-model="searchQuery"
+                type="text"
+                :placeholder="storefrontContent.search?.placeholder || 'Rechercher un produit...'"
+                class="shell-search-bar__input"
+                autofocus
+                @blur="setTimeout(() => { isSearchDropdownOpen = false }, 200)"
+                @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
+              >
+              <button class="shell-search-bar__close" @click="searchOpen = false; searchQuery = ''">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="0.85"/>
+                </svg>
+              </button>
+            </div>
+            <!-- Results -->
+            <div v-show="isSearchDropdownOpen" class="shell-search-results">
+              <div v-if="searchLoading" class="shell-search-results__state">Recherche…</div>
+              <div v-else-if="searchResults.length === 0" class="shell-search-results__state">Aucun résultat.</div>
+              <NuxtLink
+                v-for="product in searchResults"
+                :key="product.id"
+                :to="'/p/' + product.slug"
+                class="shell-search-results__item"
+                @click="searchOpen = false; searchQuery = ''"
+              >
+                <div class="shell-search-results__img">
+                  <img v-if="product.images?.length" :src="product.images[0]" :alt="product.title">
+                  <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" stroke="currentColor" stroke-width="0.5"/></svg>
+                </div>
+                <div class="shell-search-results__info">
+                  <span class="shell-search-results__name">{{ product.title }}</span>
+                  <span class="shell-search-results__price">{{ product.price }} {{ currencyCode }}</span>
+                </div>
+              </NuxtLink>
+            </div>
+          </div>
+        </Transition>
       </header>
 
-      <!-- Mobile Drawer -->
+      <!-- ── Mobile Drawer ────────────────────────────────────── -->
       <Teleport to="body">
-        <Transition name="fade">
-          <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
+        <Transition name="overlay">
+          <div v-if="mobileMenuOpen" class="shell-overlay" @click="mobileMenuOpen = false" />
         </Transition>
-        <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-[#FAF8F5] z-[61] shadow-2xl flex flex-col overflow-y-auto">
-            <div class="flex items-center justify-between px-6 py-5 border-b border-[#E8E0D4]">
-              <span class="font-maison-serif text-xl font-semibold text-[#2C2420]">{{ tenantName }}</span>
-              <button @click="mobileMenuOpen = false" class="p-1 text-[#7A6558] hover:text-[#2C2420]">
-                <Icon name="lucide:x" class="w-5 h-5" />
+        <Transition name="drawer">
+          <div v-if="mobileMenuOpen" class="shell-drawer">
+            <div class="shell-drawer__head">
+              <span class="shell-logo__text">{{ tenantName }}</span>
+              <button class="shell-drawer__close" @click="mobileMenuOpen = false">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="0.85"/>
+                </svg>
               </button>
             </div>
 
-            <!-- Search -->
-            <div class="px-6 py-4 border-b border-[#E8E0D4]">
-              <div class="relative">
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  :placeholder="storefrontContent.search?.placeholder || 'Rechercher...'"
-                  class="w-full border border-[#E8E0D4] bg-white rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-[#B0A090] text-[#2C2420] outline-none focus:border-[#C17B4E] focus:ring-1 focus:ring-[#C17B4E]/30"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
-                >
-                <Icon name="lucide:search" class="w-4 h-4 text-[#B0A090] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <div
-                  v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 bg-[#FAF8F5] border border-[#E8E0D4] shadow-xl z-50"
-                >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-[#7A6558]">Recherche...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-[#7A6558]">Aucun produit.</div>
-                  <div v-else class="flex flex-col">
-                    <NuxtLink
-                      v-for="product in searchResults"
-                      :key="product.id"
-                      :to="'/p/' + product.slug"
-                      class="flex items-center gap-3 px-4 py-3 hover:bg-[#F0EBE3] transition-colors border-b border-[#F0EBE3] last:border-0"
-                      @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
-                    >
-                      <img v-if="product.images?.length" :src="product.images[0]" class="w-10 h-10 object-cover rounded" />
-                      <div v-else class="w-10 h-10 bg-[#E8E0D4] rounded flex items-center justify-center">
-                        <Icon name="lucide:image" class="w-4 h-4 text-[#B0A090]" />
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-[#2C2420] truncate">{{ product.title }}</div>
-                        <div class="text-xs text-[#C17B4E] font-semibold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
-                      </div>
-                    </NuxtLink>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Nav links -->
-            <nav class="flex flex-col px-6 py-3 gap-1">
-              <NuxtLink to="/" class="py-3 text-xs tracking-[0.18em] uppercase font-medium text-[#7A6558] hover:text-[#C17B4E] border-b border-[#F0EBE3]" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="py-3 text-xs tracking-[0.18em] uppercase font-medium text-[#7A6558] hover:text-[#C17B4E] border-b border-[#F0EBE3]" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
-              <NuxtLink to="/contact" class="py-3 text-xs tracking-[0.18em] uppercase font-medium text-[#7A6558] hover:text-[#C17B4E] border-b border-[#F0EBE3]" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
+            <nav class="shell-drawer__nav">
+              <NuxtLink to="/" class="shell-drawer__link" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="shell-drawer__link" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
+              <NuxtLink to="/contact" class="shell-drawer__link" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
 
-            <!-- Categories -->
-            <div v-if="tenantCategories && tenantCategories.length" class="px-6 py-4">
-              <h4 class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#B0A090] mb-3">Collections</h4>
-              <div class="flex flex-col gap-1">
-                <NuxtLink
-                  v-for="cat in tenantCategories"
-                  :key="cat.id"
-                  :to="'/c/' + cat.slug"
-                  class="py-2 text-sm text-[#7A6558] hover:text-[#C17B4E] transition-colors"
-                  @click="mobileMenuOpen = false"
-                >
-                  {{ cat.title }}
-                </NuxtLink>
-              </div>
+            <div v-if="tenantCategories?.length" class="shell-drawer__cats">
+              <span class="at-label" style="margin-bottom:12px;display:block">Collections</span>
+              <NuxtLink
+                v-for="cat in tenantCategories"
+                :key="cat.id"
+                :to="'/c/' + cat.slug"
+                class="shell-drawer__cat-link"
+                @click="mobileMenuOpen = false"
+              >{{ cat.title }}</NuxtLink>
             </div>
           </div>
         </Transition>
       </Teleport>
 
-      <!-- Main Content -->
-      <main class="flex-grow">
-        <slot />
-      </main>
+      <!-- ── Main ─────────────────────────────────────────────── -->
+      <main class="shell-main"><slot /></main>
 
-      <!-- Footer -->
-      <footer class="mt-24 bg-[#2C2420] text-[#D4C4B4]">
-        <div class="max-w-7xl mx-auto px-6 py-16">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+      <!-- ── Footer ───────────────────────────────────────────── -->
+      <footer class="shell-footer">
+        <div class="shell-footer__inner">
+          <div class="shell-footer__grid">
             <!-- Brand -->
-            <div class="col-span-1 md:col-span-1">
-              <h3 class="font-maison-serif text-2xl font-semibold text-white mb-4">{{ tenantName }}</h3>
-              <p class="text-sm text-[#A09080] leading-relaxed mb-6">
-                Art de vivre, décoration intérieure & accessoires maison soigneusement sélectionnés.
-              </p>
-              <ul v-if="primaryContactInfos.length" class="space-y-3 text-sm">
-                <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
-                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4 text-[#C17B4E] mt-0.5 shrink-0" />
+            <div class="shell-footer__brand">
+              <span class="shell-logo__text" style="font-size:1.6rem;margin-bottom:16px;display:block">{{ tenantName }}</span>
+              <p class="shell-footer__tagline">Art de vivre, décoration intérieure & accessoires maison soigneusement sélectionnés.</p>
+              <ul v-if="primaryContactInfos.length" class="shell-footer__contacts">
+                <li v-for="info in primaryContactInfos" :key="info.id" class="shell-footer__contact-item">
+                  <Icon :name="kindDef(info.kind).iconName" class="shell-footer__contact-icon" />
                   <a
                     v-if="hrefFor(info)"
                     :href="hrefFor(info)!"
-                    class="hover:text-white transition-colors text-[#A09080]"
+                    class="shell-footer__contact-link"
                     :target="isExternalHref(hrefFor(info)!) ? '_blank' : undefined"
                     :rel="isExternalHref(hrefFor(info)!) ? 'noopener noreferrer' : undefined"
-                  >
-                    <span>{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
-                  </a>
-                  <span v-else class="text-[#A09080]">{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
+                  >{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</a>
+                  <span v-else class="shell-footer__contact-link">{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
                 </li>
               </ul>
-              <div v-if="socialContactInfosWithHref.length" class="flex gap-3 mt-6">
+              <div v-if="socialContactInfosWithHref.length" class="shell-footer__socials">
                 <a
                   v-for="info in socialContactInfosWithHref"
                   :key="info.id"
                   :href="info.href"
-                  class="h-9 w-9 rounded-sm bg-[#3D342F] flex items-center justify-center hover:bg-[#C17B4E] transition-colors text-[#A09080] hover:text-white"
+                  class="shell-footer__social-btn"
                   :target="isExternalHref(info.href) ? '_blank' : undefined"
                   :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
                 >
-                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4" />
+                  <Icon :name="kindDef(info.kind).iconName" style="width:14px;height:14px" />
                 </a>
               </div>
             </div>
 
             <!-- Collections -->
             <div>
-              <h4 class="text-[10px] tracking-[0.2em] uppercase font-bold text-[#C17B4E] mb-5">Collections</h4>
-              <ul class="space-y-3 text-sm text-[#A09080]">
+              <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
+              <ul class="shell-footer__links">
                 <li v-for="cat in (tenantCategories || []).slice(0, 5)" :key="cat.id">
-                  <NuxtLink :to="`/c/${cat.slug}`" class="hover:text-white transition-colors">{{ cat.title }}</NuxtLink>
+                  <NuxtLink :to="`/c/${cat.slug}`" class="shell-footer__link">{{ cat.title }}</NuxtLink>
                 </li>
               </ul>
             </div>
 
             <!-- Service -->
             <div>
-              <h4 class="text-[10px] tracking-[0.2em] uppercase font-bold text-[#C17B4E] mb-5">{{ storefrontContent.footer.contact }}</h4>
-              <ul class="space-y-3 text-sm text-[#A09080]">
-                <li><a href="/contact" class="hover:text-white transition-colors">{{ storefrontContent.footer.contactUs }}</a></li>
-                <li><a href="/about" class="hover:text-white transition-colors">{{ storefrontContent.footer.aboutUs }}</a></li>
+              <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.contact }}</span>
+              <ul class="shell-footer__links">
+                <li><NuxtLink to="/contact" class="shell-footer__link">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
+                <li><NuxtLink to="/about" class="shell-footer__link">{{ storefrontContent.footer.aboutUs }}</NuxtLink></li>
               </ul>
             </div>
 
             <!-- Legal -->
             <div>
-              <h4 class="text-[10px] tracking-[0.2em] uppercase font-bold text-[#C17B4E] mb-5">{{ storefrontContent.footer.termsPrivacy }}</h4>
-              <ul class="space-y-3 text-sm text-[#A09080]">
-                <li><a href="#" class="hover:text-white transition-colors">{{ storefrontContent.footer.termsOfService }}</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">{{ storefrontContent.footer.returnPolicy }}</a></li>
+              <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.termsPrivacy }}</span>
+              <ul class="shell-footer__links">
+                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.termsOfService }}</a></li>
+                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.privacyPolicy }}</a></li>
+                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.returnPolicy }}</a></li>
               </ul>
             </div>
           </div>
 
-          <div class="pt-8 border-t border-[#3D342F] flex flex-col md:flex-row items-center justify-between gap-4">
-            <p class="text-xs text-[#6A5A50] tracking-wider">{{ storefrontContent.footer.copyright(tenantName) }}</p>
-            <p class="text-xs text-[#6A5A50] tracking-wider uppercase">Art de Vivre · Algérie</p>
+          <div class="shell-footer__bottom">
+            <span>{{ storefrontContent.footer.copyright(tenantName) }}</span>
+            <span>Atelier · Algérie</span>
           </div>
         </div>
       </footer>
@@ -347,8 +319,424 @@ watch(searchQuery, async (q) => {
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-.slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
-.slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+/* ── Shell wrapper ──────────────────────────────────────────────── */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.shell-main { flex: 1; }
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid transparent;
+  transition: background 0.4s, border-color 0.4s;
+}
+.shell-header.is-scrolled {
+  background: rgba(14,13,12,0.96);
+  backdrop-filter: blur(12px);
+  border-color: var(--at-border);
+}
+.shell-header.mobile-hidden { display: none; }
+@media (min-width: 1024px) { .shell-header.mobile-hidden { display: block; } }
+
+.shell-header__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 64px);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+/* ── Logo ───────────────────────────────────────────────────────── */
+.shell-logo {
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.shell-logo__img {
+  height: 32px;
+  max-width: 120px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+.shell-logo__text {
+  font-family: var(--at-f-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--at-cream);
+  text-decoration: none;
+}
+
+/* ── Desktop nav ────────────────────────────────────────────────── */
+.shell-nav {
+  display: none;
+  align-items: center;
+  gap: 28px;
+  flex: 1;
+  justify-content: center;
+}
+@media (min-width: 1024px) { .shell-nav { display: flex; } }
+
+.shell-nav__link {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+  text-decoration: none;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.shell-nav__link:hover,
+.shell-nav__link.is-active { color: var(--at-gold); }
+
+.shell-nav__dropdown-wrap {
+  position: relative;
+}
+.shell-nav__dropdown-trigger { cursor: pointer; background: none; border: none; padding: 0; }
+.shell-nav__dropdown {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 180px;
+  background: var(--at-surface);
+  border: 1px solid var(--at-border);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 100;
+}
+.shell-nav__dropdown-wrap:hover .shell-nav__dropdown {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.shell-nav__dropdown-item {
+  display: block;
+  padding: 10px 16px;
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+  text-decoration: none;
+  border-bottom: 1px solid var(--at-border);
+  transition: color 0.15s, background 0.15s;
+}
+.shell-nav__dropdown-item:last-child { border-bottom: none; }
+.shell-nav__dropdown-item:hover { color: var(--at-gold); background: var(--at-surface-2); }
+
+/* ── Actions ────────────────────────────────────────────────────── */
+.shell-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.shell-actions__locale { display: none; }
+@media (min-width: 1024px) { .shell-actions__locale { display: inline-flex; } }
+
+.shell-icon-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--at-sub);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+.shell-icon-btn:hover { color: var(--at-gold); }
+
+.shell-icon-btn__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  background: var(--at-gold);
+  color: var(--at-bg);
+  font-family: var(--at-f-mono);
+  font-size: 8px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shell-hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+.shell-hamburger span {
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: var(--at-sub);
+  transition: background 0.2s;
+}
+.shell-hamburger:hover span { background: var(--at-gold); }
+@media (min-width: 1024px) { .shell-hamburger { display: none; } }
+
+/* ── Search bar ─────────────────────────────────────────────────── */
+.shell-search-bar {
+  border-top: 1px solid var(--at-border);
+  background: var(--at-surface);
+}
+.shell-search-bar__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 64px);
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.shell-search-bar__icon { color: var(--at-muted); flex-shrink: 0; }
+.shell-search-bar__input {
+  flex: 1;
+  background: none;
+  border: none;
+  font-family: var(--at-f-mono);
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--at-text);
+  outline: none;
+}
+.shell-search-bar__input::placeholder { color: var(--at-muted); }
+.shell-search-bar__close {
+  background: none;
+  border: none;
+  color: var(--at-muted);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+.shell-search-bar__close:hover { color: var(--at-gold); }
+
+.shell-search-results {
+  border-top: 1px solid var(--at-border);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 64px);
+  max-height: 320px;
+  overflow-y: auto;
+}
+.shell-search-results__state {
+  padding: 16px 0;
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: var(--at-sub);
+}
+.shell-search-results__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--at-border);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.shell-search-results__item:hover { opacity: 0.75; }
+.shell-search-results__item:last-child { border-bottom: none; }
+.shell-search-results__img {
+  width: 40px;
+  height: 40px;
+  background: var(--at-surface-2);
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--at-muted);
+}
+.shell-search-results__img img { width: 100%; height: 100%; object-fit: cover; }
+.shell-search-results__info { display: flex; flex-direction: column; gap: 3px; }
+.shell-search-results__name {
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  color: var(--at-text);
+}
+.shell-search-results__price {
+  font-family: var(--at-f-mono);
+  font-size: 10px;
+  color: var(--at-gold);
+}
+
+/* ── Mobile drawer ──────────────────────────────────────────────── */
+.shell-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 60;
+}
+.shell-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 85vw);
+  background: var(--at-surface);
+  border-right: 1px solid var(--at-border);
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.shell-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--at-border);
+}
+.shell-drawer__close {
+  background: none;
+  border: none;
+  color: var(--at-sub);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+.shell-drawer__close:hover { color: var(--at-gold); }
+.shell-drawer__nav { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--at-border); }
+.shell-drawer__link {
+  padding: 14px 24px;
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--at-sub);
+  text-decoration: none;
+  transition: color 0.2s;
+  border-bottom: 1px solid var(--at-border);
+}
+.shell-drawer__link:last-child { border-bottom: none; }
+.shell-drawer__link:hover { color: var(--at-gold); }
+.shell-drawer__cats { padding: 20px 24px; }
+.shell-drawer__cat-link {
+  display: block;
+  padding: 10px 0;
+  font-family: var(--at-f-display);
+  font-size: 1.1rem;
+  color: var(--at-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--at-border);
+  transition: color 0.2s;
+}
+.shell-drawer__cat-link:last-child { border-bottom: none; }
+.shell-drawer__cat-link:hover { color: var(--at-gold); }
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+.shell-footer {
+  border-top: 1px solid var(--at-border);
+  background: var(--at-surface);
+  margin-top: auto;
+}
+.shell-footer__inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(48px, 7vw, 80px) clamp(20px, 5vw, 64px);
+}
+.shell-footer__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+@media (min-width: 768px) {
+  .shell-footer__grid { grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 48px; }
+}
+.shell-footer__tagline {
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--at-muted);
+  margin-bottom: 20px;
+  max-width: 260px;
+}
+.shell-footer__contacts { list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 10px; }
+.shell-footer__contact-item { display: flex; align-items: flex-start; gap: 10px; }
+.shell-footer__contact-icon { width: 12px; height: 12px; color: var(--at-gold); flex-shrink: 0; margin-top: 2px; }
+.shell-footer__contact-link {
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--at-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.shell-footer__contact-link:hover { color: var(--at-text); }
+.shell-footer__socials { display: flex; gap: 8px; margin-top: 16px; }
+.shell-footer__social-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--at-border-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--at-muted);
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.shell-footer__social-btn:hover { border-color: var(--at-gold); color: var(--at-gold); }
+.shell-footer__links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.shell-footer__link {
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--at-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.shell-footer__link:hover { color: var(--at-text); }
+.shell-footer__bottom {
+  border-top: 1px solid var(--at-border);
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--at-muted);
+}
+@media (min-width: 640px) {
+  .shell-footer__bottom { flex-direction: row; justify-content: space-between; }
+}
+
+/* ── Transitions ─────────────────────────────────────────────────── */
+.search-bar-enter-active, .search-bar-leave-active { transition: opacity 0.2s, transform 0.2s; }
+.search-bar-enter-from, .search-bar-leave-to { opacity: 0; transform: translateY(-6px); }
+
+.overlay-enter-active, .overlay-leave-active { transition: opacity 0.25s; }
+.overlay-enter-from, .overlay-leave-to { opacity: 0; }
+
+.drawer-enter-active, .drawer-leave-active { transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1); }
+.drawer-enter-from, .drawer-leave-to { transform: translateX(-100%); }
 </style>

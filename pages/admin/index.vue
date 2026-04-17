@@ -27,7 +27,7 @@
         <NuxtLink
           v-if="!storeSettings?.isCompleted"
           to="/admin/onboarding"
-          class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
+          class="ui-btn ui-btn--primary ui-btn--md"
         >
           <Icon name="lucide:sparkles" class="h-4 w-4" />
           {{ t('admin.pages.dashboard.finishSetup') }}
@@ -89,7 +89,7 @@
     </div>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <div class="lg:col-span-2 rounded-2xl border border-slate-200/70 bg-white shadow-sm overflow-hidden">
+      <div class="lg:col-span-2 rounded-2xl bg-white overflow-hidden" style="border: 1px solid #eaecf0; box-shadow: 0 1px 3px rgba(0,0,0,0.04)">
         <div class="flex items-center justify-between gap-4 border-b border-slate-200/70 px-5 py-4">
           <div class="min-w-0">
             <h3 class="font-semibold text-slate-900">
@@ -218,7 +218,7 @@
                 <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <NuxtLink
                     :to="`/admin/orders/${order.id}`"
-                    class="inline-flex items-center gap-2 text-teal-600 hover:opacity-80"
+                    class="inline-flex items-center gap-2 text-brand hover:opacity-80"
                   >
                     <Icon name="lucide:eye" class="h-4 w-4" />
                     {{ t('common.view') }}
@@ -231,7 +231,7 @@
       </div>
 
       <div class="space-y-6">
-        <div class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+        <div class="rounded-2xl bg-white p-5" style="border: 1px solid #eaecf0; box-shadow: 0 1px 3px rgba(0,0,0,0.04)">
           <h3 class="font-semibold text-slate-900">
             {{ t('admin.pages.dashboard.orderStatus.title') }}
           </h3>
@@ -262,7 +262,7 @@
           </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+        <div class="rounded-2xl bg-white p-5" style="border: 1px solid #eaecf0; box-shadow: 0 1px 3px rgba(0,0,0,0.04)">
           <h3 class="font-semibold text-slate-900">
             {{ t('admin.pages.dashboard.quickLinks.title') }}
           </h3>
