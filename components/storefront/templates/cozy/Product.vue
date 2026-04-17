@@ -67,7 +67,7 @@ const images = computed(() => {
         return props.product.images.filter(Boolean)
     }
     // 4. Placeholder
-    return ['/blank.svg']
+    return ['/blank.svg?v=2']
 })
 
 // Main image for cart (first image)

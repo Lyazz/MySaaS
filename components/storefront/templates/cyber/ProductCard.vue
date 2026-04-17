@@ -41,7 +41,7 @@ const primaryImage = computed(() => {
     if (props.product?.images?.length > 0) {
         return props.product.images[0]
     }
-    return '/blank.svg'
+    return '/blank.svg?v=2'
 })
 
 const productPrice = computed(() => {

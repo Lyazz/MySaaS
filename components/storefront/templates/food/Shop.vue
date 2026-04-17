@@ -12,7 +12,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true // Non-blocking
 })
 
-const { currencyCode, format: formatCurrency } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
@@ -53,8 +53,8 @@ const filteredProducts = computed(() => {
     // Filter by Price
     result = result.filter(p => {
         const price = Number(p.price)
-        const minMatches = minPriceInput.value === null || minPriceInput.value === '' ? true : price >= Number(minPriceInput.value)
-        const maxMatches = maxPriceInput.value === null || maxPriceInput.value === '' ? true : price <= Number(maxPriceInput.value)
+        const minMatches = minPriceInput.value == null ? true : price >= Number(minPriceInput.value)
+        const maxMatches = maxPriceInput.value == null ? true : price <= Number(maxPriceInput.value)
         return minMatches && maxMatches
     })
 
@@ -67,6 +67,19 @@ const filteredProducts = computed(() => {
 
     return result
 })
+
+const {
+    currentPage,
+    totalPages,
+    pageNumbers,
+    paginatedProducts,
+    canGoPrev,
+    canGoNext,
+    goToPage,
+    goToPrevPage,
+    goToNextPage
+} = useProductPagination(filteredProducts, 12)
+
 
 const pageTitle = computed(() => {
     const content = storefrontContent.value
@@ -185,7 +198,14 @@ const closeQuickView = () => {
               </label>
             </div>
           </div>
-                 
+
+          <div class="mb-6">
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
+          </div>
+
           <!-- Apply Button Mobile -->
           <div class="pt-8 mt-4 sticky bottom-0 bg-[#fffbf2] pb-safe border-t border-dashed border-stone-300">
             <button
@@ -222,7 +242,7 @@ const closeQuickView = () => {
       <div class="flex flex-col lg:flex-row gap-12 items-start">
         
         <!-- Ticket Sidebar (Desktop) -->
-        <aside class="hidden lg:block w-72 flex-shrink-0 sticky top-32">
+        <aside class="hidden lg:block w-72 flex-shrink-0 sticky top-32 max-h-[calc(100vh-9rem)] overflow-y-auto pr-2 custom-scrollbar">
             <div class="bg-white p-8 rounded-xl shadow-sm relative border border-stone-200">
                  
                  <div class="flex items-center justify-between mb-6 pb-4 border-b border-stone-100">
@@ -266,28 +286,11 @@ const closeQuickView = () => {
                     <h4 class="font-bold text-stone-400 mb-4 text-xs uppercase tracking-widest">
                     {{ storefrontContent.shop.priceRange.label }}
                     </h4>
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="relative w-full">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-bold rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                            <input 
-                                v-model.number="minPriceInput"
-                                type="number" 
-                                :placeholder="storefrontContent.shop.priceRange.min"
-                                class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-7 rtl:pl-2 rtl:pr-7 pr-2 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 font-bold"
-                            >
-                        </div>
-                        <span class="text-stone-300">-</span>
-                        <div class="relative w-full">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-bold rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                            <input 
-                                v-model.number="maxPriceInput"
-                                type="number"
-                                :placeholder="storefrontContent.shop.priceRange.max"
-                                class="w-full bg-white border border-stone-200 rounded-lg py-2 pl-7 rtl:pl-2 rtl:pr-7 pr-2 text-sm focus:ring-stone-500 focus:border-stone-500 text-stone-700 font-bold"
-                            >
-                        </div>
-                    </div>
-                </div>
+                    <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
+          </div>
             </div>
         </aside>
 
@@ -407,12 +410,23 @@ const closeQuickView = () => {
             ]"
           >
             <ProductCard
-              v-for="product in filteredProducts"
+              v-for="product in paginatedProducts"
               :key="product.id"
               :product="product"
               :view-mode="viewMode"
               @quick-view="openQuickView"
             />
+          <StorefrontProductPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :can-go-prev="canGoPrev"
+            :can-go-next="canGoNext"
+            @go-to-page="goToPage"
+            @go-prev="goToPrevPage"
+            @go-next="goToNextPage"
+          />
+
           </div>
 
         </div>
@@ -439,7 +453,7 @@ const closeQuickView = () => {
               <!-- Image Side -->
               <div class="w-full md:w-1/2 bg-stone-100 relative group overflow-hidden">
                   <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" 
                     class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   >
                    <div class="absolute bottom-6 left-6 rtl:left-auto rtl:right-6 inline-block px-4 py-2 bg-white/90 backdrop-blur rounded-full text-xs font-bold uppercase tracking-widest text-brand-700 shadow-lg">

@@ -7,7 +7,7 @@ describe('DeliveryService Maystro destination fallback', () => {
         vi.restoreAllMocks()
     })
 
-    it('uses explicit address when provided', async () => {
+    it('uses address + commune/wilaya names when address is provided', async () => {
         const resolveSpy = vi.spyOn(MaystroLocationService.prototype, 'resolveWilayaAndCommune').mockResolvedValue({
             wilayaId: 16,
             wilayaName: 'Alger',
@@ -24,11 +24,11 @@ describe('DeliveryService Maystro destination fallback', () => {
             addressLine2: 'Apt 4'
         })
 
-        expect(destination).toBe('123 Rue Test, Apt 4')
-        expect(resolveSpy).not.toHaveBeenCalled()
+        expect(destination).toBe('123 Rue Test, Apt 4, Hydra, Alger')
+        expect(resolveSpy).toHaveBeenCalledOnce()
     })
 
-    it('falls back to wilaya + commune names when address is missing', async () => {
+    it('falls back to commune + wilaya names when address is missing', async () => {
         vi.spyOn(MaystroLocationService.prototype, 'resolveWilayaAndCommune').mockResolvedValue({
             wilayaId: 16,
             wilayaName: 'Alger',
@@ -43,7 +43,7 @@ describe('DeliveryService Maystro destination fallback', () => {
             communeCode: '575'
         })
 
-        expect(destination).toBe('Alger, Hydra')
+        expect(destination).toBe('Hydra, Alger')
     })
 
     it('falls back to raw codes if location name lookup fails', async () => {
@@ -56,6 +56,6 @@ describe('DeliveryService Maystro destination fallback', () => {
             communeCode: '575'
         })
 
-        expect(destination).toBe('16, 575')
+        expect(destination).toBe('575, 16')
     })
 })

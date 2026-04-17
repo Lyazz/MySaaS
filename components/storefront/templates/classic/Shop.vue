@@ -12,7 +12,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true // Non-blocking
 })
 
-const { currencyCode, format: formatCurrency } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
@@ -54,8 +54,8 @@ const filteredProducts = computed(() => {
     // Filter by Price
     result = result.filter(p => {
         const price = Number(p.price)
-        const minMatches = minPriceInput.value === null || minPriceInput.value === '' ? true : price >= Number(minPriceInput.value)
-        const maxMatches = maxPriceInput.value === null || maxPriceInput.value === '' ? true : price <= Number(maxPriceInput.value)
+        const minMatches = minPriceInput.value == null ? true : price >= Number(minPriceInput.value)
+        const maxMatches = maxPriceInput.value == null ? true : price <= Number(maxPriceInput.value)
         return minMatches && maxMatches
     })
 
@@ -68,6 +68,19 @@ const filteredProducts = computed(() => {
 
     return result
 })
+
+const {
+    currentPage,
+    totalPages,
+    pageNumbers,
+    paginatedProducts,
+    canGoPrev,
+    canGoNext,
+    goToPage,
+    goToPrevPage,
+    goToNextPage
+} = useProductPagination(filteredProducts, 12)
+
 
 const pageTitle = computed(() => {
     const content = storefrontContent.value
@@ -182,7 +195,14 @@ const closeQuickView = () => {
               </label>
             </div>
           </div>
-                 
+
+          <div class="mb-6">
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
+          </div>
+
           <!-- Apply Button Mobile -->
           <div class="pt-8 mt-4 sticky bottom-0 bg-white pb-safe">
             <button
@@ -217,7 +237,7 @@ const closeQuickView = () => {
 
       <div class="flex flex-col lg:flex-row gap-12">
         <!-- Tablet/Desktop Sidebar Filters (Hidden on Mobile) -->
-        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-10 h-fit sticky top-24">
+        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-10 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 custom-scrollbar">
           <!-- Filter Header -->
           <div class="flex items-center justify-between border-b border-slate-200 pb-2">
             <h3 class="font-bold text-slate-900 text-xs uppercase tracking-widest">
@@ -260,27 +280,10 @@ const closeQuickView = () => {
             <h4 class="font-serif text-slate-900 mb-4 text-lg">
               {{ storefrontContent.shop.priceRange.label }}
             </h4>
-            <div class="flex items-center gap-4">
-               <div class="relative w-full">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                  <input 
-                    v-model.number="minPriceInput"
-                    type="number" 
-                    :placeholder="storefrontContent.shop.priceRange.min"
-                    class="w-full bg-white border border-slate-200 rounded-none py-2 pl-8 rtl:pl-2 rtl:pr-8 pr-2 text-sm focus:border-slate-900 focus:ring-0 text-slate-700"
-                  >
-               </div>
-               <span class="text-slate-400">-</span>
-               <div class="relative w-full">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                  <input 
-                    v-model.number="maxPriceInput"
-                    type="number"
-                    :placeholder="storefrontContent.shop.priceRange.max" 
-                    class="w-full bg-white border border-slate-200 rounded-none py-2 pl-8 rtl:pl-2 rtl:pr-8 pr-2 text-sm focus:border-slate-900 focus:ring-0 text-slate-700"
-                  >
-               </div>
-            </div>
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
           </div>
 
           <!-- Best Sellers Widget -->
@@ -297,7 +300,7 @@ const closeQuickView = () => {
               >
                 <div class="w-16 h-20 bg-slate-100 overflow-hidden flex-shrink-0">
                   <img
-                    :src="p.images && p.images[0] ? p.images[0] : '/blank.svg'"
+                    :src="p.images && p.images[0] ? p.images[0] : '/blank.svg?v=2'"
                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                     :alt="p.title"
                   >
@@ -422,7 +425,7 @@ const closeQuickView = () => {
             ]"
           >
             <ProductCard
-              v-for="product in filteredProducts"
+              v-for="product in paginatedProducts"
               :key="product.id"
               :product="product"
               :view-mode="viewMode"
@@ -431,39 +434,17 @@ const closeQuickView = () => {
           </div>
 
                   
-          <!-- Pagination Mock -->
-          <div class="mt-20 flex justify-center border-t border-slate-100 pt-8">
-            <nav class="flex items-center gap-4">
-              <button
-                class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-colors"
-                disabled
-              >
-                <Icon name="lucide:arrow-left" class="w-4 h-4" />
-                Prev
-              </button>
-                          
-              <div class="flex items-center gap-2">
-                <button class="w-8 h-8 flex items-center justify-center bg-slate-900 text-white font-bold text-xs">
-                  1
-                </button>
-                <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-900 font-medium text-xs transition-colors">
-                  2
-                </button>
-                <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-900 font-medium text-xs transition-colors">
-                  3
-                </button>
-                <span class="text-slate-400">...</span>
-                <button class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-900 font-medium text-xs transition-colors">
-                  16
-                </button>
-              </div>
+          <StorefrontProductPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :can-go-prev="canGoPrev"
+            :can-go-next="canGoNext"
+            @go-to-page="goToPage"
+            @go-prev="goToPrevPage"
+            @go-next="goToNextPage"
+          />
 
-              <button class="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-900 hover:text-slate-600 transition-colors">
-                Next
-                <Icon name="lucide:arrow-right" class="w-4 h-4" />
-              </button>
-            </nav>
-          </div>
         </div>
       </div>
     </div>
@@ -488,7 +469,7 @@ const closeQuickView = () => {
               
               <div class="w-full md:w-1/2 bg-gray-100 relative min-h-[40vh]">
                   <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" 
                     class="absolute inset-0 w-full h-full object-cover"
                   >
               </div>

@@ -679,13 +679,13 @@ export class DeliveryService {
             .map((value) => (typeof value === 'string' ? value.trim() : ''))
             .filter(Boolean)
             .join(', ')
-        if (fromAddress) return fromAddress
 
-        const fallbackFromCodes = [input.wilayaCode, input.communeCode]
+        const fallbackFromCodes = [input.communeCode, input.wilayaCode]
             .map((value) => (typeof value === 'string' ? value.trim() : ''))
             .filter(Boolean)
             .join(', ')
 
+        let locationPart = fallbackFromCodes
         try {
             const location = new MaystroLocationService(this.prisma)
             const resolved = await location.resolveWilayaAndCommune({
@@ -694,12 +694,15 @@ export class DeliveryService {
                 commune: input.communeCode
             })
 
-            const fromNames = [resolved.wilayaName, resolved.communeName].filter(Boolean).join(', ')
-            return fromNames || fallbackFromCodes
+            const fromNames = [resolved.communeName, resolved.wilayaName].filter(Boolean).join(', ')
+            if (fromNames) locationPart = fromNames
         } catch {
             // Do not block shipment creation if location-name lookup fails.
-            return fallbackFromCodes
         }
+
+        if (fromAddress && locationPart) return `${fromAddress}, ${locationPart}`
+        if (fromAddress) return fromAddress
+        return locationPart
     }
 
     async getShipment(tenantId: string, shipmentId: string) {

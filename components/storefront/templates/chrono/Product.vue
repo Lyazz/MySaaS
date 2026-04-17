@@ -69,7 +69,7 @@ const images = computed(() => {
     if (props.product?.images && props.product.images.length > 0) {
         return props.product.images
     }
-    return ['/blank.svg']
+    return ['/blank.svg?v=2']
 })
 
 const cartImage = computed(() => images.value[0])

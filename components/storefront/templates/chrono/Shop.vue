@@ -11,7 +11,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true
 })
 
-const { currencyCode, format: formatCurrency } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const filters = computed(() => ({
@@ -43,7 +43,9 @@ const filteredProducts = computed(() => {
     }
     result = result.filter(p => {
         const price = Number(p.price)
-        return price >= minPriceInput.value && price <= maxPriceInput.value
+        const minMatches = minPriceInput.value == null ? true : price >= Number(minPriceInput.value)
+        const maxMatches = maxPriceInput.value == null ? true : price <= Number(maxPriceInput.value)
+        return minMatches && maxMatches
     })
     if (sortOption.value === 'priceAsc') {
         result.sort((a, b) => Number(a.price) - Number(b.price))
@@ -52,6 +54,19 @@ const filteredProducts = computed(() => {
     }
     return result
 })
+
+const {
+    currentPage,
+    totalPages,
+    pageNumbers,
+    paginatedProducts,
+    canGoPrev,
+    canGoNext,
+    goToPage,
+    goToPrevPage,
+    goToNextPage
+} = useProductPagination(filteredProducts, 12)
+
 
 const pageTitle = computed(() => {
     const content = storefrontContent.value
@@ -145,6 +160,13 @@ const closeQuickView = () => {
               </label>
             </div>
           </div>
+
+          <div class="mb-6">
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
+          </div>
                  
           <div class="pt-8 mt-4 sticky bottom-0 bg-[#0B0E16] pb-safe">
             <button class="w-full py-3 bg-[#A67C52] text-black font-bold tracking-wider uppercase active:scale-95 transition-transform" style="border-radius: 2px;" @click="isFilterDrawerOpen = false">
@@ -170,7 +192,7 @@ const closeQuickView = () => {
 
       <div class="flex flex-col lg:flex-row gap-10">
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-8 bg-[#0B0E16] p-6 border border-[#A67C52]/10 h-fit sticky top-24" style="border-radius: 2px;">
+        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-8 bg-[#0B0E16] p-6 border border-[#A67C52]/10 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 custom-scrollbar" style="border-radius: 2px;">
           <div class="flex items-center justify-between mb-4 border-b border-[#A67C52]/10 pb-4">
             <h3 class="font-bold text-[#A67C52] text-lg tracking-wider uppercase">{{ storefrontContent.actions.filters }}</h3>
             <button class="text-xs font-semibold text-[#A67C52] hover:text-white uppercase tracking-wide" @click="resetFilters">{{ storefrontContent.actions.reset }}</button>
@@ -188,17 +210,10 @@ const closeQuickView = () => {
 
           <div>
             <h4 class="font-bold text-[#A67C52] mb-4 text-xs uppercase tracking-[0.2em]">{{ storefrontContent.shop.priceRange.label }}</h4>
-            <div class="flex items-center gap-4">
-               <div class="relative w-full">
-                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                 <input v-model.number="minPriceInput" type="number" :placeholder="storefrontContent.shop.priceRange.min" class="w-full bg-[#131720] border border-[#A67C52]/20 py-2 pl-6 rtl:pl-2 rtl:pr-6 pr-2 text-sm focus:ring-[#A67C52] focus:border-[#A67C52] text-gray-300" style="border-radius: 2px;" >
-               </div>
-               <span class="text-gray-600">-</span>
-               <div class="relative w-full">
-                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                 <input v-model.number="maxPriceInput" type="number" :placeholder="storefrontContent.shop.priceRange.max" class="w-full bg-[#131720] border border-[#A67C52]/20 py-2 pl-6 rtl:pl-2 rtl:pr-6 pr-2 text-sm focus:ring-[#A67C52] focus:border-[#A67C52] text-gray-300" style="border-radius: 2px;" >
-               </div>
-            </div>
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
           </div>
 
           <!-- Best Sellers Widget -->
@@ -207,7 +222,7 @@ const closeQuickView = () => {
             <div class="space-y-4">
               <NuxtLink v-for="p in sidebarProducts" :key="p.id" :to="`/p/${p.slug}`" class="flex gap-3 group">
                 <div class="w-16 h-16 bg-[#131720] overflow-hidden flex-shrink-0 border border-[#A67C52]/10" style="border-radius: 2px;">
-                  <img :src="p.images && p.images[0] ? p.images[0] : '/blank.svg'" class="w-full h-full object-cover group-hover:scale-110 transition-transform" :alt="p.title" >
+                  <img :src="p.images && p.images[0] ? p.images[0] : '/blank.svg?v=2'" class="w-full h-full object-cover group-hover:scale-110 transition-transform" :alt="p.title" >
                 </div>
                 <div>
                   <h5 class="text-sm font-bold text-gray-300 line-clamp-2 group-hover:text-[#A67C52] transition-colors">{{ p.title }}</h5>
@@ -271,7 +286,18 @@ const closeQuickView = () => {
           </div>
 
           <div v-else :class="[viewMode === 'list' ? 'flex flex-col gap-4' : 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-y-10']">
-            <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product" :view-mode="viewMode" @quick-view="openQuickView" />
+            <ProductCard v-for="product in paginatedProducts" :key="product.id" :product="product" :view-mode="viewMode" @quick-view="openQuickView" />
+          <StorefrontProductPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :can-go-prev="canGoPrev"
+            :can-go-next="canGoNext"
+            @go-to-page="goToPage"
+            @go-prev="goToPrevPage"
+            @go-next="goToNextPage"
+          />
+
           </div>
         </div>
       </div>
@@ -295,7 +321,7 @@ const closeQuickView = () => {
               </button>
               
               <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-[#131720] relative">
-                  <img :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" class="w-full h-full object-cover" >
+                  <img :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" class="w-full h-full object-cover" >
               </div>
               <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col" style="background-color:#0E1117; font-family:'Cormorant Garamond',serif;">
                   <div>

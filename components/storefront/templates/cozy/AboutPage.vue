@@ -23,7 +23,7 @@ const { t } = useI18n({ useScope: 'global' })
             </p>
             
             <div class="w-24 h-24 rounded-full bg-slate-100 mx-auto mb-4 overflow-hidden">
-                 <img src="/blank.svg" class="w-full h-full object-cover grayscale opacity-80" />
+                 <img src="/blank.svg?v=2" class="w-full h-full object-cover grayscale opacity-80" />
             </div>
             <p class="font-bold text-slate-400 text-sm uppercase tracking-widest">{{ t('storefront.templates.cozy.about.founders') }}</p>
         </div>

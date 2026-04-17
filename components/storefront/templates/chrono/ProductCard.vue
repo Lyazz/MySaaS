@@ -34,7 +34,7 @@ const mainImage = computed(() => {
   if (props.product.images && props.product.images.length > 0) {
     return props.product.images[0]
   }
-  return '/blank.svg'
+  return '/blank.svg?v=2'
 })
 
 const isPromoValid = computed(() => {

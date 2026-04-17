@@ -89,8 +89,20 @@
                         {{ v.availableStock }} {{ t('admin.pages.orders.create.inStock', 'in stock') }}
                       </div>
                     </div>
-                    <div class="font-bold text-teal-600">
-                      {{ formatCurrency(v.price) }}
+                    <div class="text-right">
+                      <div class="font-bold text-teal-600">
+                        {{ formatCurrency(v.displayPrice ?? v.price) }}
+                      </div>
+                      <div
+                        v-if="v.promotionApplied"
+                        class="text-[11px] text-slate-500"
+                      >
+                        <span class="line-through">{{ formatCurrency(v.originalPrice ?? v.price) }}</span>
+                        <span
+                          v-if="v.promotionDiscountPercent != null"
+                          class="ml-1 font-semibold text-emerald-600"
+                        >-{{ v.promotionDiscountPercent }}%</span>
+                      </div>
                     </div>
                   </button>
                 </div>
@@ -388,8 +400,20 @@
                       <div class="font-medium text-sm text-slate-800 truncate">
                         {{ product.title }}
                       </div>
-                      <div class="text-xs text-slate-500">
-                        {{ formatCurrency(product.price) }}
+                      <div class="mt-0.5 text-xs">
+                        <div class="font-semibold text-teal-600">
+                          {{ formatCurrency(product.effectivePrice) }}
+                        </div>
+                        <div
+                          v-if="product.promotionApplied"
+                          class="text-slate-500"
+                        >
+                          <span class="line-through">{{ formatCurrency(product.originalPrice) }}</span>
+                          <span
+                            v-if="product.promotionDiscountPercent != null"
+                            class="ml-1 font-semibold text-emerald-600"
+                          >-{{ product.promotionDiscountPercent }}%</span>
+                        </div>
                       </div>
                     </div>
                     <Icon
@@ -1121,6 +1145,13 @@ type CartItem = {
   quantity: number
 }
 
+type ProductPricing = {
+  originalPrice: number
+  effectivePrice: number
+  promotionApplied: boolean
+  promotionDiscountPercent: number | null
+}
+
 const loading = ref(true)
 const updating = ref(false)
 const order = ref<Order | null>(null)
@@ -1362,11 +1393,65 @@ function variantLabelFromOrderItem(item: OrderItem): string | undefined {
   return labels.join(' / ')
 }
 
+function toFiniteNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function hasActivePromotion(product: any, nowMs = Date.now()): boolean {
+  if (!product?.isPromotionActive) return false
+  const promotionalPrice = Number(product?.promotionalPrice)
+  if (!Number.isFinite(promotionalPrice)) return false
+
+  const start = product?.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
+  const end = product?.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
+
+  return nowMs >= start && nowMs <= end
+}
+
+function buildProductPricing(product: any, basePriceInput?: unknown): ProductPricing {
+  const originalPrice = toFiniteNumber(basePriceInput ?? product?.price)
+  if (!hasActivePromotion(product)) {
+    return {
+      originalPrice,
+      effectivePrice: originalPrice,
+      promotionApplied: false,
+      promotionDiscountPercent: null
+    }
+  }
+
+  const effectivePrice = toFiniteNumber(product?.promotionalPrice, originalPrice)
+  const promotionDiscountPercent =
+    originalPrice > 0 && effectivePrice < originalPrice
+      ? Math.round(((originalPrice - effectivePrice) / originalPrice) * 100)
+      : null
+
+  return {
+    originalPrice,
+    effectivePrice,
+    promotionApplied: true,
+    promotionDiscountPercent
+  }
+}
+
+function applyPromotionPricingToCartItems() {
+  cartItems.value = cartItems.value.map((item) => {
+    const product = products.value.find((p: any) => p?.id === item.productId)
+    if (!product) return item
+    const pricing = buildProductPricing(product, item.price)
+    return { ...item, price: pricing.effectivePrice }
+  })
+}
+
 const searchedProducts = computed(() => {
   if (!productSearch.value.trim()) return []
   const q = productSearch.value.toLowerCase()
   return products.value
     .filter((p: any) => (p?.title || '').toLowerCase().includes(q) || (p?.sku || '').toLowerCase().includes(q))
+    .map((product: any) => ({
+      ...product,
+      ...buildProductPricing(product)
+    }))
     .slice(0, 6)
 })
 
@@ -1455,6 +1540,7 @@ async function startEdit() {
   }))
 
   await ensureProductsLoaded()
+  applyPromotionPricingToCartItems()
 }
 
 function cancelEdit() {
@@ -1468,6 +1554,7 @@ function cancelEdit() {
 
 async function addProductToCart(product: any) {
   productSearch.value = ''
+  const pricing = buildProductPricing(product)
 
   if (product?.options && product.options.length > 0) {
     selectedProductForVariant.value = product
@@ -1479,14 +1566,21 @@ async function addProductToCart(product: any) {
         headers: { Authorization: `Bearer ${authStore.token}` }
       }) as any
 
+      selectedProductForVariant.value = response
+
       availableVariantsForSelection.value = (response.variants || []).map((v: any) => {
+        const variantPricing = buildProductPricing(response, v.price)
         const label = v.optionValues
           ? v.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ')
           : 'Default'
         return {
           ...v,
           label,
-          availableStock: v.stock - (v.reserved || 0)
+          availableStock: v.stock - (v.reserved || 0),
+          originalPrice: variantPricing.originalPrice,
+          displayPrice: variantPricing.effectivePrice,
+          promotionApplied: variantPricing.promotionApplied,
+          promotionDiscountPercent: variantPricing.promotionDiscountPercent
         }
       })
     } catch (e) {
@@ -1500,6 +1594,7 @@ async function addProductToCart(product: any) {
 
   const existing = cartItems.value.find((i) => i.productId === product.id && !i.variantId)
   if (existing) {
+    existing.price = pricing.effectivePrice
     existing.quantity++
     return
   }
@@ -1507,7 +1602,7 @@ async function addProductToCart(product: any) {
   cartItems.value.push({
     productId: product.id,
     title: product.title,
-    price: Number(product.price || 0),
+    price: pricing.effectivePrice,
     quantity: 1
   })
 }
@@ -1515,9 +1610,11 @@ async function addProductToCart(product: any) {
 function onVariantSelected(variant: any) {
   const product = selectedProductForVariant.value
   if (!product) return
+  const unitPrice = toFiniteNumber(variant.displayPrice ?? variant.price)
 
   const existing = cartItems.value.find((i) => i.productId === product.id && i.variantId === variant.id)
   if (existing) {
+    existing.price = unitPrice
     existing.quantity++
   } else {
     cartItems.value.push({
@@ -1525,7 +1622,7 @@ function onVariantSelected(variant: any) {
       variantId: variant.id,
       title: product.title,
       variantLabel: variant.label,
-      price: Number(variant.price || 0),
+      price: unitPrice,
       quantity: 1
     })
   }

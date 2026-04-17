@@ -12,7 +12,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true
 })
 
-const { currencyCode, format: formatCurrency } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
@@ -53,8 +53,8 @@ const filteredProducts = computed(() => {
     // Filter by Price
     result = result.filter(p => {
         const price = Number(p.price)
-        const minMatches = minPriceInput.value === null || minPriceInput.value === '' ? true : price >= Number(minPriceInput.value)
-        const maxMatches = maxPriceInput.value === null || maxPriceInput.value === '' ? true : price <= Number(maxPriceInput.value)
+        const minMatches = minPriceInput.value == null ? true : price >= Number(minPriceInput.value)
+        const maxMatches = maxPriceInput.value == null ? true : price <= Number(maxPriceInput.value)
         return minMatches && maxMatches
     })
 
@@ -67,6 +67,19 @@ const filteredProducts = computed(() => {
 
     return result
 })
+
+const {
+    currentPage,
+    totalPages,
+    pageNumbers,
+    paginatedProducts,
+    canGoPrev,
+    canGoNext,
+    goToPage,
+    goToPrevPage,
+    goToNextPage
+} = useProductPagination(filteredProducts, 12)
+
 
 const pageTitle = computed(() => {
     const content = storefrontContent.value
@@ -184,7 +197,14 @@ const closeQuickView = () => {
               </label>
             </div>
           </div>
-                 
+
+          <div class="mb-6">
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
+          </div>
+
           <!-- Apply Button Mobile -->
           <div class="pt-8 mt-4 sticky bottom-0 bg-[#1a0a2e] pb-safe">
             <button
@@ -217,7 +237,7 @@ const closeQuickView = () => {
 
       <div class="flex flex-col lg:flex-row gap-10">
         <!-- Desktop Sidebar Filters -->
-        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-8 h-fit sticky top-24">
+        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-8 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 custom-scrollbar">
           <div class="relative">
             <div class="absolute -inset-1 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-2xl blur"></div>
             <div class="relative bg-[#1a0a2e]/95 p-6 rounded-2xl border border-pink-500/30 backdrop-blur-sm">
@@ -257,28 +277,11 @@ const closeQuickView = () => {
               <!-- Price Filter -->
               <div>
                 <h4 class="font-bold text-pink-400 mb-4 text-xs uppercase tracking-wider">{{ storefrontContent.shop.priceRange.label }}</h4>
-                <div class="flex items-center gap-4">
-                   <div class="relative w-full">
-                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400/60 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                     <input 
-                       v-model.number="minPriceInput"
-                       type="number" 
-                       :placeholder="storefrontContent.shop.priceRange.min"
-                       class="w-full bg-purple-900/30 border border-purple-500/30 rounded-lg py-2 pl-6 rtl:pl-2 rtl:pr-6 pr-2 text-sm focus:ring-pink-500 focus:border-pink-500 text-white"
-                     >
-                   </div>
-                   <span class="text-purple-500">-</span>
-                   <div class="relative w-full">
-                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400/60 text-xs rtl:left-auto rtl:right-3">{{ currencyCode }}</span>
-                     <input 
-                       v-model.number="maxPriceInput"
-                       type="number"
-                       :placeholder="storefrontContent.shop.priceRange.max" 
-                       class="w-full bg-purple-900/30 border border-purple-500/30 rounded-lg py-2 pl-6 rtl:pl-2 rtl:pr-6 pr-2 text-sm focus:ring-pink-500 focus:border-pink-500 text-white"
-                     >
-                   </div>
-                </div>
-              </div>
+                <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
+          </div>
             </div>
           </div>
         </aside>
@@ -395,12 +398,23 @@ const closeQuickView = () => {
             ]"
           >
             <ProductCard
-              v-for="product in filteredProducts"
+              v-for="product in paginatedProducts"
               :key="product.id"
               :product="product"
               :view-mode="viewMode"
               @quick-view="openQuickView"
             />
+          <StorefrontProductPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :can-go-prev="canGoPrev"
+            :can-go-next="canGoNext"
+            @go-to-page="goToPage"
+            @go-prev="goToPrevPage"
+            @go-next="goToNextPage"
+          />
+
           </div>
         </div>
       </div>
@@ -424,7 +438,7 @@ const closeQuickView = () => {
               
               <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-purple-900/30 relative">
                   <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" 
                     class="w-full h-full object-cover"
                   >
                   <!-- Overlay gradient -->

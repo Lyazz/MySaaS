@@ -50,7 +50,7 @@
                         class="flex items-center p-2 rounded-lg border border-slate-100 hover:border-teal-500/30 hover:bg-teal-50/30 cursor-pointer transition-all gap-3 group"
                     >
                         <div class="w-10 h-10 rounded-md bg-slate-100 overflow-hidden shrink-0">
-                             <img :src="getProductMainImage(product) || '/blank.svg'" class="w-full h-full object-cover">
+                             <img :src="getProductMainImage(product) || '/blank.svg?v=2'" class="w-full h-full object-cover">
                         </div>
                         <div class="min-w-0">
                             <h4 class="text-sm font-bold text-slate-700 group-hover:text-slate-900 truncate">{{ product.title }}</h4>
@@ -62,7 +62,7 @@
                 <!-- Selected Product Card -->
                 <div v-else class="relative bg-teal-50/50 border border-teal-200 rounded-lg p-3 flex items-start gap-3 group">
                      <div class="w-16 h-16 rounded-md bg-white border border-slate-200 overflow-hidden shrink-0 shadow-sm">
-                         <img :src="getProductMainImage(selectedProduct) || '/blank.svg'" class="w-full h-full object-cover">
+                         <img :src="getProductMainImage(selectedProduct) || '/blank.svg?v=2'" class="w-full h-full object-cover">
                      </div>
                      <div class="flex-1 min-w-0">
                          <h4 class="text-sm font-bold text-slate-900 truncate">{{ selectedProduct.title }}</h4>

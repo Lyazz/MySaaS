@@ -10,7 +10,7 @@ const currentImage = computed(() => {
     if (props.images && props.images.length > 0) {
         return props.images[activeImageIndex.value]
     }
-    return '/blank.svg'
+    return '/blank.svg?v=2'
 })
 
 const setActiveImage = (index: number) => {

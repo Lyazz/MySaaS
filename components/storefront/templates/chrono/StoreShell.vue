@@ -218,7 +218,7 @@ const props = defineProps<{
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 shadow-xl z-50 rounded-lg overflow-hidden"
+                  class="absolute top-[100%] left-0 right-0 mt-1 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
                   style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.12);"
                 >
                   <div v-if="searchLoading" class="px-4 py-3 text-sm" style="color: #7A7060;">Searching...</div>
@@ -232,7 +232,7 @@ const props = defineProps<{
                       style="border-bottom: 1px solid rgba(212,197,169,0.06);"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
-                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg'" class="w-10 h-10 object-cover rounded shadow-sm" />
+                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium truncate" style="color: #E8E0D5;">{{ product.title }}</div>
                         <div class="text-xs font-bold mt-0.5" style="color: #A67C52;">{{ product.price }} {{ currencyCode }}</div>

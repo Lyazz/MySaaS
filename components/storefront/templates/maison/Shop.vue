@@ -32,14 +32,27 @@ const filteredProducts = computed(() => {
   }
   result = result.filter(p => {
     const price = Number(p.price)
-    const minOk = minPriceInput.value === null || minPriceInput.value === ('' as any) ? true : price >= Number(minPriceInput.value)
-    const maxOk = maxPriceInput.value === null || maxPriceInput.value === ('' as any) ? true : price <= Number(maxPriceInput.value)
+    const minOk = minPriceInput.value == null ? true : price >= Number(minPriceInput.value)
+    const maxOk = maxPriceInput.value == null ? true : price <= Number(maxPriceInput.value)
     return minOk && maxOk
   })
   if (sortOption.value === 'priceAsc') result.sort((a, b) => Number(a.price) - Number(b.price))
   else if (sortOption.value === 'priceDesc') result.sort((a, b) => Number(b.price) - Number(a.price))
   return result
 })
+
+const {
+    currentPage,
+    totalPages,
+    pageNumbers,
+    paginatedProducts,
+    canGoPrev,
+    canGoNext,
+    goToPage,
+    goToPrevPage,
+    goToNextPage
+} = useProductPagination(filteredProducts, 12)
+
 
 const toggleCategory = (catId: string) => {
   const idx = selectedCategories.value.indexOf(catId)
@@ -110,21 +123,10 @@ const resetFilters = () => {
 
           <div class="shop__filter-section">
             <h4 class="shop__filter-title">{{ storefrontContent.shop.priceRange.label }}</h4>
-            <div class="shop__price-inputs">
-              <input
-                v-model.number="minPriceInput"
-                type="number"
-                :placeholder="storefrontContent.shop.priceRange.min"
-                class="at-input shop__price-input"
-              >
-              <span class="shop__price-sep">—</span>
-              <input
-                v-model.number="maxPriceInput"
-                type="number"
-                :placeholder="storefrontContent.shop.priceRange.max"
-                class="at-input shop__price-input"
-              >
-            </div>
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
           </div>
         </aside>
 
@@ -190,7 +192,18 @@ const resetFilters = () => {
           </div>
 
           <div v-else class="shop__grid">
-            <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product" />
+            <ProductCard v-for="product in paginatedProducts" :key="product.id" :product="product" />
+          <StorefrontProductPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :can-go-prev="canGoPrev"
+            :can-go-next="canGoNext"
+            @go-to-page="goToPage"
+            @go-prev="goToPrevPage"
+            @go-next="goToNextPage"
+          />
+
           </div>
         </div>
       </div>
@@ -221,6 +234,13 @@ const resetFilters = () => {
                   <span class="shop__filter-label">{{ cat.title }}</span>
                 </label>
               </div>
+            </div>
+
+            <div class="shop__filter-section">
+              <StorefrontPriceRangeFilter
+                v-model:min-price="minPriceInput"
+                v-model:max-price="maxPriceInput"
+              />
             </div>
           </div>
 
@@ -298,9 +318,20 @@ const resetFilters = () => {
   flex-shrink: 0;
   position: sticky;
   top: 80px;
-  height: fit-content;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding-right: 8px;
 }
 @media (min-width: 1024px) { .shop__sidebar { display: block; } }
+
+.shop__sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.shop__sidebar::-webkit-scrollbar-thumb {
+  background: rgba(203, 164, 107, 0.45);
+  border-radius: 999px;
+}
 
 .shop__sidebar-head {
   display: flex;

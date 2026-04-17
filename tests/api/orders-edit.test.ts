@@ -18,6 +18,7 @@ describe('Orders edit (unconfirmed only)', () => {
 
     let product1Id: string
     let product2Id: string
+    let promoProductId: string
 
     let pendingOrderId: string
     let confirmedOrderId: string
@@ -78,6 +79,20 @@ describe('Orders edit (unconfirmed only)', () => {
             }
         })
         product2Id = p2.id
+
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId: tenantAId,
+                title: 'Promo Product',
+                slug: `promo-p-${Date.now()}`,
+                price: 100,
+                promotionalPrice: 80,
+                isPromotionActive: true,
+                stock: 50,
+                isActive: true
+            }
+        })
+        promoProductId = promoProduct.id
 
         const pending = await prisma.order.create({
             data: {
@@ -148,6 +163,24 @@ describe('Orders edit (unconfirmed only)', () => {
         expect(itemsAfter[0].quantity).toBe(3)
     })
 
+    it('uses promotional price when editing unconfirmed order items', async () => {
+        const res = await request(app)
+            .put(`/api/admin/orders/${pendingOrderId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .send({
+                customerName: 'Buyer Promo',
+                customerPhone: '0550123456',
+                items: [{ productId: promoProductId, variantId: null, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(200)
+        expect(Number(res.body.totalAmount)).toBe(160)
+        expect(res.body.items).toHaveLength(1)
+        expect(Number(res.body.items[0].price)).toBe(80)
+        expect(res.body.items[0].productId).toBe(promoProductId)
+    })
+
     it('rejects editing for non-PENDING orders', async () => {
         const res = await request(app)
             .put(`/api/admin/orders/${confirmedOrderId}`)
@@ -190,4 +223,3 @@ describe('Orders edit (unconfirmed only)', () => {
         expect(res.status).toBe(403)
     })
 })
-

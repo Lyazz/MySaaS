@@ -15,11 +15,11 @@ describe('installImageErrorFallback', () => {
 
     const cleanup = installImageErrorFallback({
       root,
-      fallbackSrc: '/blank.svg',
+      fallbackSrc: '/blank.svg?v=2',
       treatSrcAsUnavailable: isUnavailablePlaceholder
     })
 
-    expect(img.getAttribute('src')).toBe('/blank.svg')
+    expect(img.getAttribute('src')).toBe('/blank.svg?v=2')
     cleanup()
   })
 
@@ -31,10 +31,10 @@ describe('installImageErrorFallback', () => {
 
     const cleanup = installImageErrorFallback({
       root,
-      fallbackSrc: '/blank.svg'
+      fallbackSrc: '/blank.svg?v=2'
     })
 
-    expect(img.getAttribute('src')).toBe('/blank.svg')
+    expect(img.getAttribute('src')).toBe('/blank.svg?v=2')
     cleanup()
   })
 
@@ -47,11 +47,11 @@ describe('installImageErrorFallback', () => {
 
     const cleanup = installImageErrorFallback({
       root,
-      fallbackSrc: '/blank.svg'
+      fallbackSrc: '/blank.svg?v=2'
     })
 
     img.dispatchEvent(new Event('error'))
-    expect(img.getAttribute('src')).toBe('/blank.svg')
+    expect(img.getAttribute('src')).toBe('/blank.svg?v=2')
     cleanup()
   })
 
@@ -64,14 +64,14 @@ describe('installImageErrorFallback', () => {
 
     const cleanup = installImageErrorFallback({
       root,
-      fallbackSrc: '/blank.svg',
+      fallbackSrc: '/blank.svg?v=2',
       treatSrcAsUnavailable: isUnavailablePlaceholder
     })
 
     img.setAttribute('src', 'https://placehold.co/100x100')
     await new Promise((resolve) => setTimeout(resolve, 0))
 
-    expect(img.getAttribute('src')).toBe('/blank.svg')
+    expect(img.getAttribute('src')).toBe('/blank.svg?v=2')
     cleanup()
   })
 })

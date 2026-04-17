@@ -1,7 +1,7 @@
 import { installImageErrorFallback } from '~/utils/imageFallback'
 
 export default defineNuxtPlugin(() => {
-  const fallbackSrc = '/blank.svg'
+  const fallbackSrc = '/blank.svg?v=2'
 
   // Prefer Nuxt root if present, otherwise whole document.
   const root = (document.getElementById('__nuxt') ?? document) as unknown as ParentNode

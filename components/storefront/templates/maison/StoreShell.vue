@@ -180,7 +180,7 @@ watch(searchQuery, async (q) => {
               </button>
             </div>
             <!-- Results -->
-            <div v-show="isSearchDropdownOpen" class="shell-search-results">
+            <div v-show="isSearchDropdownOpen" class="shell-search-results pointer-events-auto">
               <div v-if="searchLoading" class="shell-search-results__state">Recherche…</div>
               <div v-else-if="searchResults.length === 0" class="shell-search-results__state">Aucun résultat.</div>
               <NuxtLink
@@ -191,7 +191,7 @@ watch(searchQuery, async (q) => {
                 @click="searchOpen = false; searchQuery = ''"
               >
                 <div class="shell-search-results__img">
-                  <img :src="product.images?.[0] || '/blank.svg'" :alt="product.title">
+                  <img :src="product.images?.[0] || '/blank.svg?v=2'" :alt="product.title">
                 </div>
                 <div class="shell-search-results__info">
                   <span class="shell-search-results__name">{{ product.title }}</span>

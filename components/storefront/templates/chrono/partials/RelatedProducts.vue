@@ -8,7 +8,7 @@ const getProductMainImage = (product: any) => {
         const main = product.productImages.find((img: any) => img?.isMain)
         return main?.url || product.productImages[0]?.url
     }
-    return product?.images?.[0] || '/blank.svg'
+    return product?.images?.[0] || '/blank.svg?v=2'
 }
 </script>
 

@@ -33,7 +33,7 @@ const { format: formatPrice } = useCurrency()
 const mainImage = computed(() => {
     if (props.product?.productImages?.length > 0) return props.product.productImages[0].url
     if (props.product?.images?.length > 0) return props.product.images[0]
-    return '/blank.svg'
+    return '/blank.svg?v=2'
 })
 
 const isHovered = ref(false)

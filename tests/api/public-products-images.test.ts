@@ -88,7 +88,7 @@ describe('Public products images payload', () => {
         const noImage = res.body.find((x: any) => x?.slug === noImageProductSlug)
         expect(noImage).toBeTruthy()
         expect(Array.isArray(noImage.images)).toBe(true)
-        expect(noImage.images[0]).toBe('/blank.svg')
+        expect(noImage.images[0]).toBe('/blank.svg?v=2')
     })
 
     it('GET /api/products/:slug includes productImages and derives images when legacy images empty', async () => {
@@ -105,6 +105,6 @@ describe('Public products images payload', () => {
         const res = await request(app).get(`/api/products/${encodeURIComponent(noImageProductSlug)}`).set('Host', host)
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body.images)).toBe(true)
-        expect(res.body.images[0]).toBe('/blank.svg')
+        expect(res.body.images[0]).toBe('/blank.svg?v=2')
     })
 })

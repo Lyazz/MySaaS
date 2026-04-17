@@ -259,7 +259,7 @@
                      >
                         <div class="w-10 h-10 rounded bg-slate-100 overflow-hidden shrink-0">
                            <img 
-                            :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg'" 
+                            :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" 
                             class="w-full h-full object-cover"
                            >
                         </div>

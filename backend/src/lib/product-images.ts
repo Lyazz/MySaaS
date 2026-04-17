@@ -1,4 +1,4 @@
-export const PRODUCT_IMAGE_PLACEHOLDER_URL = '/blank.svg'
+export const PRODUCT_IMAGE_PLACEHOLDER_URL = '/blank.svg?v=2'
 
 const asNonEmptyString = (value: unknown): string | null => {
     if (typeof value !== 'string') return null

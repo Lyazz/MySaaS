@@ -169,7 +169,7 @@ const closeQuickView = () => {
 
           <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-purple-900/30 relative">
             <img
-              :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'"
+              :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'"
               class="w-full h-full object-cover"
             >
           </div>

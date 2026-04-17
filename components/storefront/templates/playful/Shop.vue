@@ -12,7 +12,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true // Non-blocking
 })
 
-const { currencyCode, format: formatCurrency } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 // Dynamic Filters
@@ -54,8 +54,8 @@ const filteredProducts = computed(() => {
     // Filter by Price
     result = result.filter(p => {
         const price = Number(p.price)
-        const minMatches = minPriceInput.value === null || minPriceInput.value === '' ? true : price >= Number(minPriceInput.value)
-        const maxMatches = maxPriceInput.value === null || maxPriceInput.value === '' ? true : price <= Number(maxPriceInput.value)
+        const minMatches = minPriceInput.value == null ? true : price >= Number(minPriceInput.value)
+        const maxMatches = maxPriceInput.value == null ? true : price <= Number(maxPriceInput.value)
         return minMatches && maxMatches
     })
 
@@ -68,6 +68,19 @@ const filteredProducts = computed(() => {
 
     return result
 })
+
+const {
+    currentPage,
+    totalPages,
+    pageNumbers,
+    paginatedProducts,
+    canGoPrev,
+    canGoNext,
+    goToPage,
+    goToPrevPage,
+    goToNextPage
+} = useProductPagination(filteredProducts, 12)
+
 
 const pageTitle = computed(() => {
     const content = storefrontContent.value
@@ -183,8 +196,16 @@ const closeQuickView = () => {
             </div>
           </div>
 
-          <!-- Price Filter (Placeholder removed or kept simple? User said remove all placeholders. Keeping logic minimal or removing mock brands) -->
-                 
+          <div>
+            <h4 class="font-bold text-slate-900 mb-4 text-xs uppercase tracking-wider">
+              {{ storefrontContent.shop.priceRange.label }}
+            </h4>
+            <StorefrontPriceRangeFilter
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+            />
+          </div>
+
           <!-- Apply Button Mobile -->
           <div class="pt-8 mt-4 sticky bottom-0 bg-white pb-safe border-t-2 border-slate-100">
             <button
@@ -223,6 +244,13 @@ const closeQuickView = () => {
           >
             <span class="opacity-80 mr-1">🌟</span> {{ cat.title }}
           </button>
+        </div>
+
+        <div class="mt-6 max-w-2xl">
+          <StorefrontPriceRangeFilter
+            v-model:min-price="minPriceInput"
+            v-model:max-price="maxPriceInput"
+          />
         </div>
       </div>
 
@@ -342,7 +370,7 @@ const closeQuickView = () => {
           >
             <!-- Apply vertical offset to alternating columns for masonry effect -->
             <div 
-              v-for="(product, index) in filteredProducts" 
+              v-for="(product, index) in paginatedProducts" 
               :key="product.id"
               :class="viewMode === 'list' ? '' : (index % 2 === 1 ? 'mt-8 lg:mt-12' : 'mt-0')"
             >
@@ -355,37 +383,17 @@ const closeQuickView = () => {
           </div>
 
                   
-          <!-- Pagination Mock -->
-          <div class="mt-16 flex justify-center">
-            <nav class="flex items-center gap-2 p-1 bg-white rounded-full border border-slate-200 shadow-sm">
-              <button
-                class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-500 disabled:opacity-30 transition-colors"
-                disabled
-              >
-                <Icon name="lucide:chevron-left" class="w-5 h-5" />
-              </button>
-                          
-              <div class="flex items-center px-2 gap-1">
-                <button class="w-10 h-10 rounded-full bg-brand-500 text-white font-black text-sm shadow-md border-b-2 border-brand-700">
-                  1
-                </button>
-                <button class="w-10 h-10 rounded-full hover:bg-slate-50 text-slate-600 font-medium text-sm transition-colors">
-                  2
-                </button>
-                <button class="w-10 h-10 rounded-full hover:bg-slate-50 text-slate-600 font-medium text-sm transition-colors">
-                  3
-                </button>
-                <span class="text-slate-400 px-1">...</span>
-                <button class="w-10 h-10 rounded-full hover:bg-slate-50 text-slate-600 font-medium text-sm transition-colors">
-                  16
-                </button>
-              </div>
+          <StorefrontProductPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :can-go-prev="canGoPrev"
+            :can-go-next="canGoNext"
+            @go-to-page="goToPage"
+            @go-prev="goToPrevPage"
+            @go-next="goToNextPage"
+          />
 
-              <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-600 hover:text-brand-600 transition-colors">
-                <Icon name="lucide:chevron-right" class="w-5 h-5" />
-              </button>
-            </nav>
-          </div>
         </div>
       </div>
     </div>
@@ -410,7 +418,7 @@ const closeQuickView = () => {
               
               <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-gray-100 relative">
                   <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg'" 
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" 
                     class="w-full h-full object-cover"
                   >
               </div>
