@@ -259,8 +259,7 @@
                      >
                         <div class="w-10 h-10 rounded bg-slate-100 overflow-hidden shrink-0">
                            <img 
-                            v-if="product.images && product.images.length > 0" 
-                            :src="product.images[0]" 
+                            :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg'" 
                             class="w-full h-full object-cover"
                            >
                         </div>

@@ -6,6 +6,7 @@ import { SelfDeliveryProvider } from './providers/self.provider'
 import { DELIVERY_PROVIDER_CATALOG, getProviderCatalogItem } from './catalog'
 import { MaystroOrderService } from './maystro/maystro-order.service'
 import { MaystroWebhookService } from './maystro/maystro-webhook.service'
+import { MaystroLocationService } from './maystro/maystro-location.service'
 import { moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
 import { OrdersService } from '../orders/orders.service'
 import type {
@@ -625,8 +626,13 @@ export class DeliveryService {
         const pickupPoint = rawPickupPoint == null ? undefined : Number(rawPickupPoint)
 
         const orderService = new MaystroOrderService(this.prisma)
-
-        const destinationText = [input.addressLine1, input.addressLine2].filter(Boolean).join(', ')
+        const destinationText = await this.buildMaystroDestinationText({
+            apiToken: input.apiToken,
+            wilayaCode: input.wilayaCode,
+            communeCode: input.communeCode,
+            addressLine1: input.addressLine1,
+            addressLine2: input.addressLine2
+        })
 
         const mapping = await orderService.createOrderFromLocalOrder({
             tenantId: input.tenantId,
@@ -659,6 +665,40 @@ export class DeliveryService {
                 tracking: mapping.tracking,
                 success: mapping.success
             }
+        }
+    }
+
+    private async buildMaystroDestinationText(input: {
+        apiToken: string
+        wilayaCode: string
+        communeCode: string
+        addressLine1?: string
+        addressLine2?: string
+    }): Promise<string> {
+        const fromAddress = [input.addressLine1, input.addressLine2]
+            .map((value) => (typeof value === 'string' ? value.trim() : ''))
+            .filter(Boolean)
+            .join(', ')
+        if (fromAddress) return fromAddress
+
+        const fallbackFromCodes = [input.wilayaCode, input.communeCode]
+            .map((value) => (typeof value === 'string' ? value.trim() : ''))
+            .filter(Boolean)
+            .join(', ')
+
+        try {
+            const location = new MaystroLocationService(this.prisma)
+            const resolved = await location.resolveWilayaAndCommune({
+                apiToken: input.apiToken,
+                wilaya: input.wilayaCode,
+                commune: input.communeCode
+            })
+
+            const fromNames = [resolved.wilayaName, resolved.communeName].filter(Boolean).join(', ')
+            return fromNames || fallbackFromCodes
+        } catch {
+            // Do not block shipment creation if location-name lookup fails.
+            return fallbackFromCodes
         }
     }
 

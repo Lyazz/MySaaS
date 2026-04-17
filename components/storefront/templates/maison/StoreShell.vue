@@ -191,8 +191,7 @@ watch(searchQuery, async (q) => {
                 @click="searchOpen = false; searchQuery = ''"
               >
                 <div class="shell-search-results__img">
-                  <img v-if="product.images?.length" :src="product.images[0]" :alt="product.title">
-                  <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" stroke="currentColor" stroke-width="0.5"/></svg>
+                  <img :src="product.images?.[0] || '/blank.svg'" :alt="product.title">
                 </div>
                 <div class="shell-search-results__info">
                   <span class="shell-search-results__name">{{ product.title }}</span>

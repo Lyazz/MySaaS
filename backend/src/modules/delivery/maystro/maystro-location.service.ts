@@ -6,6 +6,12 @@ import { MaystroIntegrationError } from './maystro.errors'
 
 export type MaystroWilaya = { id: number; name: string }
 export type MaystroCommune = { id: number; wilaya: number; name: string; postcode?: string; zone?: string }
+export type ResolvedMaystroLocation = {
+    wilayaId: number
+    wilayaName: string
+    communeId: number
+    communeName: string
+}
 
 type CacheEntry<T> = { value: T; expiresAt: number }
 
@@ -99,8 +105,23 @@ export class MaystroLocationService {
         wilaya: string
         commune: string
     }): Promise<{ wilaya: string | number; commune: string | number }> {
-        const wilayaTrimmed = input.wilaya.trim()
-        const communeTrimmed = input.commune.trim()
+        const resolved = await this.resolveWilayaAndCommune({
+            apiToken: input.apiToken,
+            wilaya: input.wilaya,
+            commune: input.commune
+        })
+
+        // Prefer stable IDs/codes for downstream calls.
+        return { wilaya: resolved.wilayaId, commune: resolved.communeId }
+    }
+
+    async resolveWilayaAndCommune(input: {
+        apiToken?: string
+        wilaya: string | number
+        commune: string | number
+    }): Promise<ResolvedMaystroLocation> {
+        const wilayaTrimmed = String(input.wilaya || '').trim()
+        const communeTrimmed = String(input.commune || '').trim()
         if (!wilayaTrimmed || !communeTrimmed) {
             throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'wilaya and commune are required' })
         }
@@ -125,7 +146,11 @@ export class MaystroLocationService {
             throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'Invalid commune for wilaya' })
         }
 
-        // Prefer stable IDs/codes for downstream calls.
-        return { wilaya: wilayaMatch.id, commune: communeMatch.id }
+        return {
+            wilayaId: wilayaMatch.id,
+            wilayaName: wilayaMatch.name,
+            communeId: communeMatch.id,
+            communeName: communeMatch.name
+        }
     }
 }

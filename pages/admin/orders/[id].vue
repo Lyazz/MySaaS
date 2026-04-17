@@ -724,7 +724,7 @@
                     {{ t('admin.pages.orders.detail.fields.wilayaCommune', 'Wilaya/Commune') }}
                   </dt>
                   <dd class="text-slate-900 font-medium">
-                    {{ [order.shippingWilayaCode, order.shippingCommuneCode].filter(Boolean).join(' / ') }}
+                    {{ shippingWilayaCommuneLabel }}
                   </dd>
                 </div>
               </dl>
@@ -1048,6 +1048,7 @@ import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import DeliveryPaymentModal from '~/components/cash/DeliveryPaymentModal.vue'
+import { DZ_WILAYAS } from '~/shared/geo/dz'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 
 definePageMeta({
@@ -1216,6 +1217,83 @@ function orderStatusLabel(code: string) {
     if (!o) return false
     return o.shippingProvider === 'MAYSTRO' && o.status === 'CONFIRMED' && (!o.shipments || o.shipments.length === 0)
   })
+
+  const wilayaNameByCode = new Map(DZ_WILAYAS.map((w) => [w.code, w.name]))
+  const communeNameCache = useState<Record<string, string>>('admin-order-commune-names', () => ({}))
+  const shippingCommuneLabel = ref('')
+  let shippingLocationResolveId = 0
+
+  const normalizeWilayaCode = (value: unknown): string => {
+    const raw = String(value || '').trim()
+    if (!raw) return ''
+    if (/^\d+$/.test(raw)) return raw.padStart(2, '0')
+    return raw
+  }
+
+  const shippingWilayaLabel = computed(() => {
+    const raw = String(order.value?.shippingWilayaCode || '').trim()
+    if (!raw) return ''
+    return wilayaNameByCode.get(normalizeWilayaCode(raw)) || raw
+  })
+
+  const shippingWilayaCommuneLabel = computed(() => {
+    const parts = [shippingWilayaLabel.value, shippingCommuneLabel.value].filter(Boolean)
+    if (parts.length > 0) return parts.join(' / ')
+    return [order.value?.shippingWilayaCode, order.value?.shippingCommuneCode].filter(Boolean).join(' / ')
+  })
+
+  watch(
+    () => [order.value?.shippingWilayaCode ?? '', order.value?.shippingCommuneCode ?? ''] as const,
+    async ([wilayaCode, communeCode]) => {
+      const currentResolveId = ++shippingLocationResolveId
+
+      const communeRaw = String(communeCode || '').trim()
+      if (!communeRaw) {
+        shippingCommuneLabel.value = ''
+        return
+      }
+
+      if (!/^\d+$/.test(communeRaw)) {
+        shippingCommuneLabel.value = communeRaw
+        return
+      }
+
+      const normalizedWilayaCode = String(wilayaCode || '').trim()
+      if (!normalizedWilayaCode) {
+        shippingCommuneLabel.value = communeRaw
+        return
+      }
+
+      const cacheKey = `${normalizeWilayaCode(normalizedWilayaCode)}:${communeRaw}`
+      const cached = communeNameCache.value[cacheKey]
+      if (cached) {
+        shippingCommuneLabel.value = cached
+        return
+      }
+
+      try {
+        const communes = await $fetch<Array<{ id?: number | string; name?: string }>>('/api/delivery/maystro/communes', {
+          query: { wilaya: normalizedWilayaCode }
+        })
+
+        if (currentResolveId !== shippingLocationResolveId) return
+
+        const matched = Array.isArray(communes)
+          ? communes.find((c) => String(c?.id ?? '').trim() === communeRaw)
+          : null
+        const resolved = typeof matched?.name === 'string' && matched.name.trim().length > 0
+          ? matched.name.trim()
+          : communeRaw
+
+        communeNameCache.value[cacheKey] = resolved
+        shippingCommuneLabel.value = resolved
+      } catch {
+        if (currentResolveId !== shippingLocationResolveId) return
+        shippingCommuneLabel.value = communeRaw
+      }
+    },
+    { immediate: true }
+  )
 
   function deliveryModeLabel(mode: any) {
     const raw = typeof mode === 'string' ? mode.trim().toLowerCase() : ''

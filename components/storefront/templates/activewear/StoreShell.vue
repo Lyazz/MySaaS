@@ -150,10 +150,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                         class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
                         @click="isSearchDropdownOpen = false"
                       >
-                        <img v-if="product.images && product.images.length > 0" :src="product.images[0]" class="w-10 h-10 object-cover rounded shadow-sm" />
-                        <div v-else class="w-10 h-10 bg-slate-100 rounded flex items-center justify-center">
-                           <Icon name="lucide:image" class="w-4 h-4 text-slate-300" />
-                        </div>
+                        <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg'" class="w-10 h-10 object-cover rounded shadow-sm" />
                         <div class="flex-1 min-w-0">
                           <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
                           <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
@@ -279,10 +276,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                       class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
-                      <img v-if="product.images && product.images.length > 0" :src="product.images[0]" class="w-10 h-10 object-cover rounded shadow-sm" />
-                      <div v-else class="w-10 h-10 bg-slate-100 rounded flex items-center justify-center">
-                         <Icon name="lucide:image" class="w-4 h-4 text-slate-300" />
-                      </div>
+                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg'" class="w-10 h-10 object-cover rounded shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
                         <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>

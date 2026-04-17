@@ -232,10 +232,7 @@ const props = defineProps<{
                       style="border-bottom: 1px solid rgba(212,197,169,0.06);"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
-                      <img v-if="product.images && product.images.length > 0" :src="product.images[0]" class="w-10 h-10 object-cover rounded shadow-sm" />
-                      <div v-else class="w-10 h-10 rounded flex items-center justify-center" style="background-color: #252B3B;">
-                         <Icon name="lucide:image" class="w-4 h-4" style="color: #6B7280;" />
-                      </div>
+                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg'" class="w-10 h-10 object-cover rounded shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium truncate" style="color: #E8E0D5;">{{ product.title }}</div>
                         <div class="text-xs font-bold mt-0.5" style="color: #A67C52;">{{ product.price }} {{ currencyCode }}</div>
