@@ -10,11 +10,11 @@
 
     <!-- Sidebar -->
     <aside :class="[
-      'flex flex-col z-30 relative shrink-0',
-      'fixed inset-y-0 left-0 lg:static transition-all duration-300',
+      'flex flex-col z-30 shrink-0',
+      'fixed inset-y-0 left-0 lg:relative transition-all duration-300',
       sidebarOpen
         ? 'translate-x-0 w-[220px]'
-        : '-translate-x-full lg:translate-x-0 lg:w-[60px]'
+        : '-translate-x-full w-[200px] lg:translate-x-0 lg:w-[60px]'
     ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
 
       <!-- Logo -->

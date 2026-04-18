@@ -86,8 +86,10 @@ export const resolveImageUploadPolicy = (input: ImageUploadPolicyInput = {}): Im
 
 export const bytesFromMb = (mb: number): number => Math.max(0, Math.floor(mb * 1024 * 1024))
 
-export const isAllowedImageMimeType = (mimeType: string, allowed = ALLOWED_IMAGE_MIME_TYPES): boolean =>
-    allowed.includes(mimeType as AllowedImageMimeType)
+export const isAllowedImageMimeType = (
+    mimeType: string,
+    allowed: ReadonlyArray<string> = ALLOWED_IMAGE_MIME_TYPES
+): boolean => allowed.includes(mimeType)
 
 export const formatMaxFileSizeLabel = (mb: number): string => `${mb} MB`
 

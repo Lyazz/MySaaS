@@ -1,10 +1,10 @@
 <template>
   <div class="max-w-7xl mx-auto space-y-6">
     <div>
-      <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+      <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
         {{ t('admin.pages.integrations.title') }}
       </h2>
-      <p class="mt-1 text-slate-600">
+      <p class="mt-1" style="color: var(--text-secondary)">
         {{ t('admin.pages.integrations.subtitle') }}
       </p>
     </div>

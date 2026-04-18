@@ -192,24 +192,25 @@
             <ul class="space-y-3 mb-8 flex-1">
               <li class="flex items-start gap-2">
                 <Icon name="lucide:check" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
-                <span class="text-sm text-slate-700 font-medium">
+                <span class="text-sm font-medium" style="color: var(--text-secondary)">
                   {{ plan.ordersPerMonth === -1 ? t('admin.pages.billing.unlimitedOrders', 'Unlimited Orders') : t('admin.pages.billing.upToOrders', { count: formatLimit(plan.ordersPerMonth) }, `Up to {count} orders/mo`) }}
                 </span>
               </li>
               <!-- Example of static robust features based on plans (could be dynamic in real apps) -->
               <li class="flex items-start gap-2" v-if="plan.code !== 'basic'">
                 <Icon name="lucide:check" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
-                <span class="text-sm text-slate-700 font-medium">{{ t('admin.pages.billing.prioritySupport', 'Priority support') }}</span>
+                <span class="text-sm font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.billing.prioritySupport', 'Priority support') }}</span>
               </li>
               <li class="flex items-start gap-2" v-if="plan.code === 'premium'">
                 <Icon name="lucide:check" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
-                <span class="text-sm text-slate-700 font-medium">{{ t('admin.pages.billing.customBranding', 'Custom branding & SMS config') }}</span>
+                <span class="text-sm font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.billing.customBranding', 'Custom branding & SMS config') }}</span>
               </li>
             </ul>
 
             <div 
               class="w-full py-2.5 rounded-xl border flex items-center justify-center font-bold text-sm transition-colors"
-              :class="plan.code === selectedPlanCode ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-slate-50 border-slate-200 text-slate-500 group-hover:bg-slate-100'"
+              :class="plan.code === selectedPlanCode ? 'text-teal-400' : ''"
+              :style="plan.code === selectedPlanCode ? 'background: rgba(20,184,166,0.1); border-color: var(--brand)' : 'background: var(--surface-2); border-color: var(--surface-border); color: var(--text-tertiary)'"
             >
               {{ plan.code === selectedPlanCode ? t('admin.pages.billing.selectedBtn', 'Selected') : t('admin.pages.billing.selectBtn', 'Select Plan') }}
             </div>
@@ -221,17 +222,17 @@
         <div id="checkout-section" class="lg:col-span-5 w-full sticky top-6">
           <!-- Checkout / Payment Flow Section -->
           <div v-if="selectedPlanCode && selectedPlanCode !== snapshot?.subscription?.planCode" class="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div class="w-full bg-white border border-slate-200 shadow-lg shadow-slate-200/40 rounded-2xl overflow-hidden text-left">
-            <div class="bg-slate-50 border-b border-slate-100 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="w-full rounded-2xl overflow-hidden text-left" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.3)">
+            <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4" style="background: var(--surface-2); border-bottom: 1px solid var(--surface-border)">
               <div>
-                <h3 class="text-xl font-bold text-slate-900">{{ t('admin.pages.billing.payment.title', 'Complete your upgrade') }}</h3>
-                <p class="text-sm text-slate-500 mt-1">{{ t('admin.pages.billing.payment.subtitle', 'Select a payment method to proceed.') }}</p>
+                <h3 class="text-xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.billing.payment.title', 'Complete your upgrade') }}</h3>
+                <p class="text-sm mt-1" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.subtitle', 'Select a payment method to proceed.') }}</p>
               </div>
               <div class="text-right">
-                <div class="text-sm text-slate-500 font-semibold mb-1">{{ t('admin.pages.billing.payment.totalLabel', 'Total to pay') }}</div>
-                <div class="text-2xl font-black text-slate-900">
+                <div class="text-sm font-semibold mb-1" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.totalLabel', 'Total to pay') }}</div>
+                <div class="text-2xl font-black" style="color: var(--text-primary)">
                   {{ formatDzd(billingInterval === 'year' ? (plans.find(p => p.code === selectedPlanCode)?.pricing?.annualAmountDzd || 0) * 12 : plans.find(p => p.code === selectedPlanCode)?.pricing?.monthlyAmountDzd) }}
-                  <span class="text-xs text-slate-500 uppercase">{{ plans.find(p => p.code === selectedPlanCode)?.pricing?.currency || 'DZD' }}</span>
+                  <span class="text-xs uppercase" style="color: var(--text-tertiary)">{{ plans.find(p => p.code === selectedPlanCode)?.pricing?.currency || 'DZD' }}</span>
                 </div>
               </div>
             </div>
@@ -241,49 +242,49 @@
               <div class="grid grid-cols-2 gap-4">
                 <label v-for="method in availableMethods" :key="method.id" class="cursor-pointer relative group">
                   <input type="radio" v-model="selectedMethod" :value="method.id" class="peer sr-only" />
-                  <div class="h-full flex flex-col items-center justify-center p-4 rounded-xl border-2 bg-white hover:border-teal-300 peer-checked:border-teal-500 peer-checked:bg-teal-50 transition-all">
-                    <!-- Placeholder icons based on method (in real app add logos) -->
-                    <Icon v-if="method.id === 'MYFIN'" name="lucide:credit-card" class="w-8 h-8 mb-2 text-slate-400 group-hover:text-teal-500 peer-checked:text-teal-600 transition-colors" />
-                    <Icon v-else-if="method.id === 'PAYSERA'" name="lucide:euro" class="w-8 h-8 mb-2 text-slate-400 group-hover:text-teal-500 peer-checked:text-teal-600 transition-colors" />
-                    <Icon v-else-if="method.id === 'BARIDIMOB'" name="lucide:smartphone" class="w-8 h-8 mb-2 text-slate-400 group-hover:text-teal-500 peer-checked:text-teal-600 transition-colors" />
-                    <Icon v-else-if="method.id === 'CCP'" name="lucide:building" class="w-8 h-8 mb-2 text-slate-400 group-hover:text-teal-500 peer-checked:text-teal-600 transition-colors" />
-                    <Icon v-else name="lucide:credit-card" class="w-8 h-8 mb-2 text-slate-400 group-hover:text-teal-500 peer-checked:text-teal-600 transition-colors" />
-                    
-                    <div class="text-xs font-bold text-center text-slate-700 peer-checked:text-teal-800">{{ method.label }}</div>
+                  <div class="h-full flex flex-col items-center justify-center p-4 rounded-xl border-2 hover:border-teal-300 peer-checked:border-teal-500 peer-checked:bg-teal-500/10 transition-all" style="background: var(--surface-3); border-color: var(--surface-border)">
+                    <Icon v-if="method.id === 'MYFIN'" name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else-if="method.id === 'PAYSERA'" name="lucide:euro" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else-if="method.id === 'BARIDIMOB'" name="lucide:smartphone" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else-if="method.id === 'CCP'" name="lucide:building" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
+
+                    <div class="text-xs font-bold text-center peer-checked:text-teal-400 transition-colors" style="color: var(--text-secondary)">{{ method.label }}</div>
                   </div>
                   <!-- Check badge -->
-                  <div class="absolute -top-2 -right-2 w-6 h-6 bg-teal-500 text-white rounded-full flex items-center justify-center border-2 border-white opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all shadow-md">
+                  <div class="absolute -top-2 -right-2 w-6 h-6 bg-teal-500 text-white rounded-full flex items-center justify-center border-2 opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all shadow-md" style="border-color: var(--surface-1)">
                     <Icon name="lucide:check" class="w-3.5 h-3.5" />
                   </div>
                 </label>
               </div>
 
               <!-- Selected Method Details -->
-              <div v-if="selectedMethod" class="bg-slate-50/80 p-6 rounded-xl border border-slate-100 space-y-5">
+              <div v-if="selectedMethod" class="p-6 rounded-xl space-y-5" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                 <div class="flex gap-4">
-                  <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background: rgba(59,130,246,0.15); color: #60a5fa">
                     <Icon name="lucide:info" class="w-5 h-5" />
                   </div>
-                  <div class="text-sm text-slate-700 whitespace-pre-line leading-relaxed flex-1 pt-1" v-html="methodInstructions"></div>
+                  <div class="text-sm whitespace-pre-line leading-relaxed flex-1 pt-1" style="color: var(--text-secondary)" v-html="methodInstructions"></div>
                 </div>
-                
-                <div v-if="requiresProof(selectedMethod)" class="pt-4 border-t border-slate-200">
-                  <label class="block text-sm font-bold text-slate-700 mb-3">{{ t('admin.pages.billing.payment.uploadProof', 'Upload Receipt/Proof') }}</label>
+
+                <div v-if="requiresProof(selectedMethod)" class="pt-4" style="border-top: 1px solid var(--surface-border)">
+                  <label class="ui-label block mb-3">{{ t('admin.pages.billing.payment.uploadProof', 'Upload Receipt/Proof') }}</label>
                   
                   <div class="flex items-center justify-center w-full">
                     <label 
                       class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors"
-                      :class="uploadError ? 'border-red-300 bg-red-50 hover:bg-red-100' : proofUrl ? 'border-green-300 bg-green-50 hover:bg-green-100' : 'border-slate-300 bg-white hover:bg-slate-50'"
+                      :class="uploadError ? 'border-red-500/50 hover:bg-red-500/5' : proofUrl ? 'border-green-500/50 hover:bg-green-500/5' : 'hover:border-teal-500/40'"
+                      :style="!uploadError && !proofUrl ? 'border-color: var(--surface-border); background: var(--surface-3)' : uploadError ? 'background: rgba(239,68,68,0.05)' : 'background: rgba(34,197,94,0.05)'"
                     >
                       <div class="flex flex-col items-center justify-center pt-5 pb-6">
                         <Icon v-if="uploading" name="lucide:loader-2" class="w-8 h-8 text-teal-500 mb-2 animate-spin" />
                         <Icon v-else-if="proofUrl" name="lucide:file-check" class="w-8 h-8 text-green-500 mb-2" />
                         <Icon v-else name="lucide:upload-cloud" class="w-8 h-8 text-slate-400 mb-2" />
                         
-                        <p class="mb-1 text-sm font-semibold" :class="proofUrl ? 'text-green-700' : 'text-slate-600'">
+                        <p class="mb-1 text-sm font-semibold" :class="proofUrl ? 'text-emerald-400' : ''" :style="!proofUrl ? 'color: var(--text-secondary)' : ''">
                           {{ uploading ? t('admin.common.uploading', 'Uploading...') : proofUrl ? t('admin.pages.billing.payment.uploadSuccess', 'Receipt attached successfully') : t('admin.common.clickToUpload', 'Click to upload receipt') }}
                         </p>
-                        <p v-if="!proofUrl && !uploading" class="text-xs text-slate-500">PNG, JPG, WEBP, PDF (Max 10MB)</p>
+                        <p v-if="!proofUrl && !uploading" class="text-xs" style="color: var(--text-muted)">PNG, JPG, WEBP, PDF (Max 10MB)</p>
                       </div>
                       <input 
                         type="file" 
@@ -333,12 +334,12 @@
           </div>
         </div>
         <!-- Empty State -->
-        <div v-else class="bg-white border border-slate-100 shadow-sm rounded-2xl p-10 flex flex-col items-center justify-center text-center h-[350px]">
-          <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-            <Icon name="lucide:credit-card" class="w-8 h-8 text-slate-300" />
+        <div v-else class="rounded-2xl p-10 flex flex-col items-center justify-center text-center h-[350px]" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4" style="background: var(--surface-3)">
+            <Icon name="lucide:credit-card" class="w-8 h-8" style="color: var(--text-muted)" />
           </div>
-          <h3 class="text-xl font-bold text-slate-800">{{ t('admin.pages.billing.payment.emptyTitle', 'Checkout') }}</h3>
-          <p class="text-slate-500 mt-2 text-sm">{{ t('admin.pages.billing.payment.emptyDesc', 'Select a plan from the list to start your upgrade.') }}</p>
+          <h3 class="text-xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.billing.payment.emptyTitle', 'Checkout') }}</h3>
+          <p class="mt-2 text-sm" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.emptyDesc', 'Select a plan from the list to start your upgrade.') }}</p>
         </div>
 
         </div> <!-- Close Right Side -->
@@ -347,14 +348,14 @@
 
     <!-- Payment History -->
     <div v-if="paymentHistory.length > 0" class="mt-2">
-      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
-          <h2 class="font-semibold text-slate-800">{{ t('admin.pages.billing.history.title', 'Payment history') }}</h2>
-          <span class="text-xs text-slate-400">{{ paymentHistory.length }} {{ t('admin.pages.billing.history.entries', 'entries') }}</span>
+      <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+        <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
+          <h2 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.billing.history.title', 'Payment history') }}</h2>
+          <span class="text-xs" style="color: var(--text-muted)">{{ paymentHistory.length }} {{ t('admin.pages.billing.history.entries', 'entries') }}</span>
         </div>
         <div class="overflow-x-auto">
           <table class="ui-table">
-            <thead class="ui-thead border-b border-slate-200">
+            <thead class="ui-thead" style="border-bottom: 1px solid var(--surface-border)">
               <tr>
                 <th class="ui-th">{{ t('admin.pages.billing.history.col.date', 'Date') }}</th>
                 <th class="ui-th">{{ t('admin.pages.billing.history.col.plan', 'Plan') }}</th>
@@ -366,13 +367,13 @@
             </thead>
             <tbody class="ui-tbody">
               <tr v-for="pay in paymentHistory" :key="pay.id" class="ui-tr">
-                <td class="ui-td text-sm text-slate-600 whitespace-nowrap">{{ formatPayDate(pay.createdAt) }}</td>
+                <td class="ui-td text-sm whitespace-nowrap" style="color: var(--text-secondary)">{{ formatPayDate(pay.createdAt) }}</td>
                 <td class="ui-td">
-                  <div class="text-sm font-semibold text-slate-800 capitalize">{{ pay.planCode }}</div>
-                  <div class="text-xs text-slate-400">{{ pay.interval }}</div>
+                  <div class="text-sm font-semibold capitalize" style="color: var(--text-primary)">{{ pay.planCode }}</div>
+                  <div class="text-xs" style="color: var(--text-muted)">{{ pay.interval }}</div>
                 </td>
-                <td class="ui-td text-sm font-semibold text-slate-700 whitespace-nowrap">{{ formatDzd(pay.amountDzd) }} {{ pay.currency }}</td>
-                <td class="ui-td text-xs font-semibold text-slate-500 uppercase">{{ pay.method }}</td>
+                <td class="ui-td text-sm font-semibold whitespace-nowrap" style="color: var(--text-secondary)">{{ formatDzd(pay.amountDzd) }} {{ pay.currency }}</td>
+                <td class="ui-td text-xs font-semibold uppercase" style="color: var(--text-tertiary)">{{ pay.method }}</td>
                 <td class="ui-td">
                   <span
                     class="ui-badge"
@@ -390,13 +391,13 @@
                   <button
                     v-if="pay.proofUrl"
                     type="button"
-                    class="text-teal-700 hover:underline font-semibold inline-flex items-center gap-1"
+                    class="text-teal-400 hover:underline font-semibold inline-flex items-center gap-1"
                     @click="openPaymentProof(pay)"
                   >
                     <Icon name="lucide:external-link" class="w-3.5 h-3.5" />
                     {{ t('admin.pages.billing.history.viewProof', 'View') }}
                   </button>
-                  <span v-else class="text-slate-300">—</span>
+                  <span v-else style="color: var(--text-muted)">—</span>
                 </td>
               </tr>
             </tbody>
