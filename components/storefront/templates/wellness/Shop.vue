@@ -15,6 +15,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Dynamic Filters
 const filters = computed(() => ({
     categories: categoryData.value || [],
@@ -27,7 +33,20 @@ const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
-const priceRange = ref({ min: 0, max: 200000 })
+const priceRange = computed(() => {
+    const prices = props.products
+        .map((product) => Number(product?.price))
+        .filter((price): price is number => Number.isFinite(price))
+
+    if (prices.length === 0) {
+        return { min: 0, max: 0 }
+    }
+
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+    }
+})
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
 
@@ -42,7 +61,7 @@ const filteredProducts = computed(() => {
     // Filter by Category
     if (selectedCategories.value.length > 0) {
         const selectedIds = selectedCategories.value 
-        result = result.filter(p => selectedIds.includes(p.categoryId))
+        result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
 
     // Filter by Search
@@ -191,7 +210,7 @@ const closeQuickView = () => {
                     class="peer h-5 w-5 rounded-md border-stone-300 text-stone-800 focus:ring-stone-500 transition-all checked:bg-stone-800 checked:border-transparent bg-white" 
                   >
                 </div>
-                <span class="text-base text-stone-600 group-hover:text-stone-900 transition-colors font-medium">{{ cat.title }}</span>
+                <span class="text-base text-stone-600 group-hover:text-stone-900 transition-colors font-medium">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -200,6 +219,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -274,7 +296,7 @@ const closeQuickView = () => {
                         class="peer h-4 w-4 rounded border-stone-300 text-stone-800 focus:ring-stone-500 transition-all checked:bg-stone-800 checked:border-transparent bg-stone-50" 
                       >
                     </div>
-                    <span class="text-sm text-stone-600 group-hover:text-stone-900 transition-colors font-medium">{{ cat.title }}</span>
+                    <span class="text-sm text-stone-600 group-hover:text-stone-900 transition-colors font-medium">{{ categoryDisplayTitle(cat) }}</span>
                   </label>
                 </div>
               </div>
@@ -287,6 +309,9 @@ const closeQuickView = () => {
                 <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
               </div>
             </div>
@@ -331,7 +356,7 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-full text-sm font-medium shadow-sm transition-all hover:-translate-y-0.5"
               >
-                  <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
+                  <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
                   <button @click="removeCategory(catId)" class="hover:text-stone-300 transition-colors">
                       <Icon name="lucide:x" class="w-3.5 h-3.5" />
                   </button>

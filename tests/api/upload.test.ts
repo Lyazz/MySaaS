@@ -153,6 +153,24 @@ describe('Upload API (Tenant Admin)', async () => {
         expect(body.url).toContain(tenantId)
     })
 
+    it('rejects oversized files (>5MB) with a stable message', async () => {
+        const oversized = Buffer.alloc(5 * 1024 * 1024 + 1, 0xff)
+        const mp = buildMultipart({ filename: 'too-large.png', contentType: 'image/png', data: oversized })
+
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': mp.contentType
+            },
+            body: mp.body
+        })
+
+        const body = await res.json()
+        expect(res.status).toBe(400)
+        expect(body.error).toBe('Image must be less than 5 MB')
+    })
+
     it('rejects unsupported file types', async () => {
         // Send a GIF which is not in the allowed list
         const gifBuffer = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]) // GIF89a header

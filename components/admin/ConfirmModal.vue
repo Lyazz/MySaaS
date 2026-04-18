@@ -8,44 +8,47 @@
       <div class="flex items-center justify-center min-h-screen px-4">
         <!-- Overlay -->
         <div
-          class="fixed inset-0 bg-black opacity-50"
+          class="fixed inset-0 bg-black/70 backdrop-blur-sm"
           @click="handleCancel"
         />
 
         <!-- Modal -->
-        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 z-10">
+        <div class="relative rounded-2xl max-w-md w-full p-6 z-10" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
           <!-- Icon -->
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <Icon name="lucide:alert-triangle" class="h-6 w-6 text-red-600" />
+          <div class="mx-auto flex items-center justify-center h-11 w-11 rounded-xl mb-4" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2)">
+            <Icon name="lucide:alert-triangle" class="h-5 w-5 text-red-400" />
           </div>
 
           <!-- Title -->
-          <h3 class="text-lg font-medium text-gray-900 text-center mb-2">
+          <h3 class="text-[15px] font-semibold text-center mb-2" style="color: var(--text-primary)">
             {{ resolvedTitle }}
           </h3>
 
           <!-- Message -->
-          <p class="text-sm text-gray-500 text-center mb-4">
+          <p class="text-[13px] text-center mb-4" style="color: var(--text-secondary)">
             {{ resolvedMessage }}
           </p>
 
           <!-- Inline error -->
-          <div v-if="error" class="mb-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div v-if="error" class="mb-4 rounded-xl px-4 py-3 text-sm text-red-400" style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.18)">
             {{ error }}
           </div>
 
           <!-- Actions -->
-          <div class="flex space-x-3">
+          <div class="flex gap-2.5">
             <button
               type="button"
-              class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+              class="flex-1 ui-btn ui-btn--secondary ui-btn--md"
               @click="handleCancel"
             >
               {{ resolvedCancelText }}
             </button>
             <button
               type="button"
-              class="flex-1 px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              class="flex-1 ui-btn ui-btn--md"
+              style="background: rgb(220,38,38); color: #fff; border: 1px solid transparent"
+              @mouseenter="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = 'rgb(185,28,28)'"
+              @mouseleave="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = 'rgb(220,38,38)'"
               @click="handleConfirm"
             >
               {{ resolvedConfirmText }}

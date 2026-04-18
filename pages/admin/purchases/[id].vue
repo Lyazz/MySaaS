@@ -6,18 +6,18 @@
         <div class="flex items-center gap-2 mb-2">
           <NuxtLink
             to="/admin/purchases"
-            class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            class="text-sm font-medium hover:text-white transition-colors" style="color: var(--text-tertiary)"
           >
             {{ t('admin.nav.purchases') }}
           </NuxtLink>
           <Icon
             name="lucide:chevron-right"
-            class="w-4 h-4 text-slate-400"
+            class="w-4 h-4" style="color: var(--text-muted)"
           />
-          <span class="text-sm font-medium text-slate-900">{{ t('admin.pages.purchases.detail.breadcrumb', { id: purchaseId.slice(0, 8) }) }}</span>
+          <span class="text-sm font-medium" style="color: var(--text-primary)">{{ t('admin.pages.purchases.detail.breadcrumb', { id: purchaseId.slice(0, 8) }) }}</span>
         </div>
         <div class="flex items-center gap-3">
-          <h2 class="text-2xl font-bold text-slate-900">
+          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
             {{ t('admin.pages.purchases.detail.title') }}
           </h2>
           <span :class="getStatusClass(order?.status || '')">
@@ -41,7 +41,7 @@
         </button>
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          class="ui-btn ui-btn--secondary text-sm"
           :disabled="loading"
           @click="fetchOrder"
         >
@@ -81,20 +81,20 @@
     <!-- Info Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Supplier Info -->
-      <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
+      <div class="rounded-lg p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+        <h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--text-tertiary)">
           {{ t('admin.pages.purchases.detail.cards.supplier') }}
         </h3>
         <div
           v-if="order?.supplier"
           class="space-y-2"
         >
-          <div class="text-lg font-medium text-slate-900">
+          <div class="text-lg font-medium" style="color: var(--text-primary)">
             {{ order.supplier.name }}
           </div>
           <div
             v-if="order.supplier.email"
-            class="text-sm text-slate-600 flex items-center gap-2"
+            class="text-sm flex items-center gap-2" style="color: var(--text-secondary)"
           >
             <Icon
               name="lucide:mail"
@@ -103,7 +103,7 @@
           </div>
           <div
             v-if="order.supplier.phone"
-            class="text-sm text-slate-600 flex items-center gap-2"
+            class="text-sm flex items-center gap-2" style="color: var(--text-secondary)"
           >
             <Icon
               name="lucide:phone"
@@ -113,55 +113,55 @@
         </div>
         <div
           v-else
-          class="text-sm text-slate-500 italic"
+          class="text-sm italic" style="color: var(--text-tertiary)"
         >
           {{ t('admin.pages.purchases.detail.cards.noSupplier') }}
         </div>
       </div>
       
       <!-- Order Summary -->
-      <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
+      <div class="rounded-lg p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+        <h3 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--text-tertiary)">
           {{ t('admin.pages.purchases.detail.cards.summary') }}
         </h3>
         <div class="space-y-2">
           <div class="flex justify-between text-sm">
-            <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.itemsOrdered') }}:</span>
-            <span class="font-medium text-slate-900">{{ totalOrdered }}</span>
+            <span style="color: var(--text-secondary)">{{ t('admin.pages.purchases.detail.cards.itemsOrdered') }}:</span>
+            <span class="font-medium" style="color: var(--text-primary)">{{ totalOrdered }}</span>
           </div>
           <div class="flex justify-between text-sm">
-            <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.itemsReceived') }}:</span>
+            <span style="color: var(--text-secondary)">{{ t('admin.pages.purchases.detail.cards.itemsReceived') }}:</span>
             <span
               class="font-medium"
               :class="totalReceived === totalOrdered ? 'text-green-600' : 'text-orange-600'"
             >{{ totalReceived }}</span>
           </div>
-          <div class="flex justify-between text-sm pt-2 border-t border-slate-100">
-            <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.estimatedTotal') }}:</span>
-            <span class="font-medium text-slate-900">{{ formatCurrency(Number(order?.totalAmount || totalCost)) }}</span>
+          <div class="flex justify-between text-sm pt-2" style="border-top: 1px solid var(--surface-border)">
+            <span style="color: var(--text-secondary)">{{ t('admin.pages.purchases.detail.cards.estimatedTotal') }}:</span>
+            <span class="font-medium" style="color: var(--text-primary)">{{ formatCurrency(Number(order?.totalAmount || totalCost)) }}</span>
           </div>
           <div class="flex justify-between text-sm">
-            <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.paidAmount', 'Paid Amount') }}:</span>
+            <span style="color: var(--text-secondary)">{{ t('admin.pages.purchases.detail.cards.paidAmount', 'Paid Amount') }}:</span>
             <span class="font-medium text-emerald-600">{{ formatCurrency(Number(order?.paidAmount || 0)) }}</span>
           </div>
-          <div class="flex justify-between text-sm pt-2 border-t border-slate-100">
-            <span class="text-slate-600">{{ t('admin.pages.purchases.detail.cards.balance', 'Balance') }}:</span>
-            <span class="font-medium text-slate-900">{{ formatCurrency(Number(order?.totalAmount || totalCost) - Number(order?.paidAmount || 0)) }}</span>
+          <div class="flex justify-between text-sm pt-2" style="border-top: 1px solid var(--surface-border)">
+            <span style="color: var(--text-secondary)">{{ t('admin.pages.purchases.detail.cards.balance', 'Balance') }}:</span>
+            <span class="font-medium" style="color: var(--text-primary)">{{ formatCurrency(Number(order?.totalAmount || totalCost) - Number(order?.paidAmount || 0)) }}</span>
           </div>
-          <div class="flex justify-between text-sm pt-2 border-t border-slate-100">
-            <span class="text-slate-600">{{ t('admin.pages.purchases.index.table.user') }}:</span>
-            <span class="font-medium text-slate-900">{{ order?.createdByEmail || 'System' }}</span>
+          <div class="flex justify-between text-sm pt-2" style="border-top: 1px solid var(--surface-border)">
+            <span style="color: var(--text-secondary)">{{ t('admin.pages.purchases.index.table.user') }}:</span>
+            <span class="font-medium" style="color: var(--text-primary)">{{ order?.createdByEmail || 'System' }}</span>
           </div>
         </div>
       </div>
 
       <!-- Actions/Notes (Placeholder for future) -->
-      <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-center items-center text-center">
+      <div class="rounded-lg p-6 flex flex-col justify-center items-center text-center" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <Icon
           name="lucide:file-text"
-          class="w-8 h-8 text-slate-300 mb-2"
+          class="w-8 h-8 mb-2" style="color: var(--text-muted)"
         />
-        <p class="text-sm text-slate-500">
+        <p class="text-sm" style="color: var(--text-tertiary)">
           {{ t('admin.pages.purchases.detail.cards.notesPlaceholder') }}
         </p>
       </div>
@@ -169,9 +169,9 @@
 
 
     <!-- Order Items -->
-    <div class="bg-white rounded-lg shadow overflow-hidden border border-slate-200">
-      <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-        <h3 class="font-medium text-slate-900">
+    <div class="rounded-lg overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="px-6 py-4 flex justify-between items-center" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
+        <h3 class="font-medium" style="color: var(--text-primary)">
           {{ t('admin.pages.purchases.detail.items.title') }}
         </h3>
         <div class="flex items-center gap-3">
@@ -184,13 +184,13 @@
           >
             {{ t('admin.common.receiveAll', 'Receive All') }}
           </button>
-          <span class="text-sm text-slate-500">{{ t('admin.pages.purchases.detail.items.count', { count: order?.items?.length || 0 }) }}</span>
+          <span class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.pages.purchases.detail.items.count', { count: order?.items?.length || 0 }) }}</span>
         </div>
       </div>
 
       <div
         v-if="loading && !order"
-        class="p-12 text-center text-sm text-slate-600"
+        class="p-12 text-center text-sm" style="color: var(--text-secondary)"
       >
         {{ t('admin.pages.purchases.detail.items.loading') }}
       </div>
@@ -200,12 +200,12 @@
       >
         <Icon
           name="lucide:shopping-cart"
-          class="mx-auto h-12 w-12 text-slate-300 mb-3"
+          class="mx-auto h-12 w-12 mb-3" style="color: var(--text-muted)"
         />
-        <h3 class="text-slate-900 font-medium mb-1">
+        <h3 class="font-medium mb-1" style="color: var(--text-primary)">
           {{ t('admin.pages.purchases.detail.items.empty.title') }}
         </h3>
-        <p class="text-slate-500 text-sm mb-4">
+        <p class="text-sm mb-4" style="color: var(--text-tertiary)">
           {{ t('admin.pages.purchases.detail.items.empty.hint') }}
         </p>
         <button
@@ -225,22 +225,22 @@
         v-else
         class="overflow-x-auto"
       >
-        <div class="mb-4 flex flex-wrap gap-4 items-center px-6 pt-4 text-sm bg-slate-50 border-b border-slate-200" v-if="order?.items?.length > 0">
+        <div class="mb-4 flex flex-wrap gap-4 items-center px-6 pt-4 text-sm" style="background: var(--surface-2); border-bottom: 1px solid var(--surface-border)" v-if="order?.items?.length > 0">
           <div class="flex items-center gap-2">
-            <span class="text-slate-500 font-medium">{{ t('admin.pages.purchases.detail.items.table.costMode.label') }}</span>
+            <span class="font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.purchases.detail.items.table.costMode.label') }}</span>
             <select
               v-model="costMode"
-              class="text-sm border-slate-300 rounded-md py-1 pl-2 pr-8 focus:ring-teal-500 focus:border-teal-500"
+              class="ui-input text-sm py-1 pl-2 pr-8"
             >
               <option value="replace">{{ t('admin.pages.purchases.detail.items.table.costMode.replace') }}</option>
               <option value="weighted">{{ t('admin.pages.purchases.detail.items.table.costMode.weighted') }}</option>
             </select>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-slate-500 font-medium">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.label') }}</span>
+            <span class="font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.label') }}</span>
             <select
               v-model="salePriceMode"
-              class="text-sm border-slate-300 rounded-md py-1 pl-2 pr-8 focus:ring-teal-500 focus:border-teal-500"
+              class="ui-input text-sm py-1 pl-2 pr-8"
             >
               <option value="replace">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.replace') }}</option>
               <option value="weighted">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.weighted') }}</option>
@@ -251,22 +251,22 @@
         <table class="ui-table border-t-0">
           <thead class="ui-thead">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[20%]">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[20%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.product') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.ordered') }} / {{ t('admin.pages.purchases.detail.items.table.received') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.unitCost') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.salePrice') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 w-[20%]">
+              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[20%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.receiveNow') }}
               </th>
-              <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 w-[15%]">
+              <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.total') }}
               </th>
             </tr>
@@ -280,13 +280,13 @@
               <!-- Product Info -->
               <td class="px-4 py-3 align-top">
                 <div>
-                  <div class="font-medium text-slate-900 truncate max-w-[200px]" :title="item.variant?.product?.title || t('admin.pages.purchases.detail.items.unknownProduct')">
+                  <div class="font-medium truncate max-w-[200px]" style="color: var(--text-primary)" :title="item.variant?.product?.title || t('admin.pages.purchases.detail.items.unknownProduct')">
                     {{ item.variant?.product?.title || t('admin.pages.purchases.detail.items.unknownProduct') }}
                   </div>
-                  <div class="text-xs text-slate-500">
+                  <div class="text-xs" style="color: var(--text-tertiary)">
                     {{ getVariantLabel(item.variant) }}
                   </div>
-                  <div v-if="item.variant?.sku" class="text-xs text-slate-400 mt-0.5 font-mono">
+                  <div v-if="item.variant?.sku" class="text-xs mt-0.5 font-mono" style="color: var(--text-muted)">
                     {{ item.variant.sku }}
                   </div>
                 </div>
@@ -301,22 +301,22 @@
                       v-model.number="editingItems[item.id].quantityOrdered"
                       type="number"
                       min="1"
-                      class="w-16 rounded-md border border-slate-300 px-2 py-1 text-sm text-center shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                      class="ui-input w-16 px-2 py-1 text-sm text-center"
                       @change="updateItem(item)"
                     >
-                    <span v-else class="text-sm font-medium text-slate-900 w-16 text-center inline-block">
+                    <span v-else class="text-sm font-medium w-16 text-center inline-block" style="color: var(--text-primary)">
                       {{ item.quantityOrdered }}
                     </span>
-                    <span class="text-slate-400">/</span>
+                    <span style="color: var(--text-muted)">/</span>
                     <span
                       class="text-sm font-medium w-16 text-center inline-block"
-                      :class="item.quantityReceived >= item.quantityOrdered ? 'text-green-600' : 'text-slate-600'"
+                      :class="item.quantityReceived >= item.quantityOrdered ? 'text-green-400' : ''" :style="item.quantityReceived < item.quantityOrdered ? 'color: var(--text-secondary)' : ''"
                     >
                       {{ item.quantityReceived }}
                     </span>
                   </div>
                   
-                  <div class="w-full bg-slate-100 rounded-full h-1 mt-1 overflow-hidden" v-if="item.quantityOrdered > 0">
+                  <div class="w-full rounded-full h-1 mt-1 overflow-hidden" v-if="item.quantityOrdered > 0" style="background: var(--surface-3)">
                     <div
                       class="bg-teal-500 h-1 transition-all duration-300"
                       :style="`width: ${Math.min((item.quantityReceived / item.quantityOrdered) * 100, 100)}%`"
@@ -332,16 +332,16 @@
                     v-if="item.quantityReceived === 0"
                     v-model="editingItems[item.id].unitCost"
                     type="text"
-                    class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm text-right shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                    class="ui-input w-24 px-2 py-1 text-sm text-right"
                     placeholder="0.00"
                     @change="updateItem(item)"
                   >
-                  <span v-else class="text-sm text-slate-900 block pt-1">
+                  <span v-else class="text-sm block pt-1" style="color: var(--text-primary)">
                     {{ item.unitCost ? formatCurrency(item.unitCost) : '—' }}
                   </span>
                   
                   <div class="flex flex-col gap-1 mt-0.5">
-                    <div class="text-[11px] text-slate-400">
+                    <div class="text-[11px]" style="color: var(--text-muted)">
                       Actuel: {{ formatCurrency(Number(item.variant?.cost || 0)) }}
                     </div>
                     <!-- New Cost Preview Badge (only if changed and receiving) -->
@@ -363,14 +363,14 @@
                     v-if="item.quantityReceived === 0"
                     v-model="editingItems[item.id].salePrice"
                     type="text"
-                    class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm text-right shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                    class="ui-input w-24 px-2 py-1 text-sm text-right"
                     placeholder="—"
                     @change="updateItem(item)"
                   >
-                  <span v-else class="text-sm text-slate-900 block pt-1">
+                  <span v-else class="text-sm block pt-1" style="color: var(--text-primary)">
                     {{ item.salePrice ? formatCurrency(item.salePrice) : '—' }}
                   </span>
-                  <div class="text-[11px] text-slate-400 mt-0.5">
+                  <div class="text-[11px] mt-0.5" style="color: var(--text-muted)">
                     Actuel: {{ formatCurrency(Number(item.variant?.price || 0)) }}
                   </div>
                 </div>
@@ -384,7 +384,7 @@
                     type="number"
                     min="0"
                     :max="Math.max(0, item.quantityOrdered - item.quantityReceived)"
-                    class="w-16 rounded-md border border-slate-300 px-2 py-1 text-sm text-center shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                    class="ui-input w-16 px-2 py-1 text-sm text-center"
                     placeholder="Qté"
                     :disabled="item.quantityReceived >= item.quantityOrdered"
                   >
@@ -407,13 +407,13 @@
               <!-- Total & Row Actions -->
               <td class="px-4 py-3 align-top text-right">
                 <div class="flex flex-col items-end gap-2">
-                  <span class="text-sm font-semibold text-slate-800">
+                  <span class="text-sm font-semibold" style="color: var(--text-primary)">
                     {{ formatCurrency(Number(editingItems[item.id]?.unitCost || 0) * (editingItems[item.id]?.quantityOrdered || item.quantityOrdered)) }}
                   </span>
                   
                   <button
                     v-if="item.quantityReceived === 0"
-                    class="text-slate-400 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    class="transition-colors p-1 rounded-md hover:text-red-400 opacity-0 group-hover:opacity-100 focus:opacity-100" style="color: var(--text-muted)"
                     :title="t('admin.pages.purchases.detail.items.table.removeItem')"
                     @click="removeItem(item)"
                   >
@@ -423,7 +423,7 @@
               </td>
             </tr>
           </tbody>
-          <tfoot class="bg-slate-50 font-semibold text-slate-900 border-t border-slate-200">
+          <tfoot class="font-semibold" style="background: var(--surface-2); color: var(--text-primary); border-top: 1px solid var(--surface-border)">
             <tr>
               <td colspan="5" class="px-4 py-4 text-right">
                 {{ t('admin.pages.purchases.detail.items.table.totalOrderValue') }}
@@ -450,12 +450,12 @@
     <!-- Payment Modal -->
     <div v-if="paymentModalOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closePaymentModal">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="closePaymentModal" />
-        <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="closePaymentModal" />
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.purchases.detail.paymentModal.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
             {{ t('admin.pages.purchases.detail.paymentModal.subtitle') }}
           </p>
 
@@ -516,7 +516,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="closePaymentModal"
             >
               {{ t('admin.common.cancel') }}
@@ -537,7 +537,7 @@
     <div class="flex justify-end mt-8">
       <button
         type="button"
-        class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors"
+        class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300 transition-colors" style="border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.08)"
         @click="showDeleteOrderModal = true"
       >
         <Icon
@@ -874,15 +874,15 @@ const getStatusClass = (status: string) => {
   switch (status.toLowerCase()) {
     case 'completed':
     case 'received':
-      return base + 'bg-green-100 text-green-800'
+      return base + 'bg-green-500/10 text-green-400'
     case 'partially_received':
     case 'pending':
     case 'ordered':
-      return base + 'bg-yellow-100 text-yellow-800'
+      return base + 'bg-yellow-500/10 text-yellow-400'
     case 'cancelled':
-      return base + 'bg-red-100 text-red-800'
+      return base + 'bg-red-500/10 text-red-400'
     default:
-      return base + 'bg-gray-100 text-gray-800'
+      return base + 'bg-white/10 text-white/60'
   }
 }
 
@@ -890,11 +890,11 @@ const getPaymentStatusClass = (status: string) => {
   const base = 'px-2.5 py-0.5 inline-flex text-xs font-semibold rounded-full '
   switch (status?.toLowerCase()) {
     case 'paid':
-      return base + 'bg-green-100 text-green-800'
+      return base + 'bg-green-500/10 text-green-400'
     case 'partially_paid':
-      return base + 'bg-yellow-100 text-yellow-800'
+      return base + 'bg-yellow-500/10 text-yellow-400'
     default:
-      return base + 'bg-gray-100 text-gray-800'
+      return base + 'bg-white/10 text-white/60'
   }
 }
 

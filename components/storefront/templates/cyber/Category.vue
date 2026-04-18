@@ -8,6 +8,12 @@ const props = defineProps<{
 
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 const { format: formatPrice } = useCurrency()
 
 // Filtering Logic

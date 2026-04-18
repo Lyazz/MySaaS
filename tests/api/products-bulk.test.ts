@@ -10,6 +10,7 @@ describe('Admin products bulk ops', () => {
     let tenantAId: string
     let adminAToken: string
     let categoryAId: string
+    let categoryBId: string
     let productAId: string
     let deleteAProduct1Id: string
     let deleteAProduct2Id: string
@@ -36,6 +37,11 @@ describe('Admin products bulk ops', () => {
             data: { tenantId: tenantAId, title: 'Cat A', slug: `cat-a-${Date.now()}` }
         })
         categoryAId = cat.id
+
+        const catB = await prisma.category.create({
+            data: { tenantId: tenantAId, title: 'Cat B', slug: `cat-b-${Date.now()}` }
+        })
+        categoryBId = catB.id
 
         const product = await prisma.product.create({
             data: {
@@ -110,6 +116,7 @@ describe('Admin products bulk ops', () => {
         await prisma.productOption.deleteMany({ where: { tenantId: tenantAId } })
         await prisma.productImage.deleteMany({ where: { tenantId: tenantAId } })
         await prisma.productBundleDeal.deleteMany({ where: { tenantId: tenantAId } })
+        await prisma.productCategory.deleteMany({ where: { tenantId: tenantAId } })
         await prisma.product.deleteMany({ where: { tenantId: tenantAId } })
         await prisma.category.deleteMany({ where: { tenantId: tenantAId } })
         await prisma.user.deleteMany({ where: { tenantId: tenantAId } })
@@ -123,6 +130,7 @@ describe('Admin products bulk ops', () => {
         await prisma.productOption.deleteMany({ where: { tenantId: tenantBId } })
         await prisma.productImage.deleteMany({ where: { tenantId: tenantBId } })
         await prisma.productBundleDeal.deleteMany({ where: { tenantId: tenantBId } })
+        await prisma.productCategory.deleteMany({ where: { tenantId: tenantBId } })
         await prisma.product.deleteMany({ where: { tenantId: tenantBId } })
         await prisma.category.deleteMany({ where: { tenantId: tenantBId } })
         await prisma.user.deleteMany({ where: { tenantId: tenantBId } })
@@ -180,6 +188,36 @@ describe('Admin products bulk ops', () => {
             orderBy: { createdAt: 'desc' }
         })
         expect(move).toBeNull()
+    })
+
+    it('imports multi-category mappings from categoryIds column', async () => {
+        const slug = `bulk-multi-cat-${Date.now()}`
+        const csv = [
+            'slug,title,price,categoryIds',
+            `${slug},Multi Category Product,120,${categoryAId}|${categoryBId}`
+        ].join('\n')
+
+        const res = await request(app)
+            .post('/api/admin/products/import.csv')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', Buffer.from(csv, 'utf8'), { filename: 'products.csv', contentType: 'text/csv' })
+
+        expect(res.status).toBe(200)
+        expect(res.body.created).toBe(1)
+        expect(res.body.errors?.length || 0).toBe(0)
+
+        const created = await prisma.product.findFirst({
+            where: { tenantId: tenantAId, slug },
+            select: { id: true, categoryId: true }
+        })
+        expect(created?.categoryId).toBe(categoryAId)
+
+        const links = await prisma.productCategory.findMany({
+            where: { tenantId: tenantAId, productId: created!.id },
+            select: { categoryId: true }
+        })
+        expect(links.map((row) => row.categoryId)).toEqual(expect.arrayContaining([categoryAId, categoryBId]))
     })
 
     it('imports images and normalizes tenant-scoped upload links', async () => {

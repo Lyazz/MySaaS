@@ -8,6 +8,12 @@ const props = defineProps<{
 
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
   headers: useTenantApiHeaders(),
@@ -16,7 +22,7 @@ const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
 
 const categoryProducts = computed(() => {
   const id = props.category.id
-  return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && p.categoryId === id)
+  return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id))
 })
 </script>
 
@@ -53,7 +59,7 @@ const categoryProducts = computed(() => {
               :class="cat.id === category.id && 'is-active'"
             >
               <span class="cat-sidebar__num">{{ String((allCategories || []).indexOf(cat) + 1).padStart(2,'0') }}</span>
-              {{ cat.title }}
+              {{ categoryDisplayTitle(cat) }}
             </NuxtLink>
           </nav>
         </div>

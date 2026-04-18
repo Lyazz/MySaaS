@@ -2,12 +2,12 @@
   <div class="space-y-6">
     <div class="flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.billing.title') }}</h1>
-        <p class="text-slate-600 mt-1">{{ t('admin.pages.billing.subtitle') }}</p>
+        <h1 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.billing.title') }}</h1>
+        <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.billing.subtitle') }}</p>
       </div>
       <NuxtLink
         to="/pricing"
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+        class="ui-btn ui-btn--secondary inline-flex items-center gap-2"
       >
         <Icon name="lucide:arrow-up-right" class="w-4 h-4" />
         <span class="text-sm font-semibold">{{ t('admin.pages.billing.seePricing') }}</span>
@@ -20,28 +20,28 @@
 
     <template v-else>
     <!-- Payment status banners -->
-    <div v-if="pendingPayments.length > 0" class="flex items-start gap-4 p-5 bg-amber-50 border border-amber-200 rounded-xl">
-      <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-        <Icon name="lucide:clock" class="w-5 h-5 text-amber-600" />
+    <div v-if="pendingPayments.length > 0" class="flex items-start gap-4 p-5 rounded-xl" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25)">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background: rgba(245,158,11,0.15)">
+        <Icon name="lucide:clock" class="w-5 h-5 text-amber-400" />
       </div>
       <div class="flex-1">
-        <p class="font-semibold text-amber-900">{{ t('admin.pages.billing.status.pending.title', 'Payment under review') }}</p>
-        <p class="text-sm text-amber-700 mt-0.5">
+        <p class="font-semibold text-amber-400">{{ t('admin.pages.billing.status.pending.title', 'Payment under review') }}</p>
+        <p class="text-sm text-amber-500/80 mt-0.5">
           {{ t('admin.pages.billing.status.pending.desc', 'We received your payment proof and our team is reviewing it. Your subscription will be updated once approved.') }}
         </p>
       </div>
-      <span class="shrink-0 text-xs font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-full">
+      <span class="shrink-0 text-xs font-bold text-amber-400 px-2.5 py-1 rounded-full" style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.25)">
         {{ pendingPayments.length }} {{ t('admin.pages.billing.status.pending.badge', 'pending') }}
       </span>
     </div>
 
-    <div v-else-if="latestApprovedProof" class="flex items-start gap-4 p-5 bg-emerald-50 border border-emerald-200 rounded-xl">
-      <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
-        <Icon name="lucide:check-circle-2" class="w-5 h-5 text-emerald-600" />
+    <div v-else-if="latestApprovedProof" class="flex items-start gap-4 p-5 rounded-xl" style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25)">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background: rgba(34,197,94,0.15)">
+        <Icon name="lucide:check-circle-2" class="w-5 h-5 text-emerald-400" />
       </div>
       <div>
-        <p class="font-semibold text-emerald-900">{{ t('admin.pages.billing.status.approved.title', 'Payment approved') }}</p>
-        <p class="text-sm text-emerald-700 mt-0.5">
+        <p class="font-semibold text-emerald-400">{{ t('admin.pages.billing.status.approved.title', 'Payment approved') }}</p>
+        <p class="text-sm text-emerald-500/80 mt-0.5">
           {{ t('admin.pages.billing.status.approved.desc', 'Your latest payment was approved and your subscription is active.') }}
         </p>
       </div>
@@ -126,27 +126,30 @@
         <div class="lg:col-span-7 space-y-6">
           <!-- Interval Toggle -->
           <div class="flex justify-center mb-8">
-            <div class="bg-slate-100 p-1 rounded-xl inline-grid grid-cols-2 relative shadow-inner">
+            <div class="p-1 rounded-xl inline-grid grid-cols-2 relative" style="background: var(--surface-3)">
               <button
                 @click="billingInterval = 'month'"
                 class="relative z-10 px-6 py-2.5 text-sm font-bold rounded-lg transition-colors flex items-center justify-center w-full"
-                :class="billingInterval === 'month' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'"
+                :class="billingInterval === 'month' ? 'text-teal-400' : ''"
+                :style="billingInterval !== 'month' ? 'color: var(--text-tertiary)' : ''"
               >
                 {{ t('admin.pages.billing.interval.monthly', 'Monthly Billing') }}
               </button>
               <button
                 @click="billingInterval = 'year'"
                 class="relative z-10 px-6 py-2.5 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 w-full"
-                :class="billingInterval === 'year' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'"
+                :class="billingInterval === 'year' ? 'text-teal-400' : ''"
+                :style="billingInterval !== 'year' ? 'color: var(--text-tertiary)' : ''"
               >
                 {{ t('admin.pages.billing.interval.yearly', 'Yearly Billing') }}
-                <span class="px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-black uppercase tracking-wider whitespace-nowrap">{{ t('admin.pages.billing.interval.save', { pct: 20 }, 'Save 20%') }}</span>
+                <span class="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-400 text-[10px] font-black uppercase tracking-wider whitespace-nowrap">{{ t('admin.pages.billing.interval.save', { pct: 20 }, 'Save 20%') }}</span>
               </button>
-              
+
               <!-- Sliding Background Indicator -->
-              <div 
-                class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-white shadow-sm transition-transform duration-300 ease-in-out border border-slate-200/50"
+              <div
+                class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg transition-transform duration-300 ease-in-out"
                 :class="billingInterval === 'month' ? 'translate-x-0' : 'translate-x-full'"
+                style="background: var(--surface-1); border: 1px solid var(--surface-border)"
               ></div>
             </div>
         </div>
@@ -160,12 +163,9 @@
             v-for="plan in plans"
             :key="plan.code"
             @click="selectPlan(plan.code)"
-            class="relative flex flex-col p-6 rounded-2xl border-2 transition-all cursor-pointer bg-white group hover:shadow-xl"
-            :class="[
-              plan.code === selectedPlanCode 
-                ? 'border-teal-500 shadow-lg shadow-teal-500/10 ring-1 ring-teal-500' 
-                : 'border-slate-200 hover:border-teal-300'
-            ]"
+            class="relative flex flex-col p-6 rounded-2xl border-2 transition-all cursor-pointer group hover:shadow-xl"
+            :class="plan.code === selectedPlanCode ? 'border-teal-500 shadow-lg shadow-teal-500/10 ring-1 ring-teal-500' : ''"
+            :style="plan.code !== selectedPlanCode ? 'background: var(--surface-1); border-color: var(--surface-border)' : 'background: var(--surface-1)'"
           >
             <!-- Current Plan Badge -->
             <div 
@@ -176,16 +176,16 @@
             </div>
 
             <div class="mb-4">
-              <h3 class="text-xl font-black text-slate-900 mb-1" :class="plan.code === selectedPlanCode ? 'text-teal-700' : ''">{{ plan.name }}</h3>
-              <p class="text-xs text-slate-500 min-h-[32px]">{{ plan.description }}</p>
+              <h3 class="text-xl font-black mb-1" :class="plan.code === selectedPlanCode ? 'text-teal-400' : ''" :style="plan.code !== selectedPlanCode ? 'color: var(--text-primary)' : ''">{{ plan.name }}</h3>
+              <p class="text-xs min-h-[32px]" style="color: var(--text-tertiary)">{{ plan.description }}</p>
             </div>
 
             <div class="mb-6 flex items-baseline gap-1">
-              <span class="text-3xl font-black text-slate-900">
+              <span class="text-3xl font-black" style="color: var(--text-primary)">
                 {{ formatDzd(billingInterval === 'year' ? (plan.pricing?.annualAmountDzd || 0) * 12 : plan.pricing?.monthlyAmountDzd) }}
               </span>
-              <span class="text-sm font-bold text-slate-500 uppercase">{{ plan.pricing?.currency }}</span>
-              <span class="text-xs text-slate-400 ml-1">/ {{ billingInterval === 'year' ? t('admin.pages.billing.yr', 'yr') : t('admin.pages.billing.mo', 'mo') }}</span>
+              <span class="text-sm font-bold uppercase" style="color: var(--text-tertiary)">{{ plan.pricing?.currency }}</span>
+              <span class="text-xs ml-1" style="color: var(--text-muted)">/ {{ billingInterval === 'year' ? t('admin.pages.billing.yr', 'yr') : t('admin.pages.billing.mo', 'mo') }}</span>
             </div>
 
             <!-- Features -->

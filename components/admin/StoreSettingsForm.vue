@@ -1,18 +1,18 @@
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200">
-    <div class="p-6 border-b border-slate-200 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+  <div style="background: var(--surface-2); border: 1px solid var(--surface-border)" class="rounded-xl shadow-sm overflow-hidden">
+    <div class="p-6 border-b flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4" style="border-color: var(--surface-border)">
       <div>
-        <h2 class="text-xl font-bold text-slate-800">
+        <h2 class="text-xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.storeSettingsForm.title') }}
         </h2>
-        <p class="text-slate-600 mt-1">
+        <p style="color: var(--text-secondary)" class="mt-1">
           {{ t('admin.storeSettingsForm.subtitle') }}
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="ui-btn ui-btn--secondary"
           :disabled="loading || saving"
           @click="reset"
         >
@@ -39,16 +39,17 @@
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">
+            <h3 class="text-lg font-medium leading-6" style="color: var(--text-primary)">
               {{ t('admin.storeSettingsForm.brandLogo.title') }}
             </h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.storeSettingsForm.brandLogo.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2">
             <SingleImageUploader
               v-model="form.logoUrl"
+              mode="logo"
               :label="t('admin.storeSettingsForm.brandLogo.inputLabel')"
               :hint="t('admin.storeSettingsForm.brandLogo.hint')"
             />
@@ -56,28 +57,28 @@
         </div>
       </section>
 
-      <div class="border-t border-slate-200" />
+      <div class="border-t" style="border-color: var(--surface-border)" />
 
       <!-- Brand Colors -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">
+            <h3 class="text-lg font-medium leading-6" style="color: var(--text-primary)">
               {{ t('admin.storeSettingsForm.brandColors.title') }}
             </h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.storeSettingsForm.brandColors.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2 space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.storeSettingsForm.brandColors.primaryLabel') }}</label>
+                <label class="ui-label mb-1 block">{{ t('admin.storeSettingsForm.brandColors.primaryLabel') }}</label>
                 <div class="flex items-center gap-3">
                   <input
                     v-model="form.primaryColor"
                     type="color"
-                    class="h-10 w-14 rounded border border-slate-300 bg-white p-1 cursor-pointer"
+                    class="ui-input h-10 w-14 rounded p-1 cursor-pointer"
                   >
                   <BaseInput
                     v-model="form.primaryColor"
@@ -90,8 +91,8 @@
             </div>
             
             <!-- Preview -->
-            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-              <span class="text-xs font-medium text-slate-500 uppercase tracking-wider block mb-3">{{ t('admin.storeSettingsForm.brandColors.previewTitle') }}</span>
+            <div class="p-4 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+              <span class="text-xs font-medium uppercase tracking-wider block mb-3" style="color: var(--text-tertiary)">{{ t('admin.storeSettingsForm.brandColors.previewTitle') }}</span>
               <div class="flex gap-3">
                 <button
                   type="button"
@@ -113,37 +114,39 @@
         </div>
       </section>
 
-      <div class="border-t border-slate-200" />
+      <div class="border-t" style="border-color: var(--surface-border)" />
 
       <!-- Store Features -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">
+            <h3 class="text-lg font-medium leading-6" style="color: var(--text-primary)">
               {{ t('admin.storeSettingsForm.features.title') }}
             </h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.storeSettingsForm.features.subtitle') }}
             </p>
           </div>
           <div class="mt-5 md:mt-0 md:col-span-2 space-y-3">
             <div
-              class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-sm"
+              class="flex items-center gap-4 p-4 rounded-xl shadow-sm"
+              style="background: var(--surface-2); border: 1px solid var(--surface-border)"
             >
               <div class="h-10 w-10 flex items-center justify-center rounded-full bg-teal-50 text-teal-600">
                 <Icon name="lucide:handbag" class="w-5 h-5" />
               </div>
               <div class="flex-1">
-                <p class="font-semibold text-slate-900">
+                <p class="font-semibold" style="color: var(--text-primary)">
                   {{ t('admin.storeSettingsForm.features.cart.title') }}
                 </p>
-                <p class="text-sm text-slate-500">
+                <p class="text-sm" style="color: var(--text-tertiary)">
                   {{ t('admin.storeSettingsForm.features.cart.subtitle') }}
                 </p>
               </div>
               <button
                 type="button"
-                :class="form.cartEnabled ? 'bg-teal-600' : 'bg-slate-200'"
+                :class="form.cartEnabled ? 'bg-teal-600' : ''"
+                :style="!form.cartEnabled ? 'background: rgba(255,255,255,0.1)' : ''"
                 class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                 @click="form.cartEnabled = !form.cartEnabled"
               >
@@ -156,22 +159,24 @@
             </div>
 
             <div
-              class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-white shadow-sm"
+              class="flex items-center gap-4 p-4 rounded-xl shadow-sm"
+              style="background: var(--surface-2); border: 1px solid var(--surface-border)"
             >
               <div class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
                 <Icon name="lucide:banknote" class="w-5 h-5" />
               </div>
               <div class="flex-1">
-                <p class="font-semibold text-slate-900">
+                <p class="font-semibold" style="color: var(--text-primary)">
                   {{ t('admin.storeSettingsForm.features.cod.title') }}
                 </p>
-                <p class="text-sm text-slate-500">
+                <p class="text-sm" style="color: var(--text-tertiary)">
                   {{ t('admin.storeSettingsForm.features.cod.subtitle') }}
                 </p>
               </div>
               <button
                 type="button"
-                :class="form.codEnabled ? 'bg-emerald-600' : 'bg-slate-200'"
+                :class="form.codEnabled ? 'bg-emerald-600' : ''"
+                :style="!form.codEnabled ? 'background: rgba(255,255,255,0.1)' : ''"
                 class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                 @click="form.codEnabled = !form.codEnabled"
               >
@@ -186,16 +191,16 @@
         </div>
       </section>
 
-      <div class="border-t border-slate-200" />
+      <div class="border-t" style="border-color: var(--surface-border)" />
 
       <!-- Currency -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">
+            <h3 class="text-lg font-medium leading-6" style="color: var(--text-primary)">
               {{ t('admin.storeSettingsForm.currency.title') }}
             </h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.storeSettingsForm.currency.subtitle') }}
             </p>
           </div>
@@ -216,23 +221,23 @@
                 {{ c.label }}
               </option>
             </BaseSelect>
-            <p class="text-xs text-slate-500">
+            <p class="text-xs" style="color: var(--text-tertiary)">
               Currency code: {{ form.currencyCode }} · Country: {{ form.currencyCountry }}
             </p>
           </div>
         </div>
       </section>
 
-      <div class="border-t border-slate-200" />
+      <div class="border-t" style="border-color: var(--surface-border)" />
 
       <!-- Template Selection -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">
+            <h3 class="text-lg font-medium leading-6" style="color: var(--text-primary)">
               {{ t('admin.storeSettingsForm.template.title') }}
             </h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.storeSettingsForm.template.subtitle') }}
             </p>
           </div>
@@ -242,22 +247,24 @@
                 v-for="tpl in templates"
                 :key="tpl.key"
                 class="cursor-pointer relative rounded-xl border p-4 shadow-sm flex flex-col transition-all hover:border-teal-300"
-                :class="form.templateKey === tpl.key ? 'border-teal-500 ring-2 ring-teal-500 ring-opacity-50 bg-teal-50' : 'border-slate-200 bg-white'"
+                :class="form.templateKey === tpl.key ? 'border-teal-500 ring-2 ring-teal-500 ring-opacity-50 bg-teal-50' : ''"
+                :style="form.templateKey !== tpl.key ? 'background: var(--surface-1); border-color: var(--surface-border)' : ''"
                 @click="form.templateKey = tpl.key"
               >
                 <div class="flex items-center justify-between mb-2">
-                  <span class="font-semibold text-slate-900">{{ tpl.label }}</span>
+                  <span class="font-semibold" style="color: var(--text-primary)">{{ tpl.label }}</span>
                   <span
                     v-if="form.templateKey === tpl.key"
                     class="h-2 w-2 rounded-full bg-teal-600"
                   />
                 </div>
-                <p class="text-sm text-slate-500 mb-3">
+                <p class="text-sm mb-3" style="color: var(--text-tertiary)">
                   {{ tpl.description }}
                 </p>
                 <div
                   class="mt-auto pt-2 flex items-center text-xs font-medium"
-                  :class="form.templateKey === tpl.key ? 'text-teal-700' : 'text-slate-500'"
+                  :class="form.templateKey === tpl.key ? 'text-teal-700' : ''"
+                  :style="form.templateKey !== tpl.key ? 'color: var(--text-tertiary)' : ''"
                 >
                   {{ form.templateKey === tpl.key ? t('admin.storeSettingsForm.template.selected') : t('admin.storeSettingsForm.template.select') }}
                 </div>
@@ -267,16 +274,16 @@
         </div>
       </section>
 
-      <div class="border-t border-slate-200" />
+      <div class="border-t" style="border-color: var(--surface-border)" />
 
       <!-- Localization -->
       <section>
         <div class="md:grid md:grid-cols-3 md:gap-6">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-medium leading-6 text-slate-900">
+            <h3 class="text-lg font-medium leading-6" style="color: var(--text-primary)">
               {{ t('admin.storeSettingsForm.localization.title') }}
             </h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.storeSettingsForm.localization.subtitle') }}
             </p>
           </div>
@@ -306,7 +313,7 @@
       </section>
 
       <!-- Actions -->
-      <div class="pt-6 border-t border-slate-200 flex items-center justify-end gap-3">
+      <div class="pt-6 border-t flex items-center justify-end gap-3" style="border-color: var(--surface-border)">
         <div
           v-if="successMessage"
           class="text-sm text-emerald-600 font-medium mr-auto animate-fadeIn"
@@ -322,7 +329,7 @@
 
         <button
           type="button"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="ui-btn ui-btn--secondary"
           :disabled="loading || saving"
           @click="reset"
         >

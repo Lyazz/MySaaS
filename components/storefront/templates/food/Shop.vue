@@ -15,6 +15,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Dynamic Filters
 const filters = computed(() => ({
     categories: categoryData.value || [],
@@ -27,7 +33,20 @@ const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
-const priceRange = ref({ min: 0, max: 200000 })
+const priceRange = computed(() => {
+    const prices = props.products
+        .map((product) => Number(product?.price))
+        .filter((price): price is number => Number.isFinite(price))
+
+    if (prices.length === 0) {
+        return { min: 0, max: 0 }
+    }
+
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+    }
+})
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
 
@@ -41,7 +60,7 @@ const filteredProducts = computed(() => {
     // Filter by Category
     if (selectedCategories.value.length > 0) {
         const selectedIds = selectedCategories.value 
-        result = result.filter(p => selectedIds.includes(p.categoryId))
+        result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
 
     // Filter by Search
@@ -194,7 +213,7 @@ const closeQuickView = () => {
                     class="peer h-5 w-5 rounded border-stone-300 text-brand-600 focus:ring-brand-500 transition-all checked:bg-brand-600 checked:border-transparent" 
                   >
                 </div>
-                <span class="text-base text-stone-700 font-medium group-hover:text-brand-700 transition-colors">{{ cat.title }}</span>
+                <span class="text-base text-stone-700 font-medium group-hover:text-brand-700 transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -203,6 +222,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -276,7 +298,7 @@ const closeQuickView = () => {
                             class="peer h-4 w-4 rounded-md border-stone-400 text-stone-900 focus:ring-stone-500 transition-all checked:bg-stone-900 checked:border-transparent" 
                         >
                         </div>
-                        <span class="text-sm font-medium text-stone-600 group-hover:text-stone-900 transition-colors">{{ cat.title }}</span>
+                        <span class="text-sm font-medium text-stone-600 group-hover:text-stone-900 transition-colors">{{ categoryDisplayTitle(cat) }}</span>
                     </label>
                     </div>
                 </div>
@@ -289,6 +311,9 @@ const closeQuickView = () => {
                     <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
             </div>
@@ -368,7 +393,7 @@ const closeQuickView = () => {
                 class="flex items-center gap-2 px-3 py-1 bg-white text-stone-600 rounded-full text-sm font-medium border border-stone-200 shadow-sm"
               >
                   <span class="w-2 h-2 rounded-full bg-brand-500"></span>
-                  <span>{{ filters.categories.find(c => c.id === catId)?.title }}</span>
+                  <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) }}</span>
                   <button @click="removeCategory(catId)" class="hover:text-red-500 ml-1">
                       <Icon name="lucide:x" class="w-3.5 h-3.5" />
                   </button>

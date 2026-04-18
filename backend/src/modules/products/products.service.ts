@@ -65,6 +65,123 @@ export class ProductsService {
         })
     }
 
+    private hasOwn(data: any, key: string): boolean {
+        return Object.prototype.hasOwnProperty.call(data ?? {}, key)
+    }
+
+    private normalizeCategoryIds(raw: unknown): string[] {
+        if (!Array.isArray(raw)) {
+            throw new Error('Invalid categories')
+        }
+
+        const normalized = raw
+            .map((value) => (typeof value === 'string' ? value.trim() : ''))
+            .filter(Boolean)
+
+        if (normalized.length !== raw.length) {
+            throw new Error('Invalid categories')
+        }
+
+        return Array.from(new Set(normalized))
+    }
+
+    private async resolveCategoryAssignment(tenantId: string, data: any): Promise<{ categoryId: string | null; categoryIds: string[] } | null> {
+        const hasCategoryId = this.hasOwn(data, 'categoryId')
+        const hasCategoryIds = this.hasOwn(data, 'categoryIds')
+        if (!hasCategoryId && !hasCategoryIds) return null
+
+        let explicitCategoryId: string | null | undefined
+        if (hasCategoryId) {
+            const raw = data.categoryId
+            if (raw === null || raw === '') {
+                explicitCategoryId = null
+            } else if (typeof raw === 'string') {
+                explicitCategoryId = raw.trim()
+                if (!explicitCategoryId) explicitCategoryId = null
+            } else {
+                throw new Error('Invalid category')
+            }
+        }
+
+        let categoryIds: string[] = []
+        if (hasCategoryIds) {
+            categoryIds = this.normalizeCategoryIds(data.categoryIds)
+        } else if (explicitCategoryId) {
+            categoryIds = [explicitCategoryId]
+        }
+
+        if (explicitCategoryId) {
+            categoryIds = [explicitCategoryId, ...categoryIds.filter((id) => id !== explicitCategoryId)]
+        }
+
+        if (categoryIds.length > 0) {
+            const found = await prisma.category.findMany({
+                where: { tenantId, id: { in: categoryIds } },
+                select: { id: true }
+            })
+            const foundSet = new Set(found.map((item) => item.id))
+            if (categoryIds.some((id) => !foundSet.has(id))) {
+                throw new Error('Invalid category')
+            }
+        }
+
+        const categoryId =
+            explicitCategoryId !== undefined
+                ? explicitCategoryId ?? (categoryIds[0] ?? null)
+                : (categoryIds[0] ?? null)
+
+        return { categoryId, categoryIds }
+    }
+
+    private async replaceProductCategories(
+        tx: Pick<typeof prisma, 'productCategory'>,
+        tenantId: string,
+        productId: string,
+        categoryIds: string[]
+    ) {
+        await tx.productCategory.deleteMany({
+            where: { tenantId, productId }
+        })
+
+        if (categoryIds.length > 0) {
+            await tx.productCategory.createMany({
+                data: categoryIds.map((categoryId) => ({
+                    tenantId,
+                    productId,
+                    categoryId
+                })),
+                skipDuplicates: true
+            })
+        }
+    }
+
+    private mapProductCategories(product: any): any {
+        const linkedCategories = (product?.categoryLinks || [])
+            .map((link: any) => link?.category)
+            .filter((category: any) => category && category.id)
+        let uniqueCategories = Array.from(
+            new Map(linkedCategories.map((category: any) => [category.id, category])).values()
+        )
+        const fallbackPrimary = uniqueCategories[0] ?? null
+        const primaryCategory = (product as any)?.category ?? fallbackPrimary
+        const primaryCategoryId = (product as any)?.categoryId ?? primaryCategory?.id ?? null
+        if (primaryCategory && !uniqueCategories.some((category: any) => category.id === primaryCategory.id)) {
+            uniqueCategories = [primaryCategory, ...uniqueCategories]
+        }
+        const categoryIds = uniqueCategories.map((category: any) => category.id)
+        if (categoryIds.length === 0 && primaryCategoryId) {
+            categoryIds.push(primaryCategoryId)
+        }
+
+        return {
+            ...product,
+            category: primaryCategory,
+            categoryId: primaryCategoryId,
+            categories: uniqueCategories,
+            categoryIds
+        }
+    }
+
     async listProducts(
         tenantId: string,
         categoryId?: string,
@@ -75,7 +192,10 @@ export class ProductsService {
             tenantId: tenantId
         }
         if (categoryId) {
-            where.categoryId = categoryId
+            where.OR = [
+                { categoryId },
+                { categoryLinks: { some: { tenantId, categoryId } } }
+            ]
         }
 
         const sortableFields: Record<string, boolean> = {
@@ -96,10 +216,16 @@ export class ProductsService {
             return { createdAt: 'desc' as const }
         })()
 
-        return await prisma.product.findMany({
+        const products = await prisma.product.findMany({
             where,
             include: {
                 category: true,
+                categoryLinks: {
+                    where: { tenantId },
+                    include: {
+                        category: true
+                    }
+                },
                 options: {
                     include: { values: true },
                     orderBy: { position: 'asc' }
@@ -115,6 +241,8 @@ export class ProductsService {
             },
             orderBy
         })
+
+        return products.map((product) => this.mapProductCategories(product))
     }
 
     async createProduct(tenantId: string, data: any) {
@@ -132,15 +260,7 @@ export class ProductsService {
             throw new Error('Product with this slug already exists')
         }
 
-        // Validate categoryId ownership if provided
-        if (data.categoryId) {
-            const category = await prisma.category.findFirst({
-                where: { id: data.categoryId, tenantId }
-            })
-            if (!category) {
-                throw new Error('Invalid category')
-            }
-        }
+        const categoryAssignment = await this.resolveCategoryAssignment(tenantId, data)
 
         const images = normalizeImages(data.images)
 
@@ -156,7 +276,7 @@ export class ProductsService {
                     stock: data.stock || 0,
                     lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : 5,
                     isActive: data.isActive ?? true,
-                    categoryId: data.categoryId,
+                    categoryId: categoryAssignment?.categoryId ?? null,
                     images: images ?? [],
                     promotionalPrice: data.promotionalPrice !== undefined && data.promotionalPrice !== null ? String(data.promotionalPrice) : null,
                     isPromotionActive: data.isPromotionActive ?? false,
@@ -182,6 +302,10 @@ export class ProductsService {
                 }
             })
 
+            if (categoryAssignment) {
+                await this.replaceProductCategories(tx, tenantId, product.id, categoryAssignment.categoryIds)
+            }
+
             return product
         })
 
@@ -194,6 +318,10 @@ export class ProductsService {
             where: { id: productId, tenantId },
             include: {
                 category: true,
+                categoryLinks: {
+                    where: { tenantId },
+                    include: { category: true }
+                },
                 options: {
                     include: { values: { orderBy: { position: 'asc' } } },
                     orderBy: { position: 'asc' }
@@ -244,10 +372,14 @@ export class ProductsService {
                 price: product.price,
                 stock: product.stock
             })
-            return prisma.product.findFirst({
+            const refreshed = await prisma.product.findFirst({
                 where: { id: productId, tenantId },
                 include: {
                     category: true,
+                    categoryLinks: {
+                        where: { tenantId },
+                        include: { category: true }
+                    },
                     options: {
                         include: { values: { orderBy: { position: 'asc' } } },
                         orderBy: { position: 'asc' }
@@ -290,9 +422,10 @@ export class ProductsService {
                     }
                 }
             })
+            return refreshed ? this.mapProductCategories(refreshed) : null
         }
 
-        return product
+        return product ? this.mapProductCategories(product) : null
     }
 
     async updateProduct(tenantId: string, productId: string, data: any, actor?: { userId?: string | null }) {
@@ -310,35 +443,36 @@ export class ProductsService {
             throw err
         }
 
-        if (data.categoryId) {
-            const category = await prisma.category.findFirst({
-                where: { id: data.categoryId, tenantId }
-            })
-            if (!category) {
-                throw new Error('Invalid category')
-            }
-        }
+        const categoryAssignment = await this.resolveCategoryAssignment(tenantId, data)
 
         const images = normalizeImages(data.images)
 
-        const updateResult = await prisma.product.updateMany({
-            where: { id: productId, tenantId },
-            data: {
-                title: data.title,
-                slug: data.slug,
-                description: data.description,
-                miniDescription: data.miniDescription,
-                price: data.price !== undefined ? String(data.price) : undefined,
-                isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
-                categoryId: data.categoryId,
-                images: images,
-                lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : undefined,
-                promotionalPrice: data.promotionalPrice !== undefined ? (data.promotionalPrice !== null ? String(data.promotionalPrice) : null) : undefined,
-                isPromotionActive: typeof data.isPromotionActive === 'boolean' ? data.isPromotionActive : undefined,
-                promotionStartDate: data.promotionStartDate !== undefined ? (data.promotionStartDate ? new Date(data.promotionStartDate) : null) : undefined,
-                promotionEndDate: data.promotionEndDate !== undefined ? (data.promotionEndDate ? new Date(data.promotionEndDate) : null) : undefined,
-                showCountdown: typeof data.showCountdown === 'boolean' ? data.showCountdown : undefined
+        const updateResult = await prisma.$transaction(async (tx) => {
+            const result = await tx.product.updateMany({
+                where: { id: productId, tenantId },
+                data: {
+                    title: data.title,
+                    slug: data.slug,
+                    description: data.description,
+                    miniDescription: data.miniDescription,
+                    price: data.price !== undefined ? String(data.price) : undefined,
+                    isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
+                    categoryId: categoryAssignment ? categoryAssignment.categoryId : undefined,
+                    images: images,
+                    lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : undefined,
+                    promotionalPrice: data.promotionalPrice !== undefined ? (data.promotionalPrice !== null ? String(data.promotionalPrice) : null) : undefined,
+                    isPromotionActive: typeof data.isPromotionActive === 'boolean' ? data.isPromotionActive : undefined,
+                    promotionStartDate: data.promotionStartDate !== undefined ? (data.promotionStartDate ? new Date(data.promotionStartDate) : null) : undefined,
+                    promotionEndDate: data.promotionEndDate !== undefined ? (data.promotionEndDate ? new Date(data.promotionEndDate) : null) : undefined,
+                    showCountdown: typeof data.showCountdown === 'boolean' ? data.showCountdown : undefined
+                }
+            })
+
+            if (categoryAssignment) {
+                await this.replaceProductCategories(tx, tenantId, productId, categoryAssignment.categoryIds)
             }
+
+            return result
         })
 
         if (updateResult.count === 0) throw new Error('Product not found')

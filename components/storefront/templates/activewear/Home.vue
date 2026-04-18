@@ -14,6 +14,12 @@ const props = defineProps<{
 const cartStore = useCartStore()
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -206,7 +212,7 @@ const displayedProducts = computed(() => {
           class="flex gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 md:px-6 max-w-7xl mx-auto scrollbar-hide"
         >
           <NuxtLink 
-            v-for="(cat, idx) in categories" 
+            v-for="(cat) in categories" 
             :key="cat.slug" 
             :to="`/c/${cat.slug}`"
             class="snap-start flex-shrink-0 w-48 h-64 md:w-64 md:h-80 lg:w-80 lg:h-96 border-4 p-6 md:p-8 flex flex-col justify-end items-start hover:shadow-[8px_8px_0_theme(colors.brand.500)] transition-all duration-300 relative overflow-hidden group hover:-translate-y-2 hover:-translate-x-2 bg-zinc-900 skew-x-[-8deg] ml-4"
@@ -217,7 +223,7 @@ const displayedProducts = computed(() => {
               <img
                 v-if="cat.imageUrl"
                 :src="cat.imageUrl"
-                :alt="cat.title"
+                :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-80"
               >
               <div
@@ -229,7 +235,7 @@ const displayedProducts = computed(() => {
 
             <div class="z-10 relative skew-x-[8deg] bg-black/80 border border-zinc-700 backdrop-blur-md px-5 py-3 w-[calc(100%+20px)] -ml-2">
               <h3 class="text-2xl md:text-3xl font-black text-white uppercase italic tracking-wider mb-1 group-hover:text-brand-500 transition-colors">
-                {{ cat.title }}
+                {{ categoryDisplayTitle(cat) }}
               </h3>
               <p class="text-slate-400 font-bold text-sm md:text-base flex items-center gap-2 uppercase tracking-widest">
                 {{ storefrontContent.common.productsCount(cat.itemCount) }}
@@ -265,7 +271,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="i in 4"
             :key="i"
-            class="flex-shrink-0 w-64 md:w-72 animate-pulse skew-x-[-5deg] ml-3"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse skew-x-[-5deg] ml-3"
           >
             <div class="bg-zinc-800 border-2 border-zinc-700 h-64 md:h-80 mb-4" />
             <div class="h-6 bg-zinc-800 w-3/4 mb-3" />
@@ -285,7 +291,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-64 md:w-72"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
             <ProductCard
               :product="product"
@@ -340,7 +346,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-64 md:w-72"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
             <ProductCard
              :product="product"

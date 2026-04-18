@@ -9,6 +9,12 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -96,7 +102,7 @@ const currentYear = new Date().getFullYear()
                     :to="`/c/${cat.slug}`"
                     class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                   >
-                    {{ cat.title }}
+                    {{ categoryDisplayTitle(cat) }}
                   </NuxtLink>
                 </div>
               </div>
@@ -213,7 +219,7 @@ const currentYear = new Date().getFullYear()
                   class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
                   @click="mobileMenuOpen = false"
                 >
-                  {{ cat.title }}
+                  {{ categoryDisplayTitle(cat) }}
                 </NuxtLink>
               </div>
             </div>

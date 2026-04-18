@@ -8,6 +8,32 @@ const extractMetaPixelIds = (metaPixels: any[]): string[] => {
         .filter((id: any) => typeof id === 'string' && /^[0-9]+$/.test(id))
 }
 
+const mapProductCategories = (product: any) => {
+    const linkedCategories = (product?.categoryLinks || [])
+        .map((link: any) => link?.category)
+        .filter((category: any) => category && category.id)
+    let uniqueCategories = Array.from(
+        new Map(linkedCategories.map((category: any) => [category.id, category])).values()
+    )
+    const primaryCategory = product?.category ?? uniqueCategories[0] ?? null
+    const primaryCategoryId = product?.categoryId ?? primaryCategory?.id ?? null
+    if (primaryCategory && !uniqueCategories.some((category: any) => category.id === primaryCategory.id)) {
+        uniqueCategories = [primaryCategory, ...uniqueCategories]
+    }
+    const categoryIds = uniqueCategories.map((category: any) => category.id)
+    if (categoryIds.length === 0 && primaryCategoryId) {
+        categoryIds.push(primaryCategoryId)
+    }
+
+    return {
+        ...product,
+        category: primaryCategory,
+        categoryId: primaryCategoryId,
+        categories: uniqueCategories,
+        categoryIds
+    }
+}
+
 export class PublicProductsService {
     async listProducts(tenantId: string, search?: string) {
         const now = new Date()
@@ -24,6 +50,10 @@ export class PublicProductsService {
             where,
             include: {
                 category: true,
+                categoryLinks: {
+                    where: { tenantId },
+                    include: { category: true }
+                },
                 productImages: { orderBy: [{ isMain: 'desc' }, { position: 'asc' }] },
                 metaPixels: {
                     include: { metaPixel: { select: { pixelId: true, isActive: true } } }
@@ -40,12 +70,15 @@ export class PublicProductsService {
             orderBy: { createdAt: 'desc' }
         })
 
-        return products.map(({ metaPixels, productImages, images, ...rest }: any) => ({
-            ...rest,
-            productImages,
-            images: coalesceProductImageUrls(images, productImages),
-            metaPixelIds: extractMetaPixelIds(metaPixels)
-        }))
+        return products.map(({ metaPixels, productImages, images, ...rest }: any) => {
+            const withCategories = mapProductCategories(rest)
+            return {
+                ...withCategories,
+                productImages,
+                images: coalesceProductImageUrls(images, productImages),
+                metaPixelIds: extractMetaPixelIds(metaPixels)
+            }
+        })
     }
 
     async getProductBySlug(tenantId: string, slug: string) {
@@ -54,6 +87,10 @@ export class PublicProductsService {
             where: { tenantId_slug: { tenantId, slug } },
             include: {
                 category: true,
+                categoryLinks: {
+                    where: { tenantId },
+                    include: { category: true }
+                },
                 metaPixels: {
                     include: { metaPixel: { select: { pixelId: true, isActive: true } } }
                 },
@@ -85,11 +122,10 @@ export class PublicProductsService {
 
         const { metaPixels, productImages, images, ...rest }: any = product
         return {
-            ...rest,
+            ...mapProductCategories(rest),
             productImages,
             images: coalesceProductImageUrls(images, productImages),
             metaPixelIds: extractMetaPixelIds(metaPixels)
         }
     }
 }
-

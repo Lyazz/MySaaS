@@ -9,6 +9,12 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -39,12 +45,20 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const searchSuggestionLimit = 5
+const visibleSearchResultCount = ref(searchSuggestionLimit)
+const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
+const hasMoreSearchResults = computed(() => searchResults.value.length > visibleSearchResultCount.value)
+const showMoreSearchResults = () => {
+    visibleSearchResultCount.value += searchSuggestionLimit
+}
 let searchTimeout: any
 
 watch(searchQuery, (newVal) => {
     if (newVal.length >= 3) {
         searchLoading.value = true
         isSearchDropdownOpen.value = true
+        visibleSearchResultCount.value = searchSuggestionLimit
         clearTimeout(searchTimeout)
         searchTimeout = setTimeout(async () => {
             try {
@@ -53,7 +67,7 @@ watch(searchQuery, (newVal) => {
                     headers: useTenantApiHeaders(),
                     query: { q: newVal }
                 })
-                searchResults.value = (data || []).slice(0, 5)
+                searchResults.value = data || []
             } catch (e) {
                 console.error('Search error:', e)
             } finally {
@@ -62,6 +76,7 @@ watch(searchQuery, (newVal) => {
         }, 500)
     } else {
         searchResults.value = []
+        visibleSearchResultCount.value = searchSuggestionLimit
         isSearchDropdownOpen.value = false
     }
 })
@@ -143,7 +158,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     :to="`/c/${cat.slug}`"
                     class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                   >
-                    {{ cat.title }}
+                    {{ categoryDisplayTitle(cat) }}
                   </NuxtLink>
                 </div>
               </div>
@@ -174,7 +189,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-stone-500">No products found.</div>
                     <div v-else class="flex flex-col gap-1">
                       <NuxtLink
-                        v-for="product in searchResults"
+                        v-for="product in visibleSearchResults"
                         :key="product.id"
                         :to="`/p/${product.slug}`"
                         class="flex items-center gap-3 px-3 py-2 hover:bg-stone-50 rounded-[1.2rem] transition-colors"
@@ -186,6 +201,15 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                           <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
                         </div>
                       </NuxtLink>
+                    <button
+                      v-if="hasMoreSearchResults"
+                      type="button"
+                      class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                      @mousedown.prevent
+                      @click="showMoreSearchResults"
+                    >
+                      See more
+                    </button>
                     </div>
                   </div>
                </div>
@@ -259,7 +283,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
-                      v-for="product in searchResults"
+                      v-for="product in visibleSearchResults"
                       :key="product.id"
                       :to="'/p/' + product.slug"
                       class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
@@ -271,6 +295,15 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                         <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
                       </div>
                     </NuxtLink>
+                  <button
+                    v-if="hasMoreSearchResults"
+                    type="button"
+                    class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                    @mousedown.prevent
+                    @click="showMoreSearchResults"
+                  >
+                    See more
+                  </button>
                   </div>
                 </div>
               </div>
@@ -294,7 +327,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
                   @click="mobileMenuOpen = false"
                 >
-                  {{ cat.title }}
+                  {{ categoryDisplayTitle(cat) }}
                 </NuxtLink>
               </div>
             </div>

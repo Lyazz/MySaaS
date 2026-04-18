@@ -3,6 +3,7 @@ import { useCartStore } from '~/stores/cart'
 import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     product: any
@@ -41,7 +42,10 @@ const currentVariant = computed(() => {
 })
 
 const currentPrice = computed(() => {
-    return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
+    if (currentVariant.value) {
+        return buildProductPricing(props.product, currentVariant.value.price).effectivePrice
+    }
+    return buildProductPricing(props.product).effectivePrice
 })
 
 const currentStock = computed(() => {
@@ -126,7 +130,7 @@ const cartImage = computed(() => images.value[0])
     >
       <div class="flex flex-col">
         <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ storefrontContent.productForm.totalPrice }}</span>
-        <span class="font-serif font-bold text-slate-900 text-lg">{{ formatPrice(Number(product?.price || 0)) }}</span>
+        <span class="font-serif font-bold text-slate-900 text-lg">{{ formatPrice(currentPrice) }}</span>
       </div>
        <button
         onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"

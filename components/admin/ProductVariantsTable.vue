@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-medium text-gray-900">
+      <h3 class="text-lg font-medium" style="color: var(--text-primary)">
         {{ t('admin.variantsTable.title') }}
       </h3>
-      <p class="text-sm text-gray-500">
+      <p class="text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.variantsTable.subtitle') }}
       </p>
     </div>
@@ -15,73 +15,73 @@
           <tr>
             <th
               scope="col"
-              class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+              class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.variant') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.price') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.cost') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.track') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.onHand') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.reserved') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.safety') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.available') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.sku') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.barcode') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.active') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.images') }}
             </th>
@@ -99,77 +99,77 @@
             :key="variant.id"
             class="ui-tr"
           >
-            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6" style="color: var(--text-primary)">
               {{ getVariantTitle(variant) }}
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <input 
                 v-model.number="variant.price" 
                 type="number"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
+                class="ui-input w-24 py-1"
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <input
                 v-model.number="variant.cost"
                 type="number"
                 min="0"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
+                class="ui-input w-24 py-1"
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm" style="color: var(--text-secondary)">
               <input
                 v-model="variant.trackInventory"
                 type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border); background: var(--surface-3)"
                 :disabled="savingInventoryIds.has(variant.id)"
                 @change="updateVariantInventory(variant, { trackInventory: Boolean(variant.trackInventory) })"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <input
                 v-model.number="variant.stock"
                 type="number"
                 min="0"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1 font-mono text-gray-700"
+                class="ui-input w-24 py-1 font-mono"
                 :disabled="savingStockIds.has(variant.id) || variant.trackInventory === false"
                 @change="setVariantStock(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
+            <td class="whitespace-nowrap px-3 py-4 text-sm" style="color: var(--text-secondary)">
               {{ Number(variant.reserved || 0) }}
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <input
                 v-model.number="variant.safetyStock"
                 type="number"
                 min="0"
-                class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
+                class="ui-input w-24 py-1"
                 :disabled="savingInventoryIds.has(variant.id)"
                 @change="updateVariantInventory(variant, { safetyStock: Number(variant.safetyStock) })"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-700">
+            <td class="whitespace-nowrap px-3 py-4 text-sm" style="color: var(--text-secondary)">
               <span v-if="variant.trackInventory !== false">
                 {{ getAvailable(variant) }}
               </span>
-              <span v-else class="text-gray-400">∞</span>
+              <span v-else style="color: var(--text-muted)">∞</span>
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <div class="flex items-center gap-2">
                 <input 
                   v-model="variant.sku" 
                   type="text"
-                  class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1" 
+                  class="ui-input w-32 py-1"
                   :disabled="variant.skuLocked === true"
                   @change="updateVariantInfo(variant)"
                 >
                 <button
                   v-if="variant.skuLocked !== true"
                   type="button"
-                  class="text-xs px-2 py-1 rounded border hover:bg-gray-50"
+                  class="text-xs px-2 py-1 rounded ui-btn ui-btn--secondary"
                   :disabled="suggestingSkuIds.has(variant.id)"
                   @click="suggestSku(variant)"
                 >
@@ -178,7 +178,7 @@
                 <button
                   v-if="variant.skuLocked !== true"
                   type="button"
-                  class="text-xs px-2 py-1 rounded border hover:bg-gray-50"
+                  class="text-xs px-2 py-1 rounded ui-btn ui-btn--secondary"
                   :disabled="lockingSkuIds.has(variant.id)"
                   @click="lockSku(variant)"
                 >
@@ -186,29 +186,29 @@
                 </button>
                 <span
                   v-else
-                  class="text-xs text-gray-400"
+                  class="text-xs" style="color: var(--text-muted)"
                 >
                   {{ t('admin.variantsTable.actions.skuLocked') }}
                 </span>
               </div>
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <input
                 v-model="variant.barcode"
                 type="text"
-                class="block w-32 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm border px-2 py-1"
+                class="ui-input w-32 py-1"
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <input 
                 v-model="variant.isActive" 
                 type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500" 
+                class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border); background: var(--surface-3)" 
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <button
                 type="button"
                 class="text-teal-600 hover:text-teal-900 font-medium"
@@ -220,7 +220,7 @@
             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
               <button
                 type="button"
-                class="text-gray-600 hover:text-gray-900"
+                class="hover:text-teal-400" style="color: var(--text-secondary)"
                 @click="openMovements(variant)"
               >
                 {{ t('admin.variantsTable.actions.movements') }}
@@ -234,21 +234,21 @@
     <!-- Movements modal -->
     <div
       v-if="movementsVariant"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
     >
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 space-y-4">
+      <div class="rounded-xl w-full max-w-3xl p-6 space-y-4" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
         <div class="flex items-start justify-between">
           <div class="min-w-0">
-            <h4 class="text-lg font-semibold text-gray-900 truncate">
+            <h4 class="text-lg font-semibold truncate" style="color: var(--text-primary)">
               {{ t('admin.variantsTable.movements.title') }} — {{ getVariantTitle(movementsVariant) }}
             </h4>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm " style="color: var(--text-secondary)">
               {{ t('admin.variantsTable.movements.subtitle') }}
             </p>
           </div>
           <button
             type="button"
-            class="text-gray-400 hover:text-gray-600"
+            class="hover:text-white" style="color: var(--text-muted)"
             @click="closeMovements"
           >
             ✕
@@ -257,14 +257,14 @@
 
         <div
           v-if="movementsLoading"
-          class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
+          class="text-sm p-3 rounded border border-dashed" style="color: var(--text-secondary); background: var(--surface-2); border-color: var(--surface-border)"
         >
           {{ t('admin.variantsTable.movements.loading') }}
         </div>
 
         <div
           v-else-if="movements.length === 0"
-          class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
+          class="text-sm p-3 rounded border border-dashed" style="color: var(--text-secondary); background: var(--surface-2); border-color: var(--surface-border)"
         >
           {{ t('admin.variantsTable.movements.empty') }}
         </div>
@@ -276,35 +276,35 @@
           <table class="ui-table">
             <thead class="ui-thead">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.date') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.type') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.deltaStock') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.deltaReserved') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.deltaSafety') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.after') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{{ t('admin.variantsTable.movements.columns.by') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.date') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.type') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaStock') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaReserved') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaSafety') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.after') }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.by') }}</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
               <tr v-for="m in movements" :key="m.id" class="ui-tr">
-                <td class="px-3 py-2 text-sm text-gray-700">{{ formatDate(m.createdAt) }}</td>
-                <td class="px-3 py-2 text-sm text-gray-700">
+                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ formatDate(m.createdAt) }}</td>
+                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">
                   <div class="min-w-0">
                     <p class="truncate font-medium">{{ m.type }}</p>
-                    <p v-if="m.orderId" class="truncate text-xs text-gray-500">{{ t('admin.variantsTable.movements.order', { id: m.orderId }) }}</p>
+                    <p v-if="m.orderId" class="truncate text-xs " style="color: var(--text-secondary)">{{ t('admin.variantsTable.movements.order', { id: m.orderId }) }}</p>
                   </div>
                 </td>
-                <td class="px-3 py-2 text-sm text-gray-700">{{ m.delta }}</td>
-                <td class="px-3 py-2 text-sm text-gray-700">{{ m.reservedDelta }}</td>
-                <td class="px-3 py-2 text-sm text-gray-700">{{ m.safetyStockDelta }}</td>
-                <td class="px-3 py-2 text-sm text-gray-700">
+                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.delta }}</td>
+                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.reservedDelta }}</td>
+                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.safetyStockDelta }}</td>
+                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">
                   <span v-if="m.stockAfter !== null">S={{ m.stockAfter }}</span><span v-else>—</span>
-                  <span class="text-gray-400"> · </span>
+                  <span style="color: var(--text-muted)"> · </span>
                   <span v-if="m.reservedAfter !== null">R={{ m.reservedAfter }}</span><span v-else>—</span>
-                  <span class="text-gray-400"> · </span>
+                  <span style="color: var(--text-muted)"> · </span>
                   <span v-if="m.safetyStockAfter !== null">SS={{ m.safetyStockAfter }}</span><span v-else>—</span>
                 </td>
-                <td class="px-3 py-2 text-sm text-gray-700">{{ m.createdBy?.email || t('admin.variantsTable.movements.system') }}</td>
+                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.createdBy?.email || t('admin.variantsTable.movements.system') }}</td>
               </tr>
             </tbody>
           </table>
@@ -325,21 +325,21 @@
     <!-- Image picker modal -->
     <div
       v-if="editingVariantId"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
     >
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-xl p-6 space-y-4">
+      <div class="rounded-xl w-full max-w-xl p-6 space-y-4" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
         <div class="flex items-start justify-between">
           <div>
-            <h4 class="text-lg font-semibold text-gray-900">
+            <h4 class="text-lg font-semibold" style="color: var(--text-primary)">
               {{ t('admin.variantsTable.imagePicker.title') }}
             </h4>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm " style="color: var(--text-secondary)">
               {{ t('admin.variantsTable.imagePicker.subtitle') }}
             </p>
           </div>
           <button
             type="button"
-            class="text-gray-400 hover:text-gray-600"
+            class="hover:text-white" style="color: var(--text-muted)"
             @click="closeImageEditor"
           >
             ✕
@@ -348,7 +348,7 @@
 
         <div
           v-if="availableImages.length === 0"
-          class="text-sm text-gray-600 bg-gray-50 p-3 rounded border border-dashed border-gray-200"
+          class="text-sm p-3 rounded border border-dashed" style="color: var(--text-secondary); background: var(--surface-2); border-color: var(--surface-border)"
         >
           {{ t('admin.variantsTable.imagePicker.empty') }}
         </div>
@@ -360,9 +360,9 @@
           <label
             v-for="img in availableImages"
             :key="img.url"
-            class="border rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:border-teal-400"
+            class="rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:border-teal-400 transition-colors" style="border: 1px solid var(--surface-border)"
           >
-            <div class="aspect-square overflow-hidden rounded-md bg-gray-50 border">
+            <div class="aspect-square overflow-hidden rounded-md" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
               <img
                 :src="img.url"
                 class="w-full h-full object-cover"
@@ -370,10 +370,10 @@
               >
             </div>
             <div class="flex items-center justify-between text-sm">
-              <span class="truncate text-gray-700">{{ img.label || t('admin.variantsTable.imagePicker.imageFallback') }}</span>
+              <span class="truncate" style="color: var(--text-secondary)">{{ img.label || t('admin.variantsTable.imagePicker.imageFallback') }}</span>
               <input
                 type="checkbox"
-                class="h-4 w-4 text-teal-600 border-gray-300 rounded"
+                class="h-4 w-4 text-teal-600 rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
                 :checked="selectedImageUrls.has(img.url)"
                 @change="toggleImage(img.url)"
               >
@@ -384,7 +384,7 @@
         <div class="flex justify-end gap-3 pt-2">
           <button
             type="button"
-            class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+            class="ui-btn ui-btn--secondary text-sm"
             @click="closeImageEditor"
           >
             {{ t('admin.common.cancel') }}

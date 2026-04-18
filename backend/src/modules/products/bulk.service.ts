@@ -158,6 +158,51 @@ const buildUniqueSlug = async (tenantId: string, base: string) => {
     return `${root}-${Date.now()}`
 }
 
+const parseDelimitedValues = (raw: string): string[] => {
+    return Array.from(
+        new Set(
+            raw
+                .split('|')
+                .map((v) => v.trim())
+                .filter(Boolean)
+        )
+    )
+}
+
+const resolveCategoryIdsForImport = async (
+    tenantId: string,
+    rawIds: string[],
+    rawSlugs: string[]
+): Promise<string[]> => {
+    let resolvedByIds: string[] = []
+    if (rawIds.length > 0) {
+        const found = await prisma.category.findMany({
+            where: { tenantId, id: { in: rawIds } },
+            select: { id: true }
+        })
+        const foundSet = new Set(found.map((item) => item.id))
+        if (rawIds.some((id) => !foundSet.has(id))) {
+            throw new Error('Invalid categoryIds')
+        }
+        resolvedByIds = rawIds
+    }
+
+    let resolvedBySlugs: string[] = []
+    if (rawSlugs.length > 0) {
+        const found = await prisma.category.findMany({
+            where: { tenantId, slug: { in: rawSlugs } },
+            select: { id: true, slug: true }
+        })
+        const bySlug = new Map(found.map((item) => [item.slug, item.id]))
+        if (rawSlugs.some((slug) => !bySlug.has(slug))) {
+            throw new Error('Invalid categorySlugs')
+        }
+        resolvedBySlugs = rawSlugs.map((slug) => bySlug.get(slug)!).filter(Boolean)
+    }
+
+    return Array.from(new Set([...resolvedByIds, ...resolvedBySlugs]))
+}
+
 export class BulkProductsService {
     private inventory = new InventoryService()
     private products = new ProductsService()
@@ -166,7 +211,13 @@ export class BulkProductsService {
         const ids = opts?.ids?.filter(Boolean) ?? null
         const products = await prisma.product.findMany({
             where: { tenantId, ...(ids && ids.length > 0 ? { id: { in: ids } } : {}) },
-            include: { category: { select: { id: true, slug: true, title: true } } },
+            include: {
+                category: { select: { id: true, slug: true, title: true } },
+                categoryLinks: {
+                    where: { tenantId },
+                    include: { category: { select: { id: true, slug: true, title: true } } }
+                }
+            },
             orderBy: { createdAt: 'desc' }
         })
 
@@ -179,12 +230,21 @@ export class BulkProductsService {
             'stock',
             'categoryId',
             'categorySlug',
+            'categoryIds',
+            'categorySlugs',
             'description',
             'miniDescription',
             'images'
         ]
 
-        const rows = products.map((p) => ({
+        const rows = products.map((p) => {
+            const categories = (p.categoryLinks || [])
+                .map((link: any) => link?.category)
+                .filter((category: any) => category?.id)
+            const categoryIds = categories.map((category: any) => category.id)
+            const categorySlugs = categories.map((category: any) => category.slug)
+
+            return {
             id: p.id,
             title: p.title,
             slug: p.slug,
@@ -193,10 +253,13 @@ export class BulkProductsService {
             stock: String(p.stock),
             categoryId: p.categoryId ?? '',
             categorySlug: p.category?.slug ?? '',
+            categoryIds: categoryIds.join('|'),
+            categorySlugs: categorySlugs.join('|'),
             description: p.description ?? '',
             miniDescription: p.miniDescription ?? '',
             images: (p.images ?? []).join('|')
-        }))
+            }
+        })
 
         return stringifyCsv(header, rows)
     }
@@ -218,6 +281,8 @@ export class BulkProductsService {
             'stock',
             'categoryId',
             'categorySlug',
+            'categoryIds',
+            'categorySlugs',
             'description',
             'miniDescription',
             'images'
@@ -282,24 +347,32 @@ export class BulkProductsService {
                         select: { id: true, slug: true }
                     })
 
-                const categoryIdCell = (record.categoryId ?? '').trim()
-                const categorySlugCell = (record.categorySlug ?? '').trim()
+                const categoryIds = await (async () => {
+                    const hasMultiCategoryColumns = hasColumn('categoryIds') || hasColumn('categorySlugs')
+                    const hasSingleCategoryColumns = hasColumn('categoryId') || hasColumn('categorySlug')
 
-                const categoryId = await (async () => {
-                    if (categoryIdCell) {
-                        const found = await prisma.category.findFirst({ where: { tenantId, id: categoryIdCell }, select: { id: true } })
-                        if (!found) throw new Error('Invalid categoryId')
-                        return found.id
+                    if (hasMultiCategoryColumns) {
+                        const idsCell = (record.categoryIds ?? '').trim()
+                        const slugsCell = (record.categorySlugs ?? '').trim()
+                        if (!idsCell && !slugsCell) return []
+                        return resolveCategoryIdsForImport(
+                            tenantId,
+                            idsCell ? parseDelimitedValues(idsCell) : [],
+                            slugsCell ? parseDelimitedValues(slugsCell) : []
+                        )
                     }
-                    if (categorySlugCell) {
-                        const found = await prisma.category.findFirst({ where: { tenantId, slug: categorySlugCell }, select: { id: true } })
-                        if (!found) throw new Error('Invalid categorySlug')
-                        return found.id
+
+                    if (hasSingleCategoryColumns) {
+                        const categoryIdCell = (record.categoryId ?? '').trim()
+                        const categorySlugCell = (record.categorySlug ?? '').trim()
+                        if (!categoryIdCell && !categorySlugCell) return []
+                        return resolveCategoryIdsForImport(
+                            tenantId,
+                            categoryIdCell ? [categoryIdCell] : [],
+                            categorySlugCell ? [categorySlugCell] : []
+                        )
                     }
-                    if (hasColumn('categoryId') || hasColumn('categorySlug')) {
-                        // Explicitly present but empty => clear category.
-                        return null
-                    }
+
                     return undefined
                 })()
 
@@ -323,17 +396,19 @@ export class BulkProductsService {
                     if (!rawTitle.trim()) throw new Error('Missing title for create')
                     if (!slug) throw new Error('Missing slug for create')
 
-                    await this.products.createProduct(tenantId, {
+                    const createData: any = {
                         title: rawTitle.trim(),
                         slug,
                         description: description?.trim() ? description : null,
                         miniDescription: miniDescription?.trim() ? miniDescription : null,
                         isActive: isActive ?? true,
-                        categoryId: categoryId === undefined ? undefined : categoryId,
                         price: price ?? undefined,
                         stock: stock ?? undefined,
                         images: images ?? undefined
-                    })
+                    }
+                    if (categoryIds !== undefined) createData.categoryIds = categoryIds
+
+                    await this.products.createProduct(tenantId, createData)
 
                     summary.created++
                     continue
@@ -345,7 +420,7 @@ export class BulkProductsService {
                 if (description !== undefined) updateData.description = description.trim() ? description : null
                 if (miniDescription !== undefined) updateData.miniDescription = miniDescription.trim() ? miniDescription : null
                 if (isActive !== null) updateData.isActive = isActive
-                if (categoryId !== undefined) updateData.categoryId = categoryId
+                if (categoryIds !== undefined) updateData.categoryIds = categoryIds
                 if (price !== null) updateData.price = price
                 if (images !== undefined) updateData.images = images ?? []
 
@@ -360,34 +435,9 @@ export class BulkProductsService {
                 }
 
                 if (Object.keys(updateData).length > 0) {
-                    await prisma.product.updateMany({ where: { tenantId, id: existing.id }, data: updateData })
-                }
-
-                if (price !== null) {
-                    const optionsCount = await prisma.productOption.count({ where: { tenantId, productId: existing.id } })
-                    if (optionsCount === 0) {
-                        const defaultVariant =
-                            (await prisma.productVariant.findFirst({
-                                where: { tenantId, productId: existing.id, optionValues: { none: {} } },
-                                select: { id: true }
-                            })) ??
-                            (await prisma.productVariant.create({
-                                data: {
-                                    tenantId,
-                                    productId: existing.id,
-                                    sku: suggestSkuFromProduct(existing.slug, ''),
-                                    price,
-                                    stock: 0,
-                                    isActive: true,
-                                    trackInventory: true,
-                                    reserved: 0,
-                                    safetyStock: 0
-                                },
-                                select: { id: true }
-                            }))
-
-                        await prisma.productVariant.updateMany({ where: { tenantId, id: defaultVariant.id }, data: { price } })
-                    }
+                    await this.products.updateProduct(tenantId, existing.id, updateData, {
+                        userId: opts?.actorUserId ?? null
+                    })
                 }
 
                 if (stock !== null) {
@@ -410,7 +460,7 @@ export class BulkProductsService {
         tenantId: string,
         input: {
             ids: string[]
-            data: { price?: unknown; stock?: unknown; isActive?: unknown; categoryId?: unknown }
+            data: { price?: unknown; stock?: unknown; isActive?: unknown; categoryId?: unknown; categoryIds?: unknown }
             options?: { propagatePriceToVariants?: boolean }
             actorUserId?: string | null
         }
@@ -427,16 +477,55 @@ export class BulkProductsService {
             patch.isActive = data.isActive
         }
 
-        if (data.categoryId !== undefined) {
-            if (data.categoryId === null || data.categoryId === '') {
-                patch.categoryId = null
-            } else if (typeof data.categoryId === 'string') {
-                const category = await prisma.category.findFirst({ where: { tenantId, id: data.categoryId }, select: { id: true } })
-                if (!category) throw new Error('Invalid categoryId')
-                patch.categoryId = category.id
-            } else {
-                throw new Error('categoryId must be string or null')
+        const hasCategoryId = Object.prototype.hasOwnProperty.call(data, 'categoryId')
+        const hasCategoryIds = Object.prototype.hasOwnProperty.call(data, 'categoryIds')
+        let resolvedCategoryIds: string[] | undefined
+        if (hasCategoryId || hasCategoryIds) {
+            let explicitCategoryId: string | null | undefined
+            if (hasCategoryId) {
+                if (data.categoryId === null || data.categoryId === '') {
+                    explicitCategoryId = null
+                } else if (typeof data.categoryId === 'string') {
+                    explicitCategoryId = data.categoryId.trim() || null
+                } else {
+                    throw new Error('categoryId must be string or null')
+                }
             }
+
+            if (hasCategoryIds) {
+                if (!Array.isArray(data.categoryIds)) {
+                    throw new Error('categoryIds must be an array')
+                }
+                resolvedCategoryIds = Array.from(
+                    new Set(
+                        data.categoryIds
+                            .map((value) => (typeof value === 'string' ? value.trim() : ''))
+                            .filter(Boolean)
+                    )
+                )
+                if (resolvedCategoryIds.length !== data.categoryIds.length) {
+                    throw new Error('categoryIds must contain only strings')
+                }
+            } else {
+                resolvedCategoryIds = explicitCategoryId ? [explicitCategoryId] : []
+            }
+
+            if (explicitCategoryId) {
+                resolvedCategoryIds = [explicitCategoryId, ...resolvedCategoryIds.filter((id) => id !== explicitCategoryId)]
+            }
+
+            if (resolvedCategoryIds.length > 0) {
+                const found = await prisma.category.findMany({
+                    where: { tenantId, id: { in: resolvedCategoryIds } },
+                    select: { id: true }
+                })
+                const foundSet = new Set(found.map((item) => item.id))
+                if (resolvedCategoryIds.some((id) => !foundSet.has(id))) {
+                    throw new Error('Invalid categoryId')
+                }
+            }
+
+            patch.categoryId = resolvedCategoryIds[0] ?? null
         }
 
         const price = data.price === undefined ? null : typeof data.price === 'number' ? String(data.price) : typeof data.price === 'string' ? data.price : null
@@ -449,6 +538,25 @@ export class BulkProductsService {
         if (stock !== null) throw new Error('stock is system-managed and cannot be edited')
 
         await prisma.product.updateMany({ where: { tenantId, id: { in: ids } }, data: patch })
+
+        if (resolvedCategoryIds !== undefined) {
+            await prisma.productCategory.deleteMany({
+                where: { tenantId, productId: { in: ids } }
+            })
+
+            if (resolvedCategoryIds.length > 0) {
+                await prisma.productCategory.createMany({
+                    data: ids.flatMap((productId) =>
+                        resolvedCategoryIds!.map((categoryId) => ({
+                            tenantId,
+                            productId,
+                            categoryId
+                        }))
+                    ),
+                    skipDuplicates: true
+                })
+            }
+        }
 
         if (price !== null && propagatePriceToVariants) {
             await prisma.productVariant.updateMany({
@@ -505,6 +613,7 @@ export class BulkProductsService {
             include: {
                 productImages: { orderBy: { position: 'asc' } },
                 options: { include: { values: { orderBy: { position: 'asc' } } }, orderBy: { position: 'asc' } },
+                categoryLinks: { where: { tenantId }, select: { categoryId: true } },
                 variants: {
                     include: {
                         optionValues: { include: { optionValue: true } },
@@ -541,6 +650,25 @@ export class BulkProductsService {
                 },
                 select: { id: true }
             })
+
+            const categoryIds = Array.from(
+                new Set(
+                    [
+                        ...(product.categoryLinks || []).map((link: any) => link.categoryId),
+                        product.categoryId
+                    ].filter((id): id is string => typeof id === 'string' && id.length > 0)
+                )
+            )
+            if (categoryIds.length > 0) {
+                await tx.productCategory.createMany({
+                    data: categoryIds.map((categoryId) => ({
+                        tenantId,
+                        productId: createdProduct.id,
+                        categoryId
+                    })),
+                    skipDuplicates: true
+                })
+            }
 
             const imageIdMap = new Map<string, string>()
             for (const img of product.productImages ?? []) {

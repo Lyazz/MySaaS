@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router'
 import { homeTemplates, storeShellTemplates } from '~/components/storefront/templates/registry'
 import { useAuthStore } from '~/stores/auth'
+import { getPromotionalPrice } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   layout: false,
@@ -48,11 +49,16 @@ const fetchSampleProduct = async () => {
       const p = products[Math.floor(Math.random() * products.length)]
       const imgs = p.productImages?.map((i:any) => i.url) || p.images || []
       const mainImg = imgs.length > 0 ? imgs[0] : (p.images?.[0] || '/blank.svg?v=2')
+      const promotionalPrice = getPromotionalPrice(p)
       sampleProduct.value = {
         id: p.id || 'sample-id',
         title: p.title || p.name || 'Sample Product',
         slug: p.slug || 'sample-product',
         price: p.price != null ? Number(p.price) : 99,
+        promotionalPrice,
+        isPromotionActive: promotionalPrice !== null,
+        promotionStartDate: null,
+        promotionEndDate: null,
         stock: p.stock ?? 10,
         isActive: true,
         images: [mainImg],

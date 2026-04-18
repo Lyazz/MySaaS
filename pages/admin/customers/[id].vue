@@ -4,57 +4,57 @@
       <div>
         <NuxtLink
           to="/admin/customers"
-          class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700"
+          class="inline-flex items-center text-sm hover:text-teal-600" style="color: var(--text-tertiary)"
         >
           <Icon name="lucide:arrow-left" class="w-4 h-4 mr-1" />
           {{ t('admin.nav.customers') }}
         </NuxtLink>
         <div class="flex items-center gap-3 mt-2">
-          <h2 class="text-2xl font-bold text-gray-800">
+          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
             {{ summary?.name || t('admin.pages.customers.detail.fallbackTitle') }}
           </h2>
           <NuxtLink
             v-if="summary"
             :to="`/admin/customers/edit/${summary.id}`"
-            class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            class="inline-flex items-center px-3 py-1.5 shadow-sm text-sm font-medium rounded-md transition-colors" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
           >
             <Icon name="lucide:pencil" class="w-4 h-4 mr-1.5" />
             {{ t('admin.common.edit') }}
           </NuxtLink>
         </div>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ summary?.phone || '' }}
           <span v-if="summary?.address"> · {{ summary?.address }}</span>
         </p>
       </div>
 
       <div class="flex flex-wrap gap-3 justify-end">
-        <div class="bg-white rounded-lg shadow px-4 py-3">
-          <div class="text-xs text-gray-500">
+        <div class="ui-card px-4 py-3">
+          <div class="text-xs" style="color: var(--text-tertiary)">
             {{ t('admin.pages.customers.detail.stats.orders') }}
           </div>
-          <div class="text-lg font-semibold text-gray-900">
+          <div class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ sales.length }}
           </div>
         </div>
-        <div class="bg-white rounded-lg shadow px-4 py-3">
-          <div class="text-xs text-gray-500">
+        <div class="ui-card px-4 py-3">
+          <div class="text-xs" style="color: var(--text-tertiary)">
             {{ t('admin.pages.customers.detail.stats.totalSpent') }}
           </div>
-          <div class="text-lg font-semibold text-gray-900">
+          <div class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ formatCurrency(totalSpent) }}
           </div>
         </div>
-        <div class="bg-white rounded-lg shadow px-4 py-3">
-          <div class="text-xs text-gray-500">
+        <div class="ui-card px-4 py-3">
+          <div class="text-xs" style="color: var(--text-tertiary)">
             {{ t('admin.pages.customers.detail.stats.totalPaid') }}
           </div>
-          <div class="text-lg font-semibold text-gray-900">
+          <div class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ formatCurrency(totalPaid) }}
           </div>
         </div>
-        <div class="bg-white rounded-lg shadow px-4 py-3">
-          <div class="text-xs text-gray-500">
+        <div class="ui-card px-4 py-3">
+          <div class="text-xs" style="color: var(--text-tertiary)">
             {{ t('admin.pages.customers.detail.stats.currentBalance') }}
           </div>
           <div class="text-lg font-semibold" :class="currentBalance >= 0 ? 'text-amber-700' : 'text-emerald-700'">
@@ -66,44 +66,44 @@
 
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.customers.detail.loading') }}
       </p>
     </div>
 
     <div
       v-else-if="!summary"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:users" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.customers.detail.notFound.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.pages.customers.detail.notFound.hint') }}
       </p>
     </div>
 
     <div
       v-else-if="sales.length === 0 && payments.length === 0"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.customers.detail.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.pages.customers.detail.empty.hint') }}
       </p>
     </div>
 
     <div v-else class="space-y-6">
       <div v-if="sales.length > 0" class="ui-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-200">
-          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.nav.salesItem') }}</h3>
+        <div class="px-6 py-4" style="border-bottom: 1px solid var(--surface-border)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.nav.salesItem') }}</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="ui-table">
@@ -133,12 +133,12 @@
                 class="ui-tr"
               >
                 <td class="ui-td whitespace-nowrap">
-                  <div class="font-medium text-slate-900">
+                  <div class="font-medium" style="color: var(--text-primary)">
                     #{{ s.id.substring(0, 8) }}
                   </div>
                 </td>
                 <td class="ui-td whitespace-nowrap">
-                  <div class="font-medium text-slate-900">
+                  <div class="font-medium" style="color: var(--text-primary)">
                     {{ formatCurrency(s.totalAmount) }}
                   </div>
                 </td>
@@ -147,7 +147,7 @@
                     {{ s.status }}
                   </span>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   {{ formatDate(s.createdAt) }}
                 </td>
                 <td class="ui-td whitespace-nowrap text-right">
@@ -168,8 +168,8 @@
       </div>
 
       <div v-if="payments.length > 0" class="ui-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-200">
-          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.pages.customers.detail.stats.payments') }}</h3>
+        <div class="px-6 py-4" style="border-bottom: 1px solid var(--surface-border)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.customers.detail.stats.payments') }}</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="ui-table">
@@ -198,18 +198,18 @@
                 :key="p.id"
                 class="ui-tr"
               >
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   {{ formatDate(p.createdAt) }}
                 </td>
                 <td class="ui-td whitespace-nowrap">
-                  <div class="text-sm font-semibold text-slate-900">
+                  <div class="text-sm font-semibold" style="color: var(--text-primary)">
                     {{ formatCurrency(p.amount) }}
                   </div>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-700">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   {{ p.method }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   {{ p.reference || '—' }}
                 </td>
                 <td class="ui-td whitespace-nowrap text-right">
@@ -222,7 +222,7 @@
                       <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
                       <span>{{ t('admin.common.view') }}</span>
                     </NuxtLink>
-                    <span v-else class="text-slate-400">—</span>
+                    <span v-else style="color: var(--text-muted)">—</span>
                   </div>
                 </td>
               </tr>

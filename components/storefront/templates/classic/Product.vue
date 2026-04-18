@@ -4,6 +4,7 @@ import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     product: any
@@ -34,7 +35,10 @@ const currentVariant = computed(() => {
 })
 
 const currentPrice = computed(() => {
-    return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
+    if (currentVariant.value) {
+        return buildProductPricing(props.product, currentVariant.value.price).effectivePrice
+    }
+    return buildProductPricing(props.product).effectivePrice
 })
 
 const currentStock = computed(() => {

@@ -40,6 +40,7 @@ model Tenant {
   purchaseOrders       PurchaseOrder[]
   purchaseOrderItems   PurchaseOrderItem[]
   categories           Category[]
+  productCategories    ProductCategory[]
   orders               Order[]
   orderItems           OrderItem[]
   sales                Sale[]
@@ -412,7 +413,12 @@ model Category {
   tenantId String
   tenant   Tenant  @relation(fields: [tenantId], references: [id])
 
-  products Product[]
+  parentId String?
+  parent   Category?  @relation("CategoryHierarchy", fields: [tenantId, parentId], references: [tenantId, id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+
+  products     Product[]
+  productLinks ProductCategory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -420,6 +426,7 @@ model Category {
   @@unique([tenantId, slug])
   @@unique([tenantId, id])
   @@index([tenantId])
+  @@index([tenantId, parentId])
 }
 
 model Product {
@@ -448,6 +455,7 @@ model Product {
 
   categoryId String?
   category   Category? @relation(fields: [tenantId, categoryId], references: [tenantId, id])
+  categoryLinks ProductCategory[]
 
   options     ProductOption[]
   variants    ProductVariant[]
@@ -465,6 +473,25 @@ model Product {
   @@unique([tenantId, slug])
   @@unique([tenantId, id])
   @@index([tenantId])
+}
+
+model ProductCategory {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
+
+  categoryId String
+  category   Category @relation(fields: [tenantId, categoryId], references: [tenantId, id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, productId, categoryId])
+  @@index([tenantId])
+  @@index([tenantId, productId])
+  @@index([tenantId, categoryId])
 }
 
 model TenantMetaPixel {

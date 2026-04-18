@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
           {{ t('admin.nav.products') }}
         </h2>
-        <p class="mt-1 text-slate-600">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.products.index.subtitle') }}
         </p>
       </div>
@@ -15,7 +15,7 @@
           <MenuButton class="ui-btn ui-btn--secondary ui-btn--md">
             <Icon name="lucide:arrow-down-up" class="w-5 h-5" />
             <span>Import/Export</span>
-            <Icon name="lucide:chevron-down" class="w-4 h-4 ml-1 -mr-1 text-slate-400" />
+            <Icon name="lucide:chevron-down" class="w-4 h-4 ml-1 -mr-1" style="color: var(--text-tertiary)" />
           </MenuButton>
           <transition
             enter-active-class="transition ease-out duration-100"
@@ -25,25 +25,27 @@
             leave-from-class="transform opacity-100 scale-100"
             leave-to-class="transform opacity-0 scale-95"
           >
-            <MenuItems class="absolute right-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <MenuItems class="absolute right-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
               <div class="py-1">
                 <MenuItem v-slot="{ active }">
                   <button
-                    :class="[active ? 'bg-slate-100 text-slate-900' : 'text-slate-700', 'group flex w-full items-center px-4 py-2 text-sm']"
+                    :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                    :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                     :disabled="loading"
                     @click="openImportModal"
                   >
-                    <Icon name="lucide:download" class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" aria-hidden="true" />
+                    <Icon name="lucide:download" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
                     {{ t('admin.pages.products.index.bulk.import') }}
                   </button>
                 </MenuItem>
                 <MenuItem v-slot="{ active }">
                   <button
-                    :class="[active ? 'bg-slate-100 text-slate-900' : 'text-slate-700', 'group flex w-full items-center px-4 py-2 text-sm']"
+                    :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                    :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                     :disabled="loading"
                     @click="exportProductsCsv"
                   >
-                    <Icon name="lucide:upload" class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" aria-hidden="true" />
+                    <Icon name="lucide:upload" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
                     {{ t('admin.pages.products.index.bulk.export') }}
                   </button>
                 </MenuItem>
@@ -66,7 +68,7 @@
     <div class="ui-card p-4 mb-6">
       <div class="flex flex-wrap items-end gap-4">
         <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.products.index.filters.searchLabel') }}</label>
+          <label class="ui-label mb-1">{{ t('admin.pages.products.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             :placeholder="t('admin.pages.products.index.filters.searchPlaceholder')"
@@ -81,11 +83,11 @@
               {{ t('admin.pages.products.index.filters.allCategories') }}
             </option>
             <option
-              v-for="cat in categories"
+              v-for="cat in orderedCategories"
               :key="cat.id"
               :value="cat.id"
             >
-              {{ cat.title }}
+              {{ categoryOptionLabel(cat) }}
             </option>
           </BaseSelect>
         </div>
@@ -117,7 +119,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.products.index.loading') }}
       </p>
     </div>
@@ -127,11 +129,11 @@
       v-else-if="filteredProducts.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:package" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:package" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.products.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.pages.products.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -150,8 +152,8 @@
       v-else
       class="ui-card overflow-hidden"
     >
-      <div v-if="selectedIds.length > 0" class="ui-card-header bg-slate-50 flex flex-wrap items-center gap-3 justify-between">
-        <div class="text-sm font-medium text-slate-700">
+      <div v-if="selectedIds.length > 0" class="ui-card-header flex flex-wrap items-center gap-3 justify-between" style="background: var(--surface-2)">
+        <div class="text-sm font-medium" style="color: var(--text-secondary)">
           {{ t('admin.pages.products.index.bulk.selected', { count: selectedIds.length }) }}
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -193,13 +195,14 @@
 	              <th class="ui-th w-10">
 	                <input
 	                  type="checkbox"
-	                  class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+	                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  style="border-color: var(--surface-border); background: var(--surface-3)"
 	                  :checked="allVisibleSelected"
 	                  :disabled="paginatedProducts.length === 0"
 	                  @change="toggleSelectAllVisible"
 	                >
 	              </th>
-	              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('title')">
+	              <th class="ui-th cursor-pointer transition-colors" @click="setSort('title')">
 	                <div class="flex items-center gap-1">
 	                  {{ t('admin.pages.products.index.table.product') }}
 	                  <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -208,19 +211,19 @@
               <th class="ui-th">
                 {{ t('admin.pages.products.index.table.category') }}
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('price')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('price')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.products.index.table.price') }}
                   <Icon v-if="sortBy === 'price'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('stock')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('stock')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.products.index.table.stock') }}
                   <Icon v-if="sortBy === 'stock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('isActive')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('isActive')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.products.index.table.status') }}
                   <Icon v-if="sortBy === 'isActive'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -244,13 +247,14 @@
 	                <input
 	                  v-model="selectedIds"
 	                  type="checkbox"
-	                  class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+	                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  style="border-color: var(--surface-border); background: var(--surface-3)"
 	                  :value="product.id"
 	                >
 	              </td>
 	              <td class="ui-td whitespace-nowrap">
 	                <div class="flex items-center">
-	                  <div class="flex-shrink-0 h-10 w-10 bg-slate-50 border border-slate-200 rounded-md flex items-center justify-center overflow-hidden">
+	                  <div class="flex-shrink-0 h-10 w-10 rounded-md flex items-center justify-center overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                     <img 
                       v-if="getProductMainImage(product)" 
                       :src="getProductMainImage(product)" 
@@ -260,33 +264,39 @@
                     <Icon
                       v-else
                       name="lucide:image"
-                      class="w-5 h-5 text-slate-300"
+                      class="w-5 h-5" style="color: var(--text-tertiary)"
                     />
                   </div>
                   <div class="ml-4">
-                    <div class="font-medium text-slate-900">
+                    <div class="font-medium" style="color: var(--text-primary)">
                       {{ product.title }}
                     </div>
-                    <div class="text-sm text-slate-500">
+                    <div class="text-sm" style="color: var(--text-tertiary)">
                       {{ product.slug }}
                     </div>
                   </div>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <span
-                  v-if="product.category"
-                  class="ui-badge ui-badge--emerald"
+                <div
+                  v-if="(product.categories && product.categories.length > 0) || product.category"
+                  class="flex flex-wrap gap-1"
                 >
-                  {{ product.category.title }}
-                </span>
+                  <span
+                    v-for="cat in (product.categories && product.categories.length > 0 ? product.categories : (product.category ? [product.category] : []))"
+                    :key="cat.id"
+                    class="ui-badge ui-badge--emerald"
+                  >
+                    {{ categoryBadgeLabel(cat) }}
+                  </span>
+                </div>
                 <span
                   v-else
-                  class="text-sm text-slate-400"
+                  class="text-sm" style="color: var(--text-tertiary)"
                 >{{ t('admin.pages.products.index.table.uncategorized') }}</span>
               </td>
-              <td class="ui-td whitespace-nowrap text-slate-900">
-                {{ formatCurrency(product.price) }}
+              <td class="ui-td whitespace-nowrap" style="color: var(--text-primary)">
+                {{ formatCurrency(effectivePriceFor(product)) }}
               </td>
               <td class="ui-td whitespace-nowrap">
                 <!-- Out of stock -->
@@ -305,7 +315,7 @@
                   {{ product.stock }} en stock
                 </span>
                 <!-- Normal stock -->
-                <span v-else class="text-slate-600">{{ product.stock }} en stock</span>
+                <span v-else style="color: var(--text-secondary)">{{ product.stock }} en stock</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <span
@@ -317,7 +327,7 @@
               </td>
               <td class="ui-td whitespace-nowrap text-center">
                 <Menu as="div" class="relative inline-block text-left text-sm">
-                  <MenuButton class="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors">
+                  <MenuButton class="p-1.5 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)">
                     <Icon name="lucide:globe" class="w-5 h-5" />
                   </MenuButton>
                   <transition
@@ -328,7 +338,7 @@
                     leave-from-class="transform opacity-100 scale-100"
                     leave-to-class="transform opacity-0 scale-95"
                   >
-                    <MenuItems class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <MenuItems class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                       <div class="py-1">
                         <!-- Product Links -->
                         <div class="flex items-center px-1">
@@ -336,16 +346,18 @@
                             <a
                               :href="getProductUrl(product.slug)"
                               target="_blank"
-                              :class="[active ? 'bg-slate-100 text-slate-900' : 'text-slate-700', 'group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4 text-slate-400 group-hover:text-slate-500" />
+                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4" style="color: var(--text-tertiary)" />
                               {{ t('admin.pages.products.index.links.openProduct') }}
                             </a>
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/p/${product.slug}`)"
-                              :class="[active ? 'bg-slate-100 text-slate-900' : 'text-slate-700', 'p-2 rounded-md hover:text-teal-600 transition-colors']"
+                              :class="['p-2 rounded-md hover:text-teal-600 transition-colors']"
+                              :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyProduct')"
                             >
                               <Icon name="lucide:copy" class="h-4 w-4" />
@@ -353,7 +365,7 @@
                           </MenuItem>
                         </div>
 
-                        <div class="my-1 border-t border-slate-100"></div>
+                        <div class="my-1" style="border-top: 1px solid var(--surface-border)"></div>
 
                         <!-- Landing Links -->
                         <div class="flex items-center px-1">
@@ -361,16 +373,18 @@
                             <a
                               :href="getLandingUrl(product.slug)"
                               target="_blank"
-                              :class="[active ? 'bg-slate-100 text-slate-900' : 'text-slate-700', 'group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4 text-slate-400 group-hover:text-slate-500" />
+                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4" style="color: var(--text-tertiary)" />
                               {{ t('admin.pages.products.index.links.openLanding') }}
                             </a>
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/p/${product.slug}?mode=landing`)"
-                              :class="[active ? 'bg-slate-100 text-slate-900' : 'text-slate-700', 'p-2 rounded-md hover:text-teal-600 transition-colors']"
+                              :class="['p-2 rounded-md hover:text-teal-600 transition-colors']"
+                              :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyLanding')"
                             >
                               <Icon name="lucide:copy" class="h-4 w-4" />
@@ -386,13 +400,13 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/products/${product.id}`"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    class="p-2 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(product)"
                   >
@@ -406,7 +420,7 @@
       </div>
  
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -415,7 +429,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm text-slate-600">
+          <span class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -428,7 +442,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-slate-700">
+            <p class="text-sm" style="color: var(--text-secondary)">
               {{ t('admin.pages.products.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredProducts.length),
@@ -440,7 +454,8 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium disabled:opacity-50"
+                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -452,15 +467,17 @@
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
                     ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    : ''
                 ]"
+                :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
                 @click="currentPage = page"
               >
                 {{ page }}
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium disabled:opacity-50"
+                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}
@@ -488,19 +505,19 @@
 	      v-if="showImportCsvModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl flex flex-col max-h-[90vh]">
-	        <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4 shrink-0">
+	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh]" style="background: var(--surface-1)">
+	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
 	          <div class="min-w-0">
-	            <h3 class="truncate text-lg font-semibold text-gray-900">
+	            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
 	              {{ t('admin.pages.products.index.bulk.importTitle') }}
 	            </h3>
-	            <p class="mt-1 text-sm text-gray-600">
+	            <p class="mt-1 text-sm" style="color: var(--text-secondary)">
 	              {{ t('admin.pages.products.index.bulk.importHint') }}
 	            </p>
 	          </div>
 	          <button
 	            type="button"
-	            class="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+	            class="rounded-md p-2" style="color: var(--text-tertiary)"
 	            @click="closeImportModal"
 	          >
 	            <Icon name="lucide:x" class="h-5 w-5" />
@@ -511,36 +528,36 @@
 	            ref="importCsvInput"
 	            type="file"
 	            accept=".csv,text/csv"
-	            class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-teal-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-teal-700 hover:file:bg-teal-100"
+	            class="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-teal-700 hover:file:bg-teal-100" style="color: var(--text-secondary)"
 	            :disabled="importingCsv"
 	            @change="onImportCsvFileChange"
 	          >
 
-	          <div class="rounded-md border border-gray-200 bg-white p-4">
+	          <div class="rounded-md p-4" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
 	            <div class="flex items-start justify-between gap-3">
 	              <div class="min-w-0">
-	                <div class="text-sm font-semibold text-gray-900">
+	                <div class="text-sm font-semibold" style="color: var(--text-primary)">
 	                  {{ t('admin.pages.products.index.bulk.importTemplateTitle') }}
 	                </div>
-	                <div class="mt-1 text-xs text-gray-600">
+	                <div class="mt-1 text-xs" style="color: var(--text-secondary)">
 	                  {{ t('admin.pages.products.index.bulk.importTemplateHint') }}
 	                </div>
 	              </div>
 	              <button
 	                type="button"
-	                class="shrink-0 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+	                class="shrink-0 rounded-md px-3 py-1.5 text-xs font-medium" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
 	                @click="downloadProductsImportTemplate"
 	              >
 	                {{ t('admin.pages.products.index.bulk.importTemplateDownload') }}
 	              </button>
 	            </div>
 
-	            <pre class="mt-3 overflow-auto rounded-md bg-gray-50 p-3 text-xs text-gray-800"><code>{{ productsImportTemplateCsv }}</code></pre>
+	            <pre class="mt-3 overflow-auto rounded-md p-3 text-xs" style="background: var(--surface-2); color: var(--text-primary)"><code>{{ productsImportTemplateCsv }}</code></pre>
 	          </div>
 
 	          <div
 	            v-if="importCsvResult"
-	            class="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700"
+	            class="rounded-md p-3 text-sm" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
 	          >
 	            <div>{{ t('admin.pages.products.index.bulk.importResult', importCsvResult) }}</div>
 	            <div v-if="importCsvResult.warnings?.length" class="mt-3">
@@ -579,10 +596,10 @@
 	            </div>
 	          </div>
 	        </div>
-	        <div class="flex justify-end gap-2 border-t border-gray-200 px-6 py-4">
+	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
 	          <button
 	            type="button"
-	            class="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50"
+	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
 	            @click="closeImportModal"
 	          >
 	            {{ t('admin.common.close') }}
@@ -598,19 +615,19 @@
 	      v-if="showBulkUpdateModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg bg-white shadow-xl flex flex-col max-h-[90vh]">
-	        <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-4 shrink-0">
+	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh]" style="background: var(--surface-1)">
+	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
 	          <div class="min-w-0">
-	            <h3 class="truncate text-lg font-semibold text-gray-900">
+	            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
 	              {{ t('admin.pages.products.index.bulk.updateTitle') }}
 	            </h3>
-	            <p class="mt-1 text-sm text-gray-600">
+	            <p class="mt-1 text-sm" style="color: var(--text-secondary)">
 	              {{ t('admin.pages.products.index.bulk.updateHint') }}
 	            </p>
 	          </div>
 	          <button
 	            type="button"
-	            class="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+	            class="rounded-md p-2" style="color: var(--text-tertiary)"
 	            @click="closeBulkUpdateModal"
 	          >
 	            <Icon name="lucide:x" class="h-5 w-5" />
@@ -659,20 +676,20 @@
 	            <option value="__clear__">
 	              {{ t('admin.pages.products.index.bulk.fields.clearCategory') }}
 	            </option>
-	            <option
-	              v-for="cat in categories"
-	              :key="cat.id"
-	              :value="cat.id"
-	            >
-	              {{ cat.title }}
-	            </option>
+	              <option
+	                v-for="cat in orderedCategories"
+	                :key="cat.id"
+	                :value="cat.id"
+	              >
+	                {{ categoryOptionLabel(cat) }}
+	              </option>
 	          </BaseSelect>
 
-	          <label class="flex items-center gap-2 text-sm text-gray-700">
+	          <label class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
 	            <input
 	              v-model="bulkPropagatePriceToVariants"
 	              type="checkbox"
-	              class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+	              class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border); background: var(--surface-3)"
 	            >
 	            {{ t('admin.pages.products.index.bulk.fields.propagatePrice') }}
 	          </label>
@@ -685,10 +702,10 @@
 	          </div>
 	        </div>
 
-	        <div class="flex justify-end gap-2 border-t border-gray-200 px-6 py-4">
+	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
 	          <button
 	            type="button"
-	            class="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50"
+	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
 	            :disabled="bulkSaving"
 	            @click="closeBulkUpdateModal"
 	          >
@@ -718,6 +735,7 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useToast } from '~/composables/useToast'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
  
 definePageMeta({
   middleware: 'auth',
@@ -735,18 +753,28 @@ interface Product {
   title: string
   slug: string
   price: number
+  promotionalPrice?: number | string | null
+  isPromotionActive?: boolean
+  promotionStartDate?: string | Date | null
+  promotionEndDate?: string | Date | null
   stock: number
   lowStockThreshold: number
   isActive: boolean
   images?: string[]
   productImages?: Array<{ id: string; url: string; isMain: boolean; position: number }>
   category?: { id: string; title: string }
+  categories?: Array<{ id: string; title: string; slug?: string }>
+  categoryIds?: string[]
 }
  
 interface Category {
   id: string
   title: string
+  displayTitle?: string
+  parentId?: string | null
+  parent?: { id: string; title: string } | null
 }
+type CategoryOption = Category & { depth: number }
  
 // State
 const products = ref<Product[]>([])
@@ -768,9 +796,9 @@ const importCsvResult = ref<any | null>(null)
 const importCsvInput = ref<HTMLInputElement | null>(null)
 
 const productsImportTemplateHeader =
-  'id,slug,title,price,stock,isActive,categoryId,categorySlug,description,miniDescription,images'
+  'id,slug,title,price,stock,isActive,categoryId,categorySlug,categoryIds,categorySlugs,description,miniDescription,images'
 const productsImportTemplateExample =
-  ',my-product,My product,1990,10,true,,,,"","image1.jpg|https://example.com/image2.jpg"'
+  ',my-product,My product,1990,10,true,,,,,,,"image1.jpg|https://example.com/image2.jpg"'
 const productsImportTemplateCsv = `${productsImportTemplateHeader}\n${productsImportTemplateExample}\n`
 
 const showBulkUpdateModal = ref(false)
@@ -781,6 +809,47 @@ const bulkCategoryId = ref('')
 const bulkPropagatePriceToVariants = ref(true)
 const bulkSaving = ref(false)
 const bulkError = ref<string | null>(null)
+
+const orderedCategories = computed<CategoryOption[]>(() => {
+  const byParent = new Map<string | null, Category[]>()
+  for (const category of categories.value) {
+    const key = category.parentId ?? null
+    const group = byParent.get(key) ?? []
+    group.push(category)
+    byParent.set(key, group)
+  }
+  for (const group of byParent.values()) {
+    group.sort((a, b) => a.title.localeCompare(b.title))
+  }
+
+  const ordered: CategoryOption[] = []
+  const seen = new Set<string>()
+  const visit = (node: Category, depth = 0) => {
+    if (seen.has(node.id)) return
+    seen.add(node.id)
+    ordered.push({ ...node, depth })
+    for (const child of byParent.get(node.id) || []) {
+      visit(child, depth + 1)
+    }
+  }
+
+  for (const root of byParent.get(null) || []) {
+    visit(root, 0)
+  }
+  for (const category of categories.value) {
+    if (!seen.has(category.id)) visit(category, 0)
+  }
+
+  return ordered
+})
+
+const categoriesById = computed(() => new Map(categories.value.map((category) => [category.id, category])))
+const categoryOptionLabel = (category: CategoryOption) => `${'-> '.repeat(category.depth)}${category.title}`
+const categoryBadgeLabel = (category: { id: string; title: string }) => {
+  const resolved = categoriesById.value.get(category.id)
+  if (resolved?.parentId) return `-> ${resolved.title}`
+  return resolved?.title || category.title
+}
 
 // Helper to get main product image
 const getProductMainImage = (product: Product): string | undefined => {
@@ -805,6 +874,8 @@ const sortOptions = [
   { key: 'stock', labelKey: 'admin.pages.products.index.sort.stock' },
   { key: 'isActive', labelKey: 'admin.pages.products.index.sort.status' }
 ] as const
+
+const effectivePriceFor = (product: Product) => buildProductPricing(product).effectivePrice
  
 // Computed
 const filteredProducts = computed(() => {
@@ -821,7 +892,15 @@ const filteredProducts = computed(() => {
  
   // Category filter
   if (selectedCategory.value) {
-    filtered = filtered.filter(p => p.category?.id === selectedCategory.value)
+    filtered = filtered.filter((p) => {
+      const ids = Array.from(
+        new Set([
+          ...(Array.isArray(p.categoryIds) ? p.categoryIds : []),
+          p.category?.id
+        ].filter((id): id is string => typeof id === 'string' && id.length > 0))
+      )
+      return ids.includes(selectedCategory.value)
+    })
   }
  
   // Status filter
@@ -833,6 +912,14 @@ const filteredProducts = computed(() => {
         selectedStatus.value === 'active' ? p.isActive : !p.isActive
       )
     }
+  }
+
+  if (sortBy.value === 'price') {
+    filtered = [...filtered].sort((a, b) => {
+      const left = effectivePriceFor(a)
+      const right = effectivePriceFor(b)
+      return sortOrder.value === 'asc' ? left - right : right - left
+    })
   }
  
   return filtered

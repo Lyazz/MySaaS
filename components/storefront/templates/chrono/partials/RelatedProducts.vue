@@ -22,12 +22,12 @@ const getProductMainImage = (product: any) => {
                 </div>
             </div>
 
-            <div class="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-5 overflow-x-auto snap-x snap-mandatory pb-6 sm:pb-0 scrollbar-hide">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
                 <NuxtLink 
                     v-for="product in products" 
                     :key="product.id"
                     :to="`/p/${product.slug}`"
-                    class="group flex flex-col flex-none w-[230px] sm:w-auto snap-center sm:snap-none border transition-all duration-300 overflow-hidden"
+                    class="group flex flex-col border transition-all duration-300 overflow-hidden"
                     style="background-color:#131720; border-color:rgba(212,197,169,0.08); border-radius:2px;"
                 >
                     <div class="aspect-square overflow-hidden relative" style="background-color:#1A1F2E;">

@@ -14,6 +14,12 @@ const props = defineProps<{
 const cartStore = useCartStore()
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -129,9 +135,9 @@ const {
                 :to="slideTo(slide.buttonHref)"
                 class="group inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-bold rounded-full hover:from-pink-600 hover:to-orange-600 transition-all transform hover:scale-105 shadow-lg shadow-pink-500/30 text-sm md:text-base"
               >
-	                {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
-	                <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
-	              </NuxtLink>
+                  {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
+                  <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </NuxtLink>
             </div>
           </div>
         </div>
@@ -200,7 +206,7 @@ const {
           class="flex gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 md:px-6 max-w-7xl mx-auto scrollbar-hide"
         >
           <NuxtLink 
-            v-for="(cat, idx) in categories" 
+            v-for="(cat) in categories" 
             :key="cat.slug" 
             :to="`/c/${cat.slug}`"
             class="snap-start flex-shrink-0 w-48 h-64 md:w-64 md:h-80 lg:w-80 lg:h-96 rounded-3xl p-6 md:p-8 flex flex-col justify-end items-start hover:shadow-xl transition-all duration-300 relative overflow-hidden group border border-purple-500/30"
@@ -211,7 +217,7 @@ const {
               <img
                 v-if="cat.imageUrl"
                 :src="cat.imageUrl"
-                :alt="cat.title"
+                :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover opacity-70 transition-transform duration-700 group-hover:scale-105"
               >
               <div
@@ -226,12 +232,12 @@ const {
 
             <div class="z-10 relative transform transition-transform duration-300 group-hover:-translate-y-2 bg-[#1a0a2e]/85 backdrop-blur-sm px-4 py-3 rounded-2xl border border-purple-500/30">
               <h3 class="text-xl md:text-2xl font-bold text-white mb-1 group-hover:text-pink-400 transition-colors">
-                {{ cat.title }}
+                {{ categoryDisplayTitle(cat) }}
               </h3>
               <p class="text-purple-300/70 font-medium text-sm md:text-base flex items-center gap-2">
-	                {{ storefrontContent.common.productsCount(cat.itemCount) }}
-	                <span class="w-8 h-px bg-purple-500/50 group-hover:w-16 group-hover:bg-pink-500 transition-all hidden md:block" />
-	              </p>
+                  {{ storefrontContent.common.productsCount(cat.itemCount) }}
+                  <span class="w-8 h-px bg-purple-500/50 group-hover:w-16 group-hover:bg-pink-500 transition-all hidden md:block" />
+                </p>
             </div>
                 
             <!-- Action Icon -->
@@ -272,7 +278,7 @@ const {
           <div
             v-for="i in 4"
             :key="i"
-            class="flex-shrink-0 w-64 md:w-72 animate-pulse"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse"
           >
             <div class="bg-purple-900/30 rounded-2xl h-64 md:h-80 mb-4" />
             <div class="h-4 bg-purple-900/30 rounded-full w-3/4 mb-3" />
@@ -291,7 +297,7 @@ const {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-             class="flex-shrink-0 w-64 md:w-72"
+             class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
            <ProductCard
              :product="product"
@@ -345,7 +351,7 @@ const {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-64 md:w-72"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
             <ProductCard
              :product="product"

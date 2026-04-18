@@ -1,14 +1,14 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-    <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+  <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+    <div class="p-6" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
       <div class="flex items-center justify-between">
         <div>
-           <h3 class="text-lg font-bold text-slate-800">{{ t('admin.homepageSettingsForm.carousel.title') }}</h3>
-           <p class="mt-1 text-sm text-slate-500">{{ t('admin.homepageSettingsForm.carousel.subtitle') }}</p>
+           <h3 class="text-lg font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.carousel.title') }}</h3>
+           <p class="mt-1 text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.carousel.subtitle') }}</p>
         </div>
         <button
           type="button"
-          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-slate-800 rounded-lg hover:bg-slate-900 transition-colors shadow-sm disabled:opacity-50"
+          class="ui-btn ui-btn--secondary text-sm"
           :disabled="slides.length >= 10"
           @click="addSlide"
         >
@@ -19,9 +19,9 @@
     </div>
 
     <div class="p-6 space-y-4">
-       <div v-if="slides.length === 0" class="text-center py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-          <Icon name="lucide:image-off" class="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p class="text-slate-500 font-medium">{{ t('admin.homepageSettingsForm.carousel.noSlides') }}</p>
+       <div v-if="slides.length === 0" class="text-center py-12 rounded-xl border-2 border-dashed" style="background: var(--surface-2); border-color: var(--surface-border)">
+          <Icon name="lucide:image-off" class="w-12 h-12 mx-auto mb-3" style="color: var(--text-muted)" />
+          <p class="font-medium" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.carousel.noSlides') }}</p>
           <button 
              @click="addSlide"
              type="button"
@@ -34,35 +34,36 @@
        <div 
          v-for="(slide, index) in slides"
          :key="'slide-' + index"
-         class="bg-white rounded-xl border transition-all duration-200 relative group"
-         :class="expandedSlideIndex === index ? 'border-teal-200 shadow-md ring-1 ring-teal-50' : 'border-slate-200 hover:border-slate-300'"
+         class="rounded-xl transition-all duration-200 relative group"
+         :style="expandedSlideIndex === index ? 'background: var(--surface-1); border: 1px solid rgba(var(--brand-rgb) / 0.4)' : 'background: var(--surface-1); border: 1px solid var(--surface-border)'"
        >
           <!-- Accordion Header -->
           <div 
              class="px-5 py-4 flex items-center justify-between cursor-pointer select-none"
-             :class="expandedSlideIndex === index ? 'bg-teal-50/30 border-b border-teal-100 rounded-t-xl' : 'rounded-xl'"
+             :style="expandedSlideIndex === index ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2)' : ''"
+             :class="expandedSlideIndex === index ? 'rounded-t-xl' : 'rounded-xl'"
              @click="toggleSlide(index)"
           >
              <div class="flex items-center gap-4">
-                <div class="flex flex-col gap-1 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" @click.stop>
-                   <button type="button" @click="moveSlide(index, -1)" :disabled="index === 0" class="hover:text-slate-600 disabled:opacity-30 p-0.5">
+                <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style="color: var(--text-muted)" @click.stop>
+                   <button type="button" @click="moveSlide(index, -1)" :disabled="index === 0" class="hover:text-white disabled:opacity-30 p-0.5">
                       <Icon name="lucide:chevron-up" class="w-4 h-4" />
                    </button>
-                   <button type="button" @click="moveSlide(index, 1)" :disabled="index === slides.length - 1" class="hover:text-slate-600 disabled:opacity-30 p-0.5">
+                   <button type="button" @click="moveSlide(index, 1)" :disabled="index === slides.length - 1" class="hover:text-white disabled:opacity-30 p-0.5">
                       <Icon name="lucide:chevron-down" class="w-4 h-4" />
                    </button>
                 </div>
                 
-                <div class="w-12 h-12 rounded bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <div class="w-12 h-12 rounded overflow-hidden flex-shrink-0 flex items-center justify-center" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
                    <img v-if="slide.imageUrl" :src="slide.imageUrl" class="w-full h-full object-cover" />
-                   <Icon v-else name="lucide:image" class="w-5 h-5 text-slate-400" />
+                   <Icon v-else name="lucide:image" class="w-5 h-5" style="color: var(--text-muted)" />
                 </div>
                 
                 <div>
-                   <span class="font-semibold text-slate-800 block">
+                   <span class="font-semibold block" style="color: var(--text-primary)">
                       {{ slide.title || t('admin.homepageSettingsForm.carousel.untitled') }}
                    </span>
-                   <span class="text-xs text-slate-500 mt-0.5 block">Slide {{ index + 1 }}</span>
+                   <span class="text-xs mt-0.5 block" style="color: var(--text-tertiary)">Slide {{ index + 1 }}</span>
                 </div>
              </div>
              
@@ -70,13 +71,13 @@
                 <button 
                    type="button"
                    @click="removeSlide(index)"
-                   class="text-slate-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50"
+                   class="hover:text-red-400 transition-colors p-2 rounded-lg" style="color: var(--text-muted)"
                    :title="t('admin.common.delete')"
                 >
                    <Icon name="lucide:trash-2" class="w-4 h-4" />
                 </button>
-                <div class="w-px h-6 bg-slate-200 mx-1"></div>
-                <div class="p-2 text-slate-400 transform transition-transform duration-200" :class="{ 'rotate-180': expandedSlideIndex === index }">
+                <div class="w-px h-6 mx-1" style="background: var(--surface-border)"></div>
+                <div class="p-2 transform transition-transform duration-200" style="color: var(--text-muted)" :class="{ 'rotate-180': expandedSlideIndex === index }">
                    <Icon name="lucide:chevron-down" class="w-5 h-5" />
                 </div>
              </div>
@@ -88,6 +89,7 @@
              <div class="lg:col-span-5 relative">
                 <ImageUploader 
                    v-model="slide.imageUrl"
+                   mode="generic"
                    :label="t('admin.homepageSettingsForm.fields.imageUrl')"
                    :hint="t('admin.homepageSettingsForm.fields.imageUrlHint')"
                 />

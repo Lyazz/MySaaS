@@ -14,6 +14,12 @@ const props = defineProps<{
 const cartStore = useCartStore()
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -233,7 +239,7 @@ const displayedProducts = computed(() => {
               <img
                 v-if="cat.imageUrl"
                 :src="cat.imageUrl"
-                :alt="cat.title"
+                :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                 style="opacity: 0.55;"
               >
@@ -247,7 +253,7 @@ const displayedProducts = computed(() => {
 
             <div class="z-10 relative p-6 transform transition-transform duration-300 group-hover:-translate-y-2">
               <h3 class="text-xl md:text-2xl font-light mb-1 transition-colors tracking-wide" style="color: #E8E0D5;">
-                {{ cat.title }}
+                {{ categoryDisplayTitle(cat) }}
               </h3>
               <p class="text-sm flex items-center gap-3" style="color: #7A7060;">
                 {{ storefrontContent.common.productsCount(cat.itemCount) }}
@@ -286,7 +292,7 @@ const displayedProducts = computed(() => {
 
         <!-- Skeleton Loading -->
         <div v-if="pending" class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide">
-          <div v-for="i in 4" :key="i" class="flex-shrink-0 w-64 md:w-72 animate-pulse">
+          <div v-for="i in 4" :key="i" class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse">
             <div class="h-80 mb-4 rounded-sm" style="background-color: #1A1F2E;" />
             <div class="h-3 w-3/4 mb-2 rounded-sm" style="background-color: #1A1F2E;" />
             <div class="h-3 w-1/3 rounded-sm" style="background-color: #1A1F2E;" />
@@ -305,8 +311,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-60 md:w-68"
-            style="width: 272px;"
+            class="flex-shrink-0 w-[calc(50%-0.625rem)] sm:w-[272px]"
           >
             <ProductCard :product="product" />
           </div>
@@ -364,8 +369,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0"
-            style="width: 272px;"
+            class="flex-shrink-0 w-[calc(50%-0.625rem)] sm:w-[272px]"
           >
             <ProductCard :product="product" />
            </div>

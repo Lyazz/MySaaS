@@ -828,7 +828,10 @@
           "pngOnly": "يرجى رفع صورة PNG.",
           "squareOnly": "يجب أن تكون الصورة مربعة (الحالي: {w}×{h}px).",
           "uploadFailed": "فشل الرفع",
-          "readDimensionsFailed": "تعذرت قراءة أبعاد الصورة."
+          "readDimensionsFailed": "تعذرت قراءة أبعاد الصورة.",
+          "invalidType": "يُسمح فقط بصور PNG وJPEG وWebP",
+          "tooLarge": "يجب أن يكون حجم الصورة أقل من {max}",
+          "cropFailed": "تعذر قص الصورة"
         }
       },
       "richTextEditor": {
@@ -854,6 +857,31 @@
         "selectedCount": "تم اختيار {count} من النسخ",
         "actions": {
           "addSelected": "إضافة المحدد"
+        }
+      },
+      "imageUploader": {
+        "clickToUpload": "انقر لرفع صورة",
+        "dragDrop": "PNG أو JPEG أو WebP",
+        "errors": {
+          "invalidType": "يُسمح فقط بصور PNG وJPEG وWebP",
+          "tooLarge": "يجب أن يكون حجم الصورة أقل من {max}",
+          "cropFailed": "تعذر قص الصورة",
+          "uploadFailed": "فشل الرفع"
+        }
+      },
+      "imageCropper": {
+        "title": "قص الصورة",
+        "confirm": "استخدام الصورة بعد القص",
+        "subtitleFree": "اضبط منطقة القص بحرية.",
+        "subtitlePreset": "قص بنسبة {preset}.",
+        "presets": {
+          "free": "حر"
+        },
+        "errors": {
+          "noFile": "لم يتم اختيار صورة للقص.",
+          "unavailable": "أداة القص غير متاحة.",
+          "resultFailed": "تعذر إنشاء الصورة المقصوصة.",
+          "loadFailed": "تعذر تحميل الصورة داخل أداة القص."
         }
       }
     },
@@ -1144,7 +1172,10 @@
         "body": "اسحب وأفلت لإعادة ترتيب الصور. اضغط على النجمة لتعيين الصورة الرئيسية."
       },
       "errors": {
-        "uploadFailed": "فشل رفع الصورة"
+        "uploadFailed": "فشل رفع الصورة",
+        "invalidType": "يُسمح فقط بصور PNG وJPEG وWebP",
+        "tooLarge": "يجب أن يكون حجم الصورة أقل من {max}",
+        "cropFailed": "تعذر قص الصورة"
       }
     },
     "variantsTable": {

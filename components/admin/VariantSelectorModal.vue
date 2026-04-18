@@ -1,25 +1,27 @@
 <template>
   <Teleport to="body">
-    <div v-if="modelValue" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 py-8">
-      <div class="w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col max-h-[90vh]">
+    <div v-if="modelValue" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 py-8">
+      <div class="w-full max-w-4xl rounded-2xl flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
         <!-- Header -->
-        <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.components.variantSelectorModal.title') }}</h3>
-          <button @click="close" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
-            <Icon name="lucide:x" class="w-6 h-6" />
+        <div class="px-6 py-4 flex justify-between items-center" style="border-bottom: 1px solid var(--surface-border)">
+          <h3 class="text-[15px] font-semibold" style="color: var(--text-primary)">{{ t('admin.components.variantSelectorModal.title') }}</h3>
+          <button @click="close" class="rounded-lg p-1.5 transition-colors" style="color: var(--text-tertiary)"
+            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
+            @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }">
+            <Icon name="lucide:x" class="w-5 h-5" />
           </button>
         </div>
 
         <!-- Search -->
-        <div class="p-4 border-b border-slate-200 bg-slate-50">
+        <div class="p-4" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Icon name="lucide:search" class="h-5 w-5 text-slate-400" />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" style="color: var(--text-tertiary)">
+              <Icon name="lucide:search" class="h-4 w-4" />
             </div>
             <input
               v-model="searchQuery"
               type="text"
-              class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+              class="ui-input pl-9"
               :placeholder="t('admin.components.variantSelectorModal.search.placeholder')"
               @input="handleSearch"
             />
@@ -27,12 +29,12 @@
         </div>
 
         <!-- List -->
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
           <div v-if="loading" class="p-8 text-center">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-            <p class="mt-2 text-slate-500">{{ t('admin.components.variantSelectorModal.loading') }}</p>
+            <p class="mt-2 text-sm" style="color: var(--text-tertiary)">{{ t('admin.components.variantSelectorModal.loading') }}</p>
           </div>
-          <div v-else-if="variants.length === 0" class="p-8 text-center text-slate-500">
+          <div v-else-if="variants.length === 0" class="p-8 text-center text-sm" style="color: var(--text-tertiary)">
             {{ t('admin.components.variantSelectorModal.empty') }}
           </div>
           <table v-else class="ui-table">
@@ -42,7 +44,8 @@
                   <input
                     type="checkbox"
                     :checked="allSelected"
-                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-slate-300 rounded"
+                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                    style="border-color: var(--surface-border); background: var(--surface-3)"
                     @change="toggleAll"
                   />
                 </th>
@@ -68,18 +71,19 @@
                   <input
                     type="checkbox"
                     :checked="isSelected(variant)"
-                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-slate-300 rounded"
+                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                    style="border-color: var(--surface-border); background: var(--surface-3)"
                     @change="toggleSelection(variant)"
                   />
                 </td>
                 <td class="ui-td">
-                  <div class="text-sm font-medium text-slate-900">{{ variant.productTitle }}</div>
-                  <div class="text-sm text-slate-500">{{ variant.optionTitle }}</div>
+                  <div class="text-[13px] font-medium" style="color: var(--text-primary)">{{ variant.productTitle }}</div>
+                  <div class="text-[12px]" style="color: var(--text-tertiary)">{{ variant.optionTitle }}</div>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-[13px]" style="color: var(--text-secondary)">
                   {{ variant.sku || '—' }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-[13px]" style="color: var(--text-secondary)">
                   {{ variant.stock }}
                 </td>
               </tr>
@@ -88,8 +92,8 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 border-t border-slate-200 flex justify-between items-center bg-slate-50 rounded-b-2xl">
-          <div class="text-sm text-slate-700">
+        <div class="px-6 py-4 flex justify-between items-center rounded-b-2xl" style="border-top: 1px solid var(--surface-border); background: var(--surface-1)">
+          <div class="text-[13px]" style="color: var(--text-secondary)">
             {{ t('admin.components.variantSelectorModal.selectedCount', { count: selectedVariants.length }) }}
           </div>
           <div class="flex space-x-3">

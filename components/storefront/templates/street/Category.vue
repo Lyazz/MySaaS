@@ -8,6 +8,12 @@ const props = defineProps<{
 
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Fetch dynamic categories for sidebar
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -17,7 +23,7 @@ const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
 
 const categoryProducts = computed(() => {
     const id = props.category.id
-    return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && p.categoryId === id)
+    return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id))
 })
 
 const sortedProducts = computed(() => {
@@ -51,7 +57,7 @@ const sortedProducts = computed(() => {
                     class="block font-mono text-sm uppercase hover:bg-brand hover:text-black px-2 py-1 transition-colors"
                     :class="cat.id === category.id ? 'bg-black text-brand font-bold' : ''"
                 >
-                    {{ cat.title }}
+                    {{ categoryDisplayTitle(cat) }}
                 </NuxtLink>
             </div>
         </aside>
@@ -66,7 +72,7 @@ const sortedProducts = computed(() => {
                 </NuxtLink>
             </div>
             
-            <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div v-else class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 <ProductCard 
                     v-for="product in sortedProducts" 
                     :key="product.id" 

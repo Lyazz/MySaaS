@@ -2,10 +2,10 @@
   <div class="max-w-7xl mx-auto space-y-6">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
           {{ t('admin.nav.inventory') }}
         </h2>
-        <p class="mt-1 text-slate-600">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.inventory.subtitle') }}
         </p>
       </div>
@@ -13,7 +13,7 @@
       <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          class="ui-btn ui-btn--secondary text-sm"
           :disabled="loading"
           @click="fetchVariants"
         >
@@ -27,7 +27,7 @@
 
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          class="ui-btn ui-btn--secondary text-sm"
           :disabled="loading"
           @click="exportVariantsCsv"
         >
@@ -37,7 +37,7 @@
 
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          class="ui-btn ui-btn--secondary text-sm"
           :disabled="loading"
           @click="openImportVariantsPicker"
         >
@@ -55,7 +55,7 @@
       </div>
     </div>
 
-    <div class="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-sm">
+    <div class="rounded-2xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
       <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div>
           <BaseInput
@@ -76,7 +76,7 @@
           </button>
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            class="ui-btn ui-btn--secondary text-sm"
             :disabled="loading"
             @click="clearSearch"
           >
@@ -94,10 +94,10 @@
       {{ errorMessage }}
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm">
+    <div class="overflow-hidden rounded-2xl" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
       <div
         v-if="loading"
-        class="p-8 text-center text-sm text-slate-600"
+        class="p-8 text-center text-sm" style="color: var(--text-secondary)"
       >
         {{ t('admin.pages.inventory.loading') }}
       </div>
@@ -106,8 +106,8 @@
         v-else-if="variants.length === 0"
         class="p-10 text-center"
       >
-        <Icon name="lucide:package-search" class="mx-auto h-10 w-10 text-slate-300" />
-        <p class="mt-3 text-sm text-slate-600">
+        <Icon name="lucide:package-search" class="mx-auto h-10 w-10" style="color: var(--text-muted)" />
+        <p class="mt-3 text-sm" style="color: var(--text-secondary)">
           {{ t('admin.pages.inventory.empty') }}
         </p>
       </div>
@@ -116,11 +116,11 @@
         v-else
         class="overflow-x-auto"
       >
-        <table class="min-w-full divide-y divide-slate-200/70">
-          <thead class="bg-slate-50">
+        <table class="min-w-full divide-y" style="border-color: var(--surface-border)">
+          <thead style="background: var(--surface-2)">
             <tr>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('productTitle')"
               >
                 <div class="flex items-center gap-1">
@@ -129,7 +129,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('trackInventory')"
               >
                 <div class="flex items-center gap-1">
@@ -138,7 +138,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('stock')"
               >
                 <div class="flex items-center gap-1">
@@ -147,7 +147,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('reserved')"
               >
                 <div class="flex items-center gap-1">
@@ -156,7 +156,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('safetyStock')"
               >
                 <div class="flex items-center gap-1">
@@ -165,7 +165,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors"
+                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('available')"
               >
                 <div class="flex items-center gap-1">
@@ -173,23 +173,23 @@
                   <Icon v-if="sortBy === 'available'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
                 </div>
               </th>
-              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                 {{ t('admin.common.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-200/70 bg-white">
+          <tbody class="divide-y" style="border-color: var(--surface-border)">
             <tr
               v-for="v in variants"
               :key="v.id"
-              class="hover:bg-slate-50"
+              class="transition-colors"
             >
               <td class="px-5 py-4">
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-medium text-slate-900">
+                  <p class="truncate text-sm font-medium" style="color: var(--text-primary)">
                     {{ v.productTitle }} — {{ v.optionTitle }}
                   </p>
-                  <p class="mt-0.5 truncate text-xs text-slate-500">
+                  <p class="mt-0.5 truncate text-xs" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.table.sku') }}: {{ v.sku || '—' }}
                   </p>
                 </div>
@@ -198,18 +198,18 @@
                 <input
                   :checked="v.trackInventory"
                   type="checkbox"
-                  class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border)"
                   :disabled="savingIds.has(v.id)"
                   @change="(e) => patchVariant(v.id, { trackInventory: (e.target as HTMLInputElement).checked })"
                 >
               </td>
               <td class="px-5 py-4">
-                <span class="text-sm font-mono text-slate-700">
+                <span class="text-sm font-mono" style="color: var(--text-secondary)">
                   {{ v.stock }}
                 </span>
               </td>
-              <td class="px-5 py-4 text-sm text-slate-700">
-                <span class="text-sm font-mono text-slate-700">
+              <td class="px-5 py-4 text-sm" style="color: var(--text-secondary)">
+                <span class="text-sm font-mono" style="color: var(--text-secondary)">
                   {{ v.reserved }}
                 </span>
               </td>
@@ -218,7 +218,7 @@
                   v-model.number="v.safetyStock"
                   type="number"
                   min="0"
-                  class="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
+                  class="ui-input w-24 px-2 py-1 text-sm"
                   :disabled="savingIds.has(v.id)"
                   @change="patchVariant(v.id, { safetyStock: v.safetyStock })"
                 >
@@ -235,7 +235,7 @@
                 </span>
                 <span
                   v-else
-                  class="text-xs text-slate-500"
+                  class="text-xs" style="color: var(--text-muted)"
                 >
                   ∞
                 </span>
@@ -243,7 +243,7 @@
               <td class="px-5 py-4 text-right">
                 <button
                   type="button"
-                  class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  class="ui-btn ui-btn--secondary text-sm"
                   @click="openMovements(v)"
                 >
                   <Icon name="lucide:history" class="h-4 w-4" />
@@ -262,19 +262,19 @@
         v-if="movementsVariant"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8"
       >
-        <div class="w-full max-w-3xl rounded-2xl bg-white shadow-xl flex flex-col max-h-[90vh]">
-          <div class="flex items-start justify-between gap-4 border-b border-slate-200/70 px-6 py-4 shrink-0">
+        <div class="w-full max-w-3xl rounded-2xl flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <div class="flex items-start justify-between gap-4 border-b px-6 py-4 shrink-0" style="border-color: var(--surface-border)">
           <div class="min-w-0">
-            <h3 class="truncate text-lg font-semibold text-slate-900">
+            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
               {{ t('admin.pages.inventory.movements.title', { product: movementsVariant.productTitle, option: movementsVariant.optionTitle }) }}
             </h3>
-            <p class="mt-0.5 text-sm text-slate-500">
+            <p class="mt-0.5 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.pages.inventory.movements.hint') }}
             </p>
           </div>
           <button
             type="button"
-            class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+            class="rounded-lg p-2 transition-colors hover:opacity-70" style="color: var(--text-muted)"
             @click="closeMovements"
           >
             <Icon name="lucide:x" class="h-5 w-5" />
@@ -284,13 +284,13 @@
         <div class="overflow-y-auto p-6 flex-1 min-h-0">
           <div
             v-if="movementsLoading"
-            class="py-8 text-center text-sm text-slate-600"
+            class="py-8 text-center text-sm" style="color: var(--text-secondary)"
           >
             {{ t('admin.pages.inventory.movements.loading') }}
           </div>
           <div
             v-else-if="movements.length === 0"
-            class="rounded-xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600"
+            class="rounded-xl p-6 text-sm" style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-secondary)"
           >
             {{ t('admin.pages.inventory.movements.empty') }}
           </div>
@@ -298,73 +298,73 @@
             v-else
             class="overflow-x-auto"
           >
-            <table class="min-w-full divide-y divide-slate-200/70">
-              <thead class="bg-slate-50">
+            <table class="min-w-full divide-y" style="border-color: var(--surface-border)">
+              <thead style="background: var(--surface-3)">
                 <tr>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.date') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.type') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.deltaStock') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.deltaReserved') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.deltaSafety') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.after') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.by') }}
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-200/70">
+              <tbody class="divide-y" style="border-color: var(--surface-border)">
                 <tr
                   v-for="m in movements"
                   :key="m.id"
                 >
-                  <td class="px-4 py-2 text-sm text-slate-700">
+                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
                     {{ formatDate(m.createdAt) }}
                   </td>
-                  <td class="px-4 py-2 text-sm text-slate-700">
+                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
                     <div class="min-w-0">
                       <p class="truncate font-medium">
                         {{ m.type }}
                       </p>
                       <p
                         v-if="m.orderId"
-                        class="truncate text-xs text-slate-500"
+                        class="truncate text-xs" style="color: var(--text-muted)"
                       >
                         {{ t('admin.pages.inventory.movements.table.order') }}: {{ m.orderId }}
                       </p>
                     </div>
                   </td>
-                  <td class="px-4 py-2 text-sm text-slate-700">
+                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
                     {{ m.delta }}
                   </td>
-                  <td class="px-4 py-2 text-sm text-slate-700">
+                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
                     {{ m.reservedDelta }}
                   </td>
-                  <td class="px-4 py-2 text-sm text-slate-700">
+                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
                     {{ m.safetyStockDelta }}
                   </td>
-                  <td class="px-4 py-2 text-sm text-slate-700">
+                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
                     <span v-if="m.stockAfter !== null">S={{ m.stockAfter }}</span>
                     <span v-else>—</span>
-                    <span class="text-slate-400"> · </span>
+                    <span style="color: var(--text-muted)"> · </span>
                     <span v-if="m.reservedAfter !== null">R={{ m.reservedAfter }}</span>
                     <span v-else>—</span>
-                    <span class="text-slate-400"> · </span>
+                    <span style="color: var(--text-muted)"> · </span>
                     <span v-if="m.safetyStockAfter !== null">SS={{ m.safetyStockAfter }}</span>
                     <span v-else>—</span>
                   </td>
-                  <td class="px-4 py-2 text-sm text-slate-700">
+                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
                     {{ m.createdBy?.email || t('admin.pages.inventory.movements.system') }}
                   </td>
                 </tr>
@@ -373,10 +373,10 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-3 border-t border-slate-200/70 px-6 py-4 shrink-0">
+        <div class="flex justify-end gap-3 border-t px-6 py-4 shrink-0" style="border-color: var(--surface-border)">
           <button
             type="button"
-            class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            class="ui-btn ui-btn--secondary text-sm"
             @click="closeMovements"
           >
             {{ t('admin.common.close') }}

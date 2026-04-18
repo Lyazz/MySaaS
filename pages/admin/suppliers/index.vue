@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.nav.suppliers') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.suppliers.index.subtitle') }}
         </p>
       </div>
@@ -20,10 +20,10 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="p-4 rounded-lg mb-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.suppliers.index.filters.searchLabel') }}</label>
+          <label class="ui-label mb-1 block">{{ t('admin.pages.suppliers.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             type="text"
@@ -39,7 +39,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.suppliers.index.loading') }}
       </p>
     </div>
@@ -49,11 +49,11 @@
       v-else-if="filteredSuppliers.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:users" class="mx-auto h-12 w-12" style="color: var(--text-muted)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.suppliers.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.pages.suppliers.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -76,19 +76,19 @@
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('name')">
+              <th class="ui-th cursor-pointer transition-colors hover:opacity-80" @click="setSort('name')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.suppliers.index.table.name') }}
                   <Icon v-if="sortBy === 'name'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('email')">
+              <th class="ui-th cursor-pointer transition-colors hover:opacity-80" @click="setSort('email')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.suppliers.index.table.info') }}
                   <Icon v-if="sortBy === 'email'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('address')">
+              <th class="ui-th cursor-pointer transition-colors hover:opacity-80" @click="setSort('address')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.suppliers.index.table.address') }}
                   <Icon v-if="sortBy === 'address'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -113,7 +113,7 @@
                   <div class="ml-4">
                     <NuxtLink
                       :to="`/admin/suppliers/${supplier.id}`"
-                      class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                      class="font-medium hover:text-teal-400 transition-colors" style="color: var(--text-primary)"
                     >
                       {{ supplier.name }}
                     </NuxtLink>
@@ -121,9 +121,9 @@
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="flex flex-col text-sm text-slate-600">
+                <div class="flex flex-col text-sm" style="color: var(--text-secondary)">
                    <div v-if="supplier.email" class="flex items-center gap-1">
-                     <Icon name="lucide:mail" class="w-3 h-3 text-slate-400" />
+                     <Icon name="lucide:mail" class="w-3 h-3" style="color: var(--text-muted)" />
                      <a
                        :href="`mailto:${supplier.email}`"
                        class="hover:text-teal-600 transition-colors"
@@ -132,7 +132,7 @@
                      </a>
                    </div>
                    <div v-if="supplier.phone" class="flex items-center gap-1 mt-1">
-                     <Icon name="lucide:phone" class="w-3 h-3 text-slate-400" />
+                     <Icon name="lucide:phone" class="w-3 h-3" style="color: var(--text-muted)" />
                      <a
                        :href="`tel:${supplier.phone}`"
                        class="hover:text-teal-600 transition-colors"
@@ -140,10 +140,10 @@
                        {{ supplier.phone }}
                      </a>
                    </div>
-                   <span v-if="!supplier.email && !supplier.phone" class="text-slate-400">—</span>
+                   <span v-if="!supplier.email && !supplier.phone" style="color: var(--text-muted)">—</span>
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                  <a
                    v-if="supplier.address"
                    :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(supplier.address)}`"
@@ -152,19 +152,19 @@
                  >
                    {{ supplier.address }}
                  </a>
-                 <span v-else class="text-slate-400">—</span>
+                 <span v-else style="color: var(--text-muted)">—</span>
               </td>
               <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/suppliers/${supplier.id}`"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    class="p-2 rounded-md transition-colors hover:text-red-400" style="color: var(--text-muted)"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(supplier)"
                   >

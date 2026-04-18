@@ -19,6 +19,8 @@ type Product = {
   productImages?: { url: string; isMain?: boolean; position?: number }[]
   metaPixelIds?: string[]
   categoryId?: string | null
+  categoryIds?: string[]
+  categories?: Array<{ id: string; title: string; slug: string }>
 }
 
 const productUrl = useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`)
@@ -38,13 +40,26 @@ const relatedProducts = computed(() => {
     if (!Array.isArray(allProducts.value)) return []
     
     const available = allProducts.value.filter(p => p.id !== product.value?.id && p.isActive)
-    const currentCategoryId = (product.value as any)?.categoryId
+    const currentCategoryIds = Array.from(
+      new Set(
+        [
+          ...(((product.value as any)?.categoryIds || []) as string[]),
+          (product.value as any)?.categoryId
+        ].filter((id): id is string => typeof id === 'string' && id.length > 0)
+      )
+    )
     
     // Prioritize products in the same category
-    if (currentCategoryId) {
+    if (currentCategoryIds.length > 0) {
         available.sort((a, b) => {
-            const aMatch = a.categoryId === currentCategoryId ? 1 : 0
-            const bMatch = b.categoryId === currentCategoryId ? 1 : 0
+            const aCategoryIds = Array.from(
+              new Set([...(a.categoryIds || []), a.categoryId].filter((id): id is string => typeof id === 'string' && id.length > 0))
+            )
+            const bCategoryIds = Array.from(
+              new Set([...(b.categoryIds || []), b.categoryId].filter((id): id is string => typeof id === 'string' && id.length > 0))
+            )
+            const aMatch = aCategoryIds.some((id) => currentCategoryIds.includes(id)) ? 1 : 0
+            const bMatch = bCategoryIds.some((id) => currentCategoryIds.includes(id)) ? 1 : 0
             return bMatch - aMatch
         })
     }

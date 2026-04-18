@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.pages.delivery.title') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.delivery.subtitle') }}
         </p>
       </div>
@@ -16,17 +16,17 @@
     <div class="ui-card mb-8">
       <div class="ui-card-header flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-semibold text-slate-900">
+          <h3 class=”text-lg font-semibold” style=”color: var(--text-primary)”>
             {{ t('admin.pages.delivery.storePickup.title', 'Store pickup') }}
           </h3>
-          <p class="text-sm text-slate-600">
+          <p class=”text-sm” style=”color: var(--text-secondary)”>
             {{ t('admin.pages.delivery.storePickup.hint', 'Enable/disable “pickup at store” as a checkout delivery option.') }}
           </p>
         </div>
         <button
           type="button"
           class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-60"
-          :class="[storePickupEnabled ? 'bg-green-500' : 'bg-gray-200']"
+          :class="[storePickupEnabled ? 'bg-green-500' : 'bg-white/10']"
           role="switch"
           :aria-checked="storePickupEnabled"
           :disabled="storePickupSaving"
@@ -35,7 +35,7 @@
           <span class="sr-only">{{ t('admin.pages.delivery.storePickup.toggleLabel', 'Toggle store pickup') }}</span>
           <span
             aria-hidden="true"
-            class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+            class="pointer-events-none inline-block h-5 w-5 rounded-full shadow transform ring-0 transition ease-in-out duration-200" style="background: var(--surface-1)"
             :class="[storePickupEnabled ? 'translate-x-5' : 'translate-x-0']"
           />
         </button>
@@ -52,18 +52,18 @@
       <div 
         v-for="provider in providers" 
         :key="provider.provider"
-        class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+        class="rounded-lg transition-shadow cursor-pointer overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
         :class="{'ring-2 ring-teal-500': selectedProvider?.provider === provider.provider}"
         @click="selectProvider(provider)"
       >
         <div class="p-6">
           <div class="flex justify-between items-start mb-4">
             <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center text-xl font-bold text-gray-600">
+              <div class="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold" style="background: var(--surface-3); color: var(--text-secondary)">
                 {{ provider.provider[0] }}
               </div>
               <div>
-                <h3 class="font-bold text-gray-900">
+                <h3 class="font-bold" style="color: var(--text-primary)">
                   {{ provider.name }}
                 </h3>
                 <div class="mt-1 flex flex-wrap gap-2">
@@ -87,7 +87,7 @@
               <button 
                 type="button" 
                 class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-                :class="[provider.offered ? 'bg-green-500' : 'bg-gray-200']"
+                :class="[provider.offered ? 'bg-green-500' : 'bg-white/10']"
                 role="switch" 
                 :aria-checked="provider.offered"
                 @click="toggleProvider(provider, $event)"
@@ -95,7 +95,7 @@
                 <span class="sr-only">{{ t('admin.pages.delivery.providers.toggleLabel') }}</span>
                 <span 
                   aria-hidden="true" 
-                  class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+                  class="pointer-events-none inline-block h-5 w-5 rounded-full shadow transform ring-0 transition ease-in-out duration-200" style="background: var(--surface-1)"
                   :class="[provider.offered ? 'translate-x-5' : 'translate-x-0']"
                 />
               </button>
@@ -103,7 +103,7 @@
           </div>
 
           <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-500">{{ t('admin.pages.delivery.providers.wilayasSupported', { count: 58 }) }}</span>
+            <span style="color: var(--text-tertiary)">{{ t('admin.pages.delivery.providers.wilayasSupported', { count: 58 }) }}</span>
             <span class="text-teal-600 font-medium">{{ t('admin.pages.delivery.providers.managePricing') }} &rarr;</span>
           </div>
         </div>
@@ -117,10 +117,10 @@
     >
       <div class="ui-card-header flex justify-between items-center">
         <div>
-          <h3 class="text-lg font-semibold text-slate-900">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.delivery.credentials.title', { provider: selectedProvider.name }) }}
           </h3>
-          <p class="text-sm text-slate-600">
+          <p class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.delivery.credentials.hint') }}
           </p>
         </div>
@@ -137,7 +137,7 @@
         <div class="flex flex-col gap-4">
           <div
             v-if="selectedProvider.credentialFields.length === 0"
-            class="text-sm text-slate-600"
+            class="text-sm" style="color: var(--text-secondary)"
           >
             {{ t('admin.pages.delivery.credentials.noCredentials') }}
           </div>
@@ -148,17 +148,17 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-slate-900">
+                <div class="text-sm font-medium" style="color: var(--text-primary)">
                   {{ t('admin.pages.delivery.credentials.enableLabel') }}
                 </div>
-                <div class="text-xs text-slate-500">
+                <div class="text-xs" style="color: var(--text-muted)">
                   {{ t('admin.pages.delivery.credentials.enableHint') }}
                 </div>
               </div>
               <button
                 type="button"
                 class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-                :class="[accountIsActive ? 'bg-green-500' : 'bg-gray-200']"
+                :class="[accountIsActive ? 'bg-green-500' : 'bg-white/10']"
                 role="switch"
                 :aria-checked="accountIsActive"
                 @click="accountIsActive = !accountIsActive"
@@ -166,7 +166,7 @@
                 <span class="sr-only">{{ t('admin.pages.delivery.credentials.enableLabel') }}</span>
                 <span
                   aria-hidden="true"
-                  class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+                  class="pointer-events-none inline-block h-5 w-5 rounded-full shadow transform ring-0 transition ease-in-out duration-200" style="background: var(--surface-1)"
                   :class="[accountIsActive ? 'translate-x-5' : 'translate-x-0']"
                 />
               </button>
@@ -177,7 +177,7 @@
                 v-for="field in selectedProvider.credentialFields"
                 :key="field.key"
               >
-                <label class="block text-sm font-medium text-slate-700">
+                <label class="ui-label block">
                   {{ field.label }}
                   <span
                     v-if="field.required"
@@ -189,7 +189,7 @@
                     v-model="accountConfigDraft[field.key]"
                     :type="field.secret ? 'password' : 'text'"
                     :placeholder="credentialPlaceholder(selectedProvider, field)"
-                    class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
+                    class="ui-input w-full px-3 py-2 text-sm"
                   >
                   <button
                     v-if="field.secret && selectedProvider.account?.secrets?.[field.key]"
@@ -202,7 +202,7 @@
                 </div>
                 <p
                   v-if="field.secret"
-                  class="mt-1 text-xs text-slate-500"
+                  class="mt-1 text-xs" style="color: var(--text-muted)"
                 >
                   {{
                     selectedProvider.account?.secrets?.[field.key]
@@ -232,10 +232,10 @@
     >
       <div class="ui-card-header flex justify-between items-center">
         <div>
-          <h3 class="text-lg font-semibold text-slate-900">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.delivery.pricing.title', { provider: selectedProvider.name }) }}
           </h3>
-          <p class="text-sm text-slate-600">
+          <p class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.delivery.pricing.hint') }}
           </p>
         </div>
@@ -262,23 +262,23 @@
         <!-- Maystro: test exact commune price -->
         <div
           v-if="selectedProvider?.provider === 'MAYSTRO'"
-          class="rounded-lg border border-slate-200 bg-slate-50 p-4"
+          class="rounded-lg p-4" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
         >
           <div class="flex flex-col md:flex-row md:items-end gap-3">
             <div class="flex-1">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Wilaya</label>
+              <label class="ui-label text-xs mb-1 block">Wilaya</label>
               <select
                 v-model="maystroTest.wilayaCode"
-                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
+                class="ui-input w-full px-3 py-2 text-sm"
               >
                 <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
               </select>
             </div>
             <div class="flex-1">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Commune (Maystro)</label>
+              <label class="ui-label text-xs mb-1 block">Commune (Maystro)</label>
               <select
                 v-model="maystroTest.communeId"
-                class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
+                class="ui-input w-full px-3 py-2 text-sm"
                 :disabled="maystroTest.loadingCommunes || maystroTest.communes.length === 0"
               >
                 <option value="" disabled>
@@ -306,15 +306,15 @@
           </div>
 
           <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-            <div class="rounded-md bg-white border border-slate-200 px-3 py-2">
-              <div class="text-slate-500">Home (delivery_type=1)</div>
-              <div class="font-semibold text-slate-900">
+            <div class="rounded-md px-3 py-2" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+              <div style="color: var(--text-tertiary)">Home (delivery_type=1)</div>
+              <div class="font-semibold" style="color: var(--text-primary)">
                 {{ maystroTest.priceHome == null ? '—' : `${maystroTest.priceHome} DZD` }}
               </div>
             </div>
-            <div class="rounded-md bg-white border border-slate-200 px-3 py-2">
-              <div class="text-slate-500">Office (delivery_type=2)</div>
-              <div class="font-semibold text-slate-900">
+            <div class="rounded-md px-3 py-2" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+              <div style="color: var(--text-tertiary)">Office (delivery_type=2)</div>
+              <div class="font-semibold" style="color: var(--text-primary)">
                 {{ maystroTest.priceOffice == null ? '—' : `${maystroTest.priceOffice} DZD` }}
               </div>
             </div>
@@ -326,7 +326,7 @@
             </div>
           </div>
 
-          <p class="mt-2 text-xs text-slate-500">
+          <p class="mt-2 text-xs" style="color: var(--text-muted)">
             Note: les “tarifs transporteur” du tableau sont calculés par wilaya (commune échantillon). Pour un prix exact, tester une commune ici.
           </p>
         </div>
@@ -336,7 +336,7 @@
             <input
               v-model="wilayaQuery"
               type="text"
-              class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
+              class="ui-input w-full px-3 py-2 text-sm"
               :placeholder="t('admin.pages.delivery.pricing.searchPlaceholder')"
             >
           </div>
@@ -378,7 +378,7 @@
           </div>
         </div>
 
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm text-slate-600">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm" style="color: var(--text-secondary)">
           <div>
             {{
               t('admin.pages.delivery.pricing.showingCount', {
@@ -416,7 +416,7 @@
         class="p-12 text-center"
       >
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-        <p class="mt-2 text-slate-500">
+        <p class="mt-2" style="color: var(--text-tertiary)">
           {{ t('admin.pages.delivery.pricing.loading') }}
         </p>
       </div>
@@ -431,28 +431,28 @@
               <tr>
                 <th
                   scope="col"
-                  class="ui-th w-24 bg-white"
+                  class="ui-th w-24"
                   rowspan="2"
                 >
                   {{ t('admin.pages.delivery.pricing.table.code') }}
                 </th>
                 <th
                   scope="col"
-                  class="ui-th bg-white"
+                  class="ui-th"
                   rowspan="2"
                 >
                   {{ t('admin.pages.delivery.pricing.table.wilaya') }}
                 </th>
                 <th
                   scope="col"
-                  class="ui-th bg-white text-center"
+                  class="ui-th text-center"
                   colspan="2"
                 >
                   {{ t('admin.pages.delivery.pricing.modes.home') }}
                 </th>
                 <th
                   scope="col"
-                  class="ui-th bg-white text-center"
+                  class="ui-th text-center"
                   colspan="2"
                 >
                   {{ t('admin.pages.delivery.pricing.modes.office') }}
@@ -461,25 +461,25 @@
               <tr>
                 <th
                   scope="col"
-                  class="ui-th w-40 bg-white"
+                  class="ui-th w-40"
                 >
                   {{ t('admin.pages.delivery.pricing.table.carrierPrice') }}
                 </th>
                 <th
                   scope="col"
-                  class="ui-th w-56 bg-white"
+                  class="ui-th w-56"
                 >
                   {{ t('admin.pages.delivery.pricing.table.overridePrice') }}
                 </th>
                 <th
                   scope="col"
-                  class="ui-th w-40 bg-white"
+                  class="ui-th w-40"
                 >
                   {{ t('admin.pages.delivery.pricing.table.carrierPrice') }}
                 </th>
                 <th
                   scope="col"
-                  class="ui-th w-56 bg-white"
+                  class="ui-th w-56"
                 >
                   {{ t('admin.pages.delivery.pricing.table.overridePrice') }}
                 </th>
@@ -491,62 +491,62 @@
                 :key="wilaya.code"
                 class="ui-tr"
               >
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600 font-mono">
+                <td class="ui-td whitespace-nowrap text-sm font-mono" style="color: var(--text-secondary)">
                   {{ wilaya.code }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm font-medium text-slate-900">
+                <td class="ui-td whitespace-nowrap text-sm font-medium" style="color: var(--text-primary)">
                   {{ wilaya.name }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   <div
                     v-if="carrierRates.home[wilaya.code] != null"
-                    class="font-medium text-slate-900"
+                    class="font-medium" style="color: var(--text-primary)"
                   >
                     {{ Number(carrierRates.home[wilaya.code]).toFixed(0) }} DZD
                   </div>
                   <div
                     v-else
-                    class="text-slate-400"
+                    style="color: var(--text-muted)"
                   >
                     —
                   </div>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   <div class="relative rounded-md shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span class="text-slate-500 sm:text-sm">DZD</span>
+                      <span class="sm:text-sm" style="color: var(--text-muted)">DZD</span>
                     </div>
                     <input 
                       v-model="modelRates.home[wilaya.code]" 
                       type="number" 
-                      class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-12 sm:text-sm border-slate-300 rounded-md" 
+                      class="ui-input block w-full pl-12 sm:text-sm"
                       :placeholder="t('admin.pages.delivery.pricing.overridePlaceholder')"
                     >
                   </div>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   <div
                     v-if="carrierRates.office[wilaya.code] != null"
-                    class="font-medium text-slate-900"
+                    class="font-medium" style="color: var(--text-primary)"
                   >
                     {{ Number(carrierRates.office[wilaya.code]).toFixed(0) }} DZD
                   </div>
                   <div
                     v-else
-                    class="text-slate-400"
+                    style="color: var(--text-muted)"
                   >
                     —
                   </div>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   <div class="relative rounded-md shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span class="text-slate-500 sm:text-sm">DZD</span>
+                      <span class="sm:text-sm" style="color: var(--text-muted)">DZD</span>
                     </div>
                     <input 
                       v-model="modelRates.office[wilaya.code]" 
                       type="number" 
-                      class="focus:ring-teal-500 focus:border-teal-500 block w-full pl-12 sm:text-sm border-slate-300 rounded-md" 
+                      class="ui-input block w-full pl-12 sm:text-sm"
                       :placeholder="t('admin.pages.delivery.pricing.overridePlaceholder')"
                     >
                   </div>

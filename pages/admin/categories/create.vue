@@ -9,15 +9,15 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/categories"
-            class="text-gray-700 hover:text-teal-600"
+            class="hover:text-teal-600" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.categories') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">{{ t('admin.pages.categories.create.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
+            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -26,17 +26,17 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.pages.categories.create.title') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.categories.create.subtitle') }}
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <NuxtLink
           to="/admin/categories"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>
@@ -55,7 +55,7 @@
     <!-- Form -->
     <form
       id="category-create-form"
-      class="bg-white rounded-lg shadow p-6 space-y-6"
+      class="ui-card p-6 space-y-6"
       @submit.prevent="handleSubmit"
     >
       <BaseInput
@@ -76,8 +76,26 @@
         pattern="[a-z0-9-]+"
       />
 
+      <BaseSelect
+        v-model="form.parentId"
+        :label="t('admin.forms.category.parent.label', 'Parent Category')"
+        :hint="t('admin.forms.category.parent.hint', 'Optional: choose a parent to create a subcategory')"
+      >
+        <option value="">
+          {{ t('admin.forms.category.parent.none', 'No parent (top-level category)') }}
+        </option>
+        <option
+          v-for="cat in availableParents"
+          :key="cat.id"
+          :value="cat.id"
+        >
+          {{ categoryOptionLabel(cat) }}
+        </option>
+      </BaseSelect>
+
       <SingleImageUploader
         v-model="form.imageUrl"
+        mode="generic"
         :label="t('admin.forms.category.image.label')"
         :hint="t('admin.forms.category.image.hint')"
       />
@@ -91,10 +109,10 @@
         </p>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-4 border-t">
+      <div class="flex justify-end space-x-3 pt-4" style="border-top: 1px solid var(--surface-border)">
         <NuxtLink
           to="/admin/categories"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>
@@ -115,6 +133,7 @@
 import { useAuthStore } from '~/stores/auth'
 import SingleImageUploader from '~/components/admin/SingleImageUploader.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -129,8 +148,53 @@ const { t } = useI18n({ useScope: 'global' })
 const form = ref({
   title: '',
   slug: '',
+  parentId: '',
   imageUrl: null as string | null
 })
+
+type Category = {
+  id: string
+  title: string
+  displayTitle?: string
+  isSubcategory?: boolean
+  parentId?: string | null
+  parent?: { title: string } | null
+}
+const categories = ref<Category[]>([])
+type CategoryOption = Category & { depth: number }
+const availableParents = computed<CategoryOption[]>(() => {
+  const byParent = new Map<string | null, Category[]>()
+  for (const category of categories.value) {
+    const key = category.parentId ?? null
+    const group = byParent.get(key) ?? []
+    group.push(category)
+    byParent.set(key, group)
+  }
+  for (const group of byParent.values()) {
+    group.sort((a, b) => a.title.localeCompare(b.title))
+  }
+
+  const ordered: CategoryOption[] = []
+  const seen = new Set<string>()
+  const visit = (node: Category, depth = 0) => {
+    if (seen.has(node.id)) return
+    seen.add(node.id)
+    ordered.push({ ...node, depth })
+    for (const child of byParent.get(node.id) || []) {
+      visit(child, depth + 1)
+    }
+  }
+
+  for (const root of byParent.get(null) || []) {
+    visit(root, 0)
+  }
+  for (const category of categories.value) {
+    if (!seen.has(category.id)) visit(category, 0)
+  }
+
+  return ordered
+})
+const categoryOptionLabel = (category: CategoryOption) => `${'-> '.repeat(category.depth)}${category.title}`
 
 const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
@@ -163,6 +227,7 @@ async function handleSubmit() {
       body: {
         title: form.value.title,
         slug: form.value.slug,
+        parentId: form.value.parentId || null,
         imageUrl: form.value.imageUrl
       }
     })
@@ -180,4 +245,21 @@ async function handleSubmit() {
     submitting.value = false
   }
 }
+
+async function fetchCategories() {
+  try {
+    const data = await $fetch('/api/admin/categories', {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    categories.value = Array.isArray(data) ? (data as Category[]) : []
+  } catch (error) {
+    console.error('Failed to fetch categories for parent selection:', error)
+  }
+}
+
+onMounted(() => {
+  fetchCategories()
+})
 </script>

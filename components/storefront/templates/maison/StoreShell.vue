@@ -9,6 +9,12 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Maison')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -37,6 +43,13 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const searchSuggestionLimit = 5
+const visibleSearchResultCount = ref(searchSuggestionLimit)
+const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
+const hasMoreSearchResults = computed(() => searchResults.value.length > visibleSearchResultCount.value)
+const showMoreSearchResults = () => {
+    visibleSearchResultCount.value += searchSuggestionLimit
+}
 const searchOpen = ref(false)
 
 const props = defineProps<{
@@ -54,14 +67,22 @@ onMounted(() => {
 })
 
 watch(searchQuery, async (q) => {
-    if (q.length < 3) { searchResults.value = []; isSearchDropdownOpen.value = false; return }
+    if (q.length < 3) {
+        searchResults.value = []
+        visibleSearchResultCount.value = searchSuggestionLimit
+        isSearchDropdownOpen.value = false
+        return
+    }
     searchLoading.value = true
     isSearchDropdownOpen.value = true
+    visibleSearchResultCount.value = searchSuggestionLimit
     try {
-        const url = useTenantApiUrl(`/api/products/search?q=${encodeURIComponent(q)}&limit=6`)
+        const url = useTenantApiUrl(`/api/products/search?q=${encodeURIComponent(q)}&limit=24`)
         const data = await $fetch<any[]>(url, { headers: useTenantApiHeaders() || {} })
         searchResults.value = Array.isArray(data) ? data : []
-    } catch { searchResults.value = [] }
+    } catch {
+        searchResults.value = []
+    }
     finally { searchLoading.value = false }
 })
 </script>
@@ -106,7 +127,7 @@ watch(searchQuery, async (q) => {
                   :key="cat.id"
                   :to="`/c/${cat.slug}`"
                   class="shell-nav__dropdown-item"
-                >{{ cat.title }}</NuxtLink>
+                >{{ categoryDisplayTitle(cat) }}</NuxtLink>
               </div>
             </div>
 
@@ -184,7 +205,7 @@ watch(searchQuery, async (q) => {
               <div v-if="searchLoading" class="shell-search-results__state">Recherche…</div>
               <div v-else-if="searchResults.length === 0" class="shell-search-results__state">Aucun résultat.</div>
               <NuxtLink
-                v-for="product in searchResults"
+                v-for="product in visibleSearchResults"
                 :key="product.id"
                 :to="'/p/' + product.slug"
                 class="shell-search-results__item"
@@ -198,6 +219,15 @@ watch(searchQuery, async (q) => {
                   <span class="shell-search-results__price">{{ product.price }} {{ currencyCode }}</span>
                 </div>
               </NuxtLink>
+              <button
+                v-if="hasMoreSearchResults"
+                type="button"
+                class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                @mousedown.prevent
+                @click="showMoreSearchResults"
+              >
+                See more
+              </button>
             </div>
           </div>
         </Transition>
@@ -233,7 +263,7 @@ watch(searchQuery, async (q) => {
                 :to="'/c/' + cat.slug"
                 class="shell-drawer__cat-link"
                 @click="mobileMenuOpen = false"
-              >{{ cat.title }}</NuxtLink>
+              >{{ categoryDisplayTitle(cat) }}</NuxtLink>
             </div>
           </div>
         </Transition>
@@ -282,7 +312,7 @@ watch(searchQuery, async (q) => {
               <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
               <ul class="shell-footer__links">
                 <li v-for="cat in (tenantCategories || []).slice(0, 5)" :key="cat.id">
-                  <NuxtLink :to="`/c/${cat.slug}`" class="shell-footer__link">{{ cat.title }}</NuxtLink>
+                  <NuxtLink :to="`/c/${cat.slug}`" class="shell-footer__link">{{ categoryDisplayTitle(cat) }}</NuxtLink>
                 </li>
               </ul>
             </div>

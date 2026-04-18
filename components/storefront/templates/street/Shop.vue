@@ -15,6 +15,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Dynamic Filters
 const filters = computed(() => ({
     categories: categoryData.value || [],
@@ -27,7 +33,20 @@ const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
-const priceRange = ref({ min: 0, max: 200000 })
+const priceRange = computed(() => {
+    const prices = props.products
+        .map((product) => Number(product?.price))
+        .filter((price): price is number => Number.isFinite(price))
+
+    if (prices.length === 0) {
+        return { min: 0, max: 0 }
+    }
+
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+    }
+})
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
 
@@ -44,7 +63,7 @@ const filteredProducts = computed(() => {
     // Filter by Category
     if (selectedCategories.value.length > 0) {
         const selectedIds = selectedCategories.value 
-        result = result.filter(p => selectedIds.includes(p.categoryId))
+        result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
 
     // Filter by Search
@@ -185,7 +204,7 @@ const closeQuickView = () => {
                   :value="cat.id"
                   class="w-5 h-5 border-2 border-black checked:bg-brand checked:border-brand" 
                 >
-                <span class="font-mono text-sm uppercase group-hover:text-brand transition-colors">{{ cat.title }}</span>
+                <span class="font-mono text-sm uppercase group-hover:text-brand transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -194,6 +213,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -246,7 +268,7 @@ const closeQuickView = () => {
                   :value="cat.id"
                   class="w-4 h-4 border-2 border-black checked:bg-brand checked:border-brand" 
                 >
-                <span class="font-mono text-sm uppercase group-hover:text-brand transition-colors">{{ cat.title }}</span>
+                <span class="font-mono text-sm uppercase group-hover:text-brand transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -259,6 +281,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
         </aside>
@@ -272,7 +297,7 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-3 py-1 bg-brand border-2 border-black font-mono text-xs uppercase"
               >
-                <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
+                <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
                 <button @click="removeCategory(catId)" class="hover:text-white">
                     <Icon name="lucide:x" class="w-4 h-4" />
                 </button>

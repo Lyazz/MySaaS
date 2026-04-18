@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
           {{ t('admin.nav.purchases') }}
         </h2>
-        <p class="mt-1 text-slate-600">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.purchases.index.subtitle') }}
         </p>
       </div>
@@ -75,7 +75,7 @@
           </BaseSelect>
         </div>
         <div class="hidden">
-          <p class="text-sm text-gray-500">
+          <p class="text-sm" style="color: var(--text-tertiary)">
             View and manage your purchase history.
           </p>
         </div>
@@ -88,7 +88,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.purchases.index.loading') }}
       </p>
     </div>
@@ -98,11 +98,11 @@
       v-else-if="filteredOrders.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:shopping-bag" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:shopping-bag" class="mx-auto h-12 w-12" style="color: var(--text-muted)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.purchases.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.pages.purchases.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -166,7 +166,7 @@
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
                   :to="`/admin/purchases/${order.id}`"
-                  class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                  class="font-medium hover:text-teal-400 transition-colors" style="color: var(--text-primary)"
                 >
                   #{{ order.id.slice(0, 8) }}
                 </NuxtLink>
@@ -175,16 +175,16 @@
                 <NuxtLink
                   v-if="order.supplier"
                   :to="`/admin/suppliers/${order.supplier.id}`"
-                  class="text-slate-600 hover:text-teal-600 transition-colors"
+                  class="hover:text-teal-400 transition-colors" style="color: var(--text-secondary)"
                 >
                   {{ order.supplier.name }}
                 </NuxtLink>
-                <span v-else class="text-slate-400">—</span>
+                <span v-else style="color: var(--text-muted)">—</span>
               </td>
-              <td class="ui-td whitespace-nowrap font-medium text-slate-900">
+              <td class="ui-td whitespace-nowrap font-medium" style="color: var(--text-primary)">
                 {{ formatCurrency(calculateTotal(order)) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 <a
                   v-if="order.createdByEmail"
                   :href="`mailto:${order.createdByEmail}`"
@@ -204,13 +204,13 @@
                   {{ order.paymentStatus }}
                 </span>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 {{ formatCurrency(Number(order.paidAmount || 0)) }} / {{ formatCurrency(Number(order.totalAmount || calculateTotal(order))) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 {{ t('admin.pages.purchases.index.table.itemsCount', { count: order.items?.length || 0 }) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 {{ formatDate(order.createdAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-right">
@@ -228,7 +228,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -237,7 +237,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm text-slate-600">
+          <span class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -250,7 +250,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-slate-700">
+            <p class="text-sm" style="color: var(--text-secondary)">
               {{ t('admin.pages.purchases.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredOrders.length),
@@ -262,7 +262,7 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -273,16 +273,19 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    ? 'z-10 border-teal-500 text-teal-400'
+                    : 'text-slate-400'
                 ]"
+                :style="currentPage === page
+                  ? 'background: rgba(20,184,166,0.1); border: 1px solid var(--brand)'
+                  : 'background: var(--surface-2); border: 1px solid var(--surface-border)'"
                 @click="currentPage = page"
               >
                 {{ page }}
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}

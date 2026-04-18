@@ -23,15 +23,15 @@ const getProductMainImage = (product: any) => {
         <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ $t('storefront.product.youMayAlsoLike') }}</h2>
       </div>
 
-      <!-- Mobile Horizontal Scroll / Desktop Grid -->
+      <!-- Product Grid -->
       <div class="relative -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div class="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory pb-6 sm:pb-0 scrollbar-hide">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           
           <NuxtLink 
             v-for="product in products" 
             :key="product.id"
             :to="`/p/${product.slug}`"
-            class="group bg-white rounded-[2rem] p-4 shadow-sm border-4 border-purple-100 hover:shadow-lg hover:border-brand-200 hover:-translate-y-1 transition-all duration-300 flex flex-col flex-none w-[260px] sm:w-auto snap-center sm:snap-none"
+            class="group bg-white rounded-[2rem] p-4 shadow-sm border-4 border-purple-100 hover:shadow-lg hover:border-brand-200 hover:-translate-y-1 transition-all duration-300 flex flex-col"
           >
             <!-- Image Container -->
             <div class="aspect-square bg-slate-50 rounded-2xl overflow-hidden mb-4 relative z-0 border-2 border-purple-50 group-hover:border-purple-100 transition-colors">

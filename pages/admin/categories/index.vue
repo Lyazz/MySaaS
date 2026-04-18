@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.nav.categories') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.categories.index.subtitle') }}
         </p>
       </div>
@@ -20,10 +20,10 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.categories.index.filters.searchLabel') }}</label>
+          <label class="ui-label mb-1">{{ t('admin.pages.categories.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             type="text"
@@ -39,7 +39,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.categories.index.loading') }}
       </p>
     </div>
@@ -49,11 +49,11 @@
       v-else-if="filteredCategories.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:shapes" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:shapes" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.categories.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.pages.categories.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -76,18 +76,19 @@
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('title')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('title')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.categories.index.table.category') }}
                   <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('products')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('products')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.categories.index.table.products') }}
                   <Icon v-if="sortBy === 'products'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
+              <th class="ui-th">Hierarchy</th>
               <th class="ui-th">
                 {{ t('admin.pages.categories.index.table.links') }}
               </th>
@@ -104,7 +105,7 @@
             >
               <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 bg-gray-100 rounded flex items-center justify-center overflow-hidden border border-gray-200">
+                  <div class="flex-shrink-0 h-10 w-10 rounded flex items-center justify-center overflow-hidden" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
                     <img
                       v-if="category.imageUrl"
                       :src="category.imageUrl"
@@ -114,14 +115,14 @@
                     <Icon
                       v-else
                       name="lucide:image"
-                      class="w-6 h-6 text-gray-400"
+                      class="w-6 h-6" style="color: var(--text-tertiary)"
                     />
                   </div>
                   <div class="ml-4">
-                    <div class="font-medium text-slate-900">
+                    <div class="font-medium" style="color: var(--text-primary)">
                       {{ category.title }}
                     </div>
-                    <div class="text-sm text-slate-500">
+                    <div class="text-sm" style="color: var(--text-tertiary)">
                       {{ category.slug }}
                     </div>
                   </div>
@@ -132,18 +133,35 @@
                   {{ t('admin.pages.categories.index.table.productsCount', { count: category._count?.products || 0 }) }}
                 </span>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap">
+                <div class="text-sm" style="color: var(--text-secondary)">
+                  <div v-if="category.parent?.title">
+                    Subcategory of {{ category.parent.title }}
+                  </div>
+                  <div v-else>
+                    {{ t('admin.pages.categories.index.table.topLevel', 'Top-level') }}
+                  </div>
+                  <div
+                    v-if="(category._count?.subcategories || 0) > 0"
+                    class="text-xs mt-0.5"
+                    style="color: var(--text-tertiary)"
+                  >
+                    {{ category._count?.subcategories || 0 }} subcategories
+                  </div>
+                </div>
+              </td>
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 <div class="flex items-center space-x-1">
                   <a
                     :href="getCategoryUrl(category.slug)"
                     target="_blank"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.pages.categories.index.links.openCategory')"
                   >
                     <Icon name="lucide:external-link" class="w-4 h-4" />
                   </a>
                   <button
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.pages.categories.index.links.copyCategory')"
                     @click="copyLink(`/c/${category.slug}`)"
                   >
@@ -155,13 +173,13 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/categories/${category.id}`"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    class="p-2 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(category)"
                   >
@@ -175,7 +193,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -184,7 +202,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm text-slate-600">
+          <span class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -197,7 +215,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-slate-700">
+            <p class="text-sm" style="color: var(--text-secondary)">
               {{ t('admin.pages.categories.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredCategories.length),
@@ -209,7 +227,8 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium disabled:opacity-50"
+                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -221,15 +240,17 @@
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
                     ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    : ''
                 ]"
+                :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
                 @click="currentPage = page"
               >
                 {{ page }}
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium disabled:opacity-50"
+                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}
@@ -272,10 +293,13 @@ const { t } = useI18n({ useScope: 'global' })
 interface Category {
   id: string
   title: string
+  displayTitle?: string
   slug: string
   imageUrl?: string | null
+  parentId?: string | null
+  parent?: { id: string; title: string; slug: string } | null
   createdAt?: string
-  _count?: { products: number }
+  _count?: { products: number; subcategories?: number }
 }
 
 const categories = ref<Category[]>([])
@@ -394,8 +418,10 @@ async function handleDelete() {
     console.error('Failed to delete category:', error)
     const status = error?.response?.status || error?.statusCode
     const msg = error?.data?.statusMessage || error?.response?.data?.statusMessage
-    if (status === 409 || msg === 'HAS_PRODUCTS') {
+    if (msg === 'HAS_PRODUCTS') {
       deleteError.value = t('admin.pages.categories.index.deleteModal.errorHasProducts')
+    } else if (msg === 'HAS_CHILDREN') {
+      deleteError.value = 'This category has subcategories. Move or delete them first.'
     } else {
       deleteError.value = t('admin.pages.categories.index.deleteModal.error')
     }

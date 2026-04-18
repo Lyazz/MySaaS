@@ -33,6 +33,105 @@ const normalizeImageUrl = (value: unknown): string | null | undefined => {
 }
 
 export class CategoriesService {
+    private orderCategoriesByHierarchy(categories: any[]): any[] {
+        const byParent = new Map<string | null, any[]>()
+        for (const category of categories) {
+            const parentKey = category.parentId ?? null
+            const group = byParent.get(parentKey) ?? []
+            group.push(category)
+            byParent.set(parentKey, group)
+        }
+
+        for (const group of byParent.values()) {
+            group.sort((a, b) => String(a.title || '').localeCompare(String(b.title || '')))
+        }
+
+        const ordered: any[] = []
+        const seen = new Set<string>()
+        const walk = (node: any, depth = 0) => {
+            if (!node?.id || seen.has(node.id)) return
+            seen.add(node.id)
+            ordered.push({ ...node, depth })
+            const children = byParent.get(node.id) || []
+            for (const child of children) {
+                walk(child, depth + 1)
+            }
+        }
+
+        for (const root of byParent.get(null) || []) {
+            walk(root, 0)
+        }
+
+        // Defensive fallback for orphaned rows.
+        for (const category of categories) {
+            if (!seen.has(category.id)) {
+                walk(category, 0)
+            }
+        }
+
+        return ordered
+    }
+
+    private mapCategory(category: any): any {
+        const rawCount = category?._count ?? {}
+        const productsCount =
+            Number(rawCount.productLinks ?? 0) > 0
+                ? Number(rawCount.productLinks ?? 0)
+                : Number(rawCount.products ?? 0)
+        const parentTitle = category?.parent?.title ?? null
+        const displayTitle = parentTitle ? `${parentTitle} / ${category.title}` : category.title
+
+        return {
+            ...category,
+            parentTitle,
+            isSubcategory: Boolean(category?.parentId),
+            displayTitle,
+            _count: {
+                ...rawCount,
+                products: productsCount,
+                subcategories: Number(rawCount.children ?? 0)
+            }
+        }
+    }
+
+    private async resolveParentCategoryId(
+        tenantId: string,
+        value: unknown,
+        currentCategoryId?: string
+    ): Promise<string | null | undefined> {
+        if (value === undefined) return undefined
+        if (value === null || value === '') return null
+        if (typeof value !== 'string') throw new Error('Invalid parent category')
+
+        const parent = await prisma.category.findFirst({
+            where: { tenantId, id: value },
+            select: { id: true, parentId: true }
+        })
+        if (!parent) throw new Error('Invalid parent category')
+        if (currentCategoryId && parent.id === currentCategoryId) {
+            throw new Error('Category cannot be its own parent')
+        }
+
+        // Ensure the new parent is not a descendant of the current category.
+        if (currentCategoryId) {
+            let cursor = parent.parentId
+            let guard = 0
+            while (cursor && guard < 100) {
+                if (cursor === currentCategoryId) {
+                    throw new Error('Category hierarchy cycle detected')
+                }
+                const next = await prisma.category.findFirst({
+                    where: { tenantId, id: cursor },
+                    select: { parentId: true }
+                })
+                cursor = next?.parentId ?? null
+                guard++
+            }
+        }
+
+        return parent.id
+    }
+
     async listAdmin(tenantId: string, sortBy?: string, sortOrder?: 'asc' | 'desc') {
         const sortableFields: Record<string, boolean> = {
             createdAt: true,
@@ -44,35 +143,42 @@ export class CategoriesService {
         const orderBy = (() => {
             if (sortBy && sortableFields[sortBy]) {
                 if (sortBy === 'products') {
-                    return { products: { _count: sortOrder === 'asc' ? 'asc' : 'desc' } }
+                    return { productLinks: { _count: (sortOrder === 'asc' ? 'asc' : 'desc') as const } }
                 }
-                return { [sortBy]: sortOrder === 'asc' ? 'asc' : 'desc' }
+                return { [sortBy]: (sortOrder === 'asc' ? 'asc' : 'desc') as const }
             }
             return { createdAt: 'desc' as const }
         })()
 
-        return prisma.category.findMany({
+        const categories = await prisma.category.findMany({
             where: { tenantId },
             include: {
-                _count: { select: { products: true } }
+                parent: { select: { id: true, title: true, slug: true } },
+                _count: { select: { products: true, productLinks: true, children: true } }
             },
             orderBy
         })
+
+        return categories.map((category) => this.mapCategory(category))
     }
 
     async listPublic(tenantId: string) {
-        return prisma.category.findMany({
+        const categories = await prisma.category.findMany({
             where: { tenantId },
             include: {
-                _count: { select: { products: true } }
+                parent: { select: { id: true, title: true, slug: true } },
+                _count: { select: { products: true, productLinks: true, children: true } }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: [{ parentId: 'asc' }, { title: 'asc' }]
         })
+
+        const mapped = categories.map((category) => this.mapCategory(category))
+        return this.orderCategoriesByHierarchy(mapped)
     }
 
     async createCategory(
         tenantId: string,
-        data: { title?: string; slug?: string; imageUrl?: unknown }
+        data: { title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown }
     ) {
         if (!data.title || !data.slug) {
             throw new Error('Title and Slug are required')
@@ -86,24 +192,29 @@ export class CategoriesService {
         }
 
         const imageUrl = normalizeImageUrl(data.imageUrl)
+        const parentId = await this.resolveParentCategoryId(tenantId, data.parentId)
 
-        return prisma.category.create({
+        const created = await prisma.category.create({
             data: {
                 tenantId,
                 title: data.title,
                 slug: data.slug,
-                imageUrl: imageUrl ?? null
+                imageUrl: imageUrl ?? null,
+                parentId: parentId ?? null
             },
             include: {
-                _count: { select: { products: true } }
+                parent: { select: { id: true, title: true, slug: true } },
+                _count: { select: { products: true, productLinks: true, children: true } }
             }
         })
+
+        return this.mapCategory(created)
     }
 
     async updateCategory(
         tenantId: string,
         categoryId: string,
-        data: { title?: string; slug?: string; imageUrl?: unknown }
+        data: { title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown }
     ) {
         const category = await prisma.category.findFirst({
             where: { id: categoryId, tenantId }
@@ -122,13 +233,15 @@ export class CategoriesService {
         }
 
         const imageUrl = normalizeImageUrl(data.imageUrl)
+        const parentId = await this.resolveParentCategoryId(tenantId, data.parentId, categoryId)
 
         const updateResult = await prisma.category.updateMany({
             where: { id: categoryId, tenantId },
             data: {
                 title: data.title ?? category.title,
                 slug: data.slug ?? category.slug,
-                imageUrl: imageUrl
+                imageUrl: imageUrl,
+                parentId
             }
         })
 
@@ -136,34 +249,49 @@ export class CategoriesService {
             throw new Error('Category not found')
         }
 
-        return prisma.category.findFirst({
+        const updated = await prisma.category.findFirst({
             where: { id: categoryId, tenantId },
             include: {
-                _count: { select: { products: true } }
+                parent: { select: { id: true, title: true, slug: true } },
+                _count: { select: { products: true, productLinks: true, children: true } }
             }
         })
+
+        return updated ? this.mapCategory(updated) : null
     }
 
     async getCategory(tenantId: string, categoryId: string) {
-        return prisma.category.findFirst({
+        const category = await prisma.category.findFirst({
             where: { id: categoryId, tenantId },
             include: {
-                _count: { select: { products: true } }
+                parent: { select: { id: true, title: true, slug: true } },
+                _count: { select: { products: true, productLinks: true, children: true } }
             }
         })
+
+        return category ? this.mapCategory(category) : null
     }
 
     async deleteCategory(tenantId: string, categoryId: string) {
         const category = await prisma.category.findFirst({
             where: { id: categoryId, tenantId },
-            include: { _count: { select: { products: true } } }
+            include: {
+                _count: { select: { products: true, productLinks: true, children: true } }
+            }
         })
 
         if (!category) {
             throw new Error('Category not found')
         }
 
-        if (category._count.products > 0) {
+        if (category._count.children > 0) {
+            const err: any = new Error('HAS_CHILDREN')
+            err.statusCode = 409
+            err.statusMessage = 'HAS_CHILDREN'
+            throw err
+        }
+
+        if (category._count.products > 0 || category._count.productLinks > 0) {
             const err: any = new Error('HAS_PRODUCTS')
             err.statusCode = 409
             err.statusMessage = 'HAS_PRODUCTS'

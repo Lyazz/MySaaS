@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 interface Product {
   id: string
@@ -34,16 +35,10 @@ const isPromoValid = computed(() => {
     return true
 })
 
-const originalPrice = computed(() => {
-    return Number(props.product.price)
-})
-
-const displayPrice = computed(() => {
-    if (isPromoValid.value && props.product.promotionalPrice) {
-        return Number(props.product.promotionalPrice)
-    }
-    return originalPrice.value
-})
+const pricing = computed(() => buildProductPricing(props.product))
+const originalPrice = computed(() => pricing.value.originalPrice)
+const displayPrice = computed(() => pricing.value.effectivePrice)
+const promotionApplied = computed(() => pricing.value.promotionApplied)
 
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
@@ -57,7 +52,7 @@ const mainImage = computed(() => {
     return '/blank.svg?v=2'
 })
 
-const discount = 0 
+const discount = computed(() => pricing.value.promotionDiscountPercent ?? 0)
 
 
 const isNew = computed(() => {
@@ -86,7 +81,7 @@ function handleAddToCart() {
     productId: props.product.id,
     title: props.product.title,
     slug: props.product.slug,
-    price: Number(props.product.price),
+    price: displayPrice.value,
     bundleDeals: props.product.bundleDeals || [],
     stock: props.product.stock,
     image: mainImage.value,
@@ -232,9 +227,9 @@ function handleAddToCart() {
         class="flex items-center gap-2" 
         :class="[ viewMode === 'list' ? '' : 'justify-center mt-2' ]"
       >
-        <span class="text-base font-medium text-slate-600">{{ Number(product.price).toLocaleString() }} <span class="text-xs font-normal text-slate-500">{{ currencyCode }}</span></span>
+        <span class="text-base font-medium text-slate-600">{{ displayPrice.toLocaleString() }} <span class="text-xs font-normal text-slate-500">{{ currencyCode }}</span></span>
         <span
-          v-if="originalPrice"
+          v-if="promotionApplied && originalPrice !== displayPrice"
           class="text-xs text-slate-400 line-through"
         >{{ originalPrice }} {{ currencyCode }}</span>
       </div>

@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 const cartStore = useCartStore()
 const favorites = useFavorites()
@@ -9,6 +10,12 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
 const activeContactInfos = computed(() => (contactInfos.value || []).filter((i) => i && (i.isActive ?? true) !== false))
@@ -24,7 +31,7 @@ const socialContactInfosWithHref = computed(() =>
 const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
 const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
 const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
-const { currencyCode } = useCurrency()
+const { currencyCode, format: formatCurrency } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -37,12 +44,20 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const searchSuggestionLimit = 5
+const visibleSearchResultCount = ref(searchSuggestionLimit)
+const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
+const hasMoreSearchResults = computed(() => searchResults.value.length > visibleSearchResultCount.value)
+const showMoreSearchResults = () => {
+    visibleSearchResultCount.value += searchSuggestionLimit
+}
 let searchTimeout: any
 
 watch(searchQuery, (newVal) => {
     if (newVal.length >= 3) {
         searchLoading.value = true
         isSearchDropdownOpen.value = true
+        visibleSearchResultCount.value = searchSuggestionLimit
         clearTimeout(searchTimeout)
         searchTimeout = setTimeout(async () => {
             try {
@@ -51,7 +66,13 @@ watch(searchQuery, (newVal) => {
                     headers: useTenantApiHeaders(),
                     query: { q: newVal }
                 })
-                searchResults.value = (data || []).slice(0, 5)
+                searchResults.value = (data || []).map((product) => {
+                    const pricing = buildProductPricing(product)
+                    return {
+                        ...product,
+                        effectivePrice: pricing.effectivePrice
+                    }
+                })
             } catch (e) {
                 console.error('Search error:', e)
             } finally {
@@ -60,6 +81,7 @@ watch(searchQuery, (newVal) => {
         }, 500)
     } else {
         searchResults.value = []
+        visibleSearchResultCount.value = searchSuggestionLimit
         isSearchDropdownOpen.value = false
     }
 })
@@ -136,7 +158,7 @@ const props = defineProps<{
                     :to="`/c/${cat.slug}`"
                     class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                   >
-                    {{ cat.title }}
+                    {{ categoryDisplayTitle(cat) }}
                   </NuxtLink>
                 </div>
               </div>
@@ -167,7 +189,7 @@ const props = defineProps<{
                     <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
                     <div v-else class="flex flex-col">
                       <NuxtLink
-                        v-for="product in searchResults"
+                        v-for="product in visibleSearchResults"
                         :key="product.id"
                         :to="`/p/${product.slug}`"
                         class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
@@ -176,9 +198,18 @@ const props = defineProps<{
                         <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
                         <div class="flex-1 min-w-0">
                           <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
+                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}</div>
                         </div>
                       </NuxtLink>
+                    <button
+                      v-if="hasMoreSearchResults"
+                      type="button"
+                      class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                      @mousedown.prevent
+                      @click="showMoreSearchResults"
+                    >
+                      See more
+                    </button>
                     </div>
                   </div>
                </div>
@@ -260,7 +291,7 @@ const props = defineProps<{
                   <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
-                      v-for="product in searchResults"
+                      v-for="product in visibleSearchResults"
                       :key="product.id"
                       :to="`/p/${product.slug}`"
                       class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
@@ -269,9 +300,18 @@ const props = defineProps<{
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
+                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}</div>
                       </div>
                     </NuxtLink>
+                  <button
+                    v-if="hasMoreSearchResults"
+                    type="button"
+                    class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                    @mousedown.prevent
+                    @click="showMoreSearchResults"
+                  >
+                    See more
+                  </button>
                   </div>
                 </div>
               </div>
@@ -295,7 +335,7 @@ const props = defineProps<{
                   class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
                   @click="mobileMenuOpen = false"
                 >
-                  {{ cat.title }}
+                  {{ categoryDisplayTitle(cat) }}
                 </NuxtLink>
               </div>
             </div>

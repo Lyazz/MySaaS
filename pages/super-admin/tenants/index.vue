@@ -198,7 +198,7 @@
               :placeholder="t('superAdmin.tenants.modal.fields.slug.placeholder')"
             >
             <p class="text-xs text-gray-500 mt-1">
-              {{ t('superAdmin.tenants.modal.fields.slug.hint', { slug: formData.slug || t('superAdmin.tenants.modal.fields.slug.slugFallback') }) }}
+              Accessible at {{ slugPreview }}
             </p>
           </div>
 
@@ -255,6 +255,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const { t, locale } = useI18n({ useScope: 'global' })
+const platformBaseDomain = usePlatformBaseDomain()
 const loading = ref(true)
 const tenants = ref<any[]>([])
 const searchQuery = ref('')
@@ -270,6 +271,23 @@ const formData = ref({
   ownerEmail: '',
   ownerPassword: ''
 })
+
+const subdomainSuffix = computed(() => {
+  const { host } = useRequestOrigin()
+  const firstHost = host.split(',')[0]?.trim() || ''
+  const hostParts = firstHost.split(':')
+  const hasPort = hostParts.length > 1 && /^\d+$/.test(hostParts[hostParts.length - 1] || '')
+  const hostname = hasPort ? hostParts.slice(0, -1).join(':').toLowerCase() : firstHost.toLowerCase()
+  const port = hasPort ? hostParts[hostParts.length - 1] : ''
+
+  if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
+    return `.localhost${port ? `:${port}` : ''}`
+  }
+
+  return `.${platformBaseDomain}`
+})
+
+const slugPreview = computed(() => `${formData.value.slug || 'your-store'}${subdomainSuffix.value}`)
 
 const filteredTenants = computed(() => {
   if (!searchQuery.value) return tenants.value

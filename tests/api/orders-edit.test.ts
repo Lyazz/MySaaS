@@ -19,6 +19,7 @@ describe('Orders edit (unconfirmed only)', () => {
     let product1Id: string
     let product2Id: string
     let promoProductId: string
+    let inactivePromoProductId: string
 
     let pendingOrderId: string
     let confirmedOrderId: string
@@ -93,6 +94,22 @@ describe('Orders edit (unconfirmed only)', () => {
             }
         })
         promoProductId = promoProduct.id
+
+        const inactivePromoProduct = await prisma.product.create({
+            data: {
+                tenantId: tenantAId,
+                title: 'Inactive Promo Product',
+                slug: `inactive-promo-p-${Date.now()}`,
+                price: 150,
+                promotionalPrice: 90,
+                isPromotionActive: false,
+                promotionStartDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+                stock: 50,
+                isActive: true
+            }
+        })
+        inactivePromoProductId = inactivePromoProduct.id
 
         const pending = await prisma.order.create({
             data: {
@@ -179,6 +196,24 @@ describe('Orders edit (unconfirmed only)', () => {
         expect(res.body.items).toHaveLength(1)
         expect(Number(res.body.items[0].price)).toBe(80)
         expect(res.body.items[0].productId).toBe(promoProductId)
+    })
+
+    it('prioritizes promotional price even when promotion is inactive or out-of-window', async () => {
+        const res = await request(app)
+            .put(`/api/admin/orders/${pendingOrderId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .send({
+                customerName: 'Buyer Inactive Promo',
+                customerPhone: '0550123456',
+                items: [{ productId: inactivePromoProductId, variantId: null, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(200)
+        expect(Number(res.body.totalAmount)).toBe(180)
+        expect(res.body.items).toHaveLength(1)
+        expect(Number(res.body.items[0].price)).toBe(90)
+        expect(res.body.items[0].productId).toBe(inactivePromoProductId)
     })
 
     it('rejects editing for non-PENDING orders', async () => {

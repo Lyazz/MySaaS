@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.contact.title') }}</h1>
-      <p class="text-slate-600 mt-1">{{ t('admin.pages.settings.contact.subtitle') }}</p>
+      <h1 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.settings.contact.title') }}</h1>
+      <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.settings.contact.subtitle') }}</p>
     </div>
 
     <ContactInfosForm />

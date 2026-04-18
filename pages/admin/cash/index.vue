@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
           {{ t('admin.pages.cash.title') }}
         </h2>
-        <p class="mt-1 text-slate-600">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.cash.subtitle') }}
         </p>
       </div>
@@ -26,52 +26,57 @@
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
-          <MenuItems class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+          <MenuItems class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
             <div class="py-1">
               <MenuItem v-slot="{ active }">
                 <button
-                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openCustomerPaymentModal"
                 >
-                  <Icon name="lucide:user-round" class="h-4 w-4 text-slate-400" />
+                  <Icon name="lucide:user-round" class="h-4 w-4" style="color: var(--text-muted)" />
                   {{ t('admin.pages.cash.actions.newCustomerPayment') }}
                 </button>
               </MenuItem>
               <MenuItem v-slot="{ active }">
                 <button
-                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openSupplierPaymentModal"
                 >
-                  <Icon name="lucide:truck" class="h-4 w-4 text-slate-400" />
+                  <Icon name="lucide:truck" class="h-4 w-4" style="color: var(--text-muted)" />
                   {{ t('admin.pages.cash.actions.newSupplierPayment') }}
                 </button>
               </MenuItem>
-              <div class="my-1 border-t border-slate-100" />
+              <div class="my-1 border-t" style="border-color: var(--surface-border)" />
               <MenuItem v-slot="{ active }">
                 <button
-                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openExpenseModal('EXPENSE')"
                 >
-                  <Icon name="lucide:minus-circle" class="h-4 w-4 text-slate-400" />
+                  <Icon name="lucide:minus-circle" class="h-4 w-4" style="color: var(--text-muted)" />
                   {{ t('admin.pages.cash.actions.newExpense') }}
                 </button>
               </MenuItem>
               <MenuItem v-slot="{ active }">
                 <button
-                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-slate-700']"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openExpenseModal('CHARGE')"
                 >
-                  <Icon name="lucide:receipt" class="h-4 w-4 text-slate-400" />
+                  <Icon name="lucide:receipt" class="h-4 w-4" style="color: var(--text-muted)" />
                   {{ t('admin.pages.cash.actions.newCharge') }}
                 </button>
               </MenuItem>
-              <div class="my-1 border-t border-slate-100" />
+              <div class="my-1 border-t" style="border-color: var(--surface-border)" />
               <MenuItem v-slot="{ active }">
                 <button
-                  :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-2.5 text-sm text-teal-700']"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-teal-400 transition-colors"
+                  :style="active ? 'background: var(--surface-3)' : ''"
                   @click="transferOpen = true"
                 >
-                  <Icon name="lucide:arrow-left-right" class="h-4 w-4 text-teal-600" />
+                  <Icon name="lucide:arrow-left-right" class="h-4 w-4 text-teal-500" />
                   {{ t('admin.pages.cash.actions.transfer') }}
                 </button>
               </MenuItem>
@@ -94,52 +99,57 @@
         leave-from-class="transform opacity-100 scale-100"
         leave-to-class="transform opacity-0 scale-95"
       >
-        <MenuItems class="absolute bottom-full right-0 mb-2 w-64 origin-bottom-right rounded-lg bg-white shadow-xl ring-1 ring-black/5 focus:outline-none">
+        <MenuItems class="absolute bottom-full right-0 mb-2 w-64 origin-bottom-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
           <div class="py-1">
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                class="flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors"
+                :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openCustomerPaymentModal"
               >
-                <Icon name="lucide:user-round" class="h-5 w-5 text-slate-400" />
+                <Icon name="lucide:user-round" class="h-5 w-5" style="color: var(--text-muted)" />
                 {{ t('admin.pages.cash.actions.newCustomerPayment') }}
               </button>
             </MenuItem>
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                class="flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors"
+                :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openSupplierPaymentModal"
               >
-                <Icon name="lucide:truck" class="h-5 w-5 text-slate-400" />
+                <Icon name="lucide:truck" class="h-5 w-5" style="color: var(--text-muted)" />
                 {{ t('admin.pages.cash.actions.newSupplierPayment') }}
               </button>
             </MenuItem>
-            <div class="my-1 border-t border-slate-100" />
+            <div class="my-1 border-t" style="border-color: var(--surface-border)" />
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                class="flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors"
+                :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openExpenseModal('EXPENSE')"
               >
-                <Icon name="lucide:minus-circle" class="h-5 w-5 text-slate-400" />
+                <Icon name="lucide:minus-circle" class="h-5 w-5" style="color: var(--text-muted)" />
                 {{ t('admin.pages.cash.actions.newExpense') }}
               </button>
             </MenuItem>
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-slate-700']"
+                class="flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors"
+                :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openExpenseModal('CHARGE')"
               >
-                <Icon name="lucide:receipt" class="h-5 w-5 text-slate-400" />
+                <Icon name="lucide:receipt" class="h-5 w-5" style="color: var(--text-muted)" />
                 {{ t('admin.pages.cash.actions.newCharge') }}
               </button>
             </MenuItem>
-            <div class="my-1 border-t border-slate-100" />
+            <div class="my-1 border-t" style="border-color: var(--surface-border)" />
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-slate-50' : '', 'flex w-full items-center gap-3 px-4 py-3 text-sm text-teal-700']"
+                class="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-teal-400 transition-colors"
+                :style="active ? 'background: var(--surface-3)' : ''"
                 @click="transferOpen = true"
               >
-                <Icon name="lucide:arrow-left-right" class="h-5 w-5 text-teal-600" />
+                <Icon name="lucide:arrow-left-right" class="h-5 w-5 text-teal-500" />
                 {{ t('admin.pages.cash.actions.transfer') }}
               </button>
             </MenuItem>
@@ -150,50 +160,50 @@
 
     <!-- Summary Statistics -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
             <Icon name="lucide:arrow-down-left" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.totalIn') || 'Total In (Today)' }}</p>
-            <p class="mt-0.5 text-lg font-bold text-emerald-600">{{ formatCurrency(todayStats.totalIn) }}</p>
+            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.totalIn') || 'Total In (Today)' }}</p>
+            <p class="mt-0.5 text-lg font-bold text-emerald-400">{{ formatCurrency(todayStats.totalIn) }}</p>
           </div>
         </div>
       </div>
-      
-      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+
+      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
             <Icon name="lucide:arrow-up-right" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.totalOut') || 'Total Out (Today)' }}</p>
-            <p class="mt-0.5 text-lg font-bold text-rose-600">{{ formatCurrency(todayStats.totalOut) }}</p>
+            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.totalOut') || 'Total Out (Today)' }}</p>
+            <p class="mt-0.5 text-lg font-bold text-rose-400">{{ formatCurrency(todayStats.totalOut) }}</p>
           </div>
         </div>
       </div>
-      
-      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+
+      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
             <Icon name="lucide:wallet" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.activeSessions') || 'Active Sessions' }}</p>
-            <p class="mt-0.5 text-lg font-bold text-slate-900">{{ activeSessions }}</p>
+            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.activeSessions') || 'Active Sessions' }}</p>
+            <p class="mt-0.5 text-lg font-bold" style="color: var(--text-primary)">{{ activeSessions }}</p>
           </div>
         </div>
       </div>
-      
-      <div class="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm">
+
+      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
             <Icon name="lucide:trending-up" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium text-slate-600">{{ t('admin.pages.cash.stats.netBalance') || 'Net (Today)' }}</p>
-            <p class="mt-0.5 text-lg font-bold" :class="todayStats.net >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.netBalance') || 'Net (Today)' }}</p>
+            <p class="mt-0.5 text-lg font-bold" :class="todayStats.net >= 0 ? 'text-emerald-400' : 'text-rose-400'">
               {{ formatCurrency(todayStats.net) }}
             </p>
           </div>
@@ -213,15 +223,15 @@
     </div>
 
     <!-- Cashboxes - Horizontal Scrollable -->
-    <section class="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm">
+    <section class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
       <div class="flex items-center justify-between gap-3 mb-4">
-        <h3 class="font-semibold text-slate-900">
+        <h3 class="font-semibold" style="color: var(--text-primary)">
           {{ t('admin.pages.cash.cashboxes.title') }}
         </h3>
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+            class="ui-btn ui-btn--secondary text-xs"
             :disabled="loadingCashboxes"
             @click="openCashboxCreate"
           >
@@ -240,17 +250,17 @@
       </div>
 
       <div v-if="loadingCashboxes" class="flex gap-3 overflow-x-auto pb-2">
-        <div v-for="i in 3" :key="i" class="min-w-[280px] h-32 rounded-xl bg-slate-100 animate-pulse" />
+        <div v-for="i in 3" :key="i" class="min-w-[280px] h-32 rounded-xl animate-pulse" style="background: var(--surface-3)" />
       </div>
 
-      <div v-else-if="cashboxes.length === 0" class="rounded-xl border border-dashed border-slate-200 p-6 text-center">
-        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-          <Icon name="lucide:inbox" class="h-5 w-5 text-slate-400" />
+      <div v-else-if="cashboxes.length === 0" class="rounded-xl border border-dashed p-6 text-center" style="border-color: var(--surface-border)">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full" style="background: var(--surface-3)">
+          <Icon name="lucide:inbox" class="h-5 w-5" style="color: var(--text-muted)" />
         </div>
-        <p class="mt-2 text-sm font-medium text-slate-900">
+        <p class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
           {{ t('admin.pages.cash.cashboxes.empty') }}
         </p>
-        <p class="mt-1 text-xs text-slate-500">
+        <p class="mt-1 text-xs" style="color: var(--text-tertiary)">
           {{ t('admin.pages.cash.cashboxes.emptyHint') }}
         </p>
         <button
@@ -267,7 +277,7 @@
         <div
           v-for="c in cashboxes"
           :key="c.id"
-          class="group relative min-w-[280px] overflow-hidden rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-slate-300 hover:shadow-sm"
+          class="group relative min-w-[280px] overflow-hidden rounded-xl p-4 transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
@@ -275,17 +285,17 @@
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                   <Icon name="lucide:wallet" class="h-4 w-4" />
                 </div>
-                <p class="font-semibold text-slate-900 truncate">
+                <p class="font-semibold truncate" style="color: var(--text-primary)">
                   {{ c.name }}
                 </p>
               </div>
-              
+
               <div class="mt-2 flex items-center gap-2">
-                <span 
+                <span
                   class="inline-flex h-2 w-2 rounded-full"
-                  :class="c.openSession ? 'bg-emerald-500' : 'bg-slate-300'"
+                  :class="c.openSession ? 'bg-emerald-500' : 'bg-white/20'"
                 />
-                <span class="text-xs font-medium" :class="c.openSession ? 'text-emerald-700' : 'text-slate-600'">
+                <span class="text-xs font-medium" :class="c.openSession ? 'text-emerald-400' : ''" :style="c.openSession ? '' : 'color: var(--text-tertiary)'">
                   <span v-if="c.openSession">
                     {{ t('admin.pages.cash.cashboxes.openSession', { id: c.openSession.id.substring(0, 8) }) }}
                   </span>
@@ -298,7 +308,8 @@
 
             <NuxtLink
               :to="`/admin/cash/${c.id}`"
-              class="shrink-0 p-2 text-slate-400 opacity-0 transition-all hover:text-teal-600 group-hover:opacity-100"
+              class="shrink-0 p-2 opacity-0 transition-all hover:text-teal-400 group-hover:opacity-100"
+              style="color: var(--text-muted)"
               :title="t('common.view')"
             >
               <Icon name="lucide:arrow-right" class="h-4 w-4" />
@@ -319,7 +330,8 @@
             <button
               v-else
               type="button"
-              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+              style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
               @click="openCloseSession(c.openSession.id)"
             >
               <Icon name="lucide:lock" class="h-3 w-3" />
@@ -327,7 +339,8 @@
             </button>
             <NuxtLink
               :to="`/admin/cash/${c.id}`"
-              class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              class="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+              style="border: 1px solid var(--surface-border); background: var(--surface-3); color: var(--text-secondary)"
             >
               {{ t('common.details') }}
             </NuxtLink>
@@ -340,29 +353,23 @@
     <!-- Transactions & Sessions Tabs - Full Width -->
     <section>
       <TabGroup @change="onTabChange">
-          <div class="rounded-2xl border border-slate-200/70 bg-white shadow-sm overflow-hidden">
-            <div class="border-b border-slate-200/70">
+          <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+            <div class="border-b" style="border-color: var(--surface-border)">
               <TabList class="flex gap-4 px-5 pt-5">
                 <Tab v-slot="{ selected }" as="template">
                   <button
-                    :class="[
-                      'px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none',
-                      selected
-                        ? 'border-b-2 border-teal-600 text-teal-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                    ]"
+                    class="px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none"
+                    :class="selected ? 'border-b-2 border-teal-500 text-teal-400' : ''"
+                    :style="selected ? '' : 'color: var(--text-secondary)'"
                   >
                     {{ t('admin.pages.cash.transactions.title') }}
                   </button>
                 </Tab>
                 <Tab v-slot="{ selected }" as="template">
                   <button
-                    :class="[
-                      'px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none',
-                      selected
-                        ? 'border-b-2 border-teal-600 text-teal-600'
-                        : 'text-slate-600 hover:text-slate-900'
-                    ]"
+                    class="px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none"
+                    :class="selected ? 'border-b-2 border-teal-500 text-teal-400' : ''"
+                    :style="selected ? '' : 'color: var(--text-secondary)'"
                   >
                     {{ t('admin.pages.cash.sessions.title') }}
                   </button>
@@ -375,15 +382,15 @@
               <TabPanel>
                 <!-- Collapsible Filters -->
                 <Disclosure v-slot="{ open }" defaultOpen>
-                  <div class="border-b border-slate-200/70 px-5 py-4">
+                  <div class="border-b px-5 py-4" style="border-color: var(--surface-border)">
                     <DisclosureButton class="flex w-full items-center justify-between text-left">
                       <div class="flex items-center gap-2">
-                        <h3 class="font-semibold text-slate-900">{{ t('admin.pages.cash.transactions.filters.title') }}</h3>
+                        <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.transactions.filters.title') }}</h3>
                         <span v-if="activeTransactionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
                           {{ activeTransactionFiltersCount }}
                         </span>
                       </div>
-                      <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5 text-slate-400" />
+                      <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5" style="color: var(--text-muted)" />
                     </DisclosureButton>
                     <transition
                       enter-active-class="transition duration-200 ease-out"
@@ -395,11 +402,11 @@
                     >
                       <DisclosurePanel class="pt-4 space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          <BaseSelect v-model="filters.cashboxId" class="!bg-slate-50">
+                          <BaseSelect v-model="filters.cashboxId">
                             <option value="">{{ t('admin.pages.cash.transactions.filters.allCashboxes') }}</option>
                             <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
                           </BaseSelect>
-                          <BaseSelect v-model="filters.type" class="!bg-slate-50">
+                          <BaseSelect v-model="filters.type" class="">
                             <option value="">{{ t('admin.pages.cash.transactions.filters.allTypes') }}</option>
                             <option value="SALE_PAYMENT">{{ t('admin.pages.cash.transactions.types.SALE_PAYMENT') }}</option>
                             <option value="CUSTOMER_PAYMENT">{{ t('admin.pages.cash.transactions.types.CUSTOMER_PAYMENT') }}</option>
@@ -408,19 +415,19 @@
                             <option value="CHARGE">{{ t('admin.pages.cash.transactions.types.CHARGE') }}</option>
                             <option value="TRANSFER">{{ t('admin.pages.cash.transactions.types.TRANSFER') }}</option>
                           </BaseSelect>
-                          <BaseSelect v-model="filters.direction" class="!bg-slate-50">
+                          <BaseSelect v-model="filters.direction" class="">
                             <option value="">{{ t('admin.pages.cash.transactions.filters.allDirections') }}</option>
                             <option value="IN">{{ t('admin.pages.cash.directions.in') }}</option>
                             <option value="OUT">{{ t('admin.pages.cash.directions.out') }}</option>
                           </BaseSelect>
-                          <BaseSelect v-model="filters.method" class="!bg-slate-50">
+                          <BaseSelect v-model="filters.method" class="">
                             <option value="">{{ t('admin.pages.cash.transactions.filters.allMethods') }}</option>
                             <option value="CASH">{{ t('admin.pages.cash.methods.CASH') }}</option>
                             <option value="CARD">{{ t('admin.pages.cash.methods.CARD') }}</option>
                             <option value="TRANSFER">{{ t('admin.pages.cash.methods.TRANSFER') }}</option>
                             <option value="OTHER">{{ t('admin.pages.cash.methods.OTHER') }}</option>
                           </BaseSelect>
-                          <BaseSelect v-model="filters.userId" class="!bg-slate-50">
+                          <BaseSelect v-model="filters.userId" class="">
                             <option value="">{{ t('admin.pages.cash.transactions.filters.allUsers') }}</option>
                             <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
                           </BaseSelect>
@@ -428,7 +435,7 @@
                         <DateFilter v-model:start-date="filters.startDate" v-model:end-date="filters.endDate" />
                         <button
                           type="button"
-                          class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                          class="ui-btn ui-btn--secondary text-xs"
                           @click="resetTxFilters"
                         >
                           <Icon name="lucide:rotate-ccw" class="h-3.5 w-3.5" />
@@ -441,46 +448,46 @@
 
         <div v-if="loadingTxs" class="p-10 text-center">
           <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600" />
-          <p class="mt-2 text-sm text-slate-500">
+          <p class="mt-2 text-sm" style="color: var(--text-tertiary)">
             {{ t('admin.pages.cash.transactions.loading') }}
           </p>
         </div>
 
         <div v-else-if="txs.length === 0" class="p-10 text-center">
-           <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-             <Icon name="lucide:inbox" class="h-5 w-5 text-slate-400" />
+           <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full" style="background: var(--surface-3)">
+             <Icon name="lucide:inbox" class="h-5 w-5" style="color: var(--text-muted)" />
            </div>
-          <p class="mt-3 text-sm font-medium text-slate-900">
+          <p class="mt-3 text-sm font-medium" style="color: var(--text-primary)">
             {{ t('admin.pages.cash.transactions.empty') }}
           </p>
-          <p class="mt-1 text-sm text-slate-500">
+          <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
             {{ t('admin.pages.cash.transactions.emptyHint') }}
           </p>
         </div>
 
         <div v-else>
-          <div class="sm:hidden divide-y divide-slate-200/70">
+          <div class="sm:hidden divide-y" style="border-color: var(--surface-border)">
             <div v-for="tx in txs" :key="tx.id" class="p-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                  <p class="text-sm font-semibold text-slate-900 truncate">{{ typeLabel(tx.type) }}</p>
-                  <p class="mt-0.5 text-xs text-slate-500">
+                  <p class="text-sm font-semibold truncate" style="color: var(--text-primary)">{{ typeLabel(tx.type) }}</p>
+                  <p class="mt-0.5 text-xs" style="color: var(--text-muted)">
                     {{ formatDate(tx.createdAt) }}
                   </p>
-                  <p class="mt-2 text-xs text-slate-600 truncate">
+                  <p class="mt-2 text-xs truncate" style="color: var(--text-secondary)">
                     {{ cashboxName(tx.cashboxId) }} · {{ userEmail(tx.createdByUserId) }}
                   </p>
                   <div class="mt-2 flex flex-wrap items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-700">
+                    <span class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium" style="background: var(--surface-3); color: var(--text-secondary)">
                       <Icon v-if="tx.method === 'CASH'" name="lucide:banknote" class="h-3 w-3" />
                       <Icon v-else-if="tx.method === 'CARD'" name="lucide:credit-card" class="h-3 w-3" />
                       <Icon v-else name="lucide:arrow-left-right" class="h-3 w-3" />
                       {{ methodLabel(tx.method) }}
                     </span>
-                    <span v-if="tx.expenseCategory" class="rounded-md bg-slate-50 px-2 py-1 text-[11px] text-slate-600">
+                    <span v-if="tx.expenseCategory" class="rounded-md px-2 py-1 text-[11px]" style="background: var(--surface-3); color: var(--text-tertiary)">
                       {{ tx.expenseCategory }}
                     </span>
-                    <span v-if="tx.reference" class="rounded-md bg-slate-50 px-2 py-1 text-[11px] text-slate-600 truncate max-w-[220px]">
+                    <span v-if="tx.reference" class="rounded-md px-2 py-1 text-[11px] truncate max-w-[220px]" style="background: var(--surface-3); color: var(--text-tertiary)">
                       Ref: {{ tx.reference }}
                     </span>
                   </div>
@@ -518,28 +525,28 @@
               </thead>
               <tbody class="ui-tbody">
                 <tr v-for="tx in paginatedTxs" :key="tx.id" class="ui-tr">
-                  <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                  <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                     {{ formatDate(tx.createdAt) }}
                   </td>
-                  <td class="ui-td text-sm font-medium text-slate-900">
+                  <td class="ui-td text-sm font-medium" style="color: var(--text-primary)">
                     {{ cashboxName(tx.cashboxId) }}
                   </td>
-                  <td class="ui-td text-sm text-slate-600 max-w-[220px] truncate">
+                  <td class="ui-td text-sm max-w-[220px] truncate" style="color: var(--text-secondary)">
                     {{ userEmail(tx.createdByUserId) }}
                   </td>
-                  <td class="ui-td text-sm text-slate-700">
+                  <td class="ui-td text-sm" style="color: var(--text-secondary)">
                     <div class="flex flex-col">
-                      <span class="font-medium text-slate-900">{{ typeLabel(tx.type) }}</span>
-                      <span v-if="tx.expenseCategory" class="text-xs text-slate-500 mt-0.5">
+                      <span class="font-medium" style="color: var(--text-primary)">{{ typeLabel(tx.type) }}</span>
+                      <span v-if="tx.expenseCategory" class="text-xs mt-0.5" style="color: var(--text-muted)">
                         {{ tx.expenseCategory }}
                       </span>
-                      <span v-if="tx.reference" class="text-xs text-slate-500 mt-0.5">
+                      <span v-if="tx.reference" class="text-xs mt-0.5" style="color: var(--text-muted)">
                         Ref: {{ tx.reference }}
                       </span>
                     </div>
                   </td>
-                  <td class="ui-td text-sm text-slate-600">
-                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
+                  <td class="ui-td text-sm" style="color: var(--text-secondary)">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium" style="background: var(--surface-3); color: var(--text-secondary)">
                       <Icon v-if="tx.method === 'CASH'" name="lucide:banknote" class="h-3 w-3" />
                       <Icon v-else-if="tx.method === 'CARD'" name="lucide:credit-card" class="h-3 w-3" />
                       <Icon v-else name="lucide:arrow-left-right" class="h-3 w-3" />
@@ -555,7 +562,7 @@
           </div>
 
           <!-- Transactions Pagination -->
-          <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+          <div class="px-4 py-3 flex items-center justify-between border-t sm:px-6" style="border-color: var(--surface-border)">
             <div class="flex flex-1 items-center justify-between sm:hidden">
               <button
                 :disabled="txPage === 1"
@@ -564,7 +571,7 @@
               >
                 <Icon name="lucide:chevron-left" class="w-4 h-4" />
               </button>
-              <span class="text-sm text-slate-600">
+              <span class="text-sm" style="color: var(--text-secondary)">
                 {{ t('admin.common.page', { page: txPage, total: txTotalPages }) }}
               </span>
               <button
@@ -577,7 +584,7 @@
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
-                <p class="text-sm text-slate-700">
+                <p class="text-sm" style="color: var(--text-secondary)">
                   {{ t('admin.common.showing', {
                     from: txTotal === 0 ? 0 : (txPage - 1) * txPerPage + 1,
                     to: Math.min(txPage * txPerPage, txTotal),
@@ -586,10 +593,11 @@
                 </p>
               </div>
               <div>
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <nav class="relative z-0 inline-flex rounded-md -space-x-px">
                   <button
                     :disabled="txPage === 1"
-                    class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                    style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                     @click="txPage--; fetchTransactions()"
                   >
                     {{ t('admin.common.previous') }}
@@ -597,19 +605,17 @@
                   <button
                     v-for="page in txTotalPages"
                     :key="page"
-                    :class="[
-                      'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
-                      txPage === page
-                        ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                    ]"
+                    class="relative inline-flex items-center px-4 py-2 text-sm font-medium"
+                    :class="txPage === page ? 'z-10 text-teal-400' : ''"
+                    :style="txPage === page ? 'background: rgba(20,184,166,0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
                     @click="txPage = page; fetchTransactions()"
                   >
                     {{ page }}
                   </button>
                   <button
                     :disabled="txPage === txTotalPages"
-                    class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                    style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                     @click="txPage++; fetchTransactions()"
                   >
                     {{ t('admin.common.next') }}
@@ -624,15 +630,15 @@
         <TabPanel>
           <!-- Collapsible Filters -->
           <Disclosure v-slot="{ open }" defaultOpen>
-            <div class="border-b border-slate-200/70 px-5 py-4">
+            <div class="border-b px-5 py-4" style="border-color: var(--surface-border)">
               <DisclosureButton class="flex w-full items-center justify-between text-left">
                 <div class="flex items-center gap-2">
-                  <h3 class="font-semibold text-slate-900">{{ t('admin.pages.cash.sessions.filters.title') }}</h3>
+                  <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.sessions.filters.title') }}</h3>
                   <span v-if="activeSessionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
                     {{ activeSessionFiltersCount }}
                   </span>
                 </div>
-                <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5 text-slate-400" />
+                <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5" style="color: var(--text-muted)" />
               </DisclosureButton>
               <transition
                 enter-active-class="transition duration-200 ease-out"
@@ -644,16 +650,16 @@
               >
                 <DisclosurePanel class="pt-4 space-y-3">
                   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <BaseSelect v-model="sessionFilters.cashboxId" class="!bg-slate-50">
+                    <BaseSelect v-model="sessionFilters.cashboxId" class="">
                       <option value="">{{ t('admin.pages.cash.sessions.filters.allCashboxes') }}</option>
                       <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
                     </BaseSelect>
-                    <BaseSelect v-model="sessionFilters.status" class="!bg-slate-50">
+                    <BaseSelect v-model="sessionFilters.status" class="">
                       <option value="">{{ t('admin.pages.cash.sessions.filters.allStatuses') }}</option>
                       <option value="OPEN">{{ t('admin.pages.cash.status.OPEN') }}</option>
                       <option value="CLOSED">{{ t('admin.pages.cash.status.CLOSED') }}</option>
                     </BaseSelect>
-                    <BaseSelect v-model="sessionFilters.userId" class="!bg-slate-50">
+                    <BaseSelect v-model="sessionFilters.userId" class="">
                       <option value="">{{ t('admin.pages.cash.sessions.filters.allUsers') }}</option>
                       <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
                     </BaseSelect>
@@ -661,7 +667,7 @@
                   <DateFilter v-model:start-date="sessionFilters.startDate" v-model:end-date="sessionFilters.endDate" />
                   <button
                     type="button"
-                    class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                    class="ui-btn ui-btn--secondary text-xs"
                     @click="resetSessionFilters"
                   >
                     <Icon name="lucide:rotate-ccw" class="h-3.5 w-3.5" />
@@ -674,47 +680,48 @@
 
           <div v-if="loadingSessions" class="p-10 text-center">
             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600" />
-            <p class="mt-2 text-sm text-slate-500">
+            <p class="mt-2 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.pages.cash.sessions.loading') }}
             </p>
           </div>
 
           <div v-else-if="sessions.length === 0" class="p-10 text-center">
-             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                 <Icon name="lucide:inbox" class="h-5 w-5 text-slate-400" />
+             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full" style="background: var(--surface-3)">
+                 <Icon name="lucide:inbox" class="h-5 w-5" style="color: var(--text-muted)" />
              </div>
-            <p class="mt-3 text-sm font-medium text-slate-900">
+            <p class="mt-3 text-sm font-medium" style="color: var(--text-primary)">
               {{ t('admin.pages.cash.sessions.empty') }}
             </p>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.pages.cash.sessions.emptyHint') }}
             </p>
           </div>
 
           <div v-else>
-            <div class="sm:hidden divide-y divide-slate-200/70">
+            <div class="sm:hidden divide-y" style="border-color: var(--surface-border)">
               <div v-for="s in sessions" :key="s.id" class="p-4">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
-                    <p class="text-sm font-semibold text-slate-900 truncate">
+                    <p class="text-sm font-semibold truncate" style="color: var(--text-primary)">
                       {{ cashboxName(s.cashboxId) }}
                     </p>
                     <div class="mt-2 flex items-center gap-2">
                       <span
                         class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium"
-                        :class="s.status === 'OPEN' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'"
+                        :class="s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-400' : ''"
+                        :style="s.status !== 'OPEN' ? 'background: var(--surface-3); color: var(--text-secondary)' : ''"
                       >
-                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-slate-500'" />
+                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
                         {{ t(`admin.pages.cash.status.${s.status}`) }}
                       </span>
                     </div>
-                    <div class="mt-3 space-y-1.5 text-xs text-slate-600">
+                    <div class="mt-3 space-y-1.5 text-xs" style="color: var(--text-secondary)">
                       <p>{{ t('admin.pages.cash.sessions.table.user') }}: {{ userEmail(s.openedByUserId) }}</p>
                       <p>{{ t('admin.pages.cash.sessions.table.opened') }}: {{ formatDate(s.openedAt) }}</p>
                       <p v-if="s.closedAt">{{ t('admin.pages.cash.sessions.table.closed') }}: {{ formatDate(s.closedAt) }}</p>
                       <p v-if="s.openingFloat">{{ t('admin.pages.cash.sessions.table.opening') }}: {{ formatCurrency(Number(s.openingFloat)) }}</p>
                       <p v-if="s.closingCount">{{ t('admin.pages.cash.sessions.table.closing') }}: {{ formatCurrency(Number(s.closingCount)) }}</p>
-                      <p v-if="s.difference" :class="Number(s.difference) !== 0 ? 'text-rose-600 font-medium' : 'text-slate-900'">
+                      <p v-if="s.difference" :class="Number(s.difference) !== 0 ? 'text-rose-400 font-medium' : ''" :style="Number(s.difference) === 0 ? 'color: var(--text-primary)' : ''">
                         {{ t('admin.pages.cash.sessions.table.difference') }}: {{ formatCurrency(Number(s.difference)) }}
                       </p>
                     </div>
@@ -758,37 +765,38 @@
                 </thead>
                 <tbody class="ui-tbody">
                   <tr v-for="s in paginatedSessions" :key="s.id" class="ui-tr">
-                    <td class="ui-td text-sm font-medium text-slate-900">
+                    <td class="ui-td text-sm font-medium" style="color: var(--text-primary)">
                       {{ cashboxName(s.cashboxId) }}
                     </td>
                     <td class="ui-td text-sm">
                       <span
                         class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                        :class="s.status === 'OPEN' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-700'"
+                        :class="s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-400' : ''"
+                        :style="s.status !== 'OPEN' ? 'background: var(--surface-3); color: var(--text-secondary)' : ''"
                       >
-                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-slate-500'" />
+                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
                         {{ t(`admin.pages.cash.status.${s.status}`) }}
                       </span>
                     </td>
-                    <td class="ui-td text-sm text-slate-600 max-w-[220px] truncate">
+                    <td class="ui-td text-sm max-w-[220px] truncate" style="color: var(--text-secondary)">
                       {{ userEmail(s.openedByUserId) }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                    <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                       {{ formatDate(s.openedAt) }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+                    <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                       {{ s.closedAt ? formatDate(s.closedAt) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
                       {{ formatCurrency(Number(s.openingFloat)) }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
                       {{ s.expectedClosing ? formatCurrency(Number(s.expectedClosing)) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium text-slate-900">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
                       {{ s.closingCount ? formatCurrency(Number(s.closingCount)) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-600' : 'text-slate-900'">
+                    <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-400' : ''" :style="!(s.difference && Number(s.difference) !== 0) ? 'color: var(--text-primary)' : ''">
                       {{ s.difference ? formatCurrency(Number(s.difference)) : '—' }}
                     </td>
                   </tr>
@@ -797,7 +805,7 @@
             </div>
 
             <!-- Sessions Pagination -->
-            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+            <div class="px-4 py-3 flex items-center justify-between border-t sm:px-6" style="border-color: var(--surface-border)">
               <div class="flex flex-1 items-center justify-between sm:hidden">
                 <button
                   :disabled="sessionsPage === 1"
@@ -806,7 +814,7 @@
                 >
                   <Icon name="lucide:chevron-left" class="w-4 h-4" />
                 </button>
-                <span class="text-sm text-slate-600">
+                <span class="text-sm" style="color: var(--text-secondary)">
                   {{ t('admin.common.page', { page: sessionsPage, total: sessionsTotalPages }) }}
                 </span>
                 <button
@@ -819,7 +827,7 @@
               </div>
               <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                  <p class="text-sm text-slate-700">
+                  <p class="text-sm" style="color: var(--text-secondary)">
                     {{ t('admin.common.showing', {
                       from: sessionsTotal === 0 ? 0 : (sessionsPage - 1) * sessionsPerPage + 1,
                       to: Math.min(sessionsPage * sessionsPerPage, sessionsTotal),
@@ -828,10 +836,11 @@
                   </p>
                 </div>
                 <div>
-                  <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <nav class="relative z-0 inline-flex rounded-md -space-x-px">
                     <button
                       :disabled="sessionsPage === 1"
-                      class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                      style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                       @click="sessionsPage--; fetchSessions()"
                     >
                       {{ t('admin.common.previous') }}
@@ -839,19 +848,17 @@
                     <button
                       v-for="page in sessionsTotalPages"
                       :key="page"
-                      :class="[
-                        'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
-                        sessionsPage === page
-                          ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                      ]"
+                      class="relative inline-flex items-center px-4 py-2 text-sm font-medium"
+                      :class="sessionsPage === page ? 'z-10 text-teal-400' : ''"
+                      :style="sessionsPage === page ? 'background: rgba(20,184,166,0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
                       @click="sessionsPage = page; fetchSessions()"
                     >
                       {{ page }}
                     </button>
                     <button
                       :disabled="sessionsPage === sessionsTotalPages"
-                      class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                      style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                       @click="sessionsPage++; fetchSessions()"
                     >
                       {{ t('admin.common.next') }}
@@ -870,24 +877,24 @@
     <!-- Open Session Modal -->
     <div v-if="openSessionOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="openSessionOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="openSessionOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="openSessionOpen = false" />
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.cash.modals.openSession.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.modals.openSession.subtitle') }}
           </p>
 
           <div class="mt-4 space-y-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.openSession.openingFloatLabel') }}
               </label>
               <BaseInput v-model="openSessionForm.openingFloat" placeholder="0" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.openSession.noteLabel') }}
               </label>
               <BaseInput v-model="openSessionForm.note" :placeholder="t('admin.pages.cash.modals.openSession.notePlaceholder')" />
@@ -897,7 +904,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="openSessionOpen = false"
             >
               {{ t('admin.common.cancel') }}
@@ -918,40 +925,40 @@
     <!-- Close Session Modal -->
     <div v-if="closeSessionOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeSessionOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="closeSessionOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="closeSessionOpen = false" />
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.cash.modals.closeSession.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.modals.closeSession.subtitle') }}
           </p>
 
           <div class="mt-4 space-y-3">
-            <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <div v-if="closeExpectedLoading" class="flex items-center gap-2 text-sm text-slate-600">
+            <div class="rounded-lg p-3" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
+              <div v-if="closeExpectedLoading" class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
                 <Icon name="lucide:loader-2" class="h-4 w-4 animate-spin" />
                 {{ t('admin.pages.cash.sessions.expected.loading') }}
               </div>
               <div v-else-if="closeExpected" class="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.cash.openingFloat') }}
                   </p>
-                  <p class="mt-0.5 font-semibold text-slate-900">
+                  <p class="mt-0.5 font-semibold" style="color: var(--text-primary)">
                     {{ formatCurrency(Number(closeExpected.openingFloat)) }}
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.cash.expectedClosing') }}
                   </p>
-                  <p class="mt-0.5 font-semibold text-slate-900">
+                  <p class="mt-0.5 font-semibold" style="color: var(--text-primary)">
                     {{ formatCurrency(Number(closeExpected.expectedClosing)) }}
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.cash.directions.in') }}
                   </p>
                   <p class="mt-0.5 font-semibold text-emerald-700">
@@ -959,7 +966,7 @@
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.cash.directions.out') }}
                   </p>
                   <p class="mt-0.5 font-semibold text-rose-700">
@@ -967,26 +974,26 @@
                   </p>
                 </div>
                 <div class="col-span-2 flex items-center justify-between">
-                  <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.cash.difference') }}
                   </p>
-                  <p class="font-semibold" :class="closeDifference !== null && closeDifference !== 0 ? 'text-rose-700' : 'text-slate-900'">
+                  <p class="font-semibold" :class="closeDifference !== null && closeDifference !== 0 ? 'text-rose-400' : ''" :style="!(closeDifference !== null && closeDifference !== 0) ? 'color: var(--text-primary)' : ''">
                     {{ closeDifference === null ? '—' : formatCurrency(closeDifference) }}
                   </p>
                 </div>
               </div>
-              <div v-else class="text-sm text-slate-600">
+              <div v-else class="text-sm" style="color: var(--text-secondary)">
                 {{ t('admin.pages.cash.sessions.expected.unavailable') }}
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.closeSession.closingCountLabel') }}
               </label>
               <BaseInput v-model="closeSessionForm.closingCount" placeholder="0" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.closeSession.noteLabel') }}
               </label>
               <BaseInput v-model="closeSessionForm.note" :placeholder="t('admin.pages.cash.modals.closeSession.notePlaceholder')" />
@@ -996,14 +1003,14 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="closeSessionOpen = false"
             >
               {{ t('admin.common.cancel') }}
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-slate-900 text-white text-sm font-semibold hover:bg-black disabled:opacity-50"
+              class="px-4 py-2 rounded-md text-white text-sm font-semibold disabled:opacity-50" style="background: var(--surface-3); border: 1px solid var(--surface-border)"
               :disabled="actionLoading"
               @click="submitCloseSession"
             >
@@ -1017,18 +1024,18 @@
     <!-- Customer Payment Modal -->
     <div v-if="customerPaymentOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="customerPaymentOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="customerPaymentOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="customerPaymentOpen = false" />
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.cash.modals.customerPayment.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.modals.customerPayment.subtitle') }}
           </p>
 
           <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.cashboxLabel') }}
               </label>
               <BaseSelect v-model="customerPaymentForm.cashboxId">
@@ -1040,7 +1047,7 @@
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.customerLabel') }}
               </label>
               <BaseInput v-model="customerSearch" :placeholder="t('admin.pages.cash.modals.customerPayment.customerSearchPlaceholder')" />
@@ -1052,20 +1059,20 @@
                   </option>
                 </BaseSelect>
               </div>
-              <p v-if="customerLoading" class="mt-1 text-xs text-slate-500">
+              <p v-if="customerLoading" class="mt-1 text-xs" style="color: var(--text-muted)">
                 {{ t('admin.pages.cash.modals.customerPayment.loadingCustomers') }}
               </p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.amountLabel') }}
               </label>
               <BaseInput v-model="customerPaymentForm.amount" placeholder="0" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.methodLabel') }}
               </label>
               <BaseSelect v-model="customerPaymentForm.method">
@@ -1077,14 +1084,14 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.referenceLabel') }}
               </label>
               <BaseInput v-model="customerPaymentForm.reference" :placeholder="t('admin.pages.cash.modals.customerPayment.referencePlaceholder')" />
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.noteLabel') }}
               </label>
               <BaseInput v-model="customerPaymentForm.note" :placeholder="t('admin.pages.cash.modals.customerPayment.notePlaceholder')" />
@@ -1094,7 +1101,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="customerPaymentOpen = false"
             >
               {{ t('admin.common.cancel') }}
@@ -1115,18 +1122,18 @@
     <!-- Supplier Payment Modal -->
     <div v-if="supplierPaymentOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="supplierPaymentOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="supplierPaymentOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="supplierPaymentOpen = false" />
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.cash.modals.supplierPayment.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.modals.supplierPayment.subtitle') }}
           </p>
 
           <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.cashboxLabel') }}
               </label>
               <BaseSelect v-model="supplierPaymentForm.cashboxId">
@@ -1138,7 +1145,7 @@
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.supplierLabel') }}
               </label>
               <BaseInput v-model="supplierSearch" :placeholder="t('admin.pages.cash.modals.supplierPayment.supplierSearchPlaceholder')" />
@@ -1153,7 +1160,7 @@
             </div>
 
             <div class="sm:col-span-2" v-if="supplierPaymentForm.supplierId">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 Purchase Order (Optional)
               </label>
               <div class="flex items-center gap-2">
@@ -1168,14 +1175,14 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.amountLabel') }}
               </label>
               <BaseInput v-model="supplierPaymentForm.amount" placeholder="0" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.methodLabel') }}
               </label>
               <BaseSelect v-model="supplierPaymentForm.method">
@@ -1187,14 +1194,14 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.referenceLabel') }}
               </label>
               <BaseInput v-model="supplierPaymentForm.reference" :placeholder="t('admin.pages.cash.modals.supplierPayment.referencePlaceholder')" />
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.noteLabel') }}
               </label>
               <BaseInput v-model="supplierPaymentForm.note" :placeholder="t('admin.pages.cash.modals.supplierPayment.notePlaceholder')" />
@@ -1204,7 +1211,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="supplierPaymentOpen = false"
             >
               {{ t('admin.common.cancel') }}
@@ -1225,18 +1232,18 @@
     <!-- Expense/Charge Modal -->
     <div v-if="expenseOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="expenseOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="expenseOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="expenseOpen = false" />
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ expenseType === 'EXPENSE' ? t('admin.pages.cash.modals.expense.title') : t('admin.pages.cash.modals.charge.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.modals.expense.subtitle') }}
           </p>
 
           <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.cashboxLabel') }}
               </label>
               <BaseSelect v-model="expenseForm.cashboxId">
@@ -1250,14 +1257,14 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.amountLabel') }}
               </label>
               <BaseInput v-model="expenseForm.amount" placeholder="0" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.categoryLabel') }}
               </label>
               <BaseInput v-model="expenseForm.category" :placeholder="t('admin.pages.cash.modals.expense.categoryPlaceholder')" list="expenseCategories" />
@@ -1267,7 +1274,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.methodLabel') }}
               </label>
               <BaseSelect v-model="expenseForm.method">
@@ -1279,14 +1286,14 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.referenceLabel') }}
               </label>
               <BaseInput v-model="expenseForm.reference" :placeholder="t('admin.pages.cash.modals.expense.referencePlaceholder')" />
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.noteLabel') }}
               </label>
               <BaseInput v-model="expenseForm.note" :placeholder="t('admin.pages.cash.modals.expense.notePlaceholder')" />
@@ -1296,7 +1303,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="expenseOpen = false"
             >
               {{ t('admin.common.cancel') }}
@@ -1317,18 +1324,18 @@
     <!-- Transfer Modal -->
     <div v-if="transferOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="transferOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="transferOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="transferOpen = false" />
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.cash.modals.transfer.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.modals.transfer.subtitle') }}
           </p>
 
           <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.transfer.fromLabel') }}
               </label>
               <BaseSelect v-model="transferForm.fromCashboxId">
@@ -1340,7 +1347,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.transfer.toLabel') }}
               </label>
               <BaseSelect v-model="transferForm.toCashboxId">
@@ -1352,21 +1359,21 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.transfer.amountLabel') }}
               </label>
               <BaseInput v-model="transferForm.amount" placeholder="0" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.transfer.referenceLabel') }}
               </label>
               <BaseInput v-model="transferForm.reference" :placeholder="t('admin.pages.cash.modals.transfer.referencePlaceholder')" />
             </div>
 
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.transfer.noteLabel') }}
               </label>
               <BaseInput v-model="transferForm.note" :placeholder="t('admin.pages.cash.modals.transfer.notePlaceholder')" />
@@ -1376,7 +1383,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="transferOpen = false"
             >
               {{ t('admin.common.cancel') }}
@@ -1397,24 +1404,24 @@
     <!-- Create Cashbox Modal -->
     <div v-if="cashboxCreateOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="cashboxCreateOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
-        <div class="fixed inset-0 bg-black/50" @click="cashboxCreateOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="cashboxCreateOpen = false" />
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.cash.modals.createCashbox.title') }}
           </h3>
-          <p class="mt-1 text-sm text-gray-500">
+          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.modals.createCashbox.subtitle') }}
           </p>
 
           <div class="mt-4 space-y-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.createCashbox.nameLabel') }}
               </label>
               <BaseInput v-model="cashboxForm.name" :placeholder="t('admin.pages.cash.modals.createCashbox.namePlaceholder')" />
             </div>
-            <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-              <input v-model="cashboxForm.isActive" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-teal-600" />
+            <label class="inline-flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
+              <input v-model="cashboxForm.isActive" type="checkbox" class="h-4 w-4 rounded text-teal-600" style="border-color: var(--surface-border)" />
               {{ t('admin.pages.cash.modals.createCashbox.activeLabel') }}
             </label>
           </div>
@@ -1422,7 +1429,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="ui-btn ui-btn--secondary text-sm"
               @click="cashboxCreateOpen = false"
             >
               {{ t('admin.common.cancel') }}

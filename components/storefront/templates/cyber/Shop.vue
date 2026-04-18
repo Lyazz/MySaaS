@@ -15,6 +15,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Dynamic Filters
 const filters = computed(() => ({
     categories: categoryData.value || [],
@@ -27,7 +33,20 @@ const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
-const priceRange = ref({ min: 0, max: 200000 })
+const priceRange = computed(() => {
+    const prices = props.products
+        .map((product) => Number(product?.price))
+        .filter((price): price is number => Number.isFinite(price))
+
+    if (prices.length === 0) {
+        return { min: 0, max: 0 }
+    }
+
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+    }
+})
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
 
@@ -41,7 +60,7 @@ const filteredProducts = computed(() => {
     // Filter by Category
     if (selectedCategories.value.length > 0) {
         const selectedIds = selectedCategories.value 
-        result = result.filter(p => selectedIds.includes(p.categoryId))
+        result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
 
     // Filter by Search
@@ -193,7 +212,7 @@ const closeQuickView = () => {
                     class="peer h-5 w-5 rounded border-purple-500/50 bg-purple-900/30 text-pink-500 focus:ring-pink-500 transition-all checked:bg-pink-500 checked:border-transparent" 
                   >
                 </div>
-                <span class="text-base text-purple-200/80 group-hover:text-pink-400 transition-colors">{{ cat.title }}</span>
+                <span class="text-base text-purple-200/80 group-hover:text-pink-400 transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -202,6 +221,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -269,7 +291,7 @@ const closeQuickView = () => {
                         class="peer h-4 w-4 rounded border-purple-500/50 bg-purple-900/30 text-pink-500 focus:ring-pink-500 transition-all checked:bg-pink-500 checked:border-transparent" 
                       >
                     </div>
-                    <span class="text-sm text-purple-200/80 group-hover:text-pink-400 transition-colors">{{ cat.title }}</span>
+                    <span class="text-sm text-purple-200/80 group-hover:text-pink-400 transition-colors">{{ categoryDisplayTitle(cat) }}</span>
                   </label>
                 </div>
               </div>
@@ -280,6 +302,9 @@ const closeQuickView = () => {
                 <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
             </div>
@@ -295,7 +320,7 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-3 py-1.5 bg-pink-500/20 text-pink-300 rounded-full text-sm font-semibold border border-pink-500/30"
               >
-                <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
+                <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
                 <button @click="removeCategory(catId)" class="hover:text-white">
                     <Icon name="lucide:x" class="w-4 h-4" />
                 </button>

@@ -812,7 +812,10 @@
           "pngOnly": "Veuillez téléverser une image PNG.",
           "squareOnly": "L’image doit être carrée (actuel : {w}x{h}px).",
           "uploadFailed": "Échec du téléversement",
-          "readDimensionsFailed": "Impossible de lire les dimensions de l’image."
+          "readDimensionsFailed": "Impossible de lire les dimensions de l’image.",
+          "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
+          "tooLarge": "L’image doit faire moins de {max}",
+          "cropFailed": "Impossible de rogner l’image"
         }
       },
       "richTextEditor": {
@@ -838,6 +841,31 @@
         "selectedCount": "{count} variante(s) sélectionnée(s)",
         "actions": {
           "addSelected": "Ajouter la sélection"
+        }
+      },
+      "imageUploader": {
+        "clickToUpload": "Cliquez pour téléverser une image",
+        "dragDrop": "PNG, JPEG ou WebP",
+        "errors": {
+          "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
+          "tooLarge": "L’image doit faire moins de {max}",
+          "cropFailed": "Impossible de rogner l’image",
+          "uploadFailed": "Échec du téléversement"
+        }
+      },
+      "imageCropper": {
+        "title": "Rogner l’image",
+        "confirm": "Utiliser l’image rognée",
+        "subtitleFree": "Ajustez librement la zone de recadrage.",
+        "subtitlePreset": "Recadrage au ratio {preset}.",
+        "presets": {
+          "free": "Libre"
+        },
+        "errors": {
+          "noFile": "Aucune image sélectionnée pour le recadrage.",
+          "unavailable": "Le module de recadrage est indisponible.",
+          "resultFailed": "Impossible de générer l’image recadrée.",
+          "loadFailed": "Impossible de charger l’image dans le recadreur."
         }
       }
     },
@@ -1128,7 +1156,10 @@
         "body": "Glissez-déposez pour réordonner. Cliquez sur l’étoile pour définir l’image principale."
       },
       "errors": {
-        "uploadFailed": "Impossible de téléverser l’image"
+        "uploadFailed": "Impossible de téléverser l’image",
+        "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
+        "tooLarge": "L’image doit faire moins de {max}",
+        "cropFailed": "Impossible de rogner l’image"
       }
     },
     "variantsTable": {

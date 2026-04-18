@@ -2,10 +2,10 @@
   <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.nav.customers') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.customers.index.subtitle') }}
         </p>
       </div>
@@ -18,10 +18,10 @@
       </NuxtLink>
     </div>
 
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.customers.index.filters.searchLabel') }}</label>
+          <label class="ui-label mb-1">{{ t('admin.pages.customers.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             :placeholder="t('admin.pages.customers.index.filters.searchPlaceholder')"
@@ -35,7 +35,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.customers.index.loading') }}
       </p>
     </div>
@@ -44,11 +44,11 @@
       v-else-if="filteredCustomers.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:users" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:users" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.customers.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ emptyHint }}
       </p>
     </div>
@@ -98,7 +98,7 @@
                   <div class="ml-4">
                     <NuxtLink
                       :to="`/admin/customers/${c.id}`"
-                      class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                      class="font-medium hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
                     >
                       {{ c.name }}
                     </NuxtLink>
@@ -106,9 +106,9 @@
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="flex flex-col text-sm text-slate-600">
+                <div class="flex flex-col text-sm" style="color: var(--text-secondary)">
                   <div v-if="c.email" class="flex items-center gap-1">
-                    <Icon name="lucide:mail" class="w-3 h-3 text-slate-400" />
+                    <Icon name="lucide:mail" class="w-3 h-3" style="color: var(--text-tertiary)" />
                     <a
                       :href="`mailto:${c.email}`"
                       class="hover:text-teal-600 transition-colors"
@@ -117,7 +117,7 @@
                     </a>
                   </div>
                   <div v-if="c.phone" class="flex items-center gap-1 mt-1">
-                    <Icon name="lucide:phone" class="w-3 h-3 text-slate-400" />
+                    <Icon name="lucide:phone" class="w-3 h-3" style="color: var(--text-tertiary)" />
                     <a
                       :href="`tel:${c.phone}`"
                       class="hover:text-teal-600 transition-colors"
@@ -125,10 +125,10 @@
                       {{ c.phone }}
                     </a>
                   </div>
-                  <span v-if="!c.email && !c.phone" class="text-slate-400">—</span>
+                  <span v-if="!c.email && !c.phone" style="color: var(--text-muted)">—</span>
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 <a
                   v-if="c.address"
                   :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}`"
@@ -137,39 +137,39 @@
                 >
                   {{ c.address }}
                 </a>
-                <span v-else class="text-slate-400">—</span>
+                <span v-else style="color: var(--text-muted)">—</span>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium text-slate-900">
+                <div class="font-medium" style="color: var(--text-primary)">
                   {{ c.ordersCount }}
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium text-slate-900">
+                <div class="font-medium" style="color: var(--text-primary)">
                   {{ formatCurrency(c.totalSpent) }}
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-slate-600">
+              <td class="ui-td whitespace-nowrap" style="color: var(--text-secondary)">
                 {{ formatDate(c.lastOrderAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
                     :title="t('admin.common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <NuxtLink
                     :to="`/admin/customers/edit/${c.id}`"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    class="p-2 rounded-md transition-colors hover:text-red-400" style="color: var(--text-muted)"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(c)"
                   >
@@ -183,7 +183,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border); background: var(--surface-1)">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -192,7 +192,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm text-slate-600">
+          <span class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -205,7 +205,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-slate-700">
+            <p class="text-sm" style="color: var(--text-secondary)">
               {{ t('admin.common.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredCustomers.length),
@@ -217,7 +217,8 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -225,19 +226,17 @@
               <button
                 v-for="page in totalPages"
                 :key="page"
-                :class="[
-                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
-                  currentPage === page
-                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                ]"
+                class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+                :class="currentPage === page ? 'z-10 bg-teal-50 border-teal-500 text-teal-600' : ''"
+                :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
                 @click="currentPage = page"
               >
                 {{ page }}
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}

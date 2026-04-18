@@ -9,15 +9,15 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/products"
-            class="text-gray-700 hover:text-teal-600"
+            class="hover:text-teal-600" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.products') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">
+            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
+            <span class="ml-1" style="color: var(--text-tertiary)">
               <span v-if="isNewProduct">{{ t('admin.pages.products.create.title', 'Créer un produit') }}</span>
               <span v-else>{{ t('admin.pages.products.edit.breadcrumbEdit', { title: form.title || t('admin.pages.products.edit.fallbackTitle') }) }}</span>
             </span>
@@ -29,10 +29,10 @@
     <!-- Loading State -->
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.products.edit.loading') }}
       </p>
     </div>
@@ -42,23 +42,23 @@
       <!-- Header -->
       <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-gray-800">
+          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
             <template v-if="isNewProduct">{{ t('admin.pages.products.create.title', 'Créer un produit') }}</template>
             <template v-else>{{ t('admin.pages.products.edit.title') }}</template>
           </h2>
-          <p class="text-gray-600 mt-1">
+          <p class="mt-1" style="color: var(--text-secondary)">
             <template v-if="isNewProduct">{{ t('admin.pages.products.create.subtitle', 'Configurez les détails de votre nouveau produit') }}</template>
             <template v-else>{{ t('admin.pages.products.edit.subtitle') }}</template>
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <!-- Public Links -->
-          <div class="flex items-center space-x-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200">
-            <span class="text-xs font-medium text-gray-500 px-2">{{ t('admin.pages.products.edit.links.label') }}:</span>
-                
+          <div class="flex items-center space-x-2 p-1.5 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+            <span class="text-xs font-medium px-2" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.label') }}:</span>
+
             <!-- Product Page -->
-            <div class="flex items-center space-x-1 border-r border-gray-300 pr-2">
-              <span class="text-xs text-gray-400">{{ t('admin.pages.products.edit.links.product') }}</span>
+            <div class="flex items-center space-x-1 pr-2" style="border-right: 1px solid var(--surface-border)">
+              <span class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.product') }}</span>
               <a
                 :href="productUrl"
                 target="_blank"
@@ -68,7 +68,7 @@
                 <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
-                class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
+                class="p-1 rounded" style="color: var(--text-tertiary)"
                 :title="t('admin.pages.products.edit.links.copyProduct')"
                 @click="copyUrl(productUrl)"
               >
@@ -78,7 +78,7 @@
 
             <!-- Landing Page -->
             <div class="flex items-center space-x-1 pl-1">
-              <span class="text-xs text-gray-400">{{ t('admin.pages.products.edit.links.landing') }}</span>
+              <span class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.landing') }}</span>
               <a
                 :href="landingUrl"
                 target="_blank"
@@ -88,7 +88,7 @@
                 <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
-                class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
+                class="p-1 rounded" style="color: var(--text-tertiary)"
                 :title="t('admin.pages.products.edit.links.copyLanding')"
                 @click="copyUrl(landingUrl)"
               >
@@ -99,7 +99,7 @@
 
           <NuxtLink
             to="/admin/products"
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
           >
             {{ t('admin.common.cancel') }}
           </NuxtLink>
@@ -114,11 +114,11 @@
       </div>
 
       <form
-        class="bg-white rounded-lg shadow overflow-hidden"
+        class="ui-card overflow-hidden"
         @submit.prevent="handleSubmit"
       >
         <!-- Tabs Navigation -->
-        <div class="border-b border-gray-200 overflow-x-auto custom-scrollbar">
+        <div class="overflow-x-auto custom-scrollbar" style="border-bottom: 1px solid var(--surface-border)">
           <nav
             class="flex -mb-px"
             aria-label="Tabs"
@@ -131,7 +131,7 @@
               :class="[
                 currentTab === tab.id
                   ? 'border-teal-500 text-teal-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent hover:border-white/20 text-[var(--text-tertiary)]'
               ]"
               @click="currentTab = tab.id"
             >
@@ -179,7 +179,7 @@
                   :id="inputId"
                   v-model="form.miniDescription"
                   rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
                   :placeholder="t('admin.forms.product.miniDescription.placeholder')"
                 />
               </template>
@@ -226,23 +226,39 @@
               :hint="t('admin.forms.product.lowStockThreshold.hint')"
             />
 
-            <!-- Category -->
-            <BaseSelect
-              v-model="form.categoryId"
+            <!-- Categories -->
+            <AdminFormField
               :label="t('admin.forms.product.category.label')"
-              :error="errors.categoryId"
+              :error="errors.categoryIds || errors.categoryId"
+              :hint="t('admin.forms.product.category.hintMulti', 'Select one or more categories/subcategories')"
             >
-              <option value="">
-                {{ t('admin.forms.product.category.placeholder') }}
-              </option>
-              <option
-                v-for="cat in categories"
-                :key="cat.id"
-                :value="cat.id"
-              >
-                {{ cat.title }}
-              </option>
-            </BaseSelect>
+              <template #default>
+                <div class="max-h-48 overflow-y-auto rounded-md p-3 space-y-2" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
+                  <label
+                    v-for="cat in sortedCategories"
+                    :key="cat.id"
+                    class="flex items-center gap-2 text-sm"
+                    style="color: var(--text-primary)"
+                  >
+                    <input
+                      type="checkbox"
+                      class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                      style="border-color: var(--surface-border); background: var(--surface-3)"
+                      :checked="form.categoryIds.includes(cat.id)"
+                      @change="toggleCategorySelection(cat.id, ($event.target as HTMLInputElement).checked)"
+                    >
+                    <span>{{ categoryDisplayTitle(cat) }}</span>
+                  </label>
+                  <p
+                    v-if="sortedCategories.length === 0"
+                    class="text-xs"
+                    style="color: var(--text-tertiary)"
+                  >
+                    {{ t('admin.pages.products.edit.noCategories', 'No categories available') }}
+                  </p>
+                </div>
+              </template>
+            </AdminFormField>
 
             <!-- Product Images -->
             <ProductImagesUploader v-model="productImages" />
@@ -253,11 +269,12 @@
                 id="isActive"
                 v-model="form.isActive"
                 type="checkbox"
-                class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
                 for="isActive"
-                class="ml-2 block text-sm text-gray-900"
+                class="ml-2 block text-sm" style="color: var(--text-primary)"
               >
                 {{ t('admin.forms.product.isActive.label') }}
               </label>
@@ -275,11 +292,12 @@
                 id="isPromotionActive"
                 v-model="form.isPromotionActive"
                 type="checkbox"
-                class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
                 for="isPromotionActive"
-                class="ml-2 block text-sm text-gray-900"
+                class="ml-2 block text-sm" style="color: var(--text-primary)"
               >
                 {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
               </label>
@@ -320,11 +338,12 @@
                   id="showCountdown"
                   v-model="form.showCountdown"
                   type="checkbox"
-                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                  style="border-color: var(--surface-border); background: var(--surface-3)"
                 >
                 <label
                   for="showCountdown"
-                  class="ml-2 block text-sm text-gray-900"
+                  class="ml-2 block text-sm" style="color: var(--text-primary)"
                 >
                   {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
                 </label>
@@ -359,7 +378,7 @@
           >
             <!-- Options & Variants -->
             <div>
-              <h2 class="text-xl font-bold text-gray-800 mb-4">
+              <h2 class="text-xl font-bold mb-4" style="color: var(--text-primary)">
                 {{ t('admin.pages.products.edit.variantsTab.title') }}
               </h2>
               <ProductOptionsEditor 
@@ -370,15 +389,16 @@
               />
 
               <div class="flex items-center justify-between mb-3">
-                <label class="flex items-center gap-2 text-sm text-gray-700">
+                <label class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
                   <input
                     v-model="showArchivedVariants"
                     type="checkbox"
-                    class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                    class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                    style="border-color: var(--surface-border); background: var(--surface-3)"
                   >
                   {{ t('admin.pages.products.edit.variantsTab.showArchived') }}
                 </label>
-                <span class="text-xs text-gray-500">
+                <span class="text-xs" style="color: var(--text-tertiary)">
                   {{ t('admin.pages.products.edit.variantsTab.archivedCount', { count: archivedVariantsCount }) }}
                 </span>
               </div>
@@ -401,16 +421,16 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <h2 class="text-xl font-bold text-gray-800">
+                <h2 class="text-xl font-bold" style="color: var(--text-primary)">
                   {{ t('admin.pages.products.edit.bundlesTab.title') }}
                 </h2>
-                <p class="text-sm text-gray-600 mt-1">
+                <p class="text-sm mt-1" style="color: var(--text-secondary)">
                   {{ t('admin.pages.products.edit.bundlesTab.hint') }}
                 </p>
               </div>
               <button
                 type="button"
-                class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800"
+                class="ui-btn ui-btn--secondary"
                 @click="addBundleDealRow"
               >
                 {{ t('admin.pages.products.edit.bundlesTab.addBundle') }}
@@ -440,7 +460,7 @@
                   </thead>
                   <tbody class="ui-tbody">
                     <tr v-if="bundleDeals.length === 0">
-                      <td colspan="5" class="px-4 py-6 text-sm text-gray-500">
+                      <td colspan="5" class="px-4 py-6 text-sm" style="color: var(--text-tertiary)">
                         {{ t('admin.pages.products.edit.bundlesTab.table.empty') }}
                       </td>
                     </tr>
@@ -454,7 +474,7 @@
                           v-model.number="deal.bundleQty"
                           type="number"
                           min="2"
-                          class="w-24 px-3 py-2 border border-slate-300 rounded-lg"
+                          class="w-24 px-3 py-2 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
                         >
                       </td>
                       <td class="ui-td">
@@ -463,13 +483,13 @@
                           type="number"
                           min="0"
                           step="0.01"
-                          class="w-40 px-3 py-2 border border-slate-300 rounded-lg"
+                          class="w-40 px-3 py-2 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
                         >
                       </td>
                       <td class="ui-td">
                         <select
                           v-model="deal.tag"
-                          class="w-48 px-3 py-2 border border-slate-300 rounded-lg bg-white"
+                          class="w-48 px-3 py-2 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
                         >
                           <option :value="null">{{ t('admin.pages.products.edit.bundlesTab.tags.none') }}</option>
                           <option value="MOST_POPULAR">{{ t('admin.pages.products.edit.bundlesTab.tags.mostPopular') }}</option>
@@ -481,9 +501,10 @@
                           <input
                             v-model="deal.isActive"
                             type="checkbox"
-                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                            style="border-color: var(--surface-border); background: var(--surface-3)"
                           >
-                          <span class="text-sm text-slate-700">{{ t('admin.common.active') }}</span>
+                          <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.common.active') }}</span>
                         </label>
                       </td>
                       <td class="ui-td text-right space-x-2">
@@ -516,15 +537,15 @@
             v-show="currentTab === 'tracking'"
             class="space-y-6"
           >
-            <div class="rounded-lg border border-gray-200 bg-white p-6">
+            <div class="rounded-lg p-6" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <h2 class="text-xl font-bold text-gray-800">{{ t('admin.pages.products.edit.metaPixels.title') }}</h2>
-                  <p class="text-sm text-gray-600 mt-1">{{ t('admin.pages.products.edit.metaPixels.subtitle') }}</p>
+                  <h2 class="text-xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.products.edit.metaPixels.title') }}</h2>
+                  <p class="text-sm mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.products.edit.metaPixels.subtitle') }}</p>
                 </div>
                 <button
                   type="button"
-                  class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 disabled:opacity-50"
+                  class="ui-btn ui-btn--secondary disabled:opacity-50"
                   :disabled="metaPixelsSaving"
                   @click="saveProductMetaPixels"
                 >
@@ -536,31 +557,32 @@
                 {{ metaPixelsError }}
               </div>
 
-              <div v-if="metaPixelsLoading" class="mt-4 text-sm text-gray-600">
+              <div v-if="metaPixelsLoading" class="mt-4 text-sm" style="color: var(--text-secondary)">
                 Loading pixels...
               </div>
 
               <div v-else class="mt-4">
-                <div v-if="metaPixels.length === 0" class="text-sm text-gray-600">
+                <div v-if="metaPixels.length === 0" class="text-sm" style="color: var(--text-secondary)">
                   No meta pixels configured yet. Create them in Admin → Integrations → Meta Pixels.
                 </div>
                 <div v-else class="space-y-3">
                   <label
                     v-for="p in metaPixels"
                     :key="p.id"
-                    class="flex items-center justify-between gap-4 rounded-lg border border-gray-200 px-4 py-3"
+                    class="flex items-center justify-between gap-4 rounded-lg px-4 py-3" style="border: 1px solid var(--surface-border)"
                   >
                     <div class="min-w-0">
-                      <div class="font-medium text-gray-900 truncate">
+                      <div class="font-medium truncate" style="color: var(--text-primary)">
                         {{ p.name || '—' }}
                         <span v-if="p.isGlobal" class="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
-                        <span v-if="!p.isActive" class="ml-2 inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{{ t('admin.common.inactive') }}</span>
+                        <span v-if="!p.isActive" class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style="background: var(--surface-3); color: var(--text-secondary)">{{ t('admin.common.inactive') }}</span>
                       </div>
-                      <div class="text-xs font-mono text-gray-600 truncate">{{ p.pixelId }}</div>
+                      <div class="text-xs font-mono truncate" style="color: var(--text-secondary)">{{ p.pixelId }}</div>
                     </div>
                     <input
                       type="checkbox"
-                      class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+                      class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                      style="border-color: var(--surface-border); background: var(--surface-3)"
                       :value="p.id"
                       v-model="productMetaPixelIds"
                     >
@@ -582,10 +604,10 @@
         </div>
 
         <!-- Actions Footer (Sticky on Mobile if needed, or just bottom) -->
-        <div class="px-6 py-4 bg-gray-50 border-t flex justify-end space-x-3">
+        <div class="px-6 py-4 flex justify-end space-x-3" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
           <NuxtLink
             to="/admin/products"
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
           >
             {{ t('admin.common.cancel') }}
           </NuxtLink>
@@ -630,7 +652,11 @@ const isNewProduct = computed(() => route.query.isNew === 'true')
 interface Category {
   id: string
   title: string
+  displayTitle?: string
+  parentId?: string | null
+  parent?: { id: string; title: string } | null
 }
+type CategoryOption = Category & { depth: number }
 
 interface ProductImage {
   id?: string | null
@@ -659,7 +685,7 @@ const form = ref({
   price: 0,
   stock: 0,
   lowStockThreshold: 5,
-  categoryId: '',
+  categoryIds: [] as string[],
   isActive: true,
   images: [] as string[], // Legacy field for backwards compatibility
   promotionalPrice: null as number | null,
@@ -687,6 +713,50 @@ const errorMessage = ref('')
 const submitting = ref(false)
 const loading = ref(true)
 const categories = ref<Category[]>([])
+
+const categoryDisplayTitle = (category: CategoryOption) => {
+  return `${'-> '.repeat(category.depth)}${category.title}`
+}
+
+const sortedCategories = computed<CategoryOption[]>(() => {
+  const byParent = new Map<string | null, Category[]>()
+  for (const category of categories.value) {
+    const key = category.parentId ?? null
+    const group = byParent.get(key) ?? []
+    group.push(category)
+    byParent.set(key, group)
+  }
+  for (const group of byParent.values()) {
+    group.sort((a, b) => a.title.localeCompare(b.title))
+  }
+
+  const ordered: CategoryOption[] = []
+  const seen = new Set<string>()
+  const visit = (node: Category, depth = 0) => {
+    if (seen.has(node.id)) return
+    seen.add(node.id)
+    ordered.push({ ...node, depth })
+    for (const child of byParent.get(node.id) || []) {
+      visit(child, depth + 1)
+    }
+  }
+
+  for (const root of byParent.get(null) || []) {
+    visit(root, 0)
+  }
+  for (const category of categories.value) {
+    if (!seen.has(category.id)) visit(category, 0)
+  }
+
+  return ordered
+})
+
+function toggleCategorySelection(categoryId: string, checked: boolean) {
+  const next = new Set(form.value.categoryIds)
+  if (checked) next.add(categoryId)
+  else next.delete(categoryId)
+  form.value.categoryIds = Array.from(next)
+}
 
 // Tabs configuration
 const tabs = computed(() => ([
@@ -727,7 +797,9 @@ async function fetchProduct() {
       price: Number(data.price),
       stock: data.stock,
       lowStockThreshold: data.lowStockThreshold ?? 5,
-      categoryId: data.categoryId || '',
+      categoryIds: Array.isArray(data.categoryIds)
+        ? data.categoryIds.filter((id: unknown) => typeof id === 'string' && id.length > 0)
+        : (data.categoryId ? [data.categoryId] : []),
       isActive: data.isActive,
       images: data.images || [],
       promotionalPrice: data.promotionalPrice ? Number(data.promotionalPrice) : null,
@@ -915,9 +987,8 @@ async function handleSubmit() {
       showCountdown: form.value.isPromotionActive && form.value.showCountdown
     }
 
-    if (form.value.categoryId) {
-      payload.categoryId = form.value.categoryId
-    }
+    payload.categoryIds = form.value.categoryIds
+    payload.categoryId = form.value.categoryIds[0] || null
 
     await $fetch(`/api/admin/products/${productId}`, {
       method: 'PUT',

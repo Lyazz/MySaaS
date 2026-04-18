@@ -2,125 +2,226 @@
   <div class="space-y-3">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-sm font-medium text-slate-700">
+        <p class="text-[13px] font-medium" style="color: var(--text-secondary)">
           {{ label }}
         </p>
-        <p
-          v-if="hint"
-          class="text-xs text-slate-500"
-        >
+        <p v-if="hint" class="mt-0.5 text-xs" style="color: var(--text-tertiary)">
           {{ hint }}
         </p>
       </div>
-      <div
-        v-if="uploading"
-        class="text-xs text-teal-600 font-medium flex items-center gap-1.5"
-      >
-        <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
+      <div v-if="uploading" class="flex items-center gap-1.5 text-xs font-medium text-teal-600">
+        <Icon name="lucide:loader-2" class="h-3 w-3 animate-spin" />
         {{ t('admin.common.uploading') }}
       </div>
     </div>
 
-    <div class="group relative bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl overflow-hidden hover:border-slate-400 transition-colors">
-      <!-- Preview -->
-      <div v-if="modelValue" class="relative group-hover:opacity-90 transition-opacity">
+    <div class="group relative overflow-hidden rounded-xl transition-colors" style="background: var(--surface-2); border: 2px dashed var(--surface-border)">
+      <div v-if="modelValue" class="relative transition-opacity group-hover:opacity-90">
         <img
           :src="modelValue"
           alt="Preview"
-          class="w-full h-auto max-h-[300px] object-contain bg-slate-100"
+          class="max-h-[300px] w-full object-contain"
+          style="background: var(--surface-3)"
         >
-        
-        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+
+        <div class="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             type="button"
-            class="p-2 bg-white text-slate-700 rounded-lg hover:text-red-600 transition-colors shadow-lg"
-            @click="removeImage"
+            class="rounded-lg p-2 transition-colors"
+            style="background: var(--surface-2); color: var(--text-secondary)"
             :title="t('admin.common.remove')"
+            @mouseenter="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.color = '#f87171')"
+            @mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)')"
+            @click="removeImage"
           >
-            <Icon name="lucide:trash-2" class="w-5 h-5" />
+            <Icon name="lucide:trash-2" class="h-5 w-5" />
           </button>
         </div>
       </div>
 
-      <!-- Upload Placeholder -->
       <label
         v-else
-        class="flex flex-col items-center justify-center p-8 cursor-pointer hover:bg-slate-100/50 transition-colors"
+        class="flex cursor-pointer flex-col items-center justify-center p-8 transition-colors"
+        @mouseenter="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)')"
+        @mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.background = '')"
       >
-        <div class="p-3 bg-white rounded-full shadow-sm mb-3">
-           <Icon name="lucide:image-plus" class="w-6 h-6 text-teal-600" />
+        <div class="mb-3 rounded-full p-3" style="background: var(--surface-3)">
+          <Icon name="lucide:image-plus" class="h-6 w-6 text-teal-600" />
         </div>
-        <span class="text-sm font-medium text-slate-700">{{ t('admin.components.imageUploader.clickToUpload') }}</span>
-        <span class="mt-1 text-xs text-slate-500">{{ t('admin.components.imageUploader.dragDrop') }}</span>
+        <span class="text-[13px] font-medium" style="color: var(--text-secondary)">
+          {{ t('admin.components.imageUploader.clickToUpload') }}
+        </span>
+        <span class="mt-1 text-xs" style="color: var(--text-tertiary)">
+          {{ t('admin.components.imageUploader.dragDrop') }}
+        </span>
         <input
+          ref="fileInput"
           type="file"
           class="hidden"
-          accept="image/*"
+          :accept="acceptMimes"
           :disabled="uploading"
           @change="handleFileSelect"
         >
       </label>
     </div>
+
+    <ImageCropperModal
+      :open="cropperOpen"
+      :file="selectedFile"
+      :crop-presets="policy.cropPresets"
+      :default-preset="policy.defaultPreset"
+      @cancel="closeCropper"
+      @error="showCropperError"
+      @confirm="handleCroppedFile"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useAuthStore } from '~/stores/auth'
+import ImageCropperModal from '~/components/admin/ImageCropperModal.vue'
+import {
+  bytesFromMb,
+  formatMaxFileSizeLabel,
+  isAllowedImageMimeType,
+  resolveImageUploadPolicy,
+  type CropRatioPreset,
+  type ImageUploaderMode
+} from '~/shared/image-upload/policies'
 
-const props = defineProps<{
-  modelValue: string | null
-  label?: string
-  hint?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: string | null
+    label?: string
+    hint?: string
+    mode?: ImageUploaderMode
+    cropPresets?: CropRatioPreset[]
+    defaultPreset?: CropRatioPreset
+    maxFileSizeMb?: number
+  }>(),
+  {
+    mode: 'generic',
+    cropPresets: undefined,
+    defaultPreset: undefined,
+    maxFileSizeMb: undefined
+  }
+)
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string | null): void
 }>()
 
 const uploading = ref(false)
+const selectedFile = ref<File | null>(null)
+const cropperOpen = ref(false)
+const fileInput = ref<HTMLInputElement | null>(null)
+
 const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
 
+const policy = computed(() =>
+  resolveImageUploadPolicy({
+    mode: props.mode,
+    cropPresets: props.cropPresets,
+    defaultPreset: props.defaultPreset,
+    maxFileSizeMb: props.maxFileSizeMb
+  })
+)
+const acceptMimes = computed(() => policy.value.allowedMimeTypes.join(','))
+
+const clearFileInput = () => {
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+const getAuthToken = () => authStore.token || useCookie('auth_token').value
+
+const fileTooLarge = (file: File): boolean => {
+  if (!policy.value.maxFileSizeMb) return false
+  return file.size > bytesFromMb(policy.value.maxFileSizeMb)
+}
+
+const showTooLargeError = () => {
+  const maxSize = policy.value.maxFileSizeMb
+  if (!maxSize) {
+    alert(t('admin.components.imageUploader.errors.uploadFailed'))
+    return
+  }
+  alert(
+    t('admin.components.imageUploader.errors.tooLarge', {
+      max: formatMaxFileSizeLabel(maxSize)
+    })
+  )
+}
+
 const handleFileSelect = async (event: Event) => {
   const input = event.target as HTMLInputElement
-  if (!input.files?.length) return
+  const file = input.files?.[0]
+  if (!file) return
 
-  const [file] = input.files
-  
-  // Basic validation
-  if (!file.type.startsWith('image/')) {
-    alert(t('admin.components.imageUploader.errors.imageOnly'))
-    input.value = ''
+  if (!isAllowedImageMimeType(file.type, policy.value.allowedMimeTypes)) {
+    alert(t('admin.components.imageUploader.errors.invalidType'))
+    clearFileInput()
     return
   }
 
-  // Proceed with upload
+  if (fileTooLarge(file)) {
+    showTooLargeError()
+    clearFileInput()
+    return
+  }
+
+  selectedFile.value = file
+  cropperOpen.value = true
+}
+
+const closeCropper = () => {
+  cropperOpen.value = false
+  selectedFile.value = null
+  clearFileInput()
+}
+
+const uploadFile = async (file: File) => {
   uploading.value = true
   try {
     const formData = new FormData()
     formData.append('file', file)
 
+    const token = getAuthToken()
     const response = await fetch('/api/upload', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      },
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       body: formData
     })
 
+    const data = await response.json().catch(() => ({}))
+
     if (!response.ok) {
-      throw new Error(t('admin.components.imageUploader.errors.uploadFailed'))
+      throw new Error(data.error || t('admin.components.imageUploader.errors.uploadFailed'))
     }
 
-    const data = await response.json()
     emit('update:modelValue', data.url)
   } catch (error) {
     console.error('Upload error:', error)
-    alert(t('admin.components.imageUploader.errors.uploadFailed'))
+    alert(error instanceof Error ? error.message : t('admin.components.imageUploader.errors.uploadFailed'))
   } finally {
     uploading.value = false
-    input.value = ''
+    closeCropper()
   }
+}
+
+const handleCroppedFile = async (file: File) => {
+  if (fileTooLarge(file)) {
+    showTooLargeError()
+    closeCropper()
+    return
+  }
+
+  await uploadFile(file)
+}
+
+const showCropperError = (message: string) => {
+  alert(message || t('admin.components.imageUploader.errors.cropFailed'))
 }
 
 const removeImage = () => {

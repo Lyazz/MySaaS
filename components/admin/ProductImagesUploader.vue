@@ -1,25 +1,20 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <label class="block text-sm font-medium text-gray-700">{{ t('admin.imageUploader.title') }}</label>
-      <div
-        v-if="uploading"
-        class="text-sm text-blue-600"
-      >
+      <label class="ui-label">{{ t('admin.imageUploader.title') }}</label>
+      <div v-if="uploading" class="text-sm text-blue-600">
         {{ t('admin.common.uploading') }}
       </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
       <div
         v-for="(image, index) in images"
         :key="image.id || `${image.url}-${index}`"
         draggable="true"
-        class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all cursor-move"
-        :class="[
-          image.isMain ? 'border-teal-500 ring-2 ring-teal-200' : 'border-gray-200 hover:border-gray-300',
-          dragging === index ? 'opacity-50' : ''
-        ]"
+        class="relative group aspect-square cursor-move overflow-hidden rounded-lg border-2 transition-all"
+        :class="dragging === index ? 'opacity-50' : ''"
+        :style="image.isMain ? 'border-color: var(--brand); background: var(--surface-3)' : 'border-color: var(--surface-border); background: var(--surface-3)'"
         @dragstart="handleDragStart($event, index)"
         @dragover.prevent="handleDragOver($event)"
         @drop="handleDrop($event, index)"
@@ -28,61 +23,64 @@
         <img
           :src="image.url"
           :alt="image.alt || t('admin.imageUploader.imageAlt')"
-          class="w-full h-full object-cover"
+          class="h-full w-full object-cover"
         >
 
-        <div
-          v-if="image.isMain"
-          class="absolute top-2 left-2"
-        >
-          <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-teal-600 text-white shadow-sm">
-            <Icon name="lucide:star" class="w-3 h-3 mr-1" />
+        <div v-if="image.isMain" class="absolute left-2 top-2">
+          <span class="inline-flex items-center rounded-md bg-teal-600 px-2 py-1 text-xs font-medium text-white shadow-sm">
+            <Icon name="lucide:star" class="mr-1 h-3 w-3" />
             {{ t('admin.imageUploader.mainBadge') }}
           </span>
         </div>
 
         <div class="absolute bottom-2 left-2">
-          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-black/60 text-white text-xs font-semibold">
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs font-semibold text-white">
             {{ index + 1 }}
           </span>
         </div>
 
-        <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             v-if="!image.isMain"
             type="button"
             :title="t('admin.imageUploader.actions.setAsMain')"
-            class="bg-teal-600 hover:bg-teal-700 text-white rounded-full p-1.5 shadow-sm"
+            class="rounded-full bg-teal-600 p-1.5 text-white shadow-sm hover:bg-teal-700"
             @click.stop="setAsMain(index)"
           >
-            <Icon name="lucide:star" class="w-3.5 h-3.5" />
+            <Icon name="lucide:star" class="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             :title="t('admin.imageUploader.actions.remove')"
-            class="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-sm"
+            class="rounded-full bg-red-500 p-1.5 text-white shadow-sm hover:bg-red-600"
             @click.stop="removeImage(index)"
           >
-            <Icon name="lucide:trash" class="w-3.5 h-3.5" />
+            <Icon name="lucide:trash" class="h-3.5 w-3.5" />
           </button>
         </div>
 
-        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-          <div class="bg-black/40 rounded-lg px-3 py-2">
-            <Icon name="lucide:grip-vertical" class="w-6 h-6 text-white" />
+        <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+          <div class="rounded-lg bg-black/40 px-3 py-2">
+            <Icon name="lucide:grip-vertical" class="h-6 w-6 text-white" />
           </div>
         </div>
       </div>
 
-      <label class="relative cursor-pointer aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 hover:border-teal-500 flex flex-col items-center justify-center transition-colors">
-        <div class="text-center">
-          <Icon name="lucide:plus" class="mx-auto h-8 w-8 text-gray-400" />
-          <span class="mt-2 block text-xs text-gray-500 font-medium">{{ t('admin.imageUploader.actions.addImage') }}</span>
+      <label
+        class="relative aspect-square cursor-pointer rounded-lg border-2 border-dashed transition-colors"
+        style="background: var(--surface-2); border-color: var(--surface-border)"
+      >
+        <div class="flex h-full flex-col items-center justify-center text-center">
+          <Icon name="lucide:plus" class="mx-auto h-8 w-8" style="color: var(--text-muted)" />
+          <span class="mt-2 block text-xs font-medium" style="color: var(--text-tertiary)">
+            {{ t('admin.imageUploader.actions.addImage') }}
+          </span>
         </div>
         <input
+          ref="fileInput"
           type="file"
           class="hidden"
-          accept="image/*"
+          :accept="acceptMimes"
           multiple
           :disabled="uploading"
           @change="handleFileSelect"
@@ -90,15 +88,32 @@
       </label>
     </div>
 
-    <p class="text-xs text-gray-500">
+    <p class="text-xs" style="color: var(--text-tertiary)">
       <strong>{{ t('admin.imageUploader.tip.title') }}</strong> {{ t('admin.imageUploader.tip.body') }}
     </p>
+
+    <ImageCropperModal
+      :open="cropperOpen"
+      :file="cropperFile"
+      :crop-presets="policy.cropPresets"
+      :default-preset="policy.defaultPreset"
+      @cancel="handleCropperCancel"
+      @error="handleCropperError"
+      @confirm="handleCropperConfirm"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import ImageCropperModal from '~/components/admin/ImageCropperModal.vue'
+import {
+  bytesFromMb,
+  formatMaxFileSizeLabel,
+  isAllowedImageMimeType,
+  resolveImageUploadPolicy
+} from '~/shared/image-upload/policies'
 
 interface ProductImage {
   id?: string | null
@@ -119,9 +134,17 @@ const emit = defineEmits<{
 const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
 
+const policy = computed(() => resolveImageUploadPolicy({ mode: 'product' }))
+const acceptMimes = computed(() => policy.value.allowedMimeTypes.join(','))
+
 const images = ref<ProductImage[]>([...props.modelValue])
 const uploading = ref(false)
 const dragging = ref<number | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const cropperOpen = ref(false)
+const cropperFile = ref<File | null>(null)
+let cropperResolver: ((file: File | null) => void) | null = null
 
 watch(
   () => props.modelValue,
@@ -133,45 +156,126 @@ watch(
 
 const getAuthToken = () => authStore.token || useCookie('auth_token').value
 
+const clearFileInput = () => {
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+const isFileTooLarge = (file: File) => {
+  const max = policy.value.maxFileSizeMb
+  if (!max) return false
+  return file.size > bytesFromMb(max)
+}
+
+const showTooLargeError = () => {
+  const max = policy.value.maxFileSizeMb
+  if (!max) {
+    alert(t('admin.imageUploader.errors.uploadFailed'))
+    return
+  }
+
+  alert(
+    t('admin.imageUploader.errors.tooLarge', {
+      max: formatMaxFileSizeLabel(max)
+    })
+  )
+}
+
+const openCropperForFile = (file: File): Promise<File | null> =>
+  new Promise((resolve) => {
+    cropperResolver = resolve
+    cropperFile.value = file
+    cropperOpen.value = true
+  })
+
+const finishCropper = (file: File | null) => {
+  cropperOpen.value = false
+  cropperFile.value = null
+  if (cropperResolver) {
+    cropperResolver(file)
+    cropperResolver = null
+  }
+}
+
+const handleCropperConfirm = (file: File) => {
+  finishCropper(file)
+}
+
+const handleCropperCancel = () => {
+  finishCropper(null)
+}
+
+const handleCropperError = (message: string) => {
+  alert(message || t('admin.imageUploader.errors.cropFailed'))
+  finishCropper(null)
+}
+
+const uploadImage = async (file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const token = getAuthToken()
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    body: formData
+  })
+
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    throw new Error(payload?.error || t('admin.imageUploader.errors.uploadFailed'))
+  }
+
+  return payload.url
+}
+
 const handleFileSelect = async (event: Event) => {
   const input = event.target as HTMLInputElement
   if (!input.files?.length) return
 
   uploading.value = true
+
   try {
     for (const file of Array.from(input.files)) {
-      if (!file.type.startsWith('image/')) continue
+      if (!isAllowedImageMimeType(file.type, policy.value.allowedMimeTypes)) {
+        alert(t('admin.imageUploader.errors.invalidType'))
+        continue
+      }
 
-      const formData = new FormData()
-      formData.append('file', file)
+      if (isFileTooLarge(file)) {
+        showTooLargeError()
+        continue
+      }
 
-      const token = getAuthToken()
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        body: formData
-      })
+      const cropped = await openCropperForFile(file)
+      if (!cropped) continue
 
-      if (!response.ok) throw new Error(t('admin.imageUploader.errors.uploadFailed'))
-      const data = await response.json()
+      if (isFileTooLarge(cropped)) {
+        showTooLargeError()
+        continue
+      }
+
+      const imageUrl = await uploadImage(cropped)
 
       const newImage: ProductImage = {
         id: null,
-        url: data.url,
+        url: imageUrl,
         alt: '',
         position: images.value.length,
         isMain: images.value.length === 0
       }
-      images.value.push(newImage)
-    }
 
-    emit('update:modelValue', images.value)
+      images.value.push(newImage)
+      emit('update:modelValue', images.value)
+    }
   } catch (error) {
     console.error('Upload error:', error)
-    alert(t('admin.imageUploader.errors.uploadFailed'))
+    alert(error instanceof Error ? error.message : t('admin.imageUploader.errors.uploadFailed'))
   } finally {
     uploading.value = false
-    input.value = ''
+    clearFileInput()
+    if (cropperOpen.value) {
+      finishCropper(null)
+    }
   }
 }
 
@@ -237,4 +341,3 @@ const handleDragEnd = () => {
   dragging.value = null
 }
 </script>
-

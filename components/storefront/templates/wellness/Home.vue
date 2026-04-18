@@ -15,6 +15,12 @@ const cartStore = useCartStore()
 
 const { t } = useI18n({ useScope: 'global' })
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -182,7 +188,7 @@ const displayedProducts = computed(() => {
              class="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 md:justify-center scrollbar-hide"
            >
              <NuxtLink 
-               v-for="(cat, idx) in categories" 
+               v-for="(cat) in categories" 
                :key="cat.slug" 
                :to="`/c/${cat.slug}`"
                class="snap-center flex-shrink-0 w-64 h-80 rounded-[4rem] relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
@@ -190,7 +196,7 @@ const displayedProducts = computed(() => {
                 <img
                   v-if="cat.imageUrl"
                   :src="cat.imageUrl"
-                  :alt="cat.title"
+                  :alt="categoryDisplayTitle(cat)"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 >
                 <div v-else class="w-full h-full bg-stone-200" />
@@ -201,7 +207,7 @@ const displayedProducts = computed(() => {
                 <!-- Label -->
                 <div class="absolute inset-x-0 bottom-0 p-6 text-center">
                     <div class="bg-white/95 backdrop-blur px-6 py-4 rounded-3xl shadow-lg">
-                        <h3 class="font-wellness text-xl text-stone-900">{{ cat.title }}</h3>
+                        <h3 class="font-wellness text-xl text-stone-900">{{ categoryDisplayTitle(cat) }}</h3>
                         <p class="text-xs text-stone-500 mt-1 uppercase tracking-wider">{{ storefrontContent.common.productsCount(cat.itemCount) }}</p>
                     </div>
                 </div>
@@ -240,7 +246,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-72 md:w-80"
+            class="flex-shrink-0 w-[calc(50%-1rem)] sm:w-72 md:w-80"
           >
             <ProductCard :product="product" />
           </div>
@@ -283,7 +289,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-72 md:w-80"
+            class="flex-shrink-0 w-[calc(50%-1rem)] sm:w-72 md:w-80"
           >
             <ProductCard :product="product" />
            </div>

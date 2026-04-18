@@ -3,24 +3,24 @@
     <div class="space-y-6">
       <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.contactInfosForm.title') }}</h1>
-          <p class="text-slate-600 mt-1 max-w-2xl">
+          <h1 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.contactInfosForm.title') }}</h1>
+          <p style="color: var(--text-secondary)" class="mt-1 max-w-2xl">
             {{ t('admin.contactInfosForm.subtitle') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="ui-btn ui-btn--secondary"
             :disabled="loading"
             @click="fetchItems"
           >
             {{ t('admin.common.reset') || 'Cancel' }}
           </button>
-          
+
           <button
             type="button"
-            class="px-4 py-2 bg-slate-900 text-white rounded-md hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="ui-btn ui-btn--secondary"
             :disabled="loading"
             @click="addDraft"
           >
@@ -43,60 +43,60 @@
       {{ errorMessage }}
     </div>
 
-    <div v-if="draft" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div v-if="draft" class="rounded-xl shadow-sm overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
       <div class="p-6 md:p-8 space-y-4">
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
-              <Icon :name="kindDef(draft.kind).iconName" class="w-5 h-5 text-slate-700" />
+            <div class="h-10 w-10 rounded-lg flex items-center justify-center" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
+              <Icon :name="kindDef(draft.kind).iconName" class="w-5 h-5" style="color: var(--text-secondary)" />
             </div>
             <div>
-              <div class="text-sm font-semibold text-slate-900">{{ t('admin.contactInfosForm.draft.title') }}</div>
-              <div class="text-xs text-slate-500">{{ t('admin.contactInfosForm.draft.subtitle') }}</div>
+              <div class="text-sm font-semibold" style="color: var(--text-primary)">{{ t('admin.contactInfosForm.draft.title') }}</div>
+              <div class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.contactInfosForm.draft.subtitle') }}</div>
             </div>
           </div>
 
-          <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50" @click="draft = null">
+          <button type="button" class="ui-btn ui-btn--secondary" @click="draft = null">
             {{ t('admin.common.cancel') }}
           </button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
           <div class="md:col-span-4">
-            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.contactInfosForm.fields.type') }}</label>
+            <label class="ui-label mb-2 block">{{ t('admin.contactInfosForm.fields.type') }}</label>
             <select
               v-model="draft.kind"
-              class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option v-for="d in kindDefs" :key="d.kind" :value="d.kind">{{ d.label }}</option>
             </select>
           </div>
 
           <div class="md:col-span-4">
-            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.contactInfosForm.fields.labelOptional') }}</label>
+            <label class="ui-label mb-2 block">{{ t('admin.contactInfosForm.fields.labelOptional') }}</label>
             <input
               v-model="draft.label"
               type="text"
-              class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               :placeholder="t('admin.contactInfosForm.fields.labelPlaceholder')"
             >
           </div>
 
           <div class="md:col-span-4">
-            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.contactInfosForm.fields.value') }}</label>
+            <label class="ui-label mb-2 block">{{ t('admin.contactInfosForm.fields.value') }}</label>
             <input
               v-model="draft.value"
               type="text"
-              class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               :placeholder="kindDef(draft.kind).placeholder"
             >
           </div>
         </div>
 
         <div class="flex items-center justify-between gap-4">
-          <div class="text-xs text-slate-500">
+          <div class="text-xs" style="color: var(--text-tertiary)">
             {{ t('admin.contactInfosForm.previewLink') }}
-            <span class="font-mono text-slate-700">{{ buildHref(draft.kind, draft.value || '') || '—' }}</span>
+            <span class="font-mono" style="color: var(--text-secondary)">{{ buildHref(draft.kind, draft.value || '') || '—' }}</span>
           </div>
           <button
             type="button"
@@ -111,41 +111,42 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="rounded-xl shadow-sm overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
       <div class="p-6 md:p-8">
         <div class="flex items-center justify-between gap-4 mb-6">
-          <h3 class="text-lg font-semibold text-slate-900">{{ t('admin.contactInfosForm.items.title') }}</h3>
-          <div class="text-sm text-slate-500">{{ t('admin.contactInfosForm.items.total', { count: items.length }) }}</div>
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.contactInfosForm.items.title') }}</h3>
+          <div class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.contactInfosForm.items.total', { count: items.length }) }}</div>
         </div>
 
-        <div v-if="loading" class="text-sm text-slate-500">{{ t('admin.common.loading') }}</div>
+        <div v-if="loading" class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.common.loading') }}</div>
 
         <div v-else class="space-y-4">
           <div
             v-for="(item, index) in items"
             :key="item.id"
-            class="bg-white rounded-xl border transition-all duration-200 relative group border-slate-200 hover:border-slate-300 shadow-sm"
+            class="rounded-xl transition-all duration-200 relative group shadow-sm"
+            style="background: var(--surface-2); border: 1px solid var(--surface-border)"
           >
             <div class="p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div class="flex items-start gap-3 flex-1">
-                <div class="h-10 w-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0">
-                  <Icon :name="kindDef(item.kind).iconName" class="w-5 h-5 text-slate-700" />
+                <div class="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
+                  <Icon :name="kindDef(item.kind).iconName" class="w-5 h-5" style="color: var(--text-secondary)" />
                 </div>
 
                 <div class="flex-1">
                   <div class="flex flex-wrap items-center gap-2">
                     <select
                       v-model="item.kind"
-                      class="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      class="ui-input px-2.5 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                       @change="saveItem(item)"
                     >
                       <option v-for="d in kindDefs" :key="d.kind" :value="d.kind">{{ d.label }}</option>
                     </select>
-                    <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <label class="inline-flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
                       <input
                         v-model="item.isActive"
                         type="checkbox"
-                        class="rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="rounded text-teal-600 focus:ring-teal-500"
                         @change="saveItem(item)"
                       >
                       {{ t('admin.common.active') }}
@@ -156,22 +157,22 @@
                     <input
                       v-model="item.label"
                       type="text"
-                      class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                       :placeholder="t('admin.contactInfosForm.fields.labelOptional')"
                       @blur="saveItem(item)"
                     >
                     <input
                       v-model="item.value"
                       type="text"
-                      class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                       :placeholder="kindDef(item.kind).placeholder"
                       @blur="saveItem(item)"
                     >
                   </div>
 
-                  <div class="mt-2 text-xs text-slate-500">
+                  <div class="mt-2 text-xs" style="color: var(--text-tertiary)">
                     {{ t('admin.contactInfosForm.previewLink') }}
-                    <span class="font-mono text-slate-700">{{ buildHref(item.kind, item.value || '') || '—' }}</span>
+                    <span class="font-mono" style="color: var(--text-secondary)">{{ buildHref(item.kind, item.value || '') || '—' }}</span>
                   </div>
                 </div>
               </div>
@@ -179,7 +180,7 @@
               <div class="flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  class="h-10 w-10 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 disabled:opacity-50"
+                  class="h-10 w-10 rounded-lg disabled:opacity-50" style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
                   :title="t('admin.contactInfosForm.actions.moveUp')"
                   :disabled="index === 0"
                   @click="moveItem(index, -1)"
@@ -188,7 +189,7 @@
                 </button>
                 <button
                   type="button"
-                  class="h-10 w-10 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 disabled:opacity-50"
+                  class="h-10 w-10 rounded-lg disabled:opacity-50" style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
                   :title="t('admin.contactInfosForm.actions.moveDown')"
                   :disabled="index === items.length - 1"
                   @click="moveItem(index, 1)"
@@ -208,9 +209,9 @@
             </div>
           </div>
 
-          <div v-if="items.length === 0" class="text-sm text-slate-500 text-center py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-            <Icon name="lucide:list" class="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p class="text-slate-500 font-medium">{{ t('admin.contactInfosForm.items.empty') }}</p>
+          <div v-if="items.length === 0" class="text-sm text-center py-12 rounded-xl border-2 border-dashed" style="color: var(--text-tertiary); background: var(--surface-2); border-color: var(--surface-border)">
+            <Icon name="lucide:list" class="w-12 h-12 mx-auto mb-3" style="color: var(--text-muted)" />
+            <p class="font-medium" style="color: var(--text-tertiary)">{{ t('admin.contactInfosForm.items.empty') }}</p>
           </div>
         </div>
       </div>
@@ -218,10 +219,10 @@
 
     <!-- Actions Footer -->
     <div class="fixed bottom-6 right-6 md:static md:flex md:justify-end mt-6">
-       <div class="bg-white md:bg-transparent p-2 md:p-0 rounded-full shadow-lg md:shadow-none border md:border-none border-slate-200 flex items-center gap-3">
+       <div class="md:bg-transparent p-2 md:p-0 rounded-full shadow-lg md:shadow-none md:border-none flex items-center gap-3" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
           <button
             type="button"
-            class="hidden md:inline-flex px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="hidden md:inline-flex ui-btn ui-btn--secondary"
             :disabled="loading"
             @click="fetchItems"
           >

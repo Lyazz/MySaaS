@@ -51,14 +51,14 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                 <DialogTitle
                   as="h3"
-                  class="text-lg font-bold leading-6 text-slate-900 flex justify-between items-center"
+                  class="text-lg font-bold leading-6 flex justify-between items-center" style="color: var(--text-primary)"
                 >
                   {{ selectedProductForVariant?.title || t('admin.pages.orders.detail.variantSelect', 'Select Variant') }}
                   <button
-                    class="p-1 rounded-full hover:bg-slate-100 text-slate-400"
+                    class="p-1 rounded-full" style="color: var(--text-tertiary)"
                     @click="variantModalOpen = false"
                   >
                     <Icon
@@ -70,7 +70,7 @@
                 <div class="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
                   <div
                     v-if="loadingVariants"
-                    class="py-8 text-center text-slate-500"
+                    class="py-8 text-center" style="color: var(--text-tertiary)"
                   >
                     {{ t('admin.common.loading', 'Loading...') }}
                   </div>
@@ -78,14 +78,14 @@
                     v-for="v in availableVariantsForSelection"
                     :key="v.id"
                     type="button"
-                    class="w-full p-4 rounded-xl border border-slate-100 hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group"
+                    class="w-full p-4 rounded-xl hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
                     @click="onVariantSelected(v)"
                   >
                     <div class="text-left">
-                      <div class="font-semibold text-slate-900 group-hover:text-teal-800">
+                      <div class="font-semibold group-hover:text-teal-800" style="color: var(--text-primary)">
                         {{ v.label }}
                       </div>
-                      <div class="text-xs text-slate-500 mt-0.5">
+                      <div class="text-xs mt-0.5" style="color: var(--text-tertiary)">
                         {{ v.availableStock }} {{ t('admin.pages.orders.create.inStock', 'in stock') }}
                       </div>
                     </div>
@@ -95,7 +95,7 @@
                       </div>
                       <div
                         v-if="v.promotionApplied"
-                        class="text-[11px] text-slate-500"
+                        class="text-[11px]" style="color: var(--text-tertiary)"
                       >
                         <span class="line-through">{{ formatCurrency(v.originalPrice ?? v.price) }}</span>
                         <span
@@ -122,7 +122,7 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/orders"
-            class="text-sm font-medium text-slate-700 hover:text-teal-700"
+            class="text-sm font-medium hover:text-teal-700" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.orders') }}
           </NuxtLink>
@@ -131,9 +131,9 @@
           <div class="flex items-center">
             <Icon
               name="lucide:chevron-right"
-              class="w-5 h-5 text-slate-400"
+              class="w-5 h-5" style="color: var(--text-tertiary)"
             />
-            <span class="ml-1 text-sm text-slate-500">{{ t('admin.pages.orders.detail.breadcrumb', { id: orderId.substring(0, 8) }) }}</span>
+            <span class="ml-1 text-sm" style="color: var(--text-tertiary)">{{ t('admin.pages.orders.detail.breadcrumb', { id: orderId.substring(0, 8) }) }}</span>
           </div>
         </li>
       </ol>
@@ -148,23 +148,23 @@
         <div class="animate-pulse space-y-6">
           <div class="flex items-start justify-between gap-6">
             <div class="space-y-3 flex-1">
-              <div class="h-6 w-52 rounded bg-slate-200" />
-              <div class="h-4 w-80 max-w-full rounded bg-slate-100" />
+              <div class="h-6 w-52 rounded" style="background: var(--surface-3)" />
+              <div class="h-4 w-80 max-w-full rounded" style="background: var(--surface-3)" />
             </div>
             <div class="hidden sm:flex gap-2">
-              <div class="h-9 w-24 rounded-lg bg-slate-100" />
-              <div class="h-9 w-24 rounded-lg bg-slate-100" />
+              <div class="h-9 w-24 rounded-lg" style="background: var(--surface-3)" />
+              <div class="h-9 w-24 rounded-lg" style="background: var(--surface-3)" />
             </div>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="h-16 rounded-xl bg-slate-100" />
-            <div class="h-16 rounded-xl bg-slate-100" />
-            <div class="h-16 rounded-xl bg-slate-100" />
-            <div class="h-16 rounded-xl bg-slate-100" />
+            <div class="h-16 rounded-xl" style="background: var(--surface-3)" />
+            <div class="h-16 rounded-xl" style="background: var(--surface-3)" />
+            <div class="h-16 rounded-xl" style="background: var(--surface-3)" />
+            <div class="h-16 rounded-xl" style="background: var(--surface-3)" />
           </div>
-          <div class="h-48 rounded-xl bg-slate-100" />
+          <div class="h-48 rounded-xl" style="background: var(--surface-3)" />
         </div>
-        <p class="mt-6 text-center text-sm text-slate-500">
+        <p class="mt-6 text-center text-sm" style="color: var(--text-tertiary)">
           {{ t('admin.pages.orders.detail.loading') }}
         </p>
       </div>
@@ -181,31 +181,31 @@
           <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-3">
-                <h1 class="min-w-0 truncate text-xl font-semibold text-slate-900">
+                <h1 class="min-w-0 truncate text-xl font-semibold" style="color: var(--text-primary)">
                   {{ t('admin.pages.orders.detail.breadcrumb', { id: order.id.substring(0, 8) }) }}
                 </h1>
                 <AdminOrderStatusBadge :status="order.status" />
               </div>
 
-              <div class="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600">
+              <div class="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm" style="color: var(--text-secondary)">
                 <div class="flex items-center gap-2">
                   <Icon
                     name="lucide:calendar"
-                    class="h-4 w-4 text-slate-400"
+                    class="h-4 w-4" style="color: var(--text-tertiary)"
                   />
                   <span>{{ formatDate(order.createdAt) }}</span>
                 </div>
                 <div class="flex items-center gap-2 min-w-0">
                   <Icon
                     name="lucide:user"
-                    class="h-4 w-4 text-slate-400"
+                    class="h-4 w-4" style="color: var(--text-tertiary)"
                   />
-                  <span class="truncate font-medium text-slate-900">{{ order.customerName }}</span>
+                  <span class="truncate font-medium" style="color: var(--text-primary)">{{ order.customerName }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <Icon
                     name="lucide:phone"
-                    class="h-4 w-4 text-slate-400"
+                    class="h-4 w-4" style="color: var(--text-tertiary)"
                   />
                   <a
                     :href="`tel:${order.customerPhone}`"
@@ -216,7 +216,7 @@
                   </a>
                   <button
                     type="button"
-                    class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors"
+                    class="rounded-md p-1 hover:text-teal-700 transition-colors" style="color: var(--text-tertiary)"
                     :aria-label="t('common.copy', 'Copy')"
                     @click="copyToClipboard(order.customerPhone)"
                   >
@@ -228,11 +228,11 @@
                 </div>
               </div>
 
-              <div class="mt-2 flex items-center gap-2 text-xs text-slate-500">
+              <div class="mt-2 flex items-center gap-2 text-xs" style="color: var(--text-tertiary)">
                 <span class="font-mono">{{ order.id }}</span>
                 <button
                   type="button"
-                  class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors"
+                  class="rounded-md p-1 hover:text-teal-700 transition-colors" style="color: var(--text-tertiary)"
                   :aria-label="t('common.copy', 'Copy')"
                   @click="copyToClipboard(order.id)"
                 >
@@ -298,35 +298,35 @@
           </div>
 
           <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div class="text-xs text-slate-500">
+            <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
+              <div class="text-xs" style="color: var(--text-tertiary)">
                 {{ t('admin.common.total', 'Total') }}
               </div>
-              <div class="mt-1 text-base font-semibold text-slate-900">
+              <div class="mt-1 text-base font-semibold" style="color: var(--text-primary)">
                 {{ formatCurrency(order.totalAmount) }}
               </div>
             </div>
-            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div class="text-xs text-slate-500">
+            <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
+              <div class="text-xs" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.orders.detail.fields.shippingFee', 'Shipping') }}
               </div>
-              <div class="mt-1 text-base font-semibold text-slate-900">
+              <div class="mt-1 text-base font-semibold" style="color: var(--text-primary)">
                 {{ order.shippingAmount != null ? formatCurrency(Number(order.shippingAmount)) : '—' }}
               </div>
             </div>
-            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div class="text-xs text-slate-500">
+            <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
+              <div class="text-xs" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.orders.detail.fields.totalWithDelivery', 'Total (with delivery)') }}
               </div>
-              <div class="mt-1 text-base font-semibold text-slate-900">
+              <div class="mt-1 text-base font-semibold" style="color: var(--text-primary)">
                 {{ formatCurrency(orderTotalWithShipping) }}
               </div>
             </div>
-            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div class="text-xs text-slate-500">
+            <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
+              <div class="text-xs" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.orders.detail.sections.orderItems') }}
               </div>
-              <div class="mt-1 text-base font-semibold text-slate-900">
+              <div class="mt-1 text-base font-semibold" style="color: var(--text-primary)">
                 {{ order.items?.length ?? 0 }}
               </div>
             </div>
@@ -340,7 +340,7 @@
           <!-- Order Items -->
           <div class="ui-card">
             <div class="ui-card-header flex items-center justify-between gap-3">
-              <h2 class="text-base font-semibold text-slate-900">
+              <h2 class="text-base font-semibold" style="color: var(--text-primary)">
                 {{ t('admin.pages.orders.detail.sections.orderItems') }}
               </h2>
               <div
@@ -377,27 +377,27 @@
               <div class="relative">
                 <Icon
                   name="lucide:search"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-tertiary)"
                 />
                 <input
                   v-model="productSearch"
                   type="text"
                   :placeholder="t('admin.pages.pos.catalog.searchPlaceholder', 'Search products…')"
-                  class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm"
+                  class="w-full pl-9 pr-3 py-2 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary)"
                 >
 
                 <div
                   v-if="productSearch.trim().length > 0"
-                  class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-xl rounded-lg z-50 max-h-64 overflow-y-auto"
+                  class="absolute left-0 right-0 top-full mt-1 shadow-xl rounded-lg z-50 max-h-64 overflow-y-auto" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
                 >
                   <div
                     v-for="product in searchedProducts"
                     :key="product.id"
-                    class="p-2 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-center gap-3"
+                    class="p-2 cursor-pointer flex items-center gap-3" style="border-bottom: 1px solid var(--surface-border)"
                     @click="addProductToCart(product)"
                   >
                     <div class="flex-1 min-w-0">
-                      <div class="font-medium text-sm text-slate-800 truncate">
+                      <div class="font-medium text-sm truncate" style="color: var(--text-primary)">
                         {{ product.title }}
                       </div>
                       <div class="mt-0.5 text-xs">
@@ -406,7 +406,7 @@
                         </div>
                         <div
                           v-if="product.promotionApplied"
-                          class="text-slate-500"
+                          style="color: var(--text-tertiary)"
                         >
                           <span class="line-through">{{ formatCurrency(product.originalPrice) }}</span>
                           <span
@@ -418,12 +418,12 @@
                     </div>
                     <Icon
                       name="lucide:plus"
-                      class="w-4 h-4 text-slate-400"
+                      class="w-4 h-4" style="color: var(--text-tertiary)"
                     />
                   </div>
                   <div
                     v-if="searchedProducts.length === 0"
-                    class="p-4 text-center text-sm text-slate-500"
+                    class="p-4 text-center text-sm" style="color: var(--text-tertiary)"
                   >
                     {{ t('admin.pages.pos.catalog.noProducts', 'No products found') }}
                   </div>
@@ -442,7 +442,7 @@
               <div class="space-y-3">
                 <div
                   v-if="cartItems.length === 0"
-                  class="text-center text-sm text-slate-500 py-10"
+                  class="text-center text-sm py-10" style="color: var(--text-tertiary)"
                 >
                   {{ t('admin.pages.orders.create.emptyCart', 'No items yet') }}
                 </div>
@@ -450,23 +450,23 @@
                 <div
                   v-for="(item, index) in cartItems"
                   :key="`${item.productId}:${item.variantId || 'default'}:${index}`"
-                  class="bg-white border border-slate-200 rounded-lg p-3 flex flex-col gap-2"
+                  class="rounded-lg p-3 flex flex-col gap-2" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
                 >
                   <div class="flex items-start justify-between gap-2">
                     <div class="flex-1 min-w-0">
-                      <div class="font-medium text-slate-800 line-clamp-2 leading-tight">
+                      <div class="font-medium line-clamp-2 leading-tight" style="color: var(--text-primary)">
                         {{ item.title }}
                       </div>
                       <div
                         v-if="item.variantLabel"
-                        class="text-xs text-slate-500 mt-0.5"
+                        class="text-xs mt-0.5" style="color: var(--text-tertiary)"
                       >
                         {{ item.variantLabel }}
                       </div>
                     </div>
                     <button
                       type="button"
-                      class="text-slate-400 hover:text-red-500 p-1 -m-1 transition-colors"
+                      class="hover:text-red-500 p-1 -m-1 transition-colors" style="color: var(--text-tertiary)"
                       :title="t('common.delete', 'Delete')"
                       @click="removeCartItem(index)"
                     >
@@ -477,15 +477,15 @@
                     </button>
                   </div>
 
-                  <div class="flex items-center justify-between pt-2 border-t border-slate-50">
-                    <div class="font-semibold text-slate-700">
+                  <div class="flex items-center justify-between pt-2" style="border-top: 1px solid var(--surface-border)">
+                    <div class="font-semibold" style="color: var(--text-secondary)">
                       {{ formatCurrency(item.price * item.quantity) }}
                     </div>
 
-                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                    <div class="flex items-center rounded-lg p-0.5 shadow-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                       <button
                         type="button"
-                        class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm disabled:opacity-50 transition-all"
+                        class="w-7 h-7 flex items-center justify-center rounded-md hover:shadow-sm disabled:opacity-50 transition-all" style="color: var(--text-secondary)"
                         :disabled="item.quantity <= 1"
                         @click="item.quantity--"
                       >
@@ -498,11 +498,11 @@
                         v-model.number="item.quantity"
                         type="number"
                         min="1"
-                        class="w-12 text-center text-sm font-semibold text-slate-700 bg-transparent focus:outline-none"
+                        class="w-12 text-center text-sm font-semibold bg-transparent focus:outline-none" style="color: var(--text-secondary)"
                       >
                       <button
                         type="button"
-                        class="w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm transition-all"
+                        class="w-7 h-7 flex items-center justify-center rounded-md hover:shadow-sm transition-all" style="color: var(--text-secondary)"
                         @click="item.quantity++"
                       >
                         <Icon
@@ -515,8 +515,8 @@
                 </div>
               </div>
 
-              <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                <div class="text-sm text-slate-500">
+              <div class="flex items-center justify-between pt-3" style="border-top: 1px solid var(--surface-border)">
+                <div class="text-sm" style="color: var(--text-tertiary)">
                   {{ t('admin.common.total', 'Total') }}
                 </div>
                 <div class="text-lg font-bold text-teal-700">
@@ -552,24 +552,24 @@
                     :key="item.id"
                     class="ui-tr"
                   >
-                    <td class="ui-td text-sm text-slate-900">
+                    <td class="ui-td text-sm" style="color: var(--text-primary)">
                       <div class="font-medium">
                         {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product') }}
                       </div>
                       <div
                         v-if="variantLabelFromOrderItem(item)"
-                        class="text-xs text-slate-500 mt-0.5"
+                        class="text-xs mt-0.5" style="color: var(--text-tertiary)"
                       >
                         {{ variantLabelFromOrderItem(item) }}
                       </div>
                     </td>
-                    <td class="ui-td text-sm text-slate-900">
+                    <td class="ui-td text-sm" style="color: var(--text-primary)">
                       {{ formatCurrency(item.price) }}
                     </td>
-                    <td class="ui-td text-sm text-slate-900">
+                    <td class="ui-td text-sm" style="color: var(--text-primary)">
                       {{ item.quantity }}
                     </td>
-                    <td class="ui-td text-sm text-slate-900 text-right">
+                    <td class="ui-td text-sm text-right" style="color: var(--text-primary)">
                       {{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}
                     </td>
                   </tr>
@@ -578,7 +578,7 @@
                   <tr>
                     <td
                       colspan="3"
-                      class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
+                      class="px-4 py-3 text-sm font-semibold text-right" style="color: var(--text-primary)"
                     >
                       {{ t('admin.pages.orders.detail.itemsTable.total') }}
                     </td>
@@ -594,13 +594,13 @@
           <!-- Internal Notes (New) -->
           <div class="ui-card">
             <div class="ui-card-header flex items-center justify-between gap-3">
-              <h2 class="text-base font-semibold text-slate-900">
+              <h2 class="text-base font-semibold" style="color: var(--text-primary)">
                 {{ t('admin.pages.orders.detail.sections.internalNotes', 'Internal Notes') }}
               </h2>
               <div class="flex justify-end h-5 items-center">
                 <span
                   v-if="savingNotes"
-                  class="text-xs text-slate-500 flex items-center"
+                  class="text-xs flex items-center" style="color: var(--text-tertiary)"
                 >
                   <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
                   {{ t('admin.common.saving', 'Saving...') }}
@@ -621,12 +621,12 @@
               <textarea
                 v-model="order.internalNotes"
                 rows="4"
-                class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 shadow-sm focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-60"
+                class="block w-full rounded-xl px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-60" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-primary)"
                 :disabled="editing"
                 :placeholder="t('admin.pages.orders.detail.fields.internalNotesPlaceholder', 'Add private remarks about this order...')"
                 @blur="handleUpdateInternalNotes"
               />
-              <p class="text-xs text-slate-500">
+              <p class="text-xs" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.orders.detail.internalNotesHelp', 'Notes are only visible to your team.') }}
               </p>
             </div>
@@ -638,7 +638,7 @@
           <!-- Status Update -->
           <div class="ui-card">
             <div class="ui-card-header">
-              <h2 class="text-base font-semibold text-slate-900">
+              <h2 class="text-base font-semibold" style="color: var(--text-primary)">
                 {{ t('admin.pages.orders.detail.statusUpdate.title') }}
               </h2>
             </div>
@@ -655,7 +655,7 @@
               <div>
                 <label
                   for="status"
-                  class="block text-sm font-medium text-slate-700 mb-1"
+                  class="ui-label mb-1"
                 >
                   {{ t('admin.pages.orders.detail.statusUpdate.statusLabel') }}
                 </label>
@@ -707,25 +707,25 @@
           <!-- Delivery Info -->
           <div class="ui-card">
             <div class="ui-card-header">
-              <h2 class="text-base font-semibold text-slate-900">
+              <h2 class="text-base font-semibold" style="color: var(--text-primary)">
                 {{ t('admin.pages.orders.detail.sections.deliveryInfo', 'Delivery') }}
               </h2>
             </div>
             <div class="ui-card-body">
-              <dl class="text-sm divide-y divide-slate-100">
+              <dl class="text-sm divide-y" style="border-color: var(--surface-border)">
                 <div class="flex items-center justify-between gap-3 py-2">
-                  <dt class="text-slate-500">
+                  <dt style="color: var(--text-tertiary)">
                     {{ t('admin.pages.orders.detail.fields.deliveryCompany', 'Company') }}
                   </dt>
-                  <dd class="text-slate-900 font-medium">
+                  <dd class="font-medium" style="color: var(--text-primary)">
                     {{ order.shippingProvider || order.shipments?.[0]?.provider || '—' }}
                   </dd>
                 </div>
                 <div class="flex items-center justify-between gap-3 py-2">
-                  <dt class="text-slate-500">
+                  <dt style="color: var(--text-tertiary)">
                     {{ t('admin.pages.orders.detail.fields.deliveryMode', 'Type') }}
                   </dt>
-                  <dd class="text-slate-900 font-medium">
+                  <dd class="font-medium" style="color: var(--text-primary)">
                     {{ deliveryModeLabel(order.deliveryMode) }}
                   </dd>
                 </div>
@@ -733,10 +733,10 @@
                   v-if="order.shippingPickupPoint"
                   class="flex items-center justify-between gap-3 py-2"
                 >
-                  <dt class="text-slate-500">
+                  <dt style="color: var(--text-tertiary)">
                     {{ t('admin.pages.orders.detail.fields.pickupPoint', 'Stop desk') }}
                   </dt>
-                  <dd class="text-slate-900 font-medium">
+                  <dd class="font-medium" style="color: var(--text-primary)">
                     {{ order.shippingPickupPoint }}
                   </dd>
                 </div>
@@ -744,10 +744,10 @@
                   v-if="order.shippingWilayaCode || order.shippingCommuneCode"
                   class="flex items-center justify-between gap-3 py-2"
                 >
-                  <dt class="text-slate-500">
+                  <dt style="color: var(--text-tertiary)">
                     {{ t('admin.pages.orders.detail.fields.wilayaCommune', 'Wilaya/Commune') }}
                   </dt>
-                  <dd class="text-slate-900 font-medium">
+                  <dd class="font-medium" style="color: var(--text-primary)">
                     {{ shippingWilayaCommuneLabel }}
                   </dd>
                 </div>
@@ -776,7 +776,7 @@
           <!-- Customer Info Card -->
           <div class="ui-card">
             <div class="ui-card-header flex items-center justify-between gap-3">
-              <h2 class="text-base font-semibold text-slate-900">
+              <h2 class="text-base font-semibold" style="color: var(--text-primary)">
                 {{ t('admin.pages.orders.detail.sections.customerInfo') }}
               </h2>
               <button
@@ -799,7 +799,7 @@
               class="ui-card-body space-y-3"
             >
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">
+                <label class="ui-label mb-1">
                   {{ t('admin.pages.orders.detail.fields.customerName', 'Customer Name') }}
                 </label>
                 <BaseInput
@@ -808,7 +808,7 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">
+                <label class="ui-label mb-1">
                   {{ t('admin.pages.orders.detail.fields.customerPhone', 'Customer Phone') }}
                 </label>
                 <BaseInput
@@ -818,7 +818,7 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">
+                <label class="ui-label mb-1">
                   {{ t('admin.pages.orders.detail.fields.deliveryAddress', 'Address') }}
                 </label>
                 <BaseInput
@@ -862,7 +862,7 @@
               </template>
               <p
                 v-else
-                class="text-xs text-slate-500"
+                class="text-xs" style="color: var(--text-tertiary)"
               >
                 {{ t('admin.pages.orders.detail.editHint', 'Save from the items section to apply changes.') }}
               </p>
@@ -873,15 +873,15 @@
               class="ui-card-body space-y-3"
             >
               <div>
-                <p class="text-sm font-medium text-slate-500">
+                <p class="text-sm font-medium" style="color: var(--text-tertiary)">
                   {{ t('admin.pages.orders.detail.fields.customerName') }}
                 </p>
-                <p class="mt-1 text-sm text-slate-900 font-medium">
+                <p class="mt-1 text-sm font-medium" style="color: var(--text-primary)">
                   {{ order.customerName }}
                 </p>
               </div>
               <div>
-                <p class="text-sm font-medium text-slate-500">
+                <p class="text-sm font-medium" style="color: var(--text-tertiary)">
                   {{ t('admin.pages.orders.detail.fields.customerPhone') }}
                 </p>
                 <div class="mt-1 flex items-center">
@@ -894,7 +894,7 @@
                   </a>
                   <button
                     type="button"
-                    class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors"
+                    class="rounded-md p-1 hover:text-teal-700 transition-colors" style="color: var(--text-tertiary)"
                     :aria-label="t('common.copy', 'Copy')"
                     @click="copyToClipboard(order.customerPhone)"
                   >
@@ -906,17 +906,17 @@
                 </div>
               </div>
               <div>
-                <p class="text-sm font-medium text-slate-500">
+                <p class="text-sm font-medium" style="color: var(--text-tertiary)">
                   {{ t('admin.pages.orders.detail.fields.deliveryAddress') }}
                 </p>
                 <div class="mt-1 flex items-start">
-                  <p class="text-sm text-slate-900 mr-2 flex-1">
+                  <p class="text-sm mr-2 flex-1" style="color: var(--text-primary)">
                     {{ order.customerAddress || 'N/A' }}
                   </p>
                   <button
                     v-if="order.customerAddress"
                     type="button"
-                    class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-teal-700 transition-colors mt-0.5"
+                    class="rounded-md p-1 hover:text-teal-700 transition-colors mt-0.5" style="color: var(--text-muted)"
                     :aria-label="t('common.copy', 'Copy')"
                     @click="copyToClipboard(order.customerAddress)"
                   >
@@ -930,8 +930,8 @@
             </div>
 
             <!-- Contact Trace Toggle -->
-            <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-              <span class="text-sm font-medium text-slate-700">{{ t('admin.pages.orders.detail.fields.callStatus', 'Call Status') }}</span>
+            <div class="mt-5 pt-4 flex items-center justify-between" style="border-top: 1px solid var(--surface-border)">
+              <span class="text-sm font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.orders.detail.fields.callStatus', 'Call Status') }}</span>
               <div class="w-48">
                 <BaseSelect
                   v-model="order.callStatus"
@@ -964,7 +964,7 @@
               <div class="flex justify-end h-5 ml-2 items-center min-w-[3rem]">
                 <span
                   v-if="savingCallStatus"
-                  class="text-xs text-slate-500 flex items-center"
+                  class="text-xs flex items-center" style="color: var(--text-tertiary)"
                 >
                   <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
                 </span>
@@ -988,7 +988,7 @@
                 name="lucide:shield-alert"
                 class="w-5 h-5 text-red-500"
               />
-              <h2 class="text-base font-semibold text-slate-900">
+              <h2 class="text-base font-semibold" style="color: var(--text-primary)">
                 {{ t('admin.pages.orders.detail.sections.securityAndFraud', 'Security & Fraud') }}
               </h2>
               <span class="ui-badge ui-badge--red ml-auto">
@@ -996,7 +996,7 @@
               </span>
             </div>
             <div class="ui-card-body space-y-3">
-              <p class="text-xs text-slate-500">
+              <p class="text-xs" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.orders.detail.securityHelp', 'Advanced actions to manage risky behavior.') }}
               </p>
               <div class="space-y-2">
@@ -1049,10 +1049,10 @@
         name="lucide:alert-circle"
         class="mx-auto h-12 w-12 text-red-400"
       />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.orders.detail.notFound.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ t('admin.pages.orders.detail.notFound.hint') }}
       </p>
       <div class="mt-6">
@@ -1074,6 +1074,7 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 import DeliveryPaymentModal from '~/components/cash/DeliveryPaymentModal.vue'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { buildProductPricing, toFiniteNumber } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   middleware: 'auth',
@@ -1143,13 +1144,6 @@ type CartItem = {
   variantLabel?: string
   price: number
   quantity: number
-}
-
-type ProductPricing = {
-  originalPrice: number
-  effectivePrice: number
-  promotionApplied: boolean
-  promotionDiscountPercent: number | null
 }
 
 const loading = ref(true)
@@ -1391,47 +1385,6 @@ function variantLabelFromOrderItem(item: OrderItem): string | undefined {
       .filter((v): v is string => typeof v === 'string' && v.trim().length > 0) ?? []
   if (labels.length === 0) return undefined
   return labels.join(' / ')
-}
-
-function toFiniteNumber(value: unknown, fallback = 0): number {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : fallback
-}
-
-function hasActivePromotion(product: any, nowMs = Date.now()): boolean {
-  if (!product?.isPromotionActive) return false
-  const promotionalPrice = Number(product?.promotionalPrice)
-  if (!Number.isFinite(promotionalPrice)) return false
-
-  const start = product?.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
-  const end = product?.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
-
-  return nowMs >= start && nowMs <= end
-}
-
-function buildProductPricing(product: any, basePriceInput?: unknown): ProductPricing {
-  const originalPrice = toFiniteNumber(basePriceInput ?? product?.price)
-  if (!hasActivePromotion(product)) {
-    return {
-      originalPrice,
-      effectivePrice: originalPrice,
-      promotionApplied: false,
-      promotionDiscountPercent: null
-    }
-  }
-
-  const effectivePrice = toFiniteNumber(product?.promotionalPrice, originalPrice)
-  const promotionDiscountPercent =
-    originalPrice > 0 && effectivePrice < originalPrice
-      ? Math.round(((originalPrice - effectivePrice) / originalPrice) * 100)
-      : null
-
-  return {
-    originalPrice,
-    effectivePrice,
-    promotionApplied: true,
-    promotionDiscountPercent
-  }
 }
 
 function applyPromotionPricingToCartItems() {

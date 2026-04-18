@@ -5,8 +5,8 @@
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-           <h1 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.homepage.metaTitle') }}</h1>
-           <p class="text-slate-600 mt-1">{{ t('admin.homepageSettingsForm.subtitle') }}</p>
+           <h1 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.settings.homepage.metaTitle') }}</h1>
+           <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.homepageSettingsForm.subtitle') }}</p>
         </div>
       </div>
       
@@ -21,7 +21,7 @@
            <div 
              v-if="message.text" 
              class="px-3 py-1.5 rounded-full text-sm font-medium animate-fadeIn"
-             :class="message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'"
+             :style="message.type === 'success' ? 'background: rgba(34,197,94,0.1); color: #4ade80' : 'background: rgba(239,68,68,0.1); color: #f87171'"
            >
              {{ message.text }}
            </div>
@@ -29,7 +29,7 @@
            <div class="flex items-center gap-3">
              <button
                type="button"
-               class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+               class="ui-btn ui-btn--secondary text-sm"
                :disabled="loading || saving"
                @click="reset"
              >

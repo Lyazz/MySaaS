@@ -4,14 +4,14 @@
     <nav class="flex mb-6" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/suppliers" class="text-gray-700 hover:text-teal-600">
+          <NuxtLink to="/admin/suppliers" class="hover:text-teal-400 transition-colors" style="color: var(--text-secondary)">
             {{ t('admin.nav.suppliers') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">{{ t('admin.pages.suppliers.edit.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
+            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.suppliers.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -20,13 +20,13 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.suppliers.edit.title') }}</h2>
-        <p class="text-gray-600 mt-1">{{ t('admin.pages.suppliers.edit.subtitle') }}</p>
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.suppliers.edit.title') }}</h2>
+        <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.suppliers.edit.subtitle') }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <NuxtLink
           to="/admin/suppliers"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="ui-btn ui-btn--secondary text-sm"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>
@@ -43,13 +43,13 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="bg-white rounded-lg shadow p-12 text-center">
+    <div v-if="loading" class="rounded-lg p-12 text-center" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-      <p class="mt-2 text-gray-600">{{ t('admin.pages.suppliers.edit.loading') }}</p>
+      <p class="mt-2" style="color: var(--text-secondary)">{{ t('admin.pages.suppliers.edit.loading') }}</p>
     </div>
 
     <!-- Form -->
-    <form v-else id="supplier-edit-form" class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
+    <form v-else id="supplier-edit-form" class="rounded-lg p-6 space-y-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)" @submit.prevent="handleSubmit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <BaseInput
           v-model="form.name"
@@ -83,11 +83,11 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.forms.supplier.notes.label') }}</label>
+        <label class="ui-label mb-1 block">{{ t('admin.forms.supplier.notes.label') }}</label>
         <textarea
           v-model="form.notes"
           rows="3"
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 transition-colors"
+          class="ui-input w-full px-3 py-2 text-sm"
           :placeholder="t('admin.forms.supplier.notes.placeholder')"
         ></textarea>
       </div>
@@ -99,7 +99,7 @@
       <div class="flex justify-end space-x-3 pt-4 border-t">
         <NuxtLink
           to="/admin/suppliers"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="ui-btn ui-btn--secondary text-sm"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>

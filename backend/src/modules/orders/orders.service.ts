@@ -2,6 +2,7 @@ import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
+import { buildProductPricing } from '../../../../shared/pricing/product-pricing'
 import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
@@ -793,15 +794,7 @@ export class OrdersService {
                     throw new OrderValidationError(400, 'Variant selection is required for this product')
                 }
 
-                let price = Number(variant.price ?? product.price)
-                if (product.isPromotionActive && product.promotionalPrice) {
-                    const nowMs = new Date().getTime()
-                    const start = product.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
-                    const end = product.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
-                    if (nowMs >= start && nowMs <= end) {
-                        price = Number(product.promotionalPrice)
-                    }
-                }
+                const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
 
                 const availableStock = variant.trackInventory
                     ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
@@ -1573,15 +1566,7 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            let price = Number(variant.price ?? product.price)
-            if (product.isPromotionActive && product.promotionalPrice) {
-                const now = new Date().getTime()
-                const start = product.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
-                const end = product.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
-                if (now >= start && now <= end) {
-                    price = Number(product.promotionalPrice)
-                }
-            }
+            const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY
@@ -1896,15 +1881,7 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            let price = Number(variant.price ?? product.price)
-            if (product.isPromotionActive && product.promotionalPrice) {
-                const now = new Date().getTime()
-                const start = product.promotionStartDate ? new Date(product.promotionStartDate).getTime() : 0
-                const end = product.promotionEndDate ? new Date(product.promotionEndDate).getTime() : Infinity
-                if (now >= start && now <= end) {
-                    price = Number(product.promotionalPrice)
-                }
-            }
+            const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY

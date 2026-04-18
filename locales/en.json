@@ -828,7 +828,10 @@
           "pngOnly": "Please upload a PNG image.",
           "squareOnly": "Image must be square (current: {w}x{h}px).",
           "uploadFailed": "Upload failed",
-          "readDimensionsFailed": "Failed to read image dimensions."
+          "readDimensionsFailed": "Failed to read image dimensions.",
+          "invalidType": "Only PNG, JPEG, and WebP images are allowed",
+          "tooLarge": "Image must be less than {max}",
+          "cropFailed": "Failed to crop image"
         }
       },
       "richTextEditor": {
@@ -854,6 +857,31 @@
         "selectedCount": "{count} variant(s) selected",
         "actions": {
           "addSelected": "Add Selected"
+        }
+      },
+      "imageUploader": {
+        "clickToUpload": "Click to upload image",
+        "dragDrop": "PNG, JPEG, or WebP",
+        "errors": {
+          "invalidType": "Only PNG, JPEG, and WebP images are allowed",
+          "tooLarge": "Image must be less than {max}",
+          "cropFailed": "Failed to crop image",
+          "uploadFailed": "Upload failed"
+        }
+      },
+      "imageCropper": {
+        "title": "Crop image",
+        "confirm": "Use cropped image",
+        "subtitleFree": "Adjust the crop area freely.",
+        "subtitlePreset": "Crop with ratio {preset}.",
+        "presets": {
+          "free": "Free"
+        },
+        "errors": {
+          "noFile": "No image selected for cropping.",
+          "unavailable": "Cropper is not available.",
+          "resultFailed": "Failed to generate cropped image.",
+          "loadFailed": "Failed to load image in cropper."
         }
       }
     },
@@ -1144,7 +1172,10 @@
         "body": "Drag and drop to reorder images. Click the star icon to set an image as the main product image."
       },
       "errors": {
-        "uploadFailed": "Failed to upload image"
+        "uploadFailed": "Failed to upload image",
+        "invalidType": "Only PNG, JPEG, and WebP images are allowed",
+        "tooLarge": "Image must be less than {max}",
+        "cropFailed": "Failed to crop image"
       }
     },
     "variantsTable": {
@@ -2236,7 +2267,7 @@
           },
           "deleteModal": {
             "title": "Delete product",
-            "message": "Are you sure you want to delete \u201c{title}\u201d? This action cannot be undone.",
+            "message": "Are you sure you want to delete “{title}”? This action cannot be undone.",
             "error": "Failed to delete product. Please try again.",
             "errorHasTransactions": "Cannot delete this product because it is referenced by existing sales or purchase orders."
           },

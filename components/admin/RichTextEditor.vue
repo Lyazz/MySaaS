@@ -158,16 +158,16 @@ const onContentUpdate = (value: string) => {
    WRAPPER STYLES
    ============================== */
 .rich-text-editor-wrapper {
-  border: 2px solid #e5e7eb;
+  border: 1px solid var(--surface-border);
   border-radius: 0.75rem;
   overflow: hidden;
-  background: white;
+  background: var(--surface-1);
   transition: border-color 0.2s;
 }
 
 .rich-text-editor-wrapper:focus-within {
-  border-color: #0f766e;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+  border-color: rgba(var(--brand-rgb) / 0.5);
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.1);
 }
 
 /* ==============================
@@ -175,8 +175,8 @@ const onContentUpdate = (value: string) => {
    ============================== */
 .rich-text-editor-wrapper .ql-toolbar.ql-snow {
   border: none !important;
-  border-bottom: 1px solid #e5e7eb !important;
-  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+  border-bottom: 1px solid var(--surface-border) !important;
+  background: var(--surface-2);
   padding: 0.75rem;
 }
 
@@ -194,7 +194,7 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-toolbar button:hover {
-  background: #f3f4f6;
+  background: rgba(255,255,255,0.08);
 }
 
 .rich-text-editor-wrapper .ql-toolbar button:hover .ql-stroke {
@@ -228,8 +228,8 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-toolbar .ql-picker-label:hover {
-  background: #f3f4f6;
-  color: #0f766e;
+  background: rgba(255,255,255,0.08);
+  color: var(--brand);
 }
 
 .rich-text-editor-wrapper .ql-toolbar .ql-picker.ql-expanded .ql-picker-label {
@@ -252,7 +252,7 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-editor.ql-blank::before {
-  color: #9ca3af;
+  color: var(--text-muted);
   font-style: normal;
 }
 
@@ -282,20 +282,20 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-editor blockquote {
-  border-left: 4px solid #0f766e;
+  border-left: 4px solid var(--brand);
   padding-left: 1rem;
   margin: 1rem 0;
-  color: #6b7280;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
 .rich-text-editor-wrapper .ql-editor pre.ql-syntax {
-  background: #1f2937;
-  color: #f3f4f6;
+  background: var(--surface-3);
+  color: var(--text-primary);
   padding: 1rem;
   border-radius: 0.5rem;
   overflow-x: auto;
-  font-family: 'Courier New', monospace;
+  font-family: 'Geist Mono', 'Courier New', monospace;
 }
 
 .rich-text-editor-wrapper .ql-editor a {
@@ -402,30 +402,44 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-snow .ql-stroke {
-  stroke: #374151;
+  stroke: #a1a1aa;
 }
 
 .rich-text-editor-wrapper .ql-snow .ql-fill {
-  fill: #374151;
+  fill: #a1a1aa;
 }
 
 .rich-text-editor-wrapper .ql-snow .ql-picker {
-  color: #374151;
+  color: #a1a1aa;
+}
+
+.rich-text-editor-wrapper .ql-snow .ql-picker-options {
+  background: var(--surface-3);
+  border: 1px solid var(--surface-border);
+  border-radius: 0.5rem;
 }
 
 /* Tooltip styling */
 .rich-text-editor-wrapper .ql-snow .ql-tooltip {
   border-radius: 0.5rem;
-  border-color: #e5e7eb;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background: var(--surface-3);
+  border-color: var(--surface-border);
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 .rich-text-editor-wrapper .ql-snow .ql-tooltip input[type="text"] {
   border-radius: 0.375rem;
-  border-color: #d1d5db;
+  background: var(--surface-2);
+  border-color: var(--surface-border);
+  color: var(--text-primary);
 }
 
 .rich-text-editor-wrapper .ql-snow .ql-tooltip a.ql-action::after {
-  border-right-color: #e5e7eb;
+  border-right-color: var(--surface-border);
+}
+
+.rich-text-editor-wrapper .ql-editor {
+  color: var(--text-primary);
 }
 </style>

@@ -3,48 +3,48 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-slate-800">{{ t('admin.pages.settings.appearance.title') || "Appearance Settings" }}</h2>
-        <p class="text-slate-600 mt-1">{{ t('admin.pages.settings.appearance.subtitle') || "Manage your store's look and feel" }}</p>
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.settings.appearance.title') || "Appearance Settings" }}</h2>
+        <p style="color: var(--text-secondary)" class="mt-1">{{ t('admin.pages.settings.appearance.subtitle') || "Manage your store's look and feel" }}</p>
       </div>
     </div>
 
     <div class="space-y-6">
       
       <!-- Store Identity -->
-      <section class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-200 overflow-hidden">
+      <section class="rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
         <div class="p-6 md:p-8">
-          <h3 class="text-xl font-bold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.identity.title') }}</h3>
-          <p class="text-[13px] text-slate-500 mb-8">{{ t('admin.appearanceSettingsForm.identity.subtitle') }}</p>
+          <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary)">{{ t('admin.appearanceSettingsForm.identity.title') }}</h3>
+          <p class="text-[13px] mb-8" style="color: var(--text-tertiary)">{{ t('admin.appearanceSettingsForm.identity.subtitle') }}</p>
           
           <div class="space-y-5">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.identity.storeName.label') }}</label>
+              <label class="ui-label mb-1.5 block">{{ t('admin.appearanceSettingsForm.identity.storeName.label') }}</label>
               <input
                 v-model="form.name"
                 type="text"
                 required
-                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-shadow"
+                class="ui-input block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-shadow"
                 :placeholder="t('admin.appearanceSettingsForm.identity.storeName.placeholder')"
               >
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.identity.slug.label') }}</label>
+              <label class="ui-label mb-1.5 block">{{ t('admin.appearanceSettingsForm.identity.slug.label') }}</label>
               <div class="flex rounded-lg shadow-sm">
                 <input
                   v-model="form.slug"
                   type="text"
                   required
                   pattern="^[a-z0-9-]+$"
-                  class="flex-1 block w-full rounded-none rounded-l-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 sm:text-sm text-right"
+                  class="ui-input flex-1 block w-full rounded-none rounded-l-lg focus:border-teal-500 focus:ring-teal-500 sm:text-sm text-right"
                   :placeholder="t('admin.appearanceSettingsForm.identity.slug.placeholder')"
                   @input="handleSlugInput"
                 >
-                <span class="inline-flex items-center px-3 rounded-r-lg border border-l-0 border-slate-300 bg-slate-50 text-slate-500 sm:text-sm">
+                <span class="inline-flex items-center px-3 rounded-r-lg border border-l-0 sm:text-sm" style="border-color: var(--surface-border); background: var(--surface-3); color: var(--text-tertiary)">
                   .{{ baseDomain }}
                 </span>
               </div>
-              <p class="mt-1.5 text-xs text-slate-500">
+              <p class="mt-1.5 text-xs" style="color: var(--text-tertiary)">
                 {{ t('admin.appearanceSettingsForm.identity.slug.hint') }}
               </p>
             </div>
@@ -53,25 +53,26 @@
       </section>
 
       <!-- Brand Assets -->
-      <section class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-200 overflow-hidden">
+      <section class="rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
         <div class="p-6 md:p-8">
-          <h3 class="text-xl font-bold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.brandAssets.title') }}</h3>
-          <p class="text-[13px] text-slate-500 mb-8">{{ t('admin.appearanceSettingsForm.brandAssets.subtitle') }}</p>
+          <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary)">{{ t('admin.appearanceSettingsForm.brandAssets.title') }}</h3>
+          <p class="text-[13px] mb-8" style="color: var(--text-tertiary)">{{ t('admin.appearanceSettingsForm.brandAssets.subtitle') }}</p>
 
           <div class="grid md:grid-cols-2 gap-10">
             <!-- Logo Upload -->
              <div>
                 <div class="flex items-center justify-between mb-3">
-                   <label class="block text-sm font-medium text-slate-700">{{ t('admin.appearanceSettingsForm.brandAssets.logo.label') }}</label>
+                   <label class="ui-label">{{ t('admin.appearanceSettingsForm.brandAssets.logo.label') }}</label>
                    <button type="button" @click="mockAiGenerate" class="text-xs font-bold px-2.5 py-1.5 bg-gradient-to-r from-violet-100 to-fuchsia-100 text-violet-700 rounded-lg hover:from-violet-200 hover:to-fuchsia-200 transition-colors flex items-center gap-1.5 border border-violet-200 shadow-sm">
                      <Icon name="lucide:sparkles" class="w-3.5 h-3.5" />
                      Magic Identity
                    </button>
                 </div>
-                <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div class="w-full rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                   <div class="absolute top-0 left-0 w-full h-1.5" :style="{ background: form.primaryColor }"></div>
                   <SingleImageUploader
                     v-model="form.logoUrl"
+                    mode="logo"
                     :label="t('admin.appearanceSettingsForm.brandAssets.logo.upload')"
                     :hint="t('admin.appearanceSettingsForm.brandAssets.logo.hint')"
                     class="w-full relative z-10"
@@ -81,9 +82,10 @@
  
              <!-- Favicon Upload -->
              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.favicon.label') || "Favicon" }}</label>
+                <label class="ui-label mb-3 block">{{ t('admin.appearanceSettingsForm.brandAssets.favicon.label') || "Favicon" }}</label>
                 <SingleImageUploader
                   v-model="form.faviconUrl"
+                  mode="favicon"
                   :label="t('admin.appearanceSettingsForm.brandAssets.favicon.upload') || 'Upload Favicon'"
                   :hint="t('admin.appearanceSettingsForm.brandAssets.favicon.hint') || 'Square image (ICO, PNG), recommended size 32x32px'"
                   class="w-full"
@@ -92,10 +94,10 @@
 
             <!-- Color Picker -->
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-3">{{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.label') }}</label>
+              <label class="ui-label mb-3 block">{{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.label') }}</label>
               <div class="space-y-4">
                  <div class="flex items-center gap-4">
-                    <div class="relative overflow-hidden rounded-xl border border-slate-200 shadow-sm w-16 h-16 shrink-0 group cursor-pointer">
+                    <div class="relative overflow-hidden rounded-xl shadow-sm w-16 h-16 shrink-0 group cursor-pointer" style="border: 1px solid var(--surface-border)">
                       <input
                         v-model="form.primaryColor"
                         type="color"
@@ -111,10 +113,10 @@
                         v-model="form.primaryColor"
                         type="text"
                         pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
-                        class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm font-mono uppercase"
+                        class="ui-input block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm font-mono uppercase"
                         placeholder="#0F766E"
                       >
-                      <p class="mt-1.5 text-xs text-slate-500">
+                      <p class="mt-1.5 text-xs" style="color: var(--text-tertiary)">
                         {{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.hint') }}
                       </p>
                     </div>
@@ -122,13 +124,13 @@
                  
                  <!-- Preset Colors -->
                  <div class="mt-6">
-                    <p class="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">Suggested Palettes</p>
+                    <p class="text-xs font-semibold mb-3 uppercase tracking-wider" style="color: var(--text-tertiary)">Suggested Palettes</p>
                     <div class="flex flex-wrap gap-3">
                        <button 
                           v-for="color in presetColors" 
                           :key="color"
                           type="button"
-                          class="w-10 h-10 rounded-full border border-slate-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 transition-all hover:scale-110 relative"
+                          class="w-10 h-10 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 transition-all hover:scale-110 relative" style="border: 1px solid var(--surface-border)"
                           :style="{ backgroundColor: color }"
                           @click="form.primaryColor = color"
                        >
@@ -144,15 +146,15 @@
 
 
       <!-- Template Selection -->
-      <section class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow ring-1 ring-slate-200 overflow-hidden">
+      <section class="rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
         <div class="p-6 md:p-8">
-           <h3 class="text-xl font-bold text-slate-900 mb-1">{{ t('admin.appearanceSettingsForm.templates.title') }}</h3>
-           <p class="text-[13px] text-slate-500 mb-8">{{ t('admin.appearanceSettingsForm.templates.subtitle') }}</p>
+           <h3 class="text-xl font-bold mb-1" style="color: var(--text-primary)">{{ t('admin.appearanceSettingsForm.templates.title') }}</h3>
+           <p class="text-[13px] mb-8" style="color: var(--text-tertiary)">{{ t('admin.appearanceSettingsForm.templates.subtitle') }}</p>
 
            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                 <h4 class="text-base font-bold text-slate-800">Sélectionner un modèle</h4>
-                 <p class="text-[13px] text-slate-500 mt-1">Sélectionnez le template à appliquer à votre boutique.</p>
+                 <h4 class="text-base font-bold" style="color: var(--text-primary)">Sélectionner un modèle</h4>
+                 <p class="text-[13px] mt-1" style="color: var(--text-tertiary)">Sélectionnez le template à appliquer à votre boutique.</p>
               </div>
               
               <!-- Filter Chips -->
@@ -162,7 +164,8 @@
                     :key="cat"
                     type="button"
                     class="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all"
-                    :class="selectedCategory === cat ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                    :class="selectedCategory === cat ? 'bg-slate-800 text-white shadow-md' : ''"
+                    :style="selectedCategory !== cat ? 'background: var(--surface-3); color: var(--text-secondary)' : ''"
                     @click="selectedCategory = cat"
                  >
                     {{ cat }}
@@ -175,8 +178,9 @@
               <div
                 v-for="tpl in filteredTemplates"
                 :key="tpl.key"
-                class="group relative rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col overflow-hidden bg-white"
-                :class="form.templateKey === tpl.key ? 'scale-[1.02] md:scale-[1.05] border-teal-500 ring-4 ring-teal-500/20 shadow-xl z-20' : 'border-slate-200 hover:border-slate-300 shadow-sm hover:shadow'"
+                class="group relative rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col overflow-hidden"
+                :class="form.templateKey === tpl.key ? 'scale-[1.02] md:scale-[1.05] border-teal-500 ring-4 ring-teal-500/20 shadow-xl z-20' : 'shadow-sm hover:shadow'"
+                :style="form.templateKey !== tpl.key ? 'background: var(--surface-1); border-color: var(--surface-border)' : 'background: var(--surface-1)'"
                 @click="form.templateKey = tpl.key"
               >
                   <!-- Absolute Badge if Selected -->
@@ -225,10 +229,10 @@
                      </div>
                    </div>
                     <!-- Hover overlay with Quick View button -->
-                    <div class="absolute inset-0 z-20 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-[2px]">
+                    <div class="absolute inset-0 z-20 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-[2px]">
                       <button
                         type="button"
-                        class="py-2.5 px-6 bg-white/95 hover:bg-white text-slate-900 font-bold text-sm rounded-full shadow-xl flex items-center justify-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105"
+                        class="py-2.5 px-6 font-bold text-sm rounded-full shadow-xl flex items-center justify-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105" style="background: var(--surface-2); color: var(--text-primary)"
                         @click.stop="openQuickView(tpl.key)"
                       >
                         <Icon name="lucide:eye" class="w-4 h-4" />
@@ -238,16 +242,16 @@
                  </div>
 
                  <!-- Template Identity Footer -->
-                 <div class="p-3 bg-white flex flex-col gap-2">
+                 <div class="p-3 flex flex-col gap-2" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
                    <div class="flex items-center justify-between">
-                     <span class="font-bold text-slate-800 text-sm" :class="tpl.fontClass">{{ tpl.label }}</span>
+                     <span class="font-bold text-sm" :class="tpl.fontClass" style="color: var(--text-primary)">{{ tpl.label }}</span>
                      <div v-if="form.templateKey === tpl.key" class="text-brand-600">
                        <Icon name="lucide:check-circle-2" class="w-5 h-5" />
                      </div>
                    </div>
                    <div class="flex flex-col gap-0.5">
-                     <p class="text-[11px] font-medium text-slate-600 leading-snug">{{ tpl.storeTypes }}</p>
-                     <p class="text-[11px] text-slate-500 leading-snug">{{ tpl.description }}</p>
+                     <p class="text-[11px] font-medium leading-snug" style="color: var(--text-secondary)">{{ tpl.storeTypes }}</p>
+                     <p class="text-[11px] leading-snug" style="color: var(--text-tertiary)">{{ tpl.description }}</p>
                    </div>
                    <!-- Color + font pills -->
                    <div class="flex items-center gap-1.5 flex-wrap">
@@ -258,7 +262,7 @@
                        <span class="w-2 h-2 rounded-full inline-block" :style="{ background: tpl.color }"></span>
                        {{ tpl.color.toUpperCase() }}
                      </span>
-                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 border border-slate-200 text-slate-600">
+                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium" style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-secondary)">
                        <Icon name="lucide:type" class="w-2.5 h-2.5" />
                        {{ tpl.fontName }}
                      </span>
@@ -273,23 +277,23 @@
 
       <!-- Quick View Modal Overlay -->
       <transition name="fade">
-        <div v-if="showQuickView" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/80 backdrop-blur-sm">
-          <div class="bg-white w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
-              <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                 <Icon name="lucide:monitor" class="w-5 h-5 text-slate-400" />
+        <div v-if="showQuickView" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm">
+          <div class="w-full max-w-6xl h-full max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+            <div class="flex items-center justify-between px-6 py-4" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
+              <h3 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
+                 <Icon name="lucide:monitor" class="w-5 h-5" style="color: var(--text-muted)" />
                  Prévisualisation Rapide
               </h3>
-              <button @click="showQuickView = false" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200 transition-colors">
+              <button @click="showQuickView = false" class="p-2 rounded-full transition-colors hover:bg-white/10" style="color: var(--text-muted)">
                 <Icon name="lucide:x" class="w-5 h-5" />
               </button>
             </div>
-            <div class="flex-1 w-full bg-slate-100 overflow-hidden relative">
+            <div class="flex-1 w-full overflow-hidden relative" style="background: var(--surface-3)">
                <div v-if="!quickViewUrl" class="absolute inset-0 flex items-center justify-center flex-col gap-3">
-                 <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin text-slate-400" />
-                 <p class="text-slate-500 text-sm">Chargement de la preview...</p>
+                 <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin" style="color: var(--text-muted)" />
+                 <p class="text-sm" style="color: var(--text-tertiary)">Chargement de la preview...</p>
                </div>
-               <iframe v-if="quickViewUrl" :src="quickViewUrl" class="w-full h-full border-0 relative z-10 bg-white" />
+               <iframe v-if="quickViewUrl" :src="quickViewUrl" class="w-full h-full border-0 relative z-10" />
             </div>
           </div>
         </div>
@@ -297,15 +301,15 @@
 
       <!-- Floating Action Bar for unsaved changes -->
       <transition name="slide-up">
-        <div v-show="isDirty" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md shadow-2xl border border-slate-200 rounded-full px-6 py-4 flex flex-col md:flex-row items-center gap-4 md:gap-8 transform origin-bottom min-w-max">
+        <div v-show="isDirty" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 backdrop-blur-md shadow-2xl rounded-full px-6 py-4 flex flex-col md:flex-row items-center gap-4 md:gap-8 transform origin-bottom min-w-max" style="background: rgba(22,25,31,0.95); border: 1px solid var(--surface-border)">
           <div class="flex flex-col items-center md:items-start">
-            <span class="text-sm font-bold text-slate-800">Modifications non enregistrées</span>
-            <span class="text-xs text-slate-500">N'oubliez pas de sauvegarder.</span>
+            <span class="text-sm font-bold" style="color: var(--text-primary)">Modifications non enregistrées</span>
+            <span class="text-xs" style="color: var(--text-tertiary)">N'oubliez pas de sauvegarder.</span>
           </div>
           <div class="flex items-center gap-3">
             <button
               type="button"
-              class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all"
+              class="ui-btn ui-btn--secondary text-sm rounded-xl"
               :disabled="loading || saving"
               @click="reset"
             >

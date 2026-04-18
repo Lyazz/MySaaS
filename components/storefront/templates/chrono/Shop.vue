@@ -14,6 +14,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 const filters = computed(() => ({
     categories: categoryData.value || [],
 }))
@@ -23,7 +29,20 @@ const searchQuery = ref('')
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
-const priceRange = ref({ min: 0, max: 200000 })
+const priceRange = computed(() => {
+    const prices = props.products
+        .map((product) => Number(product?.price))
+        .filter((price): price is number => Number.isFinite(price))
+
+    if (prices.length === 0) {
+        return { min: 0, max: 0 }
+    }
+
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+    }
+})
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
 
@@ -35,7 +54,7 @@ const filteredProducts = computed(() => {
     let result = [...props.products]
     if (selectedCategories.value.length > 0) {
         const selectedIds = selectedCategories.value 
-        result = result.filter(p => selectedIds.includes(p.categoryId))
+        result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
     if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase()
@@ -156,7 +175,7 @@ const closeQuickView = () => {
             <div class="space-y-3">
               <label v-for="cat in filters.categories" :key="cat.id" class="flex items-center gap-3 cursor-pointer group select-none">
                 <input v-model="selectedCategories" type="checkbox" :value="cat.id" class="peer h-5 w-5 border-[#A67C52]/30 bg-transparent text-[#A67C52] focus:ring-[#A67C52]" style="border-radius: 2px;" >
-                <span class="text-base text-gray-400 group-hover:text-[#A67C52] transition-colors">{{ cat.title }}</span>
+                <span class="text-base text-gray-400 group-hover:text-[#A67C52] transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -165,6 +184,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
                  
@@ -203,7 +225,7 @@ const closeQuickView = () => {
             <div class="space-y-3">
               <label v-for="cat in filters.categories" :key="cat.id" class="flex items-center gap-3 cursor-pointer group select-none">
                 <input v-model="selectedCategories" type="checkbox" :value="cat.id" class="peer h-4 w-4 border-[#A67C52]/30 bg-transparent text-[#A67C52] focus:ring-[#A67C52]" style="border-radius: 2px;" >
-                <span class="text-sm text-gray-400 group-hover:text-[#A67C52] transition-colors">{{ cat.title }}</span>
+                <span class="text-sm text-gray-400 group-hover:text-[#A67C52] transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -213,6 +235,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -238,7 +263,7 @@ const closeQuickView = () => {
           <!-- Active Filters -->
           <div v-if="selectedCategories.length > 0" class="flex flex-wrap gap-2 mb-6">
               <div v-for="catId in selectedCategories" :key="catId" class="flex items-center gap-2 px-3 py-1.5 bg-[#A67C52]/10 text-[#A67C52] text-sm font-semibold border border-[#A67C52]/20" style="border-radius: 2px;">
-                <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
+                <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
                 <button @click="removeCategory(catId)" class="hover:text-white"><Icon name="lucide:x" class="w-4 h-4" /></button>
               </div>
               <button @click="resetFilters" class="text-sm text-gray-500 hover:text-[#A67C52] underline underline-offset-2">{{ storefrontContent.actions.clearAll }}</button>

@@ -9,15 +9,15 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/categories"
-            class="text-gray-700 hover:text-teal-600"
+            class="hover:text-teal-600" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.categories') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
+            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -26,10 +26,10 @@
     <!-- Loading State -->
     <div
       v-if="loading"
-      class="bg-white rounded-lg shadow p-12 text-center"
+      class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.categories.edit.loading') }}
       </p>
     </div>
@@ -38,16 +38,16 @@
       <!-- Header -->
       <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold text-gray-800">
+          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
             {{ t('admin.pages.categories.edit.title') }}
           </h2>
-          <p class="text-gray-600 mt-1">
+          <p class="mt-1" style="color: var(--text-secondary)">
             {{ t('admin.pages.categories.edit.subtitle') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center space-x-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200">
-            <span class="text-xs font-medium text-gray-500 px-2">{{ t('admin.pages.categories.edit.links.label') }}:</span>
+          <div class="flex items-center space-x-2 p-1.5 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+            <span class="text-xs font-medium px-2" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.links.label') }}:</span>
             <a
               :href="categoryUrl"
               target="_blank"
@@ -57,7 +57,7 @@
               <Icon name="lucide:external-link" class="w-4 h-4" />
             </a>
             <button
-              class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
+              class="p-1 rounded" style="color: var(--text-tertiary)"
               :title="t('admin.pages.categories.edit.links.copyCategory')"
               @click="copyUrl(categoryUrl)"
             >
@@ -67,7 +67,7 @@
 
           <NuxtLink
             to="/admin/categories"
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
           >
             {{ t('admin.common.cancel') }}
           </NuxtLink>
@@ -85,7 +85,7 @@
 
       <form
         id="category-edit-form"
-        class="bg-white rounded-lg shadow p-6 space-y-6"
+        class="ui-card p-6 space-y-6"
         @submit.prevent="handleSubmit"
       >
         <BaseInput
@@ -106,8 +106,26 @@
           pattern="[a-z0-9-]+"
         />
 
+        <BaseSelect
+          v-model="form.parentId"
+          :label="t('admin.forms.category.parent.label', 'Parent Category')"
+          :hint="t('admin.forms.category.parent.hint', 'Optional: choose a parent to create a subcategory')"
+        >
+          <option value="">
+            {{ t('admin.forms.category.parent.none', 'No parent (top-level category)') }}
+          </option>
+          <option
+            v-for="cat in availableParents"
+            :key="cat.id"
+            :value="cat.id"
+          >
+            {{ categoryOptionLabel(cat) }}
+          </option>
+        </BaseSelect>
+
         <SingleImageUploader
           v-model="form.imageUrl"
+          mode="generic"
           :label="t('admin.forms.category.image.label')"
           :hint="t('admin.forms.category.image.hint')"
         />
@@ -121,7 +139,7 @@
           </p>
         </div>
 
-        <div class="flex justify-between items-center pt-4 border-t">
+        <div class="flex justify-between items-center pt-4" style="border-top: 1px solid var(--surface-border)">
           <button
             type="button"
             class="text-red-600 hover:text-red-700 text-sm font-medium"
@@ -132,7 +150,7 @@
           <div class="space-x-3">
             <NuxtLink
               to="/admin/categories"
-              class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
             >
               {{ t('admin.common.cancel') }}
             </NuxtLink>
@@ -166,6 +184,7 @@ import { toTenantHost, useRequestOrigin } from '~/composables/host'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import SingleImageUploader from '~/components/admin/SingleImageUploader.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -181,8 +200,19 @@ const { t } = useI18n({ useScope: 'global' })
 const form = ref({
   title: '',
   slug: '',
+  parentId: '',
   imageUrl: null as string | null
 })
+
+type Category = {
+  id: string
+  title: string
+  displayTitle?: string
+  isSubcategory?: boolean
+  parentId?: string | null
+  parent?: { id: string; title: string } | null
+}
+const categories = ref<Category[]>([])
 
 const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
@@ -192,6 +222,41 @@ const showDeleteModal = ref(false)
 const lastAutoSlug = ref('')
 
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
+type CategoryOption = Category & { depth: number }
+const availableParents = computed<CategoryOption[]>(() => {
+  const source = categories.value.filter((category) => category.id !== String(route.params.id))
+  const byParent = new Map<string | null, Category[]>()
+  for (const category of source) {
+    const key = category.parentId ?? null
+    const group = byParent.get(key) ?? []
+    group.push(category)
+    byParent.set(key, group)
+  }
+  for (const group of byParent.values()) {
+    group.sort((a, b) => a.title.localeCompare(b.title))
+  }
+
+  const ordered: CategoryOption[] = []
+  const seen = new Set<string>()
+  const visit = (node: Category, depth = 0) => {
+    if (seen.has(node.id)) return
+    seen.add(node.id)
+    ordered.push({ ...node, depth })
+    for (const child of byParent.get(node.id) || []) {
+      visit(child, depth + 1)
+    }
+  }
+
+  for (const root of byParent.get(null) || []) {
+    visit(root, 0)
+  }
+  for (const category of source) {
+    if (!seen.has(category.id)) visit(category, 0)
+  }
+
+  return ordered
+})
+const categoryOptionLabel = (category: CategoryOption) => `${'-> '.repeat(category.depth)}${category.title}`
 const confirmMessage = computed(() => {
   if (form.value.title) {
     return t('admin.pages.categories.edit.deleteModal.messageWithTitle', { title: form.value.title })
@@ -235,6 +300,7 @@ async function fetchCategory() {
 
     form.value.title = data.title
     form.value.slug = data.slug
+    form.value.parentId = data.parentId || ''
     form.value.imageUrl = data.imageUrl ?? null
     lastAutoSlug.value = slugify(data.title)
   } catch (error: any) {
@@ -259,6 +325,7 @@ async function handleSubmit() {
       body: {
         title: form.value.title,
         slug: form.value.slug,
+        parentId: form.value.parentId || null,
         imageUrl: form.value.imageUrl
       }
     })
@@ -294,6 +361,20 @@ async function copyUrl(url: string) {
 }
 
 onMounted(() => {
+  fetchCategories()
   fetchCategory()
 })
+
+async function fetchCategories() {
+  try {
+    const data = await $fetch('/api/admin/categories', {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    categories.value = Array.isArray(data) ? (data as Category[]) : []
+  } catch (error) {
+    console.error('Failed to fetch categories for parent selection:', error)
+  }
+}
 </script>

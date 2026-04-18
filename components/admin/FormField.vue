@@ -1,26 +1,26 @@
 <template>
   <div class="mb-4">
-    <label 
-      v-if="label" 
-      :for="inputId" 
-      class="block text-sm font-medium text-gray-700 mb-1"
+    <label
+      v-if="label"
+      :for="inputId"
+      class="ui-label"
     >
       {{ label }}
       <span
         v-if="required"
-        class="text-red-500"
+        class="text-red-400 ml-0.5"
       >*</span>
     </label>
     <slot :input-id="inputId" />
     <p
       v-if="error"
-      class="mt-1 text-sm text-red-600"
+      class="mt-1 text-xs text-red-400"
     >
       {{ error }}
     </p>
     <p
       v-if="hint && !error"
-      class="mt-1 text-sm text-gray-500"
+      class="mt-1 text-xs" style="color: var(--text-tertiary)"
     >
       {{ hint }}
     </p>

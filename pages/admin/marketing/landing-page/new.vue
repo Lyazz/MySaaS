@@ -54,7 +54,7 @@
                         </div>
                         <div class="min-w-0">
                             <h4 class="text-sm font-bold text-slate-700 group-hover:text-slate-900 truncate">{{ product.title }}</h4>
-                            <p class="text-xs text-slate-400 truncate">{{ formatCurrency(product.price) }}</p>
+                            <p class="text-xs text-slate-400 truncate">{{ formatCurrency(product.effectivePrice ?? product.price) }}</p>
                         </div>
                     </div>
                 </div>
@@ -185,7 +185,7 @@
                 </div>
 
                  <div v-else class="w-full">
-                    <ImageUploader v-model="customImage" label="Upload Image" class="h-32" />
+                    <ImageUploader v-model="customImage" mode="generic" label="Upload Image" class="h-32" />
                  </div>
             </section>
 
@@ -289,6 +289,7 @@
 <script setup lang="ts">
 import ImageUploader from '~/components/admin/ImageUploader.vue'
 import { useAuthStore } from '~/stores/auth'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   layout: 'admin',
@@ -349,7 +350,10 @@ const filteredProducts = computed(() => {
       p.title.toLowerCase().includes(query) || (p.slug && p.slug.toLowerCase().includes(query))
     )
   }
-  return filtered
+  return filtered.map((product: any) => ({
+    ...product,
+    effectivePrice: buildProductPricing(product).effectivePrice
+  }))
 })
 
 const canProceed = computed(() => {

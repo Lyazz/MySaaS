@@ -8,6 +8,12 @@ const props = defineProps<{
 
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Fetch dynamic categories for sidebar
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -18,7 +24,7 @@ const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
 // Filter products for this category
 const categoryProducts = computed(() => {
     const id = props.category.id
-    return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && p.categoryId === id)
+    return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id))
 })
 
 type SortOption = 'mostPopular' | 'newest' | 'priceLowToHigh' | 'priceHighToLow'
@@ -100,7 +106,7 @@ const sortedProducts = computed(() => {
             class="px-6 py-3 rounded-[2rem] text-sm font-black transition-all shadow-sm border-2 whitespace-nowrap"
             :class="cat.id === category.id ? 'bg-[#fbbf24] text-amber-900 border-amber-300 shadow-[0_4px_0_0_#d97706] -translate-y-1' : 'bg-white text-slate-600 border-purple-100 hover:border-amber-200 hover:-translate-y-1 hover:shadow-md'"
           >
-            <span class="opacity-80 mr-1">🌟</span> {{ cat.title }}
+            <span class="opacity-80 mr-1">🌟</span> {{ categoryDisplayTitle(cat) }}
           </NuxtLink>
         </div>
 
@@ -150,7 +156,7 @@ const sortedProducts = computed(() => {
           </div>
           <div
             v-else
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
+            class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
           >
             <!-- Apply vertical offset to alternating columns for masonry effect -->
             <div 

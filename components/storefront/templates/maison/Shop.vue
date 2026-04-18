@@ -12,6 +12,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 })
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const filters = computed(() => ({ categories: categoryData.value || [] }))
 
 const selectedCategories = ref<string[]>([])
@@ -19,12 +25,26 @@ const searchQuery = ref('')
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
+const priceRange = computed(() => {
+  const prices = props.products
+    .map((product) => Number(product?.price))
+    .filter((price): price is number => Number.isFinite(price))
+
+  if (prices.length === 0) {
+    return { min: 0, max: 0 }
+  }
+
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+  }
+})
 const isFilterDrawerOpen = ref(false)
 
 const filteredProducts = computed(() => {
   let result = [...props.products]
   if (selectedCategories.value.length > 0) {
-    result = result.filter(p => selectedCategories.value.includes(p.categoryId))
+    result = result.filter(p => selectedCategories.value.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
   }
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
@@ -116,7 +136,7 @@ const resetFilters = () => {
                   :value="cat.id"
                   class="shop__checkbox"
                 >
-                <span class="shop__filter-label">{{ cat.title }}</span>
+                <span class="shop__filter-label">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -126,6 +146,9 @@ const resetFilters = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
         </aside>
@@ -140,7 +163,7 @@ const resetFilters = () => {
                 :key="catId"
                 class="shop__active-tag"
               >
-                <span>{{ filters.categories.find(c => c.id === catId)?.title }}</span>
+                <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) }}</span>
                 <button class="shop__active-tag-remove" @click="removeCategory(catId)">
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
                     <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="0.85"/>
@@ -231,16 +254,19 @@ const resetFilters = () => {
               <div class="shop__filter-list">
                 <label v-for="cat in filters.categories" :key="cat.id" class="shop__filter-item">
                   <input v-model="selectedCategories" type="checkbox" :value="cat.id" class="shop__checkbox">
-                  <span class="shop__filter-label">{{ cat.title }}</span>
+                  <span class="shop__filter-label">{{ categoryDisplayTitle(cat) }}</span>
                 </label>
               </div>
             </div>
 
             <div class="shop__filter-section">
               <StorefrontPriceRangeFilter
-                v-model:min-price="minPriceInput"
-                v-model:max-price="maxPriceInput"
-              />
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
+            />
             </div>
           </div>
 

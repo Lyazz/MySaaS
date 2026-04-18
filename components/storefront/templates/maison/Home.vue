@@ -11,6 +11,12 @@ const props = defineProps<{
 }>()
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -186,7 +192,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
             <img
               v-if="cat.imageUrl"
               :src="cat.imageUrl"
-              :alt="cat.title"
+              :alt="categoryDisplayTitle(cat)"
               class="atelier-cats__img"
             >
             <div v-else class="atelier-cats__img-placeholder" />
@@ -195,7 +201,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
           <div class="atelier-cats__meta">
             <span class="atelier-cats__num">{{ String(idx + 1).padStart(2, '0') }}</span>
             <div class="atelier-cats__info">
-              <h3 class="atelier-cats__name">{{ cat.title }}</h3>
+              <h3 class="atelier-cats__name">{{ categoryDisplayTitle(cat) }}</h3>
               <span class="atelier-cats__count">{{ storefrontContent.common.productsCount(cat.itemCount) }}</span>
             </div>
             <svg class="atelier-cats__arrow" width="18" height="10" viewBox="0 0 18 10" fill="none">
@@ -211,7 +217,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
           :key="cat.slug"
           :to="`/c/${cat.slug}`"
           class="atelier-tag"
-        >{{ cat.title }}</NuxtLink>
+        >{{ categoryDisplayTitle(cat) }}</NuxtLink>
       </div>
     </section>
 
@@ -798,7 +804,10 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 .atelier-products__card {
   flex-shrink: 0;
-  width: clamp(200px, 22vw, 260px);
+  width: calc((100% - 16px) / 2);
+}
+@media (min-width: 640px) {
+  .atelier-products__card { width: clamp(200px, 22vw, 260px); }
 }
 
 .atelier-products__skeleton {
@@ -807,10 +816,13 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 }
 .atelier-products__skel-card {
   flex-shrink: 0;
-  width: 240px;
+  width: calc((100% - 16px) / 2);
   height: 340px;
   background: var(--c-surface);
   animation: pulse 1.4s ease-in-out infinite;
+}
+@media (min-width: 640px) {
+  .atelier-products__skel-card { width: 240px; }
 }
 @keyframes pulse {
   0%, 100% { opacity: 1; }

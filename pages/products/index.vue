@@ -16,6 +16,8 @@ type Product = {
   images?: string[]
   productImages?: { url: string; isMain?: boolean; position?: number }[]
   categoryId?: string | null
+  categoryIds?: string[]
+  categories?: Array<{ id: string; title: string; slug: string }>
 }
 
 const productsUrl = useTenantApiUrl('/api/products')

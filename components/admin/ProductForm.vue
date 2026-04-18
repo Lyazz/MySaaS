@@ -1,10 +1,10 @@
 <template>
   <form
-    class="bg-white rounded-lg shadow overflow-hidden"
+    class="rounded-xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
     @submit.prevent="emit('submit')"
   >
     <!-- Tabs Navigation -->
-    <div class="border-b border-gray-200 overflow-x-auto custom-scrollbar">
+    <div class="overflow-x-auto custom-scrollbar" style="border-bottom: 1px solid var(--surface-border)">
       <nav
         class="flex -mb-px"
         aria-label="Tabs"
@@ -13,11 +13,11 @@
           v-for="tab in tabs"
           :key="tab.id"
           type="button"
-          class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200"
+          class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200" style="color: var(--text-secondary)"
           :class="[
             currentTab === tab.id
-              ? 'border-teal-500 text-teal-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ? 'border-teal-500 text-teal-400'
+              : 'border-transparent hover:border-white/20'
           ]"
           @click="currentTab = tab.id"
         >
@@ -60,7 +60,7 @@
               :id="inputId"
               v-model="form.miniDescription"
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input"
               placeholder="Enter a short summary..."
             />
           </template>
@@ -91,22 +91,29 @@
             />
         </div>
 
-        <BaseSelect
-          v-model="form.categoryId"
-          label="Category"
-          :error="errors.categoryId"
+        <AdminFormField
+          label="Categories"
+          :error="errors.categoryIds || errors.categoryId"
+          hint="Select one or more categories/subcategories (optional)"
         >
-          <option value="">
-            Select a category (optional)
-          </option>
-          <option
-            v-for="cat in categories"
-            :key="cat.id"
-            :value="cat.id"
-          >
-            {{ cat.title }}
-          </option>
-        </BaseSelect>
+          <template #default>
+            <div class="ui-input max-h-44 overflow-y-auto space-y-2 p-3">
+              <label
+                v-for="cat in sortedCategories"
+                :key="cat.id"
+                class="flex items-center gap-2 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  :checked="form.categoryIds.includes(cat.id)"
+                  @change="toggleCategorySelection(cat.id, ($event.target as HTMLInputElement).checked)"
+                >
+                <span>{{ categoryDisplayTitle(cat) }}</span>
+              </label>
+            </div>
+          </template>
+        </AdminFormField>
 
         <ProductImagesUploader v-model="images" />
 
@@ -115,11 +122,11 @@
             id="isActive"
             v-model="form.isActive"
             type="checkbox"
-            class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
+            class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
           >
           <label
             for="isActive"
-            class="ml-2 block text-sm text-gray-900"
+            class="ml-2 block text-sm" style="color: var(--text-primary)"
           >
             Product is active and visible to customers
           </label>
@@ -166,11 +173,11 @@
     </div>
 
     <!-- Actions Footer -->
-    <div class="px-6 py-4 bg-gray-50 border-t flex justify-end space-x-3">
+    <div class="px-6 py-4 flex justify-end space-x-3" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
       <NuxtLink
         v-if="cancelTo"
         :to="cancelTo"
-        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+        class="ui-btn ui-btn--secondary"
       >
         Cancel
       </NuxtLink>
@@ -190,13 +197,16 @@ import { computed, ref, watch } from 'vue'
 import AdminFormField from '~/components/admin/FormField.vue'
 import ProductImagesUploader from '~/components/admin/ProductImagesUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 
 interface Category {
   id: string
   title: string
+  displayTitle?: string
+  parentId?: string | null
+  parent?: { title: string } | null
 }
+type CategoryOption = Category & { depth: number }
 
 interface ProductImage {
   id?: string | null
@@ -213,7 +223,7 @@ interface ProductFormModel {
   description: string | null
   price: number
   stock: number
-  categoryId: string | null | ''
+  categoryIds: string[]
   isActive: boolean
 }
 
@@ -257,6 +267,50 @@ const showVariants = computed(() => props.showVariants === true)
 const stockLocked = computed(() => props.stockLocked === true)
 
 const lastAutoSlug = ref('')
+
+const sortedCategories = computed<CategoryOption[]>(() => {
+  const byParent = new Map<string | null, Category[]>()
+  for (const category of props.categories) {
+    const key = category.parentId ?? null
+    const group = byParent.get(key) ?? []
+    group.push(category)
+    byParent.set(key, group)
+  }
+  for (const group of byParent.values()) {
+    group.sort((a, b) => a.title.localeCompare(b.title))
+  }
+
+  const ordered: CategoryOption[] = []
+  const seen = new Set<string>()
+  const visit = (node: Category, depth = 0) => {
+    if (seen.has(node.id)) return
+    seen.add(node.id)
+    ordered.push({ ...node, depth })
+    for (const child of byParent.get(node.id) || []) {
+      visit(child, depth + 1)
+    }
+  }
+
+  for (const root of byParent.get(null) || []) {
+    visit(root, 0)
+  }
+  for (const category of props.categories) {
+    if (!seen.has(category.id)) visit(category, 0)
+  }
+
+  return ordered
+})
+
+const categoryDisplayTitle = (category: CategoryOption) => {
+  return `${'-> '.repeat(category.depth)}${category.title}`
+}
+
+function toggleCategorySelection(categoryId: string, checked: boolean) {
+  const next = new Set(form.value.categoryIds)
+  if (checked) next.add(categoryId)
+  else next.delete(categoryId)
+  form.value.categoryIds = Array.from(next)
+}
 
 watch(() => form.value.title, (newTitle) => {
   if (!props.autoSlug) return

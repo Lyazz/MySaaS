@@ -2,10 +2,10 @@
   <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
           {{ t('admin.nav.salesItem') }}
         </h2>
-        <p class="mt-1 text-slate-600">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.sales.index.subtitle') }}
         </p>
       </div>
@@ -14,7 +14,7 @@
     <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.sales.index.filters.searchLabel') }}</label>
+          <label class="ui-label mb-1">{{ t('admin.pages.sales.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             :placeholder="t('admin.pages.sales.index.filters.searchPlaceholder')"
@@ -46,7 +46,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.sales.index.loading') }}
       </p>
     </div>
@@ -55,11 +55,11 @@
       v-else-if="sales.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.sales.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ emptyHint }}
       </p>
     </div>
@@ -73,13 +73,13 @@
         <table class="ui-table">
           <thead class="ui-thead">
             <tr>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('id')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('id')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.saleId') }}
                   <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('customerName')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('customerName')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.customer') }}
                   <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -88,7 +88,7 @@
               <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.phone') }}
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('totalAmount')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('totalAmount')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.total') }}
                   <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -97,7 +97,7 @@
               <th class="ui-th">
                 {{ t('admin.pages.sales.index.table.user') }}
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('updatedAt')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('updatedAt')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.completed') }}
                   <Icon v-if="sortBy === 'updatedAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -117,7 +117,7 @@
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
                   :to="`/admin/sales/${sale.id}`"
-                  class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                  class="font-medium hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
                 >
                   #{{ sale.id.substring(0, 8) }}
                 </NuxtLink>
@@ -126,11 +126,11 @@
                 <NuxtLink
                   v-if="sale.customerId"
                   :to="`/admin/customers/${sale.customerId}`"
-                  class="text-slate-900 hover:text-teal-600 transition-colors"
+                  class="hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
                 >
                   {{ sale.customerName }}
                 </NuxtLink>
-                <div v-else class="text-slate-900">
+                <div v-else style="color: var(--text-primary)">
                   {{ sale.customerName }}
                 </div>
               </td>
@@ -138,20 +138,20 @@
                 <a
                   v-if="sale.customerPhone"
                   :href="`tel:${sale.customerPhone}`"
-                  class="text-slate-600 hover:text-teal-600 transition-colors"
+                  class="hover:text-teal-600 transition-colors" style="color: var(--text-secondary)"
                 >
                   {{ sale.customerPhone }}
                 </a>
-                <div v-else class="text-slate-400">
+                <div v-else style="color: var(--text-tertiary)">
                   -
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium text-slate-900">
+                <div class="font-medium" style="color: var(--text-primary)">
                   {{ formatCurrency(sale.totalAmount) }}
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 <a
                   v-if="sale.createdByEmail"
                   :href="`mailto:${sale.createdByEmail}`"
@@ -161,14 +161,14 @@
                 </a>
                 <span v-else>System</span>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm text-slate-600">
+              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 {{ formatDate(sale.updatedAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/sales/${sale.id}`"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
                     :title="t('common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
@@ -181,7 +181,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border); background: var(--surface-1)">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -190,7 +190,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm text-slate-600">
+          <span class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -203,7 +203,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-slate-700">
+            <p class="text-sm" style="color: var(--text-secondary)">
               {{ t('admin.common.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, total),
@@ -215,7 +215,8 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -223,19 +224,17 @@
               <button
                 v-for="page in totalPages"
                 :key="page"
-                :class="[
-                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
-                  currentPage === page
-                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                ]"
+                class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+                :class="currentPage === page ? 'z-10 bg-teal-50 border-teal-500 text-teal-600' : ''"
+                :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
                 @click="currentPage = page"
               >
                 {{ page }}
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}

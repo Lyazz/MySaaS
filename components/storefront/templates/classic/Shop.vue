@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ProductCard from './ProductCard.vue'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     products: any[]
@@ -15,6 +16,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Dynamic Filters
 const filters = computed(() => ({
     categories: categoryData.value || [],
@@ -26,23 +33,49 @@ const searchQuery = ref('')
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
+const productsWithPricing = computed(() =>
+    props.products.map((product) => {
+        const pricing = buildProductPricing(product)
+        return {
+            ...product,
+            effectivePrice: pricing.effectivePrice,
+            originalPrice: pricing.originalPrice,
+            promotionApplied: pricing.promotionApplied,
+            promotionDiscountPercent: pricing.promotionDiscountPercent
+        }
+    })
+)
+
 // Price Range State
-const priceRange = ref({ min: 0, max: 200000 })
+const priceRange = computed(() => {
+    const prices = productsWithPricing.value
+        .map((product) => Number(product?.effectivePrice))
+        .filter((price): price is number => Number.isFinite(price))
+
+    if (prices.length === 0) {
+        return { min: 0, max: 0 }
+    }
+
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+    }
+})
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
 
 // Quick View State
 const isQuickViewOpen = ref(false)
 const quickViewProduct = ref<any>(null)
-const sidebarProducts = computed(() => props.products.slice(0, 2))
+const sidebarProducts = computed(() => productsWithPricing.value.slice(0, 2))
 
 const filteredProducts = computed(() => {
-    let result = [...props.products]
+    let result = [...productsWithPricing.value]
 
     // Filter by Category
     if (selectedCategories.value.length > 0) {
         const selectedIds = selectedCategories.value 
-        result = result.filter(p => selectedIds.includes(p.categoryId))
+        result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
 
     // Filter by Search
@@ -53,7 +86,7 @@ const filteredProducts = computed(() => {
 
     // Filter by Price
     result = result.filter(p => {
-        const price = Number(p.price)
+        const price = Number(p.effectivePrice)
         const minMatches = minPriceInput.value == null ? true : price >= Number(minPriceInput.value)
         const maxMatches = maxPriceInput.value == null ? true : price <= Number(maxPriceInput.value)
         return minMatches && maxMatches
@@ -61,9 +94,9 @@ const filteredProducts = computed(() => {
 
     // Sort
     if (sortOption.value === 'priceAsc') {
-        result.sort((a, b) => Number(a.price) - Number(b.price))
+        result.sort((a, b) => Number(a.effectivePrice) - Number(b.effectivePrice))
     } else if (sortOption.value === 'priceDesc') {
-        result.sort((a, b) => Number(b.price) - Number(a.price))
+        result.sort((a, b) => Number(b.effectivePrice) - Number(a.effectivePrice))
     }
 
     return result
@@ -191,7 +224,7 @@ const closeQuickView = () => {
                     class="peer h-4 w-4 rounded-none border-slate-300 text-slate-900 focus:ring-0 focus:ring-offset-0 transition-all checked:bg-slate-900 checked:border-transparent" 
                   >
                 </div>
-                <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{{ cat.title }}</span>
+                <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -200,6 +233,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -270,7 +306,7 @@ const closeQuickView = () => {
                     class="peer h-4 w-4 rounded-none border-slate-300 text-slate-900 focus:ring-0 focus:ring-offset-0 transition-all checked:bg-slate-900 checked:border-transparent" 
                   >
                 </div>
-                <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{{ cat.title }}</span>
+                <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -283,6 +319,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -309,7 +348,7 @@ const closeQuickView = () => {
                   <h5 class="text-sm font-serif text-slate-900 line-clamp-2 group-hover:underline decoration-1 underline-offset-4 transition-all">
                     {{ p.title }}
                   </h5>
-                  <span class="text-xs font-bold text-slate-500 mt-1 block">{{ formatCurrency(p.price) }}</span>
+                  <span class="text-xs font-bold text-slate-500 mt-1 block">{{ formatCurrency(p.effectivePrice ?? p.price) }}</span>
                 </div>
               </NuxtLink>
             </div>
@@ -325,7 +364,7 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-3 py-1 bg-slate-100 text-slate-900 text-xs uppercase tracking-wider font-bold"
               >
-                  <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
+                  <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
                   <button @click="removeCategory(catId)" class="hover:text-slate-600">
                       <Icon name="lucide:x" class="w-3 h-3" />
                   </button>
@@ -478,7 +517,7 @@ const closeQuickView = () => {
                     <span class="inline-block px-3 py-1 bg-slate-100 text-slate-900 text-[10px] font-bold uppercase tracking-widest mb-6">{{ storefrontContent.product.inStock }}</span>
                     <h2 class="text-3xl md:text-4xl font-serif text-slate-900 mb-4">{{ quickViewProduct.title }}</h2>
                     <div class="text-2xl text-slate-900 mb-8 font-light">
-                        {{ formatCurrency(quickViewProduct.price) }}
+                        {{ formatCurrency(quickViewProduct.effectivePrice ?? quickViewProduct.price) }}
                     </div>
                     <p class="text-slate-600 leading-relaxed mb-10 font-light">
                         {{ quickViewProduct.description || storefrontContent.product.descriptionFallback }}

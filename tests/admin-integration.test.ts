@@ -15,6 +15,7 @@ describe('Express Admin API', () => {
     let productId: string
     let categoryId: string
     let secondCategoryId: string
+    let subcategoryId: string
 
     it('registers a tenant successfully', async () => {
         const res = await request(app).post('/api/register').send({
@@ -150,6 +151,63 @@ describe('Express Admin API', () => {
         expect(listBody[0].title).toBe('Accessories')
     })
 
+    it('Create Subcategory under parent category (Admin)', async () => {
+        const res = await request(app)
+            .post('/api/admin/categories')
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                title: 'Android Phones',
+                slug: 'android-phones',
+                parentId: categoryId
+            })
+
+        const body = res.body
+        expect(res.status).toBe(200)
+        expect(body.parentId).toBe(categoryId)
+        subcategoryId = body.id
+    })
+
+    it('Assign product to multiple categories and subcategories', async () => {
+        const updateRes = await request(app)
+            .put(`/api/admin/products/${productId}`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                title: 'Test Product',
+                slug: 'test-product',
+                price: 100,
+                categoryIds: [categoryId, subcategoryId, secondCategoryId]
+            })
+
+        expect(updateRes.status).toBe(200)
+        expect(Array.isArray(updateRes.body.categoryIds)).toBe(true)
+        expect(updateRes.body.categoryIds).toEqual(
+            expect.arrayContaining([categoryId, subcategoryId, secondCategoryId])
+        )
+
+        const filteredBySubcategory = await request(app)
+            .get(`/api/admin/products?categoryId=${encodeURIComponent(subcategoryId)}`)
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+            .set('Authorization', `Bearer ${token}`)
+
+        expect(filteredBySubcategory.status).toBe(200)
+        expect(Array.isArray(filteredBySubcategory.body)).toBe(true)
+        expect(filteredBySubcategory.body.some((p: any) => p.id === productId)).toBe(true)
+    })
+
+    it('Public products payload includes categoryIds for multi-category assignments', async () => {
+        const res = await request(app)
+            .get('/api/products')
+            .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+
+        expect(res.status).toBe(200)
+        const product = (res.body || []).find((p: any) => p.id === productId)
+        expect(product).toBeTruthy()
+        expect(Array.isArray(product.categoryIds)).toBe(true)
+        expect(product.categoryIds).toEqual(expect.arrayContaining([categoryId, subcategoryId, secondCategoryId]))
+    })
+
     it('Update Product Images (Admin)', async () => {
         const images = ['http://example.com/b.jpg', 'http://example.com/c.jpg']
 
@@ -234,6 +292,7 @@ describe('Express Admin API', () => {
             await prisma.orderItem.deleteMany({ where: { tenantId } })
             await prisma.order.deleteMany({ where: { tenantId } })
             await prisma.productVariant.deleteMany({ where: { tenantId } })
+            await prisma.productCategory.deleteMany({ where: { tenantId } })
             await prisma.productOptionValue.deleteMany({ where: { tenantId } })
             await prisma.productOption.deleteMany({ where: { tenantId } })
             await prisma.productImage.deleteMany({ where: { tenantId } })

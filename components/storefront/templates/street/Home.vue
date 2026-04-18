@@ -14,6 +14,12 @@ const props = defineProps<{
 const cartStore = useCartStore()
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -166,7 +172,7 @@ const {
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           <NuxtLink 
-            v-for="(cat, idx) in categories" 
+            v-for="(cat) in categories" 
             :key="cat.slug" 
             :to="`/c/${cat.slug}`"
             class="group relative aspect-[3/4] md:aspect-[4/5] overflow-hidden bg-gray-100 block border-4 border-black shadow-[8px_8px_0_0_#000] hover:translate-x-2 hover:translate-y-2 hover:shadow-none transition-all"
@@ -175,7 +181,7 @@ const {
             <img
               v-if="cat.imageUrl"
               :src="cat.imageUrl"
-              :alt="cat.title"
+              :alt="categoryDisplayTitle(cat)"
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
             >
             <div v-else class="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -188,7 +194,7 @@ const {
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
                <div class="bg-brand px-6 py-3 border-4 border-black shadow-[4px_4px_0_0_#000]">
                   <h3 class="text-2xl md:text-3xl font-street text-black uppercase">
-                    {{ cat.title }}
+                    {{ categoryDisplayTitle(cat) }}
                   </h3>
                   <p class="font-mono text-xs text-black uppercase">
                     {{ storefrontContent.common.productsCount(cat.itemCount) }}
@@ -218,7 +224,7 @@ const {
           <div
             v-for="i in 4"
             :key="i"
-            class="flex-shrink-0 w-64 md:w-72 animate-pulse"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse"
           >
             <div class="bg-gray-200 h-[350px] mb-4 w-full border-4 border-black" />
             <div class="h-4 bg-gray-200 w-3/4 mx-auto mb-3" />
@@ -237,7 +243,7 @@ const {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-             class="flex-shrink-0 w-64 md:w-72"
+             class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
            <ProductCard
              :product="product"
@@ -280,7 +286,7 @@ const {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-64 md:w-72"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
             <ProductCard
              :product="product"

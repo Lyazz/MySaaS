@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-    <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+  <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+    <div class="p-6" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
       <div class="flex items-center justify-between">
         <div>
-           <h3 class="text-lg font-bold text-slate-800">{{ t('admin.homepageSettingsForm.sections.title') }}</h3>
-           <p class="mt-1 text-sm text-slate-500">{{ t('admin.homepageSettingsForm.sections.subtitle') }}</p>
+           <h3 class="text-lg font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.title') }}</h3>
+           <p class="mt-1 text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.subtitle') }}</p>
         </div>
       </div>
     </div>
@@ -12,22 +12,22 @@
     <div class="p-6 space-y-6">
       
       <!-- Browse by category -->
-      <div class="border rounded-xl transition-all duration-300" :class="modelValue.browseByCategory.enabled ? 'border-teal-200 shadow-md ring-1 ring-teal-50' : 'border-slate-200 bg-slate-50'">
-        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.browseByCategory.enabled = !modelValue.browseByCategory.enabled" :class="{ 'border-b border-teal-100 bg-teal-50/30 rounded-t-xl': modelValue.browseByCategory.enabled }">
+      <div class="rounded-xl transition-all duration-300" :style="modelValue.browseByCategory.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
+        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.browseByCategory.enabled = !modelValue.browseByCategory.enabled" :style="modelValue.browseByCategory.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.browseByCategory.enabled ? 'bg-teal-100 text-teal-600' : 'bg-slate-200 text-slate-400'">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.browseByCategory.enabled ? 'bg-teal-900/40 text-teal-400' : ''" :style="!modelValue.browseByCategory.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
                <Icon name="lucide:layout-grid" class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-base font-bold text-slate-800">{{ t('admin.homepageSettingsForm.sections.browseByCategory.title') }}</p>
-              <p class="text-sm text-slate-500">{{ t('admin.homepageSettingsForm.sections.browseByCategory.subtitle') }}</p>
+              <p class="text-base font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.browseByCategory.title') }}</p>
+              <p class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.browseByCategory.subtitle') }}</p>
             </div>
           </div>
           <BaseToggle v-model="modelValue.browseByCategory.enabled" :sr-label="t('admin.homepageSettingsForm.sections.browseByCategory.toggle')" @click.stop/>
         </div>
         
         <!-- Expanded Settings -->
-        <div v-show="modelValue.browseByCategory.enabled" class="p-5 bg-white rounded-b-xl animate-fadeIn border-t border-slate-100">
+        <div v-show="modelValue.browseByCategory.enabled" class="p-5 rounded-b-xl animate-fadeIn" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
              <BaseInput 
                 v-model="modelValue.browseByCategory.eyebrow" 
@@ -44,22 +44,22 @@
       </div>
 
       <!-- New arrivals -->
-      <div class="border rounded-xl transition-all duration-300" :class="modelValue.newArrivals.enabled ? 'border-teal-200 shadow-md ring-1 ring-teal-50' : 'border-slate-200 bg-slate-50'">
-        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.newArrivals.enabled = !modelValue.newArrivals.enabled" :class="{ 'border-b border-teal-100 bg-teal-50/30 rounded-t-xl': modelValue.newArrivals.enabled }">
+      <div class="rounded-xl transition-all duration-300" :style="modelValue.newArrivals.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
+        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.newArrivals.enabled = !modelValue.newArrivals.enabled" :style="modelValue.newArrivals.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.newArrivals.enabled ? 'bg-teal-100 text-teal-600' : 'bg-slate-200 text-slate-400'">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.newArrivals.enabled ? 'bg-teal-900/40 text-teal-400' : ''" :style="!modelValue.newArrivals.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
                <Icon name="lucide:sparkles" class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-base font-bold text-slate-800">{{ t('admin.homepageSettingsForm.sections.newArrivals.title') }}</p>
-              <p class="text-sm text-slate-500">{{ t('admin.homepageSettingsForm.sections.newArrivals.subtitle') }}</p>
+              <p class="text-base font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.newArrivals.title') }}</p>
+              <p class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.newArrivals.subtitle') }}</p>
             </div>
           </div>
           <BaseToggle v-model="modelValue.newArrivals.enabled" :sr-label="t('admin.homepageSettingsForm.sections.newArrivals.toggle')" @click.stop/>
         </div>
 
         <!-- Expanded Settings -->
-        <div v-show="modelValue.newArrivals.enabled" class="p-5 bg-white rounded-b-xl animate-fadeIn border-t border-slate-100">
+        <div v-show="modelValue.newArrivals.enabled" class="p-5 rounded-b-xl animate-fadeIn" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
              <BaseInput 
                 v-model="modelValue.newArrivals.eyebrow" 
@@ -82,22 +82,22 @@
       </div>
 
       <!-- Best sellers -->
-      <div class="border rounded-xl transition-all duration-300" :class="modelValue.bestSellers.enabled ? 'border-teal-200 shadow-md ring-1 ring-teal-50' : 'border-slate-200 bg-slate-50'">
-        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.bestSellers.enabled = !modelValue.bestSellers.enabled" :class="{ 'border-b border-teal-100 bg-teal-50/30 rounded-t-xl': modelValue.bestSellers.enabled }">
+      <div class="rounded-xl transition-all duration-300" :style="modelValue.bestSellers.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
+        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.bestSellers.enabled = !modelValue.bestSellers.enabled" :style="modelValue.bestSellers.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.bestSellers.enabled ? 'bg-teal-100 text-teal-600' : 'bg-slate-200 text-slate-400'">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.bestSellers.enabled ? 'bg-teal-900/40 text-teal-400' : ''" :style="!modelValue.bestSellers.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
                <Icon name="lucide:award" class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-base font-bold text-slate-800">{{ t('admin.homepageSettingsForm.sections.bestSellers.title') }}</p>
-              <p class="text-sm text-slate-500">{{ t('admin.homepageSettingsForm.sections.bestSellers.subtitle') }}</p>
+              <p class="text-base font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.bestSellers.title') }}</p>
+              <p class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.bestSellers.subtitle') }}</p>
             </div>
           </div>
           <BaseToggle v-model="modelValue.bestSellers.enabled" :sr-label="t('admin.homepageSettingsForm.sections.bestSellers.toggle')" @click.stop/>
         </div>
 
         <!-- Expanded Settings -->
-        <div v-show="modelValue.bestSellers.enabled" class="p-5 bg-white rounded-b-xl animate-fadeIn border-t border-slate-100">
+        <div v-show="modelValue.bestSellers.enabled" class="p-5 rounded-b-xl animate-fadeIn" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
              <BaseInput 
                 v-model="modelValue.bestSellers.eyebrow" 

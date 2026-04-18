@@ -32,6 +32,13 @@ export class CategoriesController {
                 if (e.message === 'Category with this slug already exists') {
                     return res.status(409).json({ statusCode: 409, statusMessage: e.message })
                 }
+                if (
+                    e.message === 'Invalid parent category' ||
+                    e.message === 'Category cannot be its own parent' ||
+                    e.message === 'Category hierarchy cycle detected'
+                ) {
+                    return res.status(400).json({ statusCode: 400, statusMessage: e.message })
+                }
                 if (e.message === 'Invalid image' || e.message === 'Invalid image type') {
                     return res.status(400).json({
                         statusCode: 400,
@@ -49,7 +56,7 @@ export class CategoriesController {
     async updateCategory(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const categoryId = req.params.id
+            const categoryId = String(req.params.id || '')
             const body = req.body
 
             if (!categoryId) {
@@ -65,6 +72,13 @@ export class CategoriesController {
                 }
                 if (e.message === 'Category with this slug already exists') {
                     return res.status(409).json({ statusCode: 409, statusMessage: e.message })
+                }
+                if (
+                    e.message === 'Invalid parent category' ||
+                    e.message === 'Category cannot be its own parent' ||
+                    e.message === 'Category hierarchy cycle detected'
+                ) {
+                    return res.status(400).json({ statusCode: 400, statusMessage: e.message })
                 }
                 if (e.message === 'Invalid image' || e.message === 'Invalid image type') {
                     return res.status(400).json({
@@ -83,7 +97,7 @@ export class CategoriesController {
     async getCategory(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const categoryId = req.params.id
+            const categoryId = String(req.params.id || '')
 
             if (!categoryId) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
@@ -104,7 +118,7 @@ export class CategoriesController {
     async deleteCategory(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const categoryId = req.params.id
+            const categoryId = String(req.params.id || '')
 
             if (!categoryId) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
@@ -117,8 +131,11 @@ export class CategoriesController {
                 if (e.message === 'Category not found') {
                     return res.status(404).json({ statusCode: 404, statusMessage: e.message })
                 }
-                if (e.statusCode === 409 || e.message === 'HAS_PRODUCTS') {
+                if (e.message === 'HAS_PRODUCTS') {
                     return res.status(409).json({ statusCode: 409, statusMessage: 'HAS_PRODUCTS' })
+                }
+                if (e.message === 'HAS_CHILDREN') {
+                    return res.status(409).json({ statusCode: 409, statusMessage: 'HAS_CHILDREN' })
                 }
                 throw e
             }

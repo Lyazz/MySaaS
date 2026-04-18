@@ -14,7 +14,7 @@
       <header class="bg-white border-b border-slate-200 p-3 md:p-4 flex items-center gap-3 md:gap-4 shrink-0 shadow-sm z-10">
         <!-- Title & Search (Merged for space) -->
         <h1 class="text-xl font-bold text-slate-800 hidden md:block">
-          {{ selectedCategory?.title || t('admin.pages.pos.catalog.title') }}
+          {{ categoryDisplayTitle(selectedCategory) || t('admin.pages.pos.catalog.title') }}
         </h1>
 
         <!-- Search -->
@@ -161,7 +161,7 @@
                <img
                   v-if="cat.imageUrl"
                   :src="cat.imageUrl"
-                  :alt="cat.title"
+                  :alt="categoryDisplayTitle(cat)"
                   class="w-full h-full object-cover"
                 >
                 <div v-else class="w-full h-full flex items-center justify-center text-slate-300">
@@ -172,7 +172,7 @@
                class="text-[10px] md:text-xs font-semibold leading-tight line-clamp-2"
                :class="selectedCategoryId === cat.id ? 'text-teal-700' : 'text-slate-600'"
              >
-               {{ cat.title }}
+               {{ categoryDisplayTitle(cat) }}
              </span>
           </button>
         </div>
@@ -626,6 +626,9 @@ const { format: formatCurrency } = useCurrency()
 interface Category {
   id: string
   title: string
+  displayTitle?: string
+  parentId?: string | null
+  parent?: { title: string } | null
   imageUrl?: string
 }
 
@@ -638,7 +641,9 @@ interface ProductListRow {
   isActive: boolean
   sku?: string
   categoryId?: string
+  categoryIds?: string[]
   category?: { id: string }
+  categories?: Array<{ id: string; title?: string }>
   options?: Array<{ id: string; name: string; values: any[] }>
   variants?: Array<{ id: string; sku?: string | null }>
   images?: string[]
@@ -715,6 +720,11 @@ const variantModal = reactive({
 // Computed Helpers
 const selectedCategory = computed(() => categories.value.find(c => c.id === selectedCategoryId.value))
 
+const categoryDisplayTitle = (category?: Category | null): string => {
+  if (!category) return ''
+  return category.parentId ? `-> ${category.title}` : category.title
+}
+
 const sortedProducts = computed(() => {
   return [...products.value].sort((a, b) => a.title.localeCompare(b.title))
 })
@@ -723,8 +733,15 @@ const filteredProducts = computed(() => {
   const q = productSearch.value.trim().toLowerCase()
   return sortedProducts.value.filter(p => {
     // 1. Filter by Category
-    if (selectedCategoryId.value && p.categoryId !== selectedCategoryId.value && p.category?.id !== selectedCategoryId.value) {
-      return false
+    if (selectedCategoryId.value) {
+      const ids = Array.from(
+        new Set([
+          ...(Array.isArray(p.categoryIds) ? p.categoryIds : []),
+          p.categoryId,
+          p.category?.id
+        ].filter((id): id is string => typeof id === 'string' && id.length > 0))
+      )
+      if (!ids.includes(selectedCategoryId.value)) return false
     }
     // 2. Filter by Search
     if (!q) return true

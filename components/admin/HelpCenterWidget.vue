@@ -21,8 +21,8 @@
     >
       <div 
         v-if="isOpen" 
-        class="fixed bottom-24 right-6 w-80 sm:w-[400px] bg-white border border-slate-200 rounded-2xl shadow-2xl z-[99] flex flex-col overflow-hidden"
-        style="max-height: calc(100vh - 120px); height: 550px;"
+        class="fixed bottom-24 right-6 w-80 sm:w-[400px] rounded-2xl z-[99] flex flex-col overflow-hidden"
+        style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5); max-height: calc(100vh - 120px); height: 550px;"
       >
         <!-- Header -->
         <div class="bg-gradient-to-r from-teal-600 to-teal-700 p-4 text-white flex-shrink-0 flex items-center justify-between">
@@ -39,7 +39,7 @@
         </div>
 
         <!-- Chat Area -->
-        <div class="flex-1 bg-slate-50 p-4 overflow-y-auto flex flex-col gap-4 relative custom-scrollbar" ref="chatContainer">
+        <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 relative custom-scrollbar" ref="chatContainer" style="background: var(--admin-content-bg)">
           
           <div 
             v-for="(msg, index) in messages" 
@@ -50,7 +50,7 @@
             <!-- Avatar -->
             <div 
               class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-              :class="msg.role === 'user' ? 'bg-slate-800 text-white' : 'bg-teal-100 text-teal-600'"
+              :class="msg.role === 'user' ? 'bg-teal-600 text-white' : 'bg-teal-900/40 text-teal-400'"
             >
               <Icon :name="msg.role === 'user' ? 'lucide:user' : 'lucide:bot'" class="w-5 h-5" />
             </div>
@@ -58,10 +58,11 @@
             <!-- Message Bubble -->
             <div 
               class="p-3 rounded-2xl text-sm"
+              :style="msg.role === 'user'
+                ? 'background: var(--brand); color: #fff'
+                : 'background: var(--surface-1); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
               :class="[
-                msg.role === 'user' 
-                  ? 'bg-slate-800 text-white rounded-tr-none shadow-sm ml-auto' 
-                  : 'bg-white border border-slate-200 text-slate-700 rounded-tl-none shadow-sm'
+                msg.role === 'user' ? 'rounded-tr-none ml-auto' : 'rounded-tl-none'
               ]"
             >
               {{ msg.content }}
@@ -70,10 +71,10 @@
 
           <!-- Typing Indicator -->
           <div v-if="isTyping" class="flex items-start gap-3 w-full animate-fadeIn">
-            <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 text-teal-600">
+            <div class="w-8 h-8 rounded-full bg-teal-900/40 flex items-center justify-center flex-shrink-0 text-teal-400">
               <Icon name="lucide:bot" class="w-5 h-5" />
             </div>
-            <div class="bg-white border border-slate-200 py-3 px-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1.5 h-11">
+            <div class="py-3 px-4 rounded-2xl rounded-tl-none flex items-center gap-1.5 h-11" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
               <div class="w-1.5 h-1.5 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
               <div class="w-1.5 h-1.5 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
               <div class="w-1.5 h-1.5 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
@@ -82,12 +83,12 @@
         </div>
 
         <!-- Input Area -->
-        <form @submit.prevent="sendMessage" class="p-3 bg-white border-t border-slate-100 flex gap-2 flex-shrink-0 items-end">
-          <input 
+        <form @submit.prevent="sendMessage" class="p-3 flex gap-2 flex-shrink-0 items-end" style="border-top: 1px solid var(--surface-border); background: var(--surface-1)">
+          <input
             v-model="newMessage"
-            type="text" 
-            :placeholder="t('admin.help.inputPlaceholder')" 
-            class="flex-1 ui-input ui-input--md bg-slate-50 border border-slate-200 focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-600/20 rounded-lg px-3 py-2 text-sm outline-none transition-all"
+            type="text"
+            :placeholder="t('admin.help.inputPlaceholder')"
+            class="flex-1 ui-input"
             :disabled="isTyping"
           >
           <button 
@@ -226,10 +227,10 @@ const sendMessage = () => {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
+  background-color: rgba(255,255,255,0.1);
   border-radius: 20px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+  background-color: rgba(255,255,255,0.2);
 }
 </style>

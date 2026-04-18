@@ -15,6 +15,12 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
+
 // Dynamic Filters
 const filters = computed(() => ({
     categories: categoryData.value || [],
@@ -27,7 +33,20 @@ const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
 // Price Range State
-const priceRange = ref({ min: 0, max: 200000 })
+const priceRange = computed(() => {
+    const prices = props.products
+        .map((product) => Number(product?.price))
+        .filter((price): price is number => Number.isFinite(price))
+
+    if (prices.length === 0) {
+        return { min: 0, max: 0 }
+    }
+
+    return {
+        min: Math.min(...prices),
+        max: Math.max(...prices),
+    }
+})
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
 
@@ -42,7 +61,7 @@ const filteredProducts = computed(() => {
     // Filter by Category
     if (selectedCategories.value.length > 0) {
         const selectedIds = selectedCategories.value 
-        result = result.filter(p => selectedIds.includes(p.categoryId))
+        result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
 
     // Filter by Search
@@ -191,7 +210,7 @@ const closeQuickView = () => {
                     class="peer h-5 w-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500 transition-all checked:bg-brand-600 checked:border-transparent" 
                   >
                 </div>
-                <span class="text-base text-slate-600 group-hover:text-brand-600 transition-colors">{{ cat.title }}</span>
+                <span class="text-base text-slate-600 group-hover:text-brand-600 transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
@@ -203,6 +222,9 @@ const closeQuickView = () => {
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
             />
           </div>
 
@@ -242,15 +264,18 @@ const closeQuickView = () => {
             :class="selectedCategories.includes(cat.id) ? 'bg-[#fbbf24] text-amber-900 border-amber-300 shadow-[0_4px_0_0_#d97706] -translate-y-1' : 'bg-white text-slate-600 border-purple-100 hover:border-amber-200 hover:-translate-y-1 hover:shadow-md'"
             @click="toggleCategory(cat.id)"
           >
-            <span class="opacity-80 mr-1">🌟</span> {{ cat.title }}
+            <span class="opacity-80 mr-1">🌟</span> {{ categoryDisplayTitle(cat) }}
           </button>
         </div>
 
         <div class="mt-6 max-w-2xl">
           <StorefrontPriceRangeFilter
-            v-model:min-price="minPriceInput"
-            v-model:max-price="maxPriceInput"
-          />
+              v-model:min-price="minPriceInput"
+              v-model:max-price="maxPriceInput"
+              :min-bound="priceRange.min"
+              :max-bound="priceRange.max"
+              :step="1"
+            />
         </div>
       </div>
 
@@ -266,7 +291,7 @@ const closeQuickView = () => {
                 :key="catId"
                 class="flex items-center gap-2 px-3 py-1.5 bg-brand-50 text-brand-700 rounded-full text-sm font-semibold border border-brand-100"
               >
-                  <span>{{ filters.categories.find(c => c.id === catId)?.title || storefrontContent.shop.categoryFallback }}</span>
+                  <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
                   <button @click="removeCategory(catId)" class="hover:text-brand-900">
                       <Icon name="lucide:x" class="w-4 h-4" />
                   </button>

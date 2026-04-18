@@ -4,14 +4,14 @@
     <nav class="flex mb-6" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/purchases" class="text-gray-700 hover:text-teal-600">
+          <NuxtLink to="/admin/purchases" class="hover:text-teal-400 transition-colors" style="color: var(--text-secondary)">
             {{ t('admin.nav.purchases') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">{{ t('admin.pages.purchases.create.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
+            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.purchases.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -20,13 +20,13 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.purchases.create.title') }}</h2>
-        <p class="text-gray-600 mt-1">{{ t('admin.pages.purchases.create.subtitle') }}</p>
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.purchases.create.title') }}</h2>
+        <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.purchases.create.subtitle') }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <NuxtLink
           to="/admin/purchases"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="ui-btn ui-btn--secondary text-sm"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Form -->
-    <div class="bg-white rounded-lg shadow p-6 space-y-6">
+    <div class="rounded-lg p-6 space-y-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
       <BaseSelect
         v-model="form.supplierId"
         :label="t('admin.pages.purchases.create.supplier.label')"
@@ -68,7 +68,7 @@
       <div class="flex justify-end space-x-3 pt-4 border-t">
         <NuxtLink
           to="/admin/purchases"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="ui-btn ui-btn--secondary text-sm"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>

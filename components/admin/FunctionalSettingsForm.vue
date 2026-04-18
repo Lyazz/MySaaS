@@ -1,20 +1,20 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="ui-card overflow-hidden">
       <div class="p-6 md:p-8 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">
+          <h2 class="text-xl font-bold" style="color: var(--text-primary)">
             {{ t('admin.pages.settings.functional.title') }}
           </h2>
-          <p class="text-slate-600 mt-2 max-w-2xl">
+          <p style="color: var(--text-secondary)" class="mt-2 max-w-2xl">
             {{ t('admin.pages.settings.functional.subtitle') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="ui-btn ui-btn--secondary"
             :disabled="loading || saving"
             @click="reset"
           >
@@ -37,26 +37,26 @@
     <form @submit.prevent="save" class="space-y-6">
       
       <!-- Store Features -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="ui-card overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
+            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
               {{ t('admin.functionalSettingsForm.features.title') }}
             </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
               {{ t('admin.functionalSettingsForm.features.subtitle') }}
             </p>
           </div>
           
           <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
             <!-- Cart Toggle -->
-            <div class="flex items-start md:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-sm transition-all duration-200">
+            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
                   <Icon name="lucide:handbag" class="w-4 h-4 text-teal-600" />
                   {{ t('admin.functionalSettingsForm.features.cart.title') }}
                 </h4>
-                <p class="text-sm text-slate-500 mt-1">
+                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
                   {{ t('admin.functionalSettingsForm.features.cart.subtitle') }}
                 </p>
               </div>
@@ -64,13 +64,13 @@
             </div>
 
             <!-- COD Toggle -->
-            <div class="flex items-start md:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-sm transition-all duration-200">
+            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
                   <Icon name="lucide:banknote" class="w-4 h-4 text-teal-600" />
                   {{ t('admin.functionalSettingsForm.features.cod.title') }}
                 </h4>
-                <p class="text-sm text-slate-500 mt-1">
+                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
                   {{ t('admin.functionalSettingsForm.features.cod.subtitle') }}
                 </p>
               </div>
@@ -81,22 +81,22 @@
       </div>
 
       <!-- Announcement Bar -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="ui-card overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
+            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
               {{ t('admin.appearanceSettingsForm.announcement.title') }}
             </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
               {{ t('admin.appearanceSettingsForm.announcement.subtitle') }}
             </p>
           </div>
           
           <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
             <!-- Announcement Bar -->
-            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-sm transition-all duration-200">
+            <div class="flex items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
                   <Icon name="lucide:megaphone" class="w-4 h-4 text-teal-600" />
                   {{ t('admin.appearanceSettingsForm.announcement.marquee') }}
                 </h4>
@@ -105,23 +105,23 @@
             </div>
 
             <div v-if="form.announcementScrolling" class="animate-fadeIn mt-4">
-               <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('admin.appearanceSettingsForm.announcement.message.label') }}</label>
+               <label class="ui-label mb-1.5 block">{{ t('admin.appearanceSettingsForm.announcement.message.label') }}</label>
                 <input
                   v-model="form.announcementText"
                   type="text"
-                  class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                  class="ui-input block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                   :placeholder="t('admin.appearanceSettingsForm.announcement.message.placeholder')"
                 >
             </div>
 
             <!-- Future Option Placeholder -->
-            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-teal-200 hover:shadow-sm transition-all duration-200 opacity-60">
+            <div class="flex items-center justify-between p-4 rounded-xl transition-all duration-200 opacity-60" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
                   <Icon name="lucide:search" class="w-4 h-4 text-teal-600" />
                   {{ t('admin.functionalSettingsForm.storefrontSearch.title') }}
                 </h4>
-                <p class="text-sm text-slate-500 mt-1">
+                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
                   {{ t('admin.functionalSettingsForm.storefrontSearch.subtitle') }}
                 </p>
               </div>
@@ -132,19 +132,19 @@
       </div>
 
       <!-- Currency -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="ui-card overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
+            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
               {{ t('admin.functionalSettingsForm.currency.title') }}
             </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
               {{ t('admin.functionalSettingsForm.currency.subtitle') }}
             </p>
           </div>
           
           <div class="mt-6 md:mt-0 md:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.functionalSettingsForm.currency.selectLabel') }}</label>
+            <label class="ui-label mb-2 block">{{ t('admin.functionalSettingsForm.currency.selectLabel') }}</label>
             <BaseSelect
                 v-model="form.currencyCountry"
                 :disabled="loadingCurrencies"
@@ -159,7 +159,7 @@
                   {{ c.label }}
                 </option>
             </BaseSelect>
-            <p class="mt-2 text-xs text-slate-500">
+            <p class="mt-2 text-xs" style="color: var(--text-tertiary)">
               {{ t('admin.functionalSettingsForm.currency.note') }}
             </p>
           </div>
@@ -167,29 +167,30 @@
       </div>
 
       <!-- Localization -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="ui-card overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
           <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold text-slate-900">
+            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
               {{ t('admin.functionalSettingsForm.localization.title') }}
             </h3>
-            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
               {{ t('admin.functionalSettingsForm.localization.subtitle') }}
             </p>
           </div>
           
           <div class="mt-6 md:mt-0 md:col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('admin.functionalSettingsForm.localization.defaultLanguage') }}</label>
+            <label class="ui-label mb-2 block">{{ t('admin.functionalSettingsForm.localization.defaultLanguage') }}</label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div 
                 v-for="l in languages" 
                 :key="l.key"
                 class="cursor-pointer relative rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all hover:border-teal-300"
-                :class="form.language === l.key ? 'border-teal-500 bg-teal-50/50 ring-1 ring-teal-500' : 'border-slate-200 bg-white hover:bg-slate-50'"
+                :class="form.language === l.key ? 'border-teal-500 bg-teal-50/50 ring-1 ring-teal-500' : ''"
+                :style="form.language !== l.key ? 'background: var(--surface-1); border-color: var(--surface-border)' : ''"
                 @click="form.language = l.key"
               >
                  <span class="text-2xl mb-2">{{ l.flag }}</span>
-                 <span class="text-sm font-medium" :class="form.language === l.key ? 'text-teal-900' : 'text-slate-700'">{{ l.label }}</span>
+                 <span class="text-sm font-medium" :class="form.language === l.key ? 'text-teal-900' : ''" :style="form.language !== l.key ? 'color: var(--text-secondary)' : ''">{{ l.label }}</span>
                  <Icon v-if="form.language === l.key" name="lucide:check-circle-2" class="w-4 h-4 text-teal-600 absolute top-2 right-2" />
               </div>
             </div>
@@ -209,7 +210,7 @@
 
       <!-- Action Footer -->
       <div class="fixed bottom-6 right-6 md:static md:flex md:justify-end">
-         <div class="bg-white md:bg-transparent p-2 md:p-0 rounded-full shadow-lg md:shadow-none border md:border-none border-slate-200 flex items-center gap-3">
+         <div class="md:bg-transparent p-2 md:p-0 rounded-full shadow-lg md:shadow-none md:border-none flex items-center gap-3" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
             <div
               v-if="successMessage"
               class="hidden md:block text-sm text-emerald-600 font-medium animate-fadeIn px-3"
@@ -225,7 +226,7 @@
             
             <button
               type="button"
-              class="hidden md:inline-flex px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              class="hidden md:inline-flex ui-btn ui-btn--secondary"
               :disabled="loading || saving"
               @click="reset"
             >
@@ -246,9 +247,9 @@
       
       <!-- Mobile Notifications (Toast style) -->
       <div v-if="successMessage || errorMessage" class="md:hidden fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4">
-        <div class="bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg flex items-center justify-between">
+        <div class="text-white px-4 py-3 rounded-xl shadow-lg flex items-center justify-between" style="background: var(--surface-3)">
            <span class="text-sm font-medium">{{ successMessage || errorMessage }}</span>
-           <button @click="successMessage = ''; errorMessage = ''" class="ml-4 text-slate-400 hover:text-white">
+           <button @click="successMessage = ''; errorMessage = ''" class="ml-4 hover:text-white" style="color: var(--text-muted)">
              <Icon name="lucide:x" class="w-4 h-4" />
            </button>
         </div>

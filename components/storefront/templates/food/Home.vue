@@ -14,6 +14,12 @@ const props = defineProps<{
 const cartStore = useCartStore()
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -196,7 +202,7 @@ const {
             class="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-12 px-2 scrollbar-hide"
             >
             <NuxtLink 
-                v-for="(cat, idx) in categories" 
+                v-for="(cat) in categories" 
                 :key="cat.slug" 
                 :to="`/c/${cat.slug}`"
                 class="snap-start flex-shrink-0 w-64 h-80 relative group"
@@ -207,7 +213,7 @@ const {
                          <img
                             v-if="cat.imageUrl"
                             :src="cat.imageUrl"
-                            :alt="cat.title"
+                            :alt="categoryDisplayTitle(cat)"
                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
                         >
                         <div v-else class="w-full h-full bg-stone-200" />
@@ -217,7 +223,7 @@ const {
                     </div>
                     
                     <div class="p-6 text-center">
-                        <h3 class="text-2xl font-bold text-stone-900 mb-2 group-hover:text-brand-700 transition-colors">{{ cat.title }}</h3>
+                        <h3 class="text-2xl font-bold text-stone-900 mb-2 group-hover:text-brand-700 transition-colors">{{ categoryDisplayTitle(cat) }}</h3>
                         <div class="w-12 h-0.5 bg-brand-200 mx-auto mb-4" />
                         <span class="inline-block px-3 py-1 bg-white border border-stone-200 rounded-full text-xs font-bold text-stone-500 group-hover:border-brand-200 group-hover:text-brand-600 transition-colors">
                             {{ storefrontContent.common.productsCount(cat.itemCount) }}
@@ -259,7 +265,7 @@ const {
           <div
             v-for="i in 4"
             :key="i"
-            class="flex-shrink-0 w-64 md:w-72 animate-pulse"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse"
           >
             <div class="bg-stone-200 rounded-[2.5rem] h-80 mb-4" />
             <div class="h-4 bg-stone-200 rounded-full w-3/4 mb-3" />
@@ -278,7 +284,7 @@ const {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-             class="flex-shrink-0 w-64 md:w-72"
+             class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
            <ProductCard
              :product="product"
@@ -328,7 +334,7 @@ const {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-64 md:w-72"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
           >
             <ProductCard
              :product="product"

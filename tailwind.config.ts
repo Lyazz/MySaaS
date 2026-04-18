@@ -13,15 +13,16 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Outfit', 'sans-serif'],
-                display: ['Outfit', 'sans-serif'],
+                sans: ['DM Sans', 'system-ui', 'sans-serif'],
+                display: ['DM Sans', 'system-ui', 'sans-serif'],
+                mono: ['Geist Mono', 'JetBrains Mono', 'monospace'],
                 serif: ['Alice', 'serif'],
                 stationery: ['Merriweather', 'serif'],
                 street: ['Anton', 'sans-serif'],
                 cozy: ['Nunito', 'sans-serif'],
                 food: ['Nunito', 'sans-serif'],
                 cyber: ['Orbitron', 'sans-serif'],
-                mono: ['JetBrains Mono', 'monospace'],
+                jetbrains: ['JetBrains Mono', 'monospace'],
                 wellness: ['Solway', 'serif'],
             },
             colors: {

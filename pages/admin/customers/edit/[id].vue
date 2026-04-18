@@ -4,22 +4,22 @@
     <nav class="flex mb-6" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/customers" class="text-gray-700 hover:text-teal-600">
+          <NuxtLink to="/admin/customers" class="hover:text-teal-600" style="color: var(--text-secondary)">
             {{ t('admin.nav.customers') }}
           </NuxtLink>
         </li>
         <li>
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <NuxtLink :to="`/admin/customers/${customerId}`" class="ml-1 text-gray-700 hover:text-teal-600">
+            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
+            <NuxtLink :to="`/admin/customers/${customerId}`" class="ml-1 hover:text-teal-600" style="color: var(--text-secondary)">
               {{ t('admin.pages.customers.edit.breadcrumbCustomer') }}
             </NuxtLink>
           </div>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6 text-gray-400" />
-            <span class="ml-1 text-gray-500">{{ t('admin.pages.customers.edit.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
+            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.customers.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -28,13 +28,13 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">{{ t('admin.pages.customers.edit.title') }}</h2>
-        <p class="text-gray-600 mt-1">{{ t('admin.pages.customers.edit.subtitle') }}</p>
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.customers.edit.title') }}</h2>
+        <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.customers.edit.subtitle') }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <NuxtLink
           :to="`/admin/customers/${customerId}`"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>
@@ -51,13 +51,13 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="bg-white rounded-lg shadow p-12 text-center">
+    <div v-if="loading" class="ui-card p-12 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-      <p class="mt-2 text-gray-600">{{ t('admin.pages.customers.edit.loading') }}</p>
+      <p class="mt-2" style="color: var(--text-secondary)">{{ t('admin.pages.customers.edit.loading') }}</p>
     </div>
 
     <!-- Form -->
-    <form v-else id="customer-edit-form" class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
+    <form v-else id="customer-edit-form" class="ui-card p-6 space-y-6" @submit.prevent="handleSubmit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <BaseInput
           v-model="form.name"
@@ -103,10 +103,10 @@
         <p class="text-sm text-red-800">{{ errorMessage }}</p>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-4 border-t">
+      <div class="flex justify-end space-x-3 pt-4" style="border-top: 1px solid var(--surface-border)">
         <NuxtLink
           :to="`/admin/customers/${customerId}`"
-          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
         >
           {{ t('admin.common.cancel') }}
         </NuxtLink>

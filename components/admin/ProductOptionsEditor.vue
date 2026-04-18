@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-medium text-gray-900">
+      <h3 class="text-[15px] font-semibold" style="color: var(--text-primary)">
         {{ t('admin.productOptionsEditor.title') }}
       </h3>
     </div>
@@ -11,23 +11,23 @@
         <div 
             v-for="(option, index) in options" 
             :key="option.id"
-            class="bg-white border rounded-lg p-4 relative group overflow-hidden"
+            class="rounded-xl p-4 relative group overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
         >
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pr-8">
                 <!-- Option Name & Display Type -->
                 <div class="md:col-span-4 space-y-3">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionName') }}</label>
+                        <label class="ui-label">{{ t('admin.productOptionsEditor.fields.optionName') }}</label>
                         <input 
                             type="text" 
                             v-model="option.name"
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border"
+                            class="ui-input"
                             @change="updateOption(option)"
                             :placeholder="t('admin.productOptionsEditor.fields.optionNamePlaceholder')"
                         >
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.displayType') }}</label>
+                        <label class="ui-label">{{ t('admin.productOptionsEditor.fields.displayType') }}</label>
                         <BaseSelect
                             v-model="option.displayType"
                             @change="updateOption(option)"
@@ -38,16 +38,16 @@
                             <option value="color">{{ t('admin.productOptionsEditor.displayTypes.color') }}</option>
                             <option value="image">{{ t('admin.productOptionsEditor.displayTypes.image') }}</option>
                         </BaseSelect>
-                        <p class="mt-2 text-xs font-medium text-gray-500">{{ t('admin.productOptionsEditor.preview.title') }}</p>
+                        <p class="mt-2 text-xs font-medium" style="color: var(--text-tertiary)">{{ t('admin.productOptionsEditor.preview.title') }}</p>
                         <div
-                            class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50"
+                            class="mt-1 p-3 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
                             :data-testid="`option-preview-${option.id}`"
                         >
                              <!-- Dropdown Preview -->
                             <div v-if="option.displayType === 'dropdown'" class="relative max-w-xs">
                                 <select
                                     disabled
-                                    class="block w-full h-9 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8 appearance-none bg-none"
+                                    class="ui-input h-9 pr-8 appearance-none text-sm"
                                 >
                                     <option
                                         v-for="v in previewValuesForOption(option, { max: 6, min: 1 })"
@@ -58,7 +58,7 @@
                                     </option>
                                 </select>
                                 <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                    <Icon name="lucide:chevron-down" class="w-4 h-4 text-gray-500" />
+                                    <Icon name="lucide:chevron-down" class="w-4 h-4" style="color: var(--text-tertiary)" />
                                 </div>
                             </div>
                             
@@ -67,8 +67,8 @@
                                 <div
                                     v-for="(v, i) in previewValuesForOption(option, { max: 2, min: 2 })"
                                     :key="v.id"
-                                    class="px-3 py-1.5 rounded-md text-sm font-medium border shadow-sm"
-                                    :class="i === 0 ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-700 border-gray-200 hover:border-teal-300'"
+                                    class="px-3 py-1.5 rounded-md text-sm font-medium border"
+                                    :style="i === 0 ? 'background: var(--brand); color: #fff; border-color: var(--brand)' : 'background: var(--surface-3); color: var(--text-secondary); border-color: var(--surface-border)'"
                                 >
                                     {{ v.label }}
                                 </div>
@@ -83,13 +83,13 @@
                                 >
                                     <div
                                         class="w-4 h-4 rounded-full border flex items-center justify-center"
-                                        :class="i === 0 ? 'border-teal-600' : 'border-gray-300'"
+                                        :style="i === 0 ? 'border-color: var(--brand)' : 'border-color: var(--surface-border)'"
                                     >
                                         <div v-if="i === 0" class="w-2 h-2 rounded-full bg-teal-600"></div>
                                     </div>
                                     <span
                                         class="ml-2 text-sm"
-                                        :class="i === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'"
+                                        :style="i === 0 ? 'color: var(--text-primary); font-weight: 500' : 'color: var(--text-secondary)'"
                                     >
                                         {{ v.label }}
                                     </span>
@@ -115,12 +115,12 @@
                                 <div
                                     v-for="(v, i) in previewValuesForOption(option, { max: 4, min: 2 })"
                                     :key="v.id"
-                                    class="w-12 h-12 rounded-lg border-2 relative overflow-hidden bg-gray-200"
-                                    :class="i === 0 ? 'border-teal-600 shadow-sm' : 'border-slate-100'"
+                                    class="w-12 h-12 rounded-lg border-2 relative overflow-hidden"
+                                    :style="i === 0 ? 'border-color: var(--brand); background: var(--surface-3)' : 'border-color: var(--surface-border); background: var(--surface-3)'"
                                     :title="v.label"
                                 >
                                    <img v-if="v.meta" :src="v.meta" class="absolute inset-0 w-full h-full object-cover" />
-                                   <div v-else class="absolute inset-0 flex items-center justify-center text-xs text-gray-500 font-medium">
+                                   <div v-else class="absolute inset-0 flex items-center justify-center text-xs font-medium" style="color: var(--text-tertiary)">
                                        {{ v.label?.[0]?.toUpperCase() || t('admin.productOptionsEditor.preview.imageFallbackShort') }}
                                    </div>
                                 </div>
@@ -131,16 +131,17 @@
 
                 <!-- Option Values (Chips) -->
                 <div class="md:col-span-8 overflow-hidden">
-                    <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionValues') }}</label>
-                    <div 
-                        class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md bg-white min-h-[42px] focus-within:ring-1 focus-within:ring-teal-500 focus-within:border-teal-500"
+                    <label class="block text-xs font-medium mb-1" style="color: var(--text-tertiary)">{{ t('admin.productOptionsEditor.fields.optionValues') }}</label>
+                    <div
+                        class="flex flex-wrap gap-2 p-2 rounded-md min-h-[42px] focus-within:ring-1 focus-within:ring-teal-500"
+                        style="border: 1px solid var(--surface-border); background: var(--surface-2)"
                         @click="focusInput(index)"
                     >
                         <!-- Chips -->
                         <div 
                             v-for="value in option.values" 
                             :key="value.id"
-                            class="inline-flex items-center gap-1.5 bg-gray-100 border border-gray-200 rounded px-2 py-1 text-sm text-gray-800"
+                            class="inline-flex items-center gap-1.5 rounded px-2 py-1 text-sm" style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary)"
                         >
                             <!-- Color Preview -->
                             <div 
@@ -161,7 +162,7 @@
                             <button 
                                 v-if="['color', 'image'].includes(option.displayType)"
                                 type="button"
-                                class="shrink-0 text-gray-400 hover:text-teal-600 focus:outline-none"
+                                class="shrink-0 hover:text-teal-400 focus:outline-none" style="color: var(--text-muted)"
                                 :title="t('admin.productOptionsEditor.actions.editMetadata')"
                                 @click.stop="editValueMeta(option, value)"
                             >
@@ -170,7 +171,7 @@
 
                             <button 
                                 type="button"
-                                class="shrink-0 text-gray-400 hover:text-red-600 focus:outline-none"
+                                class="shrink-0 hover:text-red-400 focus:outline-none" style="color: var(--text-muted)"
                                 @click.stop="deleteValue(option, value)"
                             >
                                 <Icon name="lucide:x" class="h-3 w-3" />
@@ -182,7 +183,7 @@
                             :ref="el => setInputRef(el, index)"
                             v-model="newValues[option.id]"
                             type="text"
-                            class="flex-1 min-w-[120px] border-none p-0 focus:ring-0 text-sm h-7"
+                            class="flex-1 min-w-[120px] border-none p-0 focus:ring-0 text-sm h-7 bg-transparent" style="color: var(--text-primary)"
                             :placeholder="t('admin.productOptionsEditor.fields.addValuePlaceholder')"
                             @keydown="handleValueKeydown($event, option)"
                             @blur="handleValueBlur(option)"
@@ -194,7 +195,7 @@
             <!-- Delete Option -->
             <button 
                 type="button"
-                class="absolute top-4 right-4 text-gray-400 hover:text-red-600 p-1"
+                class="absolute top-4 right-4 hover:text-red-400 p-1" style="color: var(--text-muted)"
                 :title="t('admin.productOptionsEditor.actions.removeOption')"
                 @click="requestDeleteOption(option)"
             >
@@ -207,30 +208,30 @@
             <button
                 v-if="!isCreatingOption"
                 type="button"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                class="ui-btn ui-btn--secondary text-sm"
                 @click="startCreatingOption"
             >
-                <Icon name="lucide:plus" class="-ml-1 mr-2 h-5 w-5 text-gray-400" />
+                <Icon name="lucide:plus" class="-ml-1 mr-2 h-5 w-5" style="color: var(--text-tertiary)" />
                 {{ t('admin.productOptionsEditor.actions.addAnotherOption') }}
             </button>
 
             <!-- Inline Create form -->
-            <div v-else class="bg-white border border-teal-200 rounded-lg p-4 shadow-sm ring-1 ring-teal-500/20">
+            <div v-else class="rounded-lg p-4 ring-1 ring-teal-500/20" style="background: var(--surface-2); border: 1px solid rgba(var(--brand-rgb) / 0.4)">
                  <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     <div class="md:col-span-4 space-y-3">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionName') }}</label>
+                            <label class="ui-label">{{ t('admin.productOptionsEditor.fields.optionName') }}</label>
                             <input 
                                 ref="newOptionNameRef"
                                 type="text" 
                                 v-model="newOptionName"
-                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border"
+                                class="ui-input"
                                 :placeholder="t('admin.productOptionsEditor.fields.newOptionNamePlaceholder')"
                                 @keydown.enter="focusNewValues"
                             >
                         </div>
                          <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.displayType') }}</label>
+                            <label class="ui-label">{{ t('admin.productOptionsEditor.fields.displayType') }}</label>
                             <BaseSelect
                                 v-model="newOptionType"
                             >
@@ -240,13 +241,13 @@
                                 <option value="color">{{ t('admin.productOptionsEditor.displayTypes.color') }}</option>
                                 <option value="image">{{ t('admin.productOptionsEditor.displayTypes.image') }}</option>
                             </BaseSelect>
-                            <p class="mt-1 text-xs font-medium text-gray-500">{{ t('admin.productOptionsEditor.preview.title') }}</p>
-                            <div class="mt-1 p-3 border border-gray-100 rounded-lg bg-gray-50/50" data-testid="new-option-preview">
+                            <p class="mt-1 text-xs font-medium" style="color: var(--text-tertiary)">{{ t('admin.productOptionsEditor.preview.title') }}</p>
+                            <div class="mt-1 p-3 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-2)" data-testid="new-option-preview">
                                  <!-- Dropdown Preview -->
                                 <div v-if="newOptionType === 'dropdown'" class="relative max-w-xs">
                                     <select
                                         disabled
-                                        class="block w-full h-8 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm pr-8 appearance-none bg-none"
+                                        class="ui-input h-8 pr-8 appearance-none text-sm"
                                     >
                                         <option
                                             v-for="v in newOptionPreviewValues.slice(0, 6)"
@@ -257,7 +258,7 @@
                                         </option>
                                     </select>
                                     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                        <Icon name="lucide:chevron-down" class="w-4 h-4 text-gray-500" />
+                                        <Icon name="lucide:chevron-down" class="w-4 h-4" style="color: var(--text-tertiary)" />
                                     </div>
                                 </div>
                                 
@@ -266,8 +267,8 @@
                                     <div
                                         v-for="(v, i) in newOptionPreviewValues.slice(0, 2)"
                                         :key="v.id"
-                                        class="px-2 py-1 rounded text-xs font-medium border shadow-sm"
-                                        :class="i === 0 ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-700 border-gray-200'"
+                                        class="px-2 py-1 rounded text-xs font-medium border"
+                                        :style="i === 0 ? 'background: var(--brand); color: #fff; border-color: var(--brand)' : 'background: var(--surface-3); color: var(--text-secondary); border-color: var(--surface-border)'"
                                     >
                                         {{ v.label }}
                                     </div>
@@ -282,11 +283,11 @@
                                     >
                                         <span
                                             class="w-3 h-3 rounded-full border flex items-center justify-center"
-                                            :class="i === 0 ? 'border-teal-600' : 'border-gray-300'"
+                                            :style="i === 0 ? 'border-color: var(--brand)' : 'border-color: var(--surface-border)'"
                                         >
                                             <span v-if="i === 0" class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
                                         </span>
-                                        <span class="ml-2 text-xs" :class="i === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'">
+                                        <span class="ml-2 text-xs" :style="i === 0 ? 'color: var(--text-primary); font-weight: 500' : 'color: var(--text-secondary)'">
                                             {{ v.label }}
                                         </span>
                                     </div>
@@ -311,11 +312,11 @@
                                     <div
                                         v-for="(v, i) in newOptionPreviewValues.slice(0, 4)"
                                         :key="v.id"
-                                        class="w-8 h-8 rounded border-2 bg-gray-200 relative overflow-hidden"
-                                        :class="i === 0 ? 'border-teal-600 shadow-sm' : 'border-gray-200'"
+                                        class="w-8 h-8 rounded border-2 relative overflow-hidden"
+                                        :style="i === 0 ? 'border-color: var(--brand); background: var(--surface-3)' : 'border-color: var(--surface-border); background: var(--surface-3)'"
                                         :title="v.label"
                                     >
-                                        <div class="absolute inset-0 flex items-center justify-center text-[10px] text-gray-500 font-medium">
+                                        <div class="absolute inset-0 flex items-center justify-center text-[10px] font-medium" style="color: var(--text-tertiary)">
                                             {{ v.label?.[0]?.toUpperCase() || t('admin.productOptionsEditor.preview.imageFallbackShort') }}
                                         </div>
                                     </div>
@@ -324,25 +325,25 @@
                         </div>
                     </div>
                     <div class="md:col-span-8">
-                         <label class="block text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.fields.optionValues') }}</label>
-                         <input 
+                         <label class="block text-xs font-medium mb-1" style="color: var(--text-tertiary)">{{ t('admin.productOptionsEditor.fields.optionValues') }}</label>
+                         <input
                             ref="newOptionValuesRef"
-                            type="text" 
+                            type="text"
                             v-model="newOptionValues"
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm px-3 py-2 border"
+                            class="ui-input"
                             :placeholder="t('admin.productOptionsEditor.fields.optionValuesPlaceholder')"
                             @keydown.enter="createOption"
                         >
-                        <p class="text-xs text-gray-400 mt-1">{{ t('admin.productOptionsEditor.fields.pressEnterToAdd') }}</p>
+                        <p class="text-xs mt-1" style="color: var(--text-muted)">{{ t('admin.productOptionsEditor.fields.pressEnterToAdd') }}</p>
                     </div>
                  </div>
                  <div class="flex justify-end mt-3 gap-2">
-                     <button type="button" class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1" @click="cancelCreatingOption">{{ t('admin.common.cancel') }}</button>
+                     <button type="button" class="text-xs px-2 py-1 hover:text-white transition-colors" style="color: var(--text-tertiary)" @click="cancelCreatingOption">{{ t('admin.common.cancel') }}</button>
                      <button type="button" class="text-xs bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700" @click="createOption">{{ t('admin.productOptionsEditor.actions.done') }}</button>
                  </div>
             </div>
         </div>
-        <div v-else class="text-center py-2 text-sm text-gray-500">
+        <div v-else class="text-center py-2 text-sm" style="color: var(--text-tertiary)">
             {{ t('admin.productOptionsEditor.maxOptions') }}
         </div>
     </div>
@@ -370,7 +371,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
@@ -387,24 +388,24 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)"
             >
               <DialogTitle
                 as="h3"
-                class="text-lg font-medium leading-6 text-gray-900 mb-4"
+                class="text-lg font-medium leading-6 mb-4" style="color: var(--text-primary)"
               >
                 {{ t('admin.productOptionsEditor.metaModal.title', { type: editingMetaTypeLabel, label: editingValue?.label }) }}
               </DialogTitle>
               
               <div v-if="editingMetaType === 'color'" class="space-y-4">
                   <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.productOptionsEditor.metaModal.colorHex') }}</label>
+                      <label class="ui-label mb-1">{{ t('admin.productOptionsEditor.metaModal.colorHex') }}</label>
                       <div class="flex gap-2">
                         <input type="color" v-model="editingMetaValue" class="h-10 w-10 p-0 border-0 rounded overflow-hidden cursor-pointer" />
                         <input 
                             type="text" 
                             v-model="editingMetaValue" 
-                            class="flex-1 rounded-md border-gray-300 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                            class="ui-input flex-1"
                             placeholder="#000000"
                         />
                       </div>
@@ -413,25 +414,25 @@
 
                <div v-if="editingMetaType === 'image'" class="space-y-4">
                   <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.productOptionsEditor.metaModal.imageUrl') }}</label>
+                      <label class="ui-label mb-1">{{ t('admin.productOptionsEditor.metaModal.imageUrl') }}</label>
                       <input 
                             type="text" 
                             v-model="editingMetaValue" 
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                            class="ui-input"
                             placeholder="https://example.com/image.jpg"
                         />
-                      <p class="text-xs text-gray-500 mt-1">{{ t('admin.productOptionsEditor.metaModal.imageUrlHint') }}</p>
+                      <p class="text-xs mt-1" style="color: var(--text-muted)">{{ t('admin.productOptionsEditor.metaModal.imageUrlHint') }}</p>
                   </div>
                   <div v-if="editingMetaValue" class="mt-2">
-                        <p class="text-xs font-medium text-gray-500 mb-1">{{ t('admin.productOptionsEditor.preview.title') }}</p>
-                        <img :src="editingMetaValue" class="w-16 h-16 object-cover rounded border border-gray-200" />
+                        <p class="text-xs font-medium mb-1" style="color: var(--text-tertiary)">{{ t('admin.productOptionsEditor.preview.title') }}</p>
+                        <img :src="editingMetaValue" class="w-16 h-16 object-cover rounded" style="border: 1px solid var(--surface-border)" />
                   </div>
               </div>
 
               <div class="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
-                  class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                  class="ui-btn ui-btn--secondary text-sm"
                   @click="closeMetaModal"
                 >
                   {{ t('admin.common.cancel') }}

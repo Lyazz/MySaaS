@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { useRequestOrigin } from '~/composables/host'
+import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
 const { t } = useI18n({ useScope: 'global' })
 const year = new Date().getFullYear()
@@ -20,6 +22,27 @@ const form = ref({
 const loading = ref(false)
 const error = ref('')
 const successData = ref<any>(null)
+const platformBaseDomain = usePlatformBaseDomain()
+
+const subdomainSuffix = computed(() => {
+  const { host } = useRequestOrigin()
+  const firstHost = host.split(',')[0]?.trim() || ''
+  const hostParts = firstHost.split(':')
+  const hasPort = hostParts.length > 1 && /^\d+$/.test(hostParts[hostParts.length - 1] || '')
+  const hostname = hasPort ? hostParts.slice(0, -1).join(':').toLowerCase() : firstHost.toLowerCase()
+  const port = hasPort ? hostParts[hostParts.length - 1] : ''
+
+  if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
+    return `.localhost${port ? `:${port}` : ''}`
+  }
+
+  return `.${platformBaseDomain}`
+})
+
+const slugPreview = computed(() => {
+  if (!form.value.slug) return ''
+  return `${form.value.slug}${subdomainSuffix.value}`
+})
 
 // Auto-generate slug from name
 watch(() => form.value.name, (newName) => {
@@ -154,11 +177,11 @@ async function register() {
                   :placeholder="t('auth.register.form.slug.placeholder')"
                 >
                 <span class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-sm font-medium">
-                  .swekly.com
+                  {{ subdomainSuffix }}
                 </span>
               </div>
               <p v-if="form.slug" class="mt-1 text-xs text-teal-500 font-medium">
-                {{ t('auth.register.form.slug.preview', { slug: form.slug }) }}
+                Your store will be at: {{ slugPreview }}
               </p>
             </div>
 

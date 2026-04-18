@@ -1,17 +1,17 @@
 <template>
-  <div class="h-[calc(100vh-4rem)] relative flex overflow-hidden bg-slate-100">
-    <div class="flex-1 flex flex-col min-w-0 bg-slate-100 transition-all duration-300">
+  <div class="h-[calc(100vh-4rem)] relative flex overflow-hidden" style="background: var(--surface-2)">
+    <div class="flex-1 flex flex-col min-w-0 transition-all duration-300" style="background: var(--surface-2)">
       
       <!-- Top header -->
-      <header class="bg-white border-b border-slate-200 p-3 md:p-4 flex items-center gap-3 shrink-0 z-10 sticky top-0">
+      <header class="p-3 md:p-4 flex items-center gap-3 shrink-0 z-10 sticky top-0" style="background: var(--surface-1); border-bottom: 1px solid var(--surface-border)">
         <NuxtLink
           to="/admin/orders"
-          class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+          class="p-2 rounded-lg transition-colors" style="color: var(--text-tertiary)"
           :title="t('admin.nav.orders')"
         >
           <Icon name="lucide:arrow-left" class="w-5 h-5" />
         </NuxtLink>
-        <h1 class="text-xl font-bold text-slate-800">
+        <h1 class="text-xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.pages.orders.create.title') }}
         </h1>
       </header>
@@ -22,9 +22,9 @@
         <!-- Left Column: Details -->
         <div class="flex-1 space-y-6 max-w-4xl max-w-full">
           <!-- Customer Selection / Details -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200">
-            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 rounded-t-xl">
-              <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <div class="ui-card">
+            <div class="p-4 flex justify-between items-center rounded-t-xl" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
+              <h2 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
                 <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600">
                   <Icon name="lucide:user" class="w-4 h-4" />
                 </div>
@@ -34,7 +34,7 @@
             
             <div class="p-4 md:p-5 space-y-4">
                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">
+                  <label class="ui-label mb-1">
                     {{ t('admin.pages.orders.create.searchCustomer') }}
                   </label>
                   <BaseSelect
@@ -56,7 +56,7 @@
 
                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                    <label class="ui-label mb-1">
                       {{ t('admin.pages.orders.create.customerName') }} <span class="text-red-500">*</span>
                     </label>
                     <BaseInput
@@ -67,7 +67,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                    <label class="ui-label mb-1">
                       {{ t('admin.pages.orders.create.customerPhone') }}
                     </label>
                     <BaseInput
@@ -82,9 +82,9 @@
           </div>
 
           <!-- Shipping Details -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200">
-            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 rounded-t-xl">
-              <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <div class="ui-card">
+            <div class="p-4 flex justify-between items-center rounded-t-xl" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
+              <h2 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
                 <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                   <Icon name="lucide:truck" class="w-4 h-4" />
                 </div>
@@ -95,7 +95,7 @@
             <div class="p-4 md:p-5 space-y-4">
                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                     <label class="block text-sm font-medium text-slate-700 mb-1">
+                     <label class="ui-label mb-1">
                        {{ t('admin.pages.orders.create.shippingProvider') }}
                      </label>
                        <BaseSelect v-model="form.shippingProvider">
@@ -106,7 +106,7 @@
                      </BaseSelect>
                   </div>
                   <div>
-                     <label class="block text-sm font-medium text-slate-700 mb-1">
+                     <label class="ui-label mb-1">
                        {{ t('admin.pages.orders.create.deliveryMode') }}
                      </label>
                      <BaseSelect v-model="form.deliveryMode">
@@ -118,7 +118,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                    <label class="ui-label mb-1">
                       {{ t('admin.pages.orders.create.wilaya') }}
                     </label>
                     <BaseSelect v-model="form.shippingWilayaCode">
@@ -127,7 +127,7 @@
                     </BaseSelect>
                   </div>
                   <div>
-                     <label class="block text-sm font-medium text-slate-700 mb-1">
+                     <label class="ui-label mb-1">
                        {{ t('admin.pages.orders.create.commune') }}
                      </label>
                      <BaseSelect
@@ -167,7 +167,7 @@
                  class="grid grid-cols-1 md:grid-cols-2 gap-4"
                >
                  <div class="md:col-span-2">
-                   <label class="block text-sm font-medium text-slate-700 mb-1">
+                   <label class="ui-label mb-1">
                      {{ t('admin.pages.orders.create.pickupPoint', 'Stop desk') }}
                    </label>
                    <BaseSelect
@@ -201,20 +201,20 @@
                </div>
 
                <div>
-                 <label class="block text-sm font-medium text-slate-700 mb-1">
+                 <label class="ui-label mb-1">
                    {{ t('admin.pages.orders.create.address') }}
                  </label>
                  <BaseInput v-model="form.shippingAddressLine1" type="text" />
                </div>
                
                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">
+                  <label class="ui-label mb-1">
                     {{ t('admin.pages.orders.create.notes') }}
                   </label>
                   <textarea
                     v-model="form.shippingNotes"
                     rows="2"
-                    class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-colors p-2.5"
+                    class="block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-colors p-2.5" style="border-color: var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
                   />
                </div>
             </div>
@@ -223,9 +223,9 @@
 
         <!-- Right Column: Cart & Summary -->
         <div class="w-full lg:w-[450px] space-y-6 mt-6 lg:mt-0 shrink-0">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col max-h-[calc(100vh-8rem)]">
-            <div class="p-4 border-b border-slate-200 bg-slate-50/50 rounded-t-xl flex justify-between items-center">
-              <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <div class="ui-card flex flex-col max-h-[calc(100vh-8rem)]">
+            <div class="p-4 rounded-t-xl flex justify-between items-center" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
+              <h2 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
                 <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
                   <Icon name="lucide:shopping-bag" class="w-4 h-4" />
                 </div>
@@ -234,41 +234,41 @@
             </div>
 
             <!-- Product Search input inside cart panel to quickly add -->
-            <div class="p-4 border-b border-slate-100 bg-white">
+            <div class="p-4" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
                <div class="relative group">
                   <Icon
                     name="lucide:search"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted)"
                   />
                   <input
                     v-model="productSearch"
                     type="text"
                     :placeholder="t('admin.pages.pos.catalog.searchPlaceholder')"
-                    class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm"
+                    class="w-full pl-9 pr-3 py-2 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary)"
                   >
                   <!-- Search Results Dropdown -->
                   <div 
                     v-if="productSearch.length > 0" 
-                    class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-xl rounded-lg z-50 max-h-60 overflow-y-auto"
+                    class="absolute left-0 right-0 top-full mt-1 shadow-xl rounded-lg z-50 max-h-60 overflow-y-auto" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
                   >
                      <div 
                       v-for="product in searchedProducts" 
                       :key="product.id"
-                      class="p-2 hover:bg-slate-50 border-b border-slate-100 last:border-0 cursor-pointer flex items-center gap-3"
+                      class="p-2 cursor-pointer flex items-center gap-3" style="border-bottom: 1px solid var(--surface-border)"
                       @click="addProductToCart(product)"
                      >
-                        <div class="w-10 h-10 rounded bg-slate-100 overflow-hidden shrink-0">
+                        <div class="w-10 h-10 rounded overflow-hidden shrink-0" style="background: var(--surface-3)">
                            <img 
                             :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" 
                             class="w-full h-full object-cover"
                            >
                         </div>
                         <div class="flex-1 min-w-0">
-                           <div class="font-medium text-sm text-slate-800 truncate">{{ product.title }}</div>
-                           <div class="text-xs text-slate-500">{{ formatCurrency(product.price) }}</div>
+                           <div class="font-medium text-sm truncate" style="color: var(--text-primary)">{{ product.title }}</div>
+                           <div class="text-xs" style="color: var(--text-tertiary)">{{ formatCurrency(product.effectivePrice ?? product.price) }}</div>
                         </div>
                      </div>
-                     <div v-if="searchedProducts.length === 0" class="p-4 text-center text-sm text-slate-500">
+                     <div v-if="searchedProducts.length === 0" class="p-4 text-center text-sm" style="color: var(--text-tertiary)">
                         {{ t('admin.pages.pos.catalog.noProducts') }}
                      </div>
                   </div>
@@ -276,49 +276,49 @@
             </div>
 
             <!-- Cart Items -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30 min-h-[150px]">
-               <div v-if="cartItems.length === 0" class="text-center text-sm text-slate-500 py-8 flex flex-col items-center gap-2">
-                 <Icon name="lucide:shopping-cart" class="w-8 h-8 text-slate-300" />
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[150px]" style="background: var(--surface-2)">
+               <div v-if="cartItems.length === 0" class="text-center text-sm py-8 flex flex-col items-center gap-2" style="color: var(--text-tertiary)">
+                 <Icon name="lucide:shopping-cart" class="w-8 h-8" style="color: var(--text-tertiary)" />
                  {{ t('admin.pages.orders.create.emptyCart') }}
                </div>
 
-               <div v-for="(item, index) in cartItems" :key="index" class="bg-white border text-sm border-slate-200 rounded-lg p-3 flex flex-col gap-3">
+               <div v-for="(item, index) in cartItems" :key="index" class="text-sm rounded-lg p-3 flex flex-col gap-3" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
                   <div class="flex justify-between items-start gap-2">
                     <div class="flex-1 min-w-0">
-                      <div class="font-medium text-slate-800 line-clamp-2 leading-tight">
+                      <div class="font-medium line-clamp-2 leading-tight" style="color: var(--text-primary)">
                         {{ item.title }}
                       </div>
-                      <div v-if="item.variantLabel" class="text-xs text-slate-500 mt-0.5">
+                      <div v-if="item.variantLabel" class="text-xs mt-0.5" style="color: var(--text-tertiary)">
                         {{ item.variantLabel }}
                       </div>
                     </div>
                     <!-- Remove item -->
-                    <button 
+                    <button
                       @click="removeCartItem(index)"
-                      class="text-slate-400 hover:text-red-500 p-1 -m-1 transition-colors"
+                      class="hover:text-red-500 p-1 -m-1 transition-colors" style="color: var(--text-tertiary)"
                     >
                       <Icon name="lucide:x" class="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div class="flex items-center justify-between mt-auto pt-2 border-t border-slate-50">
+                  <div class="flex items-center justify-between mt-auto pt-2" style="border-top: 1px solid var(--surface-border)">
                     <div class="font-bold text-indigo-600">
                       {{ formatCurrency(item.price * item.quantity) }}
                     </div>
                     
-                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-0.5 shadow-sm">
+                    <div class="flex items-center rounded-lg p-0.5 shadow-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                       <button
-                        class="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm disabled:opacity-50 transition-all font-medium"
+                        class="w-6 h-6 flex items-center justify-center rounded-md hover:shadow-sm disabled:opacity-50 transition-all font-medium" style="color: var(--text-secondary)"
                         @click="item.quantity--"
                         :disabled="item.quantity <= 1"
                       >
                         <Icon name="lucide:minus" class="w-3 h-3" />
                       </button>
-                      <span class="w-8 text-center text-sm font-semibold text-slate-700">
+                      <span class="w-8 text-center text-sm font-semibold" style="color: var(--text-secondary)">
                         {{ item.quantity }}
                       </span>
                       <button
-                        class="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm transition-all font-medium"
+                        class="w-6 h-6 flex items-center justify-center rounded-md hover:shadow-sm transition-all font-medium" style="color: var(--text-secondary)"
                         @click="item.quantity++"
                       >
                         <Icon name="lucide:plus" class="w-3 h-3" />
@@ -329,21 +329,21 @@
             </div>
 
             <!-- Summary & Submit -->
-            <div class="bg-white border-t border-slate-200 p-4 rounded-b-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
+            <div class="p-4 rounded-b-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
               <div class="space-y-2 mb-4">
-                <div class="flex justify-between text-sm text-slate-600 font-medium">
+                <div class="flex justify-between text-sm font-medium" style="color: var(--text-secondary)">
                   <span>{{ t('admin.pages.orders.create.itemsTotal') }}</span>
                   <span>{{ formatCurrency(cartTotal) }}</span>
                 </div>
                 <div class="flex justify-between items-center text-lg font-bold">
-                  <span class="text-slate-900">{{ t('admin.common.total') }}</span>
+                  <span style="color: var(--text-primary)">{{ t('admin.common.total') }}</span>
                   <span class="text-indigo-600">{{ formatCurrency(cartTotal) }}</span>
                 </div>
               </div>
 
               <button
                 class="w-full h-12 rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2"
-                :class="canSubmit ? 'bg-teal-600 hover:bg-teal-700 focus:ring-teal-500 shadow-teal-500/30 hover:shadow-lg' : 'bg-slate-300 cursor-not-allowed text-slate-100 shadow-none'"
+                :class="canSubmit ? 'bg-teal-600 hover:bg-teal-700 focus:ring-teal-500 shadow-teal-500/30 hover:shadow-lg' : 'cursor-not-allowed shadow-none'" :style="!canSubmit ? 'background: var(--surface-3); color: var(--text-muted)' : ''"
                 :disabled="!canSubmit || submitting"
                 @click="submitOrder"
               >
@@ -392,14 +392,14 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                 <DialogTitle
                   as="h3"
-                  class="text-lg font-bold leading-6 text-slate-900 flex justify-between items-center"
+                  class="text-lg font-bold leading-6 flex justify-between items-center" style="color: var(--text-primary)"
                 >
                   {{ selectedProductForVariant?.title || 'Select Variant' }}
                   <button
-                    class="p-1 rounded-full hover:bg-slate-100 text-slate-400"
+                    class="p-1 rounded-full" style="color: var(--text-tertiary)"
                     @click="variantModalOpen = false"
                   >
                     <Icon
@@ -411,26 +411,26 @@
                 <div class="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
                   <div
                     v-if="loadingVariants"
-                    class="py-8 text-center text-slate-500"
+                    class="py-8 text-center" style="color: var(--text-tertiary)"
                   >
                     Loading variants...
                   </div>
                   <button
                     v-for="v in availableVariantsForSelection"
                     :key="v.id"
-                    class="w-full p-4 rounded-xl border border-slate-100 hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group"
+                    class="w-full p-4 rounded-xl hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
                     @click="onVariantSelected(v)"
                   >
                     <div class="text-left">
-                      <div class="font-semibold text-slate-900 group-hover:text-teal-800">
+                      <div class="font-semibold group-hover:text-teal-800" style="color: var(--text-primary)">
                         {{ v.label }}
                       </div>
-                      <div class="text-xs text-slate-500 mt-0.5">
+                      <div class="text-xs mt-0.5" style="color: var(--text-tertiary)">
                         {{ v.availableStock }} in stock
                       </div>
                     </div>
                     <div class="font-bold text-teal-600">
-                      {{ formatCurrency(v.price) }}
+                      {{ formatCurrency(v.displayPrice ?? v.price) }}
                     </div>
                   </button>
                 </div>
@@ -452,6 +452,7 @@ import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } fro
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
+import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   layout: 'admin',
@@ -513,10 +514,22 @@ const availableVariantsForSelection = ref<any[]>([])
 const searchedProducts = computed(() => {
     if (!productSearch.value.trim()) return []
     const q = productSearch.value.toLowerCase()
-    return products.value.filter(p => 
-        p.title.toLowerCase().includes(q) || 
-        (p.sku || '').toLowerCase().includes(q)
-    ).slice(0, 5) // Limit results
+    return products.value
+        .filter(p =>
+            p.title.toLowerCase().includes(q) ||
+            (p.sku || '').toLowerCase().includes(q)
+        )
+        .map((product) => {
+            const pricing = buildProductPricing(product)
+            return {
+                ...product,
+                effectivePrice: pricing.effectivePrice,
+                originalPrice: pricing.originalPrice,
+                promotionApplied: pricing.promotionApplied,
+                promotionDiscountPercent: pricing.promotionDiscountPercent
+            }
+        })
+        .slice(0, 5) // Limit results
 })
 
 const cartTotal = computed(() => {
@@ -557,6 +570,7 @@ function onCustomerSelected(value: string | number | boolean | null) {
 
 async function addProductToCart(product: any) {
     productSearch.value = '' // Clear search initially
+    const pricing = buildProductPricing(product)
 
     if (product.options && product.options.length > 0) {
         // Needs variant selection
@@ -571,13 +585,18 @@ async function addProductToCart(product: any) {
             }) as any
             
             availableVariantsForSelection.value = (response.variants || []).map((v: any) => {
+              const variantPricing = buildProductPricing(response, v.price)
               const label = v.optionValues
                 ? v.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ')
                 : 'Default'
               return {
                 ...v,
                 label,
-                availableStock: v.stock - (v.reserved || 0)
+                availableStock: v.stock - (v.reserved || 0),
+                displayPrice: variantPricing.effectivePrice,
+                originalPrice: variantPricing.originalPrice,
+                promotionApplied: variantPricing.promotionApplied,
+                promotionDiscountPercent: variantPricing.promotionDiscountPercent
               }
             })
         } catch (e) {
@@ -590,12 +609,13 @@ async function addProductToCart(product: any) {
         // Add default product immediately
         const existing = cartItems.value.find(i => i.productId === product.id && !i.variantId)
         if (existing) {
+            existing.price = pricing.effectivePrice
             existing.quantity++
         } else {
             cartItems.value.push({
                 productId: product.id,
                 title: product.title,
-                price: product.price,
+                price: pricing.effectivePrice,
                 quantity: 1,
             })
         }
@@ -608,7 +628,12 @@ function onVariantSelected(variant: any) {
     const product = selectedProductForVariant.value
     const existing = cartItems.value.find(i => i.productId === product.id && i.variantId === variant.id)
     
+    const unitPrice = Number.isFinite(Number(variant.displayPrice))
+      ? Number(variant.displayPrice)
+      : Number(variant.price || 0)
+
     if (existing) {
+        existing.price = unitPrice
         existing.quantity++
     } else {
         cartItems.value.push({
@@ -616,7 +641,7 @@ function onVariantSelected(variant: any) {
             variantId: variant.id,
             title: product.title,
             variantLabel: variant.label,
-            price: variant.price,
+            price: unitPrice,
             quantity: 1,
         })
     }

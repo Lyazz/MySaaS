@@ -33,10 +33,6 @@ export const useProductPagination = (items: { value: any[] }, perPage = 12) => {
     goToPage(currentPage.value + 1)
   }
 
-  watch(items, () => {
-    currentPage.value = 1
-  })
-
   watch(totalPages, (nextTotalPages) => {
     if (currentPage.value > nextTotalPages) {
       currentPage.value = nextTotalPages

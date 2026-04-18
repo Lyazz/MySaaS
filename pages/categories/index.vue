@@ -5,8 +5,15 @@ const { t } = useI18n({ useScope: 'global' })
 type Category = {
   id: string
   title: string
+  displayTitle?: string
+  parentId?: string | null
   slug: string
   imageUrl?: string | null
+  parent?: { id: string; title: string } | null
+}
+
+const categoryDisplayTitle = (category: Category): string => {
+  return category.parentId ? `-> ${category.title}` : category.title
 }
 
 const { data: categories, error } = await useFetch<Category[]>(categoriesUrl, {
@@ -56,7 +63,7 @@ definePageMeta({
             <img
               v-if="category.imageUrl"
               :src="category.imageUrl"
-              :alt="category.title"
+              :alt="categoryDisplayTitle(category)"
               class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 bg-white"
             >
             <div
@@ -67,7 +74,7 @@ definePageMeta({
             <div class="absolute inset-0 flex items-end p-6">
               <div class="text-left">
                 <h3 class="text-xl font-bold text-white drop-shadow font-sans">
-                  {{ category.title }}
+                  {{ categoryDisplayTitle(category) }}
                 </h3>
                 <div class="mt-3 inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full bg-white/90 text-brand-700 shadow-sm">
                   {{ t('storefront.pages.categories.card.viewCollection') }}

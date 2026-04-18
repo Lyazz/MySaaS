@@ -423,6 +423,53 @@ describe('Public checkout order flow', () => {
         expect(blocked.status).toBe(400)
     })
 
+    it('prioritizes promotional price at checkout even when promotion flags/date window are inactive', async () => {
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Inactive Promo Checkout Product',
+                slug: `inactive-promo-checkout-${Date.now()}`,
+                price: 200,
+                promotionalPrice: 120,
+                isPromotionActive: false,
+                promotionStartDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                stock: 25,
+                isActive: true
+            }
+        })
+
+        const promoVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                sku: `INACTIVE-PROMO-${Date.now()}`,
+                price: 200,
+                stock: 25
+            }
+        })
+
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Promo Priority Buyer',
+                customerPhone: '0550222333',
+                items: [{ productId: promoProduct.id, variantId: promoVariant.id, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.items).toHaveLength(1)
+        expect(Number(saved?.items[0].price)).toBe(120)
+        expect(Number(saved?.totalAmount)).toBe(240)
+    })
+
     it('rejects checkout when phone is missing', async () => {
         const res = await request(app)
             .post('/api/orders')
@@ -619,6 +666,55 @@ describe('Admin Order Creation', () => {
         expect(saved?.items[0].quantity).toBe(3)
         // Admin orders start as PENDING by default based on our implementation
         expect(saved?.status).toBe('PENDING')
+    })
+
+    it('prioritizes promotional price on admin order creation when promo is set', async () => {
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Admin Inactive Promo Product',
+                slug: `admin-inactive-promo-${Date.now()}`,
+                price: 180,
+                promotionalPrice: 95,
+                isPromotionActive: false,
+                promotionStartDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                stock: 40,
+                isActive: true
+            }
+        })
+
+        const promoVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                sku: `ADM-PROMO-${Date.now()}`,
+                price: 180,
+                stock: 40
+            }
+        })
+
+        const res = await request(app)
+            .post('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerName: 'Admin Promo Customer',
+                customerPhone: '0550111000',
+                items: [{ productId: promoProduct.id, variantId: promoVariant.id, quantity: 3 }]
+            })
+
+        expect(res.status).toBe(201)
+        expect(res.body.success).toBe(true)
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.items).toHaveLength(1)
+        expect(Number(saved?.items[0].price)).toBe(95)
+        expect(Number(saved?.totalAmount)).toBe(285)
     })
 
     it('rejects admin order creation with empty items', async () => {

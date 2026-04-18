@@ -23,10 +23,10 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-800">
+        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
           {{ t('admin.nav.orders') }}
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="mt-1" style="color: var(--text-secondary)">
           {{ t('admin.pages.orders.index.subtitle') }}
         </p>
       </div>
@@ -53,10 +53,10 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.orders.index.filters.searchLabel') }}</label>
+          <label class="ui-label mb-1">{{ t('admin.pages.orders.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
             :placeholder="t('admin.pages.orders.index.filters.searchPlaceholder')"
@@ -105,7 +105,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
-      <p class="mt-2 text-gray-600">
+      <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.orders.index.loading') }}
       </p>
     </div>
@@ -115,11 +115,11 @@
       v-else-if="orders.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-gray-400" />
-      <h3 class="mt-2 text-sm font-medium text-gray-900">
+      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
+      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
         {{ t('admin.pages.orders.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
         {{ emptyHint }}
       </p>
     </div>
@@ -136,19 +136,20 @@
               <th class="ui-th w-10">
                 <input
                   type="checkbox"
-                  class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  style="border-color: var(--surface-border); background: var(--surface-3)"
                   :checked="allPendingSelected"
                   :disabled="pendingIdsOnPage.length === 0"
                   @change="toggleSelectAllPending"
                 />
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('id')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('id')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.orderId') }}
                   <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('customerName')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('customerName')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.customer') }}
                   <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -160,19 +161,19 @@
               <th class="ui-th">
                 {{ t('admin.pages.orders.index.table.delivery', 'Delivery') }}
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('totalAmount')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('totalAmount')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.total', 'Total') }}
                   <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('status')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('status')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.status') }}
                   <Icon v-if="sortBy === 'status'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
                 </div>
               </th>
-              <th class="ui-th cursor-pointer hover:bg-slate-50 transition-colors" @click="setSort('createdAt')">
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('createdAt')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.date') }}
                   <Icon v-if="sortBy === 'createdAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
@@ -193,7 +194,8 @@
                 <input
                   v-if="order.status === 'PENDING'"
                   type="checkbox"
-                  class="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  style="border-color: var(--surface-border); background: var(--surface-3)"
                   :checked="selectedIds.includes(order.id)"
                   @change="toggleSelectOne(order.id)"
                 />
@@ -201,7 +203,7 @@
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
                   :to="`/admin/orders/${order.id}`"
-                  class="font-medium text-slate-900 hover:text-teal-600 transition-colors"
+                  class="font-medium hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
                 >
                   #{{ order.id.substring(0, 8) }}
                 </NuxtLink>
@@ -210,11 +212,11 @@
                 <NuxtLink
                   v-if="order.customerId"
                   :to="`/admin/customers/${order.customerId}`"
-                  class="text-slate-900 hover:text-teal-600 transition-colors"
+                  class="hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
                 >
                   {{ order.customerName }}
                 </NuxtLink>
-                <div v-else class="text-slate-900">
+                <div v-else style="color: var(--text-primary)">
                   {{ order.customerName }}
                 </div>
               </td>
@@ -222,29 +224,29 @@
                 <a
                   v-if="order.customerPhone"
                   :href="`tel:${order.customerPhone}`"
-                  class="text-slate-600 hover:text-teal-600 transition-colors"
+                  class="hover:text-teal-600 transition-colors" style="color: var(--text-secondary)"
                 >
                   {{ order.customerPhone }}
                 </a>
-                <div v-else class="text-slate-400">
+                <div v-else style="color: var(--text-tertiary)">
                   -
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <div class="flex flex-col gap-1">
-                  <div class="text-sm text-slate-900">
+                  <div class="text-sm" style="color: var(--text-primary)">
                     {{ order.shippingProvider || '—' }}
                   </div>
-                  <div class="text-xs text-slate-500">
+                  <div class="text-xs" style="color: var(--text-tertiary)">
                     {{ deliveryModeLabel(order.deliveryMode) }}
                   </div>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium text-slate-900">
+                <div class="font-medium" style="color: var(--text-primary)">
                   {{ formatCurrency(order.totalWithShippingAmount ?? order.totalAmount) }}
                 </div>
-                <div v-if="order.shippingAmount != null && Number(order.shippingAmount) > 0" class="text-xs text-slate-500">
+                <div v-if="order.shippingAmount != null && Number(order.shippingAmount) > 0" class="text-xs" style="color: var(--text-tertiary)">
                   +{{ formatCurrency(Number(order.shippingAmount)) }}
                 </div>
               </td>
@@ -253,27 +255,27 @@
                   <AdminOrderStatusBadge :status="order.status" />
                   <span
                     v-if="order.status === 'PENDING' && order.callStatus"
-                    class="text-xs text-gray-500 truncate max-w-[120px]"
+                    class="text-xs truncate max-w-[120px]" style="color: var(--text-tertiary)"
                   >
                     {{ t(`admin.pages.orders.detail.fields.callStatusValues.${order.callStatus}`) }}
                   </span>
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-slate-600">
+              <td class="ui-td whitespace-nowrap" style="color: var(--text-secondary)">
                 {{ formatDate(order.createdAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/orders/${order.id}`"
-                    class="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <button
                     v-if="order.status === 'PENDING'"
-                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    class="p-2 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('common.delete', 'Delete')"
                     @click="openSingleDelete(order.id)"
                   >
@@ -287,7 +289,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -296,7 +298,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm text-slate-600">
+          <span class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -309,7 +311,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-slate-700">
+            <p class="text-sm" style="color: var(--text-secondary)">
               {{ t('admin.common.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, total),
@@ -321,7 +323,8 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium disabled:opacity-50"
+                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -332,16 +335,18 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    ? 'z-10 border-teal-500 text-teal-400 bg-teal-950/40'
+                    : ''
                 ]"
+                :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
                 @click="currentPage = page"
               >
                 {{ page }}
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium disabled:opacity-50"
+                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}

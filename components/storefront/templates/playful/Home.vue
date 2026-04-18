@@ -14,6 +14,12 @@ const props = defineProps<{
 const cartStore = useCartStore()
 
 const storefrontContent = useStorefrontContent()
+
+const categoryDisplayTitle = (category: any): string => {
+    if (!category) return ""
+    return category.parentId ? ("-> " + category.title) : category.title
+}
+
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
@@ -221,7 +227,7 @@ const displayedProducts = computed(() => {
               <img
                 v-if="cat.imageUrl"
                 :src="cat.imageUrl"
-                :alt="cat.title"
+                :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110"
               >
               <div
@@ -235,11 +241,11 @@ const displayedProducts = computed(() => {
             <!-- Floating Label -->
             <div class="absolute -bottom-4 md:-bottom-6 transform translate-y-0 group-hover:-translate-y-2 transition-transform duration-300 bg-white px-6 py-3 md:px-8 md:py-4 rounded-[2rem] shadow-lg border-4 border-purple-100 z-10 flex flex-col items-center min-w-[120px]">
               <h3 class="text-lg md:text-xl font-black text-[#4c1d95] mb-0.5 whitespace-nowrap font-display drop-shadow-[0_2px_2px_rgba(0,0,0,0.05)]">
-                {{ cat.title }}
+                {{ categoryDisplayTitle(cat) }}
               </h3>
-	              <span class="text-purple-500 font-bold text-xs md:text-sm bg-purple-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-	                {{ storefrontContent.common.productsCount(cat.itemCount) }}
-	              </span>
+                <span class="text-purple-500 font-bold text-xs md:text-sm bg-purple-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+                  {{ storefrontContent.common.productsCount(cat.itemCount) }}
+                </span>
             </div>
           </NuxtLink>
         </div>
@@ -266,7 +272,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="i in 4"
             :key="i"
-            class="flex-shrink-0 w-64 md:w-72 animate-pulse bg-white p-4 rounded-3xl border-2 border-slate-100"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse bg-white p-4 rounded-3xl border-2 border-slate-100"
           >
             <div class="bg-slate-100 rounded-2xl h-64 md:h-80 mb-4" />
             <div class="h-4 bg-slate-100 rounded-full w-3/4 mb-3" />
@@ -286,7 +292,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-64 md:w-72 transition-all duration-300 transform"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 transition-all duration-300 transform"
             :class="index % 2 === 0 ? 'mt-0' : 'mt-8'"
           >
             <ProductCard
@@ -341,7 +347,7 @@ const displayedProducts = computed(() => {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-64 md:w-72 transition-all duration-300 transform"
+            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 transition-all duration-300 transform"
             :class="index % 2 === 1 ? 'mt-0' : 'mt-8'"
           >
             <ProductCard
