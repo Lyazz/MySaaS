@@ -29,14 +29,11 @@ export const useAuthStore = defineStore('auth', () => {
     const isAuthenticated = computed(() => !!token.value)
 
     async function login(email: string, password: string): Promise<boolean> {
-        console.log('[Auth Store] logging in with', email)
         try {
             const data = await $fetch('/api/login', {
                 method: 'POST',
                 body: { email, password }
             }) as any
-
-            console.log('[Auth Store] Login success data:', data)
 
             if (data && data.success) {
                 token.value = data.token
@@ -46,12 +43,11 @@ export const useAuthStore = defineStore('auth', () => {
                 }
                 staffRole.value = data.staffRole ?? null
                 staffPermissions.value = data.staffPermissions ?? null
-                console.log('[Auth Store] Token set, returning true')
                 return true
             }
             return false
         } catch (e: any) {
-            console.error('[Auth Store] Login failed exception', e)
+            console.error('[Auth Store] Login failed')
             return false
         }
     }

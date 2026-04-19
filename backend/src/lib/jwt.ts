@@ -11,7 +11,7 @@ const getJwtSecret = (): string => {
 export const signAccessToken = (payload: object, opts?: Omit<SignOptions, 'algorithm'>): string => {
     return jwt.sign(payload, getJwtSecret(), {
         algorithm: 'HS256',
-        expiresIn: '24h',
+        expiresIn: '30m',
         ...opts
     })
 }
@@ -21,4 +21,3 @@ export const verifyAccessToken = (token: string): JwtPayload | string => {
         algorithms: ['HS256']
     })
 }
-

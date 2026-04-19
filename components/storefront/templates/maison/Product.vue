@@ -102,10 +102,10 @@ watch([() => props.product, selectedOptions], ([product]) => {
     <div class="pdp__desc">
       <div class="pdp__desc-inner">
         <h2 class="pdp__desc-title">{{ storefrontContent.product.detailsTitle }}</h2>
-        <div
+        <SafeRichText
           v-if="product?.description"
           class="pdp__desc-content"
-          v-html="product.description"
+          :html="product.description"
         />
         <p v-else class="pdp__desc-fallback">{{ storefrontContent.product.descriptionFallback }}</p>
       </div>

@@ -81,10 +81,10 @@ const cartImage = computed(() => images.value[0])
         <h1 class="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-8 leading-tight">
             {{ product?.title }}
         </h1>
-        <div 
+        <SafeRichText 
         v-if="product?.description" 
         class="prose prose-lg md:prose-xl prose-slate mx-auto prose-img:rounded-none prose-img:w-full prose-headings:font-serif prose-headings:font-bold prose-p:font-light prose-a:text-slate-900"
-        v-html="product.description"
+        :html="product.description"
         />
         <!-- Fallback Description -->
         <p v-else class="text-slate-600 text-xl leading-relaxed font-light">

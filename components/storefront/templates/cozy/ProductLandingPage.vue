@@ -79,10 +79,10 @@ watch([() => props.product, selectedOptions], ([product]) => {
   <div class="min-h-screen bg-gradient-to-b from-amber-50/50 to-white pb-32 md:pb-12">
     <!-- Full Width Description Section -->
     <div class="w-full mb-8 bg-white/80 backdrop-blur-sm border-b border-amber-100">
-        <div 
+        <SafeRichText 
           v-if="product?.description" 
           class="prose prose-lg md:prose-xl prose-headings:font-cozy prose-headings:text-slate-800 max-w-4xl mx-auto text-slate-600 p-8 md:p-12"
-          v-html="product.description"
+          :html="product.description"
         />
         <p v-else class="text-slate-500 text-lg max-w-4xl mx-auto p-8 md:p-12">
             Experience premium quality with our latest collection. Crafted with care for your comfort.

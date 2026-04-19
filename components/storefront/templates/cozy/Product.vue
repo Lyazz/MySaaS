@@ -120,10 +120,10 @@ watch([() => props.product, selectedOptions], ([product]) => {
     <!-- Full Description -->
     <div class="mt-16 pt-8 border-t border-slate-100">
       <h2 class="font-cozy font-bold text-2xl text-slate-800 mb-6">{{ storefrontContent.product.detailsTitle }}</h2>
-      <div 
+      <SafeRichText 
         v-if="product?.description" 
         class="prose prose-lg prose-headings:font-cozy max-w-none bg-white p-8 rounded-[2rem] shadow-soft"
-        v-html="product.description"
+        :html="product.description"
       />
       <div
         v-else

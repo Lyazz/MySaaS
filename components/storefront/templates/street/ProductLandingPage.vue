@@ -79,10 +79,10 @@ watch([() => props.product, selectedOptions], ([product]) => {
   <div class="min-h-screen bg-gray-50 pb-32 md:pb-12">
     <!-- Full Width Description Section -->
     <div class="w-full mb-8 bg-white border-b-4 border-black">
-        <div 
+        <SafeRichText 
           v-if="product?.description" 
           class="prose prose-lg md:prose-xl prose-headings:font-street prose-headings:uppercase max-w-none text-black p-8 md:p-12"
-          v-html="product.description"
+          :html="product.description"
         />
         <p v-else class="text-gray-600 text-lg font-mono uppercase p-8 md:p-12">
             Experience premium quality with our latest collection.

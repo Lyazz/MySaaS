@@ -2,11 +2,30 @@
 const envSsr = process.env.NUXT_SSR
 const ssrEnabled =
   envSsr == null ? true : !['false', '0', 'no'].includes(envSsr.toLowerCase())
+const cspReportOnly = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "img-src 'self' data: https:",
+  "font-src 'self' https://fonts.gstatic.com data:",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "connect-src 'self' https:"
+].join('; ')
+const securityHeaders = {
+  'Content-Security-Policy-Report-Only': cspReportOnly,
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), geolocation=(), microphone=()'
+}
+const withSecurityHeaders = (headers: Record<string, string> = {}) => ({ ...securityHeaders, ...headers })
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   ssr: ssrEnabled,
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
   runtimeConfig: {
     public: {
       // Used by client-side redirects/URL builders (e.g. send tenant admins to root host).
@@ -43,21 +62,23 @@ export default defineNuxtConfig({
     vueI18n: './i18n.config.ts'
   },
   routeRules: {
+    '/**': { headers: withSecurityHeaders() },
+
     // Never allow crawlers to index API responses.
-    '/api/**': { headers: { 'x-robots-tag': 'noindex, nofollow, noarchive, nosnippet' } },
+    '/api/**': { headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive, nosnippet' }) },
 
     // Admin areas must not be SSR-rendered (avoid leaking data in HTML) and must not be indexed by crawlers.
-    '/admin': { ssr: false, headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
-    '/admin/**': { ssr: false, headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
-    '/super-admin': { ssr: false, headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
-    '/super-admin/**': { ssr: false, headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
+    '/admin': { ssr: false, headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
+    '/admin/**': { ssr: false, headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
+    '/super-admin': { ssr: false, headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
+    '/super-admin/**': { ssr: false, headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
 
     // Auth / transactional pages are not SEO targets.
-    '/login': { headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
-    '/register': { headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
-    '/cart': { headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
-    '/checkout': { headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } },
-    '/order-success': { headers: { 'x-robots-tag': 'noindex, nofollow, noarchive' } }
+    '/login': { headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
+    '/register': { headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
+    '/cart': { headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
+    '/checkout': { headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
+    '/order-success': { headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) }
   },
   icon: {
     componentName: 'Icon'

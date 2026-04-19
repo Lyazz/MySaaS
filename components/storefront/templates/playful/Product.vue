@@ -158,10 +158,10 @@ watch([() => props.product, selectedOptions], ([product]) => {
             <span class="text-4xl">✨</span> {{ storefrontContent.product.detailsTitle }} <span class="text-4xl">✨</span>
           </h2>
           <div class="relative bg-white p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border-4 border-purple-100 z-10" style="border-radius: 40px 100px 40px 100px;">
-          <div 
+          <SafeRichText 
           v-if="product?.description" 
           class="prose prose-slate prose-lg text-slate-600 max-w-none leading-relaxed"
-          v-html="product.description"
+          :html="product.description"
           />
           <div
           v-else

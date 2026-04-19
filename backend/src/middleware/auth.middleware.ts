@@ -20,6 +20,7 @@ export const expressAuthMiddleware = async (req: Request, res: Response, next: N
     // 3. Verify JWT
     try {
         const decoded = verifyAccessToken(token) as any
+        const issuedAt = typeof decoded?.iat === 'number' ? decoded.iat : null
 
         if (decoded && typeof decoded === 'object' && decoded.userId) {
             // Optional: Fetch full user if needed, or just trust token payload for speed
@@ -33,6 +34,14 @@ export const expressAuthMiddleware = async (req: Request, res: Response, next: N
             })
 
             if (user) {
+                const tokenInvalidBefore = (user as any).tokenInvalidBefore
+                if (tokenInvalidBefore instanceof Date) {
+                    const tokenInvalidBeforeSec = Math.floor(tokenInvalidBefore.getTime() / 1000)
+                    if (!issuedAt || issuedAt <= tokenInvalidBeforeSec) {
+                        return next()
+                    }
+                }
+
                 req.user = user
                 // Also enforce tenant context if mismatch?
                 // The middleware/tenant.ts sets req.context.tenant
@@ -41,7 +50,7 @@ export const expressAuthMiddleware = async (req: Request, res: Response, next: N
         }
     } catch (e) {
         // invalid token
-        console.error('Auth middleware error or invalid token')
+        console.warn('Auth middleware: invalid token')
     }
 
     next()

@@ -6,6 +6,9 @@ import { signAccessToken } from '../../lib/jwt'
 import { seedStaffRolePresets } from '../staff-roles/presets'
 
 const router = Router()
+const MIN_PASSWORD_LENGTH = 8
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const DUMMY_PASSWORD_HASH = '$2b$10$X9pL7vT6A2mQjO5k9sXXuuBkEFGhqUJSTjhRLuVVU3hV3MGWST5Oi'
 
 const addUtcMonths = (date: Date, months: number) =>
     new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
@@ -21,17 +24,32 @@ router.post('/register', async (req, res) => {
 
     const { name, slug, email, password } = req.body
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+    const normalizedSlug = typeof slug === 'string' ? slug.trim() : ''
 
-    if (!name || !slug || !normalizedEmail || !password) {
+    if (typeof name !== 'string' || !name.trim() || !normalizedSlug || !normalizedEmail || typeof password !== 'string') {
         return res.status(400).json({
             statusCode: 400,
             statusMessage: 'Missing required fields'
         })
     }
 
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+        return res.status(400).json({
+            statusCode: 400,
+            statusMessage: 'Invalid email format'
+        })
+    }
+
+    if (password.length < MIN_PASSWORD_LENGTH) {
+        return res.status(400).json({
+            statusCode: 400,
+            statusMessage: `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
+        })
+    }
+
     // Basic slug validation
     const slugRegex = /^[a-z0-9-]+$/
-    if (!slugRegex.test(slug)) {
+    if (!slugRegex.test(normalizedSlug)) {
         return res.status(400).json({
             statusCode: 400,
             statusMessage: 'Invalid slug format. Use lowercase letters, numbers, and hyphens only.'
@@ -41,7 +59,7 @@ router.post('/register', async (req, res) => {
     try {
         // Check if tenant exists
         const existingTenant = await prisma.tenant.findUnique({
-            where: { slug }
+            where: { slug: normalizedSlug }
         })
 
         if (existingTenant) {
@@ -59,7 +77,7 @@ router.post('/register', async (req, res) => {
             const tenant = await tx.tenant.create({
                 data: {
                     name,
-                    slug,
+                    slug: normalizedSlug,
                 }
             })
 
@@ -133,9 +151,7 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
 
-    console.log('Login attempt:', { email: normalizedEmail, passwordProvided: !!password })
-
-    if (!normalizedEmail || !password) {
+    if (!normalizedEmail || typeof password !== 'string' || password.length === 0) {
         return res.status(400).json({
             statusCode: 400,
             statusMessage: 'Email and password are required'
@@ -174,9 +190,8 @@ router.post('/login', async (req, res) => {
             user = matches[0] ?? null
         }
 
-        console.log('Login user found:', user ? user.email : 'not found')
-
         if (!user || !user.passwordHash) {
+            await bcrypt.compare(password, DUMMY_PASSWORD_HASH)
             return res.status(401).json({
                 statusCode: 401,
                 statusMessage: 'Invalid credentials'
@@ -184,7 +199,6 @@ router.post('/login', async (req, res) => {
         }
 
         const isValid = await bcrypt.compare(password, user.passwordHash)
-        console.log('Login password valid:', isValid)
 
         if (!isValid) {
             return res.status(401).json({
@@ -233,6 +247,36 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Login error:', error)
         res.status(500).json({
+            statusCode: 500,
+            statusMessage: 'Internal Server Error'
+        })
+    }
+})
+
+router.post('/logout', async (req, res) => {
+    const user = req.user
+    if (!user) {
+        return res.status(401).json({
+            statusCode: 401,
+            statusMessage: 'Unauthorized'
+        })
+    }
+
+    try {
+        await prisma.user.updateMany({
+            where: {
+                id: user.id,
+                tenantId: user.tenantId
+            },
+            data: {
+                tokenInvalidBefore: new Date()
+            }
+        })
+
+        return res.json({ success: true })
+    } catch (error) {
+        console.error('Logout error:', error)
+        return res.status(500).json({
             statusCode: 500,
             statusMessage: 'Internal Server Error'
         })

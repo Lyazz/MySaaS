@@ -312,9 +312,8 @@ export class DeliveryAccountsService {
 
         const host = tenant.domains[0]?.domain?.trim() || `${tenant.slug}.${platformDomain}`
 
-        // Generate a per-tenant secret if not already stored. This secret is embedded
-        // in the registered webhook URL so only Maystro (which received the URL from us)
-        // can send requests that pass validation.
+        // Generate a per-tenant secret if not already stored.
+        // Receiver prefers X-Webhook-Secret and still accepts ?secret=... as legacy fallback.
         let webhookSecret = typeof config.webhookSecret === 'string' ? config.webhookSecret : ''
         if (!webhookSecret) {
             webhookSecret = randomBytes(32).toString('hex')
@@ -344,7 +343,7 @@ export class DeliveryAccountsService {
             if (url.includes(`${host}/api/webhooks/maystro`) && url !== webhookUrl) {
                 try {
                     await hooks.deleteHook({ apiToken, id: h.id })
-                    console.log(`[delivery-accounts] Removed stale Maystro webhook for tenant ${tenantId}: ${url}`)
+                    console.log(`[delivery-accounts] Removed stale Maystro webhook for tenant ${tenantId}`)
                 } catch {
                     // best-effort: log but don't block registration
                 }
@@ -356,6 +355,6 @@ export class DeliveryAccountsService {
         if (alreadyRegistered) return
 
         await hooks.createHook({ apiToken, endpoint: webhookUrl, triggerTypeId: allType.id })
-        console.log(`[delivery-accounts] Maystro webhook registered for tenant ${tenantId}: ${webhookUrl}`)
+        console.log(`[delivery-accounts] Maystro webhook registered for tenant ${tenantId}`)
     }
 }

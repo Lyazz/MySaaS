@@ -1,0 +1,176 @@
+<h2>Admin Panel Design Direction</h2>
+<p class="subtitle">Three distinct approaches to elevate the UI/UX across all admin pages. Which feels right for your product?</p>
+
+<div class="cards" style="grid-template-columns: repeat(3, 1fr);">
+
+  <!-- Option A: Refined Dark + Data-Dense -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0e1014; padding: 16px; font-family: 'DM Sans', sans-serif; min-height: 240px;">
+      <!-- Header bar -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div>
+          <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:#52525b; font-weight:700;">Products</div>
+          <div style="font-size:16px; font-weight:600; color:#f4f4f5; margin-top:2px;">142 items</div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <div style="padding:5px 10px; background:#1c1f27; border:1px solid rgba(255,255,255,0.07); border-radius:6px; font-size:10px; color:#a1a1aa;">Export</div>
+          <div style="padding:5px 10px; background:#0F766E; border-radius:6px; font-size:10px; color:#fff; font-weight:500;">+ Add</div>
+        </div>
+      </div>
+      <!-- Filter strip -->
+      <div style="display:flex; gap:6px; margin-bottom:12px;">
+        <div style="flex:1; background:#16191f; border:1px solid rgba(255,255,255,0.07); border-radius:6px; padding:5px 10px; font-size:10px; color:#52525b;">🔍 Search products…</div>
+        <div style="padding:5px 10px; background:#16191f; border:1px solid rgba(255,255,255,0.07); border-radius:6px; font-size:10px; color:#a1a1aa;">Category ▾</div>
+        <div style="padding:5px 10px; background:#16191f; border:1px solid rgba(255,255,255,0.07); border-radius:6px; font-size:10px; color:#a1a1aa;">Status ▾</div>
+      </div>
+      <!-- Table -->
+      <div style="background:#16191f; border:1px solid rgba(255,255,255,0.07); border-radius:10px; overflow:hidden;">
+        <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; padding:7px 12px; border-bottom:1px solid rgba(255,255,255,0.05);">
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#52525b; font-weight:600;">Product</div>
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#52525b; font-weight:600;">Price</div>
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#52525b; font-weight:600;">Stock</div>
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#52525b; font-weight:600;">Status</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.04); align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:28px; height:28px; background:#22262f; border-radius:6px;"></div>
+            <div style="font-size:10px; color:#f4f4f5;">Premium Sneaker</div>
+          </div>
+          <div style="font-size:10px; color:#a1a1aa;">2,400 DA</div>
+          <div style="font-size:10px; color:#4ade80;">45</div>
+          <div style="font-size:8px; background:rgba(74,222,128,0.1); color:#4ade80; padding:2px 6px; border-radius:4px; display:inline-block;">Active</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; padding:8px 12px; align-items:center; background:rgba(255,255,255,0.01);">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:28px; height:28px; background:#22262f; border-radius:6px;"></div>
+            <div style="font-size:10px; color:#f4f4f5;">Sport Hoodie</div>
+          </div>
+          <div style="font-size:10px; color:#a1a1aa;">5,800 DA</div>
+          <div style="font-size:10px; color:#fbbf24;">3</div>
+          <div style="font-size:8px; background:rgba(251,191,36,0.1); color:#fbbf24; padding:2px 6px; border-radius:4px; display:inline-block;">Low Stock</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Refined Dark — Data-First</h3>
+      <p>Polish what exists: tighter spacing, stronger typography hierarchy, better status colors. More information density, cleaner grid, professional feel. Lowest risk, fastest to implement.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Structured Light + Sidebar Stats -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #f8fafc; padding: 16px; font-family: 'DM Sans', sans-serif; min-height: 240px;">
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <div>
+          <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:#94a3b8; font-weight:700;">Inventory</div>
+          <div style="font-size:16px; font-weight:700; color:#0f172a; margin-top:2px; letter-spacing:-0.02em;">Products</div>
+        </div>
+        <div style="display:flex; gap:5px; align-items:center;">
+          <div style="padding:5px 10px; background:#fff; border:1px solid #e2e8f0; border-radius:6px; font-size:9px; color:#64748b;">↓ Export</div>
+          <div style="padding:5px 10px; background:#0F766E; border-radius:6px; font-size:9px; color:#fff; font-weight:600;">+ Add Product</div>
+        </div>
+      </div>
+      <!-- Stat mini-row -->
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:12px;">
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:8px; text-align:center;">
+          <div style="font-size:14px; font-weight:700; color:#0f172a;">142</div>
+          <div style="font-size:8px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-top:1px;">Total</div>
+        </div>
+        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:8px; text-align:center;">
+          <div style="font-size:14px; font-weight:700; color:#16a34a;">128</div>
+          <div style="font-size:8px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.08em; margin-top:1px;">Active</div>
+        </div>
+        <div style="background:#fff; border:1px solid #fde68a; border-radius:8px; padding:8px; text-align:center; background: #fffbeb;">
+          <div style="font-size:14px; font-weight:700; color:#d97706;">9</div>
+          <div style="font-size:8px; color:#d97706; text-transform:uppercase; letter-spacing:0.08em; margin-top:1px;">Low Stock</div>
+        </div>
+      </div>
+      <!-- Table light -->
+      <div style="background:#fff; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden;">
+        <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; padding:7px 12px; background:#f1f5f9; border-bottom:1px solid #e2e8f0;">
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; font-weight:600;">Product</div>
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; font-weight:600;">Price</div>
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; font-weight:600;">Stock</div>
+          <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; font-weight:600;">Status</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; padding:8px 12px; border-bottom:1px solid #f1f5f9; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:28px; height:28px; background:#f1f5f9; border-radius:6px; border:1px solid #e2e8f0;"></div>
+            <div style="font-size:10px; color:#0f172a; font-weight:500;">Premium Sneaker</div>
+          </div>
+          <div style="font-size:10px; color:#64748b;">2,400 DA</div>
+          <div style="font-size:10px; color:#16a34a; font-weight:600;">45</div>
+          <div style="font-size:8px; background:#dcfce7; color:#16a34a; padding:2px 6px; border-radius:4px; display:inline-block; font-weight:500;">Active</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 60px 60px 60px; padding:8px 12px; align-items:center;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:28px; height:28px; background:#f1f5f9; border-radius:6px; border:1px solid #e2e8f0;"></div>
+            <div style="font-size:10px; color:#0f172a; font-weight:500;">Sport Hoodie</div>
+          </div>
+          <div style="font-size:10px; color:#64748b;">5,800 DA</div>
+          <div style="font-size:10px; color:#d97706; font-weight:600;">3</div>
+          <div style="font-size:8px; background:#fef3c7; color:#d97706; padding:2px 6px; border-radius:4px; display:inline-block; font-weight:500;">Low Stock</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Structured Light — Context-Rich</h3>
+      <p>Switch to a light admin theme with inline stat summaries above each table. Adds quick context (total/active/low-stock counts) without leaving the page. Feels more like a modern SaaS dashboard.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Dark + Card-Row Hybrid -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #111318; padding: 16px; font-family: 'DM Sans', sans-serif; min-height: 240px;">
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div>
+          <div style="font-size:16px; font-weight:600; color:#f4f4f5; letter-spacing:-0.01em;">Products</div>
+          <div style="font-size:10px; color:#52525b; margin-top:2px;">142 items · Last updated 2 min ago</div>
+        </div>
+        <div style="padding:5px 12px; background:#0F766E; border-radius:7px; font-size:10px; color:#fff; font-weight:600;">+ Add</div>
+      </div>
+      <!-- Search + tabs -->
+      <div style="display:flex; gap:6px; margin-bottom:10px; align-items:center;">
+        <div style="flex:1; background:#16191f; border:1px solid rgba(255,255,255,0.07); border-radius:7px; padding:6px 10px; font-size:10px; color:#52525b;">🔍 Search…</div>
+      </div>
+      <div style="display:flex; gap:2px; margin-bottom:12px; background:#16191f; border-radius:8px; padding:3px;">
+        <div style="padding:4px 10px; background:#22262f; border-radius:6px; font-size:9px; color:#f4f4f5; font-weight:600;">All</div>
+        <div style="padding:4px 10px; font-size:9px; color:#52525b;">Active</div>
+        <div style="padding:4px 10px; font-size:9px; color:#52525b;">Low Stock</div>
+        <div style="padding:4px 10px; font-size:9px; color:#52525b;">Draft</div>
+      </div>
+      <!-- Card rows instead of plain table -->
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="background:#16191f; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:10px 12px; display:grid; grid-template-columns:32px 1fr 60px 60px 60px; gap:10px; align-items:center;">
+          <div style="width:32px; height:32px; background:#22262f; border-radius:7px;"></div>
+          <div>
+            <div style="font-size:10px; color:#f4f4f5; font-weight:500;">Premium Sneaker</div>
+            <div style="font-size:8px; color:#52525b; margin-top:1px;">Footwear · SKU-4421</div>
+          </div>
+          <div style="font-size:10px; color:#a1a1aa; text-align:right;">2,400 DA</div>
+          <div style="font-size:10px; color:#4ade80; text-align:right; font-weight:600;">45</div>
+          <div style="font-size:8px; background:rgba(74,222,128,0.1); color:#4ade80; padding:2px 7px; border-radius:20px; text-align:center;">Active</div>
+        </div>
+        <div style="background:#16191f; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:10px 12px; display:grid; grid-template-columns:32px 1fr 60px 60px 60px; gap:10px; align-items:center;">
+          <div style="width:32px; height:32px; background:#22262f; border-radius:7px;"></div>
+          <div>
+            <div style="font-size:10px; color:#f4f4f5; font-weight:500;">Sport Hoodie</div>
+            <div style="font-size:8px; color:#52525b; margin-top:1px;">Apparel · SKU-2218</div>
+          </div>
+          <div style="font-size:10px; color:#a1a1aa; text-align:right;">5,800 DA</div>
+          <div style="font-size:10px; color:#fbbf24; text-align:right; font-weight:600;">3</div>
+          <div style="font-size:8px; background:rgba(251,191,36,0.1); color:#fbbf24; padding:2px 7px; border-radius:20px; text-align:center;">Low</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Dark + Card Rows + Tab Filters</h3>
+      <p>Replace flat table rows with rounded card rows that show a subtitle (SKU/category). Add tab-based quick filters above the table. More spatial, more scannable. Modern app-like feel.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top: 16px; text-align:center;">Click a card to select it, then tell me in the terminal. You can also describe what you like/dislike about each.</p>

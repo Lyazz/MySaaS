@@ -76,10 +76,10 @@ const cartImage = computed(() => images.value[0])
   <div class="bg-slate-50 min-h-screen py-6 font-wellness pb-24 md:pb-10 overflow-x-hidden w-full">
     <!-- Description Section (Raw & Full Width & No Margins) -->
     <div class="w-full mb-8 animate-fade-in-up">
-        <div 
+        <SafeRichText 
         v-if="product?.description" 
         class="prose prose-lg md:prose-xl prose-img:rounded-xl prose-img:w-full prose-img:shadow-sm max-w-none text-slate-800"
-        v-html="product.description"
+        :html="product.description"
         />
         <!-- Fallback Description -->
         <p v-else class="text-slate-600 text-lg leading-relaxed px-4">

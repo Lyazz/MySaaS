@@ -132,10 +132,10 @@ watch([() => props.product, selectedOptions], ([product]) => {
         >
        
 
-            <div 
+            <SafeRichText 
             v-if="product?.description" 
             class="prose prose-stone prose-lg text-stone-600 max-w-none leading-relaxed bg-white/50 backdrop-blur rounded-[3rem] p-10 md:p-16 shadow-sm border border-stone-100"
-            v-html="product.description"
+            :html="product.description"
             />
             <div
             v-else

@@ -264,7 +264,7 @@
                   <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background: rgba(59,130,246,0.15); color: #60a5fa">
                     <Icon name="lucide:info" class="w-5 h-5" />
                   </div>
-                  <div class="text-sm whitespace-pre-line leading-relaxed flex-1 pt-1" style="color: var(--text-secondary)" v-html="methodInstructions"></div>
+                  <div class="text-sm whitespace-pre-line leading-relaxed flex-1 pt-1" style="color: var(--text-secondary)">{{ methodInstructions }}</div>
                 </div>
 
                 <div v-if="requiresProof(selectedMethod)" class="pt-4" style="border-top: 1px solid var(--surface-border)">

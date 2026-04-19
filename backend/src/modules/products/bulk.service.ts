@@ -4,6 +4,7 @@ import { InventoryService } from '../inventory/inventory.service'
 import { ProductsService } from './products.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { buildPublicUrl } from '../../lib/s3'
+import { sanitizeOptionalRichText } from '../../lib/rich-text'
 
 type ImportSummary = {
     created: number
@@ -388,8 +389,10 @@ export class BulkProductsService {
                 if (hasColumn('stock') && stock === null && (record.stock ?? '').trim()) throw new Error('Invalid stock')
                 if (stock !== null && stock < 0) throw new Error('stock must be >= 0')
 
-                const description = hasColumn('description') ? (record.description ?? '') : undefined
-                const miniDescription = hasColumn('miniDescription') ? (record.miniDescription ?? '') : undefined
+                const description = hasColumn('description') ? sanitizeOptionalRichText(record.description ?? '') : undefined
+                const miniDescription = hasColumn('miniDescription')
+                    ? sanitizeOptionalRichText(record.miniDescription ?? '')
+                    : undefined
                 const images = hasColumn('images') ? normalizeImportedImages(tenantId, record.images ?? '') : undefined
 
                 if (!existing) {
@@ -399,8 +402,8 @@ export class BulkProductsService {
                     const createData: any = {
                         title: rawTitle.trim(),
                         slug,
-                        description: description?.trim() ? description : null,
-                        miniDescription: miniDescription?.trim() ? miniDescription : null,
+                        description,
+                        miniDescription,
                         isActive: isActive ?? true,
                         price: price ?? undefined,
                         stock: stock ?? undefined,
@@ -417,8 +420,8 @@ export class BulkProductsService {
                 // Update
                 const updateData: any = {}
                 if (rawTitle.trim()) updateData.title = rawTitle.trim()
-                if (description !== undefined) updateData.description = description.trim() ? description : null
-                if (miniDescription !== undefined) updateData.miniDescription = miniDescription.trim() ? miniDescription : null
+                if (description !== undefined) updateData.description = description
+                if (miniDescription !== undefined) updateData.miniDescription = miniDescription
                 if (isActive !== null) updateData.isActive = isActive
                 if (categoryIds !== undefined) updateData.categoryIds = categoryIds
                 if (price !== null) updateData.price = price

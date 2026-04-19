@@ -171,11 +171,12 @@ export class DeliveryController {
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         try {
-            // Validate the per-tenant webhook secret embedded in the URL query param.
-            // Since Maystro provides no request signing, this secret-in-URL pattern is the
-            // standard mitigation: only Maystro (which received the registered URL from us)
-            // knows the correct secret value.
-            const incoming = typeof req.query.secret === 'string' ? req.query.secret : ''
+            // Preferred authentication is X-Webhook-Secret.
+            // Legacy fallback (?secret=...) remains for backward compatibility.
+            const incomingHeaderSecret = req.get('x-webhook-secret')
+            const incomingHeader = typeof incomingHeaderSecret === 'string' ? incomingHeaderSecret.trim() : ''
+            const incomingQuery = typeof req.query.secret === 'string' ? req.query.secret.trim() : ''
+            const incoming = incomingHeader || incomingQuery
             const account = await prisma.tenantDeliveryAccount.findUnique({
                 where: { tenantId_provider: { tenantId: tenant.id, provider: 'MAYSTRO' } },
                 select: { config: true }

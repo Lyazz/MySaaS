@@ -76,6 +76,8 @@ export class SuppliersService {
 
         if (!supplier) return null
 
+        // Safe usage: tagged-template $queryRaw parameterizes tenantId/supplierId.
+        // Do not replace with $queryRawUnsafe.
         const receivedRows = await prisma.$queryRaw<Array<{ totalReceived: any }>>`
             SELECT COALESCE(SUM(("PurchaseOrderItem"."quantityReceived"::numeric) * "PurchaseOrderItem"."unitCost"), 0) AS "totalReceived"
             FROM "PurchaseOrderItem"

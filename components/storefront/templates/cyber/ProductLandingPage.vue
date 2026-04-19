@@ -87,10 +87,10 @@ watch([() => props.product, selectedOptions], ([product]) => {
 
     <!-- Description Section -->
     <div class="relative z-10 w-full mb-8 animate-fade-in-up">
-        <div 
+        <SafeRichText 
           v-if="product?.description" 
           class="prose prose-lg md:prose-xl prose-invert prose-img:rounded-xl prose-img:w-full prose-img:shadow-lg prose-p:text-purple-100/90 prose-headings:text-transparent prose-headings:bg-clip-text prose-headings:bg-gradient-to-r prose-headings:from-pink-400 prose-headings:to-orange-400 max-w-none"
-          v-html="product.description"
+          :html="product.description"
         />
         <p v-else class="text-purple-200/80 text-lg leading-relaxed px-4">
             Experience premium quality with our latest collection.

@@ -133,11 +133,11 @@ watch([() => props.product, selectedOptions], ([product]) => {
                 {{ storefrontContent.product.detailsTitle }}
               </h2>
             </div>
-            <div 
+            <SafeRichText 
               v-if="product?.description" 
               class="prose prose-invert prose-lg max-w-none leading-relaxed p-8 border"
               style="background-color:#0B0E16; border-color:rgba(212,197,169,0.08); border-radius:2px; color:#8A8070;"
-              v-html="product.description"
+              :html="product.description"
             />
             <div
               v-else

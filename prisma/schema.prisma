@@ -342,6 +342,7 @@ model User {
   role         String           @default("staff") // owner, admin, staff
   isSuperAdmin Boolean          @default(false)
   isActive     Boolean          @default(true)
+  tokenInvalidBefore DateTime?
   tenantId     String
   tenant       Tenant           @relation(fields: [tenantId], references: [id])
   cashboxId    String?

@@ -3,6 +3,7 @@ import { InventoryService } from '../inventory/inventory.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { deletePublicAssetIfOwned } from '../../lib/public-assets'
+import { sanitizeOptionalRichText } from '../../lib/rich-text'
 
 const normalizeImages = (images: unknown): string[] | undefined => {
     if (images === undefined) return undefined
@@ -264,14 +265,17 @@ export class ProductsService {
 
         const images = normalizeImages(data.images)
 
+        const sanitizedDescription = sanitizeOptionalRichText(data.description)
+        const sanitizedMiniDescription = sanitizeOptionalRichText(data.miniDescription)
+
         const created = await prisma.$transaction(async (tx) => {
             const product = await tx.product.create({
                 data: {
                     tenantId: tenantId,
                     title: data.title,
                     slug: data.slug,
-                    description: data.description,
-                    miniDescription: data.miniDescription,
+                    description: sanitizedDescription,
+                    miniDescription: sanitizedMiniDescription,
                     price: data.price || 0,
                     stock: data.stock || 0,
                     lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : 5,
@@ -446,6 +450,10 @@ export class ProductsService {
         const categoryAssignment = await this.resolveCategoryAssignment(tenantId, data)
 
         const images = normalizeImages(data.images)
+        const sanitizedDescription = this.hasOwn(data, 'description') ? sanitizeOptionalRichText(data.description) : undefined
+        const sanitizedMiniDescription = this.hasOwn(data, 'miniDescription')
+            ? sanitizeOptionalRichText(data.miniDescription)
+            : undefined
 
         const updateResult = await prisma.$transaction(async (tx) => {
             const result = await tx.product.updateMany({
@@ -453,8 +461,8 @@ export class ProductsService {
                 data: {
                     title: data.title,
                     slug: data.slug,
-                    description: data.description,
-                    miniDescription: data.miniDescription,
+                    description: sanitizedDescription,
+                    miniDescription: sanitizedMiniDescription,
                     price: data.price !== undefined ? String(data.price) : undefined,
                     isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
                     categoryId: categoryAssignment ? categoryAssignment.categoryId : undefined,
