@@ -1,68 +1,65 @@
 <template>
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
-          {{ t('admin.nav.products') }}
-        </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
-          {{ t('admin.pages.products.index.subtitle') }}
-        </p>
-      </div>
-      <div class="flex flex-wrap items-center gap-3 justify-end">
-        <Menu as="div" class="relative inline-block text-left">
-          <MenuButton class="ui-btn ui-btn--secondary ui-btn--md">
-            <Icon name="lucide:arrow-down-up" class="w-5 h-5" />
-            <span>Import/Export</span>
-            <Icon name="lucide:chevron-down" class="w-4 h-4 ml-1 -mr-1" style="color: var(--text-tertiary)" />
-          </MenuButton>
-          <transition
-            enter-active-class="transition ease-out duration-100"
-            enter-from-class="transform opacity-0 scale-95"
-            enter-to-class="transform opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-75"
-            leave-from-class="transform opacity-100 scale-100"
-            leave-to-class="transform opacity-0 scale-95"
-          >
-            <MenuItems class="absolute right-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
-              <div class="py-1">
-                <MenuItem v-slot="{ active }">
-                  <button
-                    :class="['group flex w-full items-center px-4 py-2 text-sm']"
-                    :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
-                    :disabled="loading"
-                    @click="openImportModal"
-                  >
-                    <Icon name="lucide:download" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
-                    {{ t('admin.pages.products.index.bulk.import') }}
-                  </button>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <button
-                    :class="['group flex w-full items-center px-4 py-2 text-sm']"
-                    :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
-                    :disabled="loading"
-                    @click="exportProductsCsv"
-                  >
-                    <Icon name="lucide:upload" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
-                    {{ t('admin.pages.products.index.bulk.export') }}
-                  </button>
-                </MenuItem>
-              </div>
-            </MenuItems>
-          </transition>
-        </Menu>
-
-        <NuxtLink
-          to="/admin/products/create"
-          class="ui-btn ui-btn--primary ui-btn--md ml-2"
+    <AdminPageHeader
+      :title="t('admin.nav.products')"
+      :subtitle="t('admin.pages.products.index.subtitle')"
+      :stats="productStats"
+    >
+      <Menu as="div" class="relative inline-block text-left">
+        <MenuButton class="ui-btn ui-btn--secondary ui-btn--md">
+          <Icon name="lucide:arrow-down-up" class="w-5 h-5" />
+          <span>Import/Export</span>
+          <Icon name="lucide:chevron-down" class="w-4 h-4 ml-1 -mr-1" style="color: var(--text-tertiary)" />
+        </MenuButton>
+        <transition
+          enter-active-class="transition ease-out duration-100"
+          enter-from-class="transform opacity-0 scale-95"
+          enter-to-class="transform opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-75"
+          leave-from-class="transform opacity-100 scale-100"
+          leave-to-class="transform opacity-0 scale-95"
         >
-          <Icon name="lucide:plus" class="w-5 h-5" />
-          <span>{{ t('admin.pages.products.index.addProduct') }}</span>
-        </NuxtLink>
-      </div>
-    </div>
+          <MenuItems class="absolute right-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+            <div class="py-1">
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
+                  :disabled="loading"
+                  @click="openImportModal"
+                >
+                  <Icon name="lucide:download" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  {{ t('admin.pages.products.index.bulk.import') }}
+                </button>
+              </MenuItem>
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
+                  :disabled="loading"
+                  @click="exportProductsCsv"
+                >
+                  <Icon name="lucide:upload" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  {{ t('admin.pages.products.index.bulk.export') }}
+                </button>
+              </MenuItem>
+            </div>
+          </MenuItems>
+        </transition>
+      </Menu>
+
+      <NuxtLink
+        to="/admin/products/create"
+        class="ui-btn ui-btn--primary ui-btn--md"
+      >
+        <Icon name="lucide:plus" class="w-5 h-5" />
+        <span>{{ t('admin.pages.products.index.addProduct') }}</span>
+      </NuxtLink>
+    </AdminPageHeader>
+
+    <!-- Tab filter -->
+    <AdminTabFilter v-model="activeTab" :tabs="productTabs" />
  
     <!-- Filters -->
     <div class="ui-card p-4 mb-6">
@@ -195,8 +192,8 @@
 	              <th class="ui-th w-10">
 	                <input
 	                  type="checkbox"
-	                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
-                  style="border-color: var(--surface-border); background: var(--surface-3)"
+	                  class="admin-checkbox"
+                 
 	                  :checked="allVisibleSelected"
 	                  :disabled="paginatedProducts.length === 0"
 	                  @change="toggleSelectAllVisible"
@@ -247,8 +244,8 @@
 	                <input
 	                  v-model="selectedIds"
 	                  type="checkbox"
-	                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
-                  style="border-color: var(--surface-border); background: var(--surface-3)"
+	                  class="admin-checkbox"
+                 
 	                  :value="product.id"
 	                >
 	              </td>
@@ -689,7 +686,7 @@
 	            <input
 	              v-model="bulkPropagatePriceToVariants"
 	              type="checkbox"
-	              class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-3)"
+	              class="admin-checkbox"
 	            >
 	            {{ t('admin.pages.products.index.bulk.fields.propagatePrice') }}
 	          </label>
@@ -783,6 +780,7 @@ const loading = ref(true)
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const selectedStatus = ref('')
+const activeTab = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
@@ -903,6 +901,17 @@ const filteredProducts = computed(() => {
     })
   }
  
+  // Tab filter
+  if (activeTab.value === 'active') {
+    filtered = filtered.filter(p => p.isActive)
+  } else if (activeTab.value === 'draft') {
+    filtered = filtered.filter(p => !p.isActive)
+  } else if (activeTab.value === 'lowStock') {
+    filtered = filtered.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5))
+  } else if (activeTab.value === 'outOfStock') {
+    filtered = filtered.filter(p => p.stock === 0)
+  }
+
   // Status filter
   if (selectedStatus.value) {
     if (selectedStatus.value === 'lowStock') {
@@ -924,6 +933,21 @@ const filteredProducts = computed(() => {
  
   return filtered
 })
+
+const productStats = computed(() => [
+  { label: 'total', value: products.value.length },
+  { label: 'active', value: products.value.filter(p => p.isActive).length, tone: 'green' as const },
+  { label: 'low stock', value: products.value.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5)).length, tone: 'amber' as const },
+  { label: 'out of stock', value: products.value.filter(p => p.stock === 0).length, tone: 'red' as const },
+])
+
+const productTabs = computed(() => [
+  { key: 'all', label: 'All', count: products.value.length },
+  { key: 'active', label: 'Active', count: products.value.filter(p => p.isActive).length },
+  { key: 'draft', label: 'Draft', count: products.value.filter(p => !p.isActive).length },
+  { key: 'lowStock', label: 'Low Stock', count: products.value.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5)).length },
+  { key: 'outOfStock', label: 'Out of Stock', count: products.value.filter(p => p.stock === 0).length },
+])
 
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
 
@@ -1265,7 +1289,7 @@ onMounted(() => {
 })
  
 // Watch for filter changes to reset pagination
-watch([searchQuery, selectedCategory, selectedStatus], () => {
+watch([searchQuery, selectedCategory, selectedStatus, activeTab], () => {
   currentPage.value = 1
 })
 

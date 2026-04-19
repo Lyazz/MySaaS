@@ -21,15 +21,11 @@
     />
 
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
-          {{ t('admin.nav.orders') }}
-        </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
-          {{ t('admin.pages.orders.index.subtitle') }}
-        </p>
-      </div>
+    <AdminPageHeader
+      :title="t('admin.nav.orders')"
+      :subtitle="t('admin.pages.orders.index.subtitle')"
+      :stats="orderStats"
+    >
       <NuxtLink
         to="/admin/orders/create"
         class="ui-btn ui-btn--primary flex items-center gap-2"
@@ -37,7 +33,10 @@
         <Icon name="lucide:plus" class="w-5 h-5" />
         {{ t('admin.pages.orders.index.addBtn') }}
       </NuxtLink>
-    </div>
+    </AdminPageHeader>
+
+    <!-- Tab filter -->
+    <AdminTabFilter v-model="activeTab" :tabs="orderTabs" />
 
     <div v-if="selectedIds.length" class="mb-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3">
       <div class="text-sm text-red-800">
@@ -136,8 +135,7 @@
               <th class="ui-th w-10">
                 <input
                   type="checkbox"
-                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
-                  style="border-color: var(--surface-border); background: var(--surface-3)"
+                  class="admin-checkbox"
                   :checked="allPendingSelected"
                   :disabled="pendingIdsOnPage.length === 0"
                   @change="toggleSelectAllPending"
@@ -194,8 +192,7 @@
                 <input
                   v-if="order.status === 'PENDING'"
                   type="checkbox"
-                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
-                  style="border-color: var(--surface-border); background: var(--surface-3)"
+                  class="admin-checkbox"
                   :checked="selectedIds.includes(order.id)"
                   @change="toggleSelectOne(order.id)"
                 />
@@ -400,6 +397,7 @@ const total = ref(0)
 const totalPages = ref(1)
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
+const activeTab = ref('all')
 const today = new Date()
 const lastWeek = new Date(today)
 lastWeek.setDate(lastWeek.getDate() - 7)
@@ -426,6 +424,22 @@ const emptyHint = computed(() => {
   if (searchQuery.value || selectedStatus.value) return t('admin.pages.orders.index.empty.hintFiltered')
   return t('admin.pages.orders.index.empty.hint')
 })
+
+const orderStats = computed(() => [
+  { label: 'total', value: total.value },
+  { label: 'pending', value: orders.value.filter(o => o.status === 'PENDING').length, tone: 'amber' as const },
+  { label: 'delivered', value: orders.value.filter(o => o.status === 'DELIVERED').length, tone: 'green' as const },
+  { label: 'cancelled', value: orders.value.filter(o => o.status === 'CANCELLED').length, tone: 'red' as const },
+])
+
+const orderTabs = computed(() => [
+  { key: 'all', label: 'All' },
+  { key: 'PENDING', label: 'Pending', count: orders.value.filter(o => o.status === 'PENDING').length },
+  { key: 'CONFIRMED', label: 'Confirmed', count: orders.value.filter(o => o.status === 'CONFIRMED').length },
+  { key: 'SHIPPED', label: 'Shipped', count: orders.value.filter(o => o.status === 'SHIPPED').length },
+  { key: 'DELIVERED', label: 'Delivered', count: orders.value.filter(o => o.status === 'DELIVERED').length },
+  { key: 'CANCELLED', label: 'Cancelled', count: orders.value.filter(o => o.status === 'CANCELLED').length },
+])
 
 async function fetchOrders() {
   loading.value = true
@@ -547,6 +561,12 @@ function deliveryModeLabel(mode: any) {
 
 // Fetch orders on mount and when filters change
 onMounted(() => {
+  fetchOrders()
+})
+
+watch(activeTab, (tab) => {
+  selectedStatus.value = tab === 'all' ? '' : tab
+  currentPage.value = 1
   fetchOrders()
 })
 

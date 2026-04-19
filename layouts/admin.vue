@@ -134,7 +134,7 @@
           class="flex items-center rounded-xl px-2 py-2 cursor-pointer transition-colors group"
           :class="sidebarOpen ? 'gap-2.5' : 'justify-center'"
           style="color: var(--text-secondary)"
-          @mouseenter="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.045)'"
+          @mouseenter="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'"
           @mouseleave="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = ''"
         >
           <div
@@ -190,7 +190,7 @@
             class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
             style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
             :aria-label="t('admin.actions.viewStore')"
-            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
+            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
             @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
           >
             <Icon name="lucide:external-link" class="w-3.5 h-3.5 sm:w-3 sm:h-3" />
@@ -198,6 +198,7 @@
           </a>
 
           <LocaleSwitcher />
+          <AdminThemeToggle />
 
           <div class="w-px h-4" style="background: var(--surface-border)" />
 
@@ -206,7 +207,7 @@
             class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
             style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
             :aria-label="t('admin.actions.logout')"
-            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
+            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
             @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
           >
             <Icon name="lucide:log-out" class="w-3.5 h-3.5 sm:w-3 sm:h-3" />
@@ -238,7 +239,7 @@
                   @click="showLogoutModal = false"
                   class="px-4 py-2 text-[12px] font-medium rounded-lg transition-all duration-150"
                   style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
-                  @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)' }"
+                  @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }"
                   @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = '' }"
                 >
                   {{ t('admin.common.cancel') }}
@@ -284,19 +285,22 @@
 }
 
 .nav-item-idle:hover {
-  background: rgba(255,255,255,0.04);
+  background: var(--nav-hover-bg);
 }
 </style>
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { useUiStore } from '~/stores/ui'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
+import AdminThemeToggle from '~/components/admin/AdminThemeToggle.vue'
 import HelpCenterWidget from '~/components/admin/HelpCenterWidget.vue'
 
 const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
+const uiStore = useUiStore()
 const route = useRoute()
 const sidebarOpen = ref(false)
 const showLogoutModal = ref(false)
@@ -314,6 +318,7 @@ if (settings.value) {
 }
 
 onMounted(() => {
+  uiStore.initTheme()
   if (window.innerWidth >= 1024) {
     sidebarOpen.value = route.path !== '/admin/pos'
   }

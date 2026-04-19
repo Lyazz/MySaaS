@@ -116,7 +116,7 @@
         v-else
         class="overflow-x-auto"
       >
-        <table class="min-w-full divide-y" style="border-color: var(--surface-border)">
+        <table class="min-w-full divide-y">
           <thead style="background: var(--surface-2)">
             <tr>
               <th
@@ -178,7 +178,7 @@
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y" style="border-color: var(--surface-border)">
+          <tbody class="divide-y">
             <tr
               v-for="v in variants"
               :key="v.id"
@@ -198,7 +198,7 @@
                 <input
                   :checked="v.trackInventory"
                   type="checkbox"
-                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border)"
+                  class="admin-checkbox"
                   :disabled="savingIds.has(v.id)"
                   @change="(e) => patchVariant(v.id, { trackInventory: (e.target as HTMLInputElement).checked })"
                 >
@@ -263,7 +263,7 @@
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8"
       >
         <div class="w-full max-w-3xl rounded-2xl flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <div class="flex items-start justify-between gap-4 border-b px-6 py-4 shrink-0" style="border-color: var(--surface-border)">
+          <div class="flex items-start justify-between gap-4 border-b px-6 py-4 shrink-0">
           <div class="min-w-0">
             <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
               {{ t('admin.pages.inventory.movements.title', { product: movementsVariant.productTitle, option: movementsVariant.optionTitle }) }}
@@ -298,7 +298,7 @@
             v-else
             class="overflow-x-auto"
           >
-            <table class="min-w-full divide-y" style="border-color: var(--surface-border)">
+            <table class="min-w-full divide-y">
               <thead style="background: var(--surface-3)">
                 <tr>
                   <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
@@ -324,7 +324,7 @@
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y" style="border-color: var(--surface-border)">
+              <tbody class="divide-y">
                 <tr
                   v-for="m in movements"
                   :key="m.id"
@@ -373,7 +373,7 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-3 border-t px-6 py-4 shrink-0" style="border-color: var(--surface-border)">
+        <div class="flex justify-end gap-3 border-t px-6 py-4 shrink-0">
           <button
             type="button"
             class="ui-btn ui-btn--secondary text-sm"

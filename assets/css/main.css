@@ -62,6 +62,55 @@
     --status-cancelled-text: #f87171;
     --status-returned-bg: rgba(168,85,247,0.1);
     --status-returned-text: #c084fc;
+
+    /* Nav hover */
+    --nav-hover-bg: rgba(255,255,255,0.04);
+  }
+
+  [data-theme="light"] {
+    /* Admin shell — light chrome */
+    --admin-sidebar-bg: #ffffff;
+    --admin-sidebar-surface: #f8fafc;
+    --admin-sidebar-border: rgba(0,0,0,0.08);
+    --admin-topbar-bg: #ffffff;
+    --admin-topbar-border: rgba(0,0,0,0.08);
+    --admin-content-bg: #f1f5f9;
+
+    /* Surface layers */
+    --surface-1: #ffffff;
+    --surface-2: #f8fafc;
+    --surface-3: #f1f5f9;
+    --surface-border: rgba(0,0,0,0.08);
+    --surface-border-hover: rgba(0,0,0,0.15);
+
+    /* Text hierarchy */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+    --text-muted: #cbd5e1;
+
+    /* Accent */
+    --accent: #d97706;
+    --accent-rgb: 217 119 6;
+    --accent-soft: rgba(217,119,6,0.1);
+    --accent-border: rgba(217,119,6,0.25);
+
+    /* Status — adjusted for light backgrounds */
+    --status-pending-bg: rgba(245,158,11,0.1);
+    --status-pending-text: #b45309;
+    --status-confirmed-bg: rgba(59,130,246,0.1);
+    --status-confirmed-text: #1d4ed8;
+    --status-shipped-bg: rgba(99,102,241,0.1);
+    --status-shipped-text: #4338ca;
+    --status-delivered-bg: rgba(34,197,94,0.1);
+    --status-delivered-text: #15803d;
+    --status-cancelled-bg: rgba(239,68,68,0.1);
+    --status-cancelled-text: #b91c1c;
+    --status-returned-bg: rgba(168,85,247,0.1);
+    --status-returned-text: #7e22ce;
+
+    /* Nav hover */
+    --nav-hover-bg: rgba(0,0,0,0.04);
   }
 }
 
@@ -125,7 +174,12 @@
 
   .ui-btn--ghost {
     color: var(--text-secondary);
-    @apply hover:bg-white/5 hover:text-white active:scale-[0.98];
+    @apply active:scale-[0.98];
+  }
+
+  .ui-btn--ghost:hover {
+    background: var(--nav-hover-bg);
+    color: var(--text-primary);
   }
 
   /* ── Badges ── */
@@ -201,7 +255,7 @@
   }
 
   .ui-tr:hover {
-    background: rgba(255,255,255,0.025);
+    background: var(--nav-hover-bg);
   }
 
   /* ── Form inputs ── */
@@ -236,6 +290,18 @@
     color: var(--text-tertiary);
   }
 
+  /* ── Checkboxes ── */
+  .admin-checkbox {
+    @apply h-4 w-4 rounded cursor-pointer;
+    accent-color: var(--brand);
+    border: 1px solid var(--surface-border);
+  }
+
+  .admin-checkbox:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
   /* ── Scrollbars ── */
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
@@ -267,7 +333,7 @@
   }
 
   .admin-nav-item:hover {
-    background: rgba(255,255,255,0.05);
+    background: var(--nav-hover-bg);
     color: var(--text-secondary);
   }
 

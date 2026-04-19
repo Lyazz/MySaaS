@@ -242,7 +242,7 @@
                   >
                     <input
                       type="checkbox"
-                      class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
+                      class="admin-checkbox"
                       style="border-color: var(--surface-border); background: var(--surface-3)"
                       :checked="form.categoryIds.includes(cat.id)"
                       @change="toggleCategorySelection(cat.id, ($event.target as HTMLInputElement).checked)"
@@ -269,7 +269,7 @@
                 id="isActive"
                 v-model="form.isActive"
                 type="checkbox"
-                class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
+                class="admin-checkbox"
                 style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
@@ -292,7 +292,7 @@
                 id="isPromotionActive"
                 v-model="form.isPromotionActive"
                 type="checkbox"
-                class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
+                class="admin-checkbox"
                 style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
@@ -338,7 +338,7 @@
                   id="showCountdown"
                   v-model="form.showCountdown"
                   type="checkbox"
-                  class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
+                  class="admin-checkbox"
                   style="border-color: var(--surface-border); background: var(--surface-3)"
                 >
                 <label
@@ -393,7 +393,7 @@
                   <input
                     v-model="showArchivedVariants"
                     type="checkbox"
-                    class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
+                    class="admin-checkbox"
                     style="border-color: var(--surface-border); background: var(--surface-3)"
                   >
                   {{ t('admin.pages.products.edit.variantsTab.showArchived') }}
@@ -501,7 +501,7 @@
                           <input
                             v-model="deal.isActive"
                             type="checkbox"
-                            class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
+                            class="admin-checkbox"
                             style="border-color: var(--surface-border); background: var(--surface-3)"
                           >
                           <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.common.active') }}</span>
@@ -581,7 +581,7 @@
                     </div>
                     <input
                       type="checkbox"
-                      class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
+                      class="admin-checkbox"
                       style="border-color: var(--surface-border); background: var(--surface-3)"
                       :value="p.id"
                       v-model="productMetaPixelIds"

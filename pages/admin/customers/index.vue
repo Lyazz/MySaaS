@@ -1,22 +1,21 @@
 <template>
   <div class="max-w-7xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
-          {{ t('admin.nav.customers') }}
-        </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
-          {{ t('admin.pages.customers.index.subtitle') }}
-        </p>
-      </div>
+    <AdminPageHeader
+      :title="t('admin.nav.customers')"
+      :subtitle="t('admin.pages.customers.index.subtitle')"
+      :stats="customerStats"
+    >
       <NuxtLink
         to="/admin/customers/create"
-        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center space-x-2"
+        class="ui-btn ui-btn--primary ui-btn--md"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
         <span>{{ t('admin.pages.customers.index.addCustomer') }}</span>
       </NuxtLink>
-    </div>
+    </AdminPageHeader>
+
+    <!-- Tab filter -->
+    <AdminTabFilter v-model="activeTab" :tabs="customerTabs" />
 
     <div class="ui-card p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -291,6 +290,7 @@ interface CustomerSummary {
 const loading = ref(true)
 const customers = ref<CustomerSummary[]>([])
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const activeTab = ref('all')
 
 const currentPage = ref(1)
 const itemsPerPage = 25
@@ -311,10 +311,33 @@ const emptyHint = computed(() => {
   return t('admin.pages.customers.index.empty.hint')
 })
 
+const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+
+const customerStats = computed(() => {
+  const totalOrders = customers.value.reduce((sum, c) => sum + (c.ordersCount ?? 0), 0)
+  const recent = customers.value.filter(c => c.lastOrderDate && new Date(c.lastOrderDate) >= thirtyDaysAgo).length
+  return [
+    { label: 'total', value: customers.value.length },
+    { label: 'orders', value: totalOrders, tone: 'blue' as const },
+    { label: 'active (30d)', value: recent, tone: 'green' as const },
+  ]
+})
+
+const customerTabs = computed(() => [
+  { key: 'all', label: 'All', count: customers.value.length },
+  { key: 'recent', label: 'Active (30d)', count: customers.value.filter(c => c.lastOrderDate && new Date(c.lastOrderDate) >= thirtyDaysAgo).length },
+])
+
 const filteredCustomers = computed(() => {
+  let result = customers.value
+
+  if (activeTab.value === 'recent') {
+    result = result.filter(c => c.lastOrderDate && new Date(c.lastOrderDate) >= thirtyDaysAgo)
+  }
+
   const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return customers.value
-  return customers.value.filter(c =>
+  if (!q) return result
+  return result.filter(c =>
     c.name.toLowerCase().includes(q) ||
     (c.email?.toLowerCase().includes(q) ?? false) ||
     (c.phone?.toLowerCase().includes(q) ?? false)
