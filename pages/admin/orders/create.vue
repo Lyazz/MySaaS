@@ -25,7 +25,7 @@
           <div class="ui-card">
             <div class="p-4 flex justify-between items-center rounded-t-xl" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
               <h2 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
-                <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600">
+                <div class="w-8 h-8 rounded-lg [background:rgba(var(--brand-rgb)/0.08)] flex items-center justify-center [color:var(--brand)]">
                   <Icon name="lucide:user" class="w-4 h-4" />
                 </div>
                 {{ t('admin.pages.orders.create.customerSection') }}
@@ -214,7 +214,7 @@
                   <textarea
                     v-model="form.shippingNotes"
                     rows="2"
-                    class="block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-colors p-2.5" style="border-color: var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
+                    class="block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm transition-colors p-2.5" style="border-color: var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
                   />
                </div>
             </div>
@@ -244,7 +244,7 @@
                     v-model="productSearch"
                     type="text"
                     :placeholder="t('admin.pages.pos.catalog.searchPlaceholder')"
-                    class="w-full pl-9 pr-3 py-2 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary)"
+                    class="w-full pl-9 pr-3 py-2 rounded-lg focus:[border-color:var(--brand)] focus:ring-1 focus:[--tw-ring-color:var(--brand)] transition-all text-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary)"
                   >
                   <!-- Search Results Dropdown -->
                   <div 
@@ -343,7 +343,7 @@
 
               <button
                 class="w-full h-12 rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2"
-                :class="canSubmit ? 'bg-teal-600 hover:bg-teal-700 focus:ring-teal-500 shadow-teal-500/30 hover:shadow-lg' : 'cursor-not-allowed shadow-none'" :style="!canSubmit ? 'background: var(--surface-3); color: var(--text-muted)' : ''"
+                :class="canSubmit ? '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:[--tw-ring-color:var(--brand)] [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.3)] hover:shadow-lg' : 'cursor-not-allowed shadow-none'" :style="!canSubmit ? 'background: var(--surface-3); color: var(--text-muted)' : ''"
                 :disabled="!canSubmit || submitting"
                 @click="submitOrder"
               >
@@ -418,18 +418,18 @@
                   <button
                     v-for="v in availableVariantsForSelection"
                     :key="v.id"
-                    class="w-full p-4 rounded-xl hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
+                    class="w-full p-4 rounded-xl hover:[border-color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] hover:ring-1 hover:[--tw-ring-color:var(--brand)] transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
                     @click="onVariantSelected(v)"
                   >
                     <div class="text-left">
-                      <div class="font-semibold group-hover:text-teal-800" style="color: var(--text-primary)">
+                      <div class="font-semibold group-hover:[color:var(--brand)]" style="color: var(--text-primary)">
                         {{ v.label }}
                       </div>
                       <div class="text-xs mt-0.5" style="color: var(--text-tertiary)">
                         {{ v.availableStock }} in stock
                       </div>
                     </div>
-                    <div class="font-bold text-teal-600">
+                    <div class="font-bold [color:var(--brand)]">
                       {{ formatCurrency(v.displayPrice ?? v.price) }}
                     </div>
                   </button>

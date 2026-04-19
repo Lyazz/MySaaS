@@ -30,7 +30,7 @@
 
           <button
             type="button"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             :disabled="loading"
             @click="fetchItems"
           >
@@ -66,7 +66,7 @@
             <label class="ui-label mb-2 block">{{ t('admin.contactInfosForm.fields.type') }}</label>
             <select
               v-model="draft.kind"
-              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]"
             >
               <option v-for="d in kindDefs" :key="d.kind" :value="d.kind">{{ d.label }}</option>
             </select>
@@ -77,7 +77,7 @@
             <input
               v-model="draft.label"
               type="text"
-              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]"
               :placeholder="t('admin.contactInfosForm.fields.labelPlaceholder')"
             >
           </div>
@@ -87,7 +87,7 @@
             <input
               v-model="draft.value"
               type="text"
-              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]"
               :placeholder="kindDef(draft.kind).placeholder"
             >
           </div>
@@ -100,7 +100,7 @@
           </div>
           <button
             type="button"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             :disabled="creating || !draft.value?.trim()"
             @click="createDraft"
           >
@@ -137,7 +137,7 @@
                   <div class="flex flex-wrap items-center gap-2">
                     <select
                       v-model="item.kind"
-                      class="ui-input px-2.5 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      class="ui-input px-2.5 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]"
                       @change="saveItem(item)"
                     >
                       <option v-for="d in kindDefs" :key="d.kind" :value="d.kind">{{ d.label }}</option>
@@ -146,7 +146,7 @@
                       <input
                         v-model="item.isActive"
                         type="checkbox"
-                        class="rounded text-teal-600 focus:ring-teal-500"
+                        class="rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                         @change="saveItem(item)"
                       >
                       {{ t('admin.common.active') }}
@@ -157,14 +157,14 @@
                     <input
                       v-model="item.label"
                       type="text"
-                      class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]"
                       :placeholder="t('admin.contactInfosForm.fields.labelOptional')"
                       @blur="saveItem(item)"
                     >
                     <input
                       v-model="item.value"
                       type="text"
-                      class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      class="ui-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]"
                       :placeholder="kindDef(item.kind).placeholder"
                       @blur="saveItem(item)"
                     >
@@ -231,7 +231,7 @@
           
           <button
             type="button"
-            class="inline-flex px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 justify-center min-w-[140px]"
+            class="inline-flex px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 justify-center min-w-[140px]"
             :disabled="loading"
             @click="fetchItems"
           >

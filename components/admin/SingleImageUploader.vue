@@ -9,7 +9,7 @@
           {{ hint }}
         </p>
       </div>
-      <div v-if="uploading" class="text-xs font-medium text-teal-600">
+      <div v-if="uploading" class="text-xs font-medium [color:var(--brand)]">
         {{ t('admin.common.uploading') }}
       </div>
     </div>

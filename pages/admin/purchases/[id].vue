@@ -33,7 +33,7 @@
         <button
           v-if="order?.supplier && order?.paymentStatus !== 'PAID'"
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm font-medium text-teal-700 shadow-sm hover:bg-teal-100 transition-colors"
+          class="inline-flex items-center gap-2 rounded-lg border [border-color:rgba(var(--brand-rgb)/0.3)] [background:rgba(var(--brand-rgb)/0.08)] px-3 py-2 text-sm font-medium [color:var(--brand)] shadow-sm hover:[background:rgba(var(--brand-rgb)/0.12)] transition-colors"
           @click="openPaymentModal"
         >
           <Icon name="lucide:banknote" class="h-4 w-4" />
@@ -178,7 +178,7 @@
           <button
             v-if="hasItemsToReceive"
             type="button"
-            class="text-sm font-medium text-teal-600 hover:text-teal-700 bg-teal-50 px-2 py-1 rounded"
+            class="text-sm font-medium [color:var(--brand)] hover:[color:var(--brand)] [background:rgba(var(--brand-rgb)/0.08)] px-2 py-1 rounded"
             :disabled="receiving"
             @click="receiveAll"
           >
@@ -210,7 +210,7 @@
         </p>
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-teal-700"
+          class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
           @click="showVariantModal = true"
         >
           <Icon
@@ -318,7 +318,7 @@
                   
                   <div class="w-full rounded-full h-1 mt-1 overflow-hidden" v-if="item.quantityOrdered > 0" style="background: var(--surface-3)">
                     <div
-                      class="bg-teal-500 h-1 transition-all duration-300"
+                      class="[background:var(--brand)] h-1 transition-all duration-300"
                       :style="`width: ${Math.min((item.quantityReceived / item.quantityOrdered) * 100, 100)}%`"
                     />
                   </div>
@@ -392,7 +392,7 @@
                   <div class="flex flex-col gap-1 w-full max-w-[130px]">
                     <button
                       type="button"
-                      class="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md bg-teal-50 text-teal-700 hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed border border-teal-100 text-xs font-medium transition-colors"
+                      class="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md [background:rgba(var(--brand-rgb)/0.08)] [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.12)] disabled:opacity-50 disabled:cursor-not-allowed border [border-color:rgba(var(--brand-rgb)/0.15)] text-xs font-medium transition-colors"
                       :title="t('admin.common.receive')"
                       :disabled="receiving || item.quantityReceived >= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id] <= 0"
                       @click="receiveItem(item)"
@@ -428,7 +428,7 @@
               <td colspan="5" class="px-4 py-4 text-right">
                 {{ t('admin.pages.purchases.detail.items.table.totalOrderValue') }}
               </td>
-              <td class="px-4 py-4 text-right text-base text-teal-700">
+              <td class="px-4 py-4 text-right text-base [color:var(--brand)]">
                 {{ formatCurrency(totalCost) }}
               </td>
             </tr>

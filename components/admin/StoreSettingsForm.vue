@@ -20,7 +20,7 @@
         </button>
         <button
           type="button"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
           :disabled="loading || saving"
           @click="save"
@@ -132,7 +132,7 @@
               class="flex items-center gap-4 p-4 rounded-xl shadow-sm"
               style="background: var(--surface-2); border: 1px solid var(--surface-border)"
             >
-              <div class="h-10 w-10 flex items-center justify-center rounded-full bg-teal-50 text-teal-600">
+              <div class="h-10 w-10 flex items-center justify-center rounded-full [background:rgba(var(--brand-rgb)/0.08)] [color:var(--brand)]">
                 <Icon name="lucide:handbag" class="w-5 h-5" />
               </div>
               <div class="flex-1">
@@ -145,9 +145,9 @@
               </div>
               <button
                 type="button"
-                :class="form.cartEnabled ? 'bg-teal-600' : ''"
+                :class="form.cartEnabled ? '[background:var(--brand)]' : ''"
                 :style="!form.cartEnabled ? 'background: rgba(255,255,255,0.1)' : ''"
-                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2"
                 @click="form.cartEnabled = !form.cartEnabled"
               >
                 <span
@@ -246,8 +246,8 @@
               <div
                 v-for="tpl in templates"
                 :key="tpl.key"
-                class="cursor-pointer relative rounded-xl border p-4 shadow-sm flex flex-col transition-all hover:border-teal-300"
-                :class="form.templateKey === tpl.key ? 'border-teal-500 ring-2 ring-teal-500 ring-opacity-50 bg-teal-50' : ''"
+                class="cursor-pointer relative rounded-xl border p-4 shadow-sm flex flex-col transition-all hover:[border-color:rgba(var(--brand-rgb)/0.4)]"
+                :class="form.templateKey === tpl.key ? '[border-color:var(--brand)] ring-2 [--tw-ring-color:var(--brand)] ring-opacity-50 [background:rgba(var(--brand-rgb)/0.08)]' : ''"
                 :style="form.templateKey !== tpl.key ? 'background: var(--surface-1); border-color: var(--surface-border)' : ''"
                 @click="form.templateKey = tpl.key"
               >
@@ -255,7 +255,7 @@
                   <span class="font-semibold" style="color: var(--text-primary)">{{ tpl.label }}</span>
                   <span
                     v-if="form.templateKey === tpl.key"
-                    class="h-2 w-2 rounded-full bg-teal-600"
+                    class="h-2 w-2 rounded-full [background:var(--brand)]"
                   />
                 </div>
                 <p class="text-sm mb-3" style="color: var(--text-tertiary)">
@@ -263,7 +263,7 @@
                 </p>
                 <div
                   class="mt-auto pt-2 flex items-center text-xs font-medium"
-                  :class="form.templateKey === tpl.key ? 'text-teal-700' : ''"
+                  :class="form.templateKey === tpl.key ? '[color:var(--brand)]' : ''"
                   :style="form.templateKey !== tpl.key ? 'color: var(--text-tertiary)' : ''"
                 >
                   {{ form.templateKey === tpl.key ? t('admin.storeSettingsForm.template.selected') : t('admin.storeSettingsForm.template.select') }}
@@ -337,7 +337,7 @@
         </button>
         <button
           type="submit"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
           :disabled="loading || saving"
         >

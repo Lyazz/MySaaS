@@ -3,7 +3,7 @@
     <nav class="flex" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/cash" class="hover:text-teal-400 transition-colors" style="color: var(--text-secondary)">
+          <NuxtLink to="/admin/cash" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.title') }}
           </NuxtLink>
         </li>
@@ -35,7 +35,7 @@
         <button
           v-if="cashbox && !cashbox.openSession"
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-700"
+          class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-sm font-semibold text-white hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
           @click="openOpenSession"
         >
           <Icon name="lucide:play" class="h-4 w-4" />
@@ -67,7 +67,7 @@
           </div>
           <button
             type="button"
-            class="text-sm font-semibold text-teal-600 hover:text-teal-700"
+            class="text-sm font-semibold [color:var(--brand)] hover:[color:var(--brand)]"
             :disabled="loading"
             @click="refresh"
           >
@@ -77,7 +77,7 @@
       </div>
 
       <div v-if="loading" class="p-10 text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
         <p class="mt-2 text-sm" style="color: var(--text-secondary)">
           {{ t('admin.pages.cash.transactions.loading') }}
         </p>
@@ -170,7 +170,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitOpenSession"
             >
@@ -266,7 +266,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md text-white text-sm font-semibold disabled:opacity-50 bg-teal-600 hover:bg-teal-700"
+              class="px-4 py-2 rounded-md text-white text-sm font-semibold disabled:opacity-50 [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
               :disabled="actionLoading"
               @click="submitCloseSession"
             >

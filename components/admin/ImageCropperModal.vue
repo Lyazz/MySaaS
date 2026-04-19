@@ -29,7 +29,7 @@
               type="button"
               class="rounded-md px-2.5 py-1.5 text-xs font-medium transition"
               :disabled="processing"
-              :class="selectedPreset === preset ? 'bg-teal-600 text-white' : 'hover:bg-white/10'"
+              :class="selectedPreset === preset ? '[background:var(--brand)] text-white' : 'hover:bg-white/10'"
               :style="selectedPreset !== preset ? 'border: 1px solid var(--surface-border); color: var(--text-secondary)' : ''"
               @click="selectedPreset = preset"
             >
@@ -63,7 +63,7 @@
             </button>
             <button
               type="button"
-              class="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+              class="rounded-md [background:var(--brand)] px-4 py-2 text-sm font-medium text-white hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:cursor-not-allowed disabled:opacity-50"
               :disabled="processing"
               @click="confirm"
             >

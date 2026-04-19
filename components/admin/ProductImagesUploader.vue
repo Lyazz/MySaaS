@@ -27,7 +27,7 @@
         >
 
         <div v-if="image.isMain" class="absolute left-2 top-2">
-          <span class="inline-flex items-center rounded-md bg-teal-600 px-2 py-1 text-xs font-medium text-white shadow-sm">
+          <span class="inline-flex items-center rounded-md [background:var(--brand)] px-2 py-1 text-xs font-medium text-white shadow-sm">
             <Icon name="lucide:star" class="mr-1 h-3 w-3" />
             {{ t('admin.imageUploader.mainBadge') }}
           </span>
@@ -44,7 +44,7 @@
             v-if="!image.isMain"
             type="button"
             :title="t('admin.imageUploader.actions.setAsMain')"
-            class="rounded-full bg-teal-600 p-1.5 text-white shadow-sm hover:bg-teal-700"
+            class="rounded-full [background:var(--brand)] p-1.5 text-white shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
             @click.stop="setAsMain(index)"
           >
             <Icon name="lucide:star" class="h-3.5 w-3.5" />

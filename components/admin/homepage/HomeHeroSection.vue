@@ -25,7 +25,7 @@
           <button 
              @click="addSlide"
              type="button"
-             class="mt-4 text-teal-600 hover:text-teal-700 font-semibold text-sm"
+             class="mt-4 [color:var(--brand)] hover:[color:var(--brand)] font-semibold text-sm"
           >
              {{ t('admin.homepageSettingsForm.carousel.createFirst') }}
           </button>

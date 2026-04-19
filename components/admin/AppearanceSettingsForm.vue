@@ -23,7 +23,7 @@
                 v-model="form.name"
                 type="text"
                 required
-                class="ui-input block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm transition-shadow"
+                class="ui-input block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm transition-shadow"
                 :placeholder="t('admin.appearanceSettingsForm.identity.storeName.placeholder')"
               >
             </div>
@@ -36,7 +36,7 @@
                   type="text"
                   required
                   pattern="^[a-z0-9-]+$"
-                  class="ui-input flex-1 block w-full rounded-none rounded-l-lg focus:border-teal-500 focus:ring-teal-500 sm:text-sm text-right"
+                  class="ui-input flex-1 block w-full rounded-none rounded-l-lg focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm text-right"
                   :placeholder="t('admin.appearanceSettingsForm.identity.slug.placeholder')"
                   @input="handleSlugInput"
                 >
@@ -113,7 +113,7 @@
                         v-model="form.primaryColor"
                         type="text"
                         pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
-                        class="ui-input block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm font-mono uppercase"
+                        class="ui-input block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm font-mono uppercase"
                         placeholder="#0F766E"
                       >
                       <p class="mt-1.5 text-xs" style="color: var(--text-tertiary)">
@@ -179,12 +179,12 @@
                 v-for="tpl in filteredTemplates"
                 :key="tpl.key"
                 class="group relative rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col overflow-hidden"
-                :class="form.templateKey === tpl.key ? 'scale-[1.02] md:scale-[1.05] border-teal-500 ring-4 ring-teal-500/20 shadow-xl z-20' : 'shadow-sm hover:shadow'"
+                :class="form.templateKey === tpl.key ? 'scale-[1.02] md:scale-[1.05] [border-color:var(--brand)] ring-4 [--tw-ring-color:var(--brand)]/20 shadow-xl z-20' : 'shadow-sm hover:shadow'"
                 :style="form.templateKey !== tpl.key ? 'background: var(--surface-1); border-color: var(--surface-border)' : 'background: var(--surface-1)'"
                 @click="form.templateKey = tpl.key"
               >
                   <!-- Absolute Badge if Selected -->
-                  <div v-if="form.templateKey === tpl.key" class="absolute top-3 right-3 z-30 bg-teal-500 text-white shadow-md rounded-full w-7 h-7 flex items-center justify-center animate-fadeIn">
+                  <div v-if="form.templateKey === tpl.key" class="absolute top-3 right-3 z-30 [background:var(--brand)] text-white shadow-md rounded-full w-7 h-7 flex items-center justify-center animate-fadeIn">
                     <Icon name="lucide:check" class="w-4 h-4 font-bold" />
                   </div>
                  <!-- Style Swatch Preview -->
@@ -317,7 +317,7 @@
             </button>
             <button
               @click="save"
-              class="px-6 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 font-medium transition-all shadow-md hover:shadow-lg hover:shadow-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              class="px-6 py-2 [background:var(--brand)] text-white rounded-xl hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] font-medium transition-all shadow-md hover:shadow-lg hover:[box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
               :disabled="loading || saving"
             >

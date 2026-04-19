@@ -222,6 +222,15 @@
     box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.1);
   }
 
+  /* Force dark color-scheme so native date/time picker popups render dark */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"] {
+    color-scheme: dark;
+  }
+
   .ui-label {
     @apply block text-xs font-semibold uppercase tracking-wider mb-1.5;
     color: var(--text-tertiary);

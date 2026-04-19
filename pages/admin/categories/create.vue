@@ -9,7 +9,7 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/categories"
-            class="hover:text-teal-600" style="color: var(--text-secondary)"
+            class="hover:[color:var(--brand)]" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.categories') }}
           </NuxtLink>
@@ -44,7 +44,7 @@
           form="category-create-form"
           type="submit"
           :disabled="submitting"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.creating') : t('admin.pages.categories.create.submit') }}
@@ -119,7 +119,7 @@
         <button
           type="submit"
           :disabled="submitting"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.creating') : t('admin.pages.categories.create.submit') }}

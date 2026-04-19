@@ -1,20 +1,20 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <div class="mb-8">
-      <h2 class="text-2xl font-bold text-slate-900">
+      <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
         {{ t('admin.pages.onboarding.title') }}
       </h2>
-      <p class="text-slate-600 mt-1">
+      <p class="mt-1" style="color: var(--text-secondary)">
         {{ t('admin.pages.onboarding.subtitle') }}
       </p>
     </div>
 
     <div
       v-if="loading"
-      class="bg-white rounded-xl shadow-sm border border-slate-200 p-8"
+      class="rounded-xl p-8" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
     >
-      <div class="flex items-center gap-3 text-slate-600">
-        <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600" />
+      <div class="flex items-center gap-3" style="color: var(--text-secondary)">
+        <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 [border-color:var(--brand)]" />
         <span>{{ t('admin.pages.onboarding.loadingSettings') }}</span>
       </div>
     </div>
@@ -24,57 +24,58 @@
       class="space-y-6"
     >
       <!-- Progress -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div class="rounded-xl p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-center justify-between mb-4">
-          <p class="text-sm font-medium text-slate-700">
+          <p class="text-sm font-medium" style="color: var(--text-secondary)">
             {{ t('admin.pages.onboarding.progress.stepOf', { current: step + 1, total: steps.length }) }}
           </p>
-          <p class="text-sm text-slate-500">
+          <p class="text-sm" style="color: var(--text-tertiary)">
             {{ steps[step] }}
           </p>
         </div>
-        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div class="h-2 rounded-full overflow-hidden" style="background: var(--surface-3)">
           <div
-            class="h-2 bg-teal-600 transition-all"
+            class="h-2 [background:var(--brand)] transition-all"
             :style="{ width: `${progressPercent}%` }"
           />
         </div>
       </div>
 
       <!-- Step content -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <div class="rounded-xl p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <!-- Brand -->
         <div
           v-if="step === 0"
           class="space-y-4"
         >
-          <h3 class="text-lg font-semibold text-slate-900">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.onboarding.brand.title') }}
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.pages.onboarding.brand.pickColor') }}</label>
+              <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.brand.pickColor') }}</label>
               <input
                 v-model="form.primaryColor"
                 type="color"
-                class="h-12 w-full rounded-lg border border-slate-300 bg-white"
+                class="h-12 w-full rounded-lg"
+                style="border: 1px solid var(--surface-border); background: var(--surface-2)"
               >
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.pages.onboarding.brand.hexValue') }}</label>
+              <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.brand.hexValue') }}</label>
               <input
                 v-model="form.primaryColor"
                 type="text"
                 placeholder="#4F46E5"
-                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                class="ui-input w-full px-3 py-2"
               >
-              <p class="mt-1 text-xs text-slate-500">
+              <p class="mt-1 text-xs" style="color: var(--text-muted)">
                 {{ t('admin.pages.onboarding.brand.example', { value: '#4F46E5' }) }}
               </p>
             </div>
           </div>
-          <div class="rounded-lg border border-slate-200 p-4">
-            <p class="text-sm text-slate-600 mb-2">
+          <div class="rounded-lg p-4" style="border: 1px solid var(--surface-border)">
+            <p class="text-sm mb-2" style="color: var(--text-secondary)">
               {{ t('admin.pages.onboarding.brand.preview') }}
             </p>
             <button
@@ -92,10 +93,10 @@
           v-else-if="step === 1"
           class="space-y-4"
         >
-          <h3 class="text-lg font-semibold text-slate-900">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.onboarding.template.title') }}
           </h3>
-          <p class="text-sm text-slate-500">
+          <p class="text-sm" style="color: var(--text-tertiary)">
             Sélectionnez le template à appliquer à votre boutique.
           </p>
 
@@ -104,8 +105,9 @@
               <div
                 v-for="tpl in templates"
                 :key="tpl.key"
-                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col overflow-hidden bg-white"
-                :class="form.templateKey === tpl.key ? 'border-teal-600 ring-4 ring-teal-600/20 shadow-md' : 'border-slate-200 hover:border-teal-300 shadow-sm hover:shadow'"
+                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col overflow-hidden"
+                :class="form.templateKey === tpl.key ? '[border-color:var(--brand)] ring-4 [--tw-ring-color:var(--brand)]/20 shadow-md' : ''"
+                :style="form.templateKey !== tpl.key ? 'background: var(--surface-2); border-color: var(--surface-border)' : 'background: var(--surface-2)'"
                 @click="form.templateKey = tpl.key"
               >
                  <!-- Style Swatch Preview -->
@@ -155,7 +157,7 @@
                      <NuxtLink
                        :to="`/admin/preview?template=${tpl.key}`"
                        target="_blank"
-                       class="pointer-events-auto py-2 px-4 bg-white/95 hover:bg-white backdrop-blur-sm text-slate-900 font-medium text-sm rounded-lg shadow border border-slate-200 flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300"
+                       class="pointer-events-auto py-2 px-4 backdrop-blur-sm font-medium text-sm rounded-lg shadow flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300" style="background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--surface-border)"
                        @click.stop
                      >
                        <Icon name="lucide:external-link" class="w-4 h-4" />
@@ -165,16 +167,16 @@
                  </div>
 
                  <!-- Template Identity Footer -->
-                 <div class="p-3 bg-white flex flex-col gap-2">
+                 <div class="p-3 flex flex-col gap-2" style="background: var(--surface-3); border-top: 1px solid var(--surface-border)">
                    <div class="flex items-center justify-between">
-                     <span class="font-bold text-slate-800 text-sm" :class="tpl.fontClass">{{ tpl.label }}</span>
-                     <div v-if="form.templateKey === tpl.key" class="text-teal-600">
+                     <span class="font-bold text-sm" :class="tpl.fontClass" style="color: var(--text-primary)">{{ tpl.label }}</span>
+                     <div v-if="form.templateKey === tpl.key" class="[color:rgba(var(--brand-rgb)/0.85)]">
                        <Icon name="lucide:check-circle-2" class="w-5 h-5" />
                      </div>
                    </div>
                    <div class="flex flex-col gap-0.5">
-                     <p class="text-[11px] font-medium text-slate-600 leading-snug">{{ tpl.storeTypes }}</p>
-                     <p class="text-[11px] text-slate-500 leading-snug">{{ tpl.description }}</p>
+                     <p class="text-[11px] font-medium leading-snug" style="color: var(--text-secondary)">{{ tpl.storeTypes }}</p>
+                     <p class="text-[11px] leading-snug" style="color: var(--text-tertiary)">{{ tpl.description }}</p>
                    </div>
                    <!-- Color + font pills -->
                    <div class="flex items-center gap-1.5 flex-wrap">
@@ -185,7 +187,7 @@
                        <span class="w-2 h-2 rounded-full inline-block" :style="{ background: tpl.color }"></span>
                        {{ tpl.color.toUpperCase() }}
                      </span>
-                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-50 border border-slate-200 text-slate-600">
+                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium" style="background: var(--surface-1); border: 1px solid var(--surface-border); color: var(--text-tertiary)">
                        <Icon name="lucide:type" class="w-2.5 h-2.5" />
                        {{ tpl.fontName }}
                      </span>
@@ -200,11 +202,11 @@
           v-else-if="step === 2"
           class="space-y-4"
         >
-          <h3 class="text-lg font-semibold text-slate-900">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.onboarding.language.title') }}
           </h3>
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('admin.pages.onboarding.language.label') }}</label>
+            <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.language.label') }}</label>
             <BaseSelect
               v-model="form.language"
             >
@@ -216,7 +218,7 @@
                 {{ l.label }}
               </option>
             </BaseSelect>
-            <p class="mt-1 text-xs text-slate-500">
+            <p class="mt-1 text-xs" style="color: var(--text-muted)">
               {{ t('admin.pages.onboarding.language.rtlHint') }}
             </p>
           </div>
@@ -227,21 +229,21 @@
           v-else
           class="space-y-4"
         >
-          <h3 class="text-lg font-semibold text-slate-900">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.onboarding.summary.title') }}
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="rounded-xl border border-slate-200 p-4">
-              <p class="text-sm text-slate-500">
+            <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
+              <p class="text-sm" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.onboarding.summary.cards.template') }}
               </p>
-              <p class="font-semibold text-slate-900">
+              <p class="font-semibold" style="color: var(--text-primary)">
                 {{ form.templateKey }}
               </p>
             </div>
-            <div class="rounded-xl border border-slate-200 p-4">
-              <p class="text-sm text-slate-500">
+            <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
+              <p class="text-sm" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.onboarding.summary.cards.primaryColor') }}
               </p>
               <div class="flex items-center gap-3">
@@ -249,29 +251,29 @@
                   class="h-6 w-6 rounded"
                   :style="{ backgroundColor: form.primaryColor }"
                 />
-                <p class="font-semibold text-slate-900">
+                <p class="font-semibold" style="color: var(--text-primary)">
                   {{ form.primaryColor }}
                 </p>
               </div>
             </div>
-            <div class="rounded-xl border border-slate-200 p-4">
-              <p class="text-sm text-slate-500">
+            <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
+              <p class="text-sm" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.onboarding.summary.cards.language') }}
               </p>
-              <p class="font-semibold text-slate-900">
+              <p class="font-semibold" style="color: var(--text-primary)">
                 {{ form.language }}
               </p>
             </div>
           </div>
 
-          <div class="rounded-xl border border-slate-200 p-4">
+          <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
             <div class="flex items-center justify-between gap-3 mb-3">
-              <p class="font-medium text-slate-900">
+              <p class="font-medium" style="color: var(--text-primary)">
                 {{ t('admin.pages.onboarding.summary.aiTitle') }}
               </p>
               <button
                 type="button"
-                class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700"
+                class="ui-btn ui-btn--secondary px-3 py-1.5 text-sm"
                 :disabled="summaryLoading"
                 @click="loadSummary"
               >
@@ -281,13 +283,13 @@
             <textarea
               v-model="summaryMarkdown"
               rows="10"
-              class="w-full font-mono text-xs p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="ui-input w-full font-mono text-xs p-3"
               :placeholder="t('admin.pages.onboarding.summary.placeholder')"
             />
             <div class="mt-3 flex items-center justify-end gap-2">
               <button
                 type="button"
-                class="px-3 py-2 rounded-lg text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+                class="px-3 py-2 rounded-lg text-sm font-medium [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-white disabled:opacity-50"
                 :disabled="!summaryMarkdown"
                 @click="copySummary"
               >
@@ -309,7 +311,7 @@
       <div class="flex items-center justify-between">
         <button
           type="button"
-          class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          class="ui-btn ui-btn--secondary px-4 py-2 disabled:opacity-50"
           :disabled="step === 0 || saving"
           @click="step--"
         >
@@ -320,7 +322,7 @@
           <button
             v-if="step < steps.length - 1"
             type="button"
-            class="px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-medium disabled:opacity-50"
+            class="px-4 py-2 rounded-lg [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-white font-medium disabled:opacity-50"
             :disabled="saving"
             @click="nextStep"
           >

@@ -3,7 +3,7 @@
     <!-- Floating button -->
     <button 
       @click="toggleChat"
-      class="fixed bottom-6 right-6 w-14 h-14 bg-teal-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-teal-700 hover:scale-105 transition-all z-[99] focus:outline-none focus:ring-4 focus:ring-teal-600/30"
+      class="fixed bottom-6 right-6 w-14 h-14 [background:var(--brand)] text-white rounded-full shadow-lg flex items-center justify-center hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] hover:scale-105 transition-all z-[99] focus:outline-none focus:ring-4 focus:[--tw-ring-color:rgba(var(--brand-rgb)/0.3)]"
       :aria-label="t('admin.help.button')"
     >
       <Icon v-if="!isOpen" name="lucide:message-circle-question" class="w-7 h-7" />
@@ -25,15 +25,15 @@
         style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5); max-height: calc(100vh - 120px); height: 550px;"
       >
         <!-- Header -->
-        <div class="bg-gradient-to-r from-teal-600 to-teal-700 p-4 text-white flex-shrink-0 flex items-center justify-between">
+        <div class="bg-gradient-to-r [--tw-gradient-from:var(--brand)] [--tw-gradient-to:color-mix(in_srgb,var(--brand)_80%,#000)] p-4 text-white flex-shrink-0 flex items-center justify-between">
           <div>
             <h3 class="font-sans font-semibold text-lg flex items-center gap-2">
               <Icon name="lucide:life-buoy" class="w-5 h-5" />
               {{ t('admin.help.title') }}
             </h3>
-            <p class="text-teal-100 text-sm mt-1">{{ t('admin.help.subtitle') }}</p>
+            <p class="text-white/80 text-sm mt-1">{{ t('admin.help.subtitle') }}</p>
           </div>
-          <button @click="isOpen = false" class="text-teal-100 hover:text-white p-1 rounded-md hover:bg-teal-800/50 transition-colors">
+          <button @click="isOpen = false" class="text-white/80 hover:text-white p-1 rounded-md hover:[background:rgba(0,0,0/0.3)] transition-colors">
             <Icon name="lucide:x" class="w-5 h-5" />
           </button>
         </div>
@@ -50,7 +50,7 @@
             <!-- Avatar -->
             <div 
               class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-              :class="msg.role === 'user' ? 'bg-teal-600 text-white' : 'bg-teal-900/40 text-teal-400'"
+              :class="msg.role === 'user' ? '[background:var(--brand)] text-white' : '[background:rgba(var(--brand-rgb)/0.15)] [color:rgba(var(--brand-rgb)/0.85)]'"
             >
               <Icon :name="msg.role === 'user' ? 'lucide:user' : 'lucide:bot'" class="w-5 h-5" />
             </div>
@@ -71,13 +71,13 @@
 
           <!-- Typing Indicator -->
           <div v-if="isTyping" class="flex items-start gap-3 w-full animate-fadeIn">
-            <div class="w-8 h-8 rounded-full bg-teal-900/40 flex items-center justify-center flex-shrink-0 text-teal-400">
+            <div class="w-8 h-8 rounded-full [background:rgba(var(--brand-rgb)/0.15)] flex items-center justify-center flex-shrink-0 [color:rgba(var(--brand-rgb)/0.85)]">
               <Icon name="lucide:bot" class="w-5 h-5" />
             </div>
             <div class="py-3 px-4 rounded-2xl rounded-tl-none flex items-center gap-1.5 h-11" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-              <div class="w-1.5 h-1.5 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
-              <div class="w-1.5 h-1.5 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
-              <div class="w-1.5 h-1.5 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+              <div class="w-1.5 h-1.5 [background:var(--brand)] rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+              <div class="w-1.5 h-1.5 [background:var(--brand)] rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+              <div class="w-1.5 h-1.5 [background:var(--brand)] rounded-full animate-bounce" style="animation-delay: 300ms"></div>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@
           >
           <button 
             type="submit"
-            class="bg-teal-600 text-white p-2.5 rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center h-[42px] w-[42px]" 
+            class="[background:var(--brand)] text-white p-2.5 rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center h-[42px] w-[42px]" 
             :disabled="!newMessage.trim() || isTyping"
           >
             <Icon name="lucide:send" class="w-4 h-4 translate-x-[-1px] translate-y-[1px]" />

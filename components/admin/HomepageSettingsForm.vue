@@ -38,8 +38,8 @@
              
              <button
                type="submit"
-               class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30 active:scale-95 flex items-center gap-2"
-               :class="saving ? 'bg-teal-500 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'"
+               class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.2)] transition-all hover:[box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.3)] active:scale-95 flex items-center gap-2"
+               :class="saving ? '[background:var(--brand)] cursor-not-allowed' : '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]'"
                :disabled="loading || saving"
              >
                <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />

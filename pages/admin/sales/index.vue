@@ -45,7 +45,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.sales.index.loading') }}
       </p>
@@ -76,13 +76,13 @@
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('id')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.saleId') }}
-                  <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('customerName')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.customer') }}
-                  <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th">
@@ -91,7 +91,7 @@
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('totalAmount')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.total') }}
-                  <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th">
@@ -100,7 +100,7 @@
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('updatedAt')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.sales.index.table.completed') }}
-                  <Icon v-if="sortBy === 'updatedAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'updatedAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th text-right">
@@ -117,7 +117,7 @@
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
                   :to="`/admin/sales/${sale.id}`"
-                  class="font-medium hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
+                  class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
                 >
                   #{{ sale.id.substring(0, 8) }}
                 </NuxtLink>
@@ -126,7 +126,7 @@
                 <NuxtLink
                   v-if="sale.customerId"
                   :to="`/admin/customers/${sale.customerId}`"
-                  class="hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
+                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
                 >
                   {{ sale.customerName }}
                 </NuxtLink>
@@ -138,7 +138,7 @@
                 <a
                   v-if="sale.customerPhone"
                   :href="`tel:${sale.customerPhone}`"
-                  class="hover:text-teal-600 transition-colors" style="color: var(--text-secondary)"
+                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-secondary)"
                 >
                   {{ sale.customerPhone }}
                 </a>
@@ -155,7 +155,7 @@
                 <a
                   v-if="sale.createdByEmail"
                   :href="`mailto:${sale.createdByEmail}`"
-                  class="hover:text-teal-600 transition-colors"
+                  class="hover:[color:var(--brand)] transition-colors"
                 >
                   {{ sale.createdByEmail }}
                 </a>
@@ -168,7 +168,7 @@
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/sales/${sale.id}`"
-                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
+                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
                     :title="t('common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
@@ -225,7 +225,7 @@
                 v-for="page in totalPages"
                 :key="page"
                 class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                :class="currentPage === page ? 'z-10 bg-teal-50 border-teal-500 text-teal-600' : ''"
+                :class="currentPage === page ? 'z-10 [background:rgba(var(--brand-rgb)/0.08)] [border-color:var(--brand)] [color:var(--brand)]' : ''"
                 :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
                 @click="currentPage = page"
               >

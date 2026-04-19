@@ -4,7 +4,7 @@
     <nav class="flex mb-6" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/suppliers" class="hover:text-teal-400 transition-colors" style="color: var(--text-secondary)">
+          <NuxtLink to="/admin/suppliers" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">
             {{ t('admin.nav.suppliers') }}
           </NuxtLink>
         </li>
@@ -34,7 +34,7 @@
           form="supplier-edit-form"
           type="submit"
           :disabled="submitting || loading"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.saving') : t('admin.common.saveChanges') }}
@@ -44,7 +44,7 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="rounded-lg p-12 text-center" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]"></div>
       <p class="mt-2" style="color: var(--text-secondary)">{{ t('admin.pages.suppliers.edit.loading') }}</p>
     </div>
 
@@ -106,7 +106,7 @@
         <button
           type="submit"
           :disabled="submitting"
-          class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.saving') : t('admin.common.saveChanges') }}

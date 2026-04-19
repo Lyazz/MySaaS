@@ -11,7 +11,7 @@
       </div>
       <NuxtLink
         to="/admin/customers/create"
-        class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
+        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center space-x-2"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
         <span>{{ t('admin.pages.customers.index.addCustomer') }}</span>
@@ -34,7 +34,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.customers.index.loading') }}
       </p>
@@ -92,13 +92,13 @@
             >
               <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold uppercase">
+                  <div class="flex-shrink-0 h-10 w-10 [background:rgba(var(--brand-rgb)/0.12)] rounded-full flex items-center justify-center [color:var(--brand)] font-bold uppercase">
                     {{ c.name.charAt(0) }}
                   </div>
                   <div class="ml-4">
                     <NuxtLink
                       :to="`/admin/customers/${c.id}`"
-                      class="font-medium hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
+                      class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
                     >
                       {{ c.name }}
                     </NuxtLink>
@@ -111,7 +111,7 @@
                     <Icon name="lucide:mail" class="w-3 h-3" style="color: var(--text-tertiary)" />
                     <a
                       :href="`mailto:${c.email}`"
-                      class="hover:text-teal-600 transition-colors"
+                      class="hover:[color:var(--brand)] transition-colors"
                     >
                       {{ c.email }}
                     </a>
@@ -120,7 +120,7 @@
                     <Icon name="lucide:phone" class="w-3 h-3" style="color: var(--text-tertiary)" />
                     <a
                       :href="`tel:${c.phone}`"
-                      class="hover:text-teal-600 transition-colors"
+                      class="hover:[color:var(--brand)] transition-colors"
                     >
                       {{ c.phone }}
                     </a>
@@ -133,7 +133,7 @@
                   v-if="c.address"
                   :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}`"
                   target="_blank"
-                  class="hover:text-teal-600 transition-colors"
+                  class="hover:[color:var(--brand)] transition-colors"
                 >
                   {{ c.address }}
                 </a>
@@ -156,14 +156,14 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
-                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
+                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
                     :title="t('admin.common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <NuxtLink
                     :to="`/admin/customers/edit/${c.id}`"
-                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
+                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
@@ -227,7 +227,7 @@
                 v-for="page in totalPages"
                 :key="page"
                 class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                :class="currentPage === page ? 'z-10 bg-teal-50 border-teal-500 text-teal-600' : ''"
+                :class="currentPage === page ? 'z-10 [background:rgba(var(--brand-rgb)/0.08)] [border-color:var(--brand)] [color:var(--brand)]' : ''"
                 :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
                 @click="currentPage = page"
               >

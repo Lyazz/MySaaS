@@ -4,7 +4,7 @@
       <div>
         <NuxtLink
           to="/admin/customers"
-          class="inline-flex items-center text-sm hover:text-teal-600" style="color: var(--text-tertiary)"
+          class="inline-flex items-center text-sm hover:[color:var(--brand)]" style="color: var(--text-tertiary)"
         >
           <Icon name="lucide:arrow-left" class="w-4 h-4 mr-1" />
           {{ t('admin.nav.customers') }}
@@ -68,7 +68,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.customers.detail.loading') }}
       </p>

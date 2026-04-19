@@ -104,7 +104,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.orders.index.loading') }}
       </p>
@@ -136,7 +136,7 @@
               <th class="ui-th w-10">
                 <input
                   type="checkbox"
-                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                   style="border-color: var(--surface-border); background: var(--surface-3)"
                   :checked="allPendingSelected"
                   :disabled="pendingIdsOnPage.length === 0"
@@ -146,13 +146,13 @@
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('id')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.orderId') }}
-                  <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'id'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('customerName')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.customer') }}
-                  <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'customerName'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th">
@@ -164,19 +164,19 @@
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('totalAmount')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.total', 'Total') }}
-                  <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'totalAmount'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('status')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.status') }}
-                  <Icon v-if="sortBy === 'status'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'status'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('createdAt')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.date') }}
-                  <Icon v-if="sortBy === 'createdAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'createdAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th text-right">
@@ -194,7 +194,7 @@
                 <input
                   v-if="order.status === 'PENDING'"
                   type="checkbox"
-                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                   style="border-color: var(--surface-border); background: var(--surface-3)"
                   :checked="selectedIds.includes(order.id)"
                   @change="toggleSelectOne(order.id)"
@@ -203,7 +203,7 @@
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
                   :to="`/admin/orders/${order.id}`"
-                  class="font-medium hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
+                  class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
                 >
                   #{{ order.id.substring(0, 8) }}
                 </NuxtLink>
@@ -212,7 +212,7 @@
                 <NuxtLink
                   v-if="order.customerId"
                   :to="`/admin/customers/${order.customerId}`"
-                  class="hover:text-teal-600 transition-colors" style="color: var(--text-primary)"
+                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
                 >
                   {{ order.customerName }}
                 </NuxtLink>
@@ -224,7 +224,7 @@
                 <a
                   v-if="order.customerPhone"
                   :href="`tel:${order.customerPhone}`"
-                  class="hover:text-teal-600 transition-colors" style="color: var(--text-secondary)"
+                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-secondary)"
                 >
                   {{ order.customerPhone }}
                 </a>
@@ -268,7 +268,7 @@
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/orders/${order.id}`"
-                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
@@ -335,7 +335,7 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 border-teal-500 text-teal-400 bg-teal-950/40'
+                    ? 'z-10 [border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)] [background:rgba(var(--brand-rgb)/0.12)]'
                     : ''
                 ]"
                 :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"

@@ -13,7 +13,7 @@
 
       <!-- Actions Menu -->
       <Menu as="div" class="relative hidden md:block">
-        <MenuButton class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+        <MenuButton class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
           <Icon name="lucide:plus" class="h-4 w-4" />
           {{ t('admin.pages.cash.actions.newAction') }}
           <Icon name="lucide:chevron-down" class="h-4 w-4" />
@@ -72,11 +72,11 @@
               <div class="my-1 border-t" style="border-color: var(--surface-border)" />
               <MenuItem v-slot="{ active }">
                 <button
-                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-teal-400 transition-colors"
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium [color:rgba(var(--brand-rgb)/0.85)] transition-colors"
                   :style="active ? 'background: var(--surface-3)' : ''"
                   @click="transferOpen = true"
                 >
-                  <Icon name="lucide:arrow-left-right" class="h-4 w-4 text-teal-500" />
+                  <Icon name="lucide:arrow-left-right" class="h-4 w-4 [color:var(--brand)]" />
                   {{ t('admin.pages.cash.actions.transfer') }}
                 </button>
               </MenuItem>
@@ -88,7 +88,7 @@
 
     <!-- Mobile FAB -->
     <Menu as="div" class="fixed bottom-6 right-6 z-40 md:hidden">
-      <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full bg-teal-600 text-white shadow-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+      <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full [background:var(--brand)] text-white shadow-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
         <Icon name="lucide:plus" class="h-6 w-6" />
       </MenuButton>
       <transition
@@ -145,11 +145,11 @@
             <div class="my-1 border-t" style="border-color: var(--surface-border)" />
             <MenuItem v-slot="{ active }">
               <button
-                class="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-teal-400 transition-colors"
+                class="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium [color:rgba(var(--brand-rgb)/0.85)] transition-colors"
                 :style="active ? 'background: var(--surface-3)' : ''"
                 @click="transferOpen = true"
               >
-                <Icon name="lucide:arrow-left-right" class="h-5 w-5 text-teal-500" />
+                <Icon name="lucide:arrow-left-right" class="h-5 w-5 [color:var(--brand)]" />
                 {{ t('admin.pages.cash.actions.transfer') }}
               </button>
             </MenuItem>
@@ -240,7 +240,7 @@
           </button>
           <button
             type="button"
-            class="text-sm font-medium text-teal-600 hover:text-teal-700 disabled:opacity-50"
+            class="text-sm font-medium [color:var(--brand)] hover:[color:var(--brand)] disabled:opacity-50"
             :disabled="loadingCashboxes"
             @click="refreshAll"
           >
@@ -265,7 +265,7 @@
         </p>
         <button
           type="button"
-          class="mt-4 inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-700"
+          class="mt-4 inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
           @click="openCashboxCreate"
         >
           <Icon name="lucide:plus" class="h-3.5 w-3.5" />
@@ -308,7 +308,7 @@
 
             <NuxtLink
               :to="`/admin/cash/${c.id}`"
-              class="shrink-0 p-2 opacity-0 transition-all hover:text-teal-400 group-hover:opacity-100"
+              class="shrink-0 p-2 opacity-0 transition-all hover:[color:rgba(var(--brand-rgb)/0.85)] group-hover:opacity-100"
               style="color: var(--text-muted)"
               :title="t('common.view')"
             >
@@ -320,7 +320,7 @@
             <button
               v-if="!c.openSession"
               type="button"
-              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700"
+              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-1.5 text-xs font-medium text-white hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
               @click="openOpenSession(c.id)"
             >
               <Icon name="lucide:play" class="h-3 w-3" />
@@ -359,7 +359,7 @@
                 <Tab v-slot="{ selected }" as="template">
                   <button
                     class="px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none"
-                    :class="selected ? 'border-b-2 border-teal-500 text-teal-400' : ''"
+                    :class="selected ? 'border-b-2 [border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]' : ''"
                     :style="selected ? '' : 'color: var(--text-secondary)'"
                   >
                     {{ t('admin.pages.cash.transactions.title') }}
@@ -368,7 +368,7 @@
                 <Tab v-slot="{ selected }" as="template">
                   <button
                     class="px-4 py-2.5 text-sm font-semibold transition-colors focus:outline-none"
-                    :class="selected ? 'border-b-2 border-teal-500 text-teal-400' : ''"
+                    :class="selected ? 'border-b-2 [border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]' : ''"
                     :style="selected ? '' : 'color: var(--text-secondary)'"
                   >
                     {{ t('admin.pages.cash.sessions.title') }}
@@ -386,7 +386,7 @@
                     <DisclosureButton class="flex w-full items-center justify-between text-left">
                       <div class="flex items-center gap-2">
                         <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.transactions.filters.title') }}</h3>
-                        <span v-if="activeTransactionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+                        <span v-if="activeTransactionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full [background:rgba(var(--brand-rgb)/0.12)] px-2 py-0.5 text-xs font-medium [color:var(--brand)]">
                           {{ activeTransactionFiltersCount }}
                         </span>
                       </div>
@@ -447,7 +447,7 @@
                 </Disclosure>
 
         <div v-if="loadingTxs" class="p-10 text-center">
-          <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600" />
+          <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 [border-color:var(--brand)]" />
           <p class="mt-2 text-sm" style="color: var(--text-tertiary)">
             {{ t('admin.pages.cash.transactions.loading') }}
           </p>
@@ -606,8 +606,8 @@
                     v-for="page in txTotalPages"
                     :key="page"
                     class="relative inline-flex items-center px-4 py-2 text-sm font-medium"
-                    :class="txPage === page ? 'z-10 text-teal-400' : ''"
-                    :style="txPage === page ? 'background: rgba(20,184,166,0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
+                    :class="txPage === page ? 'z-10 [color:rgba(var(--brand-rgb)/0.85)]' : ''"
+                    :style="txPage === page ? 'background: rgba(var(--brand-rgb)/0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
                     @click="txPage = page; fetchTransactions()"
                   >
                     {{ page }}
@@ -634,7 +634,7 @@
               <DisclosureButton class="flex w-full items-center justify-between text-left">
                 <div class="flex items-center gap-2">
                   <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.sessions.filters.title') }}</h3>
-                  <span v-if="activeSessionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-teal-700">
+                  <span v-if="activeSessionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full [background:rgba(var(--brand-rgb)/0.12)] px-2 py-0.5 text-xs font-medium [color:var(--brand)]">
                     {{ activeSessionFiltersCount }}
                   </span>
                 </div>
@@ -679,7 +679,7 @@
           </Disclosure>
 
           <div v-if="loadingSessions" class="p-10 text-center">
-            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600" />
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 [border-color:var(--brand)]" />
             <p class="mt-2 text-sm" style="color: var(--text-tertiary)">
               {{ t('admin.pages.cash.sessions.loading') }}
             </p>
@@ -849,8 +849,8 @@
                       v-for="page in sessionsTotalPages"
                       :key="page"
                       class="relative inline-flex items-center px-4 py-2 text-sm font-medium"
-                      :class="sessionsPage === page ? 'z-10 text-teal-400' : ''"
-                      :style="sessionsPage === page ? 'background: rgba(20,184,166,0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
+                      :class="sessionsPage === page ? 'z-10 [color:rgba(var(--brand-rgb)/0.85)]' : ''"
+                      :style="sessionsPage === page ? 'background: rgba(var(--brand-rgb)/0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
                       @click="sessionsPage = page; fetchSessions()"
                     >
                       {{ page }}
@@ -911,7 +911,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitOpenSession"
             >
@@ -1108,7 +1108,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading || !canSubmitCustomerPayment"
               @click="submitCustomerPayment"
             >
@@ -1170,7 +1170,7 @@
                     {{ po.reference || po.id.substring(0, 8) }} — Total: {{ po.totalAmount }}, Paid: {{ po.paidAmount }}, Status: {{ po.status }} / {{ po.paymentStatus }}
                   </option>
                 </BaseSelect>
-                <div v-if="loadingSupplierPOs" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600" />
+                <div v-if="loadingSupplierPOs" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 [border-color:var(--brand)]" />
               </div>
             </div>
 
@@ -1218,7 +1218,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading || !canSubmitSupplierPayment"
               @click="submitSupplierPayment"
             >
@@ -1310,7 +1310,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitExpense"
             >
@@ -1390,7 +1390,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitTransfer"
             >
@@ -1421,7 +1421,7 @@
               <BaseInput v-model="cashboxForm.name" :placeholder="t('admin.pages.cash.modals.createCashbox.namePlaceholder')" />
             </div>
             <label class="inline-flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
-              <input v-model="cashboxForm.isActive" type="checkbox" class="h-4 w-4 rounded text-teal-600" style="border-color: var(--surface-border)" />
+              <input v-model="cashboxForm.isActive" type="checkbox" class="h-4 w-4 rounded [color:var(--brand)]" style="border-color: var(--surface-border)" />
               {{ t('admin.pages.cash.modals.createCashbox.activeLabel') }}
             </label>
           </div>
@@ -1436,7 +1436,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
+              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading || !canCreateCashbox"
               @click="submitCreateCashbox"
             >

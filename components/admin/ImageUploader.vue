@@ -9,7 +9,7 @@
           {{ hint }}
         </p>
       </div>
-      <div v-if="uploading" class="flex items-center gap-1.5 text-xs font-medium text-teal-600">
+      <div v-if="uploading" class="flex items-center gap-1.5 text-xs font-medium [color:var(--brand)]">
         <Icon name="lucide:loader-2" class="h-3 w-3 animate-spin" />
         {{ t('admin.common.uploading') }}
       </div>
@@ -46,7 +46,7 @@
         @mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.background = '')"
       >
         <div class="mb-3 rounded-full p-3" style="background: var(--surface-3)">
-          <Icon name="lucide:image-plus" class="h-6 w-6 text-teal-600" />
+          <Icon name="lucide:image-plus" class="h-6 w-6 [color:var(--brand)]" />
         </div>
         <span class="text-[13px] font-medium" style="color: var(--text-secondary)">
           {{ t('admin.components.imageUploader.clickToUpload') }}

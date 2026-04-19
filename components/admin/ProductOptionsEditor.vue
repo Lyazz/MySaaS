@@ -85,7 +85,7 @@
                                         class="w-4 h-4 rounded-full border flex items-center justify-center"
                                         :style="i === 0 ? 'border-color: var(--brand)' : 'border-color: var(--surface-border)'"
                                     >
-                                        <div v-if="i === 0" class="w-2 h-2 rounded-full bg-teal-600"></div>
+                                        <div v-if="i === 0" class="w-2 h-2 rounded-full [background:var(--brand)]"></div>
                                     </div>
                                     <span
                                         class="ml-2 text-sm"
@@ -102,7 +102,7 @@
                                     v-for="(v, i) in previewValuesForOption(option, { max: 4, min: 2 })"
                                     :key="v.id"
                                     class="w-8 h-8 rounded-full flex items-center justify-center relative shadow-sm"
-                                    :class="i === 0 ? 'ring-2 ring-offset-2 ring-teal-600' : 'ring-1 ring-black/5'"
+                                    :class="i === 0 ? 'ring-2 ring-offset-2 [--tw-ring-color:var(--brand)]' : 'ring-1 ring-black/5'"
                                     :style="{ backgroundColor: previewColor(v, i) }"
                                     :title="v.label"
                                 >
@@ -133,7 +133,7 @@
                 <div class="md:col-span-8 overflow-hidden">
                     <label class="block text-xs font-medium mb-1" style="color: var(--text-tertiary)">{{ t('admin.productOptionsEditor.fields.optionValues') }}</label>
                     <div
-                        class="flex flex-wrap gap-2 p-2 rounded-md min-h-[42px] focus-within:ring-1 focus-within:ring-teal-500"
+                        class="flex flex-wrap gap-2 p-2 rounded-md min-h-[42px] focus-within:ring-1 focus-within:[--tw-ring-color:var(--brand)]"
                         style="border: 1px solid var(--surface-border); background: var(--surface-2)"
                         @click="focusInput(index)"
                     >
@@ -162,7 +162,7 @@
                             <button 
                                 v-if="['color', 'image'].includes(option.displayType)"
                                 type="button"
-                                class="shrink-0 hover:text-teal-400 focus:outline-none" style="color: var(--text-muted)"
+                                class="shrink-0 hover:[color:rgba(var(--brand-rgb)/0.85)] focus:outline-none" style="color: var(--text-muted)"
                                 :title="t('admin.productOptionsEditor.actions.editMetadata')"
                                 @click.stop="editValueMeta(option, value)"
                             >
@@ -216,7 +216,7 @@
             </button>
 
             <!-- Inline Create form -->
-            <div v-else class="rounded-lg p-4 ring-1 ring-teal-500/20" style="background: var(--surface-2); border: 1px solid rgba(var(--brand-rgb) / 0.4)">
+            <div v-else class="rounded-lg p-4 ring-1 [--tw-ring-color:var(--brand)]/20" style="background: var(--surface-2); border: 1px solid rgba(var(--brand-rgb) / 0.4)">
                  <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     <div class="md:col-span-4 space-y-3">
                         <div>
@@ -285,7 +285,7 @@
                                             class="w-3 h-3 rounded-full border flex items-center justify-center"
                                             :style="i === 0 ? 'border-color: var(--brand)' : 'border-color: var(--surface-border)'"
                                         >
-                                            <span v-if="i === 0" class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+                                            <span v-if="i === 0" class="w-1.5 h-1.5 rounded-full [background:var(--brand)]"></span>
                                         </span>
                                         <span class="ml-2 text-xs" :style="i === 0 ? 'color: var(--text-primary); font-weight: 500' : 'color: var(--text-secondary)'">
                                             {{ v.label }}
@@ -299,7 +299,7 @@
                                         v-for="(v, i) in newOptionPreviewValues.slice(0, 4)"
                                         :key="v.id"
                                         class="w-6 h-6 rounded-full flex items-center justify-center relative shadow-sm"
-                                        :class="i === 0 ? 'ring-2 ring-offset-1 ring-teal-600' : 'ring-1 ring-black/5'"
+                                        :class="i === 0 ? 'ring-2 ring-offset-1 [--tw-ring-color:var(--brand)]' : 'ring-1 ring-black/5'"
                                         :style="{ backgroundColor: previewColor(v, i) }"
                                         :title="v.label"
                                     >
@@ -339,7 +339,7 @@
                  </div>
                  <div class="flex justify-end mt-3 gap-2">
                      <button type="button" class="text-xs px-2 py-1 hover:text-white transition-colors" style="color: var(--text-tertiary)" @click="cancelCreatingOption">{{ t('admin.common.cancel') }}</button>
-                     <button type="button" class="text-xs bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700" @click="createOption">{{ t('admin.productOptionsEditor.actions.done') }}</button>
+                     <button type="button" class="text-xs [background:var(--brand)] text-white px-3 py-1 rounded hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]" @click="createOption">{{ t('admin.productOptionsEditor.actions.done') }}</button>
                  </div>
             </div>
         </div>
@@ -439,7 +439,7 @@
                 </button>
                 <button
                   type="button"
-                  class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30 active:scale-95 flex items-center gap-2 bg-teal-600 hover:bg-teal-700"
+                  class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.2)] transition-all hover:[box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.3)] active:scale-95 flex items-center gap-2 [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
                   @click="saveMeta"
                 >
                   {{ t('admin.common.save') }}

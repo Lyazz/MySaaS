@@ -87,7 +87,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.purchases.index.loading') }}
       </p>
@@ -166,7 +166,7 @@
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
                   :to="`/admin/purchases/${order.id}`"
-                  class="font-medium hover:text-teal-400 transition-colors" style="color: var(--text-primary)"
+                  class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)"
                 >
                   #{{ order.id.slice(0, 8) }}
                 </NuxtLink>
@@ -175,7 +175,7 @@
                 <NuxtLink
                   v-if="order.supplier"
                   :to="`/admin/suppliers/${order.supplier.id}`"
-                  class="hover:text-teal-400 transition-colors" style="color: var(--text-secondary)"
+                  class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)"
                 >
                   {{ order.supplier.name }}
                 </NuxtLink>
@@ -188,7 +188,7 @@
                 <a
                   v-if="order.createdByEmail"
                   :href="`mailto:${order.createdByEmail}`"
-                  class="hover:text-teal-600 transition-colors"
+                  class="hover:[color:var(--brand)] transition-colors"
                 >
                   {{ order.createdByEmail }}
                 </a>
@@ -273,11 +273,11 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 border-teal-500 text-teal-400'
+                    ? 'z-10 [border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]'
                     : 'text-slate-400'
                 ]"
                 :style="currentPage === page
-                  ? 'background: rgba(20,184,166,0.1); border: 1px solid var(--brand)'
+                  ? 'background: rgba(var(--brand-rgb)/0.1); border: 1px solid var(--brand)'
                   : 'background: var(--surface-2); border: 1px solid var(--surface-border)'"
                 @click="currentPage = page"
               >

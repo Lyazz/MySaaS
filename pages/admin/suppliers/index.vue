@@ -12,7 +12,7 @@
       </div>
       <NuxtLink
         to="/admin/suppliers/create"
-        class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
+        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center space-x-2"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
         <span>{{ t('admin.pages.suppliers.index.addSupplier') }}</span>
@@ -38,7 +38,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.suppliers.index.loading') }}
       </p>
@@ -79,19 +79,19 @@
               <th class="ui-th cursor-pointer transition-colors hover:opacity-80" @click="setSort('name')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.suppliers.index.table.name') }}
-                  <Icon v-if="sortBy === 'name'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'name'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors hover:opacity-80" @click="setSort('email')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.suppliers.index.table.info') }}
-                  <Icon v-if="sortBy === 'email'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'email'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors hover:opacity-80" @click="setSort('address')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.suppliers.index.table.address') }}
-                  <Icon v-if="sortBy === 'address'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'address'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th text-right">
@@ -107,13 +107,13 @@
             >
               <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold uppercase">
+                  <div class="flex-shrink-0 h-10 w-10 [background:rgba(var(--brand-rgb)/0.12)] rounded-full flex items-center justify-center [color:var(--brand)] font-bold uppercase">
                      {{ supplier.name.charAt(0) }}
                   </div>
                   <div class="ml-4">
                     <NuxtLink
                       :to="`/admin/suppliers/${supplier.id}`"
-                      class="font-medium hover:text-teal-400 transition-colors" style="color: var(--text-primary)"
+                      class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)"
                     >
                       {{ supplier.name }}
                     </NuxtLink>
@@ -126,7 +126,7 @@
                      <Icon name="lucide:mail" class="w-3 h-3" style="color: var(--text-muted)" />
                      <a
                        :href="`mailto:${supplier.email}`"
-                       class="hover:text-teal-600 transition-colors"
+                       class="hover:[color:var(--brand)] transition-colors"
                      >
                        {{ supplier.email }}
                      </a>
@@ -135,7 +135,7 @@
                      <Icon name="lucide:phone" class="w-3 h-3" style="color: var(--text-muted)" />
                      <a
                        :href="`tel:${supplier.phone}`"
-                       class="hover:text-teal-600 transition-colors"
+                       class="hover:[color:var(--brand)] transition-colors"
                      >
                        {{ supplier.phone }}
                      </a>
@@ -148,7 +148,7 @@
                    v-if="supplier.address"
                    :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(supplier.address)}`"
                    target="_blank"
-                   class="hover:text-teal-600 transition-colors"
+                   class="hover:[color:var(--brand)] transition-colors"
                  >
                    {{ supplier.address }}
                  </a>
@@ -158,7 +158,7 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/suppliers/${supplier.id}`"
-                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
+                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
@@ -223,7 +223,7 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                    ? 'z-10 [background:rgba(var(--brand-rgb)/0.08)] [border-color:var(--brand)] [color:var(--brand)]'
                     : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                 ]"
                 @click="currentPage = page"

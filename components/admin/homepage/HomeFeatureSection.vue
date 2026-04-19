@@ -15,7 +15,7 @@
       <div class="rounded-xl transition-all duration-300" :style="modelValue.browseByCategory.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
         <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.browseByCategory.enabled = !modelValue.browseByCategory.enabled" :style="modelValue.browseByCategory.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.browseByCategory.enabled ? 'bg-teal-900/40 text-teal-400' : ''" :style="!modelValue.browseByCategory.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.browseByCategory.enabled ? '[background:rgba(var(--brand-rgb)/0.15)] [color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="!modelValue.browseByCategory.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
                <Icon name="lucide:layout-grid" class="w-5 h-5" />
             </div>
             <div>
@@ -47,7 +47,7 @@
       <div class="rounded-xl transition-all duration-300" :style="modelValue.newArrivals.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
         <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.newArrivals.enabled = !modelValue.newArrivals.enabled" :style="modelValue.newArrivals.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.newArrivals.enabled ? 'bg-teal-900/40 text-teal-400' : ''" :style="!modelValue.newArrivals.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.newArrivals.enabled ? '[background:rgba(var(--brand-rgb)/0.15)] [color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="!modelValue.newArrivals.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
                <Icon name="lucide:sparkles" class="w-5 h-5" />
             </div>
             <div>
@@ -85,7 +85,7 @@
       <div class="rounded-xl transition-all duration-300" :style="modelValue.bestSellers.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
         <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.bestSellers.enabled = !modelValue.bestSellers.enabled" :style="modelValue.bestSellers.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.bestSellers.enabled ? 'bg-teal-900/40 text-teal-400' : ''" :style="!modelValue.bestSellers.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.bestSellers.enabled ? '[background:rgba(var(--brand-rgb)/0.15)] [color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="!modelValue.bestSellers.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
                <Icon name="lucide:award" class="w-5 h-5" />
             </div>
             <div>

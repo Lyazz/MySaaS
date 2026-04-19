@@ -12,7 +12,7 @@
       </div>
       <NuxtLink
         to="/admin/categories/create"
-        class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors flex items-center space-x-2"
+        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center space-x-2"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
         <span>{{ t('admin.pages.categories.index.addCategory') }}</span>
@@ -38,7 +38,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.categories.index.loading') }}
       </p>
@@ -79,13 +79,13 @@
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('title')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.categories.index.table.category') }}
-                  <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('products')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.categories.index.table.products') }}
-                  <Icon v-if="sortBy === 'products'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'products'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th">Hierarchy</th>
@@ -155,13 +155,13 @@
                   <a
                     :href="getCategoryUrl(category.slug)"
                     target="_blank"
-                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.pages.categories.index.links.openCategory')"
                   >
                     <Icon name="lucide:external-link" class="w-4 h-4" />
                   </a>
                   <button
-                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.pages.categories.index.links.copyCategory')"
                     @click="copyLink(`/c/${category.slug}`)"
                   >
@@ -173,7 +173,7 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/categories/${category.id}`"
-                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
@@ -239,7 +239,7 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                    ? 'z-10 [background:rgba(var(--brand-rgb)/0.08)] [border-color:var(--brand)] [color:var(--brand)]'
                     : ''
                 ]"
                 :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"

@@ -123,7 +123,7 @@
               <input
                 v-model="variant.trackInventory"
                 type="checkbox"
-                class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border); background: var(--surface-3)"
+                class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-3)"
                 :disabled="savingInventoryIds.has(variant.id)"
                 @change="updateVariantInventory(variant, { trackInventory: Boolean(variant.trackInventory) })"
               >
@@ -204,14 +204,14 @@
               <input 
                 v-model="variant.isActive" 
                 type="checkbox"
-                class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border); background: var(--surface-3)" 
+                class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-3)" 
                 @change="updateVariantInfo(variant)"
               >
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <button
                 type="button"
-                class="text-teal-600 hover:text-teal-900 font-medium"
+                class="[color:var(--brand)] hover:[color:var(--brand)] font-medium"
                 @click="openImageEditor(variant)"
               >
                 {{ t('admin.variantsTable.actions.manageImages', { count: variant.images?.length || 0 }) }}
@@ -220,7 +220,7 @@
             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
               <button
                 type="button"
-                class="hover:text-teal-400" style="color: var(--text-secondary)"
+                class="hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-secondary)"
                 @click="openMovements(variant)"
               >
                 {{ t('admin.variantsTable.actions.movements') }}
@@ -360,7 +360,7 @@
           <label
             v-for="img in availableImages"
             :key="img.url"
-            class="rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:border-teal-400 transition-colors" style="border: 1px solid var(--surface-border)"
+            class="rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:[border-color:rgba(var(--brand-rgb)/0.6)] transition-colors" style="border: 1px solid var(--surface-border)"
           >
             <div class="aspect-square overflow-hidden rounded-md" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
               <img
@@ -373,7 +373,7 @@
               <span class="truncate" style="color: var(--text-secondary)">{{ img.label || t('admin.variantsTable.imagePicker.imageFallback') }}</span>
               <input
                 type="checkbox"
-                class="h-4 w-4 text-teal-600 rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
+                class="h-4 w-4 [color:var(--brand)] rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
                 :checked="selectedImageUrls.has(img.url)"
                 @change="toggleImage(img.url)"
               >
@@ -392,8 +392,8 @@
           <button
             type="button"
             :disabled="savingImages"
-            class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30 active:scale-95 flex items-center gap-2"
-            :class="savingImages ? 'bg-teal-500 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700'"
+            class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.2)] transition-all hover:[box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.3)] active:scale-95 flex items-center gap-2"
+            :class="savingImages ? '[background:var(--brand)] cursor-not-allowed' : '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]'"
             @click="saveVariantImages"
           >
             <Icon v-if="savingImages" name="lucide:loader-2" class="w-4 h-4 animate-spin" />

@@ -118,7 +118,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.products.index.loading') }}
       </p>
@@ -195,7 +195,7 @@
 	              <th class="ui-th w-10">
 	                <input
 	                  type="checkbox"
-	                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+	                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                   style="border-color: var(--surface-border); background: var(--surface-3)"
 	                  :checked="allVisibleSelected"
 	                  :disabled="paginatedProducts.length === 0"
@@ -205,7 +205,7 @@
 	              <th class="ui-th cursor-pointer transition-colors" @click="setSort('title')">
 	                <div class="flex items-center gap-1">
 	                  {{ t('admin.pages.products.index.table.product') }}
-	                  <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+	                  <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
 	                </div>
 	              </th>
               <th class="ui-th">
@@ -214,19 +214,19 @@
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('price')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.products.index.table.price') }}
-                  <Icon v-if="sortBy === 'price'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'price'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('stock')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.products.index.table.stock') }}
-                  <Icon v-if="sortBy === 'stock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'stock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('isActive')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.products.index.table.status') }}
-                  <Icon v-if="sortBy === 'isActive'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'isActive'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="ui-th text-center">
@@ -247,7 +247,7 @@
 	                <input
 	                  v-model="selectedIds"
 	                  type="checkbox"
-	                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+	                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                   style="border-color: var(--surface-border); background: var(--surface-3)"
 	                  :value="product.id"
 	                >
@@ -327,7 +327,7 @@
               </td>
               <td class="ui-td whitespace-nowrap text-center">
                 <Menu as="div" class="relative inline-block text-left text-sm">
-                  <MenuButton class="p-1.5 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)">
+                  <MenuButton class="p-1.5 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)">
                     <Icon name="lucide:globe" class="w-5 h-5" />
                   </MenuButton>
                   <transition
@@ -356,7 +356,7 @@
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/p/${product.slug}`)"
-                              :class="['p-2 rounded-md hover:text-teal-600 transition-colors']"
+                              :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyProduct')"
                             >
@@ -383,7 +383,7 @@
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/p/${product.slug}?mode=landing`)"
-                              :class="['p-2 rounded-md hover:text-teal-600 transition-colors']"
+                              :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyLanding')"
                             >
@@ -400,7 +400,7 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/products/${product.id}`"
-                    class="p-2 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
@@ -466,7 +466,7 @@
                 :class="[
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 bg-teal-50 border-teal-500 text-teal-600'
+                    ? 'z-10 [background:rgba(var(--brand-rgb)/0.08)] [border-color:var(--brand)] [color:var(--brand)]'
                     : ''
                 ]"
                 :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
@@ -528,7 +528,7 @@
 	            ref="importCsvInput"
 	            type="file"
 	            accept=".csv,text/csv"
-	            class="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-teal-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-teal-700 hover:file:bg-teal-100" style="color: var(--text-secondary)"
+	            class="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:[background:rgba(var(--brand-rgb)/0.08)] file:px-4 file:py-2 file:text-sm file:font-semibold file:[color:var(--brand)] hover:file:[background:rgba(var(--brand-rgb)/0.12)]" style="color: var(--text-secondary)"
 	            :disabled="importingCsv"
 	            @change="onImportCsvFileChange"
 	          >
@@ -689,7 +689,7 @@
 	            <input
 	              v-model="bulkPropagatePriceToVariants"
 	              type="checkbox"
-	              class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border); background: var(--surface-3)"
+	              class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-3)"
 	            >
 	            {{ t('admin.pages.products.index.bulk.fields.propagatePrice') }}
 	          </label>
@@ -713,7 +713,7 @@
 	          </button>
 	          <button
 	            type="button"
-	            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50"
+	            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
 	            :disabled="bulkSaving"
 	            @click="submitBulkUpdate"
 	          >

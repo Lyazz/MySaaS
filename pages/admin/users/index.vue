@@ -24,7 +24,7 @@
         <button
           v-if="activeTab === 'users'"
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+          class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
           :disabled="pending"
           @click="openCreate()"
         >
@@ -35,7 +35,7 @@
         <button
           v-else
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+          class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
           :disabled="rolesPending"
           @click="openCreateRole()"
         >
@@ -84,7 +84,7 @@
           />
         </div>
         <label class="inline-flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
-          <input v-model="includeInactive" type="checkbox" class="h-4 w-4 rounded text-teal-600" style="border-color: var(--surface-border); background: var(--surface-2)" />
+          <input v-model="includeInactive" type="checkbox" class="h-4 w-4 rounded [color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-2)" />
           {{ t('admin.pages.users.includeInactive') }}
         </label>
       </div>
@@ -113,7 +113,7 @@
               <td class="ui-td">
                 <a
                   :href="`mailto:${u.email}`"
-                  class="font-medium hover:text-teal-400 transition-colors" style="color: var(--text-primary)"
+                  class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)"
                 >
                   {{ u.email }}
                 </a>
@@ -149,7 +149,7 @@
                 <div class="flex items-center justify-end space-x-1">
                   <button
                     type="button"
-                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
+                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
                     :title="t('admin.common.edit')"
                     @click="openEdit(u)"
                   >
@@ -225,8 +225,8 @@
                 v-for="page in totalPages"
                 :key="page"
                 class="relative inline-flex items-center px-4 py-2 text-sm font-medium"
-                :class="currentPage === page ? 'z-10 text-teal-400' : 'text-slate-400'"
-                :style="currentPage === page ? 'background: rgba(20,184,166,0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border)'"
+                :class="currentPage === page ? 'z-10 [color:rgba(var(--brand-rgb)/0.85)]' : 'text-slate-400'"
+                :style="currentPage === page ? 'background: rgba(var(--brand-rgb)/0.1); border: 1px solid var(--brand)' : 'background: var(--surface-2); border: 1px solid var(--surface-border)'"
                 @click="currentPage = page"
               >
                 {{ page }}
@@ -282,7 +282,7 @@
                     >
                       <span style="color: var(--text-primary)">{{ p.resource }}</span>
                       <span style="color: var(--text-muted)">|</span>
-                      <span v-if="p.type === 'full'" class="text-teal-400">{{ t('admin.common.fullAccess') }}</span>
+                      <span v-if="p.type === 'full'" class="[color:rgba(var(--brand-rgb)/0.85)]">{{ t('admin.common.fullAccess') }}</span>
                       <span v-else-if="p.type === 'view'" class="text-blue-400">{{ t('admin.common.viewOnly') }}</span>
                       <div v-else class="flex items-center gap-1" style="color: var(--text-secondary)">
                         <Icon v-if="p.actions.includes('create')" name="lucide:plus" class="h-3 w-3" title="Create" />
@@ -305,7 +305,7 @@
                 <div class="flex items-center justify-end space-x-1">
                   <button
                     type="button"
-                    class="p-2 rounded-md transition-colors hover:text-teal-400" style="color: var(--text-muted)"
+                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
                     :title="t('admin.common.edit')"
                     @click="openEditRole(r)"
                   >
@@ -457,7 +457,7 @@
             </button>
             <button
               type="submit"
-              class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
               :disabled="saving"
             >
               <Icon v-if="saving" name="lucide:loader-circle" class="h-4 w-4 animate-spin" />
@@ -501,7 +501,7 @@
             <div class="px-4 py-2 flex items-center justify-end gap-2" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
                <button
                 type="button"
-                class="text-xs font-medium text-teal-600 hover:text-teal-700"
+                class="text-xs font-medium [color:var(--brand)] hover:[color:var(--brand)]"
                 @click="selectAllPermissions"
               >
                 {{ t('admin.common.selectAll') }}
@@ -530,7 +530,7 @@
                     <input
                       v-model="roleForm.permissions[resource][action]"
                       type="checkbox"
-                      class="h-4 w-4 rounded text-teal-600" style="border-color: var(--surface-border); background: var(--surface-3)"
+                      class="h-4 w-4 rounded [color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-3)"
                     />
                     {{ actionLabel(action) }}
                   </label>
@@ -553,7 +553,7 @@
             </button>
             <button
               type="submit"
-              class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95 disabled:opacity-50"
               :disabled="roleSaving"
             >
               <Icon v-if="roleSaving" name="lucide:loader-circle" class="h-4 w-4 animate-spin" />
@@ -688,7 +688,7 @@ const formatDate = (iso: string) => {
 
 const roleBadgeClass = (role: TenantUser['role']) => {
   if (role === 'owner') return 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30'
-  if (role === 'admin') return 'bg-teal-500/10 text-teal-400 border border-teal-500/30'
+  if (role === 'admin') return '[background:var(--brand)]/10 [color:rgba(var(--brand-rgb)/0.85)] border [border-color:var(--brand)]/30'
   return 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
 }
 
@@ -972,7 +972,7 @@ const getPermissionDisplay = (permissions: StaffRole['permissions']) => {
 
     if (isFull) {
       type = 'full'
-      badgeClass = 'border-teal-500/30 bg-teal-500/10'
+      badgeClass = '[border-color:var(--brand)]/30 [background:var(--brand)]/10'
     } else if (isViewOnly) {
       type = 'view'
       badgeClass = 'border-blue-500/30 bg-blue-500/10'

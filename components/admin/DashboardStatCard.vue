@@ -61,7 +61,7 @@
 </style>
 
 <script setup lang="ts">
-type Tone = 'brand' | 'teal' | 'blue' | 'amber' | 'slate' | 'red'
+type Tone = 'brand' | 'blue' | 'amber' | 'slate' | 'red'
 
 interface Props {
   label: string
@@ -88,12 +88,6 @@ const toneMap: Record<Tone, { icon: string; wrap: string; topLine: string; wash:
     wrap: 'background: rgba(var(--brand-rgb) / 0.12); border: 1px solid rgba(var(--brand-rgb) / 0.2)',
     topLine: 'background: linear-gradient(90deg, var(--brand) 0%, transparent 60%)',
     wash: 'background: linear-gradient(180deg, rgba(var(--brand-rgb) / 0.06) 0%, transparent 100%)'
-  },
-  teal: {
-    icon: 'color: #2dd4bf',
-    wrap: 'background: rgba(20,184,166,0.12); border: 1px solid rgba(20,184,166,0.2)',
-    topLine: 'background: linear-gradient(90deg, #14b8a6 0%, transparent 60%)',
-    wash: 'background: linear-gradient(180deg, rgba(20,184,166,0.06) 0%, transparent 100%)'
   },
   blue: {
     icon: 'color: #60a5fa',

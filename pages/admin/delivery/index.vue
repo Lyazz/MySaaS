@@ -25,7 +25,7 @@
         </div>
         <button
           type="button"
-          class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-60"
+          class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:[--tw-ring-color:var(--brand)] disabled:opacity-60"
           :class="[storePickupEnabled ? 'bg-green-500' : 'bg-white/10']"
           role="switch"
           :aria-checked="storePickupEnabled"
@@ -53,7 +53,7 @@
         v-for="provider in providers" 
         :key="provider.provider"
         class="rounded-lg transition-shadow cursor-pointer overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-        :class="{'ring-2 ring-teal-500': selectedProvider?.provider === provider.provider}"
+        :class="{'ring-2 [--tw-ring-color:var(--brand)]': selectedProvider?.provider === provider.provider}"
         @click="selectProvider(provider)"
       >
         <div class="p-6">
@@ -86,7 +86,7 @@
             <div @click.stop>
               <button 
                 type="button" 
-                class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:[--tw-ring-color:var(--brand)]"
                 :class="[provider.offered ? 'bg-green-500' : 'bg-white/10']"
                 role="switch" 
                 :aria-checked="provider.offered"
@@ -104,7 +104,7 @@
 
           <div class="flex justify-between items-center text-sm">
             <span style="color: var(--text-tertiary)">{{ t('admin.pages.delivery.providers.wilayasSupported', { count: 58 }) }}</span>
-            <span class="text-teal-600 font-medium">{{ t('admin.pages.delivery.providers.managePricing') }} &rarr;</span>
+            <span class="[color:var(--brand)] font-medium">{{ t('admin.pages.delivery.providers.managePricing') }} &rarr;</span>
           </div>
         </div>
       </div>
@@ -157,7 +157,7 @@
               </div>
               <button
                 type="button"
-                class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:[--tw-ring-color:var(--brand)]"
                 :class="[accountIsActive ? 'bg-green-500' : 'bg-white/10']"
                 role="switch"
                 :aria-checked="accountIsActive"
@@ -345,7 +345,7 @@
             <button
               type="button"
               class="ui-btn ui-btn--secondary ui-btn--sm"
-              :class="wilayaFilter === 'all' ? 'ring-2 ring-teal-500' : ''"
+              :class="wilayaFilter === 'all' ? 'ring-2 [--tw-ring-color:var(--brand)]' : ''"
               @click="wilayaFilter = 'all'"
             >
               {{ t('admin.pages.delivery.pricing.filters.all') }}
@@ -353,7 +353,7 @@
             <button
               type="button"
               class="ui-btn ui-btn--secondary ui-btn--sm"
-              :class="wilayaFilter === 'overrides' ? 'ring-2 ring-teal-500' : ''"
+              :class="wilayaFilter === 'overrides' ? 'ring-2 [--tw-ring-color:var(--brand)]' : ''"
               @click="wilayaFilter = 'overrides'"
             >
               {{ t('admin.pages.delivery.pricing.filters.overrides') }}
@@ -361,7 +361,7 @@
             <button
               type="button"
               class="ui-btn ui-btn--secondary ui-btn--sm"
-              :class="wilayaFilter === 'no-overrides' ? 'ring-2 ring-teal-500' : ''"
+              :class="wilayaFilter === 'no-overrides' ? 'ring-2 [--tw-ring-color:var(--brand)]' : ''"
               @click="wilayaFilter = 'no-overrides'"
             >
               {{ t('admin.pages.delivery.pricing.filters.noOverrides') }}
@@ -370,7 +370,7 @@
               type="button"
               class="ui-btn ui-btn--secondary ui-btn--sm"
               :disabled="!carrierRatesFetched"
-              :class="wilayaFilter === 'missing-carrier' ? 'ring-2 ring-teal-500' : ''"
+              :class="wilayaFilter === 'missing-carrier' ? 'ring-2 [--tw-ring-color:var(--brand)]' : ''"
               @click="wilayaFilter = 'missing-carrier'"
             >
               {{ t('admin.pages.delivery.pricing.filters.missingCarrier') }}
@@ -415,7 +415,7 @@
         v-if="loadingRates"
         class="p-12 text-center"
       >
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
         <p class="mt-2" style="color: var(--text-tertiary)">
           {{ t('admin.pages.delivery.pricing.loading') }}
         </p>

@@ -31,7 +31,7 @@
         <!-- List -->
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <div v-if="loading" class="p-8 text-center">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]"></div>
             <p class="mt-2 text-sm" style="color: var(--text-tertiary)">{{ t('admin.components.variantSelectorModal.loading') }}</p>
           </div>
           <div v-else-if="variants.length === 0" class="p-8 text-center text-sm" style="color: var(--text-tertiary)">
@@ -44,7 +44,7 @@
                   <input
                     type="checkbox"
                     :checked="allSelected"
-                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                    class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
                     style="border-color: var(--surface-border); background: var(--surface-3)"
                     @change="toggleAll"
                   />
@@ -71,7 +71,7 @@
                   <input
                     type="checkbox"
                     :checked="isSelected(variant)"
-                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                    class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
                     style="border-color: var(--surface-border); background: var(--surface-3)"
                     @change="toggleSelection(variant)"
                   />

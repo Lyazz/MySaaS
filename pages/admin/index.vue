@@ -69,7 +69,7 @@
         :value="dashboard.counts.products"
         icon="lucide:package"
         :loading="pending"
-        tone="teal"
+        tone="brand"
         to="/admin/products"
       />
       <AdminDashboardStatCard

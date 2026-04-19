@@ -187,28 +187,75 @@
             :href="storefrontUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
+            class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
             style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
+            :aria-label="t('admin.actions.viewStore')"
             @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
             @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
           >
-            <Icon name="lucide:external-link" class="w-3 h-3" />
-            <span>{{ t('admin.actions.viewStore') }}</span>
+            <Icon name="lucide:external-link" class="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+            <span class="hidden sm:inline">{{ t('admin.actions.viewStore') }}</span>
           </a>
 
-          <LocaleSwitcher class="hidden sm:inline-flex" />
+          <LocaleSwitcher />
 
-          <div class="w-px h-4 hidden sm:block" style="background: var(--surface-border)" />
+          <div class="w-px h-4" style="background: var(--surface-border)" />
 
           <button
-            @click="handleLogout"
-            class="ui-btn ui-btn--sm ui-btn--ghost"
+            @click="showLogoutModal = true"
+            class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
+            style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
             :aria-label="t('admin.actions.logout')"
+            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
+            @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
           >
-            <Icon name="lucide:log-out" class="w-3.5 h-3.5" />
-            <span class="hidden sm:inline text-[12px]">{{ t('admin.actions.logout') }}</span>
+            <Icon name="lucide:log-out" class="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+            <span class="hidden sm:inline">{{ t('admin.actions.logout') }}</span>
           </button>
         </div>
+
+        <!-- Logout Confirmation Modal -->
+        <Teleport to="body">
+          <div
+            v-if="showLogoutModal"
+            class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px)"
+            @click.self="showLogoutModal = false"
+          >
+            <div
+              class="w-full max-w-sm rounded-2xl p-6 shadow-2xl"
+              style="background: var(--admin-sidebar-bg); border: 1px solid var(--surface-border)"
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="background: rgba(239,68,68,0.12)">
+                  <Icon name="lucide:log-out" class="w-4.5 h-4.5" style="color: #ef4444" />
+                </div>
+                <h2 class="text-[15px] font-semibold" style="color: var(--text-primary)">{{ t('admin.actions.logoutConfirmTitle') }}</h2>
+              </div>
+              <p class="text-[13px] mb-5 leading-relaxed" style="color: var(--text-secondary)">{{ t('admin.actions.logoutConfirmMessage') }}</p>
+              <div class="flex gap-2 justify-end">
+                <button
+                  @click="showLogoutModal = false"
+                  class="px-4 py-2 text-[12px] font-medium rounded-lg transition-all duration-150"
+                  style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
+                  @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)' }"
+                  @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = '' }"
+                >
+                  {{ t('admin.common.cancel') }}
+                </button>
+                <button
+                  @click="handleLogout"
+                  class="px-4 py-2 text-[12px] font-medium rounded-lg transition-all duration-150 text-white"
+                  style="background: #ef4444; border: 1px solid transparent"
+                  @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = '#dc2626' }"
+                  @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = '#ef4444' }"
+                >
+                  {{ t('admin.actions.logout') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Teleport>
       </header>
 
       <!-- Content -->
@@ -252,6 +299,7 @@ const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
 const route = useRoute()
 const sidebarOpen = ref(false)
+const showLogoutModal = ref(false)
 const storeSettings = useState<any>('storeSettings')
 
 const { data: settings } = await useAsyncData('storeSettings', () =>
@@ -449,6 +497,7 @@ function toggleSidebar() {
 }
 
 function handleLogout() {
+  showLogoutModal.value = false
   authStore.logout()
 }
 </script>

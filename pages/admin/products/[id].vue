@@ -9,7 +9,7 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/products"
-            class="hover:text-teal-600" style="color: var(--text-secondary)"
+            class="hover:[color:var(--brand)]" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.products') }}
           </NuxtLink>
@@ -31,7 +31,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.products.edit.loading') }}
       </p>
@@ -62,7 +62,7 @@
               <a
                 :href="productUrl"
                 target="_blank"
-                class="p-1 text-teal-600 hover:bg-teal-50 rounded"
+                class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded"
                 :title="t('admin.pages.products.edit.links.openProduct')"
               >
                 <Icon name="lucide:external-link" class="w-4 h-4" />
@@ -82,7 +82,7 @@
               <a
                 :href="landingUrl"
                 target="_blank"
-                class="p-1 text-teal-600 hover:bg-teal-50 rounded"
+                class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded"
                 :title="t('admin.pages.products.edit.links.openLanding')"
               >
                 <Icon name="lucide:external-link" class="w-4 h-4" />
@@ -105,7 +105,7 @@
           </NuxtLink>
           <button
             :disabled="submitting"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
             @click="handleSubmit"
           >
             {{ submitting ? t('admin.common.updating') : t('admin.pages.products.edit.submit') }}
@@ -130,7 +130,7 @@
               class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200"
               :class="[
                 currentTab === tab.id
-                  ? 'border-teal-500 text-teal-600'
+                  ? '[border-color:var(--brand)] [color:var(--brand)]'
                   : 'border-transparent hover:border-white/20 text-[var(--text-tertiary)]'
               ]"
               @click="currentTab = tab.id"
@@ -179,7 +179,7 @@
                   :id="inputId"
                   v-model="form.miniDescription"
                   rows="3"
-                  class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
+                  class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
                   :placeholder="t('admin.forms.product.miniDescription.placeholder')"
                 />
               </template>
@@ -242,7 +242,7 @@
                   >
                     <input
                       type="checkbox"
-                      class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                      class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                       style="border-color: var(--surface-border); background: var(--surface-3)"
                       :checked="form.categoryIds.includes(cat.id)"
                       @change="toggleCategorySelection(cat.id, ($event.target as HTMLInputElement).checked)"
@@ -269,7 +269,7 @@
                 id="isActive"
                 v-model="form.isActive"
                 type="checkbox"
-                class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
                 style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
@@ -292,7 +292,7 @@
                 id="isPromotionActive"
                 v-model="form.isPromotionActive"
                 type="checkbox"
-                class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
                 style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
@@ -338,7 +338,7 @@
                   id="showCountdown"
                   v-model="form.showCountdown"
                   type="checkbox"
-                  class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                  class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
                   style="border-color: var(--surface-border); background: var(--surface-3)"
                 >
                 <label
@@ -393,7 +393,7 @@
                   <input
                     v-model="showArchivedVariants"
                     type="checkbox"
-                    class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                    class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                     style="border-color: var(--surface-border); background: var(--surface-3)"
                   >
                   {{ t('admin.pages.products.edit.variantsTab.showArchived') }}
@@ -501,7 +501,7 @@
                           <input
                             v-model="deal.isActive"
                             type="checkbox"
-                            class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                            class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
                             style="border-color: var(--surface-border); background: var(--surface-3)"
                           >
                           <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.common.active') }}</span>
@@ -581,7 +581,7 @@
                     </div>
                     <input
                       type="checkbox"
-                      class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded"
+                      class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
                       style="border-color: var(--surface-border); background: var(--surface-3)"
                       :value="p.id"
                       v-model="productMetaPixelIds"
@@ -614,7 +614,7 @@
           <button
             type="submit"
             :disabled="submitting"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ submitting ? t('admin.common.updating') : t('admin.pages.products.edit.submit') }}
           </button>

@@ -22,7 +22,7 @@
           </button>
           <button
             type="button"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
             :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
             :disabled="loading || saving"
             @click="save"
@@ -53,7 +53,7 @@
             <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
                 <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:handbag" class="w-4 h-4 text-teal-600" />
+                  <Icon name="lucide:handbag" class="w-4 h-4 [color:var(--brand)]" />
                   {{ t('admin.functionalSettingsForm.features.cart.title') }}
                 </h4>
                 <p class="text-sm mt-1" style="color: var(--text-tertiary)">
@@ -67,7 +67,7 @@
             <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
                 <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:banknote" class="w-4 h-4 text-teal-600" />
+                  <Icon name="lucide:banknote" class="w-4 h-4 [color:var(--brand)]" />
                   {{ t('admin.functionalSettingsForm.features.cod.title') }}
                 </h4>
                 <p class="text-sm mt-1" style="color: var(--text-tertiary)">
@@ -97,7 +97,7 @@
             <div class="flex items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
                 <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:megaphone" class="w-4 h-4 text-teal-600" />
+                  <Icon name="lucide:megaphone" class="w-4 h-4 [color:var(--brand)]" />
                   {{ t('admin.appearanceSettingsForm.announcement.marquee') }}
                 </h4>
               </div>
@@ -109,7 +109,7 @@
                 <input
                   v-model="form.announcementText"
                   type="text"
-                  class="ui-input block w-full rounded-lg shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                  class="ui-input block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm"
                   :placeholder="t('admin.appearanceSettingsForm.announcement.message.placeholder')"
                 >
             </div>
@@ -118,7 +118,7 @@
             <div class="flex items-center justify-between p-4 rounded-xl transition-all duration-200 opacity-60" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
               <div class="flex-1 pr-4">
                 <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:search" class="w-4 h-4 text-teal-600" />
+                  <Icon name="lucide:search" class="w-4 h-4 [color:var(--brand)]" />
                   {{ t('admin.functionalSettingsForm.storefrontSearch.title') }}
                 </h4>
                 <p class="text-sm mt-1" style="color: var(--text-tertiary)">
@@ -184,14 +184,14 @@
               <div 
                 v-for="l in languages" 
                 :key="l.key"
-                class="cursor-pointer relative rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all hover:border-teal-300"
-                :class="form.language === l.key ? 'border-teal-500 bg-teal-50/50 ring-1 ring-teal-500' : ''"
+                class="cursor-pointer relative rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all hover:[border-color:rgba(var(--brand-rgb)/0.4)]"
+                :class="form.language === l.key ? '[border-color:var(--brand)] [background:rgba(var(--brand-rgb)/0.08)]/50 ring-1 [--tw-ring-color:var(--brand)]' : ''"
                 :style="form.language !== l.key ? 'background: var(--surface-1); border-color: var(--surface-border)' : ''"
                 @click="form.language = l.key"
               >
                  <span class="text-2xl mb-2">{{ l.flag }}</span>
-                 <span class="text-sm font-medium" :class="form.language === l.key ? 'text-teal-900' : ''" :style="form.language !== l.key ? 'color: var(--text-secondary)' : ''">{{ l.label }}</span>
-                 <Icon v-if="form.language === l.key" name="lucide:check-circle-2" class="w-4 h-4 text-teal-600 absolute top-2 right-2" />
+                 <span class="text-sm font-medium" :class="form.language === l.key ? '[color:var(--brand)]' : ''" :style="form.language !== l.key ? 'color: var(--text-secondary)' : ''">{{ l.label }}</span>
+                 <Icon v-if="form.language === l.key" name="lucide:check-circle-2" class="w-4 h-4 [color:var(--brand)] absolute top-2 right-2" />
               </div>
             </div>
 
@@ -235,7 +235,7 @@
             
             <button
               type="submit"
-              class="inline-flex px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 justify-center"
+              class="inline-flex px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 justify-center"
               :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
               :disabled="loading || saving"
             >

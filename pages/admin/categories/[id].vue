@@ -9,7 +9,7 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/categories"
-            class="hover:text-teal-600" style="color: var(--text-secondary)"
+            class="hover:[color:var(--brand)]" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.categories') }}
           </NuxtLink>
@@ -28,7 +28,7 @@
       v-if="loading"
       class="ui-card p-12 text-center"
     >
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">
         {{ t('admin.pages.categories.edit.loading') }}
       </p>
@@ -51,7 +51,7 @@
             <a
               :href="categoryUrl"
               target="_blank"
-              class="p-1 text-teal-600 hover:bg-teal-50 rounded"
+              class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded"
               :title="t('admin.pages.categories.edit.links.openCategory')"
             >
               <Icon name="lucide:external-link" class="w-4 h-4" />
@@ -75,7 +75,7 @@
             form="category-edit-form"
             type="submit"
             :disabled="submitting || loading"
-            class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
           >
             <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
             {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}
@@ -157,7 +157,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+              class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
             >
               <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
               {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}

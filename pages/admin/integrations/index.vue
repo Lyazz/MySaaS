@@ -11,63 +11,57 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Facebook Pixel -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col">
+      <div class="rounded-2xl p-6 flex flex-col" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-start justify-between mb-4">
-          <div class="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+          <div class="h-12 w-12 rounded-xl flex items-center justify-center text-blue-400" style="background: rgba(59,130,246,0.12)">
             <Icon name="lucide:facebook" class="h-7 w-7" />
           </div>
-          <span 
+          <span
             v-if="facebookGlobalPixel?.isActive"
-            class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
+            class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-400"
           >
             {{ t('admin.common.active') }}
           </span>
-          <span 
+          <span
              v-else
-             class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800"
+             class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" style="background: var(--surface-3); color: var(--text-tertiary)"
           >
             {{ t('admin.common.inactive') }}
           </span>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900 mb-2">{{ t('admin.pages.integrations.facebook.title') }}</h3>
-        <p class="text-sm text-slate-500 mb-6 flex-1">
+        <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary)">{{ t('admin.pages.integrations.facebook.title') }}</h3>
+        <p class="text-sm mb-6 flex-1" style="color: var(--text-tertiary)">
           {{ t('admin.pages.integrations.facebook.description') }}
         </p>
-        <button 
-          @click="openFacebookModal" 
-          class="w-full inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50"
-        >
+        <button @click="openFacebookModal" class="ui-btn ui-btn--secondary w-full justify-center text-sm">
           {{ facebookGlobalPixel ? t('admin.integrations.manage') : t('admin.integrations.connect') }}
         </button>
       </div>
 
       <!-- Telegram Notifications -->
-      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col">
+      <div class="rounded-2xl p-6 flex flex-col" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-start justify-between mb-4">
-          <div class="h-12 w-12 rounded-xl bg-sky-50 flex items-center justify-center text-sky-500">
+          <div class="h-12 w-12 rounded-xl flex items-center justify-center text-sky-400" style="background: rgba(14,165,233,0.12)">
              <Icon name="lucide:send" class="h-6 w-6" />
           </div>
-          <span 
+          <span
             v-if="telegramIntegration?.isActive"
-            class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
+            class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-400"
           >
             {{ t('admin.common.active') }}
           </span>
-          <span 
+          <span
              v-else
-             class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800"
+             class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium" style="background: var(--surface-3); color: var(--text-tertiary)"
           >
             {{ t('admin.common.inactive') }}
           </span>
         </div>
-        <h3 class="text-lg font-semibold text-slate-900 mb-2">{{ t('admin.pages.integrations.telegram.title') }}</h3>
-        <p class="text-sm text-slate-500 mb-6 flex-1">
+        <h3 class="text-lg font-semibold mb-2" style="color: var(--text-primary)">{{ t('admin.pages.integrations.telegram.title') }}</h3>
+        <p class="text-sm mb-6 flex-1" style="color: var(--text-tertiary)">
           {{ t('admin.pages.integrations.telegram.description') }}
         </p>
-        <button 
-          @click="openTelegramModal" 
-          class="w-full inline-flex justify-center items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50"
-        >
+        <button @click="openTelegramModal" class="ui-btn ui-btn--secondary w-full justify-center text-sm">
           {{ telegramIntegration?.isActive ? t('admin.integrations.manage') : t('admin.integrations.connect') }}
         </button>
       </div>
@@ -75,25 +69,25 @@
 
     <!-- Telegram Modal -->
     <Teleport to="body">
-      <div v-if="showTelegramModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8">
-        <div class="w-full max-w-lg rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
-          <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 shrink-0">
-            <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.pages.integrations.telegram.modal.title') }}</h3>
-          <button @click="closeTelegramModal" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
-            <Icon name="lucide:x" class="h-5 w-5" />
-          </button>
-        </div>
-        
-	        <div class="p-6 space-y-4 overflow-y-auto">
-	          <div>
-	            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.label') }}</label>
-	            <input v-model="telegramForm.botToken" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.botToken.placeholder')" />
-	            <p class="mt-1 text-xs text-gray-500">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.hint') }}</p>
-	          </div>
+      <div v-if="showTelegramModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 py-8">
+        <div class="w-full max-w-lg rounded-xl flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <div class="flex items-center justify-between px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
+            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.integrations.telegram.modal.title') }}</h3>
+            <button @click="closeTelegramModal" class="rounded-lg p-2 transition-colors" style="color: var(--text-muted)" @mouseenter="$event.currentTarget.style.background='var(--surface-3)'" @mouseleave="$event.currentTarget.style.background=''">
+              <Icon name="lucide:x" class="h-5 w-5" />
+            </button>
+          </div>
 
-            <div class="rounded-lg border border-sky-100 bg-sky-50 p-4">
-              <div class="text-sm font-semibold text-sky-900">{{ t('admin.pages.integrations.telegram.modal.auto.title') }}</div>
-              <ol class="mt-2 list-decimal list-inside text-sm text-sky-900/90 space-y-1">
+          <div class="p-6 space-y-4 overflow-y-auto">
+            <div>
+              <label class="ui-label block mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.label') }}</label>
+              <input v-model="telegramForm.botToken" type="text" class="ui-input block w-full px-3 py-2 text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.botToken.placeholder')" />
+              <p class="mt-1 text-xs" style="color: var(--text-muted)">{{ t('admin.pages.integrations.telegram.modal.fields.botToken.hint') }}</p>
+            </div>
+
+            <div class="rounded-lg p-4" style="background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.2)">
+              <div class="text-sm font-semibold text-sky-400">{{ t('admin.pages.integrations.telegram.modal.auto.title') }}</div>
+              <ol class="mt-2 list-decimal list-inside text-sm text-sky-400/80 space-y-1">
                 <li>{{ t('admin.pages.integrations.telegram.modal.auto.steps.pasteToken') }}</li>
                 <li>{{ t('admin.pages.integrations.telegram.modal.auto.steps.startBot') }}</li>
                 <li>{{ t('admin.pages.integrations.telegram.modal.auto.steps.clickDetect') }}</li>
@@ -111,7 +105,7 @@
 
                 <a
                   v-if="detectedBot?.username"
-                  class="text-sm font-medium text-sky-700 hover:text-sky-800"
+                  class="text-sm font-medium text-sky-400 hover:text-sky-300"
                   :href="`https://t.me/${detectedBot.username}`"
                   target="_blank"
                   rel="noreferrer"
@@ -120,10 +114,10 @@
                 </a>
               </div>
 
-              <p v-if="detectError" class="mt-2 text-xs text-red-600">{{ detectError }}</p>
+              <p v-if="detectError" class="mt-2 text-xs text-red-400">{{ detectError }}</p>
 
               <div v-if="detectedChats.length" class="mt-3 space-y-2">
-                <p class="text-xs text-sky-800">
+                <p class="text-xs text-sky-400/80">
                   {{ t('admin.pages.integrations.telegram.modal.auto.found', { count: detectedChats.length }) }}
                 </p>
                 <div class="space-y-2">
@@ -131,194 +125,195 @@
                     v-for="c in detectedChats"
                     :key="c.chatId"
                     type="button"
-                    class="w-full text-left rounded-lg border border-sky-100 bg-white px-3 py-2 hover:bg-sky-50"
+                    class="w-full text-left rounded-lg px-3 py-2 transition-colors"
+                    style="background: var(--surface-1); border: 1px solid var(--surface-border)"
                     @click="selectDetectedChat(c.chatId)"
                   >
-                    <div class="text-sm font-medium text-slate-900">{{ c.name || c.title || (c.username ? `@${c.username}` : '') || c.chatId }}</div>
-                    <div class="text-xs text-slate-600 font-mono">{{ c.chatId }}</div>
+                    <div class="text-sm font-medium" style="color: var(--text-primary)">{{ c.name || c.title || (c.username ? `@${c.username}` : '') || c.chatId }}</div>
+                    <div class="text-xs font-mono" style="color: var(--text-secondary)">{{ c.chatId }}</div>
                   </button>
                 </div>
               </div>
 
-              <p v-else-if="detectedOnce && !detectingChats" class="mt-2 text-xs text-sky-800">
+              <p v-else-if="detectedOnce && !detectingChats" class="mt-2 text-xs text-sky-400/80">
                 {{ t('admin.pages.integrations.telegram.modal.auto.noneFound') }}
               </p>
 
-              <p class="mt-2 text-xs text-sky-900/80">
+              <p class="mt-2 text-xs text-sky-400/60">
                 {{ t('admin.pages.integrations.telegram.modal.auto.groupNote') }}
               </p>
             </div>
-	          
-	          <div>
-	            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.label') }}</label>
-	            <input v-model="telegramForm.chatId" type="text" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.chatId.placeholder')" />
-	            <p class="mt-1 text-xs text-gray-500">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.hint') }}</p>
-	          </div>
 
-          <div class="flex items-center gap-2">
-            <input v-model="telegramForm.isActive" type="checkbox" id="tg-active" class="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500" />
-            <label for="tg-active" class="text-sm font-medium text-gray-700">{{ t('admin.pages.integrations.telegram.modal.fields.enableNotifications') }}</label>
+            <div>
+              <label class="ui-label block mb-1">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.label') }}</label>
+              <input v-model="telegramForm.chatId" type="text" class="ui-input block w-full px-3 py-2 text-sm" :placeholder="t('admin.pages.integrations.telegram.modal.fields.chatId.placeholder')" />
+              <p class="mt-1 text-xs" style="color: var(--text-muted)">{{ t('admin.pages.integrations.telegram.modal.fields.chatId.hint') }}</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input v-model="telegramForm.isActive" type="checkbox" id="tg-active" class="h-4 w-4 rounded text-sky-500" style="border-color: var(--surface-border)" />
+              <label for="tg-active" class="ui-label">{{ t('admin.pages.integrations.telegram.modal.fields.enableNotifications') }}</label>
+            </div>
           </div>
-        </div>
 
-        <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-xl shrink-0">
-          <button 
-            @click="testTelegramConnection" 
-            :disabled="testing || !telegramForm.botToken || !telegramForm.chatId"
-            class="text-sm font-medium text-sky-600 hover:text-sky-700 disabled:opacity-50"
-          >
-            {{ testing ? t('admin.pages.integrations.telegram.modal.actions.sending') : t('admin.pages.integrations.telegram.modal.actions.sendTestMessage') }}
-          </button>
-
-          <div class="flex gap-3">
-            <button @click="closeTelegramModal" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">{{ t('admin.common.cancel') }}</button>
-            <button 
-              @click="saveTelegramSettings" 
-              :disabled="saving"
-              class="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg disabled:opacity-50"
+          <div class="flex items-center justify-between px-6 py-4 rounded-b-xl shrink-0" style="border-top: 1px solid var(--surface-border); background: var(--surface-2)">
+            <button
+              @click="testTelegramConnection"
+              :disabled="testing || !telegramForm.botToken || !telegramForm.chatId"
+              class="text-sm font-medium text-sky-400 hover:text-sky-300 disabled:opacity-50"
             >
-              {{ saving ? t('admin.common.saving') : t('admin.pages.integrations.telegram.modal.actions.saveSettings') }}
+              {{ testing ? t('admin.pages.integrations.telegram.modal.actions.sending') : t('admin.pages.integrations.telegram.modal.actions.sendTestMessage') }}
             </button>
+
+            <div class="flex gap-3">
+              <button @click="closeTelegramModal" class="ui-btn ui-btn--secondary text-sm">{{ t('admin.common.cancel') }}</button>
+              <button
+                @click="saveTelegramSettings"
+                :disabled="saving"
+                class="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg disabled:opacity-50"
+              >
+                {{ saving ? t('admin.common.saving') : t('admin.pages.integrations.telegram.modal.actions.saveSettings') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </Teleport>
 
     <!-- Facebook Modal (Multiple Pixels) -->
     <Teleport to="body">
-      <div v-if="showFacebookModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8">
-        <div class="w-full max-w-3xl rounded-xl bg-white shadow-xl flex flex-col max-h-[90vh]">
-          <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 shrink-0">
+      <div v-if="showFacebookModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4 py-8">
+        <div class="w-full max-w-3xl rounded-xl flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <div class="flex items-center justify-between px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
             <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ t('admin.pages.integrations.metaPixels.title') }}</h3>
-            <p class="text-xs text-gray-500 mt-0.5">{{ t('admin.pages.integrations.metaPixels.subtitle') }}</p>
-          </div>
-          <button @click="closeFacebookModal" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
-            <Icon name="lucide:x" class="h-5 w-5" />
-          </button>
-        </div>
-
-        <div class="p-6 space-y-6 overflow-y-auto">
-          <div v-if="metaPixelsLoading" class="text-sm text-gray-600">
-            {{ t('admin.pages.integrations.metaPixels.loading') }}
-          </div>
-          <div v-else>
-            <div v-if="metaPixelsError" class="text-sm text-red-600 mb-3">{{ metaPixelsError }}</div>
-            <div v-if="metaPixels.length === 0" class="text-sm text-gray-600">
-              {{ t('admin.pages.integrations.metaPixels.empty') }}
+              <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.integrations.metaPixels.title') }}</h3>
+              <p class="text-xs mt-0.5" style="color: var(--text-tertiary)">{{ t('admin.pages.integrations.metaPixels.subtitle') }}</p>
             </div>
-            <div v-else class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <table class="ui-table">
-                <thead class="ui-thead">
-                  <tr>
-                    <th class="ui-th">{{ t('admin.common.name') }}</th>
-                    <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.pixelId') }}</th>
-                    <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.global') }}</th>
-                    <th class="ui-th">{{ t('admin.common.active') }}</th>
-                    <th class="ui-th text-right">{{ t('admin.common.actions') }}</th>
-                  </tr>
-                </thead>
-                <tbody class="ui-tbody">
-                  <tr v-for="p in metaPixels" :key="p.id" class="ui-tr">
-                    <td class="ui-td">
-                      <div class="font-medium text-slate-900">{{ p.name || '—' }}</div>
-                      <div class="text-xs text-slate-500">{{ t('admin.pages.integrations.metaPixels.table.productsCount', { count: p.productsCount || 0 }) }}</div>
-                    </td>
-                    <td class="ui-td font-mono text-xs text-slate-700">{{ p.pixelId }}</td>
-                    <td class="ui-td">
-                      <span v-if="p.isGlobal" class="ui-badge ui-badge--indigo">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
-                      <button
-                        v-else
-                        class="text-xs font-medium text-blue-600 hover:text-blue-700"
-                        :disabled="metaPixelsSaving"
-                        @click="setGlobalPixel(p.id)"
-                      >
-                        {{ t('admin.pages.integrations.metaPixels.actions.setGlobal') }}
-                      </button>
-                    </td>
-                    <td class="ui-td">
-                      <label class="inline-flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          :checked="p.isActive"
+            <button @click="closeFacebookModal" class="rounded-lg p-2 transition-colors" style="color: var(--text-muted)">
+              <Icon name="lucide:x" class="h-5 w-5" />
+            </button>
+          </div>
+
+          <div class="p-6 space-y-6 overflow-y-auto">
+            <div v-if="metaPixelsLoading" class="text-sm" style="color: var(--text-secondary)">
+              {{ t('admin.pages.integrations.metaPixels.loading') }}
+            </div>
+            <div v-else>
+              <div v-if="metaPixelsError" class="text-sm text-red-400 mb-3">{{ metaPixelsError }}</div>
+              <div v-if="metaPixels.length === 0" class="text-sm" style="color: var(--text-secondary)">
+                {{ t('admin.pages.integrations.metaPixels.empty') }}
+              </div>
+              <div v-else class="overflow-hidden rounded-2xl" style="border: 1px solid var(--surface-border)">
+                <table class="ui-table">
+                  <thead class="ui-thead">
+                    <tr>
+                      <th class="ui-th">{{ t('admin.common.name') }}</th>
+                      <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.pixelId') }}</th>
+                      <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.global') }}</th>
+                      <th class="ui-th">{{ t('admin.common.active') }}</th>
+                      <th class="ui-th text-right">{{ t('admin.common.actions') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody class="ui-tbody">
+                    <tr v-for="p in metaPixels" :key="p.id" class="ui-tr">
+                      <td class="ui-td">
+                        <div class="font-medium" style="color: var(--text-primary)">{{ p.name || '—' }}</div>
+                        <div class="text-xs" style="color: var(--text-muted)">{{ t('admin.pages.integrations.metaPixels.table.productsCount', { count: p.productsCount || 0 }) }}</div>
+                      </td>
+                      <td class="ui-td font-mono text-xs" style="color: var(--text-secondary)">{{ p.pixelId }}</td>
+                      <td class="ui-td">
+                        <span v-if="p.isGlobal" class="ui-badge ui-badge--indigo">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
+                        <button
+                          v-else
+                          class="text-xs font-medium text-blue-400 hover:text-blue-300"
                           :disabled="metaPixelsSaving"
-                          @change="togglePixelActive(p)"
+                          @click="setGlobalPixel(p.id)"
                         >
-                        <span class="text-xs text-slate-700">{{ p.isActive ? t('admin.common.active') : t('admin.common.inactive') }}</span>
-                      </label>
-                    </td>
-                    <td class="ui-td text-right">
-                      <button
-                        class="ui-btn ui-btn--danger ui-btn--sm"
-                        :disabled="metaPixelsSaving"
-                        @click="deletePixel(p.id)"
-                      >
-                        {{ t('admin.common.delete') }}
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                          {{ t('admin.pages.integrations.metaPixels.actions.setGlobal') }}
+                        </button>
+                      </td>
+                      <td class="ui-td">
+                        <label class="inline-flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            class="h-4 w-4 rounded text-blue-500"
+                            style="border-color: var(--surface-border)"
+                            :checked="p.isActive"
+                            :disabled="metaPixelsSaving"
+                            @change="togglePixelActive(p)"
+                          >
+                          <span class="text-xs" style="color: var(--text-secondary)">{{ p.isActive ? t('admin.common.active') : t('admin.common.inactive') }}</span>
+                        </label>
+                      </td>
+                      <td class="ui-td text-right">
+                        <button
+                          class="ui-btn ui-btn--danger ui-btn--sm"
+                          :disabled="metaPixelsSaving"
+                          @click="deletePixel(p.id)"
+                        >
+                          {{ t('admin.common.delete') }}
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="rounded-lg p-4" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
+              <h4 class="text-sm font-semibold mb-3" style="color: var(--text-primary)">{{ t('admin.pages.integrations.metaPixels.addPixel.title') }}</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="md:col-span-1">
+                  <label class="ui-label block text-xs mb-1">{{ t('admin.common.name') }}</label>
+                  <input
+                    v-model="newPixelForm.name"
+                    type="text"
+                    class="ui-input block w-full px-3 py-2 text-sm"
+                    :placeholder="t('admin.pages.integrations.metaPixels.addPixel.fields.namePlaceholder')"
+                  >
+                </div>
+                <div class="md:col-span-2">
+                  <label class="ui-label block text-xs mb-1">{{ t('admin.pages.integrations.metaPixels.table.pixelId') }}</label>
+                  <input
+                    v-model="newPixelForm.pixelId"
+                    type="text"
+                    class="ui-input block w-full px-3 py-2 text-sm"
+                    placeholder="123456789012345"
+                  >
+                  <p class="mt-1 text-xs" style="color: var(--text-muted)">{{ t('admin.pages.integrations.metaPixels.addPixel.fields.pixelIdHint') }}</p>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-between">
+                <label class="inline-flex items-center gap-2">
+                  <input v-model="newPixelForm.isGlobal" type="checkbox" class="h-4 w-4 rounded text-blue-500" style="border-color: var(--surface-border)">
+                  <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.pages.integrations.metaPixels.addPixel.fields.setAsGlobal') }}</span>
+                </label>
+                <label class="inline-flex items-center gap-2">
+                  <input v-model="newPixelForm.isActive" type="checkbox" class="h-4 w-4 rounded text-blue-500" style="border-color: var(--surface-border)">
+                  <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.common.active') }}</span>
+                </label>
+              </div>
+              <div class="mt-4 flex justify-end">
+                <button
+                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+                  :disabled="metaPixelsSaving || !newPixelForm.pixelId"
+                  @click="createPixel"
+                >
+                  {{ metaPixelsSaving ? t('admin.common.saving') : t('admin.pages.integrations.metaPixels.addPixel.actions.addPixel') }}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="rounded-lg border border-gray-200 p-4 bg-gray-50">
-            <h4 class="text-sm font-semibold text-gray-900 mb-3">{{ t('admin.pages.integrations.metaPixels.addPixel.title') }}</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div class="md:col-span-1">
-                <label class="block text-xs font-medium text-gray-600 mb-1">{{ t('admin.common.name') }}</label>
-                <input
-                  v-model="newPixelForm.name"
-                  type="text"
-                  class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  :placeholder="t('admin.pages.integrations.metaPixels.addPixel.fields.namePlaceholder')"
-                >
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-xs font-medium text-gray-600 mb-1">{{ t('admin.pages.integrations.metaPixels.table.pixelId') }}</label>
-                <input
-                  v-model="newPixelForm.pixelId"
-                  type="text"
-                  class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="123456789012345"
-                >
-                <p class="mt-1 text-xs text-gray-500">{{ t('admin.pages.integrations.metaPixels.addPixel.fields.pixelIdHint') }}</p>
-              </div>
+          <div class="flex items-center justify-between px-6 py-4 rounded-b-xl shrink-0" style="border-top: 1px solid var(--surface-border); background: var(--surface-2)">
+            <div />
+            <div class="flex gap-3">
+              <button @click="closeFacebookModal" class="ui-btn ui-btn--secondary text-sm">{{ t('admin.common.cancel') }}</button>
+              <button @click="closeFacebookModal" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg">{{ t('admin.common.done') }}</button>
             </div>
-            <div class="mt-3 flex items-center justify-between">
-              <label class="inline-flex items-center gap-2">
-                <input v-model="newPixelForm.isGlobal" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                <span class="text-sm text-gray-700">{{ t('admin.pages.integrations.metaPixels.addPixel.fields.setAsGlobal') }}</span>
-              </label>
-              <label class="inline-flex items-center gap-2">
-                <input v-model="newPixelForm.isActive" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                <span class="text-sm text-gray-700">{{ t('admin.common.active') }}</span>
-              </label>
-            </div>
-            <div class="mt-4 flex justify-end">
-              <button
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
-                :disabled="metaPixelsSaving || !newPixelForm.pixelId"
-                @click="createPixel"
-              >
-                {{ metaPixelsSaving ? t('admin.common.saving') : t('admin.pages.integrations.metaPixels.addPixel.actions.addPixel') }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-xl shrink-0">
-          <div />
-
-          <div class="flex gap-3">
-            <button @click="closeFacebookModal" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">{{ t('admin.common.cancel') }}</button>
-            <button @click="closeFacebookModal" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg">{{ t('admin.common.done') }}</button>
           </div>
         </div>
       </div>
-    </div>
   </Teleport>
   </div>
 </template>

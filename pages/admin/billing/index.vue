@@ -49,9 +49,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Premium Current Plan Card -->
-      <div class="lg:col-span-3 bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div class="lg:col-span-3 bg-gradient-to-br from-slate-900 via-slate-800 [--tw-gradient-to:color-mix(in_srgb,var(--brand)_60%,#000)] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <!-- Decorative Background Glow -->
-        <div class="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-teal-500/20 blur-3xl rounded-full pointer-events-none"></div>
+        <div class="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 [background:var(--brand)]/20 blur-3xl rounded-full pointer-events-none"></div>
         <div class="absolute bottom-0 left-0 -mb-16 -ml-16 w-48 h-48 bg-slate-500/20 blur-3xl rounded-full pointer-events-none"></div>
 
         <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -59,13 +59,13 @@
           <!-- Plan Info -->
           <div class="flex-1">
             <div class="flex items-center gap-3 mb-2">
-              <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider relative inline-flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+              <h2 class="text-sm font-bold [color:rgba(var(--brand-rgb)/0.85)] uppercase tracking-wider relative inline-flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full [background:var(--brand)] animate-pulse"></span>
                 {{ t('admin.pages.billing.currentPlan.title', 'Current Plan') }}
               </h2>
               <span
                 class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border backdrop-blur-md"
-                :class="snapshot?.subscription?.status === 'ACTIVE' ? 'bg-teal-500/10 border-teal-500/30 text-teal-300' : 'bg-slate-500/10 border-slate-500/30 text-slate-300'"
+                :class="snapshot?.subscription?.status === 'ACTIVE' ? '[background:var(--brand)]/10 [border-color:var(--brand)]/30 [color:rgba(var(--brand-rgb)/0.7)]' : 'bg-slate-500/10 border-slate-500/30 text-slate-300'"
               >
                 {{ snapshot?.subscription?.status || 'UNKNOWN' }}
               </span>
@@ -96,7 +96,7 @@
             
             <!-- Progress Bar -->
             <div class="w-full bg-slate-800 rounded-full h-1.5 mb-3 overflow-hidden">
-              <div class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 rounded-full transition-all duration-1000 ease-in-out" 
+              <div class="bg-gradient-to-r [--tw-gradient-from:var(--brand)] to-emerald-400 h-1.5 rounded-full transition-all duration-1000 ease-in-out" 
                    :style="{ width: `${Math.min(100, ((snapshot?.usage?.ordersInPeriod ?? 0) / (snapshot?.usage?.ordersLimit || 1)) * 100)}%` }">
               </div>
             </div>
@@ -130,7 +130,7 @@
               <button
                 @click="billingInterval = 'month'"
                 class="relative z-10 px-6 py-2.5 text-sm font-bold rounded-lg transition-colors flex items-center justify-center w-full"
-                :class="billingInterval === 'month' ? 'text-teal-400' : ''"
+                :class="billingInterval === 'month' ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
                 :style="billingInterval !== 'month' ? 'color: var(--text-tertiary)' : ''"
               >
                 {{ t('admin.pages.billing.interval.monthly', 'Monthly Billing') }}
@@ -138,11 +138,11 @@
               <button
                 @click="billingInterval = 'year'"
                 class="relative z-10 px-6 py-2.5 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 w-full"
-                :class="billingInterval === 'year' ? 'text-teal-400' : ''"
+                :class="billingInterval === 'year' ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
                 :style="billingInterval !== 'year' ? 'color: var(--text-tertiary)' : ''"
               >
                 {{ t('admin.pages.billing.interval.yearly', 'Yearly Billing') }}
-                <span class="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-400 text-[10px] font-black uppercase tracking-wider whitespace-nowrap">{{ t('admin.pages.billing.interval.save', { pct: 20 }, 'Save 20%') }}</span>
+                <span class="px-2 py-0.5 rounded-full [background:var(--brand)]/15 [color:rgba(var(--brand-rgb)/0.85)] text-[10px] font-black uppercase tracking-wider whitespace-nowrap">{{ t('admin.pages.billing.interval.save', { pct: 20 }, 'Save 20%') }}</span>
               </button>
 
               <!-- Sliding Background Indicator -->
@@ -155,7 +155,7 @@
         </div>
 
         <div v-if="pending" class="flex justify-center py-12">
-          <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin text-teal-500" />
+          <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin [color:var(--brand)]" />
         </div>
         
         <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -164,7 +164,7 @@
             :key="plan.code"
             @click="selectPlan(plan.code)"
             class="relative flex flex-col p-6 rounded-2xl border-2 transition-all cursor-pointer group hover:shadow-xl"
-            :class="plan.code === selectedPlanCode ? 'border-teal-500 shadow-lg shadow-teal-500/10 ring-1 ring-teal-500' : ''"
+            :class="plan.code === selectedPlanCode ? '[border-color:var(--brand)] shadow-lg [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.1)] ring-1 [--tw-ring-color:var(--brand)]' : ''"
             :style="plan.code !== selectedPlanCode ? 'background: var(--surface-1); border-color: var(--surface-border)' : 'background: var(--surface-1)'"
           >
             <!-- Current Plan Badge -->
@@ -176,7 +176,7 @@
             </div>
 
             <div class="mb-4">
-              <h3 class="text-xl font-black mb-1" :class="plan.code === selectedPlanCode ? 'text-teal-400' : ''" :style="plan.code !== selectedPlanCode ? 'color: var(--text-primary)' : ''">{{ plan.name }}</h3>
+              <h3 class="text-xl font-black mb-1" :class="plan.code === selectedPlanCode ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="plan.code !== selectedPlanCode ? 'color: var(--text-primary)' : ''">{{ plan.name }}</h3>
               <p class="text-xs min-h-[32px]" style="color: var(--text-tertiary)">{{ plan.description }}</p>
             </div>
 
@@ -191,26 +191,26 @@
             <!-- Features -->
             <ul class="space-y-3 mb-8 flex-1">
               <li class="flex items-start gap-2">
-                <Icon name="lucide:check" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
+                <Icon name="lucide:check" class="w-4 h-4 [color:var(--brand)] mt-0.5 shrink-0" />
                 <span class="text-sm font-medium" style="color: var(--text-secondary)">
                   {{ plan.ordersPerMonth === -1 ? t('admin.pages.billing.unlimitedOrders', 'Unlimited Orders') : t('admin.pages.billing.upToOrders', { count: formatLimit(plan.ordersPerMonth) }, `Up to {count} orders/mo`) }}
                 </span>
               </li>
               <!-- Example of static robust features based on plans (could be dynamic in real apps) -->
               <li class="flex items-start gap-2" v-if="plan.code !== 'basic'">
-                <Icon name="lucide:check" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
+                <Icon name="lucide:check" class="w-4 h-4 [color:var(--brand)] mt-0.5 shrink-0" />
                 <span class="text-sm font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.billing.prioritySupport', 'Priority support') }}</span>
               </li>
               <li class="flex items-start gap-2" v-if="plan.code === 'premium'">
-                <Icon name="lucide:check" class="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
+                <Icon name="lucide:check" class="w-4 h-4 [color:var(--brand)] mt-0.5 shrink-0" />
                 <span class="text-sm font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.billing.customBranding', 'Custom branding & SMS config') }}</span>
               </li>
             </ul>
 
             <div 
               class="w-full py-2.5 rounded-xl border flex items-center justify-center font-bold text-sm transition-colors"
-              :class="plan.code === selectedPlanCode ? 'text-teal-400' : ''"
-              :style="plan.code === selectedPlanCode ? 'background: rgba(20,184,166,0.1); border-color: var(--brand)' : 'background: var(--surface-2); border-color: var(--surface-border); color: var(--text-tertiary)'"
+              :class="plan.code === selectedPlanCode ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
+              :style="plan.code === selectedPlanCode ? 'background: rgba(var(--brand-rgb)/0.1); border-color: var(--brand)' : 'background: var(--surface-2); border-color: var(--surface-border); color: var(--text-tertiary)'"
             >
               {{ plan.code === selectedPlanCode ? t('admin.pages.billing.selectedBtn', 'Selected') : t('admin.pages.billing.selectBtn', 'Select Plan') }}
             </div>
@@ -242,17 +242,17 @@
               <div class="grid grid-cols-2 gap-4">
                 <label v-for="method in availableMethods" :key="method.id" class="cursor-pointer relative group">
                   <input type="radio" v-model="selectedMethod" :value="method.id" class="peer sr-only" />
-                  <div class="h-full flex flex-col items-center justify-center p-4 rounded-xl border-2 hover:border-teal-300 peer-checked:border-teal-500 peer-checked:bg-teal-500/10 transition-all" style="background: var(--surface-3); border-color: var(--surface-border)">
-                    <Icon v-if="method.id === 'MYFIN'" name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else-if="method.id === 'PAYSERA'" name="lucide:euro" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else-if="method.id === 'BARIDIMOB'" name="lucide:smartphone" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else-if="method.id === 'CCP'" name="lucide:building" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:text-teal-400 transition-colors" style="color: var(--text-tertiary)" />
+                  <div class="h-full flex flex-col items-center justify-center p-4 rounded-xl border-2 hover:[border-color:rgba(var(--brand-rgb)/0.4)] peer-checked:[border-color:var(--brand)] peer-checked:[background:var(--brand)]/10 transition-all" style="background: var(--surface-3); border-color: var(--surface-border)">
+                    <Icon v-if="method.id === 'MYFIN'" name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else-if="method.id === 'PAYSERA'" name="lucide:euro" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else-if="method.id === 'BARIDIMOB'" name="lucide:smartphone" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else-if="method.id === 'CCP'" name="lucide:building" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
+                    <Icon v-else name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
 
-                    <div class="text-xs font-bold text-center peer-checked:text-teal-400 transition-colors" style="color: var(--text-secondary)">{{ method.label }}</div>
+                    <div class="text-xs font-bold text-center peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">{{ method.label }}</div>
                   </div>
                   <!-- Check badge -->
-                  <div class="absolute -top-2 -right-2 w-6 h-6 bg-teal-500 text-white rounded-full flex items-center justify-center border-2 opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all shadow-md" style="border-color: var(--surface-1)">
+                  <div class="absolute -top-2 -right-2 w-6 h-6 [background:var(--brand)] text-white rounded-full flex items-center justify-center border-2 opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all shadow-md" style="border-color: var(--surface-1)">
                     <Icon name="lucide:check" class="w-3.5 h-3.5" />
                   </div>
                 </label>
@@ -273,11 +273,11 @@
                   <div class="flex items-center justify-center w-full">
                     <label 
                       class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors"
-                      :class="uploadError ? 'border-red-500/50 hover:bg-red-500/5' : proofUrl ? 'border-green-500/50 hover:bg-green-500/5' : 'hover:border-teal-500/40'"
+                      :class="uploadError ? 'border-red-500/50 hover:bg-red-500/5' : proofUrl ? 'border-green-500/50 hover:bg-green-500/5' : 'hover:[border-color:var(--brand)]/40'"
                       :style="!uploadError && !proofUrl ? 'border-color: var(--surface-border); background: var(--surface-3)' : uploadError ? 'background: rgba(239,68,68,0.05)' : 'background: rgba(34,197,94,0.05)'"
                     >
                       <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Icon v-if="uploading" name="lucide:loader-2" class="w-8 h-8 text-teal-500 mb-2 animate-spin" />
+                        <Icon v-if="uploading" name="lucide:loader-2" class="w-8 h-8 [color:var(--brand)] mb-2 animate-spin" />
                         <Icon v-else-if="proofUrl" name="lucide:file-check" class="w-8 h-8 text-green-500 mb-2" />
                         <Icon v-else name="lucide:upload-cloud" class="w-8 h-8 text-slate-400 mb-2" />
                         
@@ -311,7 +311,7 @@
 
                 <div class="pt-4">
                   <button
-                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-teal-600 text-white hover:bg-teal-500 hover:shadow-lg disabled:opacity-50 disabled:hover:shadow-none disabled:cursor-not-allowed text-base font-bold transition-all"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl [background:var(--brand)] text-white hover:[background:var(--brand)] hover:shadow-lg disabled:opacity-50 disabled:hover:shadow-none disabled:cursor-not-allowed text-base font-bold transition-all"
                     :disabled="pending || uploading || submitting || (requiresProof(selectedMethod) && !proofUrl) || selectedMethod === 'CHARGILY'"
                     @click="submitPayment"
                   >
@@ -391,7 +391,7 @@
                   <button
                     v-if="pay.proofUrl"
                     type="button"
-                    class="text-teal-400 hover:underline font-semibold inline-flex items-center gap-1"
+                    class="[color:rgba(var(--brand-rgb)/0.85)] hover:underline font-semibold inline-flex items-center gap-1"
                     @click="openPaymentProof(pay)"
                   >
                     <Icon name="lucide:external-link" class="w-3.5 h-3.5" />

@@ -17,7 +17,7 @@
       <div class="h-16 flex items-center justify-between px-6 bg-slate-950 border-b border-white/5">
         <div class="flex items-center gap-3 overflow-hidden">
           <div 
-            class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors bg-teal-600"
+            class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors [background:var(--brand)]"
           >
             S
           </div>
@@ -50,14 +50,14 @@
           <!-- Active Indicator Strip -->
           <div 
             v-if="route.path === item.path"
-            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-teal-500"
+            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full [background:var(--brand)]"
           ></div>
 
           <div class="relative shrink-0">
             <Icon 
               :name="item.icon" 
               class="w-5 h-5 transition-transform duration-300 group-hover:scale-110"
-              :class="route.path === item.path ? 'text-teal-400' : ''"
+              :class="route.path === item.path ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
             />
             <!-- Pending badge on collapsed icon -->
             <span

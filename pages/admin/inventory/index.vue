@@ -67,7 +67,7 @@
         <div class="flex items-end gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
+            class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
             :disabled="loading"
             @click="fetchVariants"
           >
@@ -125,7 +125,7 @@
               >
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.variant') }}
-                  <Icon v-if="sortBy === 'productTitle'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'productTitle'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
@@ -134,7 +134,7 @@
               >
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.track') }}
-                  <Icon v-if="sortBy === 'trackInventory'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'trackInventory'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
@@ -143,7 +143,7 @@
               >
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.onHand') }}
-                  <Icon v-if="sortBy === 'stock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'stock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
@@ -152,7 +152,7 @@
               >
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.reserved') }}
-                  <Icon v-if="sortBy === 'reserved'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'reserved'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
@@ -161,7 +161,7 @@
               >
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.safety') }}
-                  <Icon v-if="sortBy === 'safetyStock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'safetyStock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
@@ -170,7 +170,7 @@
               >
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.available') }}
-                  <Icon v-if="sortBy === 'available'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 text-teal-600" />
+                  <Icon v-if="sortBy === 'available'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
@@ -198,7 +198,7 @@
                 <input
                   :checked="v.trackInventory"
                   type="checkbox"
-                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500" style="border-color: var(--surface-border)"
+                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border)"
                   :disabled="savingIds.has(v.id)"
                   @change="(e) => patchVariant(v.id, { trackInventory: (e.target as HTMLInputElement).checked })"
                 >

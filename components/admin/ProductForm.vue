@@ -16,7 +16,7 @@
           class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200" style="color: var(--text-secondary)"
           :class="[
             currentTab === tab.id
-              ? 'border-teal-500 text-teal-400'
+              ? '[border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]'
               : 'border-transparent hover:border-white/20'
           ]"
           @click="currentTab = tab.id"
@@ -105,7 +105,7 @@
               >
                 <input
                   type="checkbox"
-                  class="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
+                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                   :checked="form.categoryIds.includes(cat.id)"
                   @change="toggleCategorySelection(cat.id, ($event.target as HTMLInputElement).checked)"
                 >
@@ -122,7 +122,7 @@
             id="isActive"
             v-model="form.isActive"
             type="checkbox"
-            class="h-4 w-4 text-teal-600 focus:ring-teal-500 rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
+            class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
           >
           <label
             for="isActive"
@@ -184,7 +184,7 @@
       <button
         type="submit"
         :disabled="submitting"
-        class="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {{ submitting ? submittingLabel : primaryLabel }}
       </button>

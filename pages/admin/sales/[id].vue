@@ -3,7 +3,7 @@
     <nav class="flex mb-6" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/sales" class="hover:text-teal-600" style="color: var(--text-secondary)">
+          <NuxtLink to="/admin/sales" class="hover:[color:var(--brand)]" style="color: var(--text-secondary)">
             {{ t('admin.nav.salesItem') }}
           </NuxtLink>
         </li>
@@ -17,7 +17,7 @@
     </nav>
 
     <div v-if="loading" class="ui-card p-12 text-center">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600" />
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
       <p class="mt-2" style="color: var(--text-secondary)">{{ t('admin.pages.sales.detail.loading') }}</p>
     </div>
 

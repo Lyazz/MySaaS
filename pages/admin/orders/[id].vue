@@ -78,11 +78,11 @@
                     v-for="v in availableVariantsForSelection"
                     :key="v.id"
                     type="button"
-                    class="w-full p-4 rounded-xl hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
+                    class="w-full p-4 rounded-xl hover:[border-color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] hover:ring-1 hover:[--tw-ring-color:var(--brand)] transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
                     @click="onVariantSelected(v)"
                   >
                     <div class="text-left">
-                      <div class="font-semibold group-hover:text-teal-800" style="color: var(--text-primary)">
+                      <div class="font-semibold group-hover:[color:var(--brand)]" style="color: var(--text-primary)">
                         {{ v.label }}
                       </div>
                       <div class="text-xs mt-0.5" style="color: var(--text-tertiary)">
@@ -90,7 +90,7 @@
                       </div>
                     </div>
                     <div class="text-right">
-                      <div class="font-bold text-teal-600">
+                      <div class="font-bold [color:var(--brand)]">
                         {{ formatCurrency(v.displayPrice ?? v.price) }}
                       </div>
                       <div
@@ -122,7 +122,7 @@
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/orders"
-            class="text-sm font-medium hover:text-teal-700" style="color: var(--text-secondary)"
+            class="text-sm font-medium hover:[color:var(--brand)]" style="color: var(--text-secondary)"
           >
             {{ t('admin.nav.orders') }}
           </NuxtLink>
@@ -209,14 +209,14 @@
                   />
                   <a
                     :href="`tel:${order.customerPhone}`"
-                    class="font-medium text-teal-700 hover:text-teal-900"
+                    class="font-medium [color:var(--brand)] hover:[color:var(--brand)]"
                     dir="ltr"
                   >
                     {{ order.customerPhone }}
                   </a>
                   <button
                     type="button"
-                    class="rounded-md p-1 hover:text-teal-700 transition-colors" style="color: var(--text-tertiary)"
+                    class="rounded-md p-1 hover:[color:var(--brand)] transition-colors" style="color: var(--text-tertiary)"
                     :aria-label="t('common.copy', 'Copy')"
                     @click="copyToClipboard(order.customerPhone)"
                   >
@@ -232,7 +232,7 @@
                 <span class="font-mono">{{ order.id }}</span>
                 <button
                   type="button"
-                  class="rounded-md p-1 hover:text-teal-700 transition-colors" style="color: var(--text-tertiary)"
+                  class="rounded-md p-1 hover:[color:var(--brand)] transition-colors" style="color: var(--text-tertiary)"
                   :aria-label="t('common.copy', 'Copy')"
                   @click="copyToClipboard(order.id)"
                 >
@@ -383,7 +383,7 @@
                   v-model="productSearch"
                   type="text"
                   :placeholder="t('admin.pages.pos.catalog.searchPlaceholder', 'Search products…')"
-                  class="w-full pl-9 pr-3 py-2 rounded-lg focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all text-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary)"
+                  class="w-full pl-9 pr-3 py-2 rounded-lg focus:[border-color:var(--brand)] focus:ring-1 focus:[--tw-ring-color:var(--brand)] transition-all text-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary)"
                 >
 
                 <div
@@ -401,7 +401,7 @@
                         {{ product.title }}
                       </div>
                       <div class="mt-0.5 text-xs">
-                        <div class="font-semibold text-teal-600">
+                        <div class="font-semibold [color:var(--brand)]">
                           {{ formatCurrency(product.effectivePrice) }}
                         </div>
                         <div
@@ -519,7 +519,7 @@
                 <div class="text-sm" style="color: var(--text-tertiary)">
                   {{ t('admin.common.total', 'Total') }}
                 </div>
-                <div class="text-lg font-bold text-teal-700">
+                <div class="text-lg font-bold [color:var(--brand)]">
                   {{ formatCurrency(cartTotal) }}
                 </div>
               </div>
@@ -582,7 +582,7 @@
                     >
                       {{ t('admin.pages.orders.detail.itemsTable.total') }}
                     </td>
-                    <td class="px-4 py-3 text-sm font-semibold text-teal-600 text-right">
+                    <td class="px-4 py-3 text-sm font-semibold [color:var(--brand)] text-right">
                       {{ formatCurrency(order.totalAmount) }}
                     </td>
                   </tr>
@@ -602,7 +602,7 @@
                   v-if="savingNotes"
                   class="text-xs flex items-center" style="color: var(--text-tertiary)"
                 >
-                  <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
+                  <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 [border-color:var(--brand)] mr-1" />
                   {{ t('admin.common.saving', 'Saving...') }}
                 </span>
                 <span
@@ -621,7 +621,7 @@
               <textarea
                 v-model="order.internalNotes"
                 rows="4"
-                class="block w-full rounded-xl px-3 py-2 text-sm shadow-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:opacity-60" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-primary)"
+                class="block w-full rounded-xl px-3 py-2 text-sm shadow-sm focus:[border-color:var(--brand)] focus:ring-1 focus:[--tw-ring-color:var(--brand)] disabled:opacity-60" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-primary)"
                 :disabled="editing"
                 :placeholder="t('admin.pages.orders.detail.fields.internalNotesPlaceholder', 'Add private remarks about this order...')"
                 @blur="handleUpdateInternalNotes"
@@ -887,14 +887,14 @@
                 <div class="mt-1 flex items-center">
                   <a
                     :href="`tel:${order.customerPhone}`"
-                    class="text-teal-700 hover:text-teal-900 text-sm mr-2 font-medium"
+                    class="[color:var(--brand)] hover:[color:var(--brand)] text-sm mr-2 font-medium"
                     dir="ltr"
                   >
                     {{ order.customerPhone }}
                   </a>
                   <button
                     type="button"
-                    class="rounded-md p-1 hover:text-teal-700 transition-colors" style="color: var(--text-tertiary)"
+                    class="rounded-md p-1 hover:[color:var(--brand)] transition-colors" style="color: var(--text-tertiary)"
                     :aria-label="t('common.copy', 'Copy')"
                     @click="copyToClipboard(order.customerPhone)"
                   >
@@ -916,7 +916,7 @@
                   <button
                     v-if="order.customerAddress"
                     type="button"
-                    class="rounded-md p-1 hover:text-teal-700 transition-colors mt-0.5" style="color: var(--text-muted)"
+                    class="rounded-md p-1 hover:[color:var(--brand)] transition-colors mt-0.5" style="color: var(--text-muted)"
                     :aria-label="t('common.copy', 'Copy')"
                     @click="copyToClipboard(order.customerAddress)"
                   >
@@ -966,7 +966,7 @@
                   v-if="savingCallStatus"
                   class="text-xs flex items-center" style="color: var(--text-tertiary)"
                 >
-                  <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-teal-600 mr-1" />
+                  <span class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 [border-color:var(--brand)] mr-1" />
                 </span>
                 <span
                   v-else-if="callStatusSavedMessage"
@@ -1058,7 +1058,7 @@
       <div class="mt-6">
         <NuxtLink
           to="/admin/orders"
-          class="text-teal-700 hover:text-teal-900 font-medium"
+          class="[color:var(--brand)] hover:[color:var(--brand)] font-medium"
         >
           {{ t('admin.pages.orders.detail.backToOrders') }}
         </NuxtLink>
