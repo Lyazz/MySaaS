@@ -292,8 +292,17 @@
                   class="text-sm" style="color: var(--text-tertiary)"
                 >{{ t('admin.pages.products.index.table.uncategorized') }}</span>
               </td>
-              <td class="ui-td whitespace-nowrap" style="color: var(--text-primary)">
-                {{ formatCurrency(effectivePriceFor(product)) }}
+              <td class="ui-td whitespace-nowrap">
+                <template v-if="buildProductPricing(product).promotionApplied">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-medium" style="color: var(--brand)">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
+                    <span class="text-xs line-through" style="color: var(--text-tertiary)">{{ formatCurrency(buildProductPricing(product).originalPrice) }}</span>
+                  </div>
+                  <div v-if="product.promotionEndDate" class="text-xs mt-0.5" style="color: var(--text-tertiary)">
+                    exp. {{ new Date(product.promotionEndDate).toLocaleDateString() }}
+                  </div>
+                </template>
+                <span v-else style="color: var(--text-primary)">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <!-- Out of stock -->
