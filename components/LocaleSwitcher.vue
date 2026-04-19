@@ -43,14 +43,17 @@ const switchLocale = async (code: string) => {
   <Menu as="div" class="relative inline-block text-left" data-testid="locale-switcher">
     <div>
       <MenuButton
-        class="ui-btn ui-btn--secondary"
+        class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
         :class="props.class"
+        style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
+        @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
+        @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
       >
-        <Icon name="lucide:languages" class="h-4 w-4 opacity-70" aria-hidden="true" />
-        <span class="hidden sm:inline-block" v-if="showLabels">{{ currentLocale.label }}</span>
-        <span class="inline-block sm:hidden" v-if="showLabels">{{ currentLocale.short }}</span>
-        <span v-else>{{ currentLocale.short }}</span>
-        <Icon name="lucide:chevron-down" class="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
+        <Icon name="lucide:languages" class="h-3.5 w-3.5 sm:h-3 sm:w-3 opacity-70" aria-hidden="true" />
+        <span v-if="showLabels" class="hidden sm:inline-block">{{ currentLocale.label }}</span>
+        <span v-if="showLabels" class="inline-block sm:hidden">{{ currentLocale.short }}</span>
+        <span v-else class="hidden sm:inline">{{ currentLocale.short }}</span>
+        <Icon name="lucide:chevron-down" class="h-3 w-3 opacity-50 hidden sm:block" aria-hidden="true" />
       </MenuButton>
     </div>
 
