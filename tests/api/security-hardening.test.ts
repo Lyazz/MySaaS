@@ -29,6 +29,16 @@ describe('Security hardening', () => {
 
     let webhookTenantId = ''
     const webhookSecret = `secret-${stamp}`
+    const parseTokenTtlSeconds = (token: string) => {
+        const payloadPart = token.split('.')[1]
+        if (!payloadPart) return null
+        const decoded = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8')) as {
+            iat?: number
+            exp?: number
+        }
+        if (typeof decoded.iat !== 'number' || typeof decoded.exp !== 'number') return null
+        return decoded.exp - decoded.iat
+    }
 
     beforeAll(async () => {
         const authTenant = await prisma.tenant.create({
@@ -196,6 +206,50 @@ describe('Security hardening', () => {
 
         expect(res.status).toBe(401)
         expect(compareSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('issues login tokens with a SaaS-length session window', async () => {
+        const res = await request(app)
+            .post('/api/login')
+            .set('Host', authHost)
+            .set('X-Forwarded-Host', authHost)
+            .set('X-Forwarded-For', '203.0.113.21')
+            .send({ email: authEmail, password: 'Password123!' })
+
+        expect(res.status).toBe(200)
+        expect(typeof res.body.token).toBe('string')
+        const ttlSeconds = parseTokenTtlSeconds(res.body.token)
+        expect(ttlSeconds).not.toBeNull()
+        expect(ttlSeconds!).toBeGreaterThanOrEqual(60 * 60 * 24 * 6)
+        expect(ttlSeconds!).toBeLessThanOrEqual(60 * 60 * 24 * 8)
+    })
+
+    it('rejects expired tokens for admin and profile endpoints', async () => {
+        const expiredToken = signAccessToken(
+            {
+                userId: authUserId,
+                email: authEmail,
+                role: 'owner',
+                tenantId: authTenantId
+            },
+            { expiresIn: -10 }
+        )
+
+        const meRes = await request(app)
+            .get('/api/me')
+            .set('Host', authHost)
+            .set('X-Forwarded-Host', authHost)
+            .set('Authorization', `Bearer ${expiredToken}`)
+
+        expect(meRes.status).toBe(401)
+
+        const adminRes = await request(app)
+            .get('/api/admin/dashboard')
+            .set('Host', authHost)
+            .set('X-Forwarded-Host', authHost)
+            .set('Authorization', `Bearer ${expiredToken}`)
+
+        expect(adminRes.status).toBe(401)
     })
 
     it('revokes prior access token on logout', async () => {

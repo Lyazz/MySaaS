@@ -57,32 +57,32 @@ const features = [
     descriptionKey: 'saasLanding.features.items.aiTools.description',
     icon: 'lucide:sparkles',
     colSpan: 'md:col-span-2', // Wide tile
-    bgClass: 'bg-gradient-to-br from-teal-500/10 to-teal-600/5',
-    borderClass: 'border-teal-500/20'
+    bgClass: 'bg-gradient-to-br from-brand-500/10 to-brand-600/5',
+    borderClass: 'border-brand-500/20'
   },
   {
     titleKey: 'saasLanding.features.items.competitivePricing.title',
     descriptionKey: 'saasLanding.features.items.competitivePricing.description',
     icon: 'lucide:coins',
     colSpan: 'md:col-span-1',
-    bgClass: 'bg-gradient-to-br from-emerald-500/10 to-emerald-600/5',
-    borderClass: 'border-emerald-500/20'
+    bgClass: 'bg-gradient-to-br from-brand-500/10 to-brand-600/5',
+    borderClass: 'border-brand-500/20'
   },
   {
     titleKey: 'saasLanding.features.items.templates.title',
     descriptionKey: 'saasLanding.features.items.templates.description',
     icon: 'lucide:layout-template',
     colSpan: 'md:col-span-1',
-    bgClass: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5',
-    borderClass: 'border-amber-500/20'
+    bgClass: 'bg-gradient-to-br from-brand-500/10 to-brand-600/5',
+    borderClass: 'border-brand-500/20'
   },
   {
     titleKey: 'saasLanding.features.items.fastSupport.title',
     descriptionKey: 'saasLanding.features.items.fastSupport.description',
     icon: 'lucide:headset',
     colSpan: 'md:col-span-2',
-    bgClass: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
-    borderClass: 'border-blue-500/20'
+    bgClass: 'bg-gradient-to-br from-brand-500/10 to-brand-600/5',
+    borderClass: 'border-brand-500/20'
   }
 ]
 
@@ -140,14 +140,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-slate-50 font-sans text-slate-900 selection:bg-teal-500 selection:text-white overflow-hidden">
+  <div class="bg-slate-50 font-sans text-slate-900 overflow-hidden" style="--tw-selection-color: var(--brand)">
     
     <!-- HERO SECTION -->
     <section class="relative min-h-screen flex items-center justify-center pt-20 pb-32 overflow-hidden bg-slate-950 text-white">
       <!-- Static Background Mesh -->
       <div class="absolute inset-0 overflow-hidden bg-slate-950">
-        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-teal-900/10 rounded-full blur-[100px]" />
-        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-emerald-900/10 rounded-full blur-[100px]" />
+        <div class="absolute top-0 right-0 w-1/2 h-1/2 rounded-full blur-[100px]" style="background: rgba(var(--brand-rgb)/0.1)" />
+        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 rounded-full blur-[100px]" style="background: rgba(var(--brand-rgb)/0.07)" />
       </div>
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center z-10">
@@ -160,9 +160,9 @@ onMounted(() => {
           class="mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-400 leading-[1.1]"
         >
           {{ t('saasLanding.hero.title.buildSell') }} <br class="md:hidden" />
-          <span class="text-teal-400 inline-block relative">
+          <span class="inline-block relative" style="color: var(--brand)">
             {{ t('saasLanding.hero.title.scale') }}
-            <svg class="absolute w-full h-3 -bottom-1 left-0 text-teal-500 opacity-60" viewBox="0 0 200 9" fill="none"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
+            <svg class="absolute w-full h-3 -bottom-1 left-0 opacity-60" viewBox="0 0 200 9" fill="none" style="color: var(--brand)"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
           </span>
         </h1>
 
@@ -181,8 +181,8 @@ onMounted(() => {
           :delay="300"
           class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
         >
-          <NuxtLink to="/register" class="group relative px-8 py-4 bg-teal-600 rounded-xl font-bold text-white shadow-xl shadow-teal-600/20 overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-teal-600/40">
-            <div class="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-600 opacity-100 group-hover:opacity-90 transition-opacity" />
+          <NuxtLink to="/register" class="group relative px-8 py-4 rounded-xl font-bold text-white shadow-xl overflow-hidden transition-transform hover:-translate-y-1" style="background: var(--brand)">
+            <div class="absolute inset-0 opacity-100 group-hover:opacity-90 transition-opacity" style="background: var(--brand)" />
             <span class="relative flex items-center justify-center gap-2">
               {{ t('saasLanding.hero.ctaPrimary') }}
               <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -222,9 +222,9 @@ onMounted(() => {
           :delay="500"
           class="mt-16 flex flex-wrap justify-center items-center gap-8 md:gap-16 text-slate-400 font-medium text-sm"
         >
-          <div class="flex items-center gap-2"><Icon name="lucide:shield-check" class="w-5 h-5 text-teal-500" />{{ t('saasLanding.trust.secure') }}</div>
-          <div class="flex items-center gap-2"><Icon name="lucide:lock" class="w-5 h-5 text-teal-500" />{{ t('saasLanding.trust.ssl') }}</div>
-          <div class="flex items-center gap-2"><Icon name="lucide:cloud" class="w-5 h-5 text-teal-500" />{{ t('saasLanding.trust.cloud') }}</div>
+          <div class="flex items-center gap-2"><Icon name="lucide:shield-check" class="w-5 h-5" style="color: var(--brand)" />{{ t('saasLanding.trust.secure') }}</div>
+          <div class="flex items-center gap-2"><Icon name="lucide:lock" class="w-5 h-5" style="color: var(--brand)" />{{ t('saasLanding.trust.ssl') }}</div>
+          <div class="flex items-center gap-2"><Icon name="lucide:cloud" class="w-5 h-5" style="color: var(--brand)" />{{ t('saasLanding.trust.cloud') }}</div>
         </div>
       </div>
     </section>
@@ -240,7 +240,7 @@ onMounted(() => {
             class="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight"
           >
             {{ t('saasLanding.features.title.prefix') }}
-            <span class="bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+            <span class="bg-clip-text text-transparent" style="background-image: linear-gradient(to right, var(--brand), var(--brand))">
               {{ t('saasLanding.features.title.accent') }}
             </span>
           </h2>
@@ -267,7 +267,7 @@ onMounted(() => {
             </div>
             
             <div class="relative z-10">
-              <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 text-teal-600">
+              <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6" style="color: var(--brand)">
                 <Icon :name="feature.icon" class="w-6 h-6" />
               </div>
               <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ t(feature.titleKey) }}</h3>
@@ -280,11 +280,11 @@ onMounted(() => {
 
     <!-- STATS INTERLUDE -->
     <section ref="statsSection" class="py-20 bg-slate-900 text-white relative">
-       <div class="absolute inset-0 bg-teal-600/10 pattern-grid-lg opacity-20" />
+       <div class="absolute inset-0 pattern-grid-lg opacity-20" style="color: rgba(var(--brand-rgb)/0.5)" />
        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
          <div v-for="(stat, idx) in stats" :key="idx" class="text-center p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
            <div class="text-5xl lg:text-6xl font-black mb-2 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent tracking-tighter">
-             {{ stat.value.toLocaleString() }}<span class="text-teal-400 text-4xl align-top">{{ stat.suffix }}</span>
+             {{ stat.value.toLocaleString() }}<span class="text-4xl align-top" style="color: var(--brand)">{{ stat.suffix }}</span>
            </div>
            <div class="text-slate-400 font-medium uppercase tracking-wider text-sm">{{ t(stat.labelKey) }}</div>
          </div>
@@ -331,12 +331,12 @@ onMounted(() => {
           <div>
             <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">
               {{ t('saasLanding.themes.title.prefix') }}
-              <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">{{ t('saasLanding.themes.title.accent') }}</span>
+              <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(to right, var(--brand), var(--brand))">{{ t('saasLanding.themes.title.accent') }}</span>
             </h2>
             <p class="text-lg text-slate-600 mb-8 leading-relaxed">
               {{ t('saasLanding.themes.subtitle') }}
             </p>
-            <NuxtLink to="/themes" class="inline-flex items-center gap-2 font-bold text-teal-600 hover:text-teal-700 transition-colors group">
+            <NuxtLink to="/themes" class="inline-flex items-center gap-2 font-bold transition-colors group" style="color: var(--brand)">
               {{ t('saasLanding.themes.viewAll') }}
               <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </NuxtLink>
@@ -378,9 +378,10 @@ onMounted(() => {
              v-for="(plan, idx) in pricingPlans" 
              :key="idx" 
              class="group relative rounded-3xl p-8 border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
-             :class="plan.popular ? 'bg-slate-900 text-white border-slate-900 ring-4 ring-teal-500/20' : 'bg-white text-slate-900 border-slate-200 hover:border-teal-100'"
+             :class="plan.popular ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-900 border-slate-200'"
+             :style="plan.popular ? 'box-shadow: 0 0 0 4px rgba(var(--brand-rgb)/0.2)' : ''"
            >
-             <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-teal-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+             <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide" style="background: var(--brand)">
                {{ t('pricing.badges.mostPopular') }}
              </div>
 
@@ -394,14 +395,15 @@ onMounted(() => {
              
              <button 
                class="w-full py-3 rounded-xl font-bold mb-8 transition-all"
-               :class="plan.popular ? 'bg-teal-600 hover:bg-teal-500 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-900'"
+               :class="plan.popular ? 'text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-900'"
+               :style="plan.popular ? 'background: var(--brand)' : ''"
              >
                {{ plan.cta }}
              </button>
 
              <ul class="space-y-4 text-sm font-medium">
                <li v-for="(feat, fIdx) in plan.features" :key="fIdx" class="flex items-center gap-3">
-                  <Icon name="lucide:check" class="w-5 h-5 flex-shrink-0" :class="plan.popular ? 'text-teal-400' : 'text-teal-600'" />
+                  <Icon name="lucide:check" class="w-5 h-5 flex-shrink-0" :style="plan.popular ? 'color: var(--brand)' : 'color: var(--brand)'" />
                  <span class="opacity-80">{{ feat }}</span>
                </li>
              </ul>
@@ -418,15 +420,15 @@ onMounted(() => {
         <div class="text-center lg:text-left mb-12 lg:mb-0">
            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
              {{ t('saasLanding.testimonials.heading.prefix') }} <br>
-             <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">{{ t('saasLanding.testimonials.heading.accent') }}</span> {{ t('saasLanding.testimonials.heading.suffix') }}
+             <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(to right, var(--brand), var(--brand))">{{ t('saasLanding.testimonials.heading.accent') }}</span> {{ t('saasLanding.testimonials.heading.suffix') }}
            </h2>
            <p class="text-lg text-slate-500 max-w-md mx-auto lg:mx-0 mb-8">
              {{ t('saasLanding.testimonials.subtitle') }}
            </p>
            <div class="flex items-center justify-center lg:justify-start gap-2">
               <div class="flex -space-x-4">
-                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-teal-100 flex items-center justify-center text-xs font-bold text-teal-800">NS</div>
-                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-800">DC</div>
+                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 flex items-center justify-center text-xs font-bold" style="background: rgba(var(--brand-rgb)/0.12); color: var(--brand)">NS</div>
+                 <div class="w-12 h-12 rounded-full border-4 border-slate-50 flex items-center justify-center text-xs font-bold" style="background: rgba(var(--brand-rgb)/0.12); color: var(--brand)">DC</div>
                  <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-800">TA</div>
                  <div class="w-12 h-12 rounded-full border-4 border-slate-50 bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">+50</div>
               </div>
@@ -446,7 +448,7 @@ onMounted(() => {
                   </div>
                   <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ t(testi.textKey) }}"</p>
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold overflow-hidden">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold overflow-hidden" style="background: rgba(var(--brand-rgb)/0.12); color: var(--brand)">
                       {{ testi.name.charAt(0) }}
                     </div>
                     <div>
@@ -471,7 +473,7 @@ onMounted(() => {
                     <p class="text-slate-700 leading-relaxed mb-4 font-medium text-sm">"{{ t(testi.textKey) }}"</p>
                   </div>
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold overflow-hidden">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold overflow-hidden" style="background: rgba(var(--brand-rgb)/0.12); color: var(--brand)">
                       {{ testi.name.charAt(0) }}
                     </div>
                     <div>
@@ -507,7 +509,7 @@ onMounted(() => {
               <span class="text-lg font-semibold text-slate-800">{{ t(faq.questionKey) }}</span>
               <span 
                 class="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 transition-transform duration-300"
-                :class="{'rotate-180 bg-teal-50 text-teal-600 border-teal-100': activeFaq === idx}"
+                :style="activeFaq === idx ? 'background: rgba(var(--brand-rgb)/0.08); color: var(--brand); border-color: rgba(var(--brand-rgb)/0.2); transform: rotate(180deg)' : ''"
               >
                 <Icon name="lucide:chevron-down" class="w-4 h-4" />
               </span>
@@ -527,13 +529,13 @@ onMounted(() => {
     <section class="py-32 bg-slate-900 relative overflow-hidden text-center px-4">
       <div class="relative z-10 max-w-4xl mx-auto">
         <h2 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tight">{{ t('saasLanding.finalCta.title') }}</h2>
-        <p class="text-xl text-teal-200 mb-10">{{ t('saasLanding.finalCta.subtitle') }}</p>
-        <NuxtLink to="/register" class="inline-flex px-10 py-5 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-full text-lg shadow-lg shadow-teal-900/20 transition-all hover:scale-105">
+        <p class="text-xl mb-10" style="color: rgba(var(--brand-rgb)/0.8)">{{ t('saasLanding.finalCta.subtitle') }}</p>
+        <NuxtLink to="/register" class="inline-flex px-10 py-5 text-white font-bold rounded-full text-lg shadow-lg transition-all hover:scale-105 hover:opacity-90" style="background: var(--brand)">
           {{ t('saasLanding.finalCta.cta') }}
         </NuxtLink>
       </div>
       <!-- Decorative BG -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-900/30 rounded-full blur-[80px]" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[80px]" style="background: rgba(var(--brand-rgb)/0.3)" />
     </section>
 
   </div>

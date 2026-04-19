@@ -123,7 +123,7 @@
               <input
                 v-model="variant.trackInventory"
                 type="checkbox"
-                class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-3)"
+                class="admin-checkbox"
                 :disabled="savingInventoryIds.has(variant.id)"
                 @change="updateVariantInventory(variant, { trackInventory: Boolean(variant.trackInventory) })"
               >
@@ -204,7 +204,7 @@
               <input 
                 v-model="variant.isActive" 
                 type="checkbox"
-                class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]" style="border-color: var(--surface-border); background: var(--surface-3)" 
+                class="admin-checkbox"
                 @change="updateVariantInfo(variant)"
               >
             </td>
@@ -373,7 +373,7 @@
               <span class="truncate" style="color: var(--text-secondary)">{{ img.label || t('admin.variantsTable.imagePicker.imageFallback') }}</span>
               <input
                 type="checkbox"
-                class="h-4 w-4 [color:var(--brand)] rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
+                class="admin-checkbox"
                 :checked="selectedImageUrls.has(img.url)"
                 @change="toggleImage(img.url)"
               >

@@ -243,7 +243,6 @@
                     <input
                       type="checkbox"
                       class="admin-checkbox"
-                      style="border-color: var(--surface-border); background: var(--surface-3)"
                       :checked="form.categoryIds.includes(cat.id)"
                       @change="toggleCategorySelection(cat.id, ($event.target as HTMLInputElement).checked)"
                     >
@@ -270,7 +269,6 @@
                 v-model="form.isActive"
                 type="checkbox"
                 class="admin-checkbox"
-                style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
                 for="isActive"
@@ -293,7 +291,6 @@
                 v-model="form.isPromotionActive"
                 type="checkbox"
                 class="admin-checkbox"
-                style="border-color: var(--surface-border); background: var(--surface-3)"
               >
               <label
                 for="isPromotionActive"
@@ -339,7 +336,6 @@
                   v-model="form.showCountdown"
                   type="checkbox"
                   class="admin-checkbox"
-                  style="border-color: var(--surface-border); background: var(--surface-3)"
                 >
                 <label
                   for="showCountdown"
@@ -394,7 +390,6 @@
                     v-model="showArchivedVariants"
                     type="checkbox"
                     class="admin-checkbox"
-                    style="border-color: var(--surface-border); background: var(--surface-3)"
                   >
                   {{ t('admin.pages.products.edit.variantsTab.showArchived') }}
                 </label>
@@ -502,7 +497,6 @@
                             v-model="deal.isActive"
                             type="checkbox"
                             class="admin-checkbox"
-                            style="border-color: var(--surface-border); background: var(--surface-3)"
                           >
                           <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.common.active') }}</span>
                         </label>
@@ -582,7 +576,6 @@
                     <input
                       type="checkbox"
                       class="admin-checkbox"
-                      style="border-color: var(--surface-border); background: var(--surface-3)"
                       :value="p.id"
                       v-model="productMetaPixelIds"
                     >

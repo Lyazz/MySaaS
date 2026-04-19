@@ -15,7 +15,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
 
     // Check if user is authenticated
-    if (!authStore.isAuthenticated) {
+    if (!authStore.ensureSessionActive()) {
         return navigateTo('/super-admin/login')
     }
 

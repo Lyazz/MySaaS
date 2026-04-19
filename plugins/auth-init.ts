@@ -1,6 +1,6 @@
 export default defineNuxtPlugin(async () => {
   const authStore = useAuthStore()
-  if (!authStore.isAuthenticated) return
+  if (!authStore.ensureSessionActive()) return
   if (authStore.user) return
 
   const token = authStore.token
@@ -19,6 +19,6 @@ export default defineNuxtPlugin(async () => {
       authStore.setAuth(token, res.user, res.tenant, res.staffRole ?? null, res.staffPermissions ?? null)
     }
   } catch {
-    // Ignore: token might be expired/invalid; route middleware will handle redirect.
+    authStore.logout({ redirect: false })
   }
 })

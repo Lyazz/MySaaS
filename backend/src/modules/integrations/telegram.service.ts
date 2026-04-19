@@ -104,16 +104,28 @@ export class TelegramService {
         }
 
         try {
-            // Fetch tenant to get the slug for the link
+            // Fetch tenant to build a public admin link for this order notification.
             const tenant = await prisma.tenant.findUnique({
                 where: { id: tenantId },
-                select: { slug: true }
+                select: {
+                    slug: true,
+                    domains: {
+                        take: 1,
+                        orderBy: { createdAt: 'asc' },
+                        select: { domain: true }
+                    }
+                }
             })
 
             if (!tenant) return
 
             const bot = new Telegraf(botToken)
-            const message = this.formatOrderMessage(order, tenant.slug)
+            const adminUrl = this.buildOrderAdminUrl({
+                slug: tenant.slug,
+                customDomain: tenant.domains[0]?.domain ?? null,
+                orderId: order.id
+            })
+            const message = this.formatOrderMessage(order, adminUrl)
             await bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' })
         } catch (error) {
             console.error(`[TelegramService] Failed to send notification for tenant ${tenantId}:`, error)
@@ -131,9 +143,7 @@ export class TelegramService {
         }
     }
 
-    private formatOrderMessage(order: any, slug: string): string {
-        const adminUrl = `http://${slug}.localhost:3000/admin/orders/${order.id}`
-
+    private formatOrderMessage(order: any, adminUrl: string): string {
         const lines = [
             `📦 *Nouvelle Commande Reçue !*`,
             `Commande #${order.id.slice(0, 8)}`,
@@ -151,6 +161,21 @@ export class TelegramService {
         ]
 
         return lines.join('\n')
+    }
+
+    private buildOrderAdminUrl(input: { slug: string; customDomain: string | null; orderId: string }): string {
+        const customDomain = typeof input.customDomain === 'string' ? input.customDomain.trim() : ''
+        if (customDomain) {
+            return `https://${customDomain}/admin/orders/${input.orderId}`
+        }
+
+        const platformDomain = (process.env.PLATFORM_BASE_DOMAIN ?? process.env.PLATFORM_DOMAIN ?? '').trim()
+        if (platformDomain) {
+            return `https://${input.slug}.${platformDomain}/admin/orders/${input.orderId}`
+        }
+
+        // Dev fallback when no public domain is configured.
+        return `http://${input.slug}.localhost:3000/admin/orders/${input.orderId}`
     }
 
     private formatVariant(variant: any): string {

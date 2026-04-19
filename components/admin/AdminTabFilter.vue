@@ -1,6 +1,7 @@
 <template>
+  <div class="w-full overflow-x-auto mb-4 scrollbar-hide">
   <div
-    class="inline-flex items-center gap-0.5 p-1 rounded-xl mb-4"
+    class="inline-flex items-center gap-0.5 p-1 rounded-xl"
     style="background: var(--surface-2); border: 1px solid var(--surface-border);"
   >
     <button
@@ -17,6 +18,7 @@
         :style="countStyle(tab.key)"
       >{{ tab.count }}</span>
     </button>
+  </div>
   </div>
 </template>
 

@@ -293,8 +293,25 @@
   /* ── Checkboxes ── */
   .admin-checkbox {
     @apply h-4 w-4 rounded cursor-pointer;
+    color: var(--brand);
     accent-color: var(--brand);
     border: 1px solid var(--surface-border);
+    background-color: var(--surface-2);
+    color-scheme: dark;
+  }
+
+  .admin-checkbox:checked {
+    background-color: var(--brand);
+    border-color: var(--brand);
+  }
+
+  .admin-checkbox:focus-visible {
+    border-color: rgba(var(--brand-rgb) / 0.5);
+    box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.15);
+  }
+
+  [data-theme="light"] .admin-checkbox {
+    color-scheme: light;
   }
 
   .admin-checkbox:disabled {
@@ -324,6 +341,14 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255,255,255,0.25);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   /* ── Admin nav item ── */
