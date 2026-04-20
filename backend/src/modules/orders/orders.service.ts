@@ -11,6 +11,7 @@ import { ensureActiveCashboxAndOpenSession } from '../cash/cashbox-resolver'
 import { renderGenericBordereauPdf } from './bordereau-pdf'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
 import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
+import { MaystroPickupPointService } from '../delivery/maystro/maystro-pickup-point.service'
 
 const telegramService = new TelegramService()
 
@@ -121,6 +122,59 @@ const addUtcYears = (date: Date, years: number) =>
 
 export class OrdersService {
     private maystroBordereau = new MaystroBordereauService()
+    private maystroPickupPoints = new MaystroPickupPointService()
+
+    private static normalizePickupPointLabel(value: string) {
+        return value.trim().toLowerCase().replace(/\s+/g, ' ')
+    }
+
+    private async resolveShippingPickupPoint(input: {
+        tenantId: string
+        shippingProvider: unknown
+        deliveryMode: 'home' | 'pickup' | 'store'
+        shippingCommuneCode?: string | null
+        rawPickupPoint: unknown
+    }): Promise<number | null> {
+        const numeric = toOptionalPickupPoint(input.rawPickupPoint)
+        if (numeric) return numeric
+
+        const rawLabel = typeof input.rawPickupPoint === 'string' ? input.rawPickupPoint.trim() : ''
+        if (!rawLabel) return null
+
+        const provider = typeof input.shippingProvider === 'string' ? input.shippingProvider.toUpperCase() : ''
+        if (provider !== 'MAYSTRO' || input.deliveryMode !== 'pickup') {
+            throw new OrderValidationError(400, 'shippingPickupPoint must be a numeric id')
+        }
+
+        const commune = typeof input.shippingCommuneCode === 'string' ? input.shippingCommuneCode.trim() : ''
+        if (!commune) {
+            throw new OrderValidationError(400, 'shippingCommuneCode is required when shippingPickupPoint is provided')
+        }
+
+        try {
+            const creds = await getMaystroCredentials(input.tenantId)
+            const points = await this.maystroPickupPoints.listActivePickupPoints({
+                apiToken: creds.apiToken,
+                commune,
+                deliveryType: 3
+            })
+            const wanted = OrdersService.normalizePickupPointLabel(rawLabel)
+            const match = points.find((point) => {
+                if (!Number.isFinite(point.pickup_point) || point.pickup_point <= 0) return false
+                const names = [point.name, point.name_lt, point.name_ar].filter(
+                    (name): name is string => typeof name === 'string' && name.trim().length > 0
+                )
+                return names.some((name) => OrdersService.normalizePickupPointLabel(name) === wanted)
+            })
+            if (!match) {
+                throw new OrderValidationError(400, 'Invalid Maystro pickup point for commune')
+            }
+            return Math.trunc(match.pickup_point)
+        } catch (error) {
+            if (error instanceof OrderValidationError) throw error
+            throw new OrderValidationError(400, 'Invalid Maystro pickup point for commune')
+        }
+    }
 
     async getBordereauPdf(tenantId: string, orderId: string, tenantName: string) {
         const order = await prisma.order.findFirst({
@@ -640,7 +694,13 @@ export class OrdersService {
         const nextShippingPickupPoint =
             input.shippingPickupPoint === undefined
                 ? (existing.shippingPickupPoint ?? null)
-                : toOptionalPickupPoint(input.shippingPickupPoint)
+                : await this.resolveShippingPickupPoint({
+                    tenantId,
+                    shippingProvider: nextShippingProvider,
+                    deliveryMode: nextDeliveryMode,
+                    shippingCommuneCode: nextShippingCommuneCode,
+                    rawPickupPoint: input.shippingPickupPoint
+                })
 
         const nextCustomerId = input.customerId === undefined ? existing.customerId : (input.customerId || null)
         if (input.customerId !== undefined && nextCustomerId) {
@@ -1430,8 +1490,6 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
         }
 
-        const shippingPickupPoint = toOptionalPickupPoint(input.shippingPickupPoint)
-
         const storeSettings = await prisma.storeSettings.upsert({
             where: { tenantId: input.tenantId },
             create: { tenantId: input.tenantId },
@@ -1616,6 +1674,14 @@ export class OrdersService {
             shippingProvider = null
         }
 
+        const shippingPickupPoint = await this.resolveShippingPickupPoint({
+            tenantId: input.tenantId,
+            shippingProvider,
+            deliveryMode,
+            shippingCommuneCode: input.shippingCommuneCode,
+            rawPickupPoint: input.shippingPickupPoint
+        })
+
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
         const totalAmount = centsToMoney(totalCents)
         const totalWithShippingAmount = computeTotalWithShipping(totalAmount, effectiveShippingAmount)
@@ -1753,8 +1819,6 @@ export class OrdersService {
         if (shippingAmount != null && (!Number.isFinite(shippingAmount) || shippingAmount < 0)) {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
         }
-
-        const shippingPickupPoint = toOptionalPickupPoint(input.shippingPickupPoint)
 
         if (deliveryMode === 'store') {
             const settings = await prisma.storeSettings.upsert({
@@ -1931,6 +1995,14 @@ export class OrdersService {
         if (deliveryMode === 'store') {
             shippingProvider = null
         }
+
+        const shippingPickupPoint = await this.resolveShippingPickupPoint({
+            tenantId: input.tenantId,
+            shippingProvider,
+            deliveryMode,
+            shippingCommuneCode: input.shippingCommuneCode,
+            rawPickupPoint: input.shippingPickupPoint
+        })
 
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
         const totalAmount = centsToMoney(totalCents)

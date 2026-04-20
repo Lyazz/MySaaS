@@ -92,8 +92,9 @@ watch(
     pickupPointsError.value = ''
     pickupPoints.value = []
     stopDeskName.value = ''
-    if (!isPickup) form.value.pickupPoint = ''
+    form.value.pickupPoint = ''
     if (!maystroEnabled || !wilaya || !commune) return
+    if (!isPickup) return
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
@@ -110,15 +111,12 @@ watch(
         : []
       const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
       stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      if (isPickup) {
-        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-        if (relaisPoints.length > 0) {
-          const current = (form.value.pickupPoint || '').trim()
-          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-            form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-            syncPickupPointCommune()
-          }
-        }
+      const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
+      if (relaisPoints.length > 0) {
+        form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
+        syncPickupPointCommune()
+      } else if (pickupPoints.value.length === 0) {
+        pickupPointsError.value = 'Aucun point relais disponible dans cette région'
       }
     } catch (e: any) {
       pickupPoints.value = []
@@ -159,7 +157,7 @@ async function handleSubmit() {
 
     if (isMaystro) {
       if (!form.value.wilaya || !form.value.commune) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
-      if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim()) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
+      if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
       if (maystroShippingAmount == null) { errorMessage.value = 'Maystro shipping price unavailable for selected commune'; return }
     }
 
@@ -278,7 +276,7 @@ async function handleSubmit() {
                 </div>
 
                 <!-- Maystro pickup info -->
-                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || pickupPointsError)" class="co__pickup-info">
+                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)" class="co__pickup-info">
                   <div v-if="pickupPointsLoading" class="co__pickup-loading">
                     <Icon name="lucide:loader-2" style="width:11px;height:11px" /> Chargement…
                   </div>
@@ -287,7 +285,7 @@ async function handleSubmit() {
                       <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/><circle cx="5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="0.75"/></svg>
                       {{ stopDeskName }}
                     </div>
-                    <div v-if="form.selectedDeliveryOption === option.id && form.pickupPoint" class="co__pickup-point">
+                    <div v-if="form.pickupPoint" class="co__pickup-point">
                       <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/><circle cx="5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="0.75"/></svg>
                       {{ form.pickupPoint }}
                     </div>

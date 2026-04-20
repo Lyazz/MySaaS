@@ -42,13 +42,68 @@
       "description": "Créez votre boutique, recevez des commandes, et gérez paiements et livraison depuis un seul tableau de bord."
     },
     "hero": {
+      "kicker": "Le SaaS pour marchands algériens",
       "title": {
         "buildSell": "Lancez. Pilotez.",
         "scale": "Grandissez."
       },
+      "italicWord": "sans effort",
       "subtitle": "Avec Swekly, lancez votre boutique en quelques minutes. Nous nous occupons du site, des paiements et de la livraison.",
       "ctaPrimary": "Essayer gratuitement",
-      "ctaSecondary": "Découvrir les fonctionnalités"
+      "ctaSecondary": "Découvrir les fonctionnalités",
+      "scrollHint": "Faites défiler",
+      "chips": {
+        "storefront": "Boutique",
+        "payments": "Paiements",
+        "shipping": "Livraison",
+        "analytics": "Analytique",
+        "ai": "Outils IA"
+      }
+    },
+    "storyteller": {
+      "eyebrow": "Comment ça marche",
+      "title": "Quatre étapes. Une boutique complète.",
+      "subtitle": "Du pixel au colis — chaque étape pensée pour accélérer vos ventes.",
+      "steps": {
+        "design": {
+          "number": "01",
+          "caption": "Design",
+          "title": "Choisissez un thème, faites-le vôtre.",
+          "description": "Des modèles mobile-first qui s'adaptent à votre marque en quelques minutes."
+        },
+        "sell": {
+          "number": "02",
+          "caption": "Vendez",
+          "title": "Les commandes arrivent. Automatiquement.",
+          "description": "Paiement, factures, stocks — tout est connecté dès le premier jour."
+        },
+        "ship": {
+          "number": "03",
+          "caption": "Expédiez",
+          "title": "Choisissez le transporteur. On expédie.",
+          "description": "Intégrations natives avec Maystro, Yalidine et vos livreurs internes."
+        },
+        "grow": {
+          "number": "04",
+          "caption": "Grandissez",
+          "title": "Voyez ce qui marche. Doublez la mise.",
+          "description": "Analytique en direct, pixels et IA — la stack de croissance incluse."
+        }
+      }
+    },
+    "carousel": {
+      "eyebrow": "Thèmes",
+      "title": "Des boutiques avec du caractère.",
+      "subtitle": "Douze thèmes. Tous les secteurs. À portée de clic.",
+      "cta": "Voir tous les thèmes"
+    },
+    "pricingSection": {
+      "eyebrow": "Tarifs",
+      "toggle": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "discount": "Économisez 20%"
+      }
     },
     "features": {
       "title": {

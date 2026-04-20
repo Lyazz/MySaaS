@@ -330,7 +330,7 @@ const handleOrderSubmit = async () => {
             orderSubmitting.value = false
             return
           }
-          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim()) {
+          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
             return

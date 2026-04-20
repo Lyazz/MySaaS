@@ -169,7 +169,7 @@
                     </div>
                   </div>
                 </div>
-                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || pickupPointsError)" class="mt-3 pt-3 border-t border-stone-200">
+                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)" class="mt-3 pt-3 border-t border-stone-200">
                   <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-stone-500">
                     <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
                     Loading...
@@ -179,7 +179,7 @@
                       <Icon name="lucide:building-2" class="w-3 h-3 text-stone-300 flex-shrink-0" />
                       <span>{{ stopDeskName }}</span>
                     </div>
-                    <div v-if="form.selectedDeliveryOption === option.id && form.pickupPoint" class="flex items-center gap-2 text-xs mt-1">
+                    <div v-if="form.pickupPoint" class="flex items-center gap-2 text-xs mt-1">
                       <Icon name="lucide:map-pin" class="w-3 h-3 text-stone-700" />
                       <span class="font-bold uppercase text-stone-900">{{ form.pickupPoint }}</span>
                     </div>
@@ -443,8 +443,9 @@ watch(
     pickupPointsError.value = ''
     pickupPoints.value = []
     stopDeskName.value = ''
-    if (!isPickup) form.pickupPoint = ''
+    form.pickupPoint = ''
     if (!maystroEnabled || !wilaya || !commune) return
+    if (!isPickup) return
     pickupPointsLoading.value = true
     try {
       const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
@@ -461,15 +462,12 @@ watch(
         : []
       const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
       stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      if (isPickup) {
-        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-        if (relaisPoints.length > 0) {
-          const current = (form.pickupPoint || '').trim()
-          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-            form.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-            syncPickupPointCommune()
-          }
-        }
+      const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
+      if (relaisPoints.length > 0) {
+        form.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
+        syncPickupPointCommune()
+      } else if (pickupPoints.value.length === 0) {
+        pickupPointsError.value = 'Aucun point relais disponible dans cette région'
       }
     } catch (e: any) {
       pickupPoints.value = []
@@ -532,7 +530,7 @@ const handleSubmit = async () => {
         errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
         return
       }
-      if (delivery?.mode === 'pickup' && !String(form.pickupPoint || '').trim()) {
+      if (delivery?.mode === 'pickup' && !String(form.pickupPoint || '').trim() && !stopDeskName.value) {
         errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
         return
       }

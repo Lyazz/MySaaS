@@ -42,13 +42,68 @@
       "description": "Build your store, take orders, and manage payments and shipping from one dashboard."
     },
     "hero": {
+      "kicker": "The SaaS for Algerian merchants",
       "title": {
         "buildSell": "Launch. Run.",
         "scale": "Grow."
       },
+      "italicWord": "effortlessly",
       "subtitle": "Launch your store in minutes. We handle the website, payments, and shipping.",
       "ctaPrimary": "Try it free",
-      "ctaSecondary": "Explore features"
+      "ctaSecondary": "Explore features",
+      "scrollHint": "Scroll to explore",
+      "chips": {
+        "storefront": "Storefront",
+        "payments": "Payments",
+        "shipping": "Shipping",
+        "analytics": "Analytics",
+        "ai": "AI tools"
+      }
+    },
+    "storyteller": {
+      "eyebrow": "How it works",
+      "title": "Four moves. One complete storefront.",
+      "subtitle": "From pixel to parcel — every step designed to move your product faster.",
+      "steps": {
+        "design": {
+          "number": "01",
+          "caption": "Design",
+          "title": "Pick a theme, make it yours.",
+          "description": "Mobile-first templates that adapt to your brand in minutes, not weeks."
+        },
+        "sell": {
+          "number": "02",
+          "caption": "Sell",
+          "title": "Orders drop in. Automatically.",
+          "description": "Checkout, receipts, inventory — all wired up from day one."
+        },
+        "ship": {
+          "number": "03",
+          "caption": "Ship",
+          "title": "Pick the carrier. We dispatch.",
+          "description": "Native integrations with Maystro, Yalidine and self-delivery fleets."
+        },
+        "grow": {
+          "number": "04",
+          "caption": "Grow",
+          "title": "See what works. Double down.",
+          "description": "Live analytics, pixels, and AI copy — the growth stack baked in."
+        }
+      }
+    },
+    "carousel": {
+      "eyebrow": "Themes",
+      "title": "Storefronts with a point of view.",
+      "subtitle": "Twelve themes. Every industry. One click away.",
+      "cta": "Browse all themes"
+    },
+    "pricingSection": {
+      "eyebrow": "Pricing",
+      "toggle": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "discount": "Save 20%"
+      }
     },
     "features": {
       "title": {
