@@ -1880,7 +1880,8 @@ function orderStatusLabel(code: string) {
 
   async function onEditWilayaChange(nextValue: unknown) {
     const normalized = normalizeWilayaCode(nextValue)
-    if (normalized === editShippingWilayaCode.value) return
+    // With BaseSelect + v-model, the model can already be updated before this
+    // handler runs. Do not early-return here or communes/prices won't refresh.
     editShippingWilayaCode.value = normalized
     editShippingCommuneCode.value = ''
     if (isEditMaystroShipping.value) {

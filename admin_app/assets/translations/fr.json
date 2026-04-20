@@ -256,15 +256,15 @@
         "subtitle": "Démarrez votre essai gratuit de 14 jours. Aucune carte de crédit requise.",
         "companyName": {
           "label": "Nom de l’entreprise",
-          "placeholder": "Ex. Acme Corp"
+          "placeholder": "Ex. Votre boutique"
         },
         "slug": {
           "label": "URL de la boutique",
-          "placeholder": "acme",
+          "placeholder": "votre-boutique",
           "preview": "Votre boutique sera à l’adresse : {slug}.swekly.com"
         },
         "email": {
-          "label": "E-mail professionnel",
+          "label": "E-mail",
           "placeholder": "name{'@'}company.com"
         },
         "password": {
@@ -2945,17 +2945,17 @@
         "fields": {
           "name": {
             "label": "Nom du tenant",
-            "placeholder": "Acme Corp"
+            "placeholder": "Votre boutique"
           },
           "slug": {
             "label": "Slug (sous-domaine)",
-            "placeholder": "acme",
+            "placeholder": "votre-boutique",
             "slugFallback": "slug",
             "hint": "Accessible à l’adresse {slug}.localhost:3000"
           },
           "ownerEmail": {
             "label": "E-mail du propriétaire",
-            "placeholder": "admin{'@'}acme.com"
+            "placeholder": "admin{'@'}votreboutique.com"
           },
           "ownerPassword": {
             "label": "Mot de passe du propriétaire"

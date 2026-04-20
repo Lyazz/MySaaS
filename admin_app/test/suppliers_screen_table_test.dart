@@ -21,8 +21,8 @@ void main() {
     final suppliers = [
       Supplier(
         id: 's1',
-        name: 'ACME Supplies',
-        email: 'acme@example.com',
+        name: 'Your Store Supplies',
+        email: 'yourstore@example.com',
         phone: '0550 000 123',
         address: 'Algiers',
       ),

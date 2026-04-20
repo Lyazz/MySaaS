@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-slate-50 flex font-sans text-slate-600">
+  <div class="min-h-screen bg-slate-50 flex font-sans text-slate-600" :style="superAdminStyle">
     <!-- Mobile Backdrop -->
     <div 
       v-if="sidebarOpen" 
@@ -164,6 +164,10 @@ const route = useRoute()
 const sidebarOpen = ref(false)
 const { t } = useI18n({ useScope: 'global' })
 const pendingPaymentsCount = ref(0)
+const superAdminStyle = {
+  '--brand': '#FF7A45',
+  '--brand-rgb': '255 122 69'
+} as Record<string, string>
 
 onMounted(async () => {
   if (window.innerWidth >= 1024) {

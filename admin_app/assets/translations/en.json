@@ -256,11 +256,11 @@
         "subtitle": "Start your 14-day free trial. No credit card required.",
         "companyName": {
           "label": "Company Name",
-          "placeholder": "Ex. Acme Corp"
+          "placeholder": "Ex. Your Store"
         },
         "slug": {
           "label": "Store URL",
-          "placeholder": "acme",
+          "placeholder": "your-store",
           "preview": "Your store will be at: {slug}.swekly.com"
         },
         "email": {
@@ -2957,17 +2957,17 @@
         "fields": {
           "name": {
             "label": "Tenant name",
-            "placeholder": "Acme Corp"
+            "placeholder": "Your Store"
           },
           "slug": {
             "label": "Slug (subdomain)",
-            "placeholder": "acme",
+            "placeholder": "your-store",
             "slugFallback": "slug",
             "hint": "Will be accessible at {slug}.localhost:3000"
           },
           "ownerEmail": {
             "label": "Owner email",
-            "placeholder": "admin{'@'}acme.com"
+            "placeholder": "admin{'@'}yourstore.com"
           },
           "ownerPassword": {
             "label": "Owner password"

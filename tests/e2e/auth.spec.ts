@@ -12,8 +12,8 @@ test.describe('Authentication Flow', () => {
         // 1. Register
         await page.goto('/register')
         await page.waitForLoadState('networkidle')
-        await page.fill('input[placeholder="Acme Corp"]', `Test Tenant ${timestamp}`)
-        await page.fill('input[placeholder="acme"]', slug)
+        await page.fill('input[placeholder="Your Store"]', `Test Tenant ${timestamp}`)
+        await page.fill('input[placeholder="your-store"]', slug)
         await page.fill('input[name="email"]', email)
         await page.fill('input[name="password"]', password)
         const registerResponsePromise = page.waitForResponse((r) => r.url().includes('/api/register') && r.request().method() === 'POST')

@@ -54,84 +54,146 @@ const features = computed(() => [
 </script>
 
 <template>
-  <div class="bg-slate-50 min-h-screen font-sans">
-    <!-- Header -->
-    <div class="bg-slate-900 pt-24 pb-20 text-center px-4 relative overflow-hidden text-white">
-       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
-       <div class="absolute -top-40 -right-40 w-96 h-96 bg-teal-600/30 rounded-full blur-[100px]"></div>
-       
-       <div class="relative z-10 max-w-3xl mx-auto">
-         <h1 class="text-4xl md:text-5xl font-black mb-6">
-           {{ t('marketing.featuresPage.hero.title.prefix') }}
-           <span class="text-teal-400 inline-block relative">
-              {{ t('marketing.featuresPage.hero.title.accent') }}
-              <svg class="absolute w-full h-3 -bottom-1 left-0 text-teal-400 opacity-60" viewBox="0 0 200 9" fill="none"><path d="M2.00025 6.99997C2.00025 6.99997 101.996 0.999999 198.001 2.99997" stroke="currentColor" stroke-width="3"/></svg>
-            </span>
-         </h1>
-         <p class="text-slate-400 text-lg">{{ t('marketing.featuresPage.hero.subtitle') }}</p>
-       </div>
-    </div>
+  <div class="feature-page min-h-screen font-sans pt-24 md:pt-28 pb-20">
+    <section class="relative overflow-hidden px-4 pt-8 pb-14">
+      <div class="feature-page__blob feature-page__blob--mint" />
+      <div class="feature-page__blob feature-page__blob--orange" />
 
-    <!-- Features Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 -mt-10 relative z-20">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-[minmax(300px,auto)]">
-        
-        <div 
-          v-for="(feat, idx) in features" 
-          :key="idx" 
-          class="group relative bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden hover:-translate-y-1 transition-all duration-300"
+      <div class="relative z-10 mx-auto max-w-4xl text-center">
+        <p class="text-xs md:text-sm font-bold uppercase tracking-[0.24em] text-[#0D1F1A]/55 mb-5">
+          Swekly
+        </p>
+        <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-[0.95] text-[#0D1F1A] mb-6">
+          {{ t('marketing.featuresPage.hero.title.prefix') }}
+          <span class="feature-page__accent">
+            {{ t('marketing.featuresPage.hero.title.accent') }}
+          </span>
+        </h1>
+        <p class="mx-auto max-w-2xl text-base md:text-lg leading-relaxed text-[#0D1F1A]/65">
+          {{ t('marketing.featuresPage.hero.subtitle') }}
+        </p>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-[minmax(280px,auto)]">
+        <article
+          v-for="(feat, idx) in features"
+          :key="idx"
+          class="group relative overflow-hidden rounded-3xl border-2 border-[#0D1F1A] bg-[#FFFDF4] p-7 transition-all duration-300 hover:-translate-y-1"
           :class="feat.colSpan"
         >
-          <!-- Hover Gradient -->
-          <div class="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-500" 
-            :class="{
-              'from-teal-500 to-emerald-600': feat.color === 'teal',
-              'from-emerald-500 to-teal-600': feat.color === 'emerald',
-              'from-amber-500 to-orange-600': feat.color === 'amber',
-              'from-violet-500 to-fuchsia-600': feat.color === 'violet',
-              'from-blue-500 to-cyan-600': feat.color === 'blue',
-              'from-rose-500 to-pink-600': feat.color === 'rose',
-            }"
-          />
-
-          <div class="relative z-10 flex flex-col h-full">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 duration-300 shadow-lg"
-                 :class="{
-                    'bg-teal-600': feat.color === 'teal',
-                    'bg-emerald-500': feat.color === 'emerald',
-                    'bg-amber-500': feat.color === 'amber',
-                    'bg-violet-600': feat.color === 'violet',
-                    'bg-blue-500': feat.color === 'blue',
-                    'bg-rose-500': feat.color === 'rose',
-                 }"
+          <div class="feature-page__card-shadow" />
+          <div class="relative z-10 flex h-full flex-col">
+            <div
+              class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border-2 border-[#0D1F1A] text-white shadow-[3px_3px_0_#0D1F1A]"
+              :class="{
+                'bg-[#1F9D8E]': feat.color === 'teal' || feat.color === 'emerald',
+                'bg-[#FF7A45]': feat.color === 'amber' || feat.color === 'rose',
+                'bg-[#0D1F1A]': feat.color === 'violet' || feat.color === 'blue'
+              }"
             >
-              <Icon :name="feat.icon" class="w-6 h-6" />
+              <Icon :name="feat.icon" class="w-5 h-5" />
             </div>
-            
-            <h3 class="text-2xl font-bold text-slate-900 mb-3">{{ feat.title }}</h3>
-            <p class="text-slate-500 leading-relaxed max-w-md">{{ feat.description }}</p>
-            
-            <div class="flex-1"></div>
-            
-            <!-- Image for large tiles -->
-            <div v-if="feat.image" class="mt-8 rounded-xl overflow-hidden shadow-lg border border-slate-100 group-hover:shadow-2xl transition-all">
-               <img :src="feat.image" class="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-700">
+
+            <h3 class="text-2xl font-extrabold tracking-tight text-[#0D1F1A] mb-3">
+              {{ feat.title }}
+            </h3>
+            <p class="leading-relaxed text-[#0D1F1A]/65 max-w-md">
+              {{ feat.description }}
+            </p>
+
+            <div class="flex-1" />
+
+            <div
+              v-if="feat.image"
+              class="mt-8 overflow-hidden rounded-2xl border-2 border-[#0D1F1A] shadow-[4px_4px_0_#0D1F1A]"
+            >
+              <img
+                :src="feat.image"
+                :alt="feat.title"
+                class="h-48 w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              >
             </div>
           </div>
-        </div>
-
+        </article>
       </div>
-    </div>
+    </section>
 
-    <!-- CTA -->
-    <section class="py-24 text-center">
-       <div class="max-w-2xl mx-auto px-4">
-         <h2 class="text-3xl font-bold text-slate-900 mb-6">{{ t('marketing.featuresPage.cta.title') }}</h2>
-         <NuxtLink to="/register" class="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white font-bold rounded-xl shadow-xl hover:bg-slate-800 transition-all hover:scale-105">
-           {{ t('marketing.featuresPage.cta.button') }}
-            <Icon name="lucide:arrow-right" class="w-4 h-4" />
-         </NuxtLink>
-       </div>
+    <section class="pt-20 text-center px-4">
+      <div class="mx-auto max-w-2xl rounded-3xl border-2 border-[#0D1F1A] bg-[#FFF1DC] px-8 py-12 text-[#0D1F1A] shadow-[8px_8px_0_#FF7A45]">
+        <h2 class="text-3xl font-black tracking-tight mb-6">
+          {{ t('marketing.featuresPage.cta.title') }}
+        </h2>
+        <NuxtLink
+          to="/register"
+          class="inline-flex items-center gap-2 rounded-full border-2 border-[#FF7A45] bg-[#FF7A45] px-8 py-3 font-bold text-white transition-all hover:-translate-y-0.5 hover:border-[#ff8a5d] hover:bg-[#ff8a5d]"
+        >
+          {{ t('marketing.featuresPage.cta.button') }}
+          <Icon name="lucide:arrow-right" class="w-4 h-4" />
+        </NuxtLink>
+      </div>
     </section>
   </div>
 </template>
+
+<style scoped>
+.feature-page {
+  background: #FFF8E7;
+  color: #0D1F1A;
+}
+
+.feature-page__accent {
+  color: #FF7A45;
+  position: relative;
+  display: inline-block;
+}
+
+.feature-page__accent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.22em;
+  width: 100%;
+  height: 0.2em;
+  background: rgba(244, 192, 78, 0.9);
+  border-radius: 999px;
+  z-index: -1;
+}
+
+.feature-page__blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.35;
+}
+
+.feature-page__blob--mint {
+  width: 320px;
+  height: 320px;
+  top: -120px;
+  left: -80px;
+  background: #1F9D8E;
+}
+
+.feature-page__blob--orange {
+  width: 320px;
+  height: 320px;
+  top: -60px;
+  right: -100px;
+  background: #FF7A45;
+}
+
+.feature-page__card-shadow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(31, 157, 142, 0.08), rgba(255, 122, 69, 0.08));
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.group:hover .feature-page__card-shadow {
+  opacity: 1;
+}
+</style>

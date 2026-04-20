@@ -256,11 +256,11 @@
         "subtitle": "ابدأ تجربتك المجانية لمدة 14 يومًا. لا حاجة لبطاقة ائتمان.",
         "companyName": {
           "label": "اسم الشركة",
-          "placeholder": "مثال: Acme Corp"
+          "placeholder": "مثال: متجرك"
         },
         "slug": {
           "label": "رابط المتجر",
-          "placeholder": "acme",
+          "placeholder": "your-store",
           "preview": "سيكون متجرك على: {slug}.swekly.com"
         },
         "email": {

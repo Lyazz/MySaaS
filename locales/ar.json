@@ -309,6 +309,10 @@
         "title": "متجرك، تحت سيطرتك الكاملة.",
         "tagline": "أدر الطلبات والمنتجات والشحن والتحليلات من لوحة تحكم واحدة وقوية.",
         "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "عمليات مباشرة",
+          "focusArea": "محور التركيز"
+        },
         "carousel": {
           "revenue": {
             "title": "تتبع الإيرادات",
@@ -367,18 +371,38 @@
           "name": "يانيس م.",
           "role": "مالك، دزاير فاشن"
         },
-        "copyright": "© {year} Swekly Inc."
+        "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "وضع الإطلاق",
+          "title": "تحكم الإطلاق",
+          "ready": "جاهز",
+          "metrics": {
+            "goLive": "إطلاق",
+            "uptime": "الجاهزية",
+            "localCod": "الدفع عند الاستلام المحلي"
+          },
+          "pills": {
+            "orders": "إدارة الطلبات",
+            "shipping": "شحن ذكي",
+            "analytics": "تحليلات متعمقة"
+          },
+          "tasks": {
+            "cod": "تدفقات دفع محلية والدفع عند الاستلام",
+            "performance": "أداء متجر سريع من اليوم الأول",
+            "analytics": "تحليلات واضحة لقرارات يومية"
+          }
+        }
       },
       "form": {
         "title": "أنشئ حسابك",
         "subtitle": "ابدأ تجربتك المجانية لمدة 14 يومًا. لا حاجة لبطاقة ائتمان.",
         "companyName": {
           "label": "اسم الشركة",
-          "placeholder": "مثال: Acme Corp"
+          "placeholder": "مثال: متجرك"
         },
         "slug": {
           "label": "رابط المتجر",
-          "placeholder": "acme",
+          "placeholder": "your-store",
           "preview": "سيكون متجرك على: {slug}.swekly.com"
         },
         "email": {
@@ -428,7 +452,8 @@
       "recommended": "موصى به"
     },
     "period": {
-      "perMonth": "/شهر"
+      "perMonth": "/شهر",
+      "perYear": "/سنة"
     },
     "features": {
       "ordersPerMonth": "{count} طلب/شهر"
@@ -3243,17 +3268,17 @@
         "fields": {
           "name": {
             "label": "اسم المستأجر",
-            "placeholder": "Acme Corp"
+            "placeholder": "متجرك"
           },
           "slug": {
             "label": "المعرّف (النطاق الفرعي)",
-            "placeholder": "acme",
+            "placeholder": "your-store",
             "slugFallback": "slug",
             "hint": "سيكون متاحًا على {slug}.localhost:3000"
           },
           "ownerEmail": {
             "label": "بريد المالك",
-            "placeholder": "admin{'@'}acme.com"
+            "placeholder": "admin{'@'}yourstore.com"
           },
           "ownerPassword": {
             "label": "كلمة مرور المالك"

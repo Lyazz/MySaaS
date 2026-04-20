@@ -356,7 +356,7 @@ function hexToRgb(hex: string) {
 }
 
 const adminStyle = computed(() => {
-  const primaryColor = storeSettings.value?.primaryColor || '#4F46E5'
+  const primaryColor = '#FF7A45'
   return {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor)

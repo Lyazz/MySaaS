@@ -38,149 +38,142 @@ const plans = computed(() => {
 </script>
 
 <template>
-  <div class="bg-slate-50 min-h-screen text-slate-800 font-sans selection:bg-teal-500 selection:text-white">
-    <!-- Hero Header -->
-    <div class="relative pt-32 pb-24 text-center px-4 overflow-hidden bg-slate-950 text-white clip-path-hero">
-       <!-- Background Effects -->
-       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-teal-600/20 blur-[120px] rounded-full pointer-events-none -z-10 animate-pulse-slow"></div>
-       <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-600/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
-       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 pointer-events-none"></div>
-       
-       <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
-         {{ t('pricing.page.title') }}
-       </h1>
-       <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10">
-         {{ t('pricing.page.subtitle') }}
-       </p>
-       
-       <!-- Toggle -->
-       <div class="inline-flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-full border border-slate-800 backdrop-blur-sm shadow-xl relative z-10">
-         <button 
-           class="px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 relative z-10"
-           :class="!isAnnual ? 'text-white shadow-lg shadow-teal-500/20' : 'text-slate-400 hover:text-white'"
-           @click="isAnnual = false"
-         >
-           {{ t('pricing.toggle.monthly') }}
-           <div v-if="!isAnnual" class="absolute inset-0 bg-teal-600 rounded-full -z-10 layout-id-monthly"></div>
-         </button>
-         <button 
-           class="px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 relative z-10"
-           :class="isAnnual ? 'text-white' : 'text-slate-400 hover:text-white'"
-           @click="isAnnual = true"
-         >
-           {{ t('pricing.toggle.annual') }} <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide border border-emerald-500/20">{{ t('pricing.toggle.save', { percent: 20 }) }}</span>
-           <div v-if="isAnnual" class="absolute inset-0 bg-teal-600 rounded-full -z-10 layout-id-annual shadow-lg shadow-teal-500/20"></div>
-         </button>
-       </div>
-    </div>
+  <div class="pricing-page min-h-screen font-sans pt-24 md:pt-28 pb-20">
+    <section class="relative overflow-hidden px-4 pt-8 pb-14 text-center">
+      <div class="pricing-page__blob pricing-page__blob--mint" />
+      <div class="pricing-page__blob pricing-page__blob--orange" />
 
-    <!-- Pricing Grid -->
-    <div class="max-w-[1400px] mx-auto px-4 -mt-16 pb-32 relative z-10">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div 
-          v-for="(plan, idx) in plans" 
+      <div class="relative z-10 mx-auto max-w-4xl">
+        <p class="text-xs md:text-sm font-bold uppercase tracking-[0.24em] text-[#0D1F1A]/55 mb-5">
+          Pricing
+        </p>
+        <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-[0.95] text-[#0D1F1A] mb-6">
+          {{ t('pricing.page.title') }}
+        </h1>
+        <p class="mx-auto max-w-2xl text-base md:text-lg leading-relaxed text-[#0D1F1A]/65 mb-10">
+          {{ t('pricing.page.subtitle') }}
+        </p>
+
+        <div class="inline-flex items-center rounded-full border-2 border-[#0D1F1A] bg-[#FFFDF4] p-1.5 shadow-[3px_3px_0_#0D1F1A]">
+          <button
+            class="rounded-full px-6 py-2 text-sm font-bold transition-colors"
+            :class="!isAnnual ? 'bg-[#0D1F1A] text-[#FFF8E7]' : 'text-[#0D1F1A]/65'"
+            @click="isAnnual = false"
+          >
+            {{ t('pricing.toggle.monthly') }}
+          </button>
+          <button
+            class="rounded-full px-6 py-2 text-sm font-bold transition-colors"
+            :class="isAnnual ? 'bg-[#FF7A45] text-white' : 'text-[#0D1F1A]/65'"
+            @click="isAnnual = true"
+          >
+            {{ t('pricing.toggle.annual') }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <article
+          v-for="(plan, idx) in plans"
           :key="idx"
-          class="relative flex flex-col p-6 rounded-3xl border transition-all duration-300 hover:-translate-y-2 group bg-white shadow-sm hover:shadow-2xl"
-          :class="[
-            plan.popular ? 'border-teal-500 ring-2 ring-teal-500/20 shadow-xl shadow-teal-900/5 z-10 scale-[1.02] md:scale-105 xl:scale-100 xl:hover:scale-105' : 'border-slate-200 hover:border-teal-200',
-            plan.highlight ? 'border-indigo-500/50 hover:border-indigo-400' : ''
-          ]"
+          class="relative flex flex-col rounded-3xl border-2 border-[#0D1F1A] bg-[#FFFDF4] p-6 transition-all duration-300 hover:-translate-y-1"
+          :class="plan.popular ? 'shadow-[7px_7px_0_#FF7A45]' : 'shadow-[5px_5px_0_#0D1F1A]'"
         >
-          <!-- Popular Badge -->
-          <div v-if="plan.popular" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-teal-500/30 whitespace-nowrap">
+          <div
+            v-if="plan.popular"
+            class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border-2 border-[#0D1F1A] bg-[#F4C04E] px-4 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-[#0D1F1A] whitespace-nowrap"
+          >
             {{ t('pricing.badges.mostPopular') }}
           </div>
-          
-           <!-- Highlight Badge -->
-          <div v-if="plan.highlight" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/30 whitespace-nowrap">
+
+          <div
+            v-if="plan.highlight"
+            class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border-2 border-[#0D1F1A] bg-[#1F9D8E] px-4 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-[#FFF8E7] whitespace-nowrap"
+          >
             {{ t('pricing.badges.recommended') }}
           </div>
 
           <div class="mb-6">
-            <h3 
-              class="text-lg font-bold mb-2 transition-colors text-slate-900 group-hover:text-teal-600"
-            >
+            <h3 class="mb-2 text-lg font-extrabold text-[#0D1F1A]">
               {{ plan.name }}
             </h3>
-            <div class="flex items-baseline gap-1 mb-2 h-9">
-               <span 
-                 class="text-3xl font-black tracking-tight" 
-                 :class="[
-                     plan.popular ? 'text-teal-600' : 
-                     plan.highlight ? 'text-indigo-600' : 'text-slate-900'
-                 ]"
-               >
-                <template v-if="isAnnual">
-                  {{ plan.priceAnnual }}
-                </template>
-                <template v-else>
-                  {{ plan.price }}
-                </template>
-               </span>
-              <span class="text-xs font-bold ml-1 uppercase text-slate-500">{{ plan.currency }}</span>
-              <span class="text-xs text-slate-400">{{ plan.period }}</span>
+            <div class="mb-2 flex h-10 items-end gap-1">
+              <span class="text-4xl font-black tracking-tight text-[#0D1F1A]">
+                {{ isAnnual ? plan.priceAnnual : plan.price }}
+              </span>
+              <span class="ml-1 text-xs font-bold uppercase text-[#0D1F1A]/60">{{ plan.currency }}</span>
+              <span class="text-xs text-[#0D1F1A]/45">{{ plan.period }}</span>
             </div>
-            <p class="text-xs leading-relaxed min-h-[40px] text-slate-500">{{ plan.description }}</p>
+            <p class="min-h-[40px] text-xs leading-relaxed text-[#0D1F1A]/65">
+              {{ plan.description }}
+            </p>
           </div>
 
-          <div class="w-full h-px mb-6 bg-slate-100"></div>
+          <div class="mb-6 h-px w-full bg-[#0D1F1A]/15" />
 
-          <ul class="space-y-3 mb-8 flex-1">
-            <li v-for="(feat, fIdx) in plan.features" :key="fIdx" class="flex items-start gap-3 text-xs">
-              <div class="flex-shrink-0 mt-0.5" 
-                :class="[
-                  feat.included 
-                    ? (plan.popular ? 'text-teal-500' : (plan.highlight ? 'text-indigo-500' : 'text-teal-600')) 
-                    : 'text-slate-300'
-                ]"
-              >
-                 <Icon v-if="feat.included" name="lucide:check" class="w-4 h-4" />
-                 <Icon v-else name="lucide:x" class="w-4 h-4" />
-              </div>
-              <span :class="[
-                feat.included ? 'text-slate-600' : 'text-slate-400 line-through decoration-slate-200',
-                'leading-relaxed'
-              ]">
+          <ul class="mb-8 flex-1 space-y-3">
+            <li
+              v-for="(feat, fIdx) in plan.features"
+              :key="fIdx"
+              class="flex items-start gap-3 text-xs"
+            >
+              <Icon
+                v-if="feat.included"
+                name="lucide:check"
+                class="mt-0.5 h-4 w-4 shrink-0 text-[#1F9D8E]"
+              />
+              <Icon
+                v-else
+                name="lucide:x"
+                class="mt-0.5 h-4 w-4 shrink-0 text-[#0D1F1A]/30"
+              />
+              <span :class="feat.included ? 'text-[#0D1F1A]/75' : 'text-[#0D1F1A]/35 line-through'">
                 {{ feat.text }}
               </span>
             </li>
           </ul>
 
-          <button 
-            class="w-full py-3 rounded-xl text-sm font-bold transition-all shadow-sm active:scale-95"
-            :class="[
-              plan.highlight ? 'bg-indigo-600 text-white hover:bg-indigo-500 hover:shadow-indigo-500/25 shadow-indigo-200' : 
-              plan.popular ? 'bg-teal-600 text-white hover:bg-teal-500 hover:shadow-teal-500/25 shadow-teal-200' : 
-              'bg-slate-900 text-white hover:bg-slate-800 hover:shadow-lg'
-            ]"
+          <button
+            class="w-full rounded-xl border-2 border-[#0D1F1A] py-3 text-sm font-bold transition-transform active:scale-[0.98]"
+            :class="plan.popular || plan.highlight ? 'bg-[#0D1F1A] text-[#FFF8E7]' : 'bg-[#FFF8E7] text-[#0D1F1A]'"
           >
             {{ plan.cta }}
           </button>
-        </div>
+        </article>
       </div>
-    </div>
-    
+    </section>
   </div>
 </template>
 
 <style scoped>
-.animate-pulse-slow {
-  animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.pricing-page {
+  background: #FFF8E7;
+  color: #0D1F1A;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.15; }
+.pricing-page__blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.35;
 }
 
-.clip-path-hero {
-  clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+.pricing-page__blob--mint {
+  width: 340px;
+  height: 340px;
+  top: -120px;
+  left: -90px;
+  background: #1F9D8E;
 }
 
-/* Fallback for browsers without clip-path if needed, or remove clip-path if it breaks content flow at the bottom too much */
-.clip-path-hero {
-    clip-path: none; /* Resetting clip-path as it might cut off content on smaller screens improperly or need careful tweaking. Using simpler bottom border for now. */
-    border-bottom-left-radius: 2.5rem;
-    border-bottom-right-radius: 2.5rem;
+.pricing-page__blob--orange {
+  width: 340px;
+  height: 340px;
+  top: -80px;
+  right: -100px;
+  background: #FF7A45;
 }
 </style>

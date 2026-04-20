@@ -73,116 +73,161 @@ const filteredThemes = computed(() => {
 </script>
 
 <template>
-  <div class="bg-slate-50 min-h-screen font-sans">
-    <!-- Header -->
-    <div class="bg-slate-900 pt-32 pb-24 text-center px-4 relative overflow-hidden text-white">
-       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
-       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-teal-600/20 rounded-full blur-[120px]"></div>
-       
-       <div class="relative z-10 max-w-4xl mx-auto">
-         <h1 class="text-5xl md:text-6xl font-black mb-6 tracking-tight">
-           Des vitrines
-           <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">magnifiques</span>
-         </h1>
-         <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-           Trouvez le design parfait pour votre boutique. Tous nos thèmes sont optimisés pour mobile, ultra-rapides et entièrement personnalisables.
-         </p>
-       </div>
-    </div>
+  <div class="themes-page min-h-screen font-sans pt-24 md:pt-28 pb-20">
+    <section class="relative overflow-hidden px-4 pt-8 pb-14 text-center">
+      <div class="themes-page__blob themes-page__blob--mint" />
+      <div class="themes-page__blob themes-page__blob--orange" />
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-20">
-      
-      <!-- Category Filter -->
-      <div class="flex flex-wrap items-center justify-center gap-2 mb-16">
-        <button 
-          v-for="cat in categories" 
+      <div class="relative z-10 max-w-4xl mx-auto">
+        <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-6 text-[#0D1F1A]">
+          Des vitrines
+          <span class="themes-page__accent">magnifiques</span>
+        </h1>
+        <p class="text-base md:text-xl max-w-2xl mx-auto leading-relaxed text-[#0D1F1A]/65">
+          Trouvez le design parfait pour votre boutique. Tous nos thèmes sont optimisés pour mobile, ultra-rapides et entièrement personnalisables.
+        </p>
+      </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-14 flex flex-wrap items-center justify-center gap-2">
+        <button
+          v-for="cat in categories"
           :key="cat"
+          class="rounded-full border-2 border-[#0D1F1A] px-6 py-2.5 text-sm font-bold transition-all duration-300"
+          :class="activeCategory === cat ? 'bg-[#0D1F1A] text-[#FFF8E7]' : 'bg-[#FFFDF4] text-[#0D1F1A]'"
           @click="activeCategory = cat"
-          class="px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300"
-          :class="activeCategory === cat 
-            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 scale-105' 
-            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300'"
         >
           {{ cat }}
         </button>
       </div>
 
-      <!-- Themes Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 transition-all duration-500">
-        
-        <div 
-          v-for="theme in filteredThemes" 
-          :key="theme.id" 
-          class="group bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-xl shadow-slate-200/40 hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 flex flex-col"
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 transition-all duration-500">
+        <article
+          v-for="theme in filteredThemes"
+          :key="theme.id"
+          class="group flex flex-col overflow-hidden rounded-3xl border-2 border-[#0D1F1A] bg-[#FFFDF4] shadow-[6px_6px_0_#0D1F1A] transition-all duration-300 hover:-translate-y-1"
         >
-          <!-- Image Container -->
-          <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
-            <img :src="theme.image" :alt="theme.name" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
-            <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors duration-300"></div>
-            
-            <!-- Tags -->
+          <div class="relative aspect-[4/3] overflow-hidden bg-[#F5EDD3]">
+            <img
+              :src="theme.image"
+              :alt="theme.name"
+              class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            >
+
             <div class="absolute top-4 left-4 flex gap-2">
-              <span class="px-3 py-1 bg-white/90 backdrop-blur-sm shadow-sm rounded-full text-xs font-bold text-slate-900">
+              <span class="rounded-full border-2 border-[#0D1F1A] bg-[#FFF8E7] px-3 py-1 text-xs font-bold text-[#0D1F1A]">
                 {{ theme.category }}
               </span>
-              <span v-if="theme.popular" class="px-3 py-1 bg-teal-500/90 backdrop-blur-sm shadow-sm rounded-full text-xs font-bold text-white flex items-center gap-1">
-                <Icon name="lucide:flame" class="w-3 h-3" /> Populaire
+              <span v-if="theme.popular" class="inline-flex items-center gap-1 rounded-full border-2 border-[#0D1F1A] bg-[#FF7A45] px-3 py-1 text-xs font-bold text-white">
+                <Icon name="lucide:flame" class="h-3 w-3" />
+                Populaire
               </span>
-            </div>
-            
-            <!-- Hover Overlay Actions -->
-            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <button class="bg-white text-slate-900 font-bold px-6 py-3 rounded-xl shadow-xl hover:scale-105 transition-transform flex items-center gap-2">
-                <Icon name="lucide:eye" class="w-4 h-4" /> Aperçu
-              </button>
             </div>
           </div>
 
-          <!-- Content -->
-          <div class="p-6 flex-1 flex flex-col">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-xl font-bold text-slate-900">{{ theme.name }}</h3>
-              <span class="text-sm font-bold px-2 py-1 rounded" :class="theme.price === 'Gratuit' ? 'text-teal-600 bg-teal-50' : 'text-amber-600 bg-amber-50'">
+          <div class="flex flex-1 flex-col p-6">
+            <div class="mb-3 flex items-center justify-between">
+              <h3 class="text-xl font-extrabold tracking-tight text-[#0D1F1A]">
+                {{ theme.name }}
+              </h3>
+              <span
+                class="rounded-full border-2 border-[#0D1F1A] px-2.5 py-1 text-xs font-bold"
+                :class="theme.price === 'Gratuit' ? 'bg-[#1F9D8E] text-white' : 'bg-[#F4C04E] text-[#0D1F1A]'"
+              >
                 {{ theme.price }}
               </span>
             </div>
-            <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-1">
+            <p class="mb-6 flex-1 text-sm leading-relaxed text-[#0D1F1A]/65">
               {{ theme.description }}
             </p>
-            <div class="border-t border-slate-100 pt-6">
-              <NuxtLink to="/register" class="flex items-center justify-center gap-2 w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold rounded-xl transition-colors">
-                Utiliser ce thème <Icon name="lucide:arrow-right" class="w-4 h-4" />
+            <div class="border-t border-[#0D1F1A]/15 pt-5">
+              <NuxtLink to="/register" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#0D1F1A] bg-[#FFF8E7] py-3 font-bold text-[#0D1F1A] transition-colors hover:bg-[#F5EDD3]">
+                Utiliser ce thème
+                <Icon name="lucide:arrow-right" class="h-4 w-4" />
               </NuxtLink>
             </div>
           </div>
-        </div>
-
+        </article>
       </div>
 
-      <!-- Empty State -->
-      <div v-if="filteredThemes.length === 0" class="text-center py-20">
-        <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Icon name="lucide:search-X" class="w-8 h-8" />
+      <div v-if="filteredThemes.length === 0" class="py-20 text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#0D1F1A] bg-[#FFFDF4] text-[#0D1F1A]/45">
+          <Icon name="lucide:search-x" class="h-8 w-8" />
         </div>
-        <h3 class="text-xl font-bold text-slate-900 mb-2">Aucun thème trouvé</h3>
-        <p class="text-slate-500">Nous n'avons pas encore de thème dans cette catégorie.</p>
-        <button @click="activeCategory = 'Tous'" class="mt-6 text-teal-600 font-bold hover:underline">
+        <h3 class="mb-2 text-xl font-bold text-[#0D1F1A]">
+          Aucun thème trouvé
+        </h3>
+        <p class="text-[#0D1F1A]/65">
+          Nous n'avons pas encore de thème dans cette catégorie.
+        </p>
+        <button class="mt-6 font-bold text-[#FF7A45] hover:underline" @click="activeCategory = 'Tous'">
           Voir tous les thèmes
         </button>
       </div>
+    </section>
 
-    </div>
-
-    <!-- CTA -->
-    <section class="py-24 text-center border-t border-slate-200">
-       <div class="max-w-2xl mx-auto px-4">
-         <h2 class="text-3xl font-bold text-slate-900 mb-6">Prêt à créer votre boutique ?</h2>
-         <p class="text-slate-500 mb-8">Commencez avec l'un de nos superbes thèmes et personnalisez-le à votre image.</p>
-         <NuxtLink to="/register" class="inline-flex items-center gap-2 px-8 py-4 bg-teal-600 text-white font-bold rounded-xl shadow-xl shadow-teal-600/20 hover:bg-teal-500 transition-all hover:scale-105">
-           Commencer gratuitement
-         </NuxtLink>
-       </div>
+    <section class="px-4 pt-20 text-center">
+      <div class="mx-auto max-w-2xl rounded-3xl border-2 border-[#0D1F1A] bg-[#FFF1DC] px-8 py-12 text-[#0D1F1A] shadow-[8px_8px_0_#FF7A45]">
+        <h2 class="mb-5 text-3xl font-black tracking-tight">
+          Prêt à créer votre boutique ?
+        </h2>
+        <p class="mb-8 text-[#0D1F1A]/65">
+          Commencez avec l'un de nos superbes thèmes et personnalisez-le à votre image.
+        </p>
+        <NuxtLink to="/register" class="inline-flex items-center gap-2 rounded-full border-2 border-[#FF7A45] bg-[#FF7A45] px-8 py-3 font-bold text-white transition-transform hover:-translate-y-0.5 hover:border-[#ff8a5d] hover:bg-[#ff8a5d]">
+          Commencer gratuitement
+        </NuxtLink>
+      </div>
     </section>
   </div>
 </template>
+
+<style scoped>
+.themes-page {
+  background: #FFF8E7;
+  color: #0D1F1A;
+}
+
+.themes-page__accent {
+  color: #FF7A45;
+  position: relative;
+  display: inline-block;
+}
+
+.themes-page__accent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.2em;
+  width: 100%;
+  height: 0.2em;
+  background: rgba(244, 192, 78, 0.9);
+  border-radius: 999px;
+  z-index: -1;
+}
+
+.themes-page__blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.35;
+}
+
+.themes-page__blob--mint {
+  width: 320px;
+  height: 320px;
+  top: -100px;
+  left: -90px;
+  background: #1F9D8E;
+}
+
+.themes-page__blob--orange {
+  width: 320px;
+  height: 320px;
+  top: -70px;
+  right: -100px;
+  background: #FF7A45;
+}
+</style>

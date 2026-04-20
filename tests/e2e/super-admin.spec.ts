@@ -116,9 +116,9 @@ test.describe('Super Admin Dashboard', () => {
 
         // Fill in the form
         const newTenantSlug = `test-sa-new-${timestamp}`
-        await page.fill('input[placeholder="Acme Corp"]', 'New Test Tenant')
-        await page.fill('input[placeholder="acme"]', newTenantSlug)
-        await page.fill('input[placeholder="admin@acme.com"]', `owner-${timestamp}@test.com`)
+        await page.fill('input[placeholder="Your Store"]', 'New Test Tenant')
+        await page.fill('input[placeholder="your-store"]', newTenantSlug)
+        await page.fill('input[placeholder="admin@yourstore.com"]', `owner-${timestamp}@test.com`)
         await page.fill('input[type="password"]', 'Password123!')
 
         // Submit the form

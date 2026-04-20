@@ -306,6 +306,8 @@
   "auth": {
     "login": {
       "hero": {
+        "title": "Votre boutique, sous contrôle total.",
+        "tagline": "Gérez commandes, produits, livraison et analyses depuis un seul tableau de bord puissant.",
         "welcomeBack": "Bon retour",
         "builder": "Builder",
         "builderSuffix": ".",
@@ -314,7 +316,11 @@
           "title": "Suivi du chiffre d’affaires",
           "description": "Des insights en temps réel sur les performances de votre boutique."
         },
-        "copyright": "© {year} Swekly Inc."
+        "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "Ops en direct",
+          "focusArea": "Axe prioritaire"
+        }
       },
       "form": {
         "title": "Connectez-vous à votre compte",
@@ -351,22 +357,42 @@
           "name": "Yanis M.",
           "role": "Propriétaire, Dzair Fashion"
         },
-        "copyright": "© {year} Swekly Inc."
+        "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "Mode lancement",
+          "title": "Contrôle de lancement",
+          "ready": "Prêt",
+          "metrics": {
+            "goLive": "Mise en ligne",
+            "uptime": "Disponibilité",
+            "localCod": "COD local"
+          },
+          "pills": {
+            "orders": "Gestion des commandes",
+            "shipping": "Livraison intelligente",
+            "analytics": "Analytique avancée"
+          },
+          "tasks": {
+            "cod": "Checkout localisé et flux COD",
+            "performance": "Performance de boutique rapide dès le premier jour",
+            "analytics": "Analytique claire pour les décisions quotidiennes"
+          }
+        }
       },
       "form": {
         "title": "Créez votre compte",
         "subtitle": "Démarrez votre essai gratuit de 14 jours. Aucune carte de crédit requise.",
         "companyName": {
           "label": "Nom de l’entreprise",
-          "placeholder": "Ex. Acme Corp"
+          "placeholder": "Ex. Votre boutique"
         },
         "slug": {
           "label": "URL de la boutique",
-          "placeholder": "acme",
+          "placeholder": "votre-boutique",
           "preview": "Votre boutique sera à l’adresse : {slug}.swekly.com"
         },
         "email": {
-          "label": "E-mail professionnel",
+          "label": "E-mail",
           "placeholder": "name{'@'}company.com"
         },
         "password": {
@@ -412,7 +438,8 @@
       "recommended": "Recommandé"
     },
     "period": {
-      "perMonth": "/mois"
+      "perMonth": "/mois",
+      "perYear": "/an"
     },
     "features": {
       "ordersPerMonth": "{count} commandes/mois"
@@ -3292,17 +3319,17 @@
         "fields": {
           "name": {
             "label": "Nom du tenant",
-            "placeholder": "Acme Corp"
+            "placeholder": "Votre boutique"
           },
           "slug": {
             "label": "Slug (sous-domaine)",
-            "placeholder": "acme",
+            "placeholder": "votre-boutique",
             "slugFallback": "slug",
             "hint": "Accessible à l’adresse {slug}.localhost:3000"
           },
           "ownerEmail": {
             "label": "E-mail du propriétaire",
-            "placeholder": "admin{'@'}acme.com"
+            "placeholder": "admin{'@'}votreboutique.com"
           },
           "ownerPassword": {
             "label": "Mot de passe du propriétaire"

@@ -42,7 +42,7 @@ describe('admin auth middleware', () => {
         vi.clearAllMocks()
 
         toSaasHostMock.mockReturnValue('platform.localhost:3000')
-        useRequestOriginMock.mockReturnValue({ protocol: 'https', host: 'acme.localhost:3000' })
+        useRequestOriginMock.mockReturnValue({ protocol: 'https', host: 'your-store.localhost:3000' })
         usePlatformBaseDomainMock.mockReturnValue('localhost')
     })
 
@@ -55,13 +55,13 @@ describe('admin auth middleware', () => {
             ensureSessionActive: vi.fn(() => false),
             user: null
         })
-        useStateMock.mockReturnValue({ value: { slug: 'acme' } })
+        useStateMock.mockReturnValue({ value: { slug: 'your-store' } })
 
         const middleware = (await import('~/middleware/auth')).default
         await middleware({ path: '/admin/orders', fullPath: '/admin/orders' } as any, {} as any)
 
         expect(navigateToMock).toHaveBeenCalledWith(
-            'https://platform.localhost:3000/login?tenant=acme&next=%2Fadmin%2Forders',
+            'https://platform.localhost:3000/login?tenant=your-store&next=%2Fadmin%2Forders',
             { external: true }
         )
     })
@@ -84,7 +84,7 @@ describe('admin auth middleware', () => {
             ensureSessionActive: vi.fn(() => true),
             user: { isSuperAdmin: true }
         })
-        useStateMock.mockReturnValue({ value: { slug: 'acme' } })
+        useStateMock.mockReturnValue({ value: { slug: 'your-store' } })
 
         const middleware = (await import('~/middleware/auth')).default
         await middleware({ path: '/admin', fullPath: '/admin' } as any, {} as any)
@@ -98,7 +98,7 @@ describe('admin auth middleware', () => {
             ensureSessionActive,
             user: null
         })
-        useStateMock.mockReturnValue({ value: { slug: 'acme' } })
+        useStateMock.mockReturnValue({ value: { slug: 'your-store' } })
 
         const middleware = (await import('~/middleware/auth')).default
         await middleware({ path: '/products', fullPath: '/products' } as any, {} as any)
