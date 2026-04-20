@@ -87,7 +87,7 @@ export class YalidineProvider implements DeliveryProvider {
             address_second: input.addressLine2,
             notes: input.notes,
             product_list: input.metadata?.items ?? [],
-            price: input.price,
+            price: input.codAmount ?? input.price,
             service_level: input.serviceLevel
         }
         const res = await this.http.post('/parcels', payload)

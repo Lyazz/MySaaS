@@ -294,6 +294,8 @@ watch(
             quickForm.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
             syncPickupPointCommune()
           }
+        } else {
+          quickForm.pickupPoint = ''
         }
       }
     } catch (e: any) {

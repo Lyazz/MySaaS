@@ -104,6 +104,7 @@ export class DeliveryController {
             addressLine2?: string
             notes?: string
             serviceLevel?: string
+            codAmount?: number
             price?: number
             currency?: string
             metadata?: Record<string, any>

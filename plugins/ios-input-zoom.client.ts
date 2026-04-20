@@ -19,7 +19,9 @@ const withMaximumScale = (viewportContent: string, maxScale = '1') => {
     .map((part) => part.trim())
     .filter(Boolean)
     .filter((part) => !/^maximum-scale\s*=/.test(part))
+    .filter((part) => !/^user-scalable\s*=/.test(part))
   parts.push(`maximum-scale=${maxScale}`)
+  parts.push('user-scalable=no')
   return parts.join(', ')
 }
 
@@ -48,6 +50,11 @@ export default defineNuxtPlugin(() => {
     applyFocusViewport()
   }
 
+  const onPointerDown = (event: PointerEvent | TouchEvent | MouseEvent) => {
+    if (!isTextEntryField(event.target)) return
+    applyFocusViewport()
+  }
+
   const onFocusOut = () => {
     window.setTimeout(() => {
       if (isTextEntryField(document.activeElement)) return
@@ -55,6 +62,9 @@ export default defineNuxtPlugin(() => {
     }, 0)
   }
 
+  document.addEventListener('pointerdown', onPointerDown, true)
+  document.addEventListener('touchstart', onPointerDown, true)
+  document.addEventListener('mousedown', onPointerDown, true)
   document.addEventListener('focusin', onFocusIn, true)
   document.addEventListener('focusout', onFocusOut, true)
 })

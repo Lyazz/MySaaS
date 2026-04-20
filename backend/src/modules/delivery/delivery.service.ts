@@ -38,6 +38,21 @@ const normalizeOrderDeliveryMode = (value: unknown): 'home' | 'office' | undefin
     return undefined
 }
 
+const computeOrderTotalWithShipping = (order: { totalAmount?: unknown; totalWithShippingAmount?: unknown; shippingAmount?: unknown }) => {
+    const storedTotalWithShippingRaw = order.totalWithShippingAmount
+    const storedTotalWithShipping =
+        storedTotalWithShippingRaw == null ? NaN : Number(storedTotalWithShippingRaw)
+    if (Number.isFinite(storedTotalWithShipping)) return storedTotalWithShipping
+
+    const orderTotalRaw = order.totalAmount
+    const orderTotal = Number.isFinite(Number(orderTotalRaw)) ? Number(orderTotalRaw) : 0
+
+    const shippingRaw = order.shippingAmount
+    const shippingAmount = Number.isFinite(Number(shippingRaw)) ? Number(shippingRaw) : 0
+
+    return centsToMoney(moneyToCents(orderTotal) + moneyToCents(shippingAmount))
+}
+
 export class DeliveryConfigurationError extends Error {
     statusCode: number
     statusMessage: string
@@ -486,7 +501,12 @@ export class DeliveryService {
         if (!order) throw new Error('Order not found for tenant')
 
         const inferredDeliveryMode = input.deliveryMode ?? normalizeOrderDeliveryMode((order as any).deliveryMode)
-        const baseInput: CreateShipmentInput = { ...input, deliveryMode: inferredDeliveryMode }
+        const explicitCodAmount =
+            Number.isFinite(Number((input as any).codAmount)) && Number((input as any).codAmount) >= 0
+                ? Number((input as any).codAmount)
+                : null
+        const codAmount = explicitCodAmount ?? computeOrderTotalWithShipping(order as any)
+        const baseInput: CreateShipmentInput = { ...input, deliveryMode: inferredDeliveryMode, codAmount }
 
         const orderPickupPoint =
             typeof (order as any).shippingPickupPoint === 'number' && Number.isFinite((order as any).shippingPickupPoint)

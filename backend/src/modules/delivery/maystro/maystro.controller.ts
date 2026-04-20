@@ -62,10 +62,48 @@ export class MaystroController {
 
         try {
             const creds = await getMaystroCredentials(tenantId)
-            const points = nearby && wilaya.trim()
-                ? await this.pickupPoints.listActivePickupPointsNearby({ apiToken: creds.apiToken, commune, wilaya, deliveryType })
-                : await this.pickupPoints.listActivePickupPoints({ apiToken: creds.apiToken, commune, deliveryType })
-            return res.json(points)
+
+            if (deliveryType) {
+                const points = nearby && wilaya.trim()
+                    ? await this.pickupPoints.listActivePickupPointsNearby({
+                          apiToken: creds.apiToken,
+                          commune,
+                          wilaya,
+                          deliveryType
+                      })
+                    : await this.pickupPoints.listActivePickupPoints({ apiToken: creds.apiToken, commune, deliveryType })
+                return res.json(points)
+            }
+
+            const directPoints = await this.pickupPoints.listActivePickupPoints({
+                apiToken: creds.apiToken,
+                commune
+            })
+            const directPickupPoints = directPoints.filter((point) => point.delivery_type === 3)
+            if (directPickupPoints.length > 0) return res.json(directPickupPoints)
+
+            const directStopDesks = directPoints.filter((point) => point.delivery_type === 2)
+            if (directStopDesks.length > 0) return res.json(directStopDesks)
+
+            if (nearby && wilaya.trim()) {
+                const nearbyStopDesks = await this.pickupPoints.listActivePickupPointsNearby({
+                    apiToken: creds.apiToken,
+                    commune,
+                    wilaya,
+                    deliveryType: 2
+                })
+                if (nearbyStopDesks.length > 0) return res.json(nearbyStopDesks)
+
+                const nearbyPickupPoints = await this.pickupPoints.listActivePickupPointsNearby({
+                    apiToken: creds.apiToken,
+                    commune,
+                    wilaya,
+                    deliveryType: 3
+                })
+                if (nearbyPickupPoints.length > 0) return res.json(nearbyPickupPoints)
+            }
+
+            return res.json([])
         } catch (error: any) {
             if (error instanceof MaystroIntegrationError) {
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })

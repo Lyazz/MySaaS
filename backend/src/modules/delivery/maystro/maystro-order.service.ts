@@ -62,6 +62,24 @@ export class MaystroOrderService {
         return trimmed
     }
 
+    private computeCarrierTotalPrice(order: {
+        totalAmount?: unknown
+        totalWithShippingAmount?: unknown
+        shippingAmount?: unknown
+    }) {
+        const totalWithShippingRaw = order.totalWithShippingAmount
+        const totalWithShipping = totalWithShippingRaw == null ? NaN : Number(totalWithShippingRaw)
+        if (Number.isFinite(totalWithShipping)) return Math.round(totalWithShipping)
+
+        const itemsTotalRaw = order.totalAmount
+        const itemsTotal = Number.isFinite(Number(itemsTotalRaw)) ? Number(itemsTotalRaw) : 0
+
+        const shippingRaw = order.shippingAmount
+        const shippingAmount = Number.isFinite(Number(shippingRaw)) ? Number(shippingRaw) : 0
+
+        return Math.round(itemsTotal + shippingAmount)
+    }
+
     private async buildPayload(input: {
         tenantId: string
         apiToken: string
@@ -149,7 +167,7 @@ export class MaystroOrderService {
             note_to_driver: input.noteToDriver,
             express: input.express ?? false,
             external_id: externalId,
-            total_price: Math.round(order.totalAmount),
+            total_price: this.computeCarrierTotalPrice(order as any),
             delivery_type: input.deliveryType,
             pickup_point: input.deliveryType === 3 ? input.pickupPoint : undefined,
             commune: normalizedLocation.commune,

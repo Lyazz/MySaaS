@@ -4,6 +4,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
 import { MaystroProvider } from '../../backend/src/modules/delivery/providers/maystro.provider'
+import { YalidineProvider } from '../../backend/src/modules/delivery/providers/yalidine.provider'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -209,6 +210,47 @@ describe('Delivery API', () => {
 
         expect(second.status).toBe(201)
         expect(second.body.id).toBe(shipmentSelfId)
+    })
+
+    it('pushes total + delivery fee as codAmount to external delivery providers', async () => {
+        await prisma.tenantDeliveryAccount.upsert({
+            where: { tenantId_provider: { tenantId: tenantA.id, provider: 'YALIDINE' } },
+            create: {
+                tenantId: tenantA.id,
+                provider: 'YALIDINE',
+                isActive: true,
+                config: { apiId: 'api-id', apiToken: 'api-token' }
+            },
+            update: {
+                isActive: true,
+                config: { apiId: 'api-id', apiToken: 'api-token' }
+            }
+        })
+
+        const providerSpy = vi.spyOn(YalidineProvider.prototype, 'createShipment').mockResolvedValue({
+            providerShipmentId: 'yal-1',
+            status: 'REQUESTED',
+            price: 450,
+            currency: 'DZD'
+        })
+
+        const res = await request(app)
+            .post('/api/shipments')
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .send({
+                provider: 'YALIDINE',
+                orderId: orderA.id,
+                contactName: 'Alice',
+                contactPhone: '0550123456',
+                wilayaCode: '16',
+                communeCode: '1605',
+                addressLine1: '123 Rue Test'
+            })
+
+        expect(res.status).toBe(201)
+        expect(providerSpy).toHaveBeenCalledTimes(1)
+        expect(providerSpy.mock.calls[0]?.[0]?.codAmount).toBe(720)
     })
 
     it('enforces tenant isolation for shipment fetch', async () => {

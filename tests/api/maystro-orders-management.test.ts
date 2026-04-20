@@ -140,6 +140,7 @@ describe('Maystro Orders Management integration', () => {
         const orderCall = calls.find((c) => c.method === 'POST' && c.path === '/orders')
         expect(orderCall).toBeTruthy()
         expect(orderCall.data.external_id).toBe(order.id)
+        expect(orderCall.data.total_price).toBe(720)
         expect(orderCall.data.details?.[0]?.product).toBe(product.id)
         expect(orderCall.data.details?.[0]?.quantity).toBe(2)
     })

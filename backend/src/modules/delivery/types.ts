@@ -30,6 +30,7 @@ export type CreateShipmentInput = {
     provider: ShipmentProvider
     orderId: string
     serviceLevel?: string
+    codAmount?: number
     price?: number
     currency?: string
     contactName: string
