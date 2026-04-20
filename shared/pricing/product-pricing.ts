@@ -3,6 +3,12 @@ export type ProductLikeWithPromotion = {
     promotionalPrice?: unknown
 }
 
+export type ProductLikeWithPromotionSchedule = ProductLikeWithPromotion & {
+    isPromotionActive?: unknown
+    promotionStartDate?: unknown
+    promotionEndDate?: unknown
+}
+
 export type ProductPricing = {
     originalPrice: number
     effectivePrice: number
@@ -26,6 +32,29 @@ export const getPromotionalPrice = (product: ProductLikeWithPromotion | null | u
     return promotionalPrice
 }
 
+const parseDate = (value: unknown): Date | null => {
+    if (!value) return null
+    const parsed = value instanceof Date ? value : new Date(String(value))
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+export const isPromotionActiveNow = (
+    product: ProductLikeWithPromotionSchedule | null | undefined,
+    nowInput: Date = new Date()
+): boolean => {
+    if (!product || product.isPromotionActive !== true) return false
+    if (getPromotionalPrice(product) === null) return false
+
+    const now = nowInput.getTime()
+    const startDate = parseDate(product.promotionStartDate)
+    if (startDate && startDate.getTime() > now) return false
+
+    const endDate = parseDate(product.promotionEndDate)
+    if (endDate && endDate.getTime() < now) return false
+
+    return true
+}
+
 export const buildProductPricing = (
     product: ProductLikeWithPromotion | null | undefined,
     basePriceInput?: unknown
@@ -45,4 +74,16 @@ export const buildProductPricing = (
         promotionApplied,
         promotionDiscountPercent
     }
+}
+
+export const buildActiveProductPricing = (
+    product: ProductLikeWithPromotionSchedule | null | undefined,
+    basePriceInput?: unknown,
+    nowInput: Date = new Date()
+): ProductPricing => {
+    if (!product) return buildProductPricing(product, basePriceInput)
+    if (!isPromotionActiveNow(product, nowInput)) {
+        return buildProductPricing({ ...product, promotionalPrice: null }, basePriceInput)
+    }
+    return buildProductPricing(product, basePriceInput)
 }

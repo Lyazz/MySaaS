@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
+import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
 const cartStore = useCartStore()
 const favorites = useFavorites()
@@ -32,7 +33,7 @@ const socialContactInfosWithHref = computed(() =>
 const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
 const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
 const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
-const { currencyCode } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -42,7 +43,7 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 const mobileMenuOpen = ref(false)
 
 const searchQuery = ref('')
-const searchResults = ref([])
+const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
 const searchSuggestionLimit = 5
@@ -50,6 +51,15 @@ const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
 const hasMoreSearchResults = computed(() => searchResults.value.length > visibleSearchResultCount.value)
 const showMoreSearchResults = () => { visibleSearchResultCount.value += searchSuggestionLimit }
+const applySearchResultPricing = (products: any[]) => (Array.isArray(products) ? products : []).map((product: any) => {
+    const pricing = buildActiveProductPricing(product)
+    return {
+        ...product,
+        effectivePrice: pricing.effectivePrice,
+        promotionDiscountPercent: pricing.promotionDiscountPercent
+    }
+})
+
 let searchTimeout: any
 
 watch(searchQuery, (newVal) => {
@@ -62,7 +72,7 @@ watch(searchQuery, (newVal) => {
             try {
                 const url = useTenantApiUrl('/api/products')
                 const data = await $fetch(url, { headers: useTenantApiHeaders(), query: { q: newVal } })
-                searchResults.value = data || []
+                searchResults.value = applySearchResultPricing(data || [])
             } catch (e) { console.error('Search error:', e) }
             finally { searchLoading.value = false }
         }, 500)
@@ -144,7 +154,7 @@ const props = defineProps<{
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-xl border-2 border-violet-100 shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-violet-600 font-black mt-0.5">{{ product.price }} {{ currencyCode }}</div>
+                        <div class="text-xs text-violet-600 font-black mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                     <button
@@ -280,7 +290,7 @@ const props = defineProps<{
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-xl" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-violet-600 font-black">{{ product.price }} {{ currencyCode }}</div>
+                        <div class="text-xs text-violet-600 font-black">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                   </div>

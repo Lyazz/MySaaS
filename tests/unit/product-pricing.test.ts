@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { buildProductPricing, getPromotionalPrice, toFiniteNumber } from '../../shared/pricing/product-pricing'
+import {
+    buildActiveProductPricing,
+    buildProductPricing,
+    getPromotionalPrice,
+    isPromotionActiveNow,
+    toFiniteNumber
+} from '../../shared/pricing/product-pricing'
 
 describe('product pricing helper', () => {
     it('prioritizes promotional price whenever it is set', () => {
@@ -39,5 +45,41 @@ describe('product pricing helper', () => {
         expect(toFiniteNumber('bad', 5)).toBe(5)
         expect(getPromotionalPrice({ promotionalPrice: '99.5' })).toBe(99.5)
         expect(getPromotionalPrice({ promotionalPrice: 'bad' })).toBeNull()
+    })
+
+    it('only applies promotion when active and in date window', () => {
+        const now = new Date('2026-04-20T12:00:00.000Z')
+        const active = {
+            price: 1000,
+            promotionalPrice: 800,
+            isPromotionActive: true,
+            promotionStartDate: '2026-04-19T00:00:00.000Z',
+            promotionEndDate: '2026-04-21T00:00:00.000Z'
+        }
+        const inactiveFlag = { ...active, isPromotionActive: false }
+        const futurePromo = { ...active, promotionStartDate: '2026-04-21T00:00:00.000Z' }
+        const expiredPromo = { ...active, promotionEndDate: '2026-04-19T00:00:00.000Z' }
+
+        expect(isPromotionActiveNow(active, now)).toBe(true)
+        expect(isPromotionActiveNow(inactiveFlag, now)).toBe(false)
+        expect(isPromotionActiveNow(futurePromo, now)).toBe(false)
+        expect(isPromotionActiveNow(expiredPromo, now)).toBe(false)
+    })
+
+    it('buildActiveProductPricing ignores promo price when promotion is inactive', () => {
+        const now = new Date('2026-04-20T12:00:00.000Z')
+        const pricing = buildActiveProductPricing(
+            {
+                price: 1000,
+                promotionalPrice: 700,
+                isPromotionActive: false
+            },
+            undefined,
+            now
+        )
+
+        expect(pricing.effectivePrice).toBe(1000)
+        expect(pricing.promotionApplied).toBe(false)
+        expect(pricing.promotionDiscountPercent).toBeNull()
     })
 })

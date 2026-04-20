@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
+import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
 const cartStore = useCartStore()
 const favorites = useFavorites()
@@ -30,7 +31,7 @@ const socialContactInfosWithHref = computed(() =>
 const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
 const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
 const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
-const { currencyCode } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -50,6 +51,14 @@ const hasMoreSearchResults = computed(() => searchResults.value.length > visible
 const showMoreSearchResults = () => {
     visibleSearchResultCount.value += searchSuggestionLimit
 }
+const applySearchResultPricing = (products: any[]) => (Array.isArray(products) ? products : []).map((product: any) => {
+    const pricing = buildActiveProductPricing(product)
+    return {
+        ...product,
+        effectivePrice: pricing.effectivePrice,
+        promotionDiscountPercent: pricing.promotionDiscountPercent
+    }
+})
 const searchOpen = ref(false)
 
 const props = defineProps<{
@@ -79,7 +88,7 @@ watch(searchQuery, async (q) => {
     try {
         const url = useTenantApiUrl(`/api/products/search?q=${encodeURIComponent(q)}&limit=24`)
         const data = await $fetch<any[]>(url, { headers: useTenantApiHeaders() || {} })
-        searchResults.value = Array.isArray(data) ? data : []
+        searchResults.value = applySearchResultPricing(Array.isArray(data) ? data : [])
     } catch {
         searchResults.value = []
     }
@@ -216,7 +225,7 @@ watch(searchQuery, async (q) => {
                 </div>
                 <div class="shell-search-results__info">
                   <span class="shell-search-results__name">{{ product.title }}</span>
-                  <span class="shell-search-results__price">{{ product.price }} {{ currencyCode }}</span>
+                  <span class="shell-search-results__price">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></span>
                 </div>
               </NuxtLink>
               <button
