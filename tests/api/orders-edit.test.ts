@@ -180,6 +180,29 @@ describe('Orders edit (unconfirmed only)', () => {
         expect(itemsAfter[0].quantity).toBe(3)
     })
 
+    it('updates wilaya and commune for a PENDING order', async () => {
+        const res = await request(app)
+            .put(`/api/admin/orders/${pendingOrderId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .send({
+                shippingWilayaCode: '16',
+                shippingCommuneCode: '1605'
+            })
+
+        expect(res.status).toBe(200)
+        expect(res.body.id).toBe(pendingOrderId)
+        expect(res.body.shippingWilayaCode).toBe('16')
+        expect(res.body.shippingCommuneCode).toBe('1605')
+
+        const orderAfter = await prisma.order.findFirst({
+            where: { tenantId: tenantAId, id: pendingOrderId },
+            select: { shippingWilayaCode: true, shippingCommuneCode: true }
+        })
+        expect(orderAfter?.shippingWilayaCode).toBe('16')
+        expect(orderAfter?.shippingCommuneCode).toBe('1605')
+    })
+
     it('uses promotional price when editing unconfirmed order items', async () => {
         const res = await request(app)
             .put(`/api/admin/orders/${pendingOrderId}`)
@@ -225,6 +248,19 @@ describe('Orders edit (unconfirmed only)', () => {
                 customerName: 'Nope',
                 customerPhone: '0550123456',
                 items: [{ productId: product2Id, variantId: null, quantity: 1 }]
+            })
+
+        expect(res.status).toBe(409)
+    })
+
+    it('rejects wilaya/commune edit for non-PENDING orders', async () => {
+        const res = await request(app)
+            .put(`/api/admin/orders/${confirmedOrderId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .send({
+                shippingWilayaCode: '31',
+                shippingCommuneCode: '3101'
             })
 
         expect(res.status).toBe(409)

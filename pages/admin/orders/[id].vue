@@ -826,6 +826,67 @@
                   type="text"
                 />
               </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="ui-label mb-1">
+                    {{ t('admin.pages.orders.create.wilaya', 'Wilaya') }}
+                  </label>
+                  <BaseSelect
+                    v-model="editShippingWilayaCode"
+                    @update:model-value="onEditWilayaChange"
+                  >
+                    <option value="">
+                      {{ t('admin.common.noneSelected', 'None') }}
+                    </option>
+                    <option
+                      v-for="w in DZ_WILAYAS"
+                      :key="w.code"
+                      :value="w.code"
+                    >
+                      {{ w.name }}
+                    </option>
+                  </BaseSelect>
+                </div>
+
+                <div>
+                  <label class="ui-label mb-1">
+                    {{ t('admin.pages.orders.create.commune', 'Commune') }}
+                  </label>
+                  <BaseSelect
+                    v-if="isMaystroShipping"
+                    v-model="editShippingCommuneCode"
+                    :disabled="!editShippingWilayaCode || editMaystroCommunesLoading"
+                  >
+                    <option value="">
+                      {{
+                        !editShippingWilayaCode
+                          ? t('admin.pages.orders.create.wilaya', 'Wilaya')
+                          : editMaystroCommunesLoading
+                            ? t('admin.common.loading', 'Loading...')
+                            : t('admin.common.noneSelected', 'None')
+                      }}
+                    </option>
+                    <option
+                      v-for="c in editMaystroCommunes"
+                      :key="String(c.id)"
+                      :value="String(c.id)"
+                    >
+                      {{ c.id }} - {{ c.name }}
+                    </option>
+                  </BaseSelect>
+                  <BaseInput
+                    v-else
+                    v-model="editShippingCommuneCode"
+                    type="text"
+                  />
+                  <p
+                    v-if="isMaystroShipping && editMaystroCommunesError"
+                    class="mt-1 text-xs text-amber-700"
+                  >
+                    {{ editMaystroCommunesError }}
+                  </p>
+                </div>
+              </div>
 
               <!-- Save/cancel buttons shown only in customer-only edit mode -->
               <template v-if="editingCustomer">
@@ -1179,6 +1240,12 @@ const cartItems = ref<CartItem[]>([])
 const editCustomerName = ref('')
 const editCustomerPhone = ref('')
 const editCustomerAddress = ref('')
+const editShippingWilayaCode = ref('')
+const editShippingCommuneCode = ref('')
+const editMaystroCommunes = ref<Array<{ id?: number | string; name?: string }>>([])
+const editMaystroCommunesLoading = ref(false)
+const editMaystroCommunesError = ref('')
+let editMaystroCommunesResolveId = 0
 
 const variantModalOpen = ref(false)
 const loadingVariants = ref(false)
@@ -1243,6 +1310,8 @@ function orderStatusLabel(code: string) {
     return o.shippingProvider === 'MAYSTRO' && o.status === 'CONFIRMED' && (!o.shipments || o.shipments.length === 0)
   })
 
+  const isMaystroShipping = computed(() => String(order.value?.shippingProvider || '').toUpperCase() === 'MAYSTRO')
+
   const wilayaNameByCode = new Map(DZ_WILAYAS.map((w) => [w.code, w.name]))
   const communeNameCache = useState<Record<string, string>>('admin-order-commune-names', () => ({}))
   const shippingCommuneLabel = ref('')
@@ -1297,9 +1366,9 @@ function orderStatusLabel(code: string) {
       }
 
       try {
-        const communes = await $fetch<Array<{ id?: number | string; name?: string }>>('/api/delivery/maystro/communes', {
+        const communes = await $fetch('/api/delivery/maystro/communes', {
           query: { wilaya: normalizedWilayaCode }
-        })
+        }) as Array<{ id?: number | string; name?: string }>
 
         if (currentResolveId !== shippingLocationResolveId) return
 
@@ -1319,6 +1388,67 @@ function orderStatusLabel(code: string) {
     },
     { immediate: true }
   )
+
+  const normalizeOptionalText = (value: unknown): string | null => {
+    const raw = String(value ?? '').trim()
+    return raw.length > 0 ? raw : null
+  }
+
+  async function loadEditMaystroCommunes(wilayaCode: string) {
+    const normalized = normalizeWilayaCode(wilayaCode)
+    const requestId = ++editMaystroCommunesResolveId
+    editMaystroCommunesError.value = ''
+
+    if (!isMaystroShipping.value || !normalized) {
+      editMaystroCommunesLoading.value = false
+      editMaystroCommunes.value = []
+      return
+    }
+
+    editMaystroCommunesLoading.value = true
+    try {
+      const communes = await $fetch('/api/delivery/maystro/communes', {
+        query: { wilaya: normalized }
+      }) as Array<{ id?: number | string; name?: string }>
+      if (requestId !== editMaystroCommunesResolveId) return
+      editMaystroCommunes.value = Array.isArray(communes) ? communes : []
+    } catch (error: any) {
+      if (requestId !== editMaystroCommunesResolveId) return
+      editMaystroCommunes.value = []
+      editMaystroCommunesError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    } finally {
+      if (requestId === editMaystroCommunesResolveId) {
+        editMaystroCommunesLoading.value = false
+      }
+    }
+  }
+
+  function setEditLocationFieldsFromOrder() {
+    editShippingWilayaCode.value = normalizeWilayaCode(order.value?.shippingWilayaCode)
+    editShippingCommuneCode.value = String(order.value?.shippingCommuneCode || '').trim()
+    editMaystroCommunesError.value = ''
+    editMaystroCommunes.value = []
+    if (isMaystroShipping.value && editShippingWilayaCode.value) {
+      void loadEditMaystroCommunes(editShippingWilayaCode.value)
+    }
+  }
+
+  function onEditWilayaChange(nextValue: unknown) {
+    const normalized = normalizeWilayaCode(nextValue)
+    if (normalized === editShippingWilayaCode.value) return
+    editShippingWilayaCode.value = normalized
+    if (!isMaystroShipping.value) return
+    editShippingCommuneCode.value = ''
+    void loadEditMaystroCommunes(normalized)
+  }
+
+  function buildEditLocationPayload() {
+    const normalizedWilaya = normalizeWilayaCode(editShippingWilayaCode.value)
+    return {
+      shippingWilayaCode: normalizeOptionalText(normalizedWilaya),
+      shippingCommuneCode: normalizeOptionalText(editShippingCommuneCode.value)
+    }
+  }
 
   function deliveryModeLabel(mode: any) {
     const raw = typeof mode === 'string' ? mode.trim().toLowerCase() : ''
@@ -1482,6 +1612,7 @@ async function startEdit() {
   editCustomerName.value = order.value.customerName || ''
   editCustomerPhone.value = order.value.customerPhone || ''
   editCustomerAddress.value = order.value.customerAddress || ''
+  setEditLocationFieldsFromOrder()
 
   cartItems.value = (order.value.items || []).map((i) => ({
     productId: i.productId,
@@ -1503,6 +1634,8 @@ function cancelEdit() {
   variantModalOpen.value = false
   editingCustomer.value = false
   customerSaveError.value = ''
+  editMaystroCommunesLoading.value = false
+  editMaystroCommunesError.value = ''
 }
 
 async function addProductToCart(product: any) {
@@ -1601,6 +1734,7 @@ async function saveEdit() {
       customerPhone: editCustomerPhone.value,
       customerAddress: editCustomerAddress.value,
       shippingAddressLine1: editCustomerAddress.value,
+      ...buildEditLocationPayload(),
       items: cartItems.value.map((i) => ({
         productId: i.productId,
         variantId: i.variantId || null,
@@ -1630,6 +1764,7 @@ function startEditCustomer() {
   editCustomerName.value = order.value.customerName || ''
   editCustomerPhone.value = order.value.customerPhone || ''
   editCustomerAddress.value = order.value.customerAddress || ''
+  setEditLocationFieldsFromOrder()
   customerSaveError.value = ''
   editingCustomer.value = true
 }
@@ -1637,6 +1772,8 @@ function startEditCustomer() {
 function cancelEditCustomer() {
   editingCustomer.value = false
   customerSaveError.value = ''
+  editMaystroCommunesLoading.value = false
+  editMaystroCommunesError.value = ''
 }
 
 async function saveCustomerInfo() {
@@ -1651,7 +1788,8 @@ async function saveCustomerInfo() {
         customerName: editCustomerName.value,
         customerPhone: editCustomerPhone.value,
         customerAddress: editCustomerAddress.value,
-        shippingAddressLine1: editCustomerAddress.value
+        shippingAddressLine1: editCustomerAddress.value,
+        ...buildEditLocationPayload()
       }
     }) as any
     order.value = updated
