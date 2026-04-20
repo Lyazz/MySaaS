@@ -300,7 +300,8 @@ import { buildProductPricing } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   layout: 'admin',
-  title: 'Create Landing Page'
+  title: 'Create Landing Page',
+  middleware: 'auth'
 })
 
 const { format: formatCurrency } = useCurrency()

@@ -32,9 +32,11 @@ export const useAuthStore = defineStore('auth', () => {
     })
     const staffRole = ref<StaffRoleInfo | null>(null)
     const staffPermissions = ref<string[] | null>(null)
+    const sessionNowMs = ref(Date.now())
     let expiryTimer: ReturnType<typeof setTimeout> | null = null
+    let hasBoundSessionEvents = false
 
-    const isAuthenticated = computed(() => !!token.value && !isJwtExpired(token.value))
+    const isAuthenticated = computed(() => !!token.value && !isJwtExpired(token.value, sessionNowMs.value))
 
     const clearAuthState = () => {
         if (expiryTimer) {
@@ -58,6 +60,17 @@ export const useAuthStore = defineStore('auth', () => {
         return path.startsWith('/admin') || path.startsWith('/super-admin')
     }
 
+    const updateSessionNow = () => {
+        sessionNowMs.value = Date.now()
+    }
+
+    const expireSession = (opts?: { redirect?: boolean }) => {
+        clearAuthState()
+        if (opts?.redirect && shouldRedirectToLogin()) {
+            navigateTo(resolveLoginPath())
+        }
+    }
+
     const scheduleSessionExpiry = () => {
         if (!process.client) return
 
@@ -70,24 +83,43 @@ export const useAuthStore = defineStore('auth', () => {
         if (!currentToken) return
 
         const expiryMs = getJwtExpiryEpochMs(currentToken)
-        if (!expiryMs) return
+        if (!expiryMs) {
+            expireSession({ redirect: true })
+            return
+        }
 
         const timeoutMs = expiryMs - Date.now()
         if (timeoutMs <= 0) {
-            clearAuthState()
-            if (shouldRedirectToLogin()) {
-                navigateTo(resolveLoginPath())
-            }
+            expireSession({ redirect: true })
             return
         }
 
         expiryTimer = setTimeout(() => {
-            if (!token.value || !isJwtExpired(token.value, Date.now(), 0)) return
-            clearAuthState()
-            if (shouldRedirectToLogin()) {
-                navigateTo(resolveLoginPath())
-            }
+            ensureSessionActive({ redirectIfExpired: true })
         }, timeoutMs)
+    }
+
+    const validateSessionOnClient = () => {
+        if (!process.client) return
+        ensureSessionActive({ redirectIfExpired: true })
+    }
+
+    const startSessionValidation = () => {
+        if (!process.client || hasBoundSessionEvents) return
+        hasBoundSessionEvents = true
+
+        const onVisibilityChange = () => {
+            if (document.visibilityState !== 'visible') return
+            validateSessionOnClient()
+        }
+        const onFocus = () => {
+            validateSessionOnClient()
+        }
+
+        document.addEventListener('visibilitychange', onVisibilityChange)
+        window.addEventListener('focus', onFocus)
+
+        validateSessionOnClient()
     }
 
     async function login(email: string, password: string): Promise<boolean> {
@@ -108,24 +140,46 @@ export const useAuthStore = defineStore('auth', () => {
                 return true
             }
             return false
-        } catch (e: any) {
+        } catch {
             console.error('[Auth Store] Login failed')
             return false
         }
     }
 
-    function logout(opts?: { redirect?: boolean }) {
+    function logout(opts?: { redirect?: boolean; revoke?: boolean }) {
+        const currentToken = token.value
+        if (opts?.revoke !== false && process.client && currentToken) {
+            const url = useTenantApiUrl('/api/logout')
+            void $fetch(url, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${currentToken}`,
+                    ...(useTenantApiHeaders() || {})
+                }
+            }).catch(() => {})
+        }
+
         clearAuthState()
         if (opts?.redirect !== false) {
             navigateTo(resolveLoginPath())
         }
     }
 
-    function ensureSessionActive() {
-        if (!token.value) return false
-        if (!isJwtExpired(token.value)) return true
+    function ensureSessionActive(opts?: { redirectIfExpired?: boolean }) {
+        updateSessionNow()
 
-        clearAuthState()
+        if (!token.value) {
+            if (user.value || staffRole.value || staffPermissions.value) {
+                clearAuthState()
+            }
+            if (opts?.redirectIfExpired && shouldRedirectToLogin()) {
+                navigateTo(resolveLoginPath())
+            }
+            return false
+        }
+        if (!isJwtExpired(token.value, sessionNowMs.value)) return true
+
+        expireSession({ redirect: opts?.redirectIfExpired })
         return false
     }
 
@@ -140,7 +194,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     if (process.client) {
+        startSessionValidation()
         watch(token, () => {
+            updateSessionNow()
             scheduleSessionExpiry()
         }, { immediate: true })
     }

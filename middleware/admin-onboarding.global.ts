@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.path === '/admin/onboarding') return
 
   const authStore = useAuthStore()
-  if (!authStore.isAuthenticated || !authStore.token) return
+  if (!authStore.ensureSessionActive() || !authStore.token) return
   if (authStore.user?.role === 'staff') return
 
   const cached = useState<any>('storeSettings')

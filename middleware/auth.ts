@@ -2,7 +2,9 @@ import { useAuthStore } from '~/stores/auth'
 import { toSaasHost, useRequestOrigin } from '~/composables/host'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware((to) => {
+    if (!to.path.startsWith('/admin')) return
+
     const authStore = useAuthStore()
     const tenant = useState<any>('tenant')
     const hasActiveSession = authStore.ensureSessionActive()

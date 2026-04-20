@@ -19,6 +19,6 @@ export default defineNuxtPlugin(async () => {
       authStore.setAuth(token, res.user, res.tenant, res.staffRole ?? null, res.staffPermissions ?? null)
     }
   } catch {
-    authStore.logout({ redirect: false })
+    authStore.logout({ redirect: false, revoke: false })
   }
 })

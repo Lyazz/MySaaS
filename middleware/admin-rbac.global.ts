@@ -52,7 +52,7 @@ export default defineNuxtRouteMiddleware((to) => {
   if (!to.path.startsWith('/admin')) return
 
   const authStore = useAuthStore()
-  if (!authStore.isAuthenticated) return
+  if (!authStore.ensureSessionActive()) return
   if (authStore.user?.isSuperAdmin) return
 
   const role = authStore.user?.role || 'staff'
