@@ -203,6 +203,32 @@ describe('Orders edit (unconfirmed only)', () => {
         expect(orderAfter?.shippingCommuneCode).toBe('1605')
     })
 
+    it('updates delivery choice and shipping pricing for a PENDING order', async () => {
+        const res = await request(app)
+            .put(`/api/admin/orders/${pendingOrderId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .send({
+                shippingProvider: 'MAYSTRO',
+                deliveryMode: 'pickup',
+                shippingServiceLevel: 'office',
+                shippingAmount: 350,
+                shippingCurrency: 'DZD',
+                shippingWilayaCode: '16',
+                shippingCommuneCode: '1605',
+                shippingPickupPoint: '445'
+            })
+
+        expect(res.status).toBe(200)
+        expect(res.body.shippingProvider).toBe('MAYSTRO')
+        expect(res.body.deliveryMode).toBe('pickup')
+        expect(res.body.shippingServiceLevel).toBe('office')
+        expect(Number(res.body.shippingAmount)).toBe(350)
+        expect(res.body.shippingCurrency).toBe('DZD')
+        expect(res.body.shippingPickupPoint).toBe(445)
+        expect(Number(res.body.totalWithShippingAmount)).toBe(Number(res.body.totalAmount) + 350)
+    })
+
     it('uses promotional price when editing unconfirmed order items', async () => {
         const res = await request(app)
             .put(`/api/admin/orders/${pendingOrderId}`)

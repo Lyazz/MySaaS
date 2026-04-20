@@ -829,6 +829,60 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label class="ui-label mb-1">
+                    {{ t('admin.pages.orders.create.shippingProvider', 'Shipping provider') }}
+                  </label>
+                  <BaseSelect
+                    v-model="editShippingProvider"
+                    @update:model-value="onEditShippingProviderChange"
+                  >
+                    <option value="">{{ t('admin.common.noneSelected', 'None') }}</option>
+                    <option value="YALIDINE">Yalidine</option>
+                    <option value="MAYSTRO">Maystro</option>
+                    <option value="SELF">{{ t('admin.pages.orders.create.selfDelivery', 'Self delivery') }}</option>
+                  </BaseSelect>
+                </div>
+                <div>
+                  <label class="ui-label mb-1">
+                    {{ t('admin.pages.orders.create.deliveryMode', 'Delivery mode') }}
+                  </label>
+                  <BaseSelect
+                    v-if="isEditMaystroShipping"
+                    v-model="editDeliveryChoice"
+                    @update:model-value="onEditDeliveryChoiceChange"
+                  >
+                    <option value="home">
+                      {{ t('admin.pages.orders.create.modes.home', 'Home delivery') }} ({{ editMaystroHomePriceLabel }})
+                    </option>
+                    <option value="stopDesk">
+                      {{ t('admin.pages.orders.index.deliveryModes.pickup', 'Stop desk') }} ({{ editMaystroOfficePriceLabel }})
+                    </option>
+                    <option value="pickupPoint">
+                      {{ t('admin.pages.orders.detail.fields.pickupPoint', 'Pickup point') }} ({{ editMaystroOfficePriceLabel }})
+                    </option>
+                  </BaseSelect>
+                  <BaseSelect
+                    v-else
+                    v-model="editDeliveryMode"
+                  >
+                    <option value="home">{{ t('admin.pages.orders.create.modes.home', 'Home delivery') }}</option>
+                    <option value="pickup">{{ t('admin.pages.orders.index.deliveryModes.pickup', 'Stop desk') }}</option>
+                    <option value="store">{{ t('admin.pages.orders.index.deliveryModes.store', 'Store pickup') }}</option>
+                  </BaseSelect>
+                </div>
+              </div>
+
+              <div
+                v-if="isEditMaystroShipping && (editMaystroPriceLoading || editMaystroPriceError)"
+                class="rounded-lg border px-3 py-2 text-xs"
+                :class="editMaystroPriceError ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-slate-50 text-slate-600'"
+              >
+                <span v-if="editMaystroPriceLoading">{{ t('admin.common.loading', 'Loading...') }}</span>
+                <span v-else>{{ editMaystroPriceError }}</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="ui-label mb-1">
                     {{ t('admin.pages.orders.create.wilaya', 'Wilaya') }}
                   </label>
                   <BaseSelect
@@ -853,9 +907,10 @@
                     {{ t('admin.pages.orders.create.commune', 'Commune') }}
                   </label>
                   <BaseSelect
-                    v-if="isMaystroShipping"
+                    v-if="isEditMaystroShipping"
                     v-model="editShippingCommuneCode"
                     :disabled="!editShippingWilayaCode || editMaystroCommunesLoading"
+                    @update:model-value="onEditCommuneChange"
                   >
                     <option value="">
                       {{
@@ -878,13 +933,75 @@
                     v-else
                     v-model="editShippingCommuneCode"
                     type="text"
+                    @update:model-value="onEditCommuneChange"
                   />
                   <p
-                    v-if="isMaystroShipping && editMaystroCommunesError"
+                    v-if="isEditMaystroShipping && editMaystroCommunesError"
                     class="mt-1 text-xs text-amber-700"
                   >
                     {{ editMaystroCommunesError }}
                   </p>
+                </div>
+              </div>
+
+              <div
+                v-if="isEditMaystroShipping && editDeliveryChoice === 'pickupPoint'"
+              >
+                <label class="ui-label mb-1">
+                  {{ t('admin.pages.orders.detail.fields.pickupPoint', 'Pickup point') }}
+                </label>
+                <BaseSelect
+                  v-model="editShippingPickupPoint"
+                  :disabled="!editShippingCommuneCode || editMaystroPickupPointsLoading"
+                >
+                  <option value="">
+                    {{
+                      !editShippingCommuneCode
+                        ? t('admin.pages.orders.create.commune', 'Commune')
+                        : editMaystroPickupPointsLoading
+                          ? t('admin.common.loading', 'Loading...')
+                          : t('admin.common.noneSelected', 'None')
+                    }}
+                  </option>
+                  <option
+                    v-for="p in editMaystroPickupPoints"
+                    :key="String(p.pickup_point)"
+                    :value="String(p.pickup_point)"
+                  >
+                    {{ p.pickup_point }} - {{ p.name || p.name_lt || p.name_ar || `Point ${p.pickup_point}` }}
+                  </option>
+                </BaseSelect>
+                <p
+                  v-if="editMaystroPickupPointsError"
+                  class="mt-1 text-xs text-amber-700"
+                >
+                  {{ editMaystroPickupPointsError }}
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label class="ui-label mb-1">
+                    {{ t('admin.pages.orders.detail.fields.shippingFee', 'Shipping fee') }}
+                  </label>
+                  <BaseInput
+                    v-model="editShippingAmountInput"
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputmode="decimal"
+                    dir="ltr"
+                  />
+                </div>
+                <div>
+                  <label class="ui-label mb-1">
+                    {{ t('admin.pages.orders.detail.fields.currency', 'Currency') }}
+                  </label>
+                  <BaseInput
+                    v-model="editShippingCurrency"
+                    type="text"
+                    maxlength="8"
+                  />
                 </div>
               </div>
 
@@ -1240,12 +1357,29 @@ const cartItems = ref<CartItem[]>([])
 const editCustomerName = ref('')
 const editCustomerPhone = ref('')
 const editCustomerAddress = ref('')
+const editShippingProvider = ref('')
+const editDeliveryMode = ref<'home' | 'pickup' | 'store'>('home')
+const editDeliveryChoice = ref<'home' | 'stopDesk' | 'pickupPoint'>('home')
 const editShippingWilayaCode = ref('')
 const editShippingCommuneCode = ref('')
+const editShippingPickupPoint = ref('')
+const editShippingAmountInput = ref('')
+const editShippingCurrency = ref('DZD')
+const editShippingServiceLevel = ref<string | null>(null)
 const editMaystroCommunes = ref<Array<{ id?: number | string; name?: string }>>([])
 const editMaystroCommunesLoading = ref(false)
 const editMaystroCommunesError = ref('')
+const editMaystroPickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string }>>([])
+const editMaystroPickupPointsLoading = ref(false)
+const editMaystroPickupPointsError = ref('')
+const editMaystroHomePrice = ref<number | null>(null)
+const editMaystroOfficePrice = ref<number | null>(null)
+const editMaystroPriceLoading = ref(false)
+const editMaystroPriceError = ref('')
+const editMaystroCurrency = ref('DZD')
 let editMaystroCommunesResolveId = 0
+let editMaystroPickupPointsResolveId = 0
+let editMaystroPriceResolveId = 0
 
 const variantModalOpen = ref(false)
 const loadingVariants = ref(false)
@@ -1310,7 +1444,7 @@ function orderStatusLabel(code: string) {
     return o.shippingProvider === 'MAYSTRO' && o.status === 'CONFIRMED' && (!o.shipments || o.shipments.length === 0)
   })
 
-  const isMaystroShipping = computed(() => String(order.value?.shippingProvider || '').toUpperCase() === 'MAYSTRO')
+  const isEditMaystroShipping = computed(() => String(editShippingProvider.value || '').toUpperCase() === 'MAYSTRO')
 
   const wilayaNameByCode = new Map(DZ_WILAYAS.map((w) => [w.code, w.name]))
   const communeNameCache = useState<Record<string, string>>('admin-order-commune-names', () => ({}))
@@ -1394,12 +1528,27 @@ function orderStatusLabel(code: string) {
     return raw.length > 0 ? raw : null
   }
 
+  const normalizeDeliveryModeValue = (value: unknown): 'home' | 'pickup' | 'store' => {
+    const raw = String(value || '').trim().toLowerCase()
+    if (raw === 'store') return 'store'
+    if (raw === 'pickup' || raw === 'desk' || raw === 'office') return 'pickup'
+    return 'home'
+  }
+
+  const formatQuoteLabel = (price: number | null, currency = 'DZD') => {
+    if (price == null || !Number.isFinite(price)) return '—'
+    return `${price} ${currency || 'DZD'}`
+  }
+
+  const editMaystroHomePriceLabel = computed(() => formatQuoteLabel(editMaystroHomePrice.value, editMaystroCurrency.value))
+  const editMaystroOfficePriceLabel = computed(() => formatQuoteLabel(editMaystroOfficePrice.value, editMaystroCurrency.value))
+
   async function loadEditMaystroCommunes(wilayaCode: string) {
     const normalized = normalizeWilayaCode(wilayaCode)
     const requestId = ++editMaystroCommunesResolveId
     editMaystroCommunesError.value = ''
 
-    if (!isMaystroShipping.value || !normalized) {
+    if (!isEditMaystroShipping.value || !normalized) {
       editMaystroCommunesLoading.value = false
       editMaystroCommunes.value = []
       return
@@ -1423,31 +1572,279 @@ function orderStatusLabel(code: string) {
     }
   }
 
+  async function loadEditMaystroPrices() {
+    const requestId = ++editMaystroPriceResolveId
+    editMaystroPriceError.value = ''
+    editMaystroHomePrice.value = null
+    editMaystroOfficePrice.value = null
+
+    const wilayaCode = normalizeWilayaCode(editShippingWilayaCode.value)
+    const communeCode = String(editShippingCommuneCode.value || '').trim()
+
+    if (!isEditMaystroShipping.value || !wilayaCode || !communeCode) {
+      editMaystroPriceLoading.value = false
+      return
+    }
+
+    const fetchBestQuote = async (deliveryMode: 'home' | 'office') => {
+      const quotes = await $fetch('/api/delivery/options', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authStore.token}` },
+        body: {
+          provider: 'MAYSTRO',
+          deliveryMode,
+          destination: {
+            wilayaCode,
+            communeCode
+          }
+        }
+      }) as Array<{ price?: number; currency?: string; serviceLevel?: string }>
+
+      if (!Array.isArray(quotes) || quotes.length === 0) return null
+      const normalized = quotes
+        .map((q) => ({
+          price: Number(q?.price),
+          currency: String(q?.currency || '').trim(),
+          serviceLevel: String(q?.serviceLevel || '').trim()
+        }))
+        .filter((q) => Number.isFinite(q.price))
+
+      if (normalized.length === 0) return null
+      return normalized.reduce((best, current) => (current.price < best.price ? current : best))
+    }
+
+    editMaystroPriceLoading.value = true
+    try {
+      const [homeQuote, officeQuote] = await Promise.all([
+        fetchBestQuote('home'),
+        fetchBestQuote('office')
+      ])
+      if (requestId !== editMaystroPriceResolveId) return
+      editMaystroHomePrice.value = homeQuote?.price ?? null
+      editMaystroOfficePrice.value = officeQuote?.price ?? null
+      editMaystroCurrency.value =
+        homeQuote?.currency ||
+        officeQuote?.currency ||
+        editShippingCurrency.value ||
+        'DZD'
+    } catch (error: any) {
+      if (requestId !== editMaystroPriceResolveId) return
+      editMaystroPriceError.value = error?.data?.statusMessage || error?.data?.message || t('common.error', 'An error occurred. Please try again.')
+    } finally {
+      if (requestId === editMaystroPriceResolveId) {
+        editMaystroPriceLoading.value = false
+      }
+    }
+  }
+
+  async function loadEditMaystroPickupPoints() {
+    const requestId = ++editMaystroPickupPointsResolveId
+    editMaystroPickupPointsError.value = ''
+    editMaystroPickupPoints.value = []
+
+    const wilayaCode = normalizeWilayaCode(editShippingWilayaCode.value)
+    const communeCode = String(editShippingCommuneCode.value || '').trim()
+    const needsPickupPoint = isEditMaystroShipping.value && editDeliveryChoice.value === 'pickupPoint'
+
+    if (!needsPickupPoint || !wilayaCode || !communeCode) {
+      editMaystroPickupPointsLoading.value = false
+      return
+    }
+
+    editMaystroPickupPointsLoading.value = true
+    try {
+      const points = await $fetch(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(communeCode)}&wilaya=${encodeURIComponent(wilayaCode)}&deliveryType=3&nearby=true`, {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      }) as any[]
+
+      if (requestId !== editMaystroPickupPointsResolveId) return
+      editMaystroPickupPoints.value = Array.isArray(points)
+        ? points
+          .map((p: any) => ({
+            pickup_point: Number(p?.pickup_point),
+            commune: Number(p?.commune),
+            name: p?.name ? String(p.name) : undefined,
+            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
+            name_ar: p?.name_ar ? String(p.name_ar) : undefined
+          }))
+          .filter((p) => Number.isFinite(p.pickup_point) && p.pickup_point > 0)
+        : []
+    } catch (error: any) {
+      if (requestId !== editMaystroPickupPointsResolveId) return
+      editMaystroPickupPoints.value = []
+      editMaystroPickupPointsError.value = error?.data?.statusMessage || error?.data?.message || t('common.error', 'An error occurred. Please try again.')
+    } finally {
+      if (requestId === editMaystroPickupPointsResolveId) {
+        editMaystroPickupPointsLoading.value = false
+      }
+    }
+  }
+
+  function applyEditDeliveryChoice() {
+    if (!isEditMaystroShipping.value) return
+
+    if (editDeliveryChoice.value === 'home') {
+      editDeliveryMode.value = 'home'
+      editShippingServiceLevel.value = 'home'
+      editShippingPickupPoint.value = ''
+      if (editMaystroHomePrice.value != null) {
+        editShippingAmountInput.value = String(editMaystroHomePrice.value)
+      }
+    } else if (editDeliveryChoice.value === 'stopDesk') {
+      editDeliveryMode.value = 'pickup'
+      editShippingServiceLevel.value = 'office'
+      editShippingPickupPoint.value = ''
+      if (editMaystroOfficePrice.value != null) {
+        editShippingAmountInput.value = String(editMaystroOfficePrice.value)
+      }
+    } else {
+      editDeliveryMode.value = 'pickup'
+      editShippingServiceLevel.value = 'office'
+      if (editMaystroOfficePrice.value != null) {
+        editShippingAmountInput.value = String(editMaystroOfficePrice.value)
+      }
+    }
+
+    if (editMaystroCurrency.value) {
+      editShippingCurrency.value = editMaystroCurrency.value
+    }
+  }
+
+  function onEditDeliveryChoiceChange(nextValue: unknown) {
+    const next = String(nextValue || '').trim()
+    if (next === 'home' || next === 'stopDesk' || next === 'pickupPoint') {
+      editDeliveryChoice.value = next
+    } else {
+      editDeliveryChoice.value = 'home'
+    }
+    applyEditDeliveryChoice()
+    void loadEditMaystroPickupPoints()
+  }
+
+  async function onEditShippingProviderChange(nextValue: unknown) {
+    const nextProvider = String(nextValue || '').trim().toUpperCase()
+    editShippingProvider.value = nextProvider
+
+    if (nextProvider !== 'MAYSTRO') {
+      editDeliveryChoice.value = normalizeDeliveryModeValue(editDeliveryMode.value) === 'pickup' ? 'stopDesk' : 'home'
+      editShippingServiceLevel.value = null
+      editShippingPickupPoint.value = ''
+      editMaystroPriceError.value = ''
+      editMaystroPickupPointsError.value = ''
+      editMaystroPickupPoints.value = []
+      return
+    }
+
+    if (normalizeDeliveryModeValue(editDeliveryMode.value) === 'pickup') {
+      editDeliveryChoice.value = editShippingPickupPoint.value ? 'pickupPoint' : 'stopDesk'
+    } else {
+      editDeliveryChoice.value = 'home'
+    }
+
+    await loadEditMaystroCommunes(editShippingWilayaCode.value)
+    await loadEditMaystroPrices()
+    applyEditDeliveryChoice()
+    await loadEditMaystroPickupPoints()
+  }
+
+  async function onEditCommuneChange() {
+    if (!isEditMaystroShipping.value) return
+    await loadEditMaystroPrices()
+    applyEditDeliveryChoice()
+    await loadEditMaystroPickupPoints()
+  }
+
   function setEditLocationFieldsFromOrder() {
+    const currentProvider = String(order.value?.shippingProvider || '').trim().toUpperCase()
+    editShippingProvider.value = currentProvider
+    editDeliveryMode.value = normalizeDeliveryModeValue(order.value?.deliveryMode)
+    editShippingServiceLevel.value = normalizeOptionalText(order.value?.shippingServiceLevel)
+    editShippingPickupPoint.value =
+      order.value?.shippingPickupPoint != null && Number(order.value?.shippingPickupPoint) > 0
+        ? String(order.value?.shippingPickupPoint)
+        : ''
+    editShippingAmountInput.value =
+      order.value?.shippingAmount != null && Number.isFinite(Number(order.value.shippingAmount))
+        ? String(Number(order.value.shippingAmount))
+        : ''
+    editShippingCurrency.value = String(order.value?.shippingCurrency || 'DZD').trim().toUpperCase()
+
+    if (editDeliveryMode.value === 'pickup') {
+      editDeliveryChoice.value = editShippingPickupPoint.value ? 'pickupPoint' : 'stopDesk'
+    } else {
+      editDeliveryChoice.value = 'home'
+    }
+
     editShippingWilayaCode.value = normalizeWilayaCode(order.value?.shippingWilayaCode)
     editShippingCommuneCode.value = String(order.value?.shippingCommuneCode || '').trim()
     editMaystroCommunesError.value = ''
     editMaystroCommunes.value = []
-    if (isMaystroShipping.value && editShippingWilayaCode.value) {
+    if (isEditMaystroShipping.value && editShippingWilayaCode.value) {
       void loadEditMaystroCommunes(editShippingWilayaCode.value)
+      void loadEditMaystroPrices()
+      void loadEditMaystroPickupPoints()
     }
   }
 
-  function onEditWilayaChange(nextValue: unknown) {
+  async function onEditWilayaChange(nextValue: unknown) {
     const normalized = normalizeWilayaCode(nextValue)
     if (normalized === editShippingWilayaCode.value) return
     editShippingWilayaCode.value = normalized
-    if (!isMaystroShipping.value) return
+    if (!isEditMaystroShipping.value) return
     editShippingCommuneCode.value = ''
-    void loadEditMaystroCommunes(normalized)
+    await loadEditMaystroCommunes(normalized)
+    await loadEditMaystroPrices()
+    applyEditDeliveryChoice()
+    await loadEditMaystroPickupPoints()
   }
 
-  function buildEditLocationPayload() {
+  function buildEditShippingPayload() {
     const normalizedWilaya = normalizeWilayaCode(editShippingWilayaCode.value)
-    return {
-      shippingWilayaCode: normalizeOptionalText(normalizedWilaya),
-      shippingCommuneCode: normalizeOptionalText(editShippingCommuneCode.value)
+    const provider = normalizeOptionalText(editShippingProvider.value?.toUpperCase())
+    const deliveryMode =
+      provider === 'MAYSTRO'
+        ? (editDeliveryChoice.value === 'home' ? 'home' : 'pickup')
+        : normalizeOptionalText(editDeliveryMode.value)
+
+    const shippingAmountRaw = String(editShippingAmountInput.value || '').trim()
+    let shippingAmount: number | null = null
+    if (shippingAmountRaw.length > 0) {
+      const parsed = Number(shippingAmountRaw)
+      shippingAmount = Number.isFinite(parsed) ? parsed : null
     }
+
+    const shippingPickupPoint =
+      provider === 'MAYSTRO' && editDeliveryChoice.value === 'pickupPoint'
+        ? normalizeOptionalText(editShippingPickupPoint.value)
+        : null
+
+    return {
+      deliveryMode,
+      shippingProvider: provider,
+      shippingWilayaCode: normalizeOptionalText(normalizedWilaya),
+      shippingCommuneCode: normalizeOptionalText(editShippingCommuneCode.value),
+      shippingServiceLevel:
+        provider === 'MAYSTRO'
+          ? (editDeliveryChoice.value === 'home' ? 'home' : 'office')
+          : normalizeOptionalText(editShippingServiceLevel.value),
+      shippingAmount,
+      shippingCurrency: normalizeOptionalText(editShippingCurrency.value?.toUpperCase()),
+      shippingPickupPoint
+    }
+  }
+
+  function validateEditShippingSelection() {
+    if (isEditMaystroShipping.value && editDeliveryChoice.value === 'pickupPoint' && !normalizeOptionalText(editShippingPickupPoint.value)) {
+      return t('admin.pages.orders.detail.fields.pickupPoint', 'Pickup point')
+    }
+
+    const shippingAmountRaw = String(editShippingAmountInput.value || '').trim()
+    if (!shippingAmountRaw) return null
+    const parsed = Number(shippingAmountRaw)
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return t('admin.pages.orders.detail.fields.shippingFee', 'Shipping fee')
+    }
+    return null
   }
 
   function deliveryModeLabel(mode: any) {
@@ -1636,6 +2033,10 @@ function cancelEdit() {
   customerSaveError.value = ''
   editMaystroCommunesLoading.value = false
   editMaystroCommunesError.value = ''
+  editMaystroPickupPointsLoading.value = false
+  editMaystroPickupPointsError.value = ''
+  editMaystroPriceLoading.value = false
+  editMaystroPriceError.value = ''
 }
 
 async function addProductToCart(product: any) {
@@ -1725,6 +2126,12 @@ async function saveEdit() {
   if (order.value.status !== 'PENDING') return
   if (cartItems.value.length === 0) return
 
+  const shippingValidationError = validateEditShippingSelection()
+  if (shippingValidationError) {
+    editErrorMessage.value = `${shippingValidationError} ${t('common.invalid', 'is invalid')}`
+    return
+  }
+
   editErrorMessage.value = ''
   editSaving.value = true
 
@@ -1734,7 +2141,7 @@ async function saveEdit() {
       customerPhone: editCustomerPhone.value,
       customerAddress: editCustomerAddress.value,
       shippingAddressLine1: editCustomerAddress.value,
-      ...buildEditLocationPayload(),
+      ...buildEditShippingPayload(),
       items: cartItems.value.map((i) => ({
         productId: i.productId,
         variantId: i.variantId || null,
@@ -1774,10 +2181,19 @@ function cancelEditCustomer() {
   customerSaveError.value = ''
   editMaystroCommunesLoading.value = false
   editMaystroCommunesError.value = ''
+  editMaystroPickupPointsLoading.value = false
+  editMaystroPickupPointsError.value = ''
+  editMaystroPriceLoading.value = false
+  editMaystroPriceError.value = ''
 }
 
 async function saveCustomerInfo() {
   if (!order.value || order.value.status !== 'PENDING') return
+  const shippingValidationError = validateEditShippingSelection()
+  if (shippingValidationError) {
+    customerSaveError.value = `${shippingValidationError} ${t('common.invalid', 'is invalid')}`
+    return
+  }
   customerSaveError.value = ''
   savingCustomer.value = true
   try {
@@ -1789,7 +2205,7 @@ async function saveCustomerInfo() {
         customerPhone: editCustomerPhone.value,
         customerAddress: editCustomerAddress.value,
         shippingAddressLine1: editCustomerAddress.value,
-        ...buildEditLocationPayload()
+        ...buildEditShippingPayload()
       }
     }) as any
     order.value = updated

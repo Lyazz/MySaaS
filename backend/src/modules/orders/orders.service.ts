@@ -78,6 +78,9 @@ export type AdminOrderUpdateInput = {
     shippingProvider?: string | null
     shippingWilayaCode?: string | null
     shippingCommuneCode?: string | null
+    shippingServiceLevel?: string | null
+    shippingAmount?: number | null
+    shippingCurrency?: string | null
     shippingAddressLine1?: string | null
     shippingNotes?: string | null
     shippingPickupPoint?: number | string | null
@@ -584,6 +587,9 @@ export class OrdersService {
             input.shippingProvider !== undefined ||
             input.shippingWilayaCode !== undefined ||
             input.shippingCommuneCode !== undefined ||
+            input.shippingServiceLevel !== undefined ||
+            input.shippingAmount !== undefined ||
+            input.shippingCurrency !== undefined ||
             input.shippingAddressLine1 !== undefined ||
             input.shippingNotes !== undefined ||
             input.shippingPickupPoint !== undefined ||
@@ -604,7 +610,9 @@ export class OrdersService {
                 customerAddress: true,
                 deliveryMode: true,
                 shippingProvider: true,
+                shippingServiceLevel: true,
                 shippingAmount: true,
+                shippingCurrency: true,
                 shippingWilayaCode: true,
                 shippingCommuneCode: true,
                 shippingAddressLine1: true,
@@ -691,16 +699,53 @@ export class OrdersService {
         const nextShippingNotes =
             input.shippingNotes === undefined ? existing.shippingNotes : (input.shippingNotes || null)
 
-        const nextShippingPickupPoint =
-            input.shippingPickupPoint === undefined
-                ? (existing.shippingPickupPoint ?? null)
-                : await this.resolveShippingPickupPoint({
-                    tenantId,
-                    shippingProvider: nextShippingProvider,
-                    deliveryMode: nextDeliveryMode,
-                    shippingCommuneCode: nextShippingCommuneCode,
-                    rawPickupPoint: input.shippingPickupPoint
-                })
+        const nextShippingServiceLevelRaw =
+            input.shippingServiceLevel === undefined ? existing.shippingServiceLevel : (input.shippingServiceLevel || null)
+        const nextShippingServiceLevel =
+            nextShippingServiceLevelRaw == null ? null : String(nextShippingServiceLevelRaw).trim()
+        if (nextShippingServiceLevel && nextShippingServiceLevel.length > 64) {
+            throw new OrderValidationError(400, 'shippingServiceLevel is too long')
+        }
+
+        let nextShippingAmount: number | null
+        if (nextDeliveryMode === 'store') {
+            nextShippingAmount = 0
+        } else if (input.shippingAmount === undefined) {
+            nextShippingAmount =
+                existing.shippingAmount == null
+                    ? null
+                    : (Number.isFinite(Number(existing.shippingAmount)) ? Number(existing.shippingAmount) : null)
+        } else if ((input.shippingAmount as any) === null || String(input.shippingAmount).trim() === '') {
+            nextShippingAmount = null
+        } else {
+            const parsed = Number(input.shippingAmount)
+            if (!Number.isFinite(parsed) || parsed < 0) {
+                throw new OrderValidationError(400, 'shippingAmount must be a positive number')
+            }
+            nextShippingAmount = parsed
+        }
+
+        const nextShippingCurrencyRaw =
+            input.shippingCurrency === undefined ? existing.shippingCurrency : (input.shippingCurrency || null)
+        const nextShippingCurrency = nextShippingCurrencyRaw == null ? null : String(nextShippingCurrencyRaw).trim().toUpperCase()
+        if (nextShippingCurrency && nextShippingCurrency.length > 8) {
+            throw new OrderValidationError(400, 'shippingCurrency is too long')
+        }
+
+        let nextShippingPickupPoint: number | null
+        if (nextShippingProvider !== 'MAYSTRO' || nextDeliveryMode !== 'pickup') {
+            nextShippingPickupPoint = null
+        } else if (input.shippingPickupPoint === undefined) {
+            nextShippingPickupPoint = existing.shippingPickupPoint ?? null
+        } else {
+            nextShippingPickupPoint = await this.resolveShippingPickupPoint({
+                tenantId,
+                shippingProvider: nextShippingProvider,
+                deliveryMode: nextDeliveryMode,
+                shippingCommuneCode: nextShippingCommuneCode,
+                rawPickupPoint: input.shippingPickupPoint
+            })
+        }
 
         const nextCustomerId = input.customerId === undefined ? existing.customerId : (input.customerId || null)
         if (input.customerId !== undefined && nextCustomerId) {
@@ -930,6 +975,9 @@ export class OrdersService {
                 customerAddress: nextCustomerAddress,
                 deliveryMode: nextDeliveryMode,
                 shippingProvider: nextShippingProvider,
+                shippingServiceLevel: nextShippingServiceLevel || null,
+                shippingAmount: nextShippingAmount,
+                shippingCurrency: nextShippingCurrency || null,
                 shippingPickupPoint: nextShippingPickupPoint,
                 shippingWilayaCode: nextShippingWilayaCode,
                 shippingCommuneCode: nextShippingCommuneCode,
@@ -939,8 +987,6 @@ export class OrdersService {
             const nextTotalAmount = shouldUpdateItems ? centsToMoney(totalCents) : existing.totalAmount
             updateData.totalAmount = nextTotalAmount
 
-            const nextShippingAmount = nextDeliveryMode === 'store' ? 0 : (existing.shippingAmount ?? null)
-            if (nextDeliveryMode === 'store') updateData.shippingAmount = 0
             updateData.totalWithShippingAmount = computeTotalWithShipping(nextTotalAmount, nextShippingAmount)
 
             const updated = await tx.order.updateMany({ where: { tenantId, id, status: 'PENDING' }, data: updateData })
