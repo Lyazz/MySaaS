@@ -587,23 +587,15 @@ export class BulkProductsService {
             throw err
         }
 
-        const [saleItemCount, purchaseItemCount] = await Promise.all([
-            prisma.saleItem.count({ where: { tenantId, productId: { in: ids } } }),
-            prisma.purchaseOrderItem.count({ where: { tenantId, variant: { productId: { in: ids } } } })
-        ])
-
-        if (saleItemCount > 0 || purchaseItemCount > 0) {
-            const err: any = new Error('HAS_TRANSACTIONS')
-            err.statusCode = 409
-            err.statusMessage = 'HAS_TRANSACTIONS'
-            throw err
-        }
-
+        let deletedCount = 0
+        let archivedCount = 0
         for (const productId of ids) {
-            await this.products.deleteProduct(tenantId, productId)
+            const result = await this.products.deleteProduct(tenantId, productId)
+            if (result.action === 'deleted') deletedCount += 1
+            if (result.action === 'archived') archivedCount += 1
         }
 
-        return { success: true, deletedCount: ids.length }
+        return { success: true, deletedCount, archivedCount }
     }
 
     async duplicateProduct(

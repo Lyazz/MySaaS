@@ -1,28 +1,35 @@
 <template>
   <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
       <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+        <h2
+          class="text-2xl font-bold"
+          style="color: var(--text-primary)"
+        >
           {{ t('admin.nav.categories') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p
+          class="mt-1"
+          style="color: var(--text-secondary)"
+        >
           {{ t('admin.pages.categories.index.subtitle') }}
         </p>
       </div>
       <NuxtLink
         to="/admin/categories/create"
-        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center space-x-2"
+        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors inline-flex items-center gap-2"
       >
-        <Icon name="lucide:plus" class="w-5 h-5" />
+        <Icon
+          name="lucide:plus"
+          class="w-5 h-5"
+        />
         <span>{{ t('admin.pages.categories.index.addCategory') }}</span>
       </NuxtLink>
     </div>
 
-    <!-- Filters -->
     <div class="ui-card p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2">
           <label class="ui-label mb-1">{{ t('admin.pages.categories.index.filters.searchLabel') }}</label>
           <BaseInput
             v-model="searchQuery"
@@ -30,30 +37,70 @@
             :placeholder="t('admin.pages.categories.index.filters.searchPlaceholder')"
           />
         </div>
+        <div>
+          <label class="ui-label mb-1">{{ t('admin.pages.categories.index.sort.sortBy') }}</label>
+          <div class="flex items-center gap-2">
+            <select
+              v-model="sortBy"
+              class="ui-input w-full px-3 py-2 text-sm"
+            >
+              <option
+                v-for="option in sortOptions"
+                :key="option.key"
+                :value="option.key"
+              >
+                {{ t(option.labelKey) }}
+              </option>
+            </select>
+            <button
+              type="button"
+              class="h-10 w-10 shrink-0 rounded-md border transition-colors inline-flex items-center justify-center"
+              style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
+              :title="sortOrder === 'asc' ? t('admin.common.next') : t('admin.common.previous')"
+              @click="toggleSortOrder"
+            >
+              <Icon
+                :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'"
+                class="w-4 h-4"
+              />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Loading State -->
     <div
       v-if="loading"
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p
+        class="mt-2"
+        style="color: var(--text-secondary)"
+      >
         {{ t('admin.pages.categories.index.loading') }}
       </p>
     </div>
 
-    <!-- Empty State -->
     <div
-      v-else-if="filteredCategories.length === 0"
+      v-else-if="filteredParentCategories.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:shapes" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon
+        name="lucide:shapes"
+        class="mx-auto h-12 w-12"
+        style="color: var(--text-tertiary)"
+      />
+      <h3
+        class="mt-2 text-sm font-medium"
+        style="color: var(--text-primary)"
+      >
         {{ t('admin.pages.categories.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p
+        class="mt-1 text-sm"
+        style="color: var(--text-tertiary)"
+      >
         {{ t('admin.pages.categories.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -61,207 +108,324 @@
           to="/admin/categories/create"
           class="ui-btn ui-btn--primary ui-btn--md"
         >
-          <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
+          <Icon
+            name="lucide:plus"
+            class="w-5 h-5 mr-2"
+          />
           {{ t('admin.pages.categories.index.empty.newCategory') }}
         </NuxtLink>
       </div>
     </div>
 
-    <!-- Categories Table -->
     <div
       v-else
-      class="ui-card overflow-hidden"
+      class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-6"
     >
-      <div class="overflow-x-auto">
-        <table class="ui-table">
-          <thead class="ui-thead">
-            <tr>
-              <th class="ui-th cursor-pointer transition-colors" @click="setSort('title')">
-                <div class="flex items-center gap-1">
-                  {{ t('admin.pages.categories.index.table.category') }}
-                  <Icon v-if="sortBy === 'title'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
+      <section class="ui-card overflow-hidden">
+        <div
+          class="px-4 py-3 sm:px-6"
+          style="border-bottom: 1px solid var(--surface-border)"
+        >
+          <h3
+            class="text-sm font-semibold"
+            style="color: var(--text-primary)"
+          >
+            {{ t('admin.pages.categories.index.workspace.parentsTitle') }}
+          </h3>
+          <p
+            class="text-xs mt-1"
+            style="color: var(--text-tertiary)"
+          >
+            {{ t('admin.pages.categories.index.workspace.parentsHint') }}
+          </p>
+        </div>
+
+        <div
+          class="divide-y"
+          style="divide-color: var(--surface-border)"
+        >
+          <button
+            v-for="category in paginatedParentCategories"
+            :key="category.id"
+            type="button"
+            class="w-full px-4 py-3 sm:px-6 text-left transition-colors"
+            :class="activeParent?.id === category.id ? '[background:rgba(var(--brand-rgb)/0.08)]' : 'hover:[background:var(--surface-2)]'"
+            @click="activeParentId = category.id"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center min-w-0 gap-3">
+                <div
+                  class="h-10 w-10 rounded flex items-center justify-center overflow-hidden"
+                  style="background: var(--surface-3); border: 1px solid var(--surface-border)"
+                >
+                  <img
+                    v-if="category.imageUrl"
+                    :src="category.imageUrl"
+                    :alt="categoryDisplayTitle(category)"
+                    class="h-10 w-10 object-cover"
+                  >
+                  <Icon
+                    v-else
+                    name="lucide:image"
+                    class="w-5 h-5"
+                    style="color: var(--text-tertiary)"
+                  />
                 </div>
-              </th>
-              <th class="ui-th cursor-pointer transition-colors" @click="setSort('products')">
-                <div class="flex items-center gap-1">
-                  {{ t('admin.pages.categories.index.table.products') }}
-                  <Icon v-if="sortBy === 'products'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
+                <div class="min-w-0">
+                  <p
+                    class="truncate text-sm font-semibold"
+                    style="color: var(--text-primary)"
+                  >
+                    {{ categoryDisplayTitle(category) }}
+                  </p>
+                  <p
+                    class="truncate text-xs"
+                    style="color: var(--text-tertiary)"
+                  >
+                    {{ category.slug }}
+                  </p>
                 </div>
-              </th>
-              <th class="ui-th">Hierarchy</th>
-              <th class="ui-th">
-                {{ t('admin.pages.categories.index.table.links') }}
-              </th>
-              <th class="ui-th text-right">
-                {{ t('admin.pages.categories.index.table.actions') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="ui-tbody">
-            <tr
-              v-for="category in paginatedCategories"
-              :key="category.id"
-              class="ui-tr"
-            >
-              <td class="ui-td whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 rounded flex items-center justify-center overflow-hidden" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
-                    <img
-                      v-if="category.imageUrl"
-                      :src="category.imageUrl"
-                      :alt="category.title"
-                      class="h-10 w-10 object-cover"
-                    >
-                    <Icon
-                      v-else
-                      name="lucide:image"
-                      class="w-6 h-6" style="color: var(--text-tertiary)"
-                    />
-                  </div>
-                  <div class="ml-4">
-                    <div class="font-medium" style="color: var(--text-primary)">
-                      {{ category.title }}
-                    </div>
-                    <div class="text-sm" style="color: var(--text-tertiary)">
-                      {{ category.slug }}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td class="ui-td whitespace-nowrap">
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
                 <span class="ui-badge ui-badge--slate">
                   {{ t('admin.pages.categories.index.table.productsCount', { count: category._count?.products || 0 }) }}
                 </span>
-              </td>
-              <td class="ui-td whitespace-nowrap">
-                <div class="text-sm" style="color: var(--text-secondary)">
-                  <div v-if="category.parent?.title">
-                    Subcategory of {{ category.parent.title }}
-                  </div>
-                  <div v-else>
-                    {{ t('admin.pages.categories.index.table.topLevel', 'Top-level') }}
-                  </div>
-                  <div
-                    v-if="(category._count?.subcategories || 0) > 0"
-                    class="text-xs mt-0.5"
-                    style="color: var(--text-tertiary)"
-                  >
-                    {{ category._count?.subcategories || 0 }} subcategories
-                  </div>
-                </div>
-              </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
-                <div class="flex items-center space-x-1">
-                  <a
-                    :href="getCategoryUrl(category.slug)"
-                    target="_blank"
-                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
-                    :title="t('admin.pages.categories.index.links.openCategory')"
-                  >
-                    <Icon name="lucide:external-link" class="w-4 h-4" />
-                  </a>
-                  <button
-                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
-                    :title="t('admin.pages.categories.index.links.copyCategory')"
-                    @click="copyLink(`/c/${category.slug}`)"
-                  >
-                    <Icon name="lucide:copy" class="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-              <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-1">
-                  <NuxtLink
-                    :to="`/admin/categories/${category.id}`"
-                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
-                    :title="t('admin.common.edit')"
-                  >
-                    <Icon name="lucide:pencil" class="w-4 h-4" />
-                  </NuxtLink>
-                  <button
-                    class="p-2 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
-                    :title="t('admin.common.delete')"
-                    @click="confirmDelete(category)"
-                  >
-                    <Icon name="lucide:trash" class="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <span class="ui-badge ui-badge--slate">
+                  {{ t('admin.pages.categories.index.workspace.subcategoriesCount', { count: category._count?.subcategories || 0 }) }}
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
 
-      <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
-        <div class="flex flex-1 items-center justify-between sm:hidden">
+        <div
+          class="px-4 py-3 flex items-center justify-between sm:px-6"
+          style="border-top: 1px solid var(--surface-border)"
+        >
           <button
             :disabled="currentPage === 1"
             class="ui-btn ui-btn--secondary ui-btn--sm"
             @click="currentPage--"
           >
-            <Icon name="lucide:chevron-left" class="w-4 h-4" />
+            <Icon
+              name="lucide:chevron-left"
+              class="w-4 h-4"
+            />
           </button>
-          <span class="text-sm" style="color: var(--text-secondary)">
-            {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
-          </span>
+
+          <p
+            class="text-sm"
+            style="color: var(--text-secondary)"
+          >
+            {{ t('admin.pages.categories.index.pagination.showing', {
+              from: (currentPage - 1) * itemsPerPage + 1,
+              to: Math.min(currentPage * itemsPerPage, filteredParentCategories.length),
+              total: filteredParentCategories.length
+            }) }}
+          </p>
+
           <button
             :disabled="currentPage === totalPages"
             class="ui-btn ui-btn--secondary ui-btn--sm"
             @click="currentPage++"
           >
-            <Icon name="lucide:chevron-right" class="w-4 h-4" />
+            <Icon
+              name="lucide:chevron-right"
+              class="w-4 h-4"
+            />
           </button>
         </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p class="text-sm" style="color: var(--text-secondary)">
-              {{ t('admin.pages.categories.index.pagination.showing', {
-                from: (currentPage - 1) * itemsPerPage + 1,
-                to: Math.min(currentPage * itemsPerPage, filteredCategories.length),
-                total: filteredCategories.length
-              }) }}
+      </section>
+
+      <aside class="ui-card p-4 sm:p-6 xl:sticky xl:top-20 h-max">
+        <div v-if="activeParent">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p
+                class="text-xs font-semibold uppercase tracking-wide"
+                style="color: var(--text-tertiary)"
+              >
+                {{ t('admin.pages.categories.index.workspace.subcategoriesTitle') }}
+              </p>
+              <h3
+                class="mt-1 text-lg font-semibold truncate"
+                style="color: var(--text-primary)"
+              >
+                {{ categoryDisplayTitle(activeParent) }}
+              </h3>
+              <p
+                class="text-xs"
+                style="color: var(--text-tertiary)"
+              >
+                /c/{{ activeParent.slug }}
+              </p>
+            </div>
+            <div class="flex items-center gap-1">
+              <a
+                :href="getCategoryUrl(activeParent.slug)"
+                target="_blank"
+                class="p-2 rounded-md transition-colors"
+                style="color: var(--text-tertiary)"
+                :title="t('admin.pages.categories.index.links.openCategory')"
+              >
+                <Icon
+                  name="lucide:external-link"
+                  class="w-4 h-4"
+                />
+              </a>
+              <button
+                type="button"
+                class="p-2 rounded-md transition-colors"
+                style="color: var(--text-tertiary)"
+                :title="t('admin.pages.categories.index.links.copyCategory')"
+                @click="copyLink(`/c/${activeParent.slug}`)"
+              >
+                <Icon
+                  name="lucide:copy"
+                  class="w-4 h-4"
+                />
+              </button>
+              <NuxtLink
+                :to="`/admin/categories/${activeParent.id}`"
+                class="p-2 rounded-md transition-colors"
+                style="color: var(--text-tertiary)"
+                :title="t('admin.common.edit')"
+              >
+                <Icon
+                  name="lucide:pencil"
+                  class="w-4 h-4"
+                />
+              </NuxtLink>
+              <button
+                type="button"
+                class="p-2 rounded-md transition-colors hover:text-red-600 hover:bg-red-50"
+                style="color: var(--text-tertiary)"
+                :title="t('admin.common.delete')"
+                @click="confirmDelete(activeParent)"
+              >
+                <Icon
+                  name="lucide:trash"
+                  class="w-4 h-4"
+                />
+              </button>
+            </div>
+          </div>
+
+          <p
+            class="mt-4 text-sm"
+            style="color: var(--text-secondary)"
+          >
+            {{ t('admin.pages.categories.index.workspace.subcategoriesHint') }}
+          </p>
+
+          <div
+            v-if="activeSubcategories.length > 0"
+            class="mt-4 space-y-2"
+          >
+            <div
+              v-for="subcategory in activeSubcategories"
+              :key="subcategory.id"
+              class="rounded-lg border px-3 py-3 transition-colors"
+              style="border-color: var(--surface-border); background: var(--surface-2)"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p
+                    class="truncate text-sm font-medium"
+                    style="color: var(--text-primary)"
+                  >
+                    {{ categoryDisplayTitle(subcategory) }}
+                  </p>
+                  <p
+                    class="truncate text-xs"
+                    style="color: var(--text-tertiary)"
+                  >
+                    {{ subcategory.slug }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <a
+                    :href="getCategoryUrl(subcategory.slug)"
+                    target="_blank"
+                    class="p-2 rounded-md transition-colors"
+                    style="color: var(--text-tertiary)"
+                    :title="t('admin.pages.categories.index.links.openCategory')"
+                  >
+                    <Icon
+                      name="lucide:external-link"
+                      class="w-4 h-4"
+                    />
+                  </a>
+                  <button
+                    type="button"
+                    class="p-2 rounded-md transition-colors"
+                    style="color: var(--text-tertiary)"
+                    :title="t('admin.pages.categories.index.links.copyCategory')"
+                    @click="copyLink(`/c/${subcategory.slug}`)"
+                  >
+                    <Icon
+                      name="lucide:copy"
+                      class="w-4 h-4"
+                    />
+                  </button>
+                  <NuxtLink
+                    :to="`/admin/categories/${subcategory.id}`"
+                    class="p-2 rounded-md transition-colors"
+                    style="color: var(--text-tertiary)"
+                    :title="t('admin.common.edit')"
+                  >
+                    <Icon
+                      name="lucide:pencil"
+                      class="w-4 h-4"
+                    />
+                  </NuxtLink>
+                  <button
+                    type="button"
+                    class="p-2 rounded-md transition-colors hover:text-red-600 hover:bg-red-50"
+                    style="color: var(--text-tertiary)"
+                    :title="t('admin.common.delete')"
+                    @click="confirmDelete(subcategory)"
+                  >
+                    <Icon
+                      name="lucide:trash"
+                      class="w-4 h-4"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-else
+            class="mt-4 rounded-lg border border-dashed px-4 py-5 text-center"
+            style="border-color: var(--surface-border); background: var(--surface-2)"
+          >
+            <p
+              class="text-sm font-medium"
+              style="color: var(--text-primary)"
+            >
+              {{ t('admin.pages.categories.index.workspace.noSubcategories') }}
             </p>
           </div>
-          <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-              <button
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage--"
-              >
-                {{ t('admin.common.previous') }}
-              </button>
-              <button
-                v-for="page in totalPages"
-                :key="page"
-                :class="[
-                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
-                  currentPage === page
-                    ? 'z-10 [background:rgba(var(--brand-rgb)/0.08)] [border-color:var(--brand)] [color:var(--brand)]'
-                    : ''
-                ]"
-                :style="currentPage !== page ? 'border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)' : ''"
-                @click="currentPage = page"
-              >
-                {{ page }}
-              </button>
-              <button
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage++"
-              >
-                {{ t('admin.common.next') }}
-              </button>
-            </nav>
-          </div>
         </div>
-      </div>
+
+        <div
+          v-else
+          class="rounded-lg border border-dashed px-4 py-5 text-center"
+          style="border-color: var(--surface-border); background: var(--surface-2)"
+        >
+          <p
+            class="text-sm"
+            style="color: var(--text-secondary)"
+          >
+            {{ t('admin.pages.categories.index.workspace.selectCategory') }}
+          </p>
+        </div>
+      </aside>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <AdminConfirmModal
       v-model="showDeleteModal"
       :title="t('admin.pages.categories.index.deleteModal.title')"
@@ -311,6 +475,7 @@ const currentPage = ref(1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const categoryToDelete = ref<Category | null>(null)
+const activeParentId = ref<string | null>(null)
 const deleteError = ref<string | null>(null)
 
 const sortOptions = [
@@ -328,50 +493,86 @@ const deleteMessage = computed(() => {
   return t('admin.pages.categories.index.deleteModal.message')
 })
 
-const sortedCategories = computed(() => {
-  const data = [...categories.value]
+const categoryDisplayTitle = (category: Category): string => category.displayTitle || category.title
+
+const categoryMatchesQuery = (category: Category, query: string): boolean => {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) return true
+  return [category.title, category.slug, category.displayTitle || '']
+    .some((value) => value.toLowerCase().includes(normalizedQuery))
+}
+
+const compareCategories = (a: Category, b: Category): number => {
   const dir = sortOrder.value === 'asc' ? 1 : -1
 
-  return data.sort((a, b) => {
-    switch (sortBy.value) {
-      case 'title':
-        return a.title.localeCompare(b.title) * dir
-      case 'slug':
-        return a.slug.localeCompare(b.slug) * dir
-      case 'products': {
-        const aCount = a._count?.products || 0
-        const bCount = b._count?.products || 0
-        return (aCount - bCount) * dir
-      }
-      case 'createdAt':
-      default: {
-        const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0
-        const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0
-        return (aDate - bDate) * dir
-      }
+  switch (sortBy.value) {
+    case 'title':
+      return a.title.localeCompare(b.title) * dir
+    case 'slug':
+      return a.slug.localeCompare(b.slug) * dir
+    case 'products': {
+      const aCount = a._count?.products || 0
+      const bCount = b._count?.products || 0
+      return (aCount - bCount) * dir
     }
+    case 'createdAt':
+    default: {
+      const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0
+      const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0
+      return (aDate - bDate) * dir
+    }
+  }
+}
+
+const sortedCategories = computed(() => [...categories.value].sort(compareCategories))
+
+const topLevelCategories = computed(() => sortedCategories.value.filter((category) => !category.parentId))
+
+const subcategoriesByParentId = computed<Map<string, Category[]>>(() => {
+  const map = new Map<string, Category[]>()
+
+  for (const category of sortedCategories.value) {
+    if (!category.parentId) continue
+    const list = map.get(category.parentId) || []
+    list.push(category)
+    map.set(category.parentId, list)
+  }
+
+  return map
+})
+
+const filteredParentCategories = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) return topLevelCategories.value
+
+  return topLevelCategories.value.filter((parent) => {
+    if (categoryMatchesQuery(parent, query)) return true
+    const children = subcategoriesByParentId.value.get(parent.id) || []
+    return children.some((child) => categoryMatchesQuery(child, query))
   })
 })
 
-const filteredCategories = computed(() => {
-  let filtered = sortedCategories.value
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredParentCategories.value.length / itemsPerPage)))
 
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter((c) =>
-      c.title.toLowerCase().includes(query) || c.slug.toLowerCase().includes(query)
-    )
-  }
-
-  return filtered
+const paginatedParentCategories = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredParentCategories.value.slice(start, start + itemsPerPage)
 })
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredCategories.value.length / itemsPerPage)))
+const activeParent = computed(() => {
+  if (!activeParentId.value) return null
+  return topLevelCategories.value.find((category) => category.id === activeParentId.value) || null
+})
 
-const paginatedCategories = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredCategories.value.slice(start, end)
+const activeSubcategories = computed(() => {
+  if (!activeParent.value) return []
+  const children = subcategoriesByParentId.value.get(activeParent.value.id) || []
+  const query = searchQuery.value.trim().toLowerCase()
+
+  if (!query) return children
+  if (categoryMatchesQuery(activeParent.value, query)) return children
+
+  return children.filter((child) => categoryMatchesQuery(child, query))
 })
 
 async function fetchCategories() {
@@ -380,10 +581,6 @@ async function fetchCategories() {
     const data = await $fetch('/api/admin/categories', {
       headers: {
         Authorization: `Bearer ${authStore.token}`
-      },
-      query: {
-        sortBy: sortBy.value,
-        sortOrder: sortOrder.value
       }
     }) as Category[]
     categories.value = data
@@ -403,38 +600,36 @@ async function handleDelete() {
   if (!categoryToDelete.value) return
 
   try {
-    await $fetch(`/api/admin/categories/${categoryToDelete.value.id}`, {
+    const deletedId = categoryToDelete.value.id
+    await $fetch(`/api/admin/categories/${deletedId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
     })
 
-    categories.value = categories.value.filter((c) => c.id !== categoryToDelete.value?.id)
+    categories.value = categories.value.filter((c) => c.id !== deletedId)
+    if (activeParentId.value === deletedId) {
+      activeParentId.value = null
+    }
     categoryToDelete.value = null
     showDeleteModal.value = false
     deleteError.value = null
   } catch (error: any) {
     console.error('Failed to delete category:', error)
-    const status = error?.response?.status || error?.statusCode
     const msg = error?.data?.statusMessage || error?.response?.data?.statusMessage
     if (msg === 'HAS_PRODUCTS') {
       deleteError.value = t('admin.pages.categories.index.deleteModal.errorHasProducts')
     } else if (msg === 'HAS_CHILDREN') {
-      deleteError.value = 'This category has subcategories. Move or delete them first.'
+      deleteError.value = t('admin.pages.categories.index.deleteModal.errorHasChildren')
     } else {
       deleteError.value = t('admin.pages.categories.index.deleteModal.error')
     }
   }
 }
 
-function setSort(field: typeof sortOptions[number]['key']) {
-  if (sortBy.value === field) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortBy.value = field
-    sortOrder.value = field === 'createdAt' ? 'desc' : 'asc'
-  }
+function toggleSortOrder() {
+  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
 }
 
 function getCategoryUrl(slug: string): string {
@@ -467,12 +662,33 @@ onMounted(() => {
   fetchCategories()
 })
 
-watch([searchQuery], () => {
+watch(searchQuery, () => {
   currentPage.value = 1
 })
 
 watch([sortBy, sortOrder], () => {
-  fetchCategories()
   currentPage.value = 1
 })
+
+watch(totalPages, (value) => {
+  if (currentPage.value > value) {
+    currentPage.value = value
+  }
+})
+
+watch(
+  paginatedParentCategories,
+  (list) => {
+    if (list.length === 0) {
+      activeParentId.value = null
+      return
+    }
+
+    const stillVisible = list.some((category) => category.id === activeParentId.value)
+    if (!stillVisible) {
+      activeParentId.value = list[0].id
+    }
+  },
+  { immediate: true }
+)
 </script>

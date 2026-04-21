@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import { SalesService } from './sales.service'
+import { SalesService, SalesValidationError } from './sales.service'
 
 const service = new SalesService()
 
@@ -128,6 +128,33 @@ export class SalesController {
                 })
             }
             console.error('Create sale error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async updateStatus(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const { id } = req.params
+            const status = typeof req.body?.status === 'string' ? req.body.status : ''
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Sale ID is required' })
+            }
+
+            const sale = await service.updateStatus(tenant.id, id, status, { userId: user?.id ?? null })
+            res.json(sale)
+        } catch (error: any) {
+            if (error instanceof SalesValidationError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
+            }
+            console.error('Update sale status error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

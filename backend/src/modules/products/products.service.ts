@@ -513,7 +513,7 @@ export class ProductsService {
 
     async deleteProduct(tenantId: string, productId: string) {
         // Verify ownership
-        const existing = await this.getProduct(tenantId, productId)
+        const existing = await this.getProduct(tenantId, productId, { includeInactiveVariants: true })
 
         if (!existing) {
             throw new Error('Product not found')
@@ -531,23 +531,53 @@ export class ProductsService {
             )
         ) as string[]
 
-        // Block deletion if product has related sale items or purchase order items
-        const variantIds = (existing.variants || []).map((v: any) => v.id)
-        if (variantIds.length > 0) {
-            const [saleItemCount, purchaseItemCount] = await Promise.all([
-                prisma.saleItem.count({ where: { tenantId, variantId: { in: variantIds } } }),
-                prisma.purchaseOrderItem.count({ where: { tenantId, variantId: { in: variantIds } } })
-            ])
-            if (saleItemCount > 0 || purchaseItemCount > 0) {
-                const err: any = new Error('HAS_TRANSACTIONS')
-                err.statusCode = 409
-                err.statusMessage = 'HAS_TRANSACTIONS'
-                throw err
-            }
+        const variantRows = await prisma.productVariant.findMany({
+            where: { tenantId, productId },
+            select: { id: true }
+        })
+        const variantIds = variantRows.map((row) => row.id)
+
+        const [
+            orderItemCount,
+            saleItemByProductCount,
+            saleItemByVariantCount,
+            purchaseItemCount,
+            inventoryMovementCount
+        ] = await Promise.all([
+            prisma.orderItem.count({ where: { tenantId, productId } }),
+            prisma.saleItem.count({ where: { tenantId, productId } }),
+            variantIds.length > 0 ? prisma.saleItem.count({ where: { tenantId, variantId: { in: variantIds } } }) : Promise.resolve(0),
+            variantIds.length > 0 ? prisma.purchaseOrderItem.count({ where: { tenantId, variantId: { in: variantIds } } }) : Promise.resolve(0),
+            variantIds.length > 0 ? prisma.inventoryMovement.count({ where: { tenantId, variantId: { in: variantIds } } }) : Promise.resolve(0)
+        ])
+
+        const hasReferences =
+            orderItemCount > 0 ||
+            saleItemByProductCount > 0 ||
+            saleItemByVariantCount > 0 ||
+            purchaseItemCount > 0 ||
+            inventoryMovementCount > 0
+
+        if (hasReferences) {
+            await prisma.$transaction(async (tx) => {
+                await tx.product.updateMany({
+                    where: { tenantId, id: productId },
+                    data: { isActive: false }
+                })
+                await tx.productVariant.updateMany({
+                    where: { tenantId, productId },
+                    data: { isActive: false }
+                })
+                await syncProductStockForProducts(tx as any, tenantId, [productId])
+            })
+
+            return { success: true, action: 'archived' as const }
         }
 
-        await prisma.product.deleteMany({
-            where: { id: productId, tenantId }
+        await prisma.$transaction(async (tx) => {
+            await tx.product.deleteMany({
+                where: { id: productId, tenantId }
+            })
         })
 
         for (const url of urlsToMaybeDelete) {
@@ -565,7 +595,7 @@ export class ProductsService {
             }
         }
 
-        return true
+        return { success: true, action: 'deleted' as const }
     }
 
     // --- Options Management ---

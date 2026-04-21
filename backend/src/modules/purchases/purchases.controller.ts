@@ -3,6 +3,13 @@ import { PurchasesService, PurchaseValidationError } from './purchases.service'
 
 const service = new PurchasesService()
 
+const toPurchaseErrorPayload = (error: PurchaseValidationError) => ({
+    statusCode: error.statusCode,
+    statusMessage: error.statusMessage,
+    code: error.code,
+    meta: error.meta
+})
+
 export class PurchasesController {
     async list(req: Request, res: Response) {
         try {
@@ -23,7 +30,7 @@ export class PurchasesController {
             res.status(201).json(created)
         } catch (error: any) {
             if (error instanceof PurchaseValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json(toPurchaseErrorPayload(error))
             }
             console.error('Create purchase error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -54,7 +61,7 @@ export class PurchasesController {
             res.status(201).json(item)
         } catch (error: any) {
             if (error instanceof PurchaseValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json(toPurchaseErrorPayload(error))
             }
             console.error('Add purchase item error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -72,9 +79,27 @@ export class PurchasesController {
             res.json(updated)
         } catch (error: any) {
             if (error instanceof PurchaseValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json(toPurchaseErrorPayload(error))
             }
             console.error('Receive purchase error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async updateStatus(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+            const status = typeof req.body?.status === 'string' ? req.body.status : ''
+            if (!id || Array.isArray(id)) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
+
+            const updated = await service.updateStatus(tenant.id, id, status)
+            res.json(updated)
+        } catch (error: any) {
+            if (error instanceof PurchaseValidationError) {
+                return res.status(error.statusCode).json(toPurchaseErrorPayload(error))
+            }
+            console.error('Update purchase status error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
@@ -88,7 +113,7 @@ export class PurchasesController {
             res.status(204).send()
         } catch (error: any) {
             if (error instanceof PurchaseValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json(toPurchaseErrorPayload(error))
             }
             console.error('Delete purchase error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -105,7 +130,7 @@ export class PurchasesController {
             res.json(updated)
         } catch (error: any) {
             if (error instanceof PurchaseValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json(toPurchaseErrorPayload(error))
             }
             console.error('Update purchase item error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -122,7 +147,7 @@ export class PurchasesController {
             res.status(204).send()
         } catch (error: any) {
             if (error instanceof PurchaseValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json(toPurchaseErrorPayload(error))
             }
             console.error('Remove purchase item error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

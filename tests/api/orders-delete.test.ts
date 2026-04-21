@@ -139,6 +139,7 @@ describe('Orders delete (unconfirmed only)', () => {
             .set('Authorization', `Bearer ${adminAToken}`)
 
         expect(res.status).toBe(409)
+        expect(res.body?.code).toBe('ORDER_DELETE_STATUS_NOT_ALLOWED')
 
         const stillThere = await prisma.order.findFirst({ where: { tenantId: tenantAId, id: confirmedOrderId } })
         expect(stillThere).not.toBeNull()
@@ -229,6 +230,7 @@ describe('Orders delete (unconfirmed only)', () => {
             .send({ ids: [pending.id, confirmedOrderId] })
 
         expect(res.status).toBe(409)
+        expect(res.body?.code).toBe('ORDER_BULK_DELETE_HAS_LINKED_OR_NON_PENDING')
 
         const stillPending = await prisma.order.findFirst({ where: { tenantId: tenantAId, id: pending.id } })
         expect(stillPending).not.toBeNull()

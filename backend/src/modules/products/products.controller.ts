@@ -126,14 +126,11 @@ export class ProductsController {
             if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'ID required' })
 
             try {
-                await productsService.deleteProduct(tenant.id, id)
-                res.json({ success: true })
+                const result = await productsService.deleteProduct(tenant.id, id)
+                res.json(result)
             } catch (e: any) {
                 if (e.message === 'Product not found') {
                     return res.status(404).json({ statusCode: 404, statusMessage: e.message })
-                }
-                if (e.statusCode === 409 || e.message === 'HAS_TRANSACTIONS') {
-                    return res.status(409).json({ statusCode: 409, statusMessage: 'HAS_TRANSACTIONS' })
                 }
                 throw e
             }

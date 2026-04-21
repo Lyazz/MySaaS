@@ -1,8 +1,6 @@
 <template>
   <div class="space-y-5">
-
-    <!-- Page header -->
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
       <div>
         <p class="text-[10.5px] font-bold uppercase tracking-widest mb-1" style="color: var(--text-tertiary)">
           {{ t('admin.pages.dashboard.snapshot') }}
@@ -10,9 +8,27 @@
         <h2 class="text-[22px] font-semibold tracking-tight" style="color: var(--text-primary); letter-spacing: -0.02em">
           {{ t('admin.pages.dashboard.welcomeBack', { tenant: tenantName }) }}
         </h2>
+        <p class="mt-1 text-[12px]" style="color: var(--text-tertiary)">
+          {{ t('admin.pages.dashboard.periodLabel', { from: dashboard.period.from, to: dashboard.period.to, days: dashboard.period.days }) }}
+        </p>
       </div>
 
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex flex-wrap items-center gap-2 shrink-0">
+        <div class="flex items-center gap-2 rounded-xl px-2.5 py-2" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+          <label class="text-[11px]" style="color: var(--text-tertiary)">{{ t('admin.pages.dashboard.filters.range') }}</label>
+          <select v-model="selectedRange" class="ui-input h-8 py-1 text-[12px] min-w-[112px]" data-testid="dashboard-range-select">
+            <option value="7d">{{ t('admin.pages.dashboard.filters.ranges.7d') }}</option>
+            <option value="30d">{{ t('admin.pages.dashboard.filters.ranges.30d') }}</option>
+            <option value="90d">{{ t('admin.pages.dashboard.filters.ranges.90d') }}</option>
+            <option value="custom">{{ t('admin.pages.dashboard.filters.ranges.custom') }}</option>
+          </select>
+
+          <template v-if="selectedRange === 'custom'">
+            <input v-model="customFrom" type="date" class="ui-input h-8 py-1 text-[12px]" data-testid="dashboard-custom-from">
+            <input v-model="customTo" type="date" class="ui-input h-8 py-1 text-[12px]" data-testid="dashboard-custom-to">
+          </template>
+        </div>
+
         <NuxtLink
           v-if="!storeSettings?.isCompleted"
           to="/admin/onboarding"
@@ -21,6 +37,7 @@
           <Icon name="lucide:sparkles" class="h-4 w-4" />
           {{ t('admin.pages.dashboard.finishSetup') }}
         </NuxtLink>
+
         <button
           type="button"
           class="ui-btn ui-btn--sm ui-btn--secondary"
@@ -33,7 +50,6 @@
       </div>
     </div>
 
-    <!-- Error state -->
     <div
       v-if="error && !pending"
       class="rounded-xl px-4 py-3 text-sm flex items-center gap-3"
@@ -46,47 +62,71 @@
       </div>
     </div>
 
-    <!-- Stat cards -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <AdminDashboardStatCard
-        :label="t('admin.pages.dashboard.stats.orders7d')"
-        :value="dashboard.last7d.orders"
-        icon="lucide:clipboard-list"
+        :label="t('admin.pages.dashboard.stats.totalRevenue')"
+        :value="formatMoney(dashboard.revenue.total)"
+        icon="lucide:wallet"
+        :loading="pending"
+        tone="brand"
+        to="/admin/sales"
+      />
+      <AdminDashboardStatCard
+        :label="t('admin.pages.dashboard.stats.ordersRevenue')"
+        :value="formatMoney(dashboard.revenue.orders)"
+        icon="lucide:shopping-bag"
         :loading="pending"
         tone="blue"
         to="/admin/orders"
       />
       <AdminDashboardStatCard
-        :label="t('admin.pages.dashboard.stats.revenue7d')"
-        :value="formatMoney(dashboard.last7d.revenue)"
-        icon="lucide:banknote"
+        :label="t('admin.pages.dashboard.stats.posRevenue')"
+        :value="formatMoney(dashboard.revenue.pos)"
+        icon="lucide:monitor-smartphone"
         :loading="pending"
-        tone="brand"
-        to="/admin/orders"
+        tone="slate"
+        to="/admin/pos"
       />
       <AdminDashboardStatCard
-        :label="t('admin.pages.dashboard.stats.products')"
-        :value="dashboard.counts.products"
-        icon="lucide:package"
-        :loading="pending"
-        tone="brand"
-        to="/admin/products"
-      />
-      <AdminDashboardStatCard
-        :label="t('admin.pages.dashboard.stats.lowStock')"
-        :value="dashboard.inventory.lowStockProducts"
-        :hint="dashboard.inventory.outOfStockProducts ? t('admin.pages.dashboard.stats.outOfStock', { count: dashboard.inventory.outOfStockProducts }) : undefined"
-        icon="lucide:alert-circle"
+        :label="t('admin.pages.dashboard.stats.ordersCount')"
+        :value="trendOrdersCount"
+        icon="lucide:clipboard-list"
         :loading="pending"
         tone="amber"
-        to="/admin/products"
+        to="/admin/orders"
       />
     </div>
 
-    <!-- Main content -->
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <AdminDashboardTrendChart
+        :title="t('admin.pages.dashboard.trends.revenue.title')"
+        :hint="t('admin.pages.dashboard.trends.revenue.hint')"
+        :trends="dashboard.trends"
+        value-key="totalRevenue"
+        color="#FF7A45"
+        :loading="pending"
+        :empty-label="t('admin.pages.dashboard.trends.empty')"
+      />
+      <AdminDashboardTrendChart
+        :title="t('admin.pages.dashboard.trends.orders.title')"
+        :hint="t('admin.pages.dashboard.trends.orders.hint')"
+        :trends="dashboard.trends"
+        value-key="ordersCount"
+        color="#60a5fa"
+        :loading="pending"
+        :empty-label="t('admin.pages.dashboard.trends.empty')"
+      />
+    </div>
 
-      <!-- Recent orders (2/3) -->
+    <AdminDashboardInsightsPanels
+      :top-products="dashboard.topProducts"
+      :top-categories="dashboard.topCategories"
+      :critical-stock="dashboard.criticalStock"
+      :loading="pending"
+      :format-money="formatMoney"
+    />
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <div class="lg:col-span-2 rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
         <div class="flex items-center justify-between gap-4 px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
           <div class="min-w-0">
@@ -97,10 +137,7 @@
               {{ t('admin.pages.dashboard.recentOrders.hint') }}
             </p>
           </div>
-          <NuxtLink
-            to="/admin/orders"
-            class="ui-btn ui-btn--sm ui-btn--secondary shrink-0"
-          >
+          <NuxtLink to="/admin/orders" class="ui-btn ui-btn--sm ui-btn--secondary shrink-0">
             {{ t('admin.pages.dashboard.recentOrders.viewAll') }}
             <Icon name="lucide:arrow-right" class="h-3.5 w-3.5" />
           </NuxtLink>
@@ -116,32 +153,12 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Skeleton -->
-              <tr v-if="pending" v-for="n in 5" :key="'sk-' + n">
-                <td class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
-                  <div class="h-3.5 w-20 rounded animate-pulse" style="background: rgba(255,255,255,0.06)" />
-                </td>
-                <td class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
-                  <div class="space-y-1.5">
-                    <div class="h-3.5 w-36 rounded animate-pulse" style="background: rgba(255,255,255,0.06)" />
-                    <div class="h-3 w-24 rounded animate-pulse" style="background: rgba(255,255,255,0.04)" />
-                  </div>
-                </td>
-                <td class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
-                  <div class="h-3.5 w-20 rounded animate-pulse font-mono-nums" style="background: rgba(255,255,255,0.06)" />
-                </td>
-                <td class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
-                  <div class="h-5 w-20 rounded-md animate-pulse" style="background: rgba(255,255,255,0.06)" />
-                </td>
-                <td class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
-                  <div class="h-3.5 w-28 rounded animate-pulse" style="background: rgba(255,255,255,0.06)" />
-                </td>
-                <td class="px-5 py-3.5 text-right" style="border-bottom: 1px solid var(--surface-border)">
-                  <div class="ml-auto h-3.5 w-12 rounded animate-pulse" style="background: rgba(255,255,255,0.06)" />
+              <tr v-if="pending" v-for="n in 5" :key="`dash-sk-${n}`">
+                <td v-for="m in 6" :key="`dash-sk-cell-${n}-${m}`" class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
+                  <div class="h-3.5 rounded animate-pulse" style="background: rgba(255,255,255,0.06)" />
                 </td>
               </tr>
 
-              <!-- Empty -->
               <tr v-else-if="dashboard.recentOrders.length === 0">
                 <td colspan="6" class="px-5 py-14 text-center">
                   <div class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
@@ -153,23 +170,10 @@
                   <p class="mt-1 text-[12px]" style="color: var(--text-tertiary)">
                     {{ t('admin.pages.dashboard.recentOrders.empty.hint') }}
                   </p>
-                  <NuxtLink
-                    to="/"
-                    class="ui-btn ui-btn--sm ui-btn--secondary mt-4 mx-auto"
-                  >
-                    {{ t('admin.pages.dashboard.recentOrders.empty.viewStorefront') }}
-                    <Icon name="lucide:external-link" class="h-3.5 w-3.5" />
-                  </NuxtLink>
                 </td>
               </tr>
 
-              <!-- Rows -->
-              <tr
-                v-else
-                v-for="order in dashboard.recentOrders"
-                :key="order.id"
-                class="table-row-hover"
-              >
+              <tr v-else v-for="order in dashboard.recentOrders" :key="order.id" class="table-row-hover">
                 <td class="px-5 py-3.5 whitespace-nowrap" style="border-bottom: 1px solid var(--surface-border)">
                   <span class="text-[12px] font-semibold font-mono-nums" style="color: var(--text-primary)">#{{ order.id.substring(0, 8) }}</span>
                 </td>
@@ -187,11 +191,7 @@
                   {{ formatDateTime(order.createdAt) }}
                 </td>
                 <td class="px-5 py-3.5 whitespace-nowrap text-right" style="border-bottom: 1px solid var(--surface-border)">
-                  <NuxtLink
-                    :to="`/admin/orders/${order.id}`"
-                    class="inline-flex items-center gap-1.5 text-[12px] font-medium transition-colors hover:opacity-70"
-                    style="color: var(--brand)"
-                  >
+                  <NuxtLink :to="`/admin/orders/${order.id}`" class="inline-flex items-center gap-1.5 text-[12px] font-medium transition-colors hover:opacity-70" style="color: var(--brand)">
                     <Icon name="lucide:eye" class="h-3.5 w-3.5" />
                     {{ t('common.view') }}
                   </NuxtLink>
@@ -202,10 +202,7 @@
         </div>
       </div>
 
-      <!-- Right column -->
       <div class="space-y-4">
-
-        <!-- Order status breakdown -->
         <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
           <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.dashboard.orderStatus.title') }}
@@ -230,7 +227,6 @@
           </div>
         </div>
 
-        <!-- Quick links -->
         <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
           <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.dashboard.quickLinks.title') }}
@@ -254,7 +250,6 @@
             </NuxtLink>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -278,6 +273,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { buildDashboardRangeQuery, defaultCustomDateRange, type DashboardRange } from '~/composables/admin/dashboardRange'
 
 definePageMeta({
   middleware: 'auth',
@@ -285,50 +281,108 @@ definePageMeta({
   titleKey: 'admin.pages.dashboard.title'
 })
 
-const authStore = useAuthStore()
-const { t, locale } = useI18n({ useScope: 'global' })
-
 type DashboardResponse = {
   counts: { products: number; categories: number; orders: number }
   last7d: { orders: number; revenue: number }
   inventory: { lowStockProducts: number; outOfStockProducts: number }
+  period: { range: DashboardRange; from: string; to: string; days: number }
+  revenue: { total: number; orders: number; pos: number }
+  trends: Array<{
+    date: string
+    ordersCount: number
+    ordersRevenue: number
+    posRevenue: number
+    totalRevenue: number
+  }>
+  topProducts: Array<{ productId: string; title: string; quantity: number; revenue: number }>
+  topCategories: Array<{ categoryId: string; title: string; quantity: number; revenue: number }>
+  criticalStock: Array<{ productId: string; title: string; stock: number; lowStockThreshold: number }>
   ordersByStatus: Record<string, number>
   recentOrders: Array<{
-    id: string; status: string; totalAmount: number
-    customerName: string; customerPhone: string; createdAt: string
+    id: string
+    status: string
+    totalAmount: number
+    customerName: string
+    customerPhone: string
+    createdAt: string
   }>
 }
 
-const storeSettings = useState<any>('storeSettings')
+const authStore = useAuthStore()
+const { t, locale } = useI18n({ useScope: 'global' })
+const storeSettings = useState('storeSettings') as any
+
 const tenantName = computed(() => authStore.user?.tenant?.name || 'your store')
+const { format: formatMoney } = useCurrency()
+
+const defaultCustomRange = defaultCustomDateRange()
+const selectedRange = ref<DashboardRange>('7d')
+const customFrom = ref(defaultCustomRange.from)
+const customTo = ref(defaultCustomRange.to)
+
+watch(selectedRange, (value) => {
+  if (value === 'custom' && (!customFrom.value || !customTo.value)) {
+    const defaults = defaultCustomDateRange()
+    customFrom.value = defaults.from
+    customTo.value = defaults.to
+  }
+})
 
 const emptyDashboard: DashboardResponse = {
   counts: { products: 0, categories: 0, orders: 0 },
   last7d: { orders: 0, revenue: 0 },
   inventory: { lowStockProducts: 0, outOfStockProducts: 0 },
+  period: { range: '7d', from: defaultCustomRange.from, to: defaultCustomRange.to, days: 7 },
+  revenue: { total: 0, orders: 0, pos: 0 },
+  trends: [],
+  topProducts: [],
+  topCategories: [],
+  criticalStock: [],
   ordersByStatus: {},
   recentOrders: []
 }
 
 const { data, pending, error, refresh } = await useAsyncData<DashboardResponse>(
-  'adminDashboard',
+  'adminDashboardV2',
   async () => {
     const token = (authStore as any).token?.value ?? (authStore as any).token
     if (!token || typeof token !== 'string') return emptyDashboard
+
+    let query: Record<string, string>
+    try {
+      query = buildDashboardRangeQuery(selectedRange.value, customFrom.value, customTo.value)
+    } catch {
+      return emptyDashboard
+    }
+
     return $fetch<DashboardResponse>('/api/admin/dashboard', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
+      query
     })
   },
-  { server: false, watch: [() => authStore.token], default: () => emptyDashboard }
+  {
+    server: false,
+    watch: [() => authStore.token, selectedRange, customFrom, customTo],
+    default: () => emptyDashboard
+  }
 )
 
 const dashboard = computed(() => data.value || emptyDashboard)
-const { format: formatMoney } = useCurrency()
+
+const trendOrdersCount = computed(() =>
+  dashboard.value.trends.reduce((sum, point) => sum + Number(point.ordersCount || 0), 0)
+)
 
 function formatDateTime(dateString: string) {
   const date = new Date(dateString)
   const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
-  return date.toLocaleString(intlLocale, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleString(intlLocale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 const tableColumns = computed(() => [
@@ -343,19 +397,19 @@ const tableColumns = computed(() => [
 const statusRows = computed(() => {
   const byStatus = dashboard.value.ordersByStatus || {}
   return [
-    { status: 'PENDING',   labelKey: 'admin.orderStatus.pending',   dotClass: 'bg-amber-500' },
+    { status: 'PENDING', labelKey: 'admin.orderStatus.pending', dotClass: 'bg-amber-500' },
     { status: 'CONFIRMED', labelKey: 'admin.orderStatus.confirmed', dotClass: 'bg-blue-500' },
-    { status: 'SHIPPED',   labelKey: 'admin.orderStatus.shipped',   dotClass: 'bg-indigo-400' },
+    { status: 'SHIPPED', labelKey: 'admin.orderStatus.shipped', dotClass: 'bg-indigo-400' },
     { status: 'DELIVERED', labelKey: 'admin.orderStatus.delivered', dotClass: 'bg-emerald-500' },
     { status: 'CANCELLED', labelKey: 'admin.orderStatus.cancelled', dotClass: 'bg-red-500' },
-    { status: 'RETURNED',  labelKey: 'admin.orderStatus.returned',  dotClass: 'bg-purple-400' }
-  ].map((r) => ({ ...r, count: Number(byStatus[r.status] || 0) }))
+    { status: 'RETURNED', labelKey: 'admin.orderStatus.returned', dotClass: 'bg-purple-400' }
+  ].map((row) => ({ ...row, count: Number(byStatus[row.status] || 0) }))
 })
 
 const quickLinks = computed(() => [
-  { to: '/admin/products/create', icon: 'lucide:plus', label: t('admin.pages.dashboard.quickLinks.addProduct') },
+  { to: '/admin/orders', icon: 'lucide:shopping-bag', label: t('admin.pages.dashboard.quickLinks.orders') },
   { to: '/admin/products', icon: 'lucide:package', label: t('admin.pages.dashboard.quickLinks.manageProducts') },
-  { to: '/admin/categories', icon: 'lucide:tags', label: t('admin.pages.dashboard.quickLinks.categories') },
+  { to: '/admin/inventory', icon: 'lucide:warehouse', label: t('admin.pages.dashboard.quickLinks.inventory') },
   { to: '/admin/settings/appearance', icon: 'lucide:palette', label: t('admin.pages.dashboard.quickLinks.appearance') }
 ])
 </script>

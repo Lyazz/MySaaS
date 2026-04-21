@@ -18,11 +18,15 @@ const telegramService = new TelegramService()
 export class OrderValidationError extends Error {
     statusCode: number
     statusMessage: string
+    code?: string
+    meta?: Record<string, unknown>
 
-    constructor(statusCode: number, statusMessage: string) {
+    constructor(statusCode: number, statusMessage: string, opts?: { code?: string; meta?: Record<string, unknown> }) {
         super(statusMessage)
         this.statusCode = statusCode
         this.statusMessage = statusMessage
+        this.code = opts?.code
+        this.meta = opts?.meta
     }
 }
 
@@ -462,7 +466,9 @@ export class OrdersService {
 
             if (!existing) throw new OrderValidationError(404, 'Order not found')
             if (existing.status !== 'PENDING') {
-                throw new OrderValidationError(409, 'Only unconfirmed (PENDING) orders can be deleted')
+                throw new OrderValidationError(409, 'Only unconfirmed (PENDING) orders can be deleted', {
+                    code: 'ORDER_DELETE_STATUS_NOT_ALLOWED'
+                })
             }
 
             if (
@@ -471,7 +477,15 @@ export class OrdersService {
                 existing._count.cashTransactions > 0 ||
                 existing._count.inventoryMovements > 0
             ) {
-                throw new OrderValidationError(409, 'Order cannot be deleted because it has linked records')
+                throw new OrderValidationError(409, 'Order cannot be deleted because it has linked records', {
+                    code: 'ORDER_DELETE_HAS_LINKED_RECORDS',
+                    meta: {
+                        hasSale: Boolean(existing.sale),
+                        shipmentsCount: existing._count.shipments,
+                        cashTransactionsCount: existing._count.cashTransactions,
+                        inventoryMovementsCount: existing._count.inventoryMovements
+                    }
+                })
             }
 
             await tx.orderItem.deleteMany({ where: { tenantId, orderId: id } })
@@ -514,7 +528,11 @@ export class OrdersService {
                 o._count.cashTransactions > 0 ||
                 o._count.inventoryMovements > 0
             )
-            if (notDeletable.length) throw new OrderValidationError(409, 'Some orders cannot be deleted')
+            if (notDeletable.length) {
+                throw new OrderValidationError(409, 'Some orders cannot be deleted', {
+                    code: 'ORDER_BULK_DELETE_HAS_LINKED_OR_NON_PENDING'
+                })
+            }
 
             const deletableIds = orders.map((o) => o.id)
 

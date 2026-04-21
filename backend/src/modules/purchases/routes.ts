@@ -17,6 +17,7 @@ router.post('/:id/items', controller.addItem.bind(controller))
 router.put('/:id/items/:itemId', controller.updateItem.bind(controller))
 router.delete('/:id/items/:itemId', controller.removeItem.bind(controller))
 router.post('/:id/receive', requireCashCreateIfSupplierPaymentRequested, controller.receive.bind(controller))
+router.patch('/:id/status', controller.updateStatus.bind(controller))
 router.delete('/:id', controller.delete.bind(controller))
 
 export default router

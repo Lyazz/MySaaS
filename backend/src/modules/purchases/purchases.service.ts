@@ -8,11 +8,15 @@ const cashService = new CashService()
 export class PurchaseValidationError extends Error {
     statusCode: number
     statusMessage: string
+    code?: string
+    meta?: Record<string, unknown>
 
-    constructor(statusCode: number, statusMessage: string) {
+    constructor(statusCode: number, statusMessage: string, opts?: { code?: string; meta?: Record<string, unknown> }) {
         super(statusMessage)
         this.statusCode = statusCode
         this.statusMessage = statusMessage
+        this.code = opts?.code
+        this.meta = opts?.meta
     }
 }
 
@@ -49,6 +53,14 @@ const normalizeCostMode = (value: unknown): CostMode => {
 const toDecimal = (value: string) => new Prisma.Decimal(value)
 
 export class PurchasesService {
+    private static readonly PURCHASE_STATUSES = new Set([
+        'DRAFT',
+        'ORDERED',
+        'PARTIALLY_RECEIVED',
+        'RECEIVED',
+        'CANCELLED'
+    ])
+
     async list(tenantId: string, filters?: { startDate?: string; endDate?: string; supplierId?: string; status?: string; paymentStatus?: string }) {
         const where: Prisma.PurchaseOrderWhereInput = { tenantId }
 
@@ -456,12 +468,98 @@ export class PurchasesService {
         return this.getById(tenantId, purchaseOrderId)
     }
 
-    async delete(tenantId: string, purchaseOrderId: string) {
-        const order = await prisma.purchaseOrder.findFirst({ where: { tenantId, id: purchaseOrderId }, include: { items: true } })
+    async updateStatus(tenantId: string, purchaseOrderId: string, status: string) {
+        const targetStatus = String(status || '').trim().toUpperCase()
+        if (!targetStatus || !PurchasesService.PURCHASE_STATUSES.has(targetStatus)) {
+            throw new PurchaseValidationError(400, 'Invalid status value', {
+                code: 'PURCHASE_STATUS_INVALID'
+            })
+        }
+
+        const order = await prisma.purchaseOrder.findFirst({
+            where: { tenantId, id: purchaseOrderId },
+            select: {
+                status: true,
+                orderedAt: true,
+                items: { select: { quantityReceived: true } },
+                _count: { select: { cashTransactions: true, supplierPayments: true } }
+            }
+        })
+
         if (!order) throw new PurchaseValidationError(404, 'Purchase order not found')
 
-        const hasReceived = order.items.some(i => i.quantityReceived > 0)
-        if (hasReceived) throw new PurchaseValidationError(400, 'Cannot delete purchase order with received items')
+        if (order.status === targetStatus) {
+            return this.getById(tenantId, purchaseOrderId)
+        }
+
+        const hasReceived = order.items.some((i) => i.quantityReceived > 0)
+        const hasLedgerEntries = order._count.cashTransactions > 0 || order._count.supplierPayments > 0
+
+        const transitionAllowed =
+            (order.status === 'DRAFT' && (targetStatus === 'ORDERED' || targetStatus === 'CANCELLED')) ||
+            (order.status === 'ORDERED' && (targetStatus === 'DRAFT' || targetStatus === 'CANCELLED'))
+
+        if (!transitionAllowed) {
+            throw new PurchaseValidationError(409, `Invalid status transition: ${order.status} -> ${targetStatus}`, {
+                code: 'PURCHASE_STATUS_TRANSITION_NOT_ALLOWED'
+            })
+        }
+
+        if (targetStatus === 'CANCELLED') {
+            if (hasReceived) {
+                throw new PurchaseValidationError(409, 'Cannot cancel purchase order with received items', {
+                    code: 'PURCHASE_CANCEL_HAS_RECEIVED_ITEMS'
+                })
+            }
+            if (hasLedgerEntries) {
+                throw new PurchaseValidationError(409, 'Cannot cancel purchase order with linked payment records', {
+                    code: 'PURCHASE_CANCEL_HAS_LEDGER_ENTRIES'
+                })
+            }
+        }
+
+        await prisma.purchaseOrder.update({
+            where: { tenantId_id: { tenantId, id: purchaseOrderId } },
+            data: {
+                status: targetStatus,
+                orderedAt: targetStatus === 'ORDERED' ? (order.orderedAt ?? new Date()) : order.orderedAt,
+                receivedAt: targetStatus === 'CANCELLED' ? null : undefined
+            }
+        })
+
+        return this.getById(tenantId, purchaseOrderId)
+    }
+
+    async delete(tenantId: string, purchaseOrderId: string) {
+        const order = await prisma.purchaseOrder.findFirst({
+            where: { tenantId, id: purchaseOrderId },
+            select: {
+                id: true,
+                status: true,
+                items: { select: { quantityReceived: true } },
+                _count: { select: { cashTransactions: true, supplierPayments: true } }
+            }
+        })
+        if (!order) throw new PurchaseValidationError(404, 'Purchase order not found')
+
+        if (order.status !== 'DRAFT' && order.status !== 'ORDERED') {
+            throw new PurchaseValidationError(409, 'Only pre-posting purchase orders can be deleted', {
+                code: 'PURCHASE_DELETE_STATUS_NOT_ALLOWED'
+            })
+        }
+
+        const hasReceived = order.items.some((i) => i.quantityReceived > 0)
+        if (hasReceived) {
+            throw new PurchaseValidationError(409, 'Cannot delete purchase order with received items', {
+                code: 'PURCHASE_DELETE_HAS_RECEIVED_ITEMS'
+            })
+        }
+
+        if (order._count.cashTransactions > 0 || order._count.supplierPayments > 0) {
+            throw new PurchaseValidationError(409, 'Cannot delete purchase order with linked payment records', {
+                code: 'PURCHASE_DELETE_HAS_LEDGER_ENTRIES'
+            })
+        }
 
         await prisma.purchaseOrderItem.deleteMany({ where: { tenantId, purchaseOrderId } })
         await prisma.purchaseOrder.delete({ where: { tenantId, id: purchaseOrderId } })

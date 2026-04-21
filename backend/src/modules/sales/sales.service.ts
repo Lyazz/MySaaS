@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma'
 import { PosService } from '../pos/pos.service'
 import { CashService } from '../cash/cash.service'
+import { syncProductStockForProducts } from '../inventory/product-stock.service'
 
 export interface SalesListFilters {
     search?: string
@@ -18,6 +19,21 @@ export interface SalesPagination {
 
 const posService = new PosService()
 const cashService = new CashService()
+
+export class SalesValidationError extends Error {
+    statusCode: number
+    statusMessage: string
+    code?: string
+    meta?: Record<string, unknown>
+
+    constructor(statusCode: number, statusMessage: string, opts?: { code?: string; meta?: Record<string, unknown> }) {
+        super(statusMessage)
+        this.statusCode = statusCode
+        this.statusMessage = statusMessage
+        this.code = opts?.code
+        this.meta = opts?.meta
+    }
+}
 
 export class SalesService {
     async list(tenantId: string, filters: SalesListFilters, pagination: SalesPagination = { page: 1, limit: 25 }) {
@@ -254,6 +270,120 @@ export class SalesService {
             )
 
             return sale
+        })
+    }
+
+    async updateStatus(tenantId: string, id: string, status: string, actor?: { userId?: string | null }) {
+        const targetStatus = String(status || '').trim().toUpperCase()
+        if (targetStatus !== 'REFUNDED') {
+            throw new SalesValidationError(400, 'Invalid status value', {
+                code: 'SALE_STATUS_INVALID'
+            })
+        }
+
+        const sale = await prisma.sale.findFirst({
+            where: { tenantId, id },
+            select: {
+                id: true,
+                status: true,
+                source: true,
+                orderId: true,
+                items: {
+                    select: { variantId: true, quantity: true }
+                }
+            }
+        })
+        if (!sale) {
+            throw new SalesValidationError(404, 'Sale not found')
+        }
+        if (sale.orderId) {
+            throw new SalesValidationError(409, 'Order-linked sales cannot be refunded here', {
+                code: 'SALE_REFUND_ORDER_LINKED_NOT_ALLOWED'
+            })
+        }
+        if (sale.status === 'REFUNDED') {
+            return prisma.sale.findFirst({
+                where: { tenantId, id },
+                include: { items: { include: { product: true, variant: true } } }
+            })
+        }
+        if (sale.status !== 'COMPLETED') {
+            throw new SalesValidationError(409, `Invalid status transition: ${sale.status} -> ${targetStatus}`, {
+                code: 'SALE_STATUS_TRANSITION_NOT_ALLOWED'
+            })
+        }
+
+        return prisma.$transaction(async (tx) => {
+            const touchedProductIds = new Set<string>()
+            for (const item of sale.items) {
+                if (!item.variantId) continue
+
+                const variantBefore = await tx.productVariant.findFirst({
+                    where: { tenantId, id: item.variantId },
+                    select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                })
+                if (!variantBefore) continue
+                if (variantBefore.trackInventory === false) continue
+
+                const updated = await tx.productVariant.updateMany({
+                    where: {
+                        tenantId,
+                        id: item.variantId,
+                        stock: variantBefore.stock,
+                        reserved: variantBefore.reserved,
+                        safetyStock: variantBefore.safetyStock
+                    },
+                    data: {
+                        stock: { increment: item.quantity }
+                    }
+                })
+                if (updated.count !== 1) {
+                    throw new SalesValidationError(409, 'Inventory conflict, please retry', {
+                        code: 'SALE_REFUND_INVENTORY_CONFLICT'
+                    })
+                }
+                touchedProductIds.add(variantBefore.productId)
+
+                const variantAfter = await tx.productVariant.findFirst({
+                    where: { tenantId, id: item.variantId },
+                    select: { stock: true, reserved: true, safetyStock: true }
+                })
+
+                await tx.inventoryMovement.create({
+                    data: {
+                        tenantId,
+                        variantId: item.variantId,
+                        type: 'MANUAL_ADJUSTMENT',
+                        delta: item.quantity,
+                        reservedDelta: 0,
+                        safetyStockDelta: 0,
+                        reason: 'sale_refund',
+                        note: `sale_refund:${sale.id}`.slice(0, 500),
+                        saleId: sale.id,
+                        stockAfter: variantAfter?.stock ?? null,
+                        reservedAfter: variantAfter?.reserved ?? null,
+                        safetyStockAfter: variantAfter?.safetyStock ?? null,
+                        createdByUserId: actor?.userId ?? null
+                    }
+                })
+            }
+
+            await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
+
+            const statusUpdate = await tx.sale.updateMany({
+                where: { tenantId, id: sale.id, status: 'COMPLETED' },
+                data: { status: 'REFUNDED' }
+            })
+            if (statusUpdate.count !== 1) {
+                throw new SalesValidationError(409, 'Sale was updated by another request, please retry', {
+                    code: 'SALE_REFUND_STATUS_CONFLICT'
+                })
+            }
+
+            return tx.sale.findFirst({
+                where: { tenantId, id: sale.id },
+                include: { items: { include: { product: true, variant: true } } }
+            })
         })
     }
 }

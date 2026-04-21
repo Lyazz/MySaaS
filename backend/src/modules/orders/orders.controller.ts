@@ -66,7 +66,9 @@ export class OrdersController {
                 if (err instanceof OrderValidationError) {
                     return res.status(err.statusCode).json({
                         statusCode: err.statusCode,
-                        statusMessage: err.statusMessage
+                        statusMessage: err.statusMessage,
+                        code: err.code,
+                        meta: err.meta
                     })
                 }
                 throw err
@@ -136,7 +138,9 @@ export class OrdersController {
                 if (err instanceof OrderValidationError) {
                     return res.status(err.statusCode).json({
                         statusCode: err.statusCode,
-                        statusMessage: err.statusMessage
+                        statusMessage: err.statusMessage,
+                        code: err.code,
+                        meta: err.meta
                     })
                 }
                 throw err
@@ -203,7 +207,9 @@ export class OrdersController {
                 if (err instanceof OrderValidationError) {
                     return res.status(err.statusCode).json({
                         statusCode: err.statusCode,
-                        statusMessage: err.statusMessage
+                        statusMessage: err.statusMessage,
+                        code: err.code,
+                        meta: err.meta
                     })
                 }
                 throw err
@@ -230,7 +236,9 @@ export class OrdersController {
                 if (err instanceof OrderValidationError) {
                     return res.status(err.statusCode).json({
                         statusCode: err.statusCode,
-                        statusMessage: err.statusMessage
+                        statusMessage: err.statusMessage,
+                        code: err.code,
+                        meta: err.meta
                     })
                 }
                 throw err
@@ -257,7 +265,9 @@ export class OrdersController {
                 if (err instanceof OrderValidationError) {
                     return res.status(err.statusCode).json({
                         statusCode: err.statusCode,
-                        statusMessage: err.statusMessage
+                        statusMessage: err.statusMessage,
+                        code: err.code,
+                        meta: err.meta
                     })
                 }
                 throw err
@@ -303,7 +313,9 @@ export class OrdersController {
             if (error instanceof OrderValidationError) {
                 return res.status(error.statusCode).json({
                     statusCode: error.statusCode,
-                    statusMessage: error.statusMessage
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
                 })
             }
 
@@ -345,7 +357,9 @@ export class OrdersController {
             if (error instanceof OrderValidationError) {
                 return res.status(error.statusCode).json({
                     statusCode: error.statusCode,
-                    statusMessage: error.statusMessage
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
                 })
             }
 

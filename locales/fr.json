@@ -2118,17 +2118,61 @@
         "title": "Tableau de bord",
         "welcomeBack": "Bon retour, {tenant}",
         "snapshot": "Un aperçu rapide de votre boutique.",
+        "periodLabel": "Période : {from} au {to} ({days} jours)",
         "refresh": "Actualiser",
         "finishSetup": "Terminer la configuration",
         "loadErrorTitle": "Les données du tableau de bord n’ont pas pu être chargées.",
         "loadErrorHint": "Essayez d’actualiser. Si cela continue, vérifiez votre connexion ou votre session.",
+        "filters": {
+          "range": "Période",
+          "ranges": {
+            "7d": "7 derniers jours",
+            "30d": "30 derniers jours",
+            "90d": "90 derniers jours",
+            "custom": "Personnalisée"
+          }
+        },
         "stats": {
+          "totalRevenue": "CA total",
+          "ordersRevenue": "CA commandes",
+          "posRevenue": "CA point de vente",
+          "ordersCount": "Nombre de commandes",
           "activeSessions": "Sessions actives",
           "orders7d": "Commandes (7 jours)",
           "revenue7d": "Chiffre d’affaires (7 jours)",
           "products": "Produits",
           "lowStock": "Stock faible",
           "outOfStock": "{count} en rupture de stock"
+        },
+        "trends": {
+          "revenue": {
+            "title": "Tendance du chiffre d’affaires",
+            "hint": "Commandes + POS sur la période sélectionnée."
+          },
+          "orders": {
+            "title": "Tendance des commandes",
+            "hint": "Volume de commandes sur la période sélectionnée."
+          },
+          "empty": "Aucune donnée de tendance sur cette période."
+        },
+        "insights": {
+          "units": "{count} unités",
+          "topProducts": {
+            "title": "Produits les plus vendus",
+            "hint": "Produits les plus performants sur la période.",
+            "empty": "Aucune vente produit sur cette période."
+          },
+          "topCategories": {
+            "title": "Catégories les plus vendues",
+            "hint": "Catégories les plus performantes sur la période.",
+            "empty": "Aucune vente catégorie sur cette période."
+          },
+          "criticalStock": {
+            "title": "Stock critique",
+            "hint": "Produits au seuil bas ou en dessous.",
+            "empty": "Aucun produit en stock critique actuellement.",
+            "threshold": "Seuil {count}"
+          }
         },
         "recentOrders": {
           "title": "Commandes récentes",
@@ -2155,8 +2199,10 @@
         "quickLinks": {
           "title": "Actions rapides",
           "hint": "Les tâches admin les plus courantes.",
+          "orders": "Commandes",
           "addProduct": "Ajouter un produit",
           "manageProducts": "Gérer les produits",
+          "inventory": "Inventaire",
           "categories": "Catégories",
           "appearance": "Apparence",
           "pos": "Point de vente",
@@ -2465,12 +2511,22 @@
           "pagination": {
             "showing": "Affichage de {from} à {to} sur {total} résultats"
           },
+          "workspace": {
+            "parentsTitle": "Catégories principales",
+            "parentsHint": "Sélectionnez une catégorie pour afficher ses sous-catégories à droite.",
+            "subcategoriesTitle": "Sous-catégories",
+            "subcategoriesHint": "Gérez les sous-catégories et ouvrez, copiez, modifiez ou supprimez-les rapidement.",
+            "subcategoriesCount": "{count} sous-catégories",
+            "noSubcategories": "Aucune sous-catégorie pour cette catégorie pour le moment.",
+            "selectCategory": "Sélectionnez une catégorie pour afficher ses sous-catégories."
+          },
           "deleteModal": {
             "title": "Supprimer la catégorie",
             "message": "Voulez-vous vraiment supprimer cette catégorie ? Les produits deviendront « sans catégorie ».",
             "messageWithTitle": "Voulez-vous vraiment supprimer « {title} » ? Les produits deviendront « sans catégorie ».",
             "error": "Impossible de supprimer la catégorie. Veuillez réessayer.",
-            "errorHasProducts": "Impossible de supprimer cette catégorie car elle contient encore des produits. Déplacez ou supprimez-les d'abord."
+            "errorHasProducts": "Impossible de supprimer cette catégorie car elle contient encore des produits. Déplacez ou supprimez-les d'abord.",
+            "errorHasChildren": "Impossible de supprimer cette catégorie car elle contient encore des sous-catégories. Déplacez-les ou supprimez-les d'abord."
           }
         },
         "create": {

@@ -2144,17 +2144,61 @@
         "title": "Dashboard",
         "welcomeBack": "Welcome back, {tenant}",
         "snapshot": "A quick snapshot of your store.",
+        "periodLabel": "Period: {from} to {to} ({days} days)",
         "refresh": "Refresh",
         "finishSetup": "Finish setup",
         "loadErrorTitle": "Dashboard data couldn’t be loaded.",
         "loadErrorHint": "Try refreshing. If it keeps happening, check your connection or login session.",
+        "filters": {
+          "range": "Range",
+          "ranges": {
+            "7d": "Last 7 days",
+            "30d": "Last 30 days",
+            "90d": "Last 90 days",
+            "custom": "Custom"
+          }
+        },
         "stats": {
+          "totalRevenue": "Total revenue",
+          "ordersRevenue": "Orders revenue",
+          "posRevenue": "POS revenue",
+          "ordersCount": "Orders count",
           "activeSessions": "Active Sessions",
           "orders7d": "Orders (7 days)",
           "revenue7d": "Revenue (7 days)",
           "products": "Products",
           "lowStock": "Low stock",
           "outOfStock": "{count} out of stock"
+        },
+        "trends": {
+          "revenue": {
+            "title": "Revenue trend",
+            "hint": "Orders + POS revenue over the selected period."
+          },
+          "orders": {
+            "title": "Orders trend",
+            "hint": "Order volume over the selected period."
+          },
+          "empty": "No trend data for this period."
+        },
+        "insights": {
+          "units": "{count} units",
+          "topProducts": {
+            "title": "Top products",
+            "hint": "Best selling products in the selected period.",
+            "empty": "No product sales in this period."
+          },
+          "topCategories": {
+            "title": "Top categories",
+            "hint": "Best performing categories in the selected period.",
+            "empty": "No category sales in this period."
+          },
+          "criticalStock": {
+            "title": "Critical stock",
+            "hint": "Products below or at low-stock threshold.",
+            "empty": "No critical stock products right now.",
+            "threshold": "Threshold {count}"
+          }
         },
         "recentOrders": {
           "title": "Recent orders",
@@ -2181,8 +2225,10 @@
         "quickLinks": {
           "title": "Quick actions",
           "hint": "The most common admin tasks.",
+          "orders": "Orders",
           "addProduct": "Add product",
           "manageProducts": "Manage products",
+          "inventory": "Inventory",
           "categories": "Categories",
           "appearance": "Appearance",
           "pos": "Point of Sale",
@@ -2491,12 +2537,22 @@
           "pagination": {
             "showing": "Showing {from} to {to} of {total} results"
           },
+          "workspace": {
+            "parentsTitle": "Main categories",
+            "parentsHint": "Select a category to open its subcategories on the side.",
+            "subcategoriesTitle": "Subcategories",
+            "subcategoriesHint": "Manage subcategories and open, copy, edit, or delete them quickly.",
+            "subcategoriesCount": "{count} subcategories",
+            "noSubcategories": "No subcategories for this category yet.",
+            "selectCategory": "Select a category to view its subcategories."
+          },
           "deleteModal": {
             "title": "Delete category",
             "message": "Are you sure you want to delete this category? Products in this category will become uncategorized.",
             "messageWithTitle": "Are you sure you want to delete “{title}”? Products in this category will become uncategorized.",
             "error": "Failed to delete category. Please try again.",
-            "errorHasProducts": "Cannot delete this category because it still contains products. Move or delete them first."
+            "errorHasProducts": "Cannot delete this category because it still contains products. Move or delete them first.",
+            "errorHasChildren": "Cannot delete this category because it still contains subcategories. Move or delete them first."
           }
         },
         "create": {
