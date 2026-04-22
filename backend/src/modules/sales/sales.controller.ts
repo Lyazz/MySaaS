@@ -138,12 +138,29 @@ export class SalesController {
             const user = req.user
             const { id } = req.params
             const status = typeof req.body?.status === 'string' ? req.body.status : ''
+            const refundRaw = req.body?.refund
+            const refund =
+                refundRaw && typeof refundRaw === 'object'
+                    ? {
+                        cashboxId: typeof refundRaw.cashboxId === 'string' ? refundRaw.cashboxId : null,
+                        method: typeof refundRaw.method === 'string' ? refundRaw.method : null,
+                        reference: typeof refundRaw.reference === 'string' ? refundRaw.reference : null,
+                        note: typeof refundRaw.note === 'string' ? refundRaw.note : null,
+                        amount: refundRaw.amount
+                    }
+                    : null
 
             if (!id || Array.isArray(id)) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Sale ID is required' })
             }
 
-            const sale = await service.updateStatus(tenant.id, id, status, { userId: user?.id ?? null })
+            const sale = await service.updateStatus(
+                tenant.id,
+                id,
+                status,
+                { refund },
+                { userId: user?.id ?? null }
+            )
             res.json(sale)
         } catch (error: any) {
             if (error instanceof SalesValidationError) {
@@ -152,6 +169,14 @@ export class SalesController {
                     statusMessage: error.statusMessage,
                     code: error.code,
                     meta: error.meta
+                })
+            }
+            if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: typeof error?.code === 'string' ? error.code : undefined,
+                    meta: error?.meta
                 })
             }
             console.error('Update sale status error:', error)

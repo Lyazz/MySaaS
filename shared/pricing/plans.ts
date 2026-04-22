@@ -41,21 +41,21 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         name: 'Basic',
         description: 'Best for trying out',
         pricing: { currency: 'DA', monthlyAmountDzd: 0, annualAmountDzd: 0 },
-        ordersPerMonth: 10
+        ordersPerMonth: 150
     },
     {
         code: 'beginner',
         name: 'Beginner',
         description: 'A simple start to boost your store',
         pricing: { currency: 'DA', monthlyAmountDzd: 1490, annualAmountDzd: 1190 },
-        ordersPerMonth: 20
+        ordersPerMonth: 500
     },
     {
         code: 'merchant',
         name: 'Merchant',
         description: 'Smart choice for growing businesses',
         pricing: { currency: 'DA', monthlyAmountDzd: 2990, annualAmountDzd: 2390 },
-        ordersPerMonth: 30,
+        ordersPerMonth: 1500,
         flags: { popular: true }
     },
     {
@@ -63,7 +63,7 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         name: 'Professional',
         description: 'Built for scaling with confidence',
         pricing: { currency: 'DA', monthlyAmountDzd: 4490, annualAmountDzd: 3590 },
-        ordersPerMonth: 40,
+        ordersPerMonth: 5000,
         flags: { highlight: true }
     }
 ] as const
@@ -95,4 +95,3 @@ export const pricingPlanCardForUi = (plan: PlanDefinition, interval: BillingInte
         highlight
     }
 }
-

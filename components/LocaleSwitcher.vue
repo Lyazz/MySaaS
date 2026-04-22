@@ -43,6 +43,7 @@ const switchLocale = async (code: string) => {
   <Menu as="div" class="relative inline-block text-left" data-testid="locale-switcher">
     <div>
       <MenuButton
+        data-testid="locale-switch-toggle"
         class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
         :class="props.class"
         style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
@@ -76,6 +77,7 @@ const switchLocale = async (code: string) => {
           >
             <button
               type="button"
+              :data-testid="`locale-switch-${locale.code}`"
               :class="[
                 active ? 'bg-slate-100/80 text-teal-700' : 'text-slate-600',
                 i18n.locale.value === locale.code ? 'font-semibold bg-teal-50/50 text-teal-700' : '',

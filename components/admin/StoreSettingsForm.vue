@@ -303,7 +303,8 @@
               </BaseSelect>
               <p
                 v-if="form.language === 'ar'"
-                class="mt-2 text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200"
+                class="mt-2 rounded border p-2 text-xs"
+                style="color: var(--accent); background: var(--accent-soft); border-color: var(--accent-border)"
               >
                 {{ t('admin.storeSettingsForm.localization.rtlNote') }}
               </p>

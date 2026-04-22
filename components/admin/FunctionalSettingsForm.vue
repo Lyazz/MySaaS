@@ -195,11 +195,15 @@
               </div>
             </div>
 
-            <div v-if="form.language === 'ar'" class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-start gap-3">
-               <Icon name="lucide:languages" class="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+            <div
+              v-if="form.language === 'ar'"
+              class="mt-4 flex items-start gap-3 rounded-lg border p-3"
+              style="background: var(--accent-soft); border-color: var(--accent-border)"
+            >
+               <Icon name="lucide:languages" class="mt-0.5 h-5 w-5 shrink-0" style="color: var(--accent)" />
                <div>
-                 <p class="text-sm font-medium text-amber-800">{{ t('admin.functionalSettingsForm.localization.rtl.title') }}</p>
-                 <p class="text-xs text-amber-700 mt-0.5">
+                 <p class="text-sm font-medium" style="color: var(--accent)">{{ t('admin.functionalSettingsForm.localization.rtl.title') }}</p>
+                 <p class="mt-0.5 text-xs" style="color: color-mix(in srgb, var(--accent) 78%, white 22%)">
                    {{ t('admin.functionalSettingsForm.localization.rtl.subtitle') }}
                  </p>
                </div>

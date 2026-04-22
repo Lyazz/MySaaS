@@ -27,6 +27,7 @@ class SaleDetailScreen extends ConsumerStatefulWidget {
 
 class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   late Future<_SaleDetail?> _future;
+  bool _isRefunding = false;
 
   @override
   void initState() {
@@ -183,7 +184,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildHeader(),
+                      _buildHeader(sale: sale),
                       const SizedBox(height: 12),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +274,15 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader({_SaleDetail? sale}) {
+    final normalizedSource = sale?.source.trim().toUpperCase() ?? '';
+    final normalizedStatus = sale?.status.trim().toUpperCase() ?? '';
+    final isOrder = normalizedSource == 'ORDER';
+    final canRefund =
+        sale != null &&
+        normalizedSource == 'POS' &&
+        normalizedStatus == 'COMPLETED';
+
     return Row(
       children: [
         InkWell(
@@ -304,6 +313,29 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           ),
         ),
         const Spacer(),
+        if (sale != null) ...[
+          AppButton.danger(
+            label: 'Refund',
+            icon: LucideIcons.rotateCcw,
+            size: AppButtonSize.sm,
+            loading: _isRefunding,
+            onPressed: _isRefunding
+                ? null
+                : () {
+                    if (canRefund) {
+                      _handleRefund(sale);
+                      return;
+                    }
+                    final reason = isOrder
+                        ? 'Order-origin sales must be returned from the order flow.'
+                        : 'Only COMPLETED POS sales can be refunded.';
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(reason)),
+                    );
+                  },
+          ),
+          const SizedBox(width: 8),
+        ],
         AppButton.secondary(
           label: 'Retry',
           icon: LucideIcons.refreshCw,
@@ -312,6 +344,183 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _handleRefund(_SaleDetail sale) async {
+    if (_isRefunding) return;
+    setState(() => _isRefunding = true);
+    try {
+      final api = ref.read(apiProvider);
+      final response = await api.client.get('/admin/cash/cashboxes');
+      final raw = response.data;
+      final cashboxes = raw is List ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList() : <Map<String, dynamic>>[];
+      final openCashboxes = cashboxes
+          .where((c) => c['isActive'] == true && c['openSession'] is Map)
+          .toList();
+
+      if (!mounted) return;
+      if (openCashboxes.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No open cashbox available. Open a cash session first.')),
+        );
+        return;
+      }
+
+      String selectedCashboxId = (openCashboxes.first['id'] ?? '').toString();
+      String selectedMethod = 'CASH';
+      final referenceCtrl = TextEditingController();
+      final noteCtrl = TextEditingController(text: 'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}');
+      bool submitting = false;
+      String? formError;
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                title: const Text('Refund Sale'),
+                content: SizedBox(
+                  width: 420,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Create refund cash outflow and mark this sale as REFUNDED.',
+                        style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedCashboxId,
+                        items: openCashboxes
+                            .map(
+                              (c) => DropdownMenuItem<String>(
+                                value: (c['id'] ?? '').toString(),
+                                child: Text((c['name'] ?? '').toString()),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: submitting
+                            ? null
+                            : (v) => setDialogState(() => selectedCashboxId = v ?? selectedCashboxId),
+                        decoration: const InputDecoration(
+                          labelText: 'Cashbox',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedMethod,
+                        items: const [
+                          DropdownMenuItem(value: 'CASH', child: Text('Cash')),
+                          DropdownMenuItem(value: 'CARD', child: Text('Card')),
+                          DropdownMenuItem(value: 'TRANSFER', child: Text('Transfer')),
+                          DropdownMenuItem(value: 'OTHER', child: Text('Other')),
+                        ],
+                        onChanged: submitting
+                            ? null
+                            : (v) => setDialogState(() => selectedMethod = (v ?? 'CASH').toUpperCase()),
+                        decoration: const InputDecoration(
+                          labelText: 'Method',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: referenceCtrl,
+                        enabled: !submitting,
+                        decoration: const InputDecoration(
+                          labelText: 'Reference (optional)',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: noteCtrl,
+                        enabled: !submitting,
+                        maxLines: 2,
+                        decoration: const InputDecoration(
+                          labelText: 'Note (optional)',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      if (formError != null) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          formError!,
+                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: submitting ? null : () => Navigator.of(dialogContext).pop(false),
+                    child: const Text('Cancel'),
+                  ),
+                  AppButton.danger(
+                    label: 'Refund',
+                    icon: LucideIcons.rotateCcw,
+                    loading: submitting,
+                    onPressed: submitting
+                        ? null
+                        : () async {
+                            setDialogState(() {
+                              submitting = true;
+                              formError = null;
+                            });
+                            try {
+                              await api.client.patch(
+                                '/admin/sales/${sale.id}/status',
+                                data: {
+                                  'status': 'REFUNDED',
+                                  'refund': {
+                                    'cashboxId': selectedCashboxId,
+                                    'method': selectedMethod,
+                                    if (referenceCtrl.text.trim().isNotEmpty) 'reference': referenceCtrl.text.trim(),
+                                    if (noteCtrl.text.trim().isNotEmpty) 'note': noteCtrl.text.trim(),
+                                  }
+                                },
+                              );
+                              if (!dialogContext.mounted) return;
+                              Navigator.of(dialogContext).pop(true);
+                            } catch (e) {
+                              setDialogState(() {
+                                submitting = false;
+                                formError = e.toString();
+                              });
+                            }
+                          },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+
+      referenceCtrl.dispose();
+      noteCtrl.dispose();
+
+      if (confirmed == true) {
+        _retry();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sale refunded successfully')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to refund sale: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isRefunding = false);
+      }
+    }
   }
 
   Widget _totalCard(String total) {

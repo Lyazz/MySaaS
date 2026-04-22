@@ -62,7 +62,8 @@
             <!-- Pending badge on collapsed icon -->
             <span
               v-if="item.badge && !sidebarOpen"
-              class="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] px-0.5 bg-amber-400 text-slate-900 text-[9px] font-bold rounded-full flex items-center justify-center leading-none"
+              class="absolute -top-1.5 -right-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-[9px] font-bold leading-none text-white"
+              style="background: var(--brand)"
             >
               {{ item.badge }}
             </span>
@@ -78,7 +79,8 @@
           <!-- Pending badge on expanded label -->
           <span
             v-if="item.badge && sidebarOpen"
-            class="ml-auto shrink-0 min-w-[20px] h-5 px-1.5 bg-amber-400 text-slate-900 text-[10px] font-bold rounded-full flex items-center justify-center leading-none"
+            class="ml-auto flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-bold leading-none text-white"
+            style="background: var(--brand)"
           >
             {{ item.badge }}
           </span>
@@ -89,7 +91,7 @@
             class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
           >
             {{ item.label }}
-            <span v-if="item.badge" class="ml-1.5 bg-amber-400 text-slate-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            <span v-if="item.badge" class="ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style="background: var(--brand)">
               {{ item.badge }}
             </span>
           </div>
@@ -165,8 +167,8 @@ const sidebarOpen = ref(false)
 const { t } = useI18n({ useScope: 'global' })
 const pendingPaymentsCount = ref(0)
 const superAdminStyle = {
-  '--brand': '#FF7A45',
-  '--brand-rgb': '255 122 69'
+  '--brand': '#3559ff',
+  '--brand-rgb': '53 89 255'
 } as Record<string, string>
 
 onMounted(async () => {

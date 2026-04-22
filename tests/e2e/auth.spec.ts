@@ -9,13 +9,12 @@ test.describe('Authentication Flow', () => {
 
     test('should register a new tenant and then login', async ({ page }) => {
         test.setTimeout(120000)
-        // 1. Register
         await page.goto('/register')
         await page.waitForLoadState('networkidle')
-        await page.fill('input[placeholder="Your Store"]', `Test Tenant ${timestamp}`)
-        await page.fill('input[placeholder="your-store"]', slug)
-        await page.fill('input[name="email"]', email)
-        await page.fill('input[name="password"]', password)
+        await page.getByTestId('register-company').fill(`Test Tenant ${timestamp}`)
+        await page.getByTestId('register-slug').fill(slug)
+        await page.getByTestId('register-email').fill(email)
+        await page.getByTestId('register-password').fill(password)
         const registerResponsePromise = page.waitForResponse((r) => r.url().includes('/api/register') && r.request().method() === 'POST')
         await page.click('button[type="submit"]')
         const registerRes = await registerResponsePromise
@@ -24,12 +23,10 @@ test.describe('Authentication Flow', () => {
             throw new Error(`Registration failed: ${registerRes.status()} ${body}`)
         }
 
-        // Debug: Wait for either success or error
         try {
-            await expect(page.locator('text=Registration Successful!')).toBeVisible({ timeout: 30000 })
+            await expect(page.getByTestId('register-success')).toBeVisible({ timeout: 30000 })
         } catch (e) {
-            // Check for error message
-            const errorLocator = page.locator('.text-red-500')
+            const errorLocator = page.locator('text=/error|invalid|failed/i')
             if (await errorLocator.count() > 0) {
                 const errorText = await errorLocator.textContent()
                 console.log(`Registration failed with error on page: ${errorText}`)
@@ -38,11 +35,10 @@ test.describe('Authentication Flow', () => {
             throw e
         }
 
-        // 2. Login
         await page.goto('/login')
         await page.waitForLoadState('networkidle')
-        await page.fill('input[name="email"]', email)
-        await page.fill('input[name="password"]', password)
+        await page.getByTestId('login-email').fill(email)
+        await page.getByTestId('login-password').fill(password)
 
         const loginResponsePromise = page.waitForResponse(
             (r) => r.url().includes('/api/login') && r.request().method() === 'POST'
@@ -54,12 +50,10 @@ test.describe('Authentication Flow', () => {
             throw new Error(`Login failed: ${loginRes.status()} ${body}`)
         }
 
-        // Expect redirect to admin
-        // Wait for URL to change to /admin
         try {
             await expect(page).toHaveURL(/.*\/admin/, { timeout: 30000 })
         } catch (e) {
-            const errorLocator = page.locator('.text-red-500')
+            const errorLocator = page.locator('text=/error|invalid|failed/i')
             if (await errorLocator.count() > 0) {
                 const errorText = await errorLocator.first().textContent()
                 throw new Error(`Login failed on page: ${errorText}`)
@@ -67,7 +61,6 @@ test.describe('Authentication Flow', () => {
             throw e
         }
 
-        // Admin lands either on dashboard or onboarding (store setup wizard)
         const dashboardHeading = page.locator('h2:has-text("Welcome back!")')
         const onboardingHeading = page.locator('h2:has-text("Store setup")')
         if (await dashboardHeading.count()) {

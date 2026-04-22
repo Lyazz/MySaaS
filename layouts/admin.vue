@@ -356,7 +356,7 @@ function hexToRgb(hex: string) {
 }
 
 const adminStyle = computed(() => {
-  const primaryColor = '#FF7A45'
+  const primaryColor = '#3559ff'
   return {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor)

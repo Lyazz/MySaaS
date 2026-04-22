@@ -273,7 +273,21 @@ export class SalesService {
         })
     }
 
-    async updateStatus(tenantId: string, id: string, status: string, actor?: { userId?: string | null }) {
+    async updateStatus(
+        tenantId: string,
+        id: string,
+        status: string,
+        opts?: {
+            refund?: {
+                cashboxId?: string | null
+                method?: string | null
+                reference?: string | null
+                note?: string | null
+                amount?: number | string | null
+            } | null
+        },
+        actor?: { userId?: string | null }
+    ) {
         const targetStatus = String(status || '').trim().toUpperCase()
         if (targetStatus !== 'REFUNDED') {
             throw new SalesValidationError(400, 'Invalid status value', {
@@ -288,6 +302,8 @@ export class SalesService {
                 status: true,
                 source: true,
                 orderId: true,
+                totalAmount: true,
+                customerId: true,
                 items: {
                     select: { variantId: true, quantity: true }
                 }
@@ -296,7 +312,7 @@ export class SalesService {
         if (!sale) {
             throw new SalesValidationError(404, 'Sale not found')
         }
-        if (sale.orderId) {
+        if (sale.orderId || sale.source === 'ORDER') {
             throw new SalesValidationError(409, 'Order-linked sales cannot be refunded here', {
                 code: 'SALE_REFUND_ORDER_LINKED_NOT_ALLOWED'
             })
@@ -310,6 +326,32 @@ export class SalesService {
         if (sale.status !== 'COMPLETED') {
             throw new SalesValidationError(409, `Invalid status transition: ${sale.status} -> ${targetStatus}`, {
                 code: 'SALE_STATUS_TRANSITION_NOT_ALLOWED'
+            })
+        }
+
+        const refund = opts?.refund ?? null
+        const refundCashboxId = typeof refund?.cashboxId === 'string' ? refund.cashboxId.trim() : ''
+        if (!refundCashboxId) {
+            throw new SalesValidationError(400, 'refund.cashboxId is required', {
+                code: 'SALE_REFUND_CASHBOX_REQUIRED'
+            })
+        }
+
+        const refundAmount = (() => {
+            const raw = refund?.amount
+            if (raw === undefined || raw === null || raw === '') return Number(sale.totalAmount || 0)
+            const n = typeof raw === 'number' ? raw : Number(String(raw).trim())
+            return Number.isFinite(n) ? n : NaN
+        })()
+        if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
+            throw new SalesValidationError(400, 'refund amount must be greater than 0', {
+                code: 'SALE_REFUND_AMOUNT_INVALID'
+            })
+        }
+        const totalAmount = Number(sale.totalAmount || 0)
+        if (refundAmount > totalAmount) {
+            throw new SalesValidationError(400, 'refund amount cannot exceed sale total', {
+                code: 'SALE_REFUND_AMOUNT_EXCEEDS_TOTAL'
             })
         }
 
@@ -369,6 +411,24 @@ export class SalesService {
             }
 
             await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
+
+            await cashService.createTransactionInTx(
+                tx,
+                tenantId,
+                {
+                    cashboxId: refundCashboxId,
+                    type: 'SALE_REFUND',
+                    direction: 'OUT',
+                    amount: String(refundAmount),
+                    currency: 'DZD',
+                    method: refund?.method ?? 'CASH',
+                    customerId: sale.customerId ?? null,
+                    saleId: sale.id,
+                    reference: refund?.reference ?? undefined,
+                    note: refund?.note ?? `POS sale refund: ${sale.id}`.slice(0, 500)
+                },
+                actor
+            )
 
             const statusUpdate = await tx.sale.updateMany({
                 where: { tenantId, id: sale.id, status: 'COMPLETED' },

@@ -58,6 +58,9 @@
         "shipping": "Shipping",
         "analytics": "Analytics",
         "ai": "AI tools"
+      },
+      "pills": {
+        "mobile": "Mobile-friendly storefronts"
       }
     },
     "storyteller": {
@@ -133,7 +136,8 @@
     "stats": {
       "activeMerchants": "Active stores",
       "revenueGenerated": "Sales processed",
-      "uptime": "Uptime"
+      "uptime": "Uptime",
+      "gmvDetail": "Monthly sales volume"
     },
     "faq": {
       "title": "Frequently Asked Questions",
@@ -201,7 +205,12 @@
     },
     "integrations": {
       "title": "Works with your tools",
-      "subtitle": "Payments, shipping, and marketing—plug in what you use."
+      "subtitle": "Payments, shipping, and marketing—plug in what you use.",
+      "items": {
+        "checkout": "Checkout",
+        "catalog": "Product catalog",
+        "ads": "Ads tracking"
+      }
     },
     "themes": {
       "title": {
@@ -234,7 +243,47 @@
         "subject": "Subject",
         "message": "Message",
         "submit": "Send Message"
+      },
+      "supportPill": "Help with setup and launch"
+    },
+    "visual": {
+      "storefrontLabel": "Your store",
+      "live": "Online",
+      "orders": "Orders",
+      "conversion": "Conversion",
+      "checkoutLabel": "Checkout flow",
+      "checkoutTitle": "Order confirmation in 3 clear steps",
+      "checkoutSteps": {
+        "phone": "Collect phone number and wilaya",
+        "delivery": "Choose delivery and confirm the order",
+        "dispatch": "Send the order to your carrier"
+      },
+      "today": "Today",
+      "operationsRail": "What runs in the background",
+      "whatsapp": "WhatsApp confirmations",
+      "carriers": "Delivery sent to Maystro or Yalidine",
+      "analytics": "Sales and campaign tracking",
+      "readinessLabel": "Ready to sell",
+      "readinessText": "Everything stays simple for your team: your shop, your orders, your delivery options, and your daily follow-up.",
+      "commandCenterEyebrow": "Daily follow-up",
+      "commandCenterTitle": "One place to run your store",
+      "commandCenterBadge": "For every step",
+      "orderConfirmations": "Confirmed orders",
+      "carrierSync": "Delivery follow-up",
+      "realtime": "Live",
+      "localFleet": "Your own driver",
+      "weeklyPulse": "Weekly sales rhythm",
+      "showcase": {
+        "title": "Beautiful storefronts that feel made for your products",
+        "body": "Choose a theme, add your products, and give customers a smooth buying experience on mobile.",
+        "preview": "Store preview",
+        "analyticsBody": "See what sells, what converts, and where to push harder",
+        "logisticsBody": "Offer delivery choices that match how your customers order"
       }
+    },
+    "pricingPreview": {
+      "storefront": "Your online store is included",
+      "delivery": "Delivery options are ready from day one"
     }
   },
   "marketing": {
@@ -255,41 +304,60 @@
           "prefix": "Everything you need to ",
           "accent": "Scale"
         },
-        "subtitle": "Swekly is more than just a store builder. It's an entire operating system for your commerce business."
+        "subtitle": "Create your store, receive orders, manage delivery, and stay in control without adding more tools."
       },
       "items": {
         "builder": {
-          "title": "Drag & Drop Store Builder",
-          "description": "Create professional storefronts without writing a single line of code. Our intuitive builder lets you customize every detail."
+          "title": "Easy store setup",
+          "description": "Launch a clean, mobile-first store and customize it around your products in a short time."
         },
         "payments": {
-          "title": "Global Payments",
-          "description": "Accept payments from anywhere with integrated gateways including CIB, Edahabia, and local providers."
+          "title": "Checkout that fits local buying habits",
+          "description": "Make ordering simple with a flow built for COD, customer trust, and fast confirmation."
         },
         "analytics": {
-          "title": "Advanced Analytics",
-          "description": "Track real-time sales, visitor behavior, and conversion funnels."
+          "title": "Clear sales visibility",
+          "description": "See what is selling, what is slowing down, and what deserves more budget."
         },
         "automation": {
-          "title": "Marketing Automation",
-          "description": "Recover abandoned carts and engage customers with SMS and Email workflows."
+          "title": "Simple follow-up",
+          "description": "Keep customers engaged with better order updates and reminders that save time."
         },
         "logistics": {
-          "title": "Logistics Network",
-          "description": "Auto-dispatch orders to Yalidine, Eckoz, and 50+ other carriers."
+          "title": "Delivery connections",
+          "description": "Send orders to Maystro, Yalidine, or your own delivery workflow without copy-pasting."
         },
         "domains": {
-          "title": "Custom Domains",
-          "description": "Connect your own domain name for a fully branded experience."
+          "title": "Your own domain",
+          "description": "Keep your brand front and center with a custom domain and a store that feels like yours."
         }
       },
+      "bullets": {
+        "checkout": "Fast order form",
+        "carriers": "Maystro and Yalidine",
+        "dispatch": "Easy dispatch follow-up"
+      },
+      "visual": {
+        "setupLabel": "Store setup",
+        "setupTitle": "Open your store without wasting weeks",
+        "setupTheme": "Theme and brand setup",
+        "setupCheckout": "Ready-to-use order flow",
+        "setupDelivery": "Delivery setup included",
+        "signalLabel": "Momentum"
+      },
+      "outcomeLabel": "What you gain",
+      "outcomeTitle": "Launch faster and stay organized",
+      "outcomeBody": "Every step helps you sell sooner and keep daily work lighter for your team.",
+      "surfaceLabel": "Included",
+      "surfaceBody": "Store, checkout, delivery follow-up, and sales visibility work together without extra tools.",
       "cta": {
         "title": "Ready to get started?",
         "button": "Start Your Free Trial"
       }
     },
     "footer": {
-      "tagline": "Empowering businesses with cutting-edge tools and a premium experience. Built for scale, designed for you.",
+      "tagline": "Create a professional store, receive your orders, and keep delivery under control from one simple workspace.",
+      "bottomLine": "",
       "product": {
         "title": "Product",
         "changelog": "Changelog"
@@ -301,6 +369,45 @@
         "contact": "Contact"
       },
       "copyright": "© {year} Swekly Platform. All rights reserved."
+    },
+    "aboutPage": {
+      "heroTitle": "Built for the way Algerian commerce actually runs",
+      "heroSubtitle": "Swekly helps merchants launch faster, stay organized, and keep delivery simple from the first day.",
+      "storyTitle": "Not another generic store builder",
+      "storyBody": "We designed Swekly around the realities of Algerian merchants: mobile-first shopping, COD confirmation, local delivery networks, and teams that need a smoother daily routine.",
+      "context": {
+        "storyLabel": "Why merchants switch",
+        "label": "Built around real habits",
+        "mobile": "Customers buy on mobile first",
+        "delivery": "Delivery is part of every sale",
+        "cod": "Trust matters before checkout"
+      },
+      "principles": {
+        "title": "What guides the product",
+        "subtitle": "A commerce system should reduce operational drag, not add more dashboards to manage.",
+        "items": {
+          "platform": {
+            "title": "One platform, one operating loop",
+            "body": "Storefront, checkout, inventory, orders, and analytics stay connected so teams work from the same source of truth."
+          },
+          "tenancy": {
+            "title": "Your brand, your own space",
+            "body": "Your store keeps its own domain, look, and day-to-day flow so customers feel they are buying directly from you."
+          },
+          "cod": {
+            "title": "Built for COD conversion",
+            "body": "Phone-first checkout, clear trust signals, and delivery-friendly steps match how customers order in Algeria."
+          },
+          "ops": {
+            "title": "Made for daily execution",
+            "body": "Swekly is designed for teams who need to publish products quickly, confirm orders fast, and keep delivery predictable."
+          }
+        }
+      },
+      "final": {
+        "title": "Start with a stronger storefront foundation",
+        "subtitle": "Launch faster, keep operations cleaner, and scale on a platform designed for Algerian commerce."
+      }
     }
   },
   "auth": {
@@ -312,6 +419,12 @@
         "panel": {
           "badge": "Live Ops",
           "focusArea": "Focus Area"
+        },
+        "side": {
+          "label": "Inside your workspace",
+          "orders": "Orders, products, and delivery in one place",
+          "workspace": "A clean workspace for your team",
+          "performance": "Quick visibility on daily results"
         },
         "carousel": {
           "revenue": {
@@ -434,10 +547,6 @@
       "title": "Pricing - Swekly",
       "description": "Choose a plan that fits your growth stage."
     },
-    "page": {
-      "title": "Simple, transparent pricing",
-      "subtitle": "Choose the plan that fits your growth stage. No hidden fees."
-    },
     "section": {
       "title": "Transparent Pricing",
       "subtitle": "No hidden fees. Scale as you grow."
@@ -458,25 +567,51 @@
     "features": {
       "ordersPerMonth": "{count} Orders/mo"
     },
+    "page": {
+      "title": "Simple, transparent pricing",
+      "subtitle": "Choose the plan that matches your order volume and the level of support you need.",
+      "includedTitle": "Included from the start",
+      "includedCheckout": "A store with a simple order flow",
+      "includedDelivery": "Delivery options ready for your orders",
+      "includedSupport": "Setup help when you launch",
+      "growthLabel": "Scale with confidence",
+      "growthTitle": "More orders, more options, same easy workflow",
+      "growthBody": "Upgrade when your store grows. Your products, team habits, and delivery flow stay the same.",
+      "enterpriseLabel": "Need more help?",
+      "enterpriseTitle": "Custom setup for bigger stores and teams",
+      "enterpriseBody": "Talk to Swekly if you need migration help, a higher monthly volume, or a guided rollout for your team.",
+      "enterpriseItems": {
+        "setup": "Store setup and migration help",
+        "ops": "Delivery and order workflow review",
+        "guidance": "Plan sizing for growing brands"
+      },
+      "features": {
+        "store": "Professional online store included",
+        "delivery": "Delivery options and follow-up",
+        "upsell": "Marketing and upsell tools",
+        "analytics": "Clear sales and conversion tracking",
+        "team": "Advanced support for larger teams"
+      }
+    },
     "plans": {
       "basic": {
         "name": "Basic",
-        "description": "Best for trying out",
+        "description": "A free start to test your first products",
         "cta": "Get Started"
       },
       "beginner": {
         "name": "Beginner",
-        "description": "A simple start to boost your store",
+        "description": "For a small store that wants to sell seriously",
         "cta": "Get Started"
       },
       "merchant": {
         "name": "Merchant",
-        "description": "Smart choice for growing businesses",
+        "description": "The best fit for growing stores with regular orders",
         "cta": "Get Started"
       },
       "professional": {
         "name": "Professional",
-        "description": "Built for scaling with confidence",
+        "description": "For brands handling larger volumes every month",
         "cta": "Get 15 days for free"
       }
     }
@@ -3168,6 +3303,29 @@
             "completed": "Completed",
             "actions": "Actions"
           }
+        },
+        "actions": {
+          "refund": "Refund"
+        },
+        "refundModal": {
+          "title": "Refund sale",
+          "subtitle": "Record a cash outflow and mark this sale as refunded.",
+          "cashboxLabel": "Cashbox",
+          "cashboxPlaceholder": "Select a cashbox",
+          "noOpenSession": "No open session",
+          "methodLabel": "Payment method",
+          "referenceLabel": "Reference (optional)",
+          "referencePlaceholder": "Receipt or bank reference",
+          "noteLabel": "Note (optional)",
+          "notePlaceholder": "Reason for refund"
+        },
+        "messages": {
+          "refundFromOrderFlow": "Order-origin sales must be returned from the order flow.",
+          "alreadyRefunded": "This sale is already refunded.",
+          "onlyCompletedPos": "Only completed POS sales can be refunded.",
+          "noOpenCashbox": "No open cashbox available. Open a cash session first.",
+          "refundSuccess": "Sale refunded successfully.",
+          "refundFailed": "Failed to refund sale."
         },
         "detail": {
           "metaTitle": "Sale",

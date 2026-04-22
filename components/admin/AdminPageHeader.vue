@@ -56,7 +56,7 @@ function pillStyle(tone?: StatTone) {
     case 'green':
       return 'background: var(--status-delivered-bg); color: var(--status-delivered-text); border: 1px solid rgba(34,197,94,0.2);'
     case 'amber':
-      return 'background: var(--status-pending-bg); color: var(--status-pending-text); border: 1px solid rgba(245,158,11,0.2);'
+      return 'background: var(--status-pending-bg); color: var(--status-pending-text); border: 1px solid var(--accent-border);'
     case 'red':
       return 'background: var(--status-cancelled-bg); color: var(--status-cancelled-text); border: 1px solid rgba(239,68,68,0.2);'
     case 'blue':

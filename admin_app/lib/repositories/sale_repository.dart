@@ -168,4 +168,28 @@ class SaleRepository {
     if (payload is! Map) return null;
     return payload.cast<String, dynamic>();
   }
+
+  Future<void> refundSale({
+    required String saleId,
+    required String cashboxId,
+    String method = 'CASH',
+    String? reference,
+    String? note,
+    double? amount,
+  }) async {
+    await _apiService.client.patch(
+      '/admin/sales/$saleId/status',
+      data: {
+        'status': 'REFUNDED',
+        'refund': {
+          'cashboxId': cashboxId,
+          'method': method,
+          if (reference != null && reference.trim().isNotEmpty)
+            'reference': reference.trim(),
+          if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+          if (amount != null) 'amount': amount,
+        },
+      },
+    );
+  }
 }

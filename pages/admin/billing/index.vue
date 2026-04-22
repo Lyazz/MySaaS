@@ -20,17 +20,17 @@
 
     <template v-else>
     <!-- Payment status banners -->
-    <div v-if="pendingPayments.length > 0" class="flex items-start gap-4 p-5 rounded-xl" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25)">
-      <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background: rgba(245,158,11,0.15)">
-        <Icon name="lucide:clock" class="w-5 h-5 text-amber-400" />
+    <div v-if="pendingPayments.length > 0" class="flex items-start gap-4 rounded-xl p-5" style="background: rgba(var(--brand-rgb)/0.08); border: 1px solid rgba(var(--brand-rgb)/0.25)">
+      <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: rgba(var(--brand-rgb)/0.15)">
+        <Icon name="lucide:clock" class="w-5 h-5 [color:var(--brand)]" />
       </div>
       <div class="flex-1">
-        <p class="font-semibold text-amber-400">{{ t('admin.pages.billing.status.pending.title', 'Payment under review') }}</p>
-        <p class="text-sm text-amber-500/80 mt-0.5">
+        <p class="font-semibold [color:var(--brand)]">{{ t('admin.pages.billing.status.pending.title', 'Payment under review') }}</p>
+        <p class="mt-0.5 text-sm" style="color: rgba(var(--brand-rgb)/0.82)">
           {{ t('admin.pages.billing.status.pending.desc', 'We received your payment proof and our team is reviewing it. Your subscription will be updated once approved.') }}
         </p>
       </div>
-      <span class="shrink-0 text-xs font-bold text-amber-400 px-2.5 py-1 rounded-full" style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.25)">
+      <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold [color:var(--brand)]" style="background: rgba(var(--brand-rgb)/0.15); border: 1px solid rgba(var(--brand-rgb)/0.25)">
         {{ pendingPayments.length }} {{ t('admin.pages.billing.status.pending.badge', 'pending') }}
       </span>
     </div>
@@ -301,11 +301,17 @@
                   </div>
                 </div>
 
-                <div v-if="selectedMethod === 'CHARGILY'" class="flex items-start gap-3 text-sm text-amber-800 bg-amber-100/50 p-4 rounded-xl border border-amber-200/50">
-                  <Icon name="lucide:alert-triangle" class="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div
+                  v-if="selectedMethod === 'CHARGILY'"
+                  class="flex items-start gap-3 rounded-xl border p-4 text-sm"
+                  style="color: var(--brand); background: rgba(var(--brand-rgb)/0.08); border-color: rgba(var(--brand-rgb)/0.2)"
+                >
+                  <Icon name="lucide:alert-triangle" class="mt-0.5 w-5 flex-shrink-0 [color:var(--brand)]" />
                   <div>
                     <span class="font-bold block mb-1">{{ t('admin.pages.billing.payment.chargilySoon', 'Coming soon') }}</span>
-                    {{ t('admin.pages.billing.payment.chargilyNote', 'Automatic payment gateway integration is currently unavailable. Please choose another manual method like CCP or BaridiMob in the meantime.') }}
+                    <span style="color: rgba(var(--brand-rgb)/0.82)">
+                      {{ t('admin.pages.billing.payment.chargilyNote', 'Automatic payment gateway integration is currently unavailable. Please choose another manual method like CCP or BaridiMob in the meantime.') }}
+                    </span>
                   </div>
                 </div>
 

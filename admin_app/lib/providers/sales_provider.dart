@@ -93,6 +93,31 @@ class SalesNotifier extends Notifier<SalesState> {
       state = state.copyWith(isLoading: false, error: _formatApiError(e));
     }
   }
+
+  Future<void> refundSale({
+    required String saleId,
+    required String cashboxId,
+    String method = 'CASH',
+    String? reference,
+    String? note,
+    double? amount,
+  }) async {
+    try {
+      final api = ref.read(apiProvider);
+      final repo = SaleRepository(api);
+      await repo.refundSale(
+        saleId: saleId,
+        cashboxId: cashboxId,
+        method: method,
+        reference: reference,
+        note: note,
+        amount: amount,
+      );
+    } catch (e) {
+      state = state.copyWith(error: _formatApiError(e));
+      rethrow;
+    }
+  }
 }
 
 final salesProvider = NotifierProvider<SalesNotifier, SalesState>(

@@ -18,9 +18,9 @@
   }
 
   :root {
-    /* Brand — tenant-overridable */
-    --brand: #0F766E;
-    --brand-rgb: 15 118 110;
+    /* Brand — default admin primary, aligned with marketing */
+    --brand: #3559ff;
+    --brand-rgb: 53 89 255;
 
     /* Admin shell palette — fixed dark chrome */
     --admin-sidebar-bg: #111318;
@@ -43,15 +43,15 @@
     --text-tertiary: #52525b;
     --text-muted: #3f3f46;
 
-    /* Accent — electric amber, brand-agnostic, always visible on dark */
-    --accent: #f59e0b;
-    --accent-rgb: 245 158 11;
-    --accent-soft: rgba(245,158,11,0.12);
-    --accent-border: rgba(245,158,11,0.25);
+    /* Accent — cobalt from the marketing theme */
+    --accent: #3559ff;
+    --accent-rgb: 53 89 255;
+    --accent-soft: rgba(53,89,255,0.12);
+    --accent-border: rgba(53,89,255,0.28);
 
     /* Status */
-    --status-pending-bg: rgba(245,158,11,0.1);
-    --status-pending-text: #fbbf24;
+    --status-pending-bg: rgba(53,89,255,0.14);
+    --status-pending-text: #9eb1ff;
     --status-confirmed-bg: rgba(59,130,246,0.1);
     --status-confirmed-text: #60a5fa;
     --status-shipped-bg: rgba(99,102,241,0.1);
@@ -90,14 +90,14 @@
     --text-muted: #cbd5e1;
 
     /* Accent */
-    --accent: #d97706;
-    --accent-rgb: 217 119 6;
-    --accent-soft: rgba(217,119,6,0.1);
-    --accent-border: rgba(217,119,6,0.25);
+    --accent: #3559ff;
+    --accent-rgb: 53 89 255;
+    --accent-soft: rgba(53,89,255,0.1);
+    --accent-border: rgba(53,89,255,0.22);
 
     /* Status — adjusted for light backgrounds */
-    --status-pending-bg: rgba(245,158,11,0.1);
-    --status-pending-text: #b45309;
+    --status-pending-bg: rgba(53,89,255,0.1);
+    --status-pending-text: #3559ff;
     --status-confirmed-bg: rgba(59,130,246,0.1);
     --status-confirmed-text: #1d4ed8;
     --status-shipped-bg: rgba(99,102,241,0.1);
@@ -214,7 +214,7 @@
   .ui-badge--amber {
     background: var(--status-pending-bg);
     color: var(--status-pending-text);
-    border: 1px solid rgba(245,158,11,0.2);
+    border: 1px solid var(--accent-border);
   }
 
   .ui-badge--red {
@@ -380,6 +380,147 @@
     border: none;
     border-top: 1px solid var(--surface-border);
   }
+
+  .marketing-shell {
+    --marketing-bg: #050816;
+    --marketing-surface: rgba(8, 14, 30, 0.78);
+    --marketing-surface-strong: rgba(11, 17, 35, 0.92);
+    --marketing-border: rgba(255,255,255,0.11);
+    --marketing-border-strong: rgba(255,255,255,0.2);
+    --marketing-text: #f8fbff;
+    --marketing-text-soft: #b2bfd8;
+    --marketing-text-muted: #7f8ba6;
+    --marketing-cobalt: #3559ff;
+    --marketing-teal: #16d5b3;
+    --marketing-orange: #ff8a4c;
+    min-height: 100vh;
+    color: var(--marketing-text);
+    background:
+      radial-gradient(circle at 12% 18%, rgba(53, 89, 255, 0.28), transparent 24%),
+      radial-gradient(circle at 88% 16%, rgba(22, 213, 179, 0.18), transparent 18%),
+      radial-gradient(circle at 50% 72%, rgba(255, 138, 76, 0.1), transparent 26%),
+      linear-gradient(180deg, #071022 0%, #050816 42%, #060912 100%);
+    position: relative;
+    overflow: clip;
+  }
+
+  .marketing-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent 90%);
+  }
+
+  .marketing-shell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.16;
+    background-image: radial-gradient(rgba(255,255,255,0.9) 0.7px, transparent 0.7px);
+    background-size: 10px 10px;
+    mix-blend-mode: soft-light;
+  }
+
+  .marketing-container {
+    @apply relative mx-auto w-full px-4 sm:px-6 lg:px-8;
+  }
+
+  .marketing-section {
+    @apply relative py-16 md:py-24;
+  }
+
+  .marketing-section--tight {
+    @apply py-12 md:py-16;
+  }
+
+  .marketing-eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-slate-300 backdrop-blur-sm;
+  }
+
+  .marketing-heading {
+    @apply font-display text-4xl font-semibold tracking-[-0.05em] text-white md:text-5xl lg:text-6xl;
+  }
+
+  .marketing-copy {
+    @apply text-base leading-7 text-slate-300 md:text-lg;
+  }
+
+  .marketing-label {
+    @apply text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-slate-400;
+  }
+
+  .marketing-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-all duration-300;
+  }
+
+  .marketing-button--primary {
+    color: white;
+    background: linear-gradient(135deg, var(--marketing-cobalt), #6b7cff);
+    box-shadow: 0 18px 45px -20px rgba(53, 89, 255, 0.75);
+  }
+
+  .marketing-button--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 24px 55px -24px rgba(53, 89, 255, 0.85);
+  }
+
+  .marketing-button--ghost {
+    color: var(--marketing-text);
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+  }
+
+  .marketing-button--ghost:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .marketing-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-slate-200 backdrop-blur-sm;
+  }
+
+  .marketing-panel {
+    @apply relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] backdrop-blur-md;
+    box-shadow: 0 30px 120px -60px rgba(53, 89, 255, 0.8);
+  }
+
+  .marketing-panel--muted {
+    background: rgba(255,255,255,0.03);
+    box-shadow: 0 20px 70px -50px rgba(0, 0, 0, 0.7);
+  }
+
+  .marketing-divider {
+    @apply h-px w-full bg-white/10;
+  }
+
+  .marketing-link {
+    @apply text-sm font-medium text-slate-300 transition-colors duration-200;
+  }
+
+  .marketing-link:hover {
+    color: white;
+  }
+
+  .marketing-float {
+    animation: marketing-float 8s ease-in-out infinite;
+  }
+
+  .marketing-float--slow {
+    animation-duration: 12s;
+  }
+
+  .marketing-float--delay {
+    animation-delay: -3s;
+  }
 }
 
 @layer utilities {
@@ -441,4 +582,21 @@
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 0.9; }
+}
+
+@keyframes marketing-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -12px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .marketing-float,
+  .marketing-float--slow,
+  .marketing-float--delay {
+    animation: none !important;
+  }
 }

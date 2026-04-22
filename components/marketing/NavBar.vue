@@ -11,7 +11,8 @@ const { t } = useI18n({ useScope: 'global' })
 const navLinks = computed(() => [
   { name: t('marketing.nav.features'), to: '/features' },
   { name: t('marketing.nav.pricing'), to: '/pricing' },
-  { name: t('marketing.nav.about'), to: '/about' }
+  { name: t('marketing.nav.about'), to: '/about' },
+  { name: t('marketing.footer.support.contact'), to: '/contact' }
 ])
 
 const isActiveLink = (to: string) => route.path === to
@@ -45,156 +46,108 @@ function handleLogout() {
 
 <template>
   <nav
-    class="fixed inset-x-0 top-0 z-50 border-b border-[#E6D8B8] bg-[#FFF8E7] transition-all duration-300"
-    :class="isScrolled ? 'pt-2 shadow-lg shadow-[#DCCFB0]/70' : 'pt-0'"
+    class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
+    :class="isScrolled ? 'pt-3' : 'pt-0'"
   >
-    <div
-      class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-    >
+    <div class="marketing-container max-w-[90rem]">
       <div
-        class="flex items-center justify-between px-2 transition-all duration-300 md:px-0"
-        :class="isScrolled ? 'h-16' : 'h-20'"
+        class="rounded-[1.35rem] border transition-all duration-300"
+        :class="isScrolled ? 'border-white/12 bg-[#08101f]/82 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)] backdrop-blur-xl' : 'border-transparent bg-transparent'"
       >
-        <NuxtLink
-          to="/"
-          class="group flex items-center gap-3"
-        >
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#FF7A45]/35 bg-gradient-to-br from-[#FF7A45] to-[#FF9A66] text-white shadow-lg shadow-[#FF7A45]/30 transition-transform group-hover:scale-105">
-            <Icon
-              name="lucide:store"
-              class="h-5 w-5"
-            />
-          </div>
-          <div class="leading-tight">
-            <p class="text-lg font-extrabold tracking-tight text-[#0D1F1A]">
+        <div class="flex h-20 items-center justify-between px-4 sm:px-6">
+          <NuxtLink to="/" class="flex items-center">
+            <p class="font-display text-xl font-semibold tracking-[-0.04em] text-white sm:text-2xl">
               Swekly
             </p>
-          </div>
-        </NuxtLink>
-
-        <div class="hidden items-center gap-7 md:flex">
-          <NuxtLink
-            v-for="link in navLinks"
-            :key="link.name"
-            :to="link.to"
-            class="relative text-sm font-semibold transition-colors duration-200"
-            :class="isActiveLink(link.to) ? 'text-[#0D1F1A]' : 'text-[#0D1F1A]/70 hover:text-[#0D1F1A]'"
-          >
-            {{ link.name }}
-            <span
-              class="pointer-events-none absolute -bottom-2 start-0 h-px bg-amber-300 transition-all duration-300"
-              :class="isActiveLink(link.to) ? 'w-full opacity-100' : 'w-0 opacity-0'"
-            />
           </NuxtLink>
 
-          <LocaleSwitcher class="border-[#D8C9A8] bg-[#FFF3DB] text-[#0D1F1A]" />
+          <div class="hidden items-center gap-7 lg:flex">
+            <NuxtLink
+              v-for="link in navLinks"
+              :key="link.to"
+              :to="link.to"
+              class="relative text-sm font-medium transition-colors duration-200"
+              :class="isActiveLink(link.to) ? 'text-white' : 'text-slate-300 hover:text-white'"
+            >
+              {{ link.name }}
+              <span
+                class="pointer-events-none absolute -bottom-2 left-0 h-px bg-gradient-to-r from-[#3559ff] to-[#16d5b3] transition-all duration-300"
+                :class="isActiveLink(link.to) ? 'w-full opacity-100' : 'w-0 opacity-0'"
+              />
+            </NuxtLink>
+          </div>
 
-          <div class="h-6 w-px bg-[#0D1F1A]/15" />
-
-          <div class="flex items-center gap-3">
+          <div class="hidden items-center gap-3 lg:flex">
+            <LocaleSwitcher class="border-white/10 bg-white/5 text-white" />
             <template v-if="authStore.isAuthenticated">
-              <NuxtLink
-                to="/admin"
-                class="rounded-xl border border-[#0D1F1A]/20 px-4 py-2 text-sm font-semibold text-[#0D1F1A] transition-colors hover:bg-[#0D1F1A]/5"
-              >
+              <NuxtLink to="/admin" class="marketing-button marketing-button--ghost">
                 {{ t('marketing.actions.dashboard') }}
               </NuxtLink>
-              <button
-                class="text-sm font-medium text-[#0D1F1A]/65 transition-colors hover:text-[#0D1F1A]"
-                @click="handleLogout"
-              >
+              <button class="marketing-button text-slate-300 hover:text-white" @click="handleLogout">
                 {{ t('marketing.actions.logout') }}
               </button>
             </template>
             <template v-else>
-              <NuxtLink
-                to="/login"
-                class="text-sm font-semibold text-[#0D1F1A]/75 transition-colors hover:text-[#0D1F1A]"
-              >
+              <NuxtLink to="/login" class="marketing-button text-slate-300 hover:text-white">
                 {{ t('marketing.actions.login') }}
               </NuxtLink>
-              <NuxtLink
-                to="/register"
-                class="rounded-xl bg-[#FF7A45] px-4 py-2 text-sm font-extrabold text-white shadow-lg shadow-[#FF7A45]/30 transition-all hover:-translate-y-0.5 hover:bg-[#ff8a5d]"
-              >
+              <NuxtLink to="/register" class="marketing-button marketing-button--primary">
                 {{ t('marketing.actions.getStarted') }}
               </NuxtLink>
             </template>
           </div>
+
+          <div class="flex items-center gap-2 lg:hidden">
+            <LocaleSwitcher class="border-white/10 bg-white/5 text-white" />
+            <button
+              type="button"
+              class="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/5 text-white"
+              :aria-expanded="mobileMenuOpen"
+              aria-label="Toggle navigation"
+              @click="mobileMenuOpen = !mobileMenuOpen"
+            >
+              <Icon :name="mobileMenuOpen ? 'lucide:x' : 'lucide:menu'" class="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-show="mobileMenuOpen"
+        class="mt-3 rounded-[1.6rem] border border-white/12 bg-[#08101f]/92 p-4 shadow-[0_24px_70px_-30px_rgba(0,0,0,0.9)] backdrop-blur-xl lg:hidden"
+      >
+        <div class="space-y-2">
+          <NuxtLink
+            v-for="link in navLinks"
+            :key="`mobile-${link.to}`"
+            :to="link.to"
+            class="block rounded-2xl px-4 py-3 text-sm font-medium transition-colors"
+            :class="isActiveLink(link.to) ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/6 hover:text-white'"
+          >
+            {{ link.name }}
+          </NuxtLink>
         </div>
 
-        <button
-          class="inline-flex items-center justify-center rounded-lg p-2 text-[#0D1F1A] md:hidden"
-          type="button"
-          :aria-expanded="mobileMenuOpen"
-          aria-label="Toggle menu"
-          @click="mobileMenuOpen = !mobileMenuOpen"
-        >
-          <Icon
-            v-if="!mobileMenuOpen"
-            name="lucide:menu"
-            class="h-6 w-6"
-          />
-          <Icon
-            v-else
-            name="lucide:x"
-            class="h-6 w-6"
-          />
-        </button>
-      </div>
-    </div>
+        <div class="my-4 h-px bg-white/10" />
 
-    <div
-      v-show="mobileMenuOpen"
-      class="mx-4 mt-2 rounded-2xl border border-[#E6D8B8] bg-[#FFF3DB] p-4 shadow-xl shadow-[#DCCFB0]/60 md:hidden"
-    >
-      <div class="space-y-2">
-        <NuxtLink
-          v-for="link in navLinks"
-          :key="`mobile-${link.name}`"
-          :to="link.to"
-          class="block rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
-          :class="isActiveLink(link.to) ? 'bg-[#0D1F1A]/8 text-[#0D1F1A]' : 'text-[#0D1F1A]/75 hover:bg-[#0D1F1A]/6 hover:text-[#0D1F1A]'"
-        >
-          {{ link.name }}
-        </NuxtLink>
-      </div>
-
-      <div class="my-4 h-px bg-[#0D1F1A]/10" />
-
-      <div class="mb-4 flex justify-center">
-        <LocaleSwitcher class="border-[#D8C9A8] bg-[#FFF8E7] text-[#0D1F1A]" />
-      </div>
-
-      <div class="space-y-2">
-        <template v-if="authStore.isAuthenticated">
-          <NuxtLink
-            to="/admin"
-            class="block w-full rounded-xl bg-[#FF7A45] px-4 py-3 text-center text-sm font-bold text-white"
-          >
-            {{ t('marketing.actions.dashboard') }}
-          </NuxtLink>
-          <button
-            class="block w-full rounded-xl border border-[#0D1F1A]/20 px-4 py-3 text-sm font-medium text-[#0D1F1A]/70 transition-colors hover:text-[#0D1F1A]"
-            @click="handleLogout"
-          >
-            {{ t('marketing.actions.logout') }}
-          </button>
-        </template>
-        <template v-else>
-          <NuxtLink
-            to="/login"
-            class="block w-full rounded-xl border border-[#0D1F1A]/20 px-4 py-3 text-center text-sm font-semibold text-[#0D1F1A]/80"
-          >
-            {{ t('marketing.actions.login') }}
-          </NuxtLink>
-          <NuxtLink
-            to="/register"
-            class="block w-full rounded-xl bg-[#FF7A45] px-4 py-3 text-center text-sm font-extrabold text-white"
-          >
-            {{ t('marketing.actions.getStarted') }}
-          </NuxtLink>
-        </template>
+        <div class="space-y-2">
+          <template v-if="authStore.isAuthenticated">
+            <NuxtLink to="/admin" class="marketing-button marketing-button--primary w-full">
+              {{ t('marketing.actions.dashboard') }}
+            </NuxtLink>
+            <button class="marketing-button marketing-button--ghost w-full" @click="handleLogout">
+              {{ t('marketing.actions.logout') }}
+            </button>
+          </template>
+          <template v-else>
+            <NuxtLink to="/login" class="marketing-button marketing-button--ghost w-full">
+              {{ t('marketing.actions.login') }}
+            </NuxtLink>
+            <NuxtLink to="/register" class="marketing-button marketing-button--primary w-full">
+              {{ t('marketing.actions.getStarted') }}
+            </NuxtLink>
+          </template>
+        </div>
       </div>
     </div>
   </nav>

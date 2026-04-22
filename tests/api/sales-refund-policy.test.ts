@@ -12,6 +12,7 @@ describe('Sales refund lifecycle policy', () => {
     let token: string
     let variantId: string
     let productId: string
+    let cashboxId: string
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
@@ -50,9 +51,33 @@ describe('Sales refund lifecycle policy', () => {
             }
         })
         variantId = variant.id
+
+        const cashbox = await prisma.cashbox.create({
+            data: {
+                tenantId,
+                name: `Refund Cashbox ${Date.now()}`,
+                isActive: true
+            }
+        })
+        cashboxId = cashbox.id
+
+        await prisma.cashSession.create({
+            data: {
+                tenantId,
+                cashboxId,
+                status: 'OPEN',
+                openingFloat: 500,
+                openedByUserId: admin.id
+            }
+        })
     })
 
     afterAll(async () => {
+        await prisma.customerPayment.deleteMany({ where: { tenantId } })
+        await prisma.supplierPayment.deleteMany({ where: { tenantId } })
+        await prisma.cashTransaction.deleteMany({ where: { tenantId } })
+        await prisma.cashSession.deleteMany({ where: { tenantId } })
+        await prisma.cashbox.deleteMany({ where: { tenantId } })
         await prisma.inventoryMovement.deleteMany({ where: { tenantId } })
         await prisma.saleItem.deleteMany({ where: { tenantId } })
         await prisma.sale.deleteMany({ where: { tenantId } })
@@ -88,7 +113,14 @@ describe('Sales refund lifecycle policy', () => {
             .patch(`/api/admin/sales/${sale.id}/status`)
             .set('X-Forwarded-Host', host)
             .set('Authorization', `Bearer ${token}`)
-            .send({ status: 'REFUNDED' })
+            .send({
+                status: 'REFUNDED',
+                refund: {
+                    cashboxId,
+                    method: 'CASH',
+                    note: 'Refund in test'
+                }
+            })
 
         expect(res.status).toBe(200)
         expect(res.body?.status).toBe('REFUNDED')
@@ -110,6 +142,15 @@ describe('Sales refund lifecycle policy', () => {
             orderBy: { createdAt: 'desc' }
         })
         expect(movement?.delta).toBe(2)
+
+        const cashTx = await prisma.cashTransaction.findFirst({
+            where: { tenantId, saleId: sale.id, type: 'SALE_REFUND' },
+            orderBy: { createdAt: 'desc' }
+        })
+        expect(cashTx).not.toBeNull()
+        expect(cashTx?.cashboxId).toBe(cashboxId)
+        expect(cashTx?.direction).toBe('OUT')
+        expect(String(cashTx?.amount)).toBe('200')
     })
 
     it('rejects refund for order-linked sale', async () => {
@@ -140,5 +181,59 @@ describe('Sales refund lifecycle policy', () => {
 
         expect(res.status).toBe(409)
         expect(res.body?.code).toBe('SALE_REFUND_ORDER_LINKED_NOT_ALLOWED')
+    })
+
+    it('requires refund cashbox for POS refunds', async () => {
+        const sale = await prisma.sale.create({
+            data: {
+                tenantId,
+                source: 'POS',
+                status: 'COMPLETED',
+                totalAmount: 100
+            }
+        })
+
+        const res = await request(app)
+            .patch(`/api/admin/sales/${sale.id}/status`)
+            .set('X-Forwarded-Host', host)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ status: 'REFUNDED' })
+
+        expect(res.status).toBe(400)
+        expect(res.body?.code).toBe('SALE_REFUND_CASHBOX_REQUIRED')
+    })
+
+    it('returns cash session conflict code when selected cashbox has no open session', async () => {
+        const closedCashbox = await prisma.cashbox.create({
+            data: {
+                tenantId,
+                name: `Closed Refund Cashbox ${Date.now()}`,
+                isActive: true
+            }
+        })
+
+        const sale = await prisma.sale.create({
+            data: {
+                tenantId,
+                source: 'POS',
+                status: 'COMPLETED',
+                totalAmount: 100
+            }
+        })
+
+        const res = await request(app)
+            .patch(`/api/admin/sales/${sale.id}/status`)
+            .set('X-Forwarded-Host', host)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                status: 'REFUNDED',
+                refund: {
+                    cashboxId: closedCashbox.id,
+                    method: 'CASH'
+                }
+            })
+
+        expect(res.status).toBe(409)
+        expect(res.body?.code).toBe('CASH_SESSION_REQUIRED')
     })
 })

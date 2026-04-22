@@ -97,7 +97,7 @@
             {{ product.title }}
           </p>
           <div class="text-right shrink-0">
-            <p class="text-[11px] font-semibold font-mono-nums" style="color: #f59e0b">
+            <p class="text-[11px] font-semibold font-mono-nums" style="color: var(--accent)">
               {{ product.stock }}
             </p>
             <p class="text-[10px] font-mono-nums" style="color: var(--text-tertiary)">

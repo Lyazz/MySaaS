@@ -1,9 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-600">
+  <div class="marketing-shell flex min-h-screen flex-col font-sans">
     <MarketingNavBar />
-    <div class="h-20" /> <!-- Spacer for fixed header -->
 
-    <main class="flex-grow">
+    <main class="relative z-10 flex-grow">
       <slot />
     </main>
 

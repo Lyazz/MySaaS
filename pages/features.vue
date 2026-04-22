@@ -1,199 +1,230 @@
 <script setup lang="ts">
+import type { MarketingChapter } from '~/shared/marketing/types'
+
 const { t } = useI18n({ useScope: 'global' })
 
 definePageMeta({
-  layout: 'marketing',
-  title: 'Features - Swekly'
+  layout: 'marketing'
 })
 
-const features = computed(() => [
+useSeoMeta({
+  title: computed(() => `${t('marketing.nav.features')} - Swekly`),
+  description: computed(() => t('marketing.featuresPage.hero.subtitle'))
+})
+
+const chapters = computed<MarketingChapter[]>(() => [
   {
+    eyebrow: '01',
     title: t('marketing.featuresPage.items.builder.title'),
     description: t('marketing.featuresPage.items.builder.description'),
     icon: 'lucide:layout-template',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2426&ixlib=rb-4.0.3',
-    colSpan: 'lg:col-span-2 row-span-2',
-    color: 'teal'
+    tone: 'cobalt',
+    bullets: [
+      { label: t('saasLanding.features.items.templates.title'), icon: 'lucide:smartphone' },
+      { label: t('marketing.featuresPage.items.domains.title'), icon: 'lucide:globe' }
+    ]
   },
   {
+    eyebrow: '02',
     title: t('marketing.featuresPage.items.payments.title'),
     description: t('marketing.featuresPage.items.payments.description'),
     icon: 'lucide:credit-card',
-    colSpan: 'lg:col-span-1',
-    color: 'emerald'
+    tone: 'teal',
+    bullets: [
+      { label: t('saasLanding.trust.secure'), icon: 'lucide:shield-check' },
+      { label: t('marketing.featuresPage.bullets.checkout'), icon: 'lucide:badge-dollar-sign' }
+    ]
   },
   {
-    title: t('marketing.featuresPage.items.analytics.title'),
-    description: t('marketing.featuresPage.items.analytics.description'),
-    icon: 'lucide:bar-chart-3',
-    colSpan: 'lg:col-span-1',
-    color: 'amber'
-  },
-  {
-    title: t('marketing.featuresPage.items.automation.title'),
-    description: t('marketing.featuresPage.items.automation.description'),
-    icon: 'lucide:mail',
-    colSpan: 'lg:col-span-1',
-    color: 'violet'
-  },
-  {
+    eyebrow: '03',
     title: t('marketing.featuresPage.items.logistics.title'),
     description: t('marketing.featuresPage.items.logistics.description'),
     icon: 'lucide:truck',
-    colSpan: 'lg:col-span-2',
-    color: 'blue'
+    tone: 'orange',
+    bullets: [
+      { label: t('marketing.featuresPage.bullets.carriers'), icon: 'lucide:send' },
+      { label: t('marketing.featuresPage.bullets.dispatch'), icon: 'lucide:boxes' }
+    ]
   },
   {
-    title: t('marketing.featuresPage.items.domains.title'),
-    description: t('marketing.featuresPage.items.domains.description'),
-    icon: 'lucide:globe',
-    colSpan: 'lg:col-span-1',
-    color: 'rose'
+    eyebrow: '04',
+    title: t('marketing.featuresPage.items.analytics.title'),
+    description: t('marketing.featuresPage.items.analytics.description'),
+    icon: 'lucide:bar-chart-3',
+    tone: 'cobalt',
+    bullets: [
+      { label: t('auth.login.hero.carousel.analytics.title'), icon: 'lucide:line-chart' },
+      { label: t('saasLanding.features.items.aiTools.title'), icon: 'lucide:sparkles' }
+    ]
   }
 ])
 </script>
 
 <template>
-  <div class="feature-page min-h-screen font-sans pt-24 md:pt-28 pb-20">
-    <section class="relative overflow-hidden px-4 pt-8 pb-14">
-      <div class="feature-page__blob feature-page__blob--mint" />
-      <div class="feature-page__blob feature-page__blob--orange" />
-
-      <div class="relative z-10 mx-auto max-w-4xl text-center">
-        <p class="text-xs md:text-sm font-bold uppercase tracking-[0.24em] text-[#0D1F1A]/55 mb-5">
-          Swekly
-        </p>
-        <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-[0.95] text-[#0D1F1A] mb-6">
-          {{ t('marketing.featuresPage.hero.title.prefix') }}
-          <span class="feature-page__accent">
-            {{ t('marketing.featuresPage.hero.title.accent') }}
-          </span>
-        </h1>
-        <p class="mx-auto max-w-2xl text-base md:text-lg leading-relaxed text-[#0D1F1A]/65">
-          {{ t('marketing.featuresPage.hero.subtitle') }}
-        </p>
-      </div>
-    </section>
-
-    <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-[minmax(280px,auto)]">
-        <article
-          v-for="(feat, idx) in features"
-          :key="idx"
-          class="group relative overflow-hidden rounded-3xl border-2 border-[#0D1F1A] bg-[#FFFDF4] p-7 transition-all duration-300 hover:-translate-y-1"
-          :class="feat.colSpan"
-        >
-          <div class="feature-page__card-shadow" />
-          <div class="relative z-10 flex h-full flex-col">
-            <div
-              class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border-2 border-[#0D1F1A] text-white shadow-[3px_3px_0_#0D1F1A]"
-              :class="{
-                'bg-[#1F9D8E]': feat.color === 'teal' || feat.color === 'emerald',
-                'bg-[#FF7A45]': feat.color === 'amber' || feat.color === 'rose',
-                'bg-[#0D1F1A]': feat.color === 'violet' || feat.color === 'blue'
-              }"
-            >
-              <Icon :name="feat.icon" class="w-5 h-5" />
+  <div class="relative overflow-hidden pt-28 md:pt-32">
+    <section class="marketing-section pb-10">
+      <div class="marketing-container max-w-[90rem]">
+        <div class="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
+          <div>
+            <div class="marketing-eyebrow">
+              <Icon name="lucide:layers-3" class="h-3.5 w-3.5 text-[#16d5b3]" />
+              {{ t('marketing.nav.features') }}
             </div>
-
-            <h3 class="text-2xl font-extrabold tracking-tight text-[#0D1F1A] mb-3">
-              {{ feat.title }}
-            </h3>
-            <p class="leading-relaxed text-[#0D1F1A]/65 max-w-md">
-              {{ feat.description }}
+            <h1 class="mt-6 font-display text-5xl font-semibold tracking-[-0.06em] text-white md:text-6xl lg:text-7xl">
+              {{ t('marketing.featuresPage.hero.title.prefix') }}
+              <span class="block bg-[linear-gradient(135deg,#ffffff,#8fa7ff)] bg-clip-text text-transparent">
+                {{ t('marketing.featuresPage.hero.title.accent') }}
+              </span>
+            </h1>
+            <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl">
+              {{ t('marketing.featuresPage.hero.subtitle') }}
             </p>
-
-            <div class="flex-1" />
-
-            <div
-              v-if="feat.image"
-              class="mt-8 overflow-hidden rounded-2xl border-2 border-[#0D1F1A] shadow-[4px_4px_0_#0D1F1A]"
-            >
-              <img
-                :src="feat.image"
-                :alt="feat.title"
-                class="h-48 w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              >
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+              <NuxtLink to="/register" class="marketing-button marketing-button--primary">
+                {{ t('marketing.actions.getStarted') }}
+              </NuxtLink>
+              <NuxtLink to="/pricing" class="marketing-button marketing-button--ghost">
+                {{ t('marketing.nav.pricing') }}
+              </NuxtLink>
             </div>
           </div>
-        </article>
+
+          <MarketingVisualFrame tone="cobalt">
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-5">
+                <p class="marketing-label">{{ t('marketing.featuresPage.visual.setupLabel') }}</p>
+                <p class="mt-3 text-2xl font-display font-semibold text-white">
+                  {{ t('marketing.featuresPage.visual.setupTitle') }}
+                </p>
+                <div class="mt-5 space-y-3 text-sm text-slate-300">
+                  <div class="feature-lab-row">
+                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
+                    {{ t('marketing.featuresPage.visual.setupTheme') }}
+                  </div>
+                  <div class="feature-lab-row">
+                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
+                    {{ t('marketing.featuresPage.visual.setupCheckout') }}
+                  </div>
+                  <div class="feature-lab-row">
+                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
+                    {{ t('marketing.featuresPage.visual.setupDelivery') }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(53,89,255,0.2),rgba(255,255,255,0.03))] p-5">
+                <p class="marketing-label">{{ t('marketing.featuresPage.visual.signalLabel') }}</p>
+                <div class="mt-4 flex items-end gap-2">
+                  <div class="feature-lab-bar h-16" />
+                  <div class="feature-lab-bar h-24" />
+                  <div class="feature-lab-bar h-20" />
+                  <div class="feature-lab-bar h-28" />
+                  <div class="feature-lab-bar h-32" />
+                </div>
+              </div>
+            </div>
+          </MarketingVisualFrame>
+        </div>
       </div>
     </section>
 
-    <section class="pt-20 text-center px-4">
-      <div class="mx-auto max-w-2xl rounded-3xl border-2 border-[#0D1F1A] bg-[#FFF1DC] px-8 py-12 text-[#0D1F1A] shadow-[8px_8px_0_#FF7A45]">
-        <h2 class="text-3xl font-black tracking-tight mb-6">
-          {{ t('marketing.featuresPage.cta.title') }}
-        </h2>
-        <NuxtLink
-          to="/register"
-          class="inline-flex items-center gap-2 rounded-full border-2 border-[#FF7A45] bg-[#FF7A45] px-8 py-3 font-bold text-white transition-all hover:-translate-y-0.5 hover:border-[#ff8a5d] hover:bg-[#ff8a5d]"
+    <MarketingSection width="wide">
+      <div class="space-y-6">
+        <div
+          v-for="chapter in chapters"
+          :key="chapter.title"
+          class="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]"
         >
-          {{ t('marketing.featuresPage.cta.button') }}
-          <Icon name="lucide:arrow-right" class="w-4 h-4" />
-        </NuxtLink>
+          <div class="lg:sticky lg:top-28 lg:self-start">
+            <MarketingVisualFrame :tone="chapter.tone || 'cobalt'">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <p class="marketing-label">{{ chapter.eyebrow }}</p>
+                  <Icon :name="chapter.icon || 'lucide:sparkles'" class="h-5 w-5 text-[#8fa7ff]" />
+                </div>
+                <h2 class="font-display text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">
+                  {{ chapter.title }}
+                </h2>
+                <p class="text-base leading-7 text-slate-300">
+                  {{ chapter.description }}
+                </p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <div
+                    v-for="bullet in chapter.bullets"
+                    :key="bullet.label"
+                    class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-200"
+                  >
+                    <div class="flex items-center gap-2">
+                      <Icon :name="bullet.icon || 'lucide:check'" class="h-4 w-4 text-[#16d5b3]" />
+                      {{ bullet.label }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </MarketingVisualFrame>
+          </div>
+
+          <div class="marketing-panel px-6 py-6 md:px-8 md:py-8">
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-5">
+                <p class="marketing-label">{{ t('marketing.featuresPage.outcomeLabel') }}</p>
+                <p class="mt-3 text-xl font-display font-semibold tracking-[-0.04em] text-white">
+                  {{ t('marketing.featuresPage.outcomeTitle') }}
+                </p>
+                <p class="mt-3 text-sm leading-7 text-slate-300">
+                  {{ t('marketing.featuresPage.outcomeBody') }}
+                </p>
+              </div>
+              <div class="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-5">
+                <p class="marketing-label">{{ t('marketing.featuresPage.surfaceLabel') }}</p>
+                <p class="mt-3 text-sm leading-7 text-slate-300">
+                  {{ t('marketing.featuresPage.surfaceBody') }}
+                </p>
+                <div class="mt-4 h-2 rounded-full bg-white/10">
+                  <div class="h-2 w-[78%] rounded-full bg-gradient-to-r from-[#16d5b3] to-[#3559ff]" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MarketingSection>
+
+    <section class="marketing-section pt-6">
+      <div class="marketing-container max-w-5xl">
+        <div class="marketing-panel px-6 py-8 text-center md:px-10">
+          <p class="marketing-eyebrow">
+            <Icon name="lucide:rocket" class="h-3.5 w-3.5 text-[#16d5b3]" />
+            {{ t('marketing.featuresPage.cta.title') }}
+          </p>
+          <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <NuxtLink to="/register" class="marketing-button marketing-button--primary">
+              {{ t('marketing.featuresPage.cta.button') }}
+            </NuxtLink>
+            <NuxtLink to="/contact" class="marketing-button marketing-button--ghost">
+              {{ t('marketing.footer.support.contact') }}
+            </NuxtLink>
+          </div>
+        </div>
       </div>
     </section>
   </div>
 </template>
 
 <style scoped>
-.feature-page {
-  background: #FFF8E7;
-  color: #0D1F1A;
+.feature-lab-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.8rem 0.9rem;
 }
 
-.feature-page__accent {
-  color: #FF7A45;
-  position: relative;
-  display: inline-block;
-}
-
-.feature-page__accent::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -0.22em;
-  width: 100%;
-  height: 0.2em;
-  background: rgba(244, 192, 78, 0.9);
-  border-radius: 999px;
-  z-index: -1;
-}
-
-.feature-page__blob {
-  pointer-events: none;
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(80px);
-  opacity: 0.35;
-}
-
-.feature-page__blob--mint {
-  width: 320px;
-  height: 320px;
-  top: -120px;
-  left: -80px;
-  background: #1F9D8E;
-}
-
-.feature-page__blob--orange {
-  width: 320px;
-  height: 320px;
-  top: -60px;
-  right: -100px;
-  background: #FF7A45;
-}
-
-.feature-page__card-shadow {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(31, 157, 142, 0.08), rgba(255, 122, 69, 0.08));
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.group:hover .feature-page__card-shadow {
-  opacity: 1;
+.feature-lab-bar {
+  flex: 1 1 0%;
+  min-width: 0;
+  border-radius: 999px 999px 0.8rem 0.8rem;
+  background: linear-gradient(180deg, rgba(22, 213, 179, 0.9), rgba(53, 89, 255, 0.82));
 }
 </style>

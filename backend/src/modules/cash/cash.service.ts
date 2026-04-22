@@ -111,6 +111,8 @@ const typePolicy = (type: string): { direction: 'IN' | 'OUT'; needs: Array<'cust
     switch (type) {
         case 'SALE_PAYMENT':
             return { direction: 'IN', needs: [] }
+        case 'SALE_REFUND':
+            return { direction: 'OUT', needs: [] }
         case 'CUSTOMER_PAYMENT':
             return { direction: 'IN', needs: ['customer'] }
         case 'SUPPLIER_PAYMENT':

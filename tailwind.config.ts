@@ -14,7 +14,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['DM Sans', 'system-ui', 'sans-serif'],
-                display: ['DM Sans', 'system-ui', 'sans-serif'],
+                display: ['Outfit', 'system-ui', 'sans-serif'],
                 mono: ['Geist Mono', 'JetBrains Mono', 'monospace'],
                 serif: ['Alice', 'serif'],
                 stationery: ['Merriweather', 'serif'],

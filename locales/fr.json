@@ -58,6 +58,9 @@
         "shipping": "Livraison",
         "analytics": "Analytique",
         "ai": "Outils IA"
+      },
+      "pills": {
+        "mobile": "Boutiques pensées pour le mobile"
       }
     },
     "storyteller": {
@@ -133,7 +136,8 @@
     "stats": {
       "activeMerchants": "Boutiques actives",
       "revenueGenerated": "Ventes traitées",
-      "uptime": "Disponibilité"
+      "uptime": "Disponibilité",
+      "gmvDetail": "Volume de ventes mensuel"
     },
     "faq": {
       "title": "Questions fréquentes",
@@ -201,7 +205,12 @@
     },
     "integrations": {
       "title": "Connecté à vos outils",
-      "subtitle": "Paiement, livraison et marketing : tout se branche facilement."
+      "subtitle": "Paiement, livraison et marketing : tout se branche facilement.",
+      "items": {
+        "checkout": "Commande",
+        "catalog": "Catalogue produits",
+        "ads": "Suivi publicitaire"
+      }
     },
     "themes": {
       "title": {
@@ -234,7 +243,47 @@
         "subject": "Sujet",
         "message": "Message",
         "submit": "Envoyer le message"
+      },
+      "supportPill": "Aide au lancement et à la mise en place"
+    },
+    "visual": {
+      "storefrontLabel": "Votre boutique",
+      "live": "En ligne",
+      "orders": "Commandes",
+      "conversion": "Conversion",
+      "checkoutLabel": "Parcours de commande",
+      "checkoutTitle": "Validation de commande en 3 étapes",
+      "checkoutSteps": {
+        "phone": "Récupérez le téléphone et la wilaya",
+        "delivery": "Choisissez la livraison et confirmez la commande",
+        "dispatch": "Envoyez la commande au transporteur"
+      },
+      "today": "Aujourd’hui",
+      "operationsRail": "Ce qui tourne en arrière-plan",
+      "whatsapp": "Confirmations WhatsApp",
+      "carriers": "Livraison envoyée vers Maystro ou Yalidine",
+      "analytics": "Suivi des ventes et des campagnes",
+      "readinessLabel": "Prêt à vendre",
+      "readinessText": "Tout reste simple pour votre équipe : votre boutique, vos commandes, vos options de livraison et votre suivi quotidien.",
+      "commandCenterEyebrow": "Suivi quotidien",
+      "commandCenterTitle": "Un seul endroit pour gérer votre boutique",
+      "commandCenterBadge": "Pour chaque étape",
+      "orderConfirmations": "Commandes confirmées",
+      "carrierSync": "Suivi livraison",
+      "realtime": "En direct",
+      "localFleet": "Votre propre livreur",
+      "weeklyPulse": "Rythme des ventes hebdomadaire",
+      "showcase": {
+        "title": "De belles boutiques pensées pour vos produits",
+        "body": "Choisissez un thème, ajoutez vos produits et offrez un achat fluide sur mobile.",
+        "preview": "Aperçu boutique",
+        "analyticsBody": "Voyez ce qui se vend, ce qui convertit et où pousser plus fort",
+        "logisticsBody": "Proposez les options de livraison qui correspondent à vos clients"
       }
+    },
+    "pricingPreview": {
+      "storefront": "Votre boutique en ligne est incluse",
+      "delivery": "Les options de livraison sont prêtes dès le départ"
     }
   },
   "marketing": {
@@ -255,41 +304,60 @@
           "prefix": "Tout ce qu’il vous faut pour ",
           "accent": "passer à l’échelle"
         },
-        "subtitle": "Swekly est bien plus qu’un créateur de boutique. C’est un véritable système d’exploitation pour votre activité e-commerce."
+        "subtitle": "Créez votre boutique, recevez des commandes, gérez la livraison et gardez le contrôle sans multiplier les outils."
       },
       "items": {
         "builder": {
-          "title": "Constructeur de boutique (drag & drop)",
-          "description": "Créez des vitrines professionnelles sans écrire une seule ligne de code. Personnalisez chaque détail en quelques minutes."
+          "title": "Mise en place rapide",
+          "description": "Lancez une boutique propre, pensée pour le mobile, et adaptez-la rapidement à vos produits."
         },
         "payments": {
-          "title": "Paiements mondiaux",
-          "description": "Acceptez des paiements partout grâce à des passerelles intégrées comme CIB, Edahabia et des fournisseurs locaux."
+          "title": "Commande pensée pour vos clients",
+          "description": "Simplifiez la prise de commande avec un parcours fait pour le COD, la confiance et la confirmation rapide."
         },
         "analytics": {
-          "title": "Analytique avancée",
-          "description": "Suivez les ventes en temps réel, le comportement des visiteurs et les entonnoirs de conversion."
+          "title": "Lecture claire des ventes",
+          "description": "Voyez ce qui se vend, ce qui ralentit et où investir davantage."
         },
         "automation": {
-          "title": "Automatisation marketing",
-          "description": "Récupérez les paniers abandonnés et engagez vos clients avec des workflows SMS et e-mail."
+          "title": "Suivi simple",
+          "description": "Gardez le contact avec vos clients grâce à de meilleurs suivis de commande et rappels."
         },
         "logistics": {
-          "title": "Réseau logistique",
-          "description": "Dispatch automatique des commandes vers Yalidine, Eckoz et plus de 50 transporteurs."
+          "title": "Connexions livraison",
+          "description": "Envoyez vos commandes vers Maystro, Yalidine ou votre propre organisation sans copier-coller."
         },
         "domains": {
-          "title": "Domaines personnalisés",
-          "description": "Connectez votre propre nom de domaine pour une expérience entièrement personnalisée."
+          "title": "Votre domaine",
+          "description": "Gardez votre image avec un domaine personnalisé et une boutique qui vous ressemble."
         }
       },
+      "bullets": {
+        "checkout": "Formulaire de commande rapide",
+        "carriers": "Maystro et Yalidine",
+        "dispatch": "Suivi dispatch simplifié"
+      },
+      "visual": {
+        "setupLabel": "Mise en place",
+        "setupTitle": "Ouvrez votre boutique sans perdre des semaines",
+        "setupTheme": "Thème et image de marque",
+        "setupCheckout": "Parcours de commande prêt à l’emploi",
+        "setupDelivery": "Livraison configurée dès le départ",
+        "signalLabel": "Élan"
+      },
+      "outcomeLabel": "Ce que vous gagnez",
+      "outcomeTitle": "Lancez plus vite, restez organisé",
+      "outcomeBody": "Chaque étape vous aide à vendre plus tôt et à alléger le quotidien de votre équipe.",
+      "surfaceLabel": "Inclus",
+      "surfaceBody": "Boutique, commande, livraison et suivi des ventes fonctionnent ensemble sans outils en plus.",
       "cta": {
         "title": "Prêt à commencer ?",
         "button": "Démarrer l’essai gratuit"
       }
     },
     "footer": {
-      "tagline": "Donnez plus de puissance à votre entreprise avec des outils modernes et une expérience premium. Conçu pour évoluer, pensé pour vous.",
+      "tagline": "Créez une boutique professionnelle, recevez vos commandes et gardez la livraison sous contrôle depuis un espace simple.",
+      "bottomLine": "",
       "product": {
         "title": "Produit",
         "changelog": "Historique des changements"
@@ -301,6 +369,45 @@
         "contact": "Contact"
       },
       "copyright": "© {year} Plateforme Swekly. Tous droits réservés."
+    },
+    "aboutPage": {
+      "heroTitle": "Pensé pour la façon dont le commerce algérien fonctionne vraiment",
+      "heroSubtitle": "Swekly aide les marchands à lancer plus vite, rester organisés et garder la livraison simple dès le premier jour.",
+      "storyTitle": "Pas un autre simple créateur de boutique",
+      "storyBody": "Nous avons conçu Swekly autour des réalités des marchands algériens : achat mobile-first, confirmation COD, réseaux de livraison locaux et équipes qui veulent un quotidien plus fluide.",
+      "context": {
+        "storyLabel": "Pourquoi les marchands changent",
+        "label": "Construit autour des vrais usages",
+        "mobile": "Les clients achètent d’abord sur mobile",
+        "delivery": "La livraison fait partie de chaque vente",
+        "cod": "La confiance compte avant la commande"
+      },
+      "principles": {
+        "title": "Ce qui guide le produit",
+        "subtitle": "Un système commerce doit réduire la friction opérationnelle, pas ajouter plus de tableaux de bord à gérer.",
+        "items": {
+          "platform": {
+            "title": "Une plateforme, une boucle d'exécution",
+            "body": "Vitrine, checkout, inventaire, commandes et analytique restent connectés pour que l'équipe travaille depuis la même source de vérité."
+          },
+          "tenancy": {
+            "title": "Votre image, votre espace",
+            "body": "Votre boutique garde son domaine, son style et sa façon de travailler pour que vos clients aient l’impression d’acheter chez vous."
+          },
+          "cod": {
+            "title": "Conçu pour convertir en COD",
+            "body": "Un checkout centré téléphone, des signaux de confiance clairs et des étapes adaptées à la livraison reflètent la façon dont les clients commandent en Algérie."
+          },
+          "ops": {
+            "title": "Pensé pour l'exécution quotidienne",
+            "body": "Swekly est fait pour les équipes qui doivent publier vite, confirmer rapidement et garder la livraison prévisible."
+          }
+        }
+      },
+      "final": {
+        "title": "Partez d'une meilleure base storefront",
+        "subtitle": "Lancez plus vite, gardez des opérations plus propres et évoluez sur une plateforme conçue pour le commerce algérien."
+      }
     }
   },
   "auth": {
@@ -320,6 +427,12 @@
         "panel": {
           "badge": "Ops en direct",
           "focusArea": "Axe prioritaire"
+        },
+        "side": {
+          "label": "Dans votre espace",
+          "orders": "Commandes, produits et livraison au même endroit",
+          "workspace": "Un espace clair pour votre équipe",
+          "performance": "Une vue rapide sur les résultats du jour"
         }
       },
       "form": {
@@ -420,10 +533,6 @@
       "title": "Tarifs - Swekly",
       "description": "Choisissez l’offre adaptée à votre étape de croissance."
     },
-    "page": {
-      "title": "Tarifs simples et transparents",
-      "subtitle": "Choisissez l’offre adaptée à votre croissance. Aucun frais caché."
-    },
     "section": {
       "title": "Tarifs transparents",
       "subtitle": "Aucun frais caché. Évoluez à votre rythme."
@@ -444,25 +553,51 @@
     "features": {
       "ordersPerMonth": "{count} commandes/mois"
     },
+    "page": {
+      "title": "Tarifs simples et transparents",
+      "subtitle": "Choisissez l’offre qui correspond à votre volume de commandes et au niveau d’accompagnement souhaité.",
+      "includedTitle": "Inclus dès le départ",
+      "includedCheckout": "Une boutique avec un parcours de commande simple",
+      "includedDelivery": "Des options de livraison prêtes pour vos commandes",
+      "includedSupport": "Une aide au lancement quand vous démarrez",
+      "growthLabel": "Grandir sereinement",
+      "growthTitle": "Plus de commandes, plus d’options, le même confort",
+      "growthBody": "Passez à l’offre supérieure quand votre boutique grandit. Vos produits, vos habitudes d’équipe et votre flux livraison restent les mêmes.",
+      "enterpriseLabel": "Besoin de plus ?",
+      "enterpriseTitle": "Une mise en place sur mesure pour les boutiques et équipes plus larges",
+      "enterpriseBody": "Parlez à Swekly si vous avez besoin d’aide à la migration, d’un volume mensuel plus élevé ou d’un accompagnement au déploiement.",
+      "enterpriseItems": {
+        "setup": "Aide à la mise en place et à la migration",
+        "ops": "Revue du flux commandes et livraison",
+        "guidance": "Dimensionnement de l’offre pour une marque en croissance"
+      },
+      "features": {
+        "store": "Boutique en ligne professionnelle incluse",
+        "delivery": "Options de livraison et suivi",
+        "upsell": "Outils marketing et vente additionnelle",
+        "analytics": "Suivi clair des ventes et conversions",
+        "team": "Accompagnement avancé pour les équipes plus larges"
+      }
+    },
     "plans": {
       "basic": {
         "name": "Basique",
-        "description": "Idéal pour essayer",
+        "description": "Un départ gratuit pour tester vos premiers produits",
         "cta": "Commencer"
       },
       "beginner": {
         "name": "Débutant",
-        "description": "Un démarrage simple pour booster votre boutique",
+        "description": "Pour une petite boutique qui veut vendre sérieusement",
         "cta": "Commencer"
       },
       "merchant": {
         "name": "Marchand",
-        "description": "Le choix malin pour les entreprises en croissance",
+        "description": "Le meilleur choix pour une boutique qui reçoit déjà des commandes",
         "cta": "Commencer"
       },
       "professional": {
         "name": "Professionnel",
-        "description": "Conçu pour évoluer en toute confiance",
+        "description": "Pour les marques qui gèrent un plus gros volume chaque mois",
         "cta": "15 jours gratuits"
       }
     }
@@ -3142,6 +3277,29 @@
             "completed": "Vente",
             "actions": "Actions"
           }
+        },
+        "actions": {
+          "refund": "Rembourser"
+        },
+        "refundModal": {
+          "title": "Rembourser la vente",
+          "subtitle": "Enregistrer une sortie de caisse et marquer cette vente comme remboursée.",
+          "cashboxLabel": "Caisse",
+          "cashboxPlaceholder": "Sélectionner une caisse",
+          "noOpenSession": "Aucune session ouverte",
+          "methodLabel": "Mode de paiement",
+          "referenceLabel": "Référence (optionnel)",
+          "referencePlaceholder": "Reçu ou référence bancaire",
+          "noteLabel": "Note (optionnel)",
+          "notePlaceholder": "Motif du remboursement"
+        },
+        "messages": {
+          "refundFromOrderFlow": "Les ventes liées aux commandes doivent être retournées depuis le flux commande.",
+          "alreadyRefunded": "Cette vente est déjà remboursée.",
+          "onlyCompletedPos": "Seules les ventes PDV terminées peuvent être remboursées.",
+          "noOpenCashbox": "Aucune caisse ouverte disponible. Ouvrez une session de caisse d’abord.",
+          "refundSuccess": "Vente remboursée avec succès.",
+          "refundFailed": "Échec du remboursement de la vente."
         },
         "detail": {
           "metaTitle": "Vente",

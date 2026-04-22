@@ -96,10 +96,10 @@ const toneMap: Record<Tone, { icon: string; wrap: string; topLine: string; wash:
     wash: 'background: linear-gradient(180deg, rgba(59,130,246,0.06) 0%, transparent 100%)'
   },
   amber: {
-    icon: 'color: #fbbf24',
-    wrap: 'background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.2)',
-    topLine: 'background: linear-gradient(90deg, #f59e0b 0%, transparent 60%)',
-    wash: 'background: linear-gradient(180deg, rgba(245,158,11,0.06) 0%, transparent 100%)'
+    icon: 'color: var(--accent)',
+    wrap: 'background: var(--accent-soft); border: 1px solid var(--accent-border)',
+    topLine: 'background: linear-gradient(90deg, var(--accent) 0%, transparent 60%)',
+    wash: 'background: linear-gradient(180deg, rgba(var(--accent-rgb) / 0.08) 0%, transparent 100%)'
   },
   slate: {
     icon: 'color: #a1a1aa',

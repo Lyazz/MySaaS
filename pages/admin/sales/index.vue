@@ -165,7 +165,25 @@
                 {{ formatDate(sale.updatedAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end">
+                <div class="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    class="ui-btn ui-btn--danger ui-btn--sm"
+                    :disabled="refundLoading && refundingSaleId === sale.id"
+                    @click="openRefundModal(sale)"
+                  >
+                    <Icon
+                      v-if="refundLoading && refundingSaleId === sale.id"
+                      name="lucide:loader-2"
+                      class="h-4 w-4 animate-spin"
+                    />
+                    <Icon
+                      v-else
+                      name="lucide:rotate-ccw"
+                      class="h-4 w-4"
+                    />
+                    <span>{{ t('admin.pages.sales.actions.refund') }}</span>
+                  </button>
                   <NuxtLink
                     :to="`/admin/sales/${sale.id}`"
                     class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
@@ -244,11 +262,92 @@
         </div>
       </div>
     </div>
+
+    <div v-if="refundModalOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeRefundModal">
+      <div class="flex min-h-screen items-center justify-center px-4">
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="closeRefundModal" />
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+            {{ t('admin.pages.sales.refundModal.title') }}
+          </h3>
+          <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+            {{ t('admin.pages.sales.refundModal.subtitle') }}
+          </p>
+
+          <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <BaseSelect
+                v-model="refundForm.cashboxId"
+                :label="t('admin.pages.sales.refundModal.cashboxLabel')"
+              >
+                <option value="">{{ t('admin.pages.sales.refundModal.cashboxPlaceholder') }}</option>
+                <option
+                  v-for="c in cashboxes"
+                  :key="c.id"
+                  :value="c.id"
+                  :disabled="!c.openSession"
+                >
+                  {{ c.name }}{{ !c.openSession ? ` (${t('admin.pages.sales.refundModal.noOpenSession')})` : '' }}
+                </option>
+              </BaseSelect>
+            </div>
+
+            <div class="sm:col-span-2">
+              <BaseSelect
+                v-model="refundForm.method"
+                :label="t('admin.pages.sales.refundModal.methodLabel')"
+              >
+                <option value="CASH">{{ t('admin.pages.cash.methods.CASH') }}</option>
+                <option value="CARD">{{ t('admin.pages.cash.methods.CARD') }}</option>
+                <option value="TRANSFER">{{ t('admin.pages.cash.methods.TRANSFER') }}</option>
+                <option value="OTHER">{{ t('admin.pages.cash.methods.OTHER') }}</option>
+              </BaseSelect>
+            </div>
+
+            <div class="sm:col-span-2">
+              <BaseInput
+                v-model="refundForm.reference"
+                :label="t('admin.pages.sales.refundModal.referenceLabel')"
+                :placeholder="t('admin.pages.sales.refundModal.referencePlaceholder')"
+              />
+            </div>
+
+            <div class="sm:col-span-2">
+              <BaseInput
+                v-model="refundForm.note"
+                :label="t('admin.pages.sales.refundModal.noteLabel')"
+                :placeholder="t('admin.pages.sales.refundModal.notePlaceholder')"
+              />
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              class="ui-btn ui-btn--secondary text-sm"
+              @click="closeRefundModal"
+            >
+              {{ t('admin.common.cancel') }}
+            </button>
+            <button
+              type="button"
+              class="ui-btn ui-btn--danger text-sm"
+              :disabled="!canSubmitRefund || refundLoading"
+              @click="submitRefund"
+            >
+              <Icon v-if="refundLoading" name="lucide:loader-2" class="h-4 w-4 animate-spin" />
+              <span>{{ refundLoading ? t('admin.common.updating') : t('admin.pages.sales.actions.refund') }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { useToast } from '~/composables/useToast'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
@@ -261,9 +360,9 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const route = useRoute()
-const router = useRouter()
 const { t, locale } = useI18n()
 const { format: formatCurrency } = useCurrency()
+const { showToast } = useToast()
 
 interface Sale {
   id: string
@@ -276,6 +375,12 @@ interface Sale {
   createdAt: string
   updatedAt: string
   createdByEmail?: string | null
+}
+
+interface Cashbox {
+  id: string
+  name: string
+  openSession?: { id: string } | null
 }
 
 const loading = ref(true)
@@ -295,11 +400,115 @@ lastWeek.setDate(lastWeek.getDate() - 7)
 
 const startDate = ref(lastWeek.toISOString().split('T')[0])
 const endDate = ref(today.toISOString().split('T')[0])
+const cashboxes = ref<Cashbox[]>([])
+const cashboxesLoaded = ref(false)
+const refundModalOpen = ref(false)
+const refundLoading = ref(false)
+const refundingSaleId = ref<string | null>(null)
+const refundTarget = ref<Sale | null>(null)
+const refundForm = reactive({
+  cashboxId: '',
+  method: 'CASH',
+  reference: '',
+  note: ''
+})
 
 const emptyHint = computed(() => {
   if (searchQuery.value) return t('admin.pages.sales.index.empty.hintFiltered')
   return t('admin.pages.sales.index.empty.hint')
 })
+
+const canSubmitRefund = computed(() => {
+  return !!refundTarget.value && !!refundForm.cashboxId
+})
+
+const openCashboxes = computed(() => cashboxes.value.filter(c => !!c.openSession))
+
+const normalizeStatus = (value: unknown) => String(value || '').trim().toUpperCase()
+const normalizeType = (value: unknown) => String(value || '').trim().toUpperCase()
+
+const isRefundableSale = (sale: Sale) => {
+  return normalizeType(sale.type) !== 'ORDER' && normalizeStatus(sale.status) === 'COMPLETED'
+}
+
+const getRefundBlockedReason = (sale: Sale) => {
+  if (normalizeType(sale.type) === 'ORDER') return t('admin.pages.sales.messages.refundFromOrderFlow')
+  if (normalizeStatus(sale.status) === 'REFUNDED') return t('admin.pages.sales.messages.alreadyRefunded')
+  return t('admin.pages.sales.messages.onlyCompletedPos')
+}
+
+async function fetchCashboxes() {
+  if (cashboxesLoaded.value) return
+  try {
+    const rows = await $fetch<Cashbox[]>('/api/admin/cashboxes', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    cashboxes.value = rows || []
+    cashboxesLoaded.value = true
+  } catch {
+    cashboxes.value = []
+  }
+}
+
+async function openRefundModal(sale: Sale) {
+  if (!isRefundableSale(sale)) {
+    showToast(getRefundBlockedReason(sale), 'info')
+    return
+  }
+
+  refundingSaleId.value = sale.id
+  try {
+    await fetchCashboxes()
+    if (openCashboxes.value.length === 0) {
+      showToast(t('admin.pages.sales.messages.noOpenCashbox'), 'error')
+      return
+    }
+
+    refundTarget.value = sale
+    refundForm.cashboxId = openCashboxes.value[0]?.id || ''
+    refundForm.method = 'CASH'
+    refundForm.reference = ''
+    refundForm.note = `sale_refund:${sale.id.substring(0, 8)}`
+    refundModalOpen.value = true
+  } finally {
+    refundingSaleId.value = null
+  }
+}
+
+function closeRefundModal() {
+  if (refundLoading.value) return
+  refundModalOpen.value = false
+  refundTarget.value = null
+}
+
+async function submitRefund() {
+  if (!canSubmitRefund.value || !refundTarget.value) return
+  refundLoading.value = true
+  refundingSaleId.value = refundTarget.value.id
+  try {
+    await $fetch(`/api/admin/sales/${refundTarget.value.id}/status`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: {
+        status: 'REFUNDED',
+        refund: {
+          cashboxId: refundForm.cashboxId,
+          method: refundForm.method,
+          reference: refundForm.reference?.trim() || undefined,
+          note: refundForm.note?.trim() || undefined
+        }
+      }
+    })
+    showToast(t('admin.pages.sales.messages.refundSuccess'), 'success')
+    closeRefundModal()
+    await fetchSales()
+  } catch (e: any) {
+    showToast(e?.data?.statusMessage || t('admin.pages.sales.messages.refundFailed'), 'error')
+  } finally {
+    refundLoading.value = false
+    refundingSaleId.value = null
+  }
+}
 
 async function fetchSales() {
   loading.value = true
