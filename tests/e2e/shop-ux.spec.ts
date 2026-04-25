@@ -14,7 +14,7 @@ test.describe('Shop UX', () => {
         // Check Categories
         await expect(page.getByText('Browse by Category')).toBeVisible();
         // Check if at least one category link exists
-        await expect(page.locator('a[href^="/c/"]').first()).toBeVisible();
+        await expect(page.locator('a[href^="/category/"]').first()).toBeVisible();
 
         // Check Featured Products
         await expect(page.getByText('Trending Now')).toBeVisible();

@@ -35,6 +35,7 @@ router.post('/import.csv', csvUpload.single('file'), bulkController.importCsv.bi
 router.patch('/bulk', bulkController.bulkPatch.bind(bulkController))
 router.delete('/bulk', bulkController.bulkDelete.bind(bulkController))
 router.post('/:id/duplicate', bulkController.duplicate.bind(bulkController))
+router.get('/slug-availability', controller.checkSlugAvailability.bind(controller))
 
 // GET /products - List products
 router.get('/', controller.listProducts.bind(controller))

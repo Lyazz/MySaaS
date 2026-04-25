@@ -101,7 +101,7 @@ function handleAddToCart() {
     
     <!-- Image -->
     <NuxtLink
-      :to="`/p/${product.slug}`"
+      :to="`/product/${product.slug}`"
       class="relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden bg-purple-900/30"
     >
       <img
@@ -113,7 +113,7 @@ function handleAddToCart() {
 
     <!-- Details -->
     <div class="flex-1 flex flex-col justify-center relative z-10">
-      <NuxtLink :to="`/p/${product.slug}`">
+      <NuxtLink :to="`/product/${product.slug}`">
         
 <h3 class="font-bold text-white text-lg group-hover:text-pink-400 transition-colors line-clamp-1 mb-2">
           {{ product.title }}
@@ -165,7 +165,7 @@ function handleAddToCart() {
     
     <!-- Image Container -->
     <NuxtLink
-      :to="`/p/${product.slug}`"
+      :to="`/product/${product.slug}`"
       class="block relative aspect-square overflow-hidden"
     >
       <img
@@ -202,7 +202,7 @@ function handleAddToCart() {
 
     <!-- Product Info -->
     <div class="p-4">
-      <NuxtLink :to="`/p/${product.slug}`">
+      <NuxtLink :to="`/product/${product.slug}`">
         
 <h3 class="font-bold text-white text-base group-hover:text-pink-400 transition-colors line-clamp-2 mb-2 leading-tight">
           {{ product.title }}

@@ -54,8 +54,12 @@ describe('Inventory management + movements', () => {
         tokenB = signAccessToken({ userId: userBId, email: userB.email, role: userB.role, tenantId: userB.tenantId })
 
         await prisma.$transaction([
-            prisma.storeSettings.create({ data: { tenantId: tenantAId, cartEnabled: true, codEnabled: true } }),
-            prisma.storeSettings.create({ data: { tenantId: tenantBId, cartEnabled: true, codEnabled: true } })
+            prisma.storeSettings.create({
+                data: { tenantId: tenantAId, cartEnabled: true, codEnabled: true, minimumOrderAmountDzd: 0, hideOptionalAddress: true }
+            }),
+            prisma.storeSettings.create({
+                data: { tenantId: tenantBId, cartEnabled: true, codEnabled: true, minimumOrderAmountDzd: 0, hideOptionalAddress: true }
+            })
         ])
 
         const productA = await prisma.product.create({

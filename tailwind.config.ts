@@ -24,6 +24,8 @@ export default {
                 cyber: ['Orbitron', 'sans-serif'],
                 jetbrains: ['JetBrains Mono', 'monospace'],
                 wellness: ['Solway', 'serif'],
+                cinematic: ['Geist', 'system-ui', 'sans-serif'],
+                cinematicDisplay: ['Instrument Serif', 'serif'],
             },
             colors: {
                 brand: {
@@ -67,7 +69,10 @@ export default {
                 },
                 slate: {
                     850: '#151e2e', // Custom deep slate
-                }
+                },
+                lime: {
+                    neon: '#C6F432',
+                },
             },
             boxShadow: {
                 'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',

@@ -846,7 +846,7 @@
         "subtitle": "Sous-titre",
         "buttonText": "Texte du bouton",
         "buttonLink": "Lien du bouton",
-        "buttonLinkHint": "Utilisez des chemins internes comme \"/products\" ou \"/c/shoes\".",
+        "buttonLinkHint": "Utilisez des chemins internes comme \"/products\" ou \"/category/shoes\".",
         "imageUrl": "URL de l’image",
         "imageUrlHint": "Ou collez une URL si vous en avez déjà une.",
         "eyebrow": "Sur-titre",

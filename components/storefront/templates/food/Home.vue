@@ -204,7 +204,7 @@ const {
             <NuxtLink 
                 v-for="(cat) in categories" 
                 :key="cat.slug" 
-                :to="`/c/${cat.slug}`"
+                :to="`/category/${cat.slug}`"
                 class="snap-start flex-shrink-0 w-64 h-80 relative group"
             >
                 <!-- Recipe Card Shape -->

@@ -20,6 +20,7 @@ const { currencyCode } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
+const hideOptionalAddress = computed(() => storeSettings.value?.hideOptionalAddress !== false)
 
 const orderSubmitting = ref(false)
 const addToCartSubmitting = ref(false)
@@ -292,8 +293,8 @@ const handleOrderSubmit = async () => {
         const payload = {
             customerName: quickForm.fullName.trim(),
             customerPhone: quickForm.phone.trim(),
-            customerAddress: quickForm.address?.trim() || undefined,
-            shippingAddressLine1: quickForm.address?.trim() || undefined,
+            customerAddress: hideOptionalAddress.value ? undefined : (quickForm.address?.trim() || undefined),
+            shippingAddressLine1: hideOptionalAddress.value ? undefined : (quickForm.address?.trim() || undefined),
             shippingWilayaCode: quickForm.wilaya || undefined,
             shippingCommuneCode: quickForm.commune || undefined,
             deliveryMode: delivery?.mode,
@@ -519,7 +520,7 @@ const scrollToForm = () => {
         </div>
 
         <!-- Address -->
-        <div>
+        <div v-if="!hideOptionalAddress">
           <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
             {{ storefrontContent.checkout.form.address.label }}
           </label>

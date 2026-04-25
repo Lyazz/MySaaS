@@ -174,7 +174,7 @@ const {
           <NuxtLink 
             v-for="(cat) in categories" 
             :key="cat.slug" 
-            :to="`/c/${cat.slug}`"
+            :to="`/category/${cat.slug}`"
             class="group relative aspect-[3/4] md:aspect-[4/5] overflow-hidden bg-gray-100 block border-4 border-black shadow-[8px_8px_0_0_#000] hover:translate-x-2 hover:translate-y-2 hover:shadow-none transition-all"
           >
             <!-- Background Image -->

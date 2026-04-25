@@ -71,7 +71,9 @@ describe('Security hardening', () => {
             data: {
                 tenantId: orderTenantId,
                 cartEnabled: true,
-                codEnabled: true
+                codEnabled: true,
+                minimumOrderAmountDzd: 0,
+                hideOptionalAddress: true
             }
         })
 

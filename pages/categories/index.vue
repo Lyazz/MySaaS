@@ -56,7 +56,7 @@ definePageMeta({
         <NuxtLink
           v-for="category in categories"
           :key="category.id"
-          :to="`/c/${category.slug}`"
+          :to="`/category/${category.slug}`"
           class="group bg-white rounded-xl border border-gray-200 flex flex-col hover:shadow-lg hover:border-brand-300 transition-all duration-300 relative overflow-hidden"
         >
           <div class="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">

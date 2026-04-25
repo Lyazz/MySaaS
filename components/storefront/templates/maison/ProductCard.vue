@@ -59,7 +59,7 @@ function handleAddToCart() {
   <div class="pc" :class="viewMode === 'list' && 'pc--list'">
     <!-- Image zone -->
     <div class="pc__img-wrap">
-      <NuxtLink :to="`/p/${product.slug}`" class="pc__img-link">
+      <NuxtLink :to="`/product/${product.slug}`" class="pc__img-link">
         <img :src="mainImage" :alt="product.title" class="pc__img">
       </NuxtLink>
 
@@ -83,7 +83,7 @@ function handleAddToCart() {
           </svg>
           <span>Ajouter</span>
         </button>
-        <NuxtLink :to="`/p/${product.slug}`" class="pc__hover-btn pc__hover-btn--outline">
+        <NuxtLink :to="`/product/${product.slug}`" class="pc__hover-btn pc__hover-btn--outline">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="0.85"/>
             <path d="M1 8c1.5-4 10-4 14 0-4 4-12.5 4-14 0z" stroke="currentColor" stroke-width="0.85"/>
@@ -104,7 +104,7 @@ function handleAddToCart() {
     <div class="pc__info">
       <span class="pc__cat">{{ product.category?.title || 'Maison & Déco' }}</span>
       <h3 class="pc__title">
-        <NuxtLink :to="`/p/${product.slug}`" class="pc__title-link">{{ product.title }}</NuxtLink>
+        <NuxtLink :to="`/product/${product.slug}`" class="pc__title-link">{{ product.title }}</NuxtLink>
       </h3>
       <div class="pc__price-row">
         <span class="pc__price">{{ formatPrice(displayPrice) }}</span>

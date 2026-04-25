@@ -334,7 +334,7 @@ const closeQuickView = () => {
               <NuxtLink
                 v-for="p in sidebarProducts"
                 :key="p.id"
-                :to="`/p/${p.slug}`"
+                :to="`/product/${p.slug}`"
                 class="flex gap-4 group"
               >
                 <div class="w-16 h-20 bg-slate-100 overflow-hidden flex-shrink-0">
@@ -528,7 +528,7 @@ const closeQuickView = () => {
                       <button class="w-full py-4 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors">
                         {{ storefrontContent.actions.addToCart }}
                       </button>
-                      <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 border border-slate-200 text-slate-900 text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-colors text-center" @click="closeQuickView">
+                      <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="block w-full py-4 border border-slate-200 text-slate-900 text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-colors text-center" @click="closeQuickView">
                         {{ storefrontContent.product.viewFullDetails }}
                       </NuxtLink>
                   </div>

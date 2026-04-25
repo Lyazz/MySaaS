@@ -134,7 +134,7 @@ watch(searchQuery, async (q) => {
                 <NuxtLink
                   v-for="cat in tenantCategories"
                   :key="cat.id"
-                  :to="`/c/${cat.slug}`"
+                  :to="`/category/${cat.slug}`"
                   class="shell-nav__dropdown-item"
                 >{{ categoryDisplayTitle(cat) }}</NuxtLink>
               </div>
@@ -216,7 +216,7 @@ watch(searchQuery, async (q) => {
               <NuxtLink
                 v-for="product in visibleSearchResults"
                 :key="product.id"
-                :to="'/p/' + product.slug"
+                :to="'/product/' + product.slug"
                 class="shell-search-results__item"
                 @click="searchOpen = false; searchQuery = ''"
               >
@@ -269,7 +269,7 @@ watch(searchQuery, async (q) => {
               <NuxtLink
                 v-for="cat in tenantCategories"
                 :key="cat.id"
-                :to="'/c/' + cat.slug"
+                :to="'/category/' + cat.slug"
                 class="shell-drawer__cat-link"
                 @click="mobileMenuOpen = false"
               >{{ categoryDisplayTitle(cat) }}</NuxtLink>
@@ -321,7 +321,7 @@ watch(searchQuery, async (q) => {
               <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
               <ul class="shell-footer__links">
                 <li v-for="cat in (tenantCategories || []).slice(0, 5)" :key="cat.id">
-                  <NuxtLink :to="`/c/${cat.slug}`" class="shell-footer__link">{{ categoryDisplayTitle(cat) }}</NuxtLink>
+                  <NuxtLink :to="`/category/${cat.slug}`" class="shell-footer__link">{{ categoryDisplayTitle(cat) }}</NuxtLink>
                 </li>
               </ul>
             </div>

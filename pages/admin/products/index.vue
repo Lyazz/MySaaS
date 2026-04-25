@@ -361,7 +361,7 @@
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
-                              @click="copyLink(`/p/${product.slug}`)"
+                              @click="copyLink(`/product/${product.slug}`)"
                               :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyProduct')"
@@ -388,7 +388,7 @@
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
-                              @click="copyLink(`/p/${product.slug}?mode=landing`)"
+                              @click="copyLink(`/product/${product.slug}?mode=landing`)"
                               :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyLanding')"
@@ -1261,7 +1261,7 @@ function getProductUrl(slug: string): string {
     const { protocol, host } = useRequestOrigin()
     const platformBaseDomain = usePlatformBaseDomain()
     const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
-    return `${protocol}://${tenantHost}/p/${slug}`
+    return `${protocol}://${tenantHost}/product/${slug}`
 }
 
 function getLandingUrl(slug: string): string {
@@ -1271,7 +1271,7 @@ function getLandingUrl(slug: string): string {
     const { protocol, host } = useRequestOrigin()
     const platformBaseDomain = usePlatformBaseDomain()
     const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
-    return `${protocol}://${tenantHost}/p/${slug}?mode=landing`
+    return `${protocol}://${tenantHost}/product/${slug}?mode=landing`
 }
 
 async function copyLink(path: string) {

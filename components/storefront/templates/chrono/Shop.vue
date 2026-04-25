@@ -245,7 +245,7 @@ const closeQuickView = () => {
           <div class="pt-8 border-t border-[#A67C52]/10">
             <h4 class="font-bold text-[#A67C52] mb-4 text-xs uppercase tracking-[0.2em]">{{ storefrontContent.shop.sidebar.bestSellers }}</h4>
             <div class="space-y-4">
-              <NuxtLink v-for="p in sidebarProducts" :key="p.id" :to="`/p/${p.slug}`" class="flex gap-3 group">
+              <NuxtLink v-for="p in sidebarProducts" :key="p.id" :to="`/product/${p.slug}`" class="flex gap-3 group">
                 <div class="w-16 h-16 bg-[#131720] overflow-hidden flex-shrink-0 border border-[#A67C52]/10" style="border-radius: 2px;">
                   <img :src="p.images && p.images[0] ? p.images[0] : '/blank.svg?v=2'" class="w-full h-full object-cover group-hover:scale-110 transition-transform" :alt="p.title" >
                 </div>
@@ -361,7 +361,7 @@ const closeQuickView = () => {
                         <Icon name="lucide:handbag" class="w-5 h-5" />
                         {{ storefrontContent.actions.addToCart }}
                       </button>
-                      <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 border border-[#A67C52]/30 text-[#A67C52] font-bold tracking-wider uppercase hover:bg-[#A67C52]/10 transition-colors text-center" style="border-radius: 2px;" @click="closeQuickView">
+                      <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="block w-full py-4 border border-[#A67C52]/30 text-[#A67C52] font-bold tracking-wider uppercase hover:bg-[#A67C52]/10 transition-colors text-center" style="border-radius: 2px;" @click="closeQuickView">
                         {{ storefrontContent.product.viewFullDetails }}
                       </NuxtLink>
                   </div>

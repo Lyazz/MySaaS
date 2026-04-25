@@ -31,7 +31,7 @@ const getProductMainImage = (product: any) => {
         <NuxtLink
           v-for="(product, index) in products"
           :key="product.id"
-          :to="`/p/${product.slug}`"
+          :to="`/product/${product.slug}`"
           class="group flex flex-col"
           :style="{ transform: `rotate(${index % 2 === 1 ? '-0.6deg' : '0.5deg'})`, marginTop: index % 2 === 1 ? '1.5rem' : '0' }"
         >

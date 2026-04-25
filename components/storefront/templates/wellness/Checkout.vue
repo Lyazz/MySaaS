@@ -11,6 +11,12 @@ const { currencyCode, format: formatCurrency } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
+const minimumOrderAmount = computed(() => {
+  const raw = Number(storeSettings.value?.minimumOrderAmountDzd ?? 1000)
+  return Number.isFinite(raw) && raw >= 0 ? raw : 1000
+})
+const hideOptionalAddress = computed(() => storeSettings.value?.hideOptionalAddress !== false)
+
 // Available delivery providers based on store settings
 const availableProviders = computed(() => {
   const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
@@ -194,7 +200,7 @@ const hasRequiredFields = computed(() => Boolean(
   form.value.fullName.trim() &&
   form.value.phone.trim() &&
   cartStore.hasItems &&
-  cartStore.total >= 1000 &&
+  cartStore.total >= minimumOrderAmount.value &&
   form.value.selectedDeliveryOption
 ))
 
@@ -258,8 +264,8 @@ async function handleSubmit() {
         const payload = {
           customerName: form.value.fullName.trim(),
           customerPhone: form.value.phone.trim(),
-          customerAddress: form.value.address?.trim() || undefined,
-          shippingAddressLine1: form.value.address?.trim() || undefined,
+          customerAddress: hideOptionalAddress.value ? undefined : (form.value.address?.trim() || undefined),
+          shippingAddressLine1: hideOptionalAddress.value ? undefined : (form.value.address?.trim() || undefined),
           shippingWilayaCode: form.value.wilaya || undefined,
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
@@ -390,7 +396,7 @@ async function handleSubmit() {
 	                      :select-class="'w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
 	                    />
 	                 </div>
-                 <div class="col-span-2 space-y-2">
+                 <div v-if="!hideOptionalAddress" class="col-span-2 space-y-2">
                     <label class="block text-sm font-medium text-stone-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input
                       v-model="form.address"

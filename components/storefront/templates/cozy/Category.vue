@@ -50,7 +50,7 @@ const categoryProducts = computed(() => {
                         <NuxtLink 
                             v-for="cat in allCategories" 
                             :key="cat.id" 
-                            :to="`/c/${cat.slug}`"
+                            :to="`/category/${cat.slug}`"
                             class="block px-4 py-2 rounded-2xl text-sm font-bold transition-all"
                             :class="cat.id === category.id ? 'bg-brand-500 text-white shadow-soft' : 'text-slate-500 hover:bg-white hover:text-slate-700'"
                         >

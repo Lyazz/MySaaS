@@ -467,7 +467,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
   Future<void> _copyLink(String slug) async {
     // For now, just copy a relative link
-    final url = '/c/$slug';
+    final url = '/category/$slug';
 
     await Clipboard.setData(ClipboardData(text: url));
 

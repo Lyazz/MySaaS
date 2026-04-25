@@ -167,8 +167,8 @@ const sidebarOpen = ref(false)
 const { t } = useI18n({ useScope: 'global' })
 const pendingPaymentsCount = ref(0)
 const superAdminStyle = {
-  '--brand': '#3559ff',
-  '--brand-rgb': '53 89 255'
+  '--brand': '#C6F432',
+  '--brand-rgb': '198 244 50'
 } as Record<string, string>
 
 onMounted(async () => {

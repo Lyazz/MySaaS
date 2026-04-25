@@ -191,7 +191,7 @@ const closeQuickView = () => {
             </div>
 
             <div class="mt-auto space-y-4">
-              <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-bold rounded-xl text-center" @click="closeQuickView">
+              <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="block w-full py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-bold rounded-xl text-center" @click="closeQuickView">
                 {{ storefrontContent.product.viewFullDetails }}
               </NuxtLink>
             </div>

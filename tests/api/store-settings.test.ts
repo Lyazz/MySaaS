@@ -53,6 +53,8 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(getBody.isCompleted).toBe(false)
         expect(getBody).toHaveProperty('cartEnabled')
         expect(getBody).toHaveProperty('codEnabled')
+        expect(getBody).toHaveProperty('minimumOrderAmountDzd')
+        expect(getBody).toHaveProperty('hideOptionalAddress')
         expect(getBody).toHaveProperty('currencyCode')
         expect(getBody).toHaveProperty('currencyCountry')
 
@@ -68,6 +70,8 @@ describe('Store Settings (Tenant Admin)', async () => {
                 language: 'ar',
                 cartEnabled: false,
                 codEnabled: false,
+                minimumOrderAmountDzd: 2500,
+                hideOptionalAddress: false,
                 currencyCode: 'EUR',
                 currencyCountry: 'FR',
                 isCompleted: true
@@ -80,6 +84,8 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(patchBody.language).toBe('ar')
         expect(patchBody.cartEnabled).toBe(false)
         expect(patchBody.codEnabled).toBe(false)
+        expect(patchBody.minimumOrderAmountDzd).toBe(2500)
+        expect(patchBody.hideOptionalAddress).toBe(false)
         expect(patchBody.currencyCode).toBe('EUR')
         expect(patchBody.currencyCountry).toBe('FR')
 
@@ -156,6 +162,8 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(res.status).toBe(200)
         expect(body.tenant.slug).toBe(slugA)
         expect(body.storeSettings).toHaveProperty('templateKey')
+        expect(body.storeSettings.minimumOrderAmountDzd).toBeTypeOf('number')
+        expect(body.storeSettings).toHaveProperty('hideOptionalAddress')
     })
 
     it('cleanups', async () => {

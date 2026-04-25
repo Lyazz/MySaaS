@@ -57,7 +57,7 @@
                   <div>
                     <div class="flex justify-between items-start gap-4">
                       <h3 class="text-lg font-serif font-bold text-slate-900 hover:text-slate-600 transition-colors">
-                        <NuxtLink :to="`/p/${item.slug}`">
+                        <NuxtLink :to="`/product/${item.slug}`">
                           {{ item.title }}
                         </NuxtLink>
                       </h3>

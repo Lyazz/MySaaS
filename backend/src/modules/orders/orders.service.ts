@@ -1812,6 +1812,13 @@ export class OrdersService {
             throw new OrderValidationError(403, 'Store pickup is disabled for this store')
         }
 
+        const minimumOrderAmountDzdRaw = Number((storeSettings as any).minimumOrderAmountDzd ?? 1000)
+        const minimumOrderAmountDzd =
+            Number.isFinite(minimumOrderAmountDzdRaw) && minimumOrderAmountDzdRaw >= 0
+                ? Math.trunc(minimumOrderAmountDzdRaw)
+                : 1000
+        const hideOptionalAddress = (storeSettings as any).hideOptionalAddress !== false
+
         const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
         const variantIds = Array.from(
             new Set(
@@ -1990,6 +1997,22 @@ export class OrdersService {
 
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
         const totalAmount = centsToMoney(totalCents)
+        if (minimumOrderAmountDzd > 0 && totalAmount < minimumOrderAmountDzd) {
+            throw new OrderValidationError(
+                400,
+                `Minimum order amount is ${minimumOrderAmountDzd} DZD`,
+                {
+                    code: 'MIN_ORDER_AMOUNT_NOT_MET',
+                    meta: { minimumOrderAmountDzd, currentOrderAmountDzd: totalAmount }
+                }
+            )
+        }
+
+        const normalizedCustomerAddress = hideOptionalAddress ? null : (input.customerAddress || null)
+        const normalizedShippingAddressLine1 = hideOptionalAddress
+            ? null
+            : (input.shippingAddressLine1 || input.customerAddress || null)
+
         const pointsPreview = this.loyaltyFormula.computeTotal(
             storeSettings,
             validatedItems.map((item) => ({
@@ -2006,7 +2029,7 @@ export class OrdersService {
                     tenantId: input.tenantId,
                     phone: customerPhone,
                     name: customerName,
-                    address: input.customerAddress || null
+                    address: normalizedCustomerAddress
                 })
             } catch (error) {
                 if (error instanceof PhoneNormalizationError) {
@@ -2039,7 +2062,7 @@ export class OrdersService {
                     customerId: resolvedCustomer?.id ?? null,
                     customerName,
                     customerPhone,
-                    customerAddress: input.customerAddress || null,
+                    customerAddress: normalizedCustomerAddress,
                     deliveryMode,
                     shippingProvider,
                     shippingWilayaCode: input.shippingWilayaCode || null,
@@ -2047,7 +2070,7 @@ export class OrdersService {
                     shippingServiceLevel: shippingServiceLevel || null,
                     shippingAmount: effectiveShippingAmount,
                     shippingCurrency: shippingCurrency || undefined,
-                    shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
+                    shippingAddressLine1: normalizedShippingAddressLine1,
                     shippingNotes: input.shippingNotes || null,
                     shippingPickupPoint: shippingPickupPoint ?? undefined,
                     totalAmount,

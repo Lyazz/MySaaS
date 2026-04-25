@@ -326,7 +326,7 @@ const closeQuickView = () => {
                 <NuxtLink
                   v-for="p in sidebarProducts"
                   :key="p.id"
-                  :to="`/p/${p.slug}`"
+                  :to="`/product/${p.slug}`"
                   class="flex gap-4 group"
                 >
                   <div class="w-16 h-16 bg-stone-100 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-50">
@@ -523,7 +523,7 @@ const closeQuickView = () => {
                         <Icon name="lucide:shopping-bag" class="w-5 h-5" />
                         {{ storefrontContent.actions.addToCart }}
                       </button>
-                      <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-5 border border-stone-200 text-stone-700 font-bold rounded-full hover:bg-stone-50 transition-colors text-center" @click="closeQuickView">
+                      <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="block w-full py-5 border border-stone-200 text-stone-700 font-bold rounded-full hover:bg-stone-50 transition-colors text-center" @click="closeQuickView">
                         {{ storefrontContent.product.viewFullDetails }}
                       </NuxtLink>
                   </div>

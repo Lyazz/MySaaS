@@ -72,6 +72,8 @@ export type StoreSettingsPatchInput = Partial<{
     language: string
     cartEnabled: boolean
     codEnabled: boolean
+    minimumOrderAmountDzd: number
+    hideOptionalAddress: boolean
     currencyCode: string
     currencyCountry: string
     isCompleted: boolean
@@ -199,6 +201,21 @@ export class StoreSettingsService {
             updateSettings.codEnabled = input.codEnabled
         }
 
+        if (input.minimumOrderAmountDzd !== undefined) {
+            const minimumOrderAmountDzd = Math.trunc(Number(input.minimumOrderAmountDzd))
+            if (!Number.isFinite(minimumOrderAmountDzd) || minimumOrderAmountDzd < 0) {
+                throw new StoreSettingsValidationError('minimumOrderAmountDzd must be a non-negative integer')
+            }
+            updateSettings.minimumOrderAmountDzd = minimumOrderAmountDzd
+        }
+
+        if (input.hideOptionalAddress !== undefined) {
+            if (typeof input.hideOptionalAddress !== 'boolean') {
+                throw new StoreSettingsValidationError('hideOptionalAddress must be a boolean')
+            }
+            updateSettings.hideOptionalAddress = input.hideOptionalAddress
+        }
+
         if (input.currencyCode !== undefined) {
             if (typeof input.currencyCode !== 'string' || !/^[A-Z]{3}$/.test(input.currencyCode)) {
                 throw new StoreSettingsValidationError('currencyCode must be an ISO-4217 code (3 uppercase letters)')
@@ -302,6 +319,8 @@ export class StoreSettingsService {
             language: string
             cartEnabled: boolean
             codEnabled: boolean
+            minimumOrderAmountDzd: number
+            hideOptionalAddress: boolean
             currencyCode: string
             currencyCountry: string
         }
@@ -348,6 +367,8 @@ export class StoreSettingsService {
             `- Language: ${args.settings.language}`,
             `- Cart + checkout enabled: ${args.settings.cartEnabled ? 'yes' : 'no'}`,
             `- Product page COD form: ${args.settings.codEnabled ? 'enabled' : 'disabled'}`,
+            `- Minimum order amount: ${args.settings.minimumOrderAmountDzd} DZD`,
+            `- Hide optional address at checkout: ${args.settings.hideOptionalAddress ? 'yes' : 'no'}`,
             `- Currency: ${args.settings.currencyCode} (${args.settings.currencyCountry})`,
             ``,
             `## What to Implement`,
@@ -356,7 +377,9 @@ export class StoreSettingsService {
             `3) Show prices with the configured currency code (${args.settings.currencyCode}).`,
             `4) If cartEnabled is false, hide cart/checkout entry points.`,
             `5) If codEnabled is true, surface a COD option at checkout.`,
-            `6) If language is "ar", consider RTL layout and Arabic-friendly typography.`,
+            `6) Enforce the minimum order amount (${args.settings.minimumOrderAmountDzd} DZD) before order submission.`,
+            `7) If hideOptionalAddress is true, hide the optional address field in checkout forms.`,
+            `8) If language is "ar", consider RTL layout and Arabic-friendly typography.`,
             ``,
             `## Backend API (Tenant-scoped)`,
             `- Public store settings: GET ${data.api.public.storeSettings}`,

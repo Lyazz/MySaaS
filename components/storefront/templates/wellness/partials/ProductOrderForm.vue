@@ -20,6 +20,7 @@ const { currencyCode } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
+const hideOptionalAddress = computed(() => storeSettings.value?.hideOptionalAddress !== false)
 
 const orderSubmitting = ref(false)
 const addToCartSubmitting = ref(false)
@@ -346,8 +347,8 @@ const handleOrderSubmit = async () => {
         }        const payload = {
             customerName: quickForm.fullName.trim(),
             customerPhone: quickForm.phone.trim(),
-            customerAddress: quickForm.address?.trim() || undefined,
-            shippingAddressLine1: quickForm.address?.trim() || undefined,
+            customerAddress: hideOptionalAddress.value ? undefined : (quickForm.address?.trim() || undefined),
+            shippingAddressLine1: hideOptionalAddress.value ? undefined : (quickForm.address?.trim() || undefined),
             shippingWilayaCode: quickForm.wilaya || undefined,
             shippingCommuneCode: quickForm.commune || undefined,
             deliveryMode: delivery?.mode,
@@ -571,7 +572,7 @@ const handleAddToCart = async () => {
                 </div>
                 </div>
 
-                <div class="space-y-2">
+                <div v-if="!hideOptionalAddress" class="space-y-2">
                     <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input
                         v-model="quickForm.address"

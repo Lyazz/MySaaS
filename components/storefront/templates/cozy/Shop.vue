@@ -438,7 +438,7 @@ const closeQuickView = () => {
                         <button class="w-full py-4 bg-slate-800 text-white font-bold rounded-full shadow-lg hover:bg-brand-500 hover:shadow-xl transition-all">
                           {{ storefrontContent.actions.addToCart }}
                         </button>
-                        <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-3 text-center text-slate-500 hover:text-brand-500 font-medium transition-colors" @click="closeQuickView">
+                        <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="block w-full py-3 text-center text-slate-500 hover:text-brand-500 font-medium transition-colors" @click="closeQuickView">
                           {{ storefrontContent.product.viewFullDetails }}
                         </NuxtLink>
                     </div>

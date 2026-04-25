@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Geist+Mono:wght@400;500;600&display=swap');
+@import './marketing-cinematic.css';
 
 @tailwind base;
 @tailwind components;
@@ -19,8 +20,8 @@
 
   :root {
     /* Brand — default admin primary, aligned with marketing */
-    --brand: #3559ff;
-    --brand-rgb: 53 89 255;
+    --brand: #C6F432;
+    --brand-rgb: 198 244 50;
 
     /* Admin shell palette — fixed dark chrome */
     --admin-sidebar-bg: #111318;
@@ -43,15 +44,15 @@
     --text-tertiary: #52525b;
     --text-muted: #3f3f46;
 
-    /* Accent — cobalt from the marketing theme */
-    --accent: #3559ff;
-    --accent-rgb: 53 89 255;
-    --accent-soft: rgba(53,89,255,0.12);
-    --accent-border: rgba(53,89,255,0.28);
+    /* Accent — neon lime from the marketing theme */
+    --accent: #C6F432;
+    --accent-rgb: 198 244 50;
+    --accent-soft: rgba(198,244,50,0.14);
+    --accent-border: rgba(198,244,50,0.32);
 
     /* Status */
-    --status-pending-bg: rgba(53,89,255,0.14);
-    --status-pending-text: #9eb1ff;
+    --status-pending-bg: rgba(198,244,50,0.14);
+    --status-pending-text: #C6F432;
     --status-confirmed-bg: rgba(59,130,246,0.1);
     --status-confirmed-text: #60a5fa;
     --status-shipped-bg: rgba(99,102,241,0.1);
@@ -90,14 +91,14 @@
     --text-muted: #cbd5e1;
 
     /* Accent */
-    --accent: #3559ff;
-    --accent-rgb: 53 89 255;
-    --accent-soft: rgba(53,89,255,0.1);
-    --accent-border: rgba(53,89,255,0.22);
+    --accent: #84A60D;
+    --accent-rgb: 132 166 13;
+    --accent-soft: rgba(132,166,13,0.12);
+    --accent-border: rgba(132,166,13,0.28);
 
     /* Status — adjusted for light backgrounds */
-    --status-pending-bg: rgba(53,89,255,0.1);
-    --status-pending-text: #3559ff;
+    --status-pending-bg: rgba(132,166,13,0.12);
+    --status-pending-text: #4d6308;
     --status-confirmed-bg: rgba(59,130,246,0.1);
     --status-confirmed-text: #1d4ed8;
     --status-shipped-bg: rgba(99,102,241,0.1);
@@ -147,7 +148,7 @@
 
   .ui-btn--primary {
     background-color: var(--brand);
-    color: #fff;
+    color: #05070A;
     @apply shadow-sm hover:opacity-90 active:scale-[0.98];
   }
 

@@ -41,7 +41,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                         
                         <div class="flex-grow">
                             <h3 class="font-bold text-slate-700 text-lg mb-1">
-                                <NuxtLink :to="`/p/${item.slug}`" class="hover:text-brand-500 transition-colors">{{ item.title }}</NuxtLink>
+                                <NuxtLink :to="`/product/${item.slug}`" class="hover:text-brand-500 transition-colors">{{ item.title }}</NuxtLink>
                             </h3>
                             <p v-if="item.variantId" class="text-sm text-slate-400">{{ item.variantId.slice(0, 8) }}</p>
                             

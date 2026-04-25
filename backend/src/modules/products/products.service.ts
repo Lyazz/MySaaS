@@ -246,6 +246,19 @@ export class ProductsService {
         return products.map((product) => this.mapProductCategories(product))
     }
 
+    async isSlugAvailable(tenantId: string, slug: string, excludeProductId?: string) {
+        const existing = await prisma.product.findFirst({
+            where: {
+                tenantId,
+                slug,
+                ...(excludeProductId ? { NOT: { id: excludeProductId } } : {})
+            },
+            select: { id: true }
+        })
+
+        return !existing
+    }
+
     async createProduct(tenantId: string, data: any) {
         // Check slug uniqueness within tenant
         const existing = await prisma.product.findUnique({

@@ -87,7 +87,7 @@ function handleAddToCart() {
     class="group flex flex-row items-center gap-5 bg-white p-4 rounded-3xl border-3 border-violet-100 hover:border-violet-300 hover:shadow-[0_6px_0_0_#ddd6fe] transition-all duration-300"
   >
     <div class="relative w-28 h-28 flex-shrink-0 rounded-2xl overflow-hidden border-2 border-violet-100">
-      <NuxtLink :to="`/p/${product.slug}`" class="block w-full h-full">
+      <NuxtLink :to="`/product/${product.slug}`" class="block w-full h-full">
         <img :src="mainImage" :alt="product.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
       </NuxtLink>
       <div v-if="isPromoValid" class="absolute top-2 left-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full rotate-[-2deg]">
@@ -96,7 +96,7 @@ function handleAddToCart() {
     </div>
 
     <div class="flex-1 min-w-0">
-      <NuxtLink :to="`/p/${product.slug}`">
+      <NuxtLink :to="`/product/${product.slug}`">
         <h3 class="font-black text-stone-900 text-base leading-tight mb-1 group-hover:text-violet-700 transition-colors" style="font-family: 'Fredoka', sans-serif">{{ product.title }}</h3>
       </NuxtLink>
       <p class="text-sm text-stone-500 mb-3 line-clamp-1">{{ product.description || '' }}</p>
@@ -128,7 +128,7 @@ function handleAddToCart() {
   <div v-else class="group relative flex flex-col w-full">
     <!-- Image area -->
     <div class="relative w-full aspect-[4/5] rounded-3xl overflow-hidden border-3 border-violet-100 bg-violet-50 shadow-[0_4px_0_0_#ddd6fe] group-hover:-translate-y-1 group-hover:shadow-[0_8px_0_0_#ddd6fe] transition-all duration-300">
-      <NuxtLink :to="`/p/${product.slug}`" class="block w-full h-full">
+      <NuxtLink :to="`/product/${product.slug}`" class="block w-full h-full">
         <img :src="mainImage" :alt="product.title" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108">
       </NuxtLink>
 
@@ -174,7 +174,7 @@ function handleAddToCart() {
 
     <!-- Details card — overlaps image bottom -->
     <div class="-mt-6 mx-2 bg-white rounded-3xl border-3 border-violet-100 px-4 pt-4 pb-4 shadow-sm z-10 flex flex-col gap-3">
-      <NuxtLink :to="`/p/${product.slug}`">
+      <NuxtLink :to="`/product/${product.slug}`">
         <h3 class="font-black text-stone-900 text-sm leading-snug line-clamp-2 group-hover:text-violet-700 transition-colors" style="font-family: 'Fredoka', sans-serif">{{ product.title }}</h3>
       </NuxtLink>
 

@@ -158,7 +158,7 @@ const props = defineProps<{
                   <NuxtLink
                     v-for="cat in tenantCategories"
                     :key="cat.id"
-                    :to="`/c/${cat.slug}`"
+                    :to="`/category/${cat.slug}`"
                     class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                   >
                     {{ categoryDisplayTitle(cat) }}
@@ -252,7 +252,7 @@ const props = defineProps<{
                     <NuxtLink
                       v-for="product in visibleSearchResults"
                       :key="product.id"
-                      :to="`/p/${product.slug}`"
+                      :to="`/product/${product.slug}`"
                       class="flex items-center gap-3 px-4 py-3 transition-colors"
                       style="border-bottom: 1px solid rgba(212,197,169,0.06);"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
@@ -291,7 +291,7 @@ const props = defineProps<{
                 <NuxtLink
                   v-for="cat in tenantCategories"
                   :key="cat.id"
-                  :to="`/c/${cat.slug}`"
+                  :to="`/category/${cat.slug}`"
                   class="py-2 text-sm transition-colors"
                   style="color: #7A7060;"
                   @click="mobileMenuOpen = false"

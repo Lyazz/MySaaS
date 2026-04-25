@@ -4,6 +4,27 @@ import { CategoriesService } from './categories.service'
 const categoriesService = new CategoriesService()
 
 export class CategoriesController {
+    async checkSlugAvailability(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const slug = typeof req.query.slug === 'string' ? req.query.slug.trim() : ''
+            const excludeId = typeof req.query.excludeId === 'string' ? req.query.excludeId.trim() : undefined
+
+            if (!slug) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Slug is required' })
+            }
+            if (!/^[a-z0-9-]+$/.test(slug)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid slug format' })
+            }
+
+            const available = await categoriesService.isSlugAvailable(tenant.id, slug, excludeId)
+            res.json({ slug, available })
+        } catch (error) {
+            console.error('Check category slug availability error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async listCategories(req: Request, res: Response) {
         try {
             const tenant = req.tenant!

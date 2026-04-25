@@ -102,7 +102,7 @@ const currentYear = new Date().getFullYear()
                   <NuxtLink
                     v-for="cat in tenantCategories"
                     :key="cat.id"
-                    :to="`/c/${cat.slug}`"
+                    :to="`/category/${cat.slug}`"
                     class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
                   >
                     {{ categoryDisplayTitle(cat) }}
@@ -191,7 +191,7 @@ const currentYear = new Date().getFullYear()
                     <NuxtLink
                       v-for="product in searchResults"
                       :key="product.id"
-                      :to="'/p/' + product.slug"
+                      :to="'/product/' + product.slug"
                       class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
@@ -220,7 +220,7 @@ const currentYear = new Date().getFullYear()
                 <NuxtLink
                   v-for="cat in tenantCategories"
                   :key="cat.id"
-                  :to="'/c/' + cat.slug"
+                  :to="'/category/' + cat.slug"
                   class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
                   @click="mobileMenuOpen = false"
                 >

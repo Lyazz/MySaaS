@@ -106,7 +106,7 @@ function handleAddToCart() {
       style="border-radius: 2px; background-color: #131720;"
     >
       <!-- Background Image -->
-      <NuxtLink :to="`/p/${product.slug}`" class="block w-full h-full">
+      <NuxtLink :to="`/product/${product.slug}`" class="block w-full h-full">
         <img
           :src="mainImage"
           :alt="product.title"
@@ -219,7 +219,7 @@ function handleAddToCart() {
           : 'mt-4 text-left w-full px-1'
       ]"
     >
-      <NuxtLink :to="`/p/${product.slug}`" class="block">
+      <NuxtLink :to="`/product/${product.slug}`" class="block">
         <h3 
           class="font-light leading-snug tracking-wide transition-colors duration-200 group-hover:text-[#D4C5A9]"
           :class="[ viewMode === 'list' ? 'text-xl mb-2' : 'text-sm uppercase truncate' ]"

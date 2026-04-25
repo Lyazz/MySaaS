@@ -284,6 +284,72 @@
     "pricingPreview": {
       "storefront": "Votre boutique en ligne est incluse",
       "delivery": "Les options de livraison sont prêtes dès le départ"
+    },
+    "cinematic": {
+      "hero": {
+        "eyebrow": "Conçu pour le commerce algérien",
+        "headlinePre": "Un seul moteur.",
+        "headlineAccent": "Tous",
+        "headlinePost": "les marchands algériens.",
+        "subhead": "Boutique, paiement, livraison, analytics — tout réuni sur une plateforme qui démarre en minutes, pas en mois.",
+        "ctaPrimary": "Commencer gratuitement",
+        "ctaSecondary": "Voir la démo"
+      },
+      "logoCloud": "Intégrations de confiance",
+      "howItWorks": {
+        "titlePre": "De l'idée au",
+        "titleAccent": "revenu",
+        "titlePost": "en quatre étapes.",
+        "description": "Nous avons supprimé chaque détour entre le lancement et votre première commande."
+      },
+      "preview": {
+        "eyebrow": "Contrôle temps réel",
+        "titlePre": "Voyez les commandes",
+        "titleAccent": "arriver",
+        "titlePost": "en direct.",
+        "description": "Un pipeline unifié pour chaque commande, chaque statut, chaque livraison — sans rafraîchir, sans exporter.",
+        "point1": "Statuts en direct depuis chaque transporteur",
+        "point2": "Un clic pour confirmer, modifier ou rembourser",
+        "point3": "Signaux antifraude intégrés sur chaque commande"
+      },
+      "features": {
+        "eyebrow": "À l'intérieur",
+        "titlePre": "Tout ce qu'il faut.",
+        "titleAccent": "Rien",
+        "titlePost": "de superflu.",
+        "description": "Multi-tenant par conception. Localisé pour l'Algérie. Conçu pour scaler sans refondre votre stack."
+      },
+      "pricing": {
+        "eyebrow": "Tarifs",
+        "titlePre": "Pensé pour",
+        "titleAccent": "grandir",
+        "titlePost": "avec vous.",
+        "description": "Des formules adaptées à chaque étape — de la première vente à cinquante mille par mois.",
+        "viewAll": "Comparer toutes les formules"
+      },
+      "testimonials": {
+        "titlePre": "Des marchands qui ont",
+        "titleAccent": "lancé",
+        "titlePost": "avec Swekly."
+      },
+      "faq": {
+        "titlePre": "Vos questions,",
+        "titleAccent": "résolues",
+        "titlePost": "."
+      },
+      "cta": {
+        "eyebrow": "Quand vous voulez",
+        "headlinePre": "Ouvrez votre boutique",
+        "headlineAccent": "aujourd'hui",
+        "headlinePost": ".",
+        "subhead": "Gratuit pour commencer. Sans carte bancaire. Onboarding en moins de dix minutes.",
+        "button": "Créer ma boutique",
+        "secondary": "Parler aux ventes"
+      },
+      "footer": {
+        "languages": "Langue",
+        "madeFor": "Fait pour l'Algérie"
+      }
     }
   },
   "marketing": {
@@ -1177,7 +1243,7 @@
         "subtitle": "Sous-titre",
         "buttonText": "Texte du bouton",
         "buttonLink": "Lien du bouton",
-        "buttonLinkHint": "Utilisez des chemins internes comme \"/products\" ou \"/c/shoes\".",
+        "buttonLinkHint": "Utilisez des chemins internes comme \"/products\" ou \"/category/shoes\".",
         "imageUrl": "URL de l’image",
         "imageUrlHint": "Ou collez une URL si vous en avez déjà une.",
         "eyebrow": "Sur-titre",
@@ -1222,6 +1288,18 @@
           "title": "Paiement à la livraison (COD)",
           "subtitle": "Afficher un formulaire \"Acheter maintenant en COD\" sur les pages produit pour convertir plus vite.",
           "toggle": "Activer le formulaire COD"
+        }
+      },
+      "checkoutRules": {
+        "minimumOrder": {
+          "title": "Montant minimum de commande",
+          "subtitle": "Bloquer le checkout si le sous-total panier est inférieur à ce montant.",
+          "unit": "DZD"
+        },
+        "hideOptionalAddress": {
+          "title": "Masquer le champ adresse optionnelle",
+          "subtitle": "Retirer le champ adresse optionnelle du checkout et des formulaires de commande rapide.",
+          "toggle": "Masquer l'adresse optionnelle"
         }
       },
       "currency": {

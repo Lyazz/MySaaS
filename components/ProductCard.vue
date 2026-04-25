@@ -15,7 +15,7 @@
     <!-- Product Info -->
     <div class="p-4">
       <NuxtLink
-        :to="`/p/${product.slug}`"
+        :to="`/product/${product.slug}`"
         class="block"
       >
         <h3 class="text-lg font-semibold text-gray-900 hover:text-brand line-clamp-2">

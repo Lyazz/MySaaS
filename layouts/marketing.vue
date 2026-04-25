@@ -1,11 +1,11 @@
 <template>
-  <div class="marketing-shell flex min-h-screen flex-col font-sans">
-    <MarketingNavBar />
+  <div class="marketing-shell marketing-shell--cinematic flex min-h-screen flex-col">
+    <MarketingCinematicNavCinematic />
 
     <main class="relative z-10 flex-grow">
       <slot />
     </main>
 
-    <MarketingFooter />
+    <MarketingCinematicFooterCinematic />
   </div>
 </template>

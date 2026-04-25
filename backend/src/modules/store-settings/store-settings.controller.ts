@@ -53,6 +53,8 @@ export class StoreSettingsController {
                     language: settings.language,
                     cartEnabled: settings.cartEnabled,
                     codEnabled: settings.codEnabled,
+                    minimumOrderAmountDzd: settings.minimumOrderAmountDzd,
+                    hideOptionalAddress: settings.hideOptionalAddress,
                     currencyCode: settings.currencyCode,
                     currencyCountry: settings.currencyCountry
                 }
@@ -85,6 +87,8 @@ export class StoreSettingsController {
                     language: settings.language,
                     cartEnabled: settings.cartEnabled,
                     codEnabled: settings.codEnabled,
+                    minimumOrderAmountDzd: settings.minimumOrderAmountDzd,
+                    hideOptionalAddress: settings.hideOptionalAddress,
                     currencyCode: settings.currencyCode,
                     currencyCountry: settings.currencyCountry,
                     allowedDeliveryProviders: settings.allowedDeliveryProviders,

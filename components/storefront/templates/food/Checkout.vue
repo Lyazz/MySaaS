@@ -87,7 +87,7 @@
 	                  :select-class="'w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none font-medium'"
 	                />
 	              </div>
-              <div class="col-span-2 space-y-3">
+              <div v-if="!hideOptionalAddress" class="col-span-2 space-y-3">
                 <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
@@ -320,6 +320,12 @@ const { currencyCode } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
+const minimumOrderAmount = computed(() => {
+  const raw = Number(storeSettings.value?.minimumOrderAmountDzd ?? 1000)
+  return Number.isFinite(raw) && raw >= 0 ? raw : 1000
+})
+const hideOptionalAddress = computed(() => storeSettings.value?.hideOptionalAddress !== false)
+
 const availableProviders = computed(() => {
   const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
   const providerMeta = {
@@ -491,7 +497,7 @@ const grandTotal = computed(() => {
   return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
 })
 
-const hasRequiredFields = computed(() => Boolean(form.fullName.trim() && form.phone.trim() && cartStore.hasItems && cartStore.total >= 1000 && form.selectedDeliveryOption))
+const hasRequiredFields = computed(() => Boolean(form.fullName.trim() && form.phone.trim() && cartStore.hasItems && cartStore.total >= minimumOrderAmount.value && form.selectedDeliveryOption))
 
 const handleSubmit = async () => {
   if (!cartEnabled.value) return
@@ -549,8 +555,8 @@ const handleSubmit = async () => {
     const payload = {
       customerName: form.fullName.trim(),
       customerPhone: form.phone.trim(),
-      customerAddress: form.address?.trim() || undefined,
-      shippingAddressLine1: form.address?.trim() || undefined,
+      customerAddress: hideOptionalAddress.value ? undefined : (form.address?.trim() || undefined),
+      shippingAddressLine1: hideOptionalAddress.value ? undefined : (form.address?.trim() || undefined),
       shippingWilayaCode: form.wilaya || undefined,
       shippingCommuneCode: form.commune || undefined,
       deliveryMode: delivery?.mode,

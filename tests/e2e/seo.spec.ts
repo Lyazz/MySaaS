@@ -58,12 +58,12 @@ test.describe('Storefront SEO', () => {
     })
 
     test('Product page has correct SEO and Schema', async ({ page }) => {
-        await page.goto(`http://${tenantHost}/p/awesome-product`)
+        await page.goto(`http://${tenantHost}/product/awesome-product`)
         await expect(page).toHaveTitle(/Awesome Product/, { timeout: 15000 })
 
         const canonical = await page.locator('link[rel="canonical"]').getAttribute('href')
         expect(canonical).toContain(tenantHost)
-        expect(canonical).toContain('/p/awesome-product')
+        expect(canonical).toContain('/product/awesome-product')
 
         const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content')
         expect(ogTitle).toContain('Awesome Product')
@@ -75,12 +75,12 @@ test.describe('Storefront SEO', () => {
     })
 
     test('Category page has correct SEO', async ({ page }) => {
-        await page.goto(`http://${tenantHost}/c/electronics`)
+        await page.goto(`http://${tenantHost}/category/electronics`)
         await expect(page).toHaveTitle(/Electronics/, { timeout: 15000 })
 
         const canonical = await page.locator('link[rel="canonical"]').getAttribute('href')
         expect(canonical).toContain(tenantHost)
-        expect(canonical).toContain('/c/electronics')
+        expect(canonical).toContain('/category/electronics')
     })
 
     test('Static pages have SEO', async ({ page }) => {

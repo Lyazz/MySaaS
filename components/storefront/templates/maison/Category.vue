@@ -54,7 +54,7 @@ const categoryProducts = computed(() => {
             <NuxtLink
               v-for="cat in allCategories"
               :key="cat.id"
-              :to="`/c/${cat.slug}`"
+              :to="`/category/${cat.slug}`"
               class="cat-sidebar__link"
               :class="cat.id === category.id && 'is-active'"
             >

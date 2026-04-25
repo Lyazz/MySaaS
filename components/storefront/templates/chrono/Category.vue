@@ -96,7 +96,7 @@ const sortedProducts = computed(() => {
               <NuxtLink 
                 v-for="cat in allCategories" 
                 :key="cat.id" 
-                :to="`/c/${cat.slug}`"
+                :to="`/category/${cat.slug}`"
                 class="flex items-center gap-3 cursor-pointer group p-2 transition-colors"
                 :class="cat.id === category.id ? 'bg-[#A67C52]/10 text-[#A67C52] font-medium border-l-2 border-[#A67C52]' : 'text-gray-500 hover:text-[#A67C52]'"
               >

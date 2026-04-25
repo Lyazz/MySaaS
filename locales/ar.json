@@ -284,6 +284,72 @@
     "pricingPreview": {
       "storefront": "متجرك الإلكتروني متضمن",
       "delivery": "خيارات التوصيل جاهزة من اليوم الأول"
+    },
+    "cinematic": {
+      "hero": {
+        "eyebrow": "مصمم للتجارة الجزائرية",
+        "headlinePre": "محرك تجارة واحد.",
+        "headlineAccent": "لكل",
+        "headlinePost": "تاجر جزائري.",
+        "subhead": "المتجر، الدفع، التوصيل، والتحليلات — كل شيء في منصة واحدة تنطلق في دقائق، لا في أشهر.",
+        "ctaPrimary": "ابدأ مجانًا",
+        "ctaSecondary": "شاهد العرض"
+      },
+      "logoCloud": "تكاملات موثوقة",
+      "howItWorks": {
+        "titlePre": "من الفكرة إلى",
+        "titleAccent": "الإيراد",
+        "titlePost": "في أربع خطوات.",
+        "description": "أزلنا كل عقبة بين إطلاق متجرك واستقبال أول طلب."
+      },
+      "preview": {
+        "eyebrow": "تحكم لحظي",
+        "titlePre": "شاهد الطلبات",
+        "titleAccent": "تصل",
+        "titlePost": "فور وقوعها.",
+        "description": "خط أنابيب موحّد لكل طلب، كل حالة، كل توصيل — بلا تحديث ولا تصدير.",
+        "point1": "تحديثات حالة مباشرة من كل ناقل",
+        "point2": "نقرة واحدة للتأكيد أو التعديل أو الاسترداد",
+        "point3": "إشارات منع احتيال مدمجة في كل طلب"
+      },
+      "features": {
+        "eyebrow": "ما بداخلها",
+        "titlePre": "كل ما تحتاجه.",
+        "titleAccent": "لا",
+        "titlePost": "شيء زائد.",
+        "description": "متعددة المستأجرين بالتصميم. مُعرّبة للجزائر. مهندسة لتتوسع دون إعادة بناء."
+      },
+      "pricing": {
+        "eyebrow": "الأسعار",
+        "titlePre": "مصممة",
+        "titleAccent": "لتنمو",
+        "titlePost": "معك.",
+        "description": "خطط تناسب كل مرحلة — من أول بيعة إلى خمسين ألف شهريًا.",
+        "viewAll": "قارن كل الخطط"
+      },
+      "testimonials": {
+        "titlePre": "تجار",
+        "titleAccent": "أطلقوا",
+        "titlePost": "مع Swekly."
+      },
+      "faq": {
+        "titlePre": "أسئلتك،",
+        "titleAccent": "أُجيبت",
+        "titlePost": "."
+      },
+      "cta": {
+        "eyebrow": "متى أردت",
+        "headlinePre": "افتح متجرك",
+        "headlineAccent": "اليوم",
+        "headlinePost": ".",
+        "subhead": "مجاني للبدء. بدون بطاقة. تهيئة في أقل من عشر دقائق.",
+        "button": "أنشئ متجرك",
+        "secondary": "تحدث مع المبيعات"
+      },
+      "footer": {
+        "languages": "اللغة",
+        "madeFor": "صُنع للجزائر"
+      }
     }
   },
   "marketing": {
@@ -1191,7 +1257,7 @@
         "subtitle": "العنوان الفرعي",
         "buttonText": "نص الزر",
         "buttonLink": "رابط الزر",
-        "buttonLinkHint": "استخدم المسارات الداخلية مثل \"/products\" أو \"/c/shoes\".",
+        "buttonLinkHint": "استخدم المسارات الداخلية مثل \"/products\" أو \"/category/shoes\".",
         "imageUrl": "رابط الصورة",
         "imageUrlHint": "أو الصق رابطًا إذا كان لديك واحد.",
         "eyebrow": "عنوان صغير",
@@ -1236,6 +1302,18 @@
           "title": "الدفع عند الاستلام (COD)",
           "subtitle": "إظهار نموذج \"اشترِ الآن بالدفع عند الاستلام\" في صفحات المنتج لتحويل أسرع.",
           "toggle": "تفعيل نموذج COD"
+        }
+      },
+      "checkoutRules": {
+        "minimumOrder": {
+          "title": "الحد الأدنى لقيمة الطلب",
+          "subtitle": "منع إتمام الطلب إذا كان مجموع السلة أقل من هذا المبلغ.",
+          "unit": "دج"
+        },
+        "hideOptionalAddress": {
+          "title": "إخفاء حقل العنوان الاختياري",
+          "subtitle": "إزالة حقل العنوان الاختياري من صفحة الدفع ونماذج الطلب السريع.",
+          "toggle": "إخفاء العنوان الاختياري"
         }
       },
       "currency": {

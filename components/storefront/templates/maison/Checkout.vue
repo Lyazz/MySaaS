@@ -11,6 +11,12 @@ const { currencyCode, format: formatCurrency } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
+const minimumOrderAmount = computed(() => {
+  const raw = Number(storeSettings.value?.minimumOrderAmountDzd ?? 1000)
+  return Number.isFinite(raw) && raw >= 0 ? raw : 1000
+})
+const hideOptionalAddress = computed(() => storeSettings.value?.hideOptionalAddress !== false)
+
 const availableProviders = computed(() => {
   const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
   const providerMeta = {
@@ -140,7 +146,7 @@ const grandTotal = computed(() => {
   return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
 })
 
-const hasRequiredFields = computed(() => Boolean(form.value.fullName.trim() && form.value.phone.trim() && cartStore.hasItems && cartStore.total >= 1000 && form.value.selectedDeliveryOption))
+const hasRequiredFields = computed(() => Boolean(form.value.fullName.trim() && form.value.phone.trim() && cartStore.hasItems && cartStore.total >= minimumOrderAmount.value && form.value.selectedDeliveryOption))
 
 onMounted(() => { cartStore.loadFromLocalStorage() })
 
@@ -169,8 +175,8 @@ async function handleSubmit() {
     const payload = {
       customerName: form.value.fullName.trim(),
       customerPhone: form.value.phone.trim(),
-      customerAddress: form.value.address?.trim() || undefined,
-      shippingAddressLine1: form.value.address?.trim() || undefined,
+      customerAddress: hideOptionalAddress.value ? undefined : (form.value.address?.trim() || undefined),
+      shippingAddressLine1: hideOptionalAddress.value ? undefined : (form.value.address?.trim() || undefined),
       shippingWilayaCode: form.value.wilaya || undefined,
       shippingCommuneCode: form.value.commune || undefined,
       deliveryMode: delivery?.mode,
@@ -248,7 +254,7 @@ async function handleSubmit() {
                   :select-class="'co__select'"
                 />
               </div>
-              <div class="co__field co__field--full">
+              <div v-if="!hideOptionalAddress" class="co__field co__field--full">
                 <label class="co__label">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input v-model="form.address" type="text" :placeholder="storefrontContent.checkout.form.address.placeholder" class="co__input">
               </div>

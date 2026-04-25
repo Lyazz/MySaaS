@@ -86,7 +86,7 @@ function handleAddToCart() {
             class="relative overflow-hidden border-b-2 border-black aspect-square bg-gray-100"
             :class="[ viewMode === 'list' ? 'w-48 border-2 mb-0' : 'w-full' ]"
         >
-            <NuxtLink :to="`/p/${product.slug}`" class="block w-full h-full">
+            <NuxtLink :to="`/product/${product.slug}`" class="block w-full h-full">
                  <img 
                     :src="mainImage" 
                     :alt="product.title" 
@@ -126,7 +126,7 @@ function handleAddToCart() {
         <div class="p-4 flex flex-col flex-grow">
             
 <h3 class="font-street text-2xl leading-none mb-2 uppercase truncate">
-                <NuxtLink :to="`/p/${product.slug}`">
+                <NuxtLink :to="`/product/${product.slug}`">
                     {{ product.title }}
                 </NuxtLink>
             </h3>

@@ -320,7 +320,7 @@ function handleQuickViewAddToCart() {
               <NuxtLink
                 v-for="p in sidebarProducts"
                 :key="p.id"
-                :to="`/p/${p.slug}`"
+                :to="`/product/${p.slug}`"
                 class="flex gap-3 group items-center"
               >
                 <div class="w-14 h-14 bg-violet-50 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-violet-100 group-hover:border-violet-300 transition-colors">
@@ -587,7 +587,7 @@ function handleQuickViewAddToCart() {
               </Transition>
             </button>
             <NuxtLink
-              :to="`/p/${quickViewProduct.slug}`"
+              :to="`/product/${quickViewProduct.slug}`"
               class="block w-full py-3.5 border-3 border-violet-100 text-stone-700 font-black rounded-full hover:border-violet-300 hover:bg-violet-50 transition-colors text-center text-sm"
               @click="closeQuickView"
             >{{ storefrontContent.product.viewFullDetails }}</NuxtLink>

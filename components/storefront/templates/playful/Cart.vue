@@ -62,7 +62,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
 
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
-                  <NuxtLink :to="`/p/${item.slug}`" class="font-black text-stone-900 hover:text-violet-700 transition-colors text-sm leading-snug line-clamp-2" style="font-family: 'Fredoka', sans-serif">
+                  <NuxtLink :to="`/product/${item.slug}`" class="font-black text-stone-900 hover:text-violet-700 transition-colors text-sm leading-snug line-clamp-2" style="font-family: 'Fredoka', sans-serif">
                     {{ item.title }}
                   </NuxtLink>
                   <p class="text-xs text-stone-500 mt-0.5">

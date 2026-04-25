@@ -304,6 +304,8 @@ model StoreSettings {
 
   cartEnabled     Boolean @default(true)
   codEnabled      Boolean @default(true)
+  minimumOrderAmountDzd Int @default(1000)
+  hideOptionalAddress   Boolean @default(true)
   currencyCode    String  @default("DZD") // ISO currency code
   currencyCountry String  @default("DZ") // ISO country for flag/locale
 

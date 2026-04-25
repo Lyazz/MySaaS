@@ -846,7 +846,7 @@
         "subtitle": "Subtitle",
         "buttonText": "Button text",
         "buttonLink": "Button link",
-        "buttonLinkHint": "Use internal paths like \"/products\" or \"/c/shoes\".",
+        "buttonLinkHint": "Use internal paths like \"/products\" or \"/category/shoes\".",
         "imageUrl": "Image URL",
         "imageUrlHint": "Or paste a URL if you already have one.",
         "eyebrow": "Eyebrow",

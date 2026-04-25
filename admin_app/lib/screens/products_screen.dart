@@ -1173,7 +1173,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       onPressed: () async {
                         await Clipboard.setData(
                           ClipboardData(
-                            text: 'https://example.com/p/${product.slug}',
+                            text: 'https://example.com/product/${product.slug}',
                           ),
                         );
                         if (context.mounted) {
@@ -1227,7 +1227,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         await Clipboard.setData(
                           ClipboardData(
                             text:
-                                'https://example.com/p/${product.slug}?mode=landing',
+                                'https://example.com/product/${product.slug}?mode=landing',
                           ),
                         );
                         if (context.mounted) {

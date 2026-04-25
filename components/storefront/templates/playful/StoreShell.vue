@@ -147,7 +147,7 @@ const props = defineProps<{
                     <NuxtLink
                       v-for="product in visibleSearchResults"
                       :key="product.id"
-                      :to="'/p/' + product.slug"
+                      :to="'/product/' + product.slug"
                       class="flex items-center gap-3 px-4 py-3 hover:bg-violet-50 transition-colors border-b border-violet-50 last:border-0"
                       @click="isSearchDropdownOpen = false"
                     >
@@ -195,7 +195,7 @@ const props = defineProps<{
                     <NuxtLink
                       v-for="cat in tenantCategories"
                       :key="cat.id"
-                      :to="`/c/${cat.slug}`"
+                      :to="`/category/${cat.slug}`"
                       class="block px-4 py-3 text-sm font-bold text-stone-700 hover:bg-violet-50 hover:text-violet-700 transition-colors border-b border-violet-50 last:border-0"
                     >{{ categoryDisplayTitle(cat) }}</NuxtLink>
                   </div>
@@ -283,7 +283,7 @@ const props = defineProps<{
                     <NuxtLink
                       v-for="product in visibleSearchResults"
                       :key="product.id"
-                      :to="'/p/' + product.slug"
+                      :to="'/product/' + product.slug"
                       class="flex items-center gap-3 px-4 py-3 hover:bg-violet-50 transition-colors border-b border-violet-50 last:border-0"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
@@ -310,7 +310,7 @@ const props = defineProps<{
                 <NuxtLink
                   v-for="cat in tenantCategories"
                   :key="cat.id"
-                  :to="'/c/' + cat.slug"
+                  :to="'/category/' + cat.slug"
                   class="py-2 px-3 text-sm font-bold text-stone-600 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-colors"
                   @click="mobileMenuOpen = false"
                 >{{ categoryDisplayTitle(cat) }}</NuxtLink>

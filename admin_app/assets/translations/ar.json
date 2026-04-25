@@ -846,7 +846,7 @@
         "subtitle": "العنوان الفرعي",
         "buttonText": "نص الزر",
         "buttonLink": "رابط الزر",
-        "buttonLinkHint": "استخدم المسارات الداخلية مثل \"/products\" أو \"/c/shoes\".",
+        "buttonLinkHint": "استخدم المسارات الداخلية مثل \"/products\" أو \"/category/shoes\".",
         "imageUrl": "رابط الصورة",
         "imageUrlHint": "أو الصق رابطًا إذا كان لديك واحد.",
         "eyebrow": "عنوان صغير",

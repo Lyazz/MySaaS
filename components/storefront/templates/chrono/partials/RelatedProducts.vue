@@ -26,7 +26,7 @@ const getProductMainImage = (product: any) => {
                 <NuxtLink 
                     v-for="product in products" 
                     :key="product.id"
-                    :to="`/p/${product.slug}`"
+                    :to="`/product/${product.slug}`"
                     class="group flex flex-col border transition-all duration-300 overflow-hidden"
                     style="background-color:#131720; border-color:rgba(212,197,169,0.08); border-radius:2px;"
                 >

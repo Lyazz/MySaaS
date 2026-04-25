@@ -2,6 +2,7 @@ import request from 'supertest'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
+import { getPlanByCode } from '../../shared/pricing/plans'
 
 describe('Order limit enforcement', () => {
     const slug = `limit-${Date.now()}`
@@ -9,6 +10,7 @@ describe('Order limit enforcement', () => {
 
     let tenantId: string
     let productId: string
+    const basicPlanLimit = getPlanByCode('basic')?.ordersPerMonth ?? 0
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({ data: { name: 'Limit Tenant', slug } })
@@ -21,11 +23,21 @@ describe('Order limit enforcement', () => {
         await prisma.tenantSubscription.create({
             data: {
                 tenantId,
-                planCode: 'basic', // 10 orders/mo
+                planCode: 'basic',
                 interval: 'month',
                 status: 'ACTIVE',
                 currentPeriodStart: start,
                 currentPeriodEnd: end
+            }
+        })
+
+        await prisma.storeSettings.create({
+            data: {
+                tenantId,
+                cartEnabled: true,
+                codEnabled: true,
+                minimumOrderAmountDzd: 0,
+                hideOptionalAddress: true
             }
         })
 
@@ -34,7 +46,7 @@ describe('Order limit enforcement', () => {
         })
         productId = product.id
 
-        // Seed 10 orders in current period to reach Basic limit.
+        // Seed orders in current period to reach Basic limit.
         const baseOrder = {
             tenantId,
             status: 'PENDING',
@@ -44,8 +56,12 @@ describe('Order limit enforcement', () => {
             createdAt: new Date(start.getTime() + 60_000)
         }
 
+        if (basicPlanLimit <= 0) {
+            throw new Error('basic plan must have a positive ordersPerMonth limit for this test')
+        }
+
         await prisma.order.createMany({
-            data: Array.from({ length: 10 }).map((_, idx) => ({
+            data: Array.from({ length: basicPlanLimit }).map((_, idx) => ({
                 ...baseOrder,
                 customerPhone: `05500000${idx.toString().padStart(2, '0')}`,
                 createdAt: new Date(start.getTime() + (idx + 1) * 60_000)
@@ -57,6 +73,7 @@ describe('Order limit enforcement', () => {
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
+        await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.billingPayment.deleteMany({ where: { tenantId } })
         await prisma.tenantSubscription.deleteMany({ where: { tenantId } })
         await prisma.tenant.deleteMany({ where: { id: tenantId } })
@@ -80,4 +97,3 @@ describe('Order limit enforcement', () => {
         expect(res.body?.statusMessage || '').toContain('Monthly order limit reached')
     })
 })
-

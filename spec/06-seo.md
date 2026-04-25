@@ -10,8 +10,8 @@ Per tenant:
 ## SEO rules
 - SSR/hybrid rendering enabled for public pages
 - Clean urls:
-  - /p/:productSlug
-  - /c/:categorySlug
+  - /product/:productSlug
+  - /category/:categorySlug
 - Canonical URL per page, per tenant host
 - Meta tags: title, description, OG tags
 - Product structured data (schema.org Product)

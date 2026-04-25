@@ -284,6 +284,72 @@
     "pricingPreview": {
       "storefront": "Your online store is included",
       "delivery": "Delivery options are ready from day one"
+    },
+    "cinematic": {
+      "hero": {
+        "eyebrow": "Built for Algerian commerce",
+        "headlinePre": "One commerce engine.",
+        "headlineAccent": "Every",
+        "headlinePost": "Algerian merchant.",
+        "subhead": "Storefront, checkout, delivery, and analytics — unified on a single platform that ships in minutes, not months.",
+        "ctaPrimary": "Start for free",
+        "ctaSecondary": "See it work"
+      },
+      "logoCloud": "Trusted integrations",
+      "howItWorks": {
+        "titlePre": "From idea to",
+        "titleAccent": "income",
+        "titlePost": "in four steps.",
+        "description": "We removed every detour between launching a store and receiving your first order."
+      },
+      "preview": {
+        "eyebrow": "Real-time control",
+        "titlePre": "Watch orders",
+        "titleAccent": "land",
+        "titlePost": "as they happen.",
+        "description": "A unified pipeline shows every order, every status, every delivery — no tabs to refresh, no exports to chase.",
+        "point1": "Live status updates from every carrier",
+        "point2": "One click to confirm, edit, or refund",
+        "point3": "Built-in fraud signals on every order"
+      },
+      "features": {
+        "eyebrow": "What's inside",
+        "titlePre": "Everything you need.",
+        "titleAccent": "Nothing",
+        "titlePost": "you don't.",
+        "description": "Multi-tenant by design. Localized for Algeria. Engineered to scale without rewriting your stack."
+      },
+      "pricing": {
+        "eyebrow": "Pricing",
+        "titlePre": "Built to",
+        "titleAccent": "grow",
+        "titlePost": "with you.",
+        "description": "Plans that match your stage — from first sale to fifty thousand a month.",
+        "viewAll": "Compare every plan"
+      },
+      "testimonials": {
+        "titlePre": "Merchants who",
+        "titleAccent": "shipped",
+        "titlePost": "with Swekly."
+      },
+      "faq": {
+        "titlePre": "Questions,",
+        "titleAccent": "answered",
+        "titlePost": "."
+      },
+      "cta": {
+        "eyebrow": "Ready when you are",
+        "headlinePre": "Open your store",
+        "headlineAccent": "today",
+        "headlinePost": ".",
+        "subhead": "Free to start. No credit card. Onboarding in under ten minutes.",
+        "button": "Create your store",
+        "secondary": "Talk to sales"
+      },
+      "footer": {
+        "languages": "Language",
+        "madeFor": "Made for Algeria"
+      }
     }
   },
   "marketing": {
@@ -1191,7 +1257,7 @@
         "subtitle": "Subtitle",
         "buttonText": "Button text",
         "buttonLink": "Button link",
-        "buttonLinkHint": "Use internal paths like \"/products\" or \"/c/shoes\".",
+        "buttonLinkHint": "Use internal paths like \"/products\" or \"/category/shoes\".",
         "imageUrl": "Image URL",
         "imageUrlHint": "Or paste a URL if you already have one.",
         "eyebrow": "Eyebrow",
@@ -1236,6 +1302,18 @@
           "title": "Cash on delivery (COD)",
           "subtitle": "Show a 'Buy Now with COD' form directly on product pages for faster conversion.",
           "toggle": "Enable COD form"
+        }
+      },
+      "checkoutRules": {
+        "minimumOrder": {
+          "title": "Minimum order amount",
+          "subtitle": "Block checkout when cart subtotal is below this amount.",
+          "unit": "DZD"
+        },
+        "hideOptionalAddress": {
+          "title": "Hide optional address field",
+          "subtitle": "Remove the optional address input from checkout and quick order forms.",
+          "toggle": "Hide optional address"
         }
       },
       "currency": {

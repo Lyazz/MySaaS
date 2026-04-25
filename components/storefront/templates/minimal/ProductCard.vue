@@ -117,7 +117,7 @@ function handleAddToCart() {
     >
       <!-- Background Image -->
       <NuxtLink
-        :to="`/p/${product.slug}`"
+        :to="`/product/${product.slug}`"
         class="block w-full h-full"
       >
         <img
@@ -222,7 +222,7 @@ function handleAddToCart() {
       ]"
     >
       <NuxtLink
-        :to="`/p/${product.slug}`"
+        :to="`/product/${product.slug}`"
         class="block group-hover:text-brand-600 transition-colors duration-200"
       >
         

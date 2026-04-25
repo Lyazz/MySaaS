@@ -46,163 +46,102 @@ const plans = computed(() => {
 </script>
 
 <template>
-  <div class="relative overflow-hidden pt-28 md:pt-32">
-    <section class="marketing-section pb-10">
-      <div class="marketing-container max-w-[90rem]">
-        <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
-          <div>
-            <div class="marketing-eyebrow">
-              <Icon name="lucide:wallet-cards" class="h-3.5 w-3.5 text-[#16d5b3]" />
-              {{ t('pricing.page.title') }}
-            </div>
-            <h1 class="mt-6 font-display text-5xl font-semibold tracking-[-0.06em] text-white md:text-6xl lg:text-7xl">
-              {{ t('pricing.page.title') }}
-            </h1>
-            <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl">
-              {{ t('pricing.page.subtitle') }}
-            </p>
+  <div class="pt-24 md:pt-32">
+    <!-- ─── Hero ─── -->
+    <section class="relative overflow-hidden pb-12">
+      <div class="cinematic-grid-bg" />
+      <div class="cinematic-container relative">
+        <div class="mx-auto max-w-3xl text-center">
+          <span class="cinematic-pill">
+            <span class="cinematic-pill__dot" />
+            {{ t('pricing.page.title') }}
+          </span>
+          <h1 class="cinematic-headline mt-6">
+            {{ t('saasLanding.cinematic.pricing.titlePre') }}
+            <em>{{ t('saasLanding.cinematic.pricing.titleAccent') }}</em>
+            {{ t('saasLanding.cinematic.pricing.titlePost') }}
+          </h1>
+          <p class="cinematic-subhead mx-auto mt-5">{{ t('pricing.page.subtitle') }}</p>
 
-            <div class="mt-8 inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] p-1.5">
-              <button
-                class="rounded-full px-5 py-2 text-sm font-semibold transition-colors"
-                :class="!isAnnual ? 'bg-white text-[#050816]' : 'text-slate-300'"
-                @click="isAnnual = false"
-              >
-                {{ t('pricing.toggle.monthly') }}
-              </button>
-              <button
-                class="rounded-full px-5 py-2 text-sm font-semibold transition-colors"
-                :class="isAnnual ? 'bg-[#3559ff] text-white' : 'text-slate-300'"
-                @click="isAnnual = true"
-              >
-                {{ t('pricing.toggle.annual') }}
-              </button>
-            </div>
+          <div class="mt-9 inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.02] p-1">
+            <button
+              class="rounded-full px-5 py-2 text-sm font-medium transition-all"
+              :class="!isAnnual ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
+              @click="isAnnual = false"
+            >
+              {{ t('pricing.toggle.monthly') }}
+            </button>
+            <button
+              class="rounded-full px-5 py-2 text-sm font-medium transition-all"
+              :class="isAnnual ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
+              @click="isAnnual = true"
+            >
+              {{ t('pricing.toggle.annual') }}
+            </button>
           </div>
-
-          <MarketingVisualFrame tone="cobalt">
-            <div class="grid gap-4 md:grid-cols-[1.05fr_0.95fr]">
-              <div class="rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-5">
-                <p class="marketing-label">{{ t('pricing.page.includedTitle') }}</p>
-                <div class="mt-4 space-y-3 text-sm text-slate-200">
-                  <div class="pricing-rail-row">
-                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-                    {{ t('pricing.page.includedCheckout') }}
-                  </div>
-                  <div class="pricing-rail-row">
-                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-                    {{ t('pricing.page.includedDelivery') }}
-                  </div>
-                  <div class="pricing-rail-row">
-                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-                    {{ t('pricing.page.includedSupport') }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(53,89,255,0.2),rgba(255,255,255,0.03))] p-5">
-                <p class="marketing-label">{{ t('pricing.page.growthLabel') }}</p>
-                <p class="mt-3 text-2xl font-display font-semibold tracking-[-0.04em] text-white">
-                  {{ t('pricing.page.growthTitle') }}
-                </p>
-                <p class="mt-3 text-sm leading-7 text-slate-300">
-                  {{ t('pricing.page.growthBody') }}
-                </p>
-              </div>
-            </div>
-          </MarketingVisualFrame>
         </div>
       </div>
     </section>
 
-    <MarketingSection width="wide">
-      <div class="grid gap-5 xl:grid-cols-[1fr_1fr_1fr_0.92fr]">
-        <article
-          v-for="plan in plans"
-          :key="plan.code"
-          class="marketing-panel px-6 py-6"
-          :class="plan.popular || plan.highlight ? 'border-[#3559ff]/55 bg-[linear-gradient(180deg,rgba(53,89,255,0.18),rgba(255,255,255,0.04))]' : ''"
-        >
-          <div class="flex items-start justify-between gap-3">
+    <!-- ─── Plan grid ─── -->
+    <section class="cinematic-section !pt-12">
+      <div class="cinematic-container !max-w-[80rem]">
+        <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <MarketingCinematicPricingTile
+            v-for="plan in plans"
+            :id="plan.code"
+            :key="plan.code"
+            :name="plan.name"
+            :price="plan.price"
+            :currency="plan.currency"
+            :period="plan.period"
+            :description="plan.description"
+            :features="plan.features"
+            :cta="plan.cta"
+            :cta-to="`/register?plan=${plan.code}`"
+            :featured="plan.popular || plan.highlight"
+            :popular-label="plan.popular ? t('pricing.badges.mostPopular') : t('pricing.badges.recommended')"
+          />
+        </div>
+
+        <!-- Enterprise band -->
+        <div class="mt-12 cinematic-card overflow-hidden p-8 md:p-10">
+          <div class="grid gap-8 md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div>
-              <p class="marketing-label">
-                {{ plan.name }}
-              </p>
-              <p class="mt-4 font-display text-5xl font-semibold tracking-[-0.06em] text-white">
-                {{ plan.price }}
-              </p>
-              <p class="mt-1 text-sm text-slate-400">
-                {{ plan.currency }} {{ plan.period }}
-              </p>
+              <span class="cinematic-eyebrow">{{ t('pricing.page.enterpriseLabel') }}</span>
+              <h2 class="cinematic-headline mt-3 !text-3xl md:!text-4xl">
+                {{ t('pricing.page.enterpriseTitle') }}
+              </h2>
+              <p class="cinematic-subhead mt-4">{{ t('pricing.page.enterpriseBody') }}</p>
+              <div class="mt-6 space-y-2.5">
+                <div v-for="line in [t('pricing.page.enterpriseItems.setup'), t('pricing.page.enterpriseItems.ops'), t('pricing.page.enterpriseItems.guidance')]" :key="line" class="flex items-start gap-2.5 text-sm text-white/85">
+                  <Icon name="lucide:check" class="mt-0.5 h-4 w-4 flex-none text-lime-neon" />
+                  <span>{{ line }}</span>
+                </div>
+              </div>
             </div>
-            <span
-              v-if="plan.popular || plan.highlight"
-              class="rounded-full border border-[#3559ff]/30 bg-[#3559ff]/15 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#aebcff]"
-            >
-              {{ plan.popular ? t('pricing.badges.mostPopular') : t('pricing.badges.recommended') }}
-            </span>
-          </div>
-
-          <p class="mt-4 min-h-[3.5rem] text-sm leading-7 text-slate-300">
-            {{ plan.description }}
-          </p>
-
-          <div class="my-5 h-px bg-white/10" />
-
-          <div class="space-y-3 text-sm text-slate-200">
-            <div v-for="feature in plan.features" :key="feature" class="pricing-rail-row">
-              <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-              {{ feature }}
+            <div class="flex flex-col gap-3 md:items-end">
+              <NuxtLink to="/contact" class="cinematic-button cinematic-button--primary">
+                {{ t('marketing.footer.support.contact') }}
+                <Icon name="lucide:arrow-right" class="h-4 w-4" />
+              </NuxtLink>
+              <NuxtLink to="/register" class="cinematic-button cinematic-button--ghost">
+                {{ t('marketing.actions.getStarted') }}
+              </NuxtLink>
             </div>
           </div>
-
-          <button class="marketing-button mt-6 w-full justify-center" :class="plan.popular || plan.highlight ? 'marketing-button--primary' : 'marketing-button--ghost'">
-            {{ plan.cta }}
-          </button>
-        </article>
-
-        <aside class="marketing-panel px-6 py-6">
-          <p class="marketing-label">{{ t('pricing.page.enterpriseLabel') }}</p>
-          <h2 class="mt-4 font-display text-3xl font-semibold tracking-[-0.05em] text-white">
-            {{ t('pricing.page.enterpriseTitle') }}
-          </h2>
-          <p class="mt-4 text-sm leading-7 text-slate-300">
-            {{ t('pricing.page.enterpriseBody') }}
-          </p>
-
-          <div class="mt-6 space-y-3 text-sm text-slate-200">
-            <div class="pricing-rail-row">
-              <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-              {{ t('pricing.page.enterpriseItems.setup') }}
-            </div>
-            <div class="pricing-rail-row">
-              <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-              {{ t('pricing.page.enterpriseItems.ops') }}
-            </div>
-            <div class="pricing-rail-row">
-              <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-              {{ t('pricing.page.enterpriseItems.guidance') }}
-            </div>
-          </div>
-
-          <div class="mt-8 flex flex-col gap-3">
-            <NuxtLink to="/contact" class="marketing-button marketing-button--primary justify-center">
-              {{ t('marketing.footer.support.contact') }}
-            </NuxtLink>
-            <NuxtLink to="/register" class="marketing-button marketing-button--ghost justify-center">
-              {{ t('marketing.actions.getStarted') }}
-            </NuxtLink>
-          </div>
-        </aside>
+        </div>
       </div>
-    </MarketingSection>
+    </section>
+
+    <!-- ─── Final CTA ─── -->
+    <MarketingCinematicCTABand
+      :eyebrow="t('saasLanding.cinematic.cta.eyebrow')"
+      :headline-pre="t('saasLanding.cinematic.cta.headlinePre')"
+      :headline-accent="t('saasLanding.cinematic.cta.headlineAccent')"
+      :headline-post="t('saasLanding.cinematic.cta.headlinePost')"
+      :subhead="t('saasLanding.cinematic.cta.subhead')"
+      :primary-cta="{ label: t('saasLanding.cinematic.cta.button'), to: '/register' }"
+    />
   </div>
 </template>
-
-<style scoped>
-.pricing-rail-row {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-</style>

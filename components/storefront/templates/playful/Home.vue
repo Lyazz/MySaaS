@@ -169,7 +169,7 @@ const categories = computed(() => {
           <NuxtLink
             v-for="(cat) in categories"
             :key="cat.slug"
-            :to="`/c/${cat.slug}`"
+            :to="`/category/${cat.slug}`"
             class="snap-start flex-shrink-0 w-44 md:w-56 group"
           >
             <div

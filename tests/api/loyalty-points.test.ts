@@ -35,6 +35,8 @@ describe('Loyalty points flows', () => {
                 tenantId,
                 cartEnabled: true,
                 codEnabled: true,
+                minimumOrderAmountDzd: 0,
+                hideOptionalAddress: true,
                 loyaltyEnabled: true,
                 loyaltyBasePoints: 2,
                 loyaltyMarginFactor: 0.1,

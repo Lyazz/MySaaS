@@ -52,7 +52,7 @@ const { format: formatCurrency } = useCurrency()
               <div class="cart__item-body">
                 <div class="cart__item-top">
                   <div>
-                    <NuxtLink :to="`/p/${item.slug}`" class="cart__item-name">{{ item.title }}</NuxtLink>
+                    <NuxtLink :to="`/product/${item.slug}`" class="cart__item-name">{{ item.title }}</NuxtLink>
                     <p v-if="item.variantId" class="cart__item-ref">Réf. {{ item.variantId.slice(0, 8) }}</p>
                   </div>
                   <button class="cart__item-remove" @click="cartStore.removeItem(item.productId, item.variantId)">

@@ -184,7 +184,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
         <NuxtLink
           v-for="(cat, idx) in categories.slice(0, 5)"
           :key="cat.slug"
-          :to="`/c/${cat.slug}`"
+          :to="`/category/${cat.slug}`"
           class="atelier-cats__item"
           :class="`atelier-cats__item--${idx}`"
         >
@@ -215,7 +215,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
         <NuxtLink
           v-for="cat in categories.slice(5)"
           :key="cat.slug"
-          :to="`/c/${cat.slug}`"
+          :to="`/category/${cat.slug}`"
           class="atelier-tag"
         >{{ categoryDisplayTitle(cat) }}</NuxtLink>
       </div>

@@ -41,7 +41,7 @@ describe('Public checkout order flow', () => {
         adminToken = signAccessToken({ userId: admin.id, email: admin.email, role: admin.role, tenantId: admin.tenantId })
 
         await prisma.storeSettings.create({
-            data: { tenantId, cartEnabled: true, codEnabled: true }
+            data: { tenantId, cartEnabled: true, codEnabled: true, minimumOrderAmountDzd: 0, hideOptionalAddress: true }
         })
 
         const product = await prisma.product.create({
@@ -210,6 +210,59 @@ describe('Public checkout order flow', () => {
         expect(afterCancel?.reserved).toBe(0)
     })
 
+    it('enforces tenant minimum order amount from settings', async () => {
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { minimumOrderAmountDzd: 1000 }
+        })
+
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Below Minimum Buyer',
+                customerPhone: '0550111000',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(res.status).toBe(400)
+        expect(res.body.code).toBe('MIN_ORDER_AMOUNT_NOT_MET')
+        expect(String(res.body.statusMessage || '')).toContain('Minimum order amount is 1000 DZD')
+
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { minimumOrderAmountDzd: 0 }
+        })
+    })
+
+    it('ignores optional address fields when hideOptionalAddress is enabled', async () => {
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { hideOptionalAddress: true, minimumOrderAmountDzd: 0 }
+        })
+
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'No Address Stored Buyer',
+                customerPhone: '0550111001',
+                customerAddress: 'Some Street 123',
+                shippingAddressLine1: 'Another Street',
+                items: [{ productId, variantId, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+        const orderId = res.body.orderId as string
+        const saved = await prisma.order.findUnique({
+            where: { id: orderId },
+            select: { customerAddress: true, shippingAddressLine1: true }
+        })
+
+        expect(saved?.customerAddress).toBeNull()
+        expect(saved?.shippingAddressLine1).toBeNull()
+    })
+
     it('rejects store pickup checkout when store pickup is disabled', async () => {
         const res = await request(app)
             .post('/api/orders')
@@ -285,7 +338,9 @@ describe('Public checkout order flow', () => {
         const otherSlug = `other-${Date.now()}`
         const otherHost = `${otherSlug}.localhost:3000`
         const otherTenant = await prisma.tenant.create({ data: { name: 'Other', slug: otherSlug } })
-        await prisma.storeSettings.create({ data: { tenantId: otherTenant.id, cartEnabled: true, codEnabled: true } })
+        await prisma.storeSettings.create({
+            data: { tenantId: otherTenant.id, cartEnabled: true, codEnabled: true, minimumOrderAmountDzd: 0, hideOptionalAddress: true }
+        })
 
         const otherRes = await request(app)
             .get(`/api/orders/${orderId}/pixel`)

@@ -30,7 +30,7 @@ const getProductMainImage = (product: any) => {
           <NuxtLink 
             v-for="product in products" 
             :key="product.id"
-            :to="`/p/${product.slug}`"
+            :to="`/product/${product.slug}`"
             class="group bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-lg hover:border-brand-200 transition-all duration-300 flex flex-col"
           >
             <!-- Image Container -->

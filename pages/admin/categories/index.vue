@@ -258,7 +258,7 @@
                 class="text-xs"
                 style="color: var(--text-tertiary)"
               >
-                /c/{{ activeParent.slug }}
+                /category/{{ activeParent.slug }}
               </p>
             </div>
             <div class="flex items-center gap-1">
@@ -279,7 +279,7 @@
                 class="p-2 rounded-md transition-colors"
                 style="color: var(--text-tertiary)"
                 :title="t('admin.pages.categories.index.links.copyCategory')"
-                @click="copyLink(`/c/${activeParent.slug}`)"
+                @click="copyLink(`/category/${activeParent.slug}`)"
               >
                 <Icon
                   name="lucide:copy"
@@ -362,7 +362,7 @@
                     class="p-2 rounded-md transition-colors"
                     style="color: var(--text-tertiary)"
                     :title="t('admin.pages.categories.index.links.copyCategory')"
-                    @click="copyLink(`/c/${subcategory.slug}`)"
+                    @click="copyLink(`/category/${subcategory.slug}`)"
                   >
                     <Icon
                       name="lucide:copy"
@@ -639,7 +639,7 @@ function getCategoryUrl(slug: string): string {
   const { protocol, host } = useRequestOrigin()
   const platformBaseDomain = usePlatformBaseDomain()
   const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
-  return `${protocol}://${tenantHost}/c/${slug}`
+  return `${protocol}://${tenantHost}/category/${slug}`
 }
 
 async function copyLink(path: string) {

@@ -9,6 +9,7 @@ const controller = new CategoriesController()
 router.use(requireTenantMember)
 router.use(requireStaffCrud('categories'))
 
+router.get('/slug-availability', controller.checkSlugAvailability.bind(controller))
 router.get('/', controller.listCategories)
 router.post('/', controller.createCategory)
 router.get('/:id', controller.getCategory)

@@ -486,7 +486,7 @@ const closeQuickView = () => {
                         <Icon name="lucide:handbag" class="w-5 h-5" />
                         {{ storefrontContent.actions.addToCart }}
                       </button>
-                      <NuxtLink :to="`/p/${quickViewProduct.slug}`" class="block w-full py-4 border border-purple-500/50 text-purple-200 font-bold rounded-xl hover:bg-purple-900/30 hover:border-pink-500/50 transition-all text-center" @click="closeQuickView">
+                      <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="block w-full py-4 border border-purple-500/50 text-purple-200 font-bold rounded-xl hover:bg-purple-900/30 hover:border-pink-500/50 transition-all text-center" @click="closeQuickView">
                         {{ storefrontContent.product.viewFullDetails }}
                       </NuxtLink>
                   </div>

@@ -75,7 +75,7 @@
                   <div class="flex justify-between">
                     <div class="min-w-0 flex-1">
                       <h3 class="text-lg font-medium text-white hover:text-pink-400 transition-colors">
-                        <NuxtLink :to="`/p/${item.slug}`">
+                        <NuxtLink :to="`/product/${item.slug}`">
                           {{ item.title }}
                         </NuxtLink>
                       </h3>

@@ -11,6 +11,12 @@ const { currencyCode } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
+const minimumOrderAmount = computed(() => {
+  const raw = Number(storeSettings.value?.minimumOrderAmountDzd ?? 1000)
+  return Number.isFinite(raw) && raw >= 0 ? raw : 1000
+})
+const hideOptionalAddress = computed(() => storeSettings.value?.hideOptionalAddress !== false)
+
 const availableProviders = computed(() => {
   const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
   const providerMeta = {
@@ -184,7 +190,7 @@ const hasRequiredFields = computed(() => Boolean(
   form.value.fullName.trim() &&
   form.value.phone.trim() &&
   cartStore.hasItems &&
-  cartStore.total >= 1000 &&
+  cartStore.total >= minimumOrderAmount.value &&
   form.value.selectedDeliveryOption
 ))
 
@@ -243,8 +249,8 @@ async function handleSubmit() {
         const payload = {
           customerName: form.value.fullName.trim(),
           customerPhone: form.value.phone.trim(),
-          customerAddress: form.value.address?.trim() || undefined,
-          shippingAddressLine1: form.value.address?.trim() || undefined,
+          customerAddress: hideOptionalAddress.value ? undefined : (form.value.address?.trim() || undefined),
+          shippingAddressLine1: hideOptionalAddress.value ? undefined : (form.value.address?.trim() || undefined),
           shippingWilayaCode: form.value.wilaya || undefined,
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
@@ -342,7 +348,7 @@ async function handleSubmit() {
                   :select-class="'w-full h-12 bg-[#131720] border border-[#A67C52]/20 px-4 text-white focus:border-[#A67C52] focus:ring-2 focus:ring-[#A67C52]/20 transition-all outline-none rounded-[2px]'"
                 />
               </div>
-              <div class="col-span-2 space-y-2">
+              <div v-if="!hideOptionalAddress" class="col-span-2 space-y-2">
                 <label class="block text-sm font-semibold text-[#A67C52] ml-1 rtl:ml-0 rtl:mr-1 tracking-wider uppercase text-xs">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input v-model="form.address" type="text" class="w-full h-12 bg-[#131720] border border-[#A67C52]/20 px-4 text-white placeholder:text-gray-600 focus:border-[#A67C52] focus:ring-2 focus:ring-[#A67C52]/20 transition-all outline-none" style="border-radius: 2px;" :placeholder="storefrontContent.checkout.form.address.placeholder" >
               </div>
@@ -504,7 +510,7 @@ async function handleSubmit() {
                 <span class="font-bold text-xl text-white">{{ storefrontContent.cart.summary.total }}</span>
                 <span class="font-bold text-xl text-[#A67C52]">{{ grandTotal }} {{ currencyCode }}</span>
               </div>
-              <p class="text-xs text-gray-600 mt-1">{{ storefrontContent.checkout.minimumOrder('1,000', currencyCode) }}</p>
+              <p class="text-xs text-gray-600 mt-1">{{ storefrontContent.checkout.minimumOrder(minimumOrderAmount.toLocaleString(), currencyCode) }}</p>
             </div>
 
             <div v-if="errorMessage" class="mt-4 border-2 border-red-800/30 bg-red-950/30 text-red-400 text-sm px-4 py-3.5 flex items-start gap-3" style="border-radius: 2px;">

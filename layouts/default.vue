@@ -1,29 +1,21 @@
 <template>
-  <div class="marketing-shell flex min-h-screen flex-col font-sans">
-    <MarketingNavBar />
+  <div class="marketing-shell marketing-shell--cinematic flex min-h-screen flex-col">
+    <MarketingCinematicNavCinematic />
 
     <main class="relative z-10 flex-grow">
       <slot />
     </main>
 
-    <MarketingFooter />
+    <MarketingCinematicFooterCinematic />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
 import { useCartStore } from '~/stores/cart'
 
-const authStore = useAuthStore()
 const cartStore = useCartStore()
-const storeSettings = useState<any>('storeSettings')
 
-// Load cart on mount
 onMounted(() => {
   cartStore.loadFromLocalStorage()
 })
-
-function handleLogout() {
-  authStore.logout()
-}
 </script>

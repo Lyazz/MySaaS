@@ -190,7 +190,7 @@ const displayedProducts = computed(() => {
              <NuxtLink 
                v-for="(cat) in categories" 
                :key="cat.slug" 
-               :to="`/c/${cat.slug}`"
+               :to="`/category/${cat.slug}`"
                class="snap-center flex-shrink-0 w-64 h-80 rounded-[4rem] relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
              >
                 <img

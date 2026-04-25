@@ -176,6 +176,19 @@ export class CategoriesService {
         return this.orderCategoriesByHierarchy(mapped)
     }
 
+    async isSlugAvailable(tenantId: string, slug: string, excludeCategoryId?: string) {
+        const existing = await prisma.category.findFirst({
+            where: {
+                tenantId,
+                slug,
+                ...(excludeCategoryId ? { NOT: { id: excludeCategoryId } } : {})
+            },
+            select: { id: true }
+        })
+
+        return !existing
+    }
+
     async createCategory(
         tenantId: string,
         data: { title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown }

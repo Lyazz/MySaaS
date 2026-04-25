@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MarketingChapter } from '~/shared/marketing/types'
+import { computed } from 'vue'
 
 const { t } = useI18n({ useScope: 'global' })
 
@@ -8,223 +8,136 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: computed(() => `${t('marketing.nav.features')} - Swekly`),
+  title: computed(() => `${t('marketing.nav.features')} — Swekly`),
   description: computed(() => t('marketing.featuresPage.hero.subtitle'))
 })
 
-const chapters = computed<MarketingChapter[]>(() => [
+const featureGroups = computed(() => [
   {
-    eyebrow: '01',
+    eyebrow: '01 · Storefront',
     title: t('marketing.featuresPage.items.builder.title'),
     description: t('marketing.featuresPage.items.builder.description'),
     icon: 'lucide:layout-template',
-    tone: 'cobalt',
-    bullets: [
-      { label: t('saasLanding.features.items.templates.title'), icon: 'lucide:smartphone' },
-      { label: t('marketing.featuresPage.items.domains.title'), icon: 'lucide:globe' }
+    items: [
+      { icon: 'lucide:smartphone', label: t('saasLanding.features.items.templates.title') },
+      { icon: 'lucide:globe', label: t('marketing.featuresPage.items.domains.title') },
+      { icon: 'lucide:languages', label: t('marketing.featuresPage.items.localization.title') }
     ]
   },
   {
-    eyebrow: '02',
+    eyebrow: '02 · Commerce',
     title: t('marketing.featuresPage.items.payments.title'),
     description: t('marketing.featuresPage.items.payments.description'),
     icon: 'lucide:credit-card',
-    tone: 'teal',
-    bullets: [
-      { label: t('saasLanding.trust.secure'), icon: 'lucide:shield-check' },
-      { label: t('marketing.featuresPage.bullets.checkout'), icon: 'lucide:badge-dollar-sign' }
+    items: [
+      { icon: 'lucide:shield-check', label: t('saasLanding.trust.secure') },
+      { icon: 'lucide:badge-dollar-sign', label: t('marketing.featuresPage.bullets.checkout') },
+      { icon: 'lucide:repeat', label: t('marketing.featuresPage.items.payments.title') }
     ]
   },
   {
-    eyebrow: '03',
+    eyebrow: '03 · Logistics',
     title: t('marketing.featuresPage.items.logistics.title'),
     description: t('marketing.featuresPage.items.logistics.description'),
     icon: 'lucide:truck',
-    tone: 'orange',
-    bullets: [
-      { label: t('marketing.featuresPage.bullets.carriers'), icon: 'lucide:send' },
-      { label: t('marketing.featuresPage.bullets.dispatch'), icon: 'lucide:boxes' }
+    items: [
+      { icon: 'lucide:send', label: t('marketing.featuresPage.bullets.carriers') },
+      { icon: 'lucide:boxes', label: t('marketing.featuresPage.bullets.dispatch') },
+      { icon: 'lucide:map-pin', label: t('marketing.featuresPage.items.logistics.title') }
     ]
   },
   {
-    eyebrow: '04',
+    eyebrow: '04 · Intelligence',
     title: t('marketing.featuresPage.items.analytics.title'),
     description: t('marketing.featuresPage.items.analytics.description'),
     icon: 'lucide:bar-chart-3',
-    tone: 'cobalt',
-    bullets: [
-      { label: t('auth.login.hero.carousel.analytics.title'), icon: 'lucide:line-chart' },
-      { label: t('saasLanding.features.items.aiTools.title'), icon: 'lucide:sparkles' }
+    items: [
+      { icon: 'lucide:line-chart', label: t('auth.login.hero.carousel.analytics.title') },
+      { icon: 'lucide:sparkles', label: t('saasLanding.features.items.aiTools.title') },
+      { icon: 'lucide:target', label: t('marketing.featuresPage.items.analytics.title') }
     ]
   }
 ])
 </script>
 
 <template>
-  <div class="relative overflow-hidden pt-28 md:pt-32">
-    <section class="marketing-section pb-10">
-      <div class="marketing-container max-w-[90rem]">
-        <div class="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
-          <div>
-            <div class="marketing-eyebrow">
-              <Icon name="lucide:layers-3" class="h-3.5 w-3.5 text-[#16d5b3]" />
-              {{ t('marketing.nav.features') }}
-            </div>
-            <h1 class="mt-6 font-display text-5xl font-semibold tracking-[-0.06em] text-white md:text-6xl lg:text-7xl">
-              {{ t('marketing.featuresPage.hero.title.prefix') }}
-              <span class="block bg-[linear-gradient(135deg,#ffffff,#8fa7ff)] bg-clip-text text-transparent">
-                {{ t('marketing.featuresPage.hero.title.accent') }}
-              </span>
-            </h1>
-            <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl">
-              {{ t('marketing.featuresPage.hero.subtitle') }}
-            </p>
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-              <NuxtLink to="/register" class="marketing-button marketing-button--primary">
-                {{ t('marketing.actions.getStarted') }}
-              </NuxtLink>
-              <NuxtLink to="/pricing" class="marketing-button marketing-button--ghost">
-                {{ t('marketing.nav.pricing') }}
-              </NuxtLink>
-            </div>
-          </div>
-
-          <MarketingVisualFrame tone="cobalt">
-            <div class="grid gap-4 md:grid-cols-2">
-              <div class="rounded-[1.5rem] border border-white/10 bg-white/[0.05] p-5">
-                <p class="marketing-label">{{ t('marketing.featuresPage.visual.setupLabel') }}</p>
-                <p class="mt-3 text-2xl font-display font-semibold text-white">
-                  {{ t('marketing.featuresPage.visual.setupTitle') }}
-                </p>
-                <div class="mt-5 space-y-3 text-sm text-slate-300">
-                  <div class="feature-lab-row">
-                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-                    {{ t('marketing.featuresPage.visual.setupTheme') }}
-                  </div>
-                  <div class="feature-lab-row">
-                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-                    {{ t('marketing.featuresPage.visual.setupCheckout') }}
-                  </div>
-                  <div class="feature-lab-row">
-                    <Icon name="lucide:check" class="h-4 w-4 text-[#16d5b3]" />
-                    {{ t('marketing.featuresPage.visual.setupDelivery') }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(53,89,255,0.2),rgba(255,255,255,0.03))] p-5">
-                <p class="marketing-label">{{ t('marketing.featuresPage.visual.signalLabel') }}</p>
-                <div class="mt-4 flex items-end gap-2">
-                  <div class="feature-lab-bar h-16" />
-                  <div class="feature-lab-bar h-24" />
-                  <div class="feature-lab-bar h-20" />
-                  <div class="feature-lab-bar h-28" />
-                  <div class="feature-lab-bar h-32" />
-                </div>
-              </div>
-            </div>
-          </MarketingVisualFrame>
-        </div>
-      </div>
-    </section>
-
-    <MarketingSection width="wide">
-      <div class="space-y-6">
-        <div
-          v-for="chapter in chapters"
-          :key="chapter.title"
-          class="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]"
-        >
-          <div class="lg:sticky lg:top-28 lg:self-start">
-            <MarketingVisualFrame :tone="chapter.tone || 'cobalt'">
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <p class="marketing-label">{{ chapter.eyebrow }}</p>
-                  <Icon :name="chapter.icon || 'lucide:sparkles'" class="h-5 w-5 text-[#8fa7ff]" />
-                </div>
-                <h2 class="font-display text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">
-                  {{ chapter.title }}
-                </h2>
-                <p class="text-base leading-7 text-slate-300">
-                  {{ chapter.description }}
-                </p>
-                <div class="grid gap-3 sm:grid-cols-2">
-                  <div
-                    v-for="bullet in chapter.bullets"
-                    :key="bullet.label"
-                    class="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-200"
-                  >
-                    <div class="flex items-center gap-2">
-                      <Icon :name="bullet.icon || 'lucide:check'" class="h-4 w-4 text-[#16d5b3]" />
-                      {{ bullet.label }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </MarketingVisualFrame>
-          </div>
-
-          <div class="marketing-panel px-6 py-6 md:px-8 md:py-8">
-            <div class="grid gap-4 md:grid-cols-2">
-              <div class="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-5">
-                <p class="marketing-label">{{ t('marketing.featuresPage.outcomeLabel') }}</p>
-                <p class="mt-3 text-xl font-display font-semibold tracking-[-0.04em] text-white">
-                  {{ t('marketing.featuresPage.outcomeTitle') }}
-                </p>
-                <p class="mt-3 text-sm leading-7 text-slate-300">
-                  {{ t('marketing.featuresPage.outcomeBody') }}
-                </p>
-              </div>
-              <div class="rounded-[1.4rem] border border-white/10 bg-white/[0.04] p-5">
-                <p class="marketing-label">{{ t('marketing.featuresPage.surfaceLabel') }}</p>
-                <p class="mt-3 text-sm leading-7 text-slate-300">
-                  {{ t('marketing.featuresPage.surfaceBody') }}
-                </p>
-                <div class="mt-4 h-2 rounded-full bg-white/10">
-                  <div class="h-2 w-[78%] rounded-full bg-gradient-to-r from-[#16d5b3] to-[#3559ff]" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </MarketingSection>
-
-    <section class="marketing-section pt-6">
-      <div class="marketing-container max-w-5xl">
-        <div class="marketing-panel px-6 py-8 text-center md:px-10">
-          <p class="marketing-eyebrow">
-            <Icon name="lucide:rocket" class="h-3.5 w-3.5 text-[#16d5b3]" />
-            {{ t('marketing.featuresPage.cta.title') }}
-          </p>
-          <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-            <NuxtLink to="/register" class="marketing-button marketing-button--primary">
-              {{ t('marketing.featuresPage.cta.button') }}
+  <div class="pt-24 md:pt-32">
+    <!-- ─── Hero ─── -->
+    <section class="relative overflow-hidden pb-12">
+      <div class="cinematic-grid-bg" />
+      <div class="cinematic-container relative">
+        <div class="mx-auto max-w-3xl text-center">
+          <span class="cinematic-pill">
+            <span class="cinematic-pill__dot" />
+            {{ t('marketing.nav.features') }}
+          </span>
+          <h1 class="cinematic-headline mt-6">
+            {{ t('marketing.featuresPage.hero.title.prefix') }}
+            <em>{{ t('marketing.featuresPage.hero.title.accent') }}</em>
+          </h1>
+          <p class="cinematic-subhead mx-auto mt-5">{{ t('marketing.featuresPage.hero.subtitle') }}</p>
+          <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <NuxtLink to="/register" class="cinematic-button cinematic-button--primary">
+              {{ t('marketing.actions.getStarted') }}
+              <Icon name="lucide:arrow-right" class="h-4 w-4" />
             </NuxtLink>
-            <NuxtLink to="/contact" class="marketing-button marketing-button--ghost">
-              {{ t('marketing.footer.support.contact') }}
+            <NuxtLink to="/pricing" class="cinematic-button cinematic-button--ghost">
+              {{ t('marketing.nav.pricing') }}
             </NuxtLink>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- ─── Feature groups ─── -->
+    <section class="cinematic-section !pt-12">
+      <div class="cinematic-container">
+        <div class="space-y-16 md:space-y-24">
+          <div
+            v-for="group in featureGroups"
+            :key="group.title"
+            class="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center"
+          >
+            <div v-motion-slide-visible-once-bottom>
+              <div class="cinematic-eyebrow mb-3 flex items-center gap-2">
+                <Icon :name="group.icon" class="h-3.5 w-3.5 text-lime-neon" />
+                {{ group.eyebrow }}
+              </div>
+              <h2 class="cinematic-headline !text-4xl md:!text-5xl">{{ group.title }}</h2>
+              <p class="cinematic-subhead mt-5">{{ group.description }}</p>
+              <div class="mt-7 grid gap-2.5 sm:grid-cols-2">
+                <div v-for="item in group.items" :key="item.label" class="cinematic-glass flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm text-white/85">
+                  <Icon :name="item.icon" class="h-3.5 w-3.5 flex-none text-lime-neon" />
+                  <span>{{ item.label }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-motion-slide-visible-once-bottom class="cinematic-card relative aspect-[5/4] overflow-hidden p-0">
+              <div class="absolute inset-0 bg-gradient-to-br from-[#0A1014] via-[#06181a] to-[#05070A]" />
+              <div class="absolute inset-0 cinematic-grid-bg opacity-50" />
+              <div class="relative h-full flex items-center justify-center p-8">
+                <div class="relative">
+                  <div class="absolute inset-0 -m-8 rounded-full bg-lime-neon/15 blur-3xl" />
+                  <div class="relative flex h-32 w-32 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur">
+                    <Icon :name="group.icon" class="h-14 w-14 text-lime-neon" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Final CTA ─── -->
+    <MarketingCinematicCTABand
+      :eyebrow="t('marketing.featuresPage.cta.title')"
+      :headline-pre="t('saasLanding.cinematic.cta.headlinePre')"
+      :headline-accent="t('saasLanding.cinematic.cta.headlineAccent')"
+      :headline-post="t('saasLanding.cinematic.cta.headlinePost')"
+      :primary-cta="{ label: t('marketing.featuresPage.cta.button'), to: '/register' }"
+      :secondary-cta="{ label: t('marketing.footer.support.contact'), to: '/contact' }"
+    />
   </div>
 </template>
-
-<style scoped>
-.feature-lab-row {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  border-radius: 0.95rem;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 0.8rem 0.9rem;
-}
-
-.feature-lab-bar {
-  flex: 1 1 0%;
-  min-width: 0;
-  border-radius: 999px 999px 0.8rem 0.8rem;
-  background: linear-gradient(180deg, rgba(22, 213, 179, 0.9), rgba(53, 89, 255, 0.82));
-}
-</style>

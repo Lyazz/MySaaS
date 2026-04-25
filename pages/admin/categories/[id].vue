@@ -102,6 +102,8 @@
           :error="errors.slug"
           :placeholder="t('admin.forms.category.slug.placeholder')"
           :hint="t('admin.forms.category.slug.hintEdit')"
+          @change="handleSlugChange"
+          @blur="handleSlugChange"
           required
           pattern="[a-z0-9-]+"
         />
@@ -220,6 +222,8 @@ const submitting = ref(false)
 const loading = ref(true)
 const showDeleteModal = ref(false)
 const lastAutoSlug = ref('')
+const slugPattern = /^[a-z0-9-]+$/
+const slugSuggestionSeq = ref(0)
 
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
 type CategoryOption = Category & { depth: number }
@@ -270,15 +274,11 @@ const categoryUrl = computed(() => {
   const { protocol, host } = useRequestOrigin()
   const platformBaseDomain = usePlatformBaseDomain()
   const tenantHost = toTenantHost(host, tenantSlugValue, { platformBaseDomain })
-  return `${protocol}://${tenantHost}/c/${form.value.slug}`
+  return `${protocol}://${tenantHost}/category/${form.value.slug}`
 })
 
 watch(() => form.value.title, (newTitle) => {
-  const generated = slugify(newTitle)
-  if (!form.value.slug || form.value.slug === lastAutoSlug.value) {
-    form.value.slug = generated
-    lastAutoSlug.value = generated
-  }
+  void syncAutoSlugFromTitle(newTitle)
 })
 
 function slugify(text: string): string {
@@ -286,6 +286,105 @@ function slugify(text: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+}
+
+function normalizeSlugInput(): string {
+  const normalized = slugify(form.value.slug || '')
+  if (form.value.slug !== normalized) {
+    form.value.slug = normalized
+  }
+  return normalized
+}
+
+function candidateFromBase(base: string, attempt: number): string {
+  return attempt === 0 ? base : `${base}-${attempt + 1}`
+}
+
+async function fetchSlugAvailability(slug: string, showError = true): Promise<boolean | null> {
+  try {
+    const result = await $fetch('/api/admin/categories/slug-availability', {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      query: { slug, excludeId: String(route.params.id) }
+    }) as { slug: string; available: boolean }
+    return result.available
+  } catch (error: any) {
+    if (showError) {
+      errors.value.slug = error?.data?.statusMessage || 'Unable to validate slug right now'
+    }
+    return null
+  }
+}
+
+async function findAvailableSlug(baseInput: string): Promise<string | null> {
+  const base = slugify(baseInput)
+  if (!base) return ''
+
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const candidate = candidateFromBase(base, attempt)
+    const available = await fetchSlugAvailability(candidate, false)
+    if (available === true) return candidate
+    if (available === null) return null
+  }
+
+  return null
+}
+
+async function syncAutoSlugFromTitle(title: string) {
+  const shouldAutoManage = !form.value.slug || form.value.slug === lastAutoSlug.value
+  if (!shouldAutoManage) return
+
+  const seq = ++slugSuggestionSeq.value
+  const base = slugify(title)
+  if (!base) {
+    form.value.slug = ''
+    lastAutoSlug.value = ''
+    return
+  }
+
+  const suggested = await findAvailableSlug(base)
+  if (seq !== slugSuggestionSeq.value) return
+
+  const resolved = suggested || base
+  form.value.slug = resolved
+  lastAutoSlug.value = resolved
+  errors.value.slug = ''
+}
+
+async function checkSlugAvailability(): Promise<boolean> {
+  errors.value.slug = ''
+  const slug = normalizeSlugInput()
+
+  if (!slug) {
+    errors.value.slug = 'Slug is required'
+    return false
+  }
+  if (!slugPattern.test(slug)) {
+    errors.value.slug = 'Slug must contain only lowercase letters, numbers, and hyphens'
+    return false
+  }
+
+  const available = await fetchSlugAvailability(slug, true)
+  if (available === true) return true
+  if (available === null) return false
+
+  const suggested = await findAvailableSlug(slug)
+  if (suggested && suggested !== slug) {
+    if (form.value.slug === lastAutoSlug.value) {
+      form.value.slug = suggested
+      lastAutoSlug.value = suggested
+      errors.value.slug = ''
+      return true
+    }
+    errors.value.slug = `This slug is already used in your store. Suggested: ${suggested}`
+    return false
+  }
+
+  errors.value.slug = 'This slug is already used in your store'
+  return false
+}
+
+async function handleSlugChange() {
+  await checkSlugAvailability()
 }
 
 async function fetchCategory() {
@@ -302,7 +401,7 @@ async function fetchCategory() {
     form.value.slug = data.slug
     form.value.parentId = data.parentId || ''
     form.value.imageUrl = data.imageUrl ?? null
-    lastAutoSlug.value = slugify(data.title)
+    lastAutoSlug.value = slugify(data.slug || data.title)
   } catch (error: any) {
     console.error('Failed to load category:', error)
     errorMessage.value = error.data?.statusMessage || t('admin.pages.categories.edit.errors.loadFailed')
@@ -317,6 +416,9 @@ async function handleSubmit() {
   submitting.value = true
 
   try {
+    const slugOk = await checkSlugAvailability()
+    if (!slugOk) return
+
     await $fetch(`/api/admin/categories/${route.params.id}`, {
       method: 'PUT',
       headers: {

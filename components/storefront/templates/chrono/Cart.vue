@@ -61,7 +61,7 @@
                   <div class="flex justify-between">
                     <div class="min-w-0 flex-1">
                       <h3 class="text-lg font-medium text-white hover:text-[#A67C52] transition-colors">
-                        <NuxtLink :to="`/p/${item.slug}`">{{ item.title }}</NuxtLink>
+                        <NuxtLink :to="`/product/${item.slug}`">{{ item.title }}</NuxtLink>
                       </h3>
                       <p class="mt-1 text-sm text-gray-600 line-clamp-1">
                         <template v-if="item.variantId">{{ storefrontContent.cart.item.variant }}: {{ item.variantId.slice(0, 8) }}</template>

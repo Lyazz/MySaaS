@@ -60,7 +60,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                   <div>
                     <div class="flex justify-between items-start">
                       <h3 class="font-street text-2xl uppercase leading-none mb-2">
-                        <NuxtLink :to="`/p/${item.slug}`" class="hover:text-brand transition-colors">
+                        <NuxtLink :to="`/product/${item.slug}`" class="hover:text-brand transition-colors">
                           {{ item.title }}
                         </NuxtLink>
                       </h3>

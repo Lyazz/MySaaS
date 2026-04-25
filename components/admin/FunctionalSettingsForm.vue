@@ -76,6 +76,50 @@
               </div>
               <BaseToggle v-model="form.codEnabled" :sr-label="t('admin.functionalSettingsForm.features.cod.toggle')" />
             </div>
+
+            <!-- Minimum order amount -->
+            <div class="p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
+              <div class="flex items-start gap-2">
+                <Icon name="lucide:badge-cent" class="w-4 h-4 mt-0.5 [color:var(--brand)]" />
+                <div class="w-full">
+                  <h4 class="text-sm font-semibold" style="color: var(--text-primary)">
+                    {{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.title') }}
+                  </h4>
+                  <p class="text-sm mt-1" style="color: var(--text-tertiary)">
+                    {{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.subtitle') }}
+                  </p>
+                  <div class="mt-3 flex items-center gap-2">
+                    <input
+                      v-model.number="form.minimumOrderAmountDzd"
+                      type="number"
+                      min="0"
+                      step="100"
+                      class="ui-input block w-full rounded-lg max-w-xs"
+                    >
+                    <span class="text-xs font-semibold" style="color: var(--text-muted)">
+                      {{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.unit') }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Optional address visibility -->
+            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
+              <div class="flex-1 pr-4">
+                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
+                  <Icon name="lucide:map-pin-off" class="w-4 h-4 [color:var(--brand)]" />
+                  {{ t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.title') }}
+                </h4>
+                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
+                  {{ t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.subtitle') }}
+                </p>
+              </div>
+              <BaseToggle
+                v-model="form.hideOptionalAddress"
+                :sr-label="t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.toggle')"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -361,7 +405,9 @@ const form = reactive({
   loyaltyBasePoints: 0,
   loyaltyMarginFactor: 0,
   loyaltyMinRedeemPoints: 0,
-  loyaltyRedeemRateDzdPerPoint: 1
+  loyaltyRedeemRateDzdPerPoint: 1,
+  minimumOrderAmountDzd: 1000,
+  hideOptionalAddress: true
 })
 
 const languages = computed(() => [
@@ -428,6 +474,8 @@ const updateForm = (data: any) => {
   form.loyaltyMarginFactor = Number(data.loyaltyMarginFactor ?? 0)
   form.loyaltyMinRedeemPoints = Number(data.loyaltyMinRedeemPoints ?? 0)
   form.loyaltyRedeemRateDzdPerPoint = Number(data.loyaltyRedeemRateDzdPerPoint ?? 1)
+  form.minimumOrderAmountDzd = Number(data.minimumOrderAmountDzd ?? 1000)
+  form.hideOptionalAddress = data.hideOptionalAddress ?? true
 }
 
 const fetchSettings = async () => {
@@ -465,7 +513,9 @@ const save = async () => {
         loyaltyBasePoints: form.loyaltyBasePoints,
         loyaltyMarginFactor: form.loyaltyMarginFactor,
         loyaltyMinRedeemPoints: form.loyaltyMinRedeemPoints,
-        loyaltyRedeemRateDzdPerPoint: form.loyaltyRedeemRateDzdPerPoint
+        loyaltyRedeemRateDzdPerPoint: form.loyaltyRedeemRateDzdPerPoint,
+        minimumOrderAmountDzd: form.minimumOrderAmountDzd,
+        hideOptionalAddress: form.hideOptionalAddress
       }
     })
     useState<any>('storeSettings').value = updated
