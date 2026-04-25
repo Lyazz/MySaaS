@@ -14,11 +14,11 @@
       'fixed inset-y-0 left-0 lg:relative transition-all duration-300',
       sidebarOpen
         ? 'translate-x-0 w-[220px]'
-        : '-translate-x-full w-[200px] lg:translate-x-0 lg:w-[60px]'
+        : '-translate-x-full w-[220px] lg:translate-x-0 lg:w-[52px]'
     ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
 
       <!-- Logo -->
-      <div class="h-[56px] flex items-center shrink-0 px-3.5 gap-3 overflow-hidden" style="border-bottom: 1px solid var(--admin-sidebar-border)">
+      <div class="h-[52px] flex items-center shrink-0 px-3 gap-2.5 overflow-hidden" style="border-bottom: 1px solid var(--admin-sidebar-border)">
         <template v-if="storeSettings?.logoUrl">
           <img
             :src="storeSettings.logoUrl"
@@ -29,96 +29,85 @@
         </template>
         <template v-else>
           <div
-            class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white shrink-0 text-xs"
-            style="background: var(--brand);"
+            class="w-7 h-7 rounded-lg flex items-center justify-center font-bold shrink-0 text-xs"
+            style="background: var(--brand); color: #0a0a0a;"
           >
             {{ tenantInitial }}
           </div>
         </template>
 
-        <span
-          class="font-semibold text-[13.5px] tracking-tight text-white/80 truncate transition-all duration-300 min-w-0"
-          :class="sidebarOpen ? 'opacity-100 max-w-[140px]' : 'opacity-0 max-w-0 pointer-events-none'"
+        <div
+          class="min-w-0 transition-all duration-300 overflow-hidden"
+          :class="sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 pointer-events-none'"
         >
-          {{ tenantName }}
-        </span>
+          <p class="font-semibold text-[12.5px] truncate leading-tight" style="color: var(--text-primary)">{{ tenantName }}</p>
+          <p class="text-[10px] truncate leading-tight mt-0.5" style="color: var(--text-tertiary)">{{ tenantSlug }}.swekly.dz</p>
+        </div>
 
         <button
           @click="sidebarOpen = false"
-          class="ml-auto p-1 rounded-lg text-white/30 hover:text-white/60 transition-colors lg:hidden shrink-0"
+          class="ml-auto p-1 rounded-lg transition-colors lg:hidden shrink-0"
+          style="color: var(--text-tertiary)"
         >
           <Icon name="lucide:x" class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Nav -->
-      <nav class="flex-1 py-3 overflow-y-auto custom-scrollbar" :class="sidebarOpen ? 'px-2.5' : 'px-2'">
-        <div v-for="entry in visibleNavGroups" :key="entry.originalIndex" class="mb-4">
-          <!-- Group label -->
+      <nav class="flex-1 py-2.5 overflow-y-auto custom-scrollbar" :class="sidebarOpen ? 'px-2.5' : 'px-1.5'">
+        <div v-for="entry in visibleNavGroups" :key="entry.originalIndex" class="mb-3">
+          <!-- Group label (expanded) -->
           <div
             v-if="entry.group.titleKey && sidebarOpen"
-            class="flex items-center justify-between px-2 mb-1"
+            class="px-2 mb-1"
           >
-            <button
-              @click="toggleGroup(entry.originalIndex)"
-              class="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.12em] transition-colors"
-              style="color: var(--text-muted)"
-            >
-              <span>{{ t(entry.group.titleKey) }}</span>
-              <Icon
-                name="lucide:chevron-down"
-                class="w-2.5 h-2.5 transition-transform duration-200"
-                :class="entry.group.collapsed ? '-rotate-90' : ''"
-              />
-            </button>
+            <span class="text-[9px] font-bold uppercase tracking-[0.12em]" style="color: var(--text-muted)">
+              {{ t(entry.group.titleKey) }}
+            </span>
           </div>
+          <!-- Group divider (collapsed) -->
           <div
             v-else-if="entry.group.titleKey && !sidebarOpen"
             class="mx-auto w-5 h-px mb-2"
             style="background: var(--surface-border)"
           />
 
-          <div
-            class="space-y-px transition-[max-height,opacity] duration-250 overflow-hidden"
-            :class="(!entry.group.collapsed || !sidebarOpen) ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'"
-          >
+          <div class="space-y-px">
             <NuxtLink
               v-for="item in entry.items"
               :key="item.path"
               :to="item.path"
-              class="group relative flex items-center h-9 rounded-xl transition-all duration-150"
+              class="group relative flex items-center h-8 rounded-lg transition-all duration-150"
               :class="[
                 sidebarOpen ? 'px-2.5 gap-2.5' : 'justify-center px-0',
-                route.path === item.path
-                  ? 'nav-item-active'
-                  : 'nav-item-idle'
+                isActive(item.path) ? 'nav-item-active' : 'nav-item-idle'
               ]"
             >
-              <!-- Active accent bar -->
-              <div
-                v-if="route.path === item.path"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-[2.5px] h-5 rounded-r-full"
-                style="background: var(--brand)"
-              />
-
               <Icon
                 :name="item.icon"
-                class="w-[16px] h-[16px] shrink-0 transition-transform duration-150"
-                :style="route.path === item.path ? 'color: var(--brand)' : 'color: var(--text-tertiary)'"
+                class="w-[15px] h-[15px] shrink-0"
+                :style="isActive(item.path) ? 'color: var(--brand)' : 'color: var(--text-tertiary)'"
               />
 
               <span
-                class="text-[13px] font-medium truncate transition-all duration-300 whitespace-nowrap leading-none"
-                :class="sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 pointer-events-none'"
-                :style="route.path === item.path ? 'color: var(--text-primary)' : 'color: var(--text-secondary)'"
+                class="text-[12.5px] font-medium truncate transition-all duration-300 whitespace-nowrap leading-none flex-1"
+                :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0 pointer-events-none'"
+                :style="isActive(item.path) ? 'color: var(--brand)' : 'color: var(--text-secondary)'"
               >
                 {{ t(item.labelKey) }}
               </span>
 
-              <!-- Tooltip -->
+              <!-- Pending orders badge -->
+              <span
+                v-if="sidebarOpen && item.path === '/admin/orders' && pendingOrdersCount > 0"
+                class="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                style="background: rgba(239,68,68,0.15); color: #f87171;"
+              >{{ pendingOrdersCount }}</span>
+
+              <!-- Tooltip (collapsed) -->
               <div
                 v-if="!sidebarOpen"
-                class="fixed left-[68px] px-2.5 py-1.5 text-[12px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                class="fixed left-[60px] px-2.5 py-1.5 text-[11px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
                 style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary); top: auto"
               >
                 {{ t(item.labelKey) }}
@@ -131,15 +120,14 @@
       <!-- User -->
       <div class="shrink-0 p-2" style="border-top: 1px solid var(--admin-sidebar-border)">
         <div
-          class="flex items-center rounded-xl px-2 py-2 cursor-pointer transition-colors group"
+          class="flex items-center rounded-lg px-2 py-1.5 cursor-pointer transition-all duration-150 group"
           :class="sidebarOpen ? 'gap-2.5' : 'justify-center'"
-          style="color: var(--text-secondary)"
           @mouseenter="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'"
           @mouseleave="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.background = ''"
         >
           <div
-            class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-            style="background: rgba(var(--brand-rgb) / 0.2); border: 1px solid rgba(var(--brand-rgb) / 0.3)"
+            class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+            style="background: rgba(var(--brand-rgb) / 0.15); border: 1px solid rgba(var(--brand-rgb) / 0.3); color: var(--brand)"
           >
             {{ userInitial }}
           </div>
@@ -147,7 +135,7 @@
             class="min-w-0 transition-all duration-300 overflow-hidden"
             :class="sidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'"
           >
-            <p class="text-[12px] font-medium truncate leading-tight" style="color: var(--text-primary)">{{ authStore.user?.email }}</p>
+            <p class="text-[11.5px] font-medium truncate leading-tight" style="color: var(--text-primary)">{{ authStore.user?.email }}</p>
             <p class="text-[10px] truncate mt-0.5 capitalize" style="color: var(--text-tertiary)">{{ authStore.user?.role }}</p>
           </div>
         </div>
@@ -159,24 +147,24 @@
 
       <!-- Topbar -->
       <header
-        class="shrink-0 flex items-center px-4 h-[56px] gap-3"
+        class="shrink-0 flex items-center px-4 h-[52px] gap-3"
         style="background: var(--admin-topbar-bg); border-bottom: 1px solid var(--admin-topbar-border);"
       >
         <button
           @click="toggleSidebar"
-          class="p-1.5 rounded-lg transition-all duration-150"
-          style="color: var(--text-tertiary)"
-          @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
+          class="p-1.5 rounded-lg transition-all duration-150 shrink-0"
+          style="color: var(--text-tertiary); border: 1px solid transparent"
+          @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
           @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }"
           :aria-label="t('admin.actions.toggleSidebar')"
         >
-          <Icon name="lucide:panel-left" class="w-4.5 h-4.5" />
+          <Icon name="lucide:panel-left" class="w-4 h-4" />
         </button>
 
         <div class="w-px h-4 shrink-0" style="background: var(--surface-border)" />
 
         <h1
-          class="text-[13.5px] font-semibold truncate"
+          class="text-[13px] font-semibold truncate"
           style="color: var(--text-primary); letter-spacing: -0.01em"
         >
           {{ pageTitle }}
@@ -187,30 +175,30 @@
             :href="storefrontUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 text-[11.5px] font-medium rounded-lg transition-all duration-150"
             style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
             :aria-label="t('admin.actions.viewStore')"
             @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
             @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
           >
-            <Icon name="lucide:external-link" class="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+            <Icon name="lucide:external-link" class="w-3.5 h-3.5" />
             <span class="hidden sm:inline">{{ t('admin.actions.viewStore') }}</span>
           </a>
 
           <LocaleSwitcher />
           <AdminThemeToggle />
 
-          <div class="w-px h-4" style="background: var(--surface-border)" />
+          <div class="w-px h-4 shrink-0" style="background: var(--surface-border)" />
 
           <button
             @click="showLogoutModal = true"
-            class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 text-[11.5px] font-medium rounded-lg transition-all duration-150"
             style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
             :aria-label="t('admin.actions.logout')"
             @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
             @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
           >
-            <Icon name="lucide:log-out" class="w-3.5 h-3.5 sm:w-3 sm:h-3" />
+            <Icon name="lucide:log-out" class="w-3.5 h-3.5" />
             <span class="hidden sm:inline">{{ t('admin.actions.logout') }}</span>
           </button>
         </div>
@@ -246,8 +234,8 @@
                 </button>
                 <button
                   @click="handleLogout"
-                  class="px-4 py-2 text-[12px] font-medium rounded-lg transition-all duration-150 text-white"
-                  style="background: #ef4444; border: 1px solid transparent"
+                  class="px-4 py-2 text-[12px] font-medium rounded-lg transition-all duration-150"
+                  style="background: #ef4444; border: 1px solid transparent; color: #fff"
                   @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = '#dc2626' }"
                   @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = '#ef4444' }"
                 >
@@ -280,8 +268,8 @@
 
 <style scoped>
 .nav-item-active {
-  background: rgba(var(--brand-rgb) / 0.12);
-  box-shadow: inset 0 0 0 1px rgba(var(--brand-rgb) / 0.18);
+  background: rgba(var(--brand-rgb) / 0.1);
+  border: 1px solid rgba(var(--brand-rgb) / 0.16);
 }
 
 .nav-item-idle:hover {
@@ -336,6 +324,12 @@ const tenantName = computed(() => authStore.user?.tenant?.name || 'Swekly')
 const tenantInitial = computed(() => tenantName.value.charAt(0).toUpperCase())
 const userInitial = computed(() => authStore.user?.email.charAt(0).toUpperCase() || 'U')
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
+const pendingOrdersCount = ref(0)
+
+function isActive(path: string) {
+  if (path === '/admin') return route.path === '/admin'
+  return route.path.startsWith(path)
+}
 
 const storefrontUrl = computed(() => {
   const slug = tenantSlug.value
@@ -430,11 +424,11 @@ const navGroups = ref<NavGroup[]>([
     titleKey: 'admin.nav.sales',
     collapsed: false,
     items: [
-      { path: '/admin/pos', labelKey: 'admin.nav.pos', icon: 'lucide:monitor-smartphone', access: 'admin' },
       { path: '/admin/orders', labelKey: 'admin.nav.orders', icon: 'lucide:shopping-bag', access: 'member' },
+      { path: '/admin/pos', labelKey: 'admin.nav.pos', icon: 'lucide:monitor-smartphone', access: 'admin' },
+      { path: '/admin/delivery', labelKey: 'admin.nav.deliveryItem', icon: 'lucide:truck', access: 'admin' },
       { path: '/admin/sales', labelKey: 'admin.nav.salesItem', icon: 'lucide:badge-dollar-sign', access: 'admin' },
-      { path: '/admin/cash', labelKey: 'admin.nav.cash', icon: 'lucide:wallet', access: 'admin' },
-      { path: '/admin/delivery', labelKey: 'admin.nav.deliveryItem', icon: 'lucide:truck', access: 'admin' }
+      { path: '/admin/cash', labelKey: 'admin.nav.cash', icon: 'lucide:wallet', access: 'admin' }
     ]
   },
   {
@@ -449,34 +443,16 @@ const navGroups = ref<NavGroup[]>([
     ]
   },
   {
-    titleKey: 'admin.nav.marketing',
-    collapsed: false,
-    items: [
-      { path: '/admin/customers', labelKey: 'admin.nav.customers', icon: 'lucide:users', access: 'admin' },
-      { path: '/admin/marketing/landing-page/new', labelKey: 'admin.nav.landingPage', icon: 'lucide:megaphone', access: 'admin' }
-    ]
-  },
-  {
-    titleKey: 'admin.nav.finance',
-    collapsed: false,
-    items: [
-      { path: '/admin/billing', labelKey: 'admin.nav.billing', icon: 'lucide:credit-card', access: 'admin' }
-    ]
-  },
-  {
     titleKey: 'admin.nav.storeParameters',
     collapsed: false,
     items: [
+      { path: '/admin/customers', labelKey: 'admin.nav.customers', icon: 'lucide:users', access: 'admin' },
+      { path: '/admin/marketing/landing-page/new', labelKey: 'admin.nav.landingPage', icon: 'lucide:megaphone', access: 'admin' },
       { path: '/admin/settings/appearance', labelKey: 'admin.nav.appearance', icon: 'lucide:palette', access: 'admin' },
       { path: '/admin/settings/homepage', labelKey: 'admin.nav.homepage', icon: 'lucide:home', access: 'admin' },
       { path: '/admin/settings/contact', labelKey: 'admin.nav.contactInfo', icon: 'lucide:phone', access: 'admin' },
-      { path: '/admin/settings/functional', labelKey: 'admin.nav.functional', icon: 'lucide:sliders', access: 'admin' }
-    ]
-  },
-  {
-    titleKey: 'admin.nav.settings',
-    collapsed: false,
-    items: [
+      { path: '/admin/settings/functional', labelKey: 'admin.nav.functional', icon: 'lucide:sliders', access: 'admin' },
+      { path: '/admin/billing', labelKey: 'admin.nav.billing', icon: 'lucide:credit-card', access: 'admin' },
       { path: '/admin/users', labelKey: 'admin.nav.users', icon: 'lucide:user-cog', access: 'admin' },
       { path: '/admin/integrations', labelKey: 'admin.nav.integrations', icon: 'lucide:puzzle', access: 'admin' }
     ]

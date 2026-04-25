@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
 
-const { t, locale, tm } = useI18n({ useScope: 'global' })
+const { t, locale, tm, rt } = useI18n({ useScope: 'global' })
 const isRtl = computed(() => locale.value === 'ar')
 
 useSeoMeta({
@@ -128,7 +128,12 @@ const pricingPreview = computed(() =>
 
 const testimonials = computed<Array<{ quote: string; author: string; role: string }>>(() => {
   const raw = tm('saasLanding.testimonials.items') as any
-  return Array.isArray(raw) ? raw : []
+  if (!Array.isArray(raw)) return []
+  return raw.map((item: any) => ({
+    quote: rt(item.quote),
+    author: rt(item.author),
+    role: rt(item.role),
+  }))
 })
 const testimonialsRow1 = computed(() => testimonials.value.slice(0, Math.ceil(testimonials.value.length / 2)))
 const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testimonials.value.length / 2)))
@@ -136,7 +141,7 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
 const faqItems = computed<Array<{ q: string; a: string }>>(() => {
   const raw = tm('saasLanding.faq.items') as any
   if (!Array.isArray(raw)) return []
-  return raw.map((i: { question: string; answer: string }) => ({ q: i.question, a: i.answer }))
+  return raw.map((i: any) => ({ q: rt(i.question), a: rt(i.answer) }))
 })
 </script>
 

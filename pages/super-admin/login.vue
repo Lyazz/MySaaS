@@ -1,19 +1,19 @@
 <template>
-  <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+  <div class="min-h-screen flex items-center justify-center p-4 font-sans" style="background: var(--admin-content-bg);">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
         <div class="inline-flex items-center justify-center w-16 h-16 bg-teal-600 rounded-2xl mb-4 shadow-lg shadow-teal-600/20">
           <Icon name="lucide:shield-check" class="h-8 w-8 text-white" />
         </div>
-        <h1 class="text-3xl font-bold text-slate-800 mb-2">
+        <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">
           {{ t('superAdmin.login.title') }}
         </h1>
-        <p class="text-slate-500">
+        <p style="color: var(--text-secondary)">
           {{ t('superAdmin.login.subtitle') }}
         </p>
       </div>
 
-      <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-xl shadow-slate-200/50">
+      <div class="rounded-xl p-8 shadow-xl" style="background: var(--surface-1); border: 1px solid var(--surface-border);">
         <!-- Error Alert -->
         <div
           v-if="error"
@@ -30,30 +30,32 @@
           @submit.prevent="handleLogin"
         >
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('superAdmin.login.form.email.label') }}</label>
+            <label class="block text-sm font-medium mb-1.5" style="color: var(--text-secondary)">{{ t('superAdmin.login.form.email.label') }}</label>
             <div class="relative">
               <input
                 v-model="email"
                 type="email"
                 required
-                class="w-full px-4 py-3 pl-10 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                class="w-full px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary);"
                 :placeholder="t('superAdmin.login.form.email.placeholder')"
               >
-              <Icon name="lucide:mail" class="h-5 w-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Icon name="lucide:mail" class="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary)" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ t('superAdmin.login.form.password.label') }}</label>
+            <label class="block text-sm font-medium mb-1.5" style="color: var(--text-secondary)">{{ t('superAdmin.login.form.password.label') }}</label>
             <div class="relative">
               <input
                 v-model="password"
                 type="password"
                 required
-                class="w-full px-4 py-3 pl-10 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                class="w-full px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary);"
                 placeholder="••••••••"
               >
-              <Icon name="lucide:lock" class="h-5 w-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Icon name="lucide:lock" class="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary)" />
             </div>
           </div>
 
@@ -67,10 +69,11 @@
           </button>
         </form>
 
-        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <div class="mt-8 pt-6 text-center" style="border-top: 1px solid var(--surface-border);">
           <NuxtLink
             to="/"
-            class="inline-flex items-center text-sm text-slate-500 hover:text-teal-600 font-medium transition-colors"
+            class="inline-flex items-center text-sm hover:text-teal-600 font-medium transition-colors"
+            style="color: var(--text-secondary)"
           >
             <Icon name="lucide:arrow-left" class="h-4 w-4 mr-1.5" />
             {{ t('superAdmin.login.backToSite') }}
@@ -97,12 +100,24 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const previousTheme = ref<string | null>(null)
 
-// Redirect if already logged in as super admin
 onMounted(() => {
+  previousTheme.value = document.documentElement.dataset.theme || null
+  document.documentElement.dataset.theme = 'dark'
+
+  // Redirect if already logged in as super admin
   if (authStore.isAuthenticated && authStore.user?.isSuperAdmin) {
     router.push('/super-admin')
   }
+})
+
+onBeforeUnmount(() => {
+  if (previousTheme.value) {
+    document.documentElement.dataset.theme = previousTheme.value
+    return
+  }
+  document.documentElement.removeAttribute('data-theme')
 })
 
 const handleLogin = async () => {

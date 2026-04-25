@@ -24,19 +24,20 @@
     --brand-rgb: 198 244 50;
 
     /* Admin shell palette — fixed dark chrome */
-    --admin-sidebar-bg: #111318;
-    --admin-sidebar-surface: #16191f;
-    --admin-sidebar-border: rgba(255,255,255,0.055);
-    --admin-topbar-bg: #111318;
+    --admin-sidebar-bg: #0f1117;
+    --admin-sidebar-surface: #13161e;
+    --admin-sidebar-border: rgba(255,255,255,0.07);
+    --admin-topbar-bg: #0c0e12;
     --admin-topbar-border: rgba(255,255,255,0.07);
-    --admin-content-bg: #0e1014;
+    --admin-content-bg: #0c0e12;
 
     /* Surface layers */
-    --surface-1: #16191f;
-    --surface-2: #1c1f27;
-    --surface-3: #22262f;
+    --surface-1: #0f1117;
+    --surface-2: #13161e;
+    --surface-3: #181c26;
     --surface-border: rgba(255,255,255,0.07);
-    --surface-border-hover: rgba(255,255,255,0.12);
+    --surface-border-hover: rgba(255,255,255,0.13);
+    --card-shadow: none;
 
     /* Text hierarchy */
     --text-primary: #f4f4f5;
@@ -83,6 +84,7 @@
     --surface-3: #f1f5f9;
     --surface-border: rgba(0,0,0,0.08);
     --surface-border-hover: rgba(0,0,0,0.15);
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
 
     /* Text hierarchy */
     --text-primary: #0f172a;
@@ -120,6 +122,7 @@
   .ui-card {
     background: var(--surface-1);
     border: 1px solid var(--surface-border);
+    box-shadow: var(--card-shadow);
     @apply rounded-2xl;
   }
 
@@ -157,10 +160,6 @@
   .admin-shell :is(button, a, [role="button"])[class*='bg-brand-'],
   .admin-shell :is(button, a, [role="button"])[style*='background: var(--brand)'],
   .admin-shell :is(button, a, [role="button"])[style*='background-color: var(--brand)'],
-  .admin-shell :is(button, a, [role="button"])[class*='bg-'][class*='text-white'],
-  .admin-shell :is(button, a, [role="button"])[class*='[background:'][class*='text-white'],
-  .admin-shell :is(button, a, [role="button"])[style*='background:'][class*='text-white'],
-  .admin-shell :is(button, a, [role="button"])[style*='background-color:'][class*='text-white'],
   .admin-shell .ui-btn--primary {
     color: #05070A !important;
   }
@@ -168,11 +167,7 @@
   .admin-shell :is(button, a, [role="button"])[class*='[background:var(--brand)]'] :is(svg, i, span),
   .admin-shell :is(button, a, [role="button"])[class*='bg-brand-'] :is(svg, i, span),
   .admin-shell :is(button, a, [role="button"])[style*='background: var(--brand)'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[style*='background-color: var(--brand)'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[class*='bg-'][class*='text-white'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[class*='[background:'][class*='text-white'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[style*='background:'][class*='text-white'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[style*='background-color:'][class*='text-white'] :is(svg, i, span) {
+  .admin-shell :is(button, a, [role="button"])[style*='background-color: var(--brand)'] :is(svg, i, span) {
     color: inherit !important;
   }
 
@@ -209,11 +204,11 @@
 
   /* ── Badges ── */
   .ui-badge {
-    @apply inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
   }
 
   .ui-badge--slate {
-    background: rgba(113,113,122,0.15);
+    background: rgba(113,113,122,0.12);
     color: #a1a1aa;
     border: 1px solid rgba(113,113,122,0.2);
   }
@@ -231,9 +226,9 @@
   }
 
   .ui-badge--teal {
-    background: rgba(var(--brand-rgb) / 0.16);
-    color: #05070A;
-    border: 1px solid rgba(var(--brand-rgb) / 0.34);
+    background: rgba(129,140,248,0.1);
+    color: #818cf8;
+    border: 1px solid rgba(129,140,248,0.2);
   }
 
   .ui-badge--amber {

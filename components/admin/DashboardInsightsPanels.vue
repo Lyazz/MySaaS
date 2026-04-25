@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-    <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+    <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
+      <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
         {{ t('admin.pages.dashboard.insights.topProducts.title') }}
       </h3>
       <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
@@ -36,8 +36,8 @@
       </div>
     </div>
 
-    <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+    <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
+      <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
         {{ t('admin.pages.dashboard.insights.topCategories.title') }}
       </h3>
       <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
@@ -72,8 +72,8 @@
       </div>
     </div>
 
-    <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+    <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
+      <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
         {{ t('admin.pages.dashboard.insights.criticalStock.title') }}
       </h3>
       <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">

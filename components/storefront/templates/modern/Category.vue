@@ -43,6 +43,7 @@ const sortedProducts = computed(() => {
 })
 
 // Mock filters removed. We only show Categories logic for navigation.
+const categoriesDropdownOpen = ref(false)
 </script>
 
 <template>
@@ -101,12 +102,21 @@ const sortedProducts = computed(() => {
         <aside class="w-full lg:w-64 flex-shrink-0 space-y-8">
           <!-- Categories -->
           <div>
-            <div class="flex items-center justify-between mb-4">
+            <button
+              type="button"
+              class="w-full flex items-center justify-between text-left mb-4"
+              @click="categoriesDropdownOpen = !categoriesDropdownOpen"
+            >
               <h3 class="font-bold text-slate-900">
                 {{ storefrontContent.shop.categories }}
               </h3>
-            </div>
-            <div class="space-y-2">
+              <Icon
+                name="lucide:chevron-down"
+                class="w-4 h-4 text-slate-500 transition-transform"
+                :class="categoriesDropdownOpen ? 'rotate-180' : ''"
+              />
+            </button>
+            <div v-show="categoriesDropdownOpen" class="space-y-2">
               <!-- Iterate over fetched categories -->
               <NuxtLink 
                 v-for="cat in allCategories" 

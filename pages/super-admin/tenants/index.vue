@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout name="super-admin">
-    <div class="space-y-6">
+  <div class="space-y-6">
       <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-slate-900">
           {{ t('superAdmin.tenants.title') }}
@@ -152,8 +151,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-
     <!-- Create/Edit Modal -->
     <div
       v-if="showCreateModal || showEditModal" 
@@ -244,12 +241,15 @@
         </form>
       </div>
     </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+
 definePageMeta({
   middleware: 'super-admin',
+  layout: 'super-admin',
   title: 'Tenant Management'
 })
 

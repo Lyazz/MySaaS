@@ -166,32 +166,38 @@
       "subtitle": "Des commerçants en Algérie qui veulent un site rapide et une gestion simple.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "Avatar utilisateur",
-      "items": {
-        "nassim": {
-          "text": "On a mis nos produits en ligne rapidement. Les commandes arrivent, et tout est centralisé.",
+      "items": [
+        {
+          "quote": "On a mis nos produits en ligne rapidement. Les commandes arrivent, et tout est centralisé.",
+          "author": "Nassim",
           "role": "Propriétaire, Nokhba Store"
         },
-        "amina": {
-          "text": "Le domaine personnalisé a été simple à configurer, et je vois mes ventes clairement.",
+        {
+          "quote": "Le domaine personnalisé a été simple à configurer, et je vois mes ventes clairement.",
+          "author": "Amina",
           "role": "Fondatrice, Dzair Cosmetics"
         },
-        "yanis": {
-          "text": "Les intégrations de livraison nous font gagner du temps chaque jour. Expédier devient un réflexe.",
+        {
+          "quote": "Les intégrations de livraison nous font gagner du temps chaque jour. Expédier devient un réflexe.",
+          "author": "Yanis",
           "role": "Directeur, TechAlgeria"
         },
-        "lyes": {
-          "text": "Même quand il y a beaucoup de trafic, la boutique reste rapide. On peut se concentrer sur la vente.",
+        {
+          "quote": "Même quand il y a beaucoup de trafic, la boutique reste rapide. On peut se concentrer sur la vente.",
+          "author": "Lyes",
           "role": "Propriétaire, Oran Fashion"
         },
-        "meriem": {
-          "text": "Fini les commandes perdues sur les réseaux. Les clients commandent et paient facilement.",
+        {
+          "quote": "Fini les commandes perdues sur les réseaux. Les clients commandent et paient facilement.",
+          "author": "Meriem",
           "role": "PDG, BioAtlas"
         },
-        "sofiane": {
-          "text": "On a lancé la boutique en une après‑midi. Simple, propre, et prêt à vendre.",
+        {
+          "quote": "On a lancé la boutique en une après‑midi. Simple, propre, et prêt à vendre.",
+          "author": "Sofiane",
           "role": "Gérant, Casbah Gifts"
         }
-      }
+      ]
     },
     "finalCta": {
       "title": "Prêt à commencer ?",
@@ -349,6 +355,55 @@
       "footer": {
         "languages": "Langue",
         "madeFor": "Fait pour l'Algérie"
+      },
+      "templates": {
+        "eyebrow": "Thèmes boutique",
+        "titlePre": "Des boutiques superbes,",
+        "titleAccent": "prêtes à lancer",
+        "titlePost": "",
+        "description": "Choisissez un modèle conçu par des professionnels et personnalisez-le à votre marque. Chaque thème est mobile-first, RTL et ultra-rapide.",
+        "viewAll": "Voir tous les thèmes"
+      },
+      "integrations": {
+        "eyebrow": "Intégrations natives",
+        "titlePre": "Tous les outils",
+        "titleAccent": "des marchands algériens",
+        "titlePost": "réunis",
+        "description": "Des livreurs locaux à l'automatisation WhatsApp, du pixel Meta aux outils IA — tout fonctionne dès le premier jour.",
+        "tools": {
+          "maystro": {
+            "name": "Maystro",
+            "description": "Le réseau de livraison n°1 en Algérie. Créez et suivez vos expéditions sans quitter votre tableau de bord."
+          },
+          "yalidine": {
+            "name": "Yalidine",
+            "description": "Livraison express nationale avec suivi en temps réel et mises à jour automatiques."
+          },
+          "whatsapp": {
+            "name": "WhatsApp API",
+            "description": "Envoyez des confirmations de commande, mises à jour d'expédition et promotions directement à vos clients."
+          },
+          "telegram": {
+            "name": "Telegram",
+            "description": "Recevez des alertes instantanées pour les nouvelles commandes, stocks bas et confirmations de paiement."
+          },
+          "metapixel": {
+            "name": "Meta Pixel",
+            "description": "Suivez les conversions, optimisez vos dépenses publicitaires et reciblez avec Facebook & Instagram."
+          },
+          "googlesheets": {
+            "name": "Google Sheets",
+            "description": "Exportez commandes et inventaire vers Google Sheets automatiquement pour des rapports personnalisés."
+          },
+          "ai": {
+            "name": "Outils IA",
+            "description": "Descriptions de produits générées par IA, suggestions de prix intelligentes et prévisions de la demande."
+          },
+          "imagegen": {
+            "name": "Génération d'images",
+            "description": "Générez des photos produits professionnelles et des bannières avec l'IA — sans séance photo."
+          }
+        }
       }
     }
   },
@@ -523,6 +578,12 @@
       "errors": {
         "invalidCredentials": "E-mail ou mot de passe incorrect",
         "generic": "Une erreur est survenue. Veuillez réessayer."
+      },
+      "social": {
+        "divider": "ou continuer avec",
+        "google": "Continuer avec Google",
+        "facebook": "Continuer avec Facebook",
+        "apple": "Continuer avec Apple"
       }
     },
     "register": {
@@ -591,6 +652,12 @@
       },
       "errors": {
         "generic": "Une erreur est survenue lors de l’inscription."
+      },
+      "social": {
+        "divider": "ou continuer avec",
+        "google": "Continuer avec Google",
+        "facebook": "Continuer avec Facebook",
+        "apple": "Continuer avec Apple"
       }
     }
   },

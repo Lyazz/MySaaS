@@ -5,41 +5,40 @@
     class="stat-card group relative overflow-hidden rounded-2xl transition-all duration-200"
     :class="to ? 'cursor-pointer' : ''"
   >
-    <!-- Subtle gradient wash at top -->
-    <div class="absolute inset-x-0 top-0 h-px" :style="topLineStyle" />
-    <div class="absolute inset-x-0 top-0 h-16 pointer-events-none" :style="gradientWashStyle" />
+    <!-- Colored top border -->
+    <div class="absolute inset-x-0 top-0 h-[2px]" :style="topLineStyle" />
+    <!-- Subtle gradient wash -->
+    <div class="absolute inset-x-0 top-0 h-20 pointer-events-none" :style="gradientWashStyle" />
 
     <div class="relative p-5">
       <div class="flex items-start justify-between gap-3">
-        <!-- Label + value -->
         <div class="min-w-0 flex-1">
-          <p class="text-[10.5px] font-bold uppercase tracking-widest" style="color: var(--text-tertiary)">
+          <p class="text-[9.5px] font-bold uppercase tracking-[0.1em]" style="color: var(--text-muted)">
             {{ label }}
           </p>
 
           <div v-if="loading" class="mt-3 h-7 w-24 rounded-lg animate-pulse" style="background: rgba(255,255,255,0.06)" />
-          <p v-else class="mt-2.5 text-[26px] font-semibold leading-none font-mono-nums" style="color: var(--text-primary)">
+          <p v-else class="mt-2 text-[24px] font-semibold leading-none font-mono-nums" style="color: var(--text-primary); letter-spacing: -0.02em">
             {{ value }}
           </p>
 
-          <p v-if="hint && !loading" class="mt-2 text-[11px]" style="color: var(--text-tertiary)">
+          <p v-if="hint && !loading" class="mt-1.5 text-[11px]" style="color: var(--text-tertiary)">
             {{ hint }}
           </p>
         </div>
 
-        <!-- Icon chip -->
         <div
-          class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
           :style="iconWrapStyle"
         >
           <Icon :name="icon" class="w-4 h-4" :style="iconStyle" />
         </div>
       </div>
 
-      <!-- Bottom arrow hint on hover -->
       <div
         v-if="to"
-        class="mt-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        class="mt-4 pt-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        style="border-top: 1px solid rgba(255,255,255,0.05)"
       >
         <span class="text-[11px] font-medium" :style="iconStyle">View details</span>
         <Icon name="lucide:arrow-right" class="w-3 h-3 transition-transform group-hover:translate-x-0.5" :style="iconStyle" />
@@ -61,7 +60,7 @@
 </style>
 
 <script setup lang="ts">
-type Tone = 'brand' | 'blue' | 'amber' | 'slate' | 'red'
+type Tone = 'brand' | 'blue' | 'amber' | 'slate' | 'red' | 'indigo'
 
 interface Props {
   label: string
@@ -86,32 +85,38 @@ const toneMap: Record<Tone, { icon: string; wrap: string; topLine: string; wash:
   brand: {
     icon: 'color: var(--brand)',
     wrap: 'background: rgba(var(--brand-rgb) / 0.12); border: 1px solid rgba(var(--brand-rgb) / 0.2)',
-    topLine: 'background: linear-gradient(90deg, var(--brand) 0%, transparent 60%)',
-    wash: 'background: linear-gradient(180deg, rgba(var(--brand-rgb) / 0.06) 0%, transparent 100%)'
+    topLine: 'background: linear-gradient(90deg, var(--brand) 0%, transparent 70%)',
+    wash: 'background: linear-gradient(180deg, rgba(var(--brand-rgb) / 0.05) 0%, transparent 100%)'
   },
   blue: {
     icon: 'color: #60a5fa',
     wrap: 'background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2)',
-    topLine: 'background: linear-gradient(90deg, #3b82f6 0%, transparent 60%)',
-    wash: 'background: linear-gradient(180deg, rgba(59,130,246,0.06) 0%, transparent 100%)'
+    topLine: 'background: linear-gradient(90deg, #3b82f6 0%, transparent 70%)',
+    wash: 'background: linear-gradient(180deg, rgba(59,130,246,0.05) 0%, transparent 100%)'
   },
   amber: {
-    icon: 'color: var(--accent)',
-    wrap: 'background: var(--accent-soft); border: 1px solid var(--accent-border)',
-    topLine: 'background: linear-gradient(90deg, var(--accent) 0%, transparent 60%)',
-    wash: 'background: linear-gradient(180deg, rgba(var(--accent-rgb) / 0.08) 0%, transparent 100%)'
+    icon: 'color: #f59e0b',
+    wrap: 'background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.2)',
+    topLine: 'background: linear-gradient(90deg, #f59e0b 0%, transparent 70%)',
+    wash: 'background: linear-gradient(180deg, rgba(245,158,11,0.05) 0%, transparent 100%)'
   },
   slate: {
-    icon: 'color: #a1a1aa',
-    wrap: 'background: rgba(113,113,122,0.12); border: 1px solid rgba(113,113,122,0.2)',
-    topLine: 'background: linear-gradient(90deg, #71717a 0%, transparent 60%)',
-    wash: 'background: linear-gradient(180deg, rgba(113,113,122,0.05) 0%, transparent 100%)'
+    icon: 'color: #818cf8',
+    wrap: 'background: rgba(129,140,248,0.12); border: 1px solid rgba(129,140,248,0.2)',
+    topLine: 'background: linear-gradient(90deg, #818cf8 0%, transparent 70%)',
+    wash: 'background: linear-gradient(180deg, rgba(129,140,248,0.05) 0%, transparent 100%)'
+  },
+  indigo: {
+    icon: 'color: #818cf8',
+    wrap: 'background: rgba(129,140,248,0.12); border: 1px solid rgba(129,140,248,0.2)',
+    topLine: 'background: linear-gradient(90deg, #818cf8 0%, transparent 70%)',
+    wash: 'background: linear-gradient(180deg, rgba(129,140,248,0.05) 0%, transparent 100%)'
   },
   red: {
     icon: 'color: #f87171',
     wrap: 'background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2)',
-    topLine: 'background: linear-gradient(90deg, #ef4444 0%, transparent 60%)',
-    wash: 'background: linear-gradient(180deg, rgba(239,68,68,0.06) 0%, transparent 100%)'
+    topLine: 'background: linear-gradient(90deg, #ef4444 0%, transparent 70%)',
+    wash: 'background: linear-gradient(180deg, rgba(239,68,68,0.05) 0%, transparent 100%)'
   }
 }
 

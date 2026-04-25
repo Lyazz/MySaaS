@@ -1,0 +1,177 @@
+<h2>Section 1 — Layout Shell & Navigation</h2>
+<p class="subtitle">The admin.vue shell: sidebar, topbar, and nav reorganization. Does this look right?</p>
+
+<div class="mockup">
+  <div class="mockup-header">Admin Shell — Dark Mode (B direction)</div>
+  <div class="mockup-body" style="padding:0;overflow:hidden;font-family:'Inter',sans-serif;">
+    <div style="display:flex;height:380px;background:#0c0e12;">
+
+      <!-- Sidebar -->
+      <div style="width:200px;flex-shrink:0;background:#0f1117;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;">
+
+        <!-- Logo area -->
+        <div style="height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,0.07);">
+          <div style="width:24px;height:24px;background:#C6F432;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="font-size:11px;font-weight:800;color:#0a0a0a;">S</span>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#f4f4f5;line-height:1.2;">My Store</div>
+            <div style="font-size:9px;color:#52525b;">mystore.swekly.dz</div>
+          </div>
+        </div>
+
+        <!-- Nav groups -->
+        <div style="flex:1;overflow-y:auto;padding:10px 8px;">
+
+          <!-- Group: Overview -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8.5px;font-weight:700;color:#3f3f46;letter-spacing:0.1em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;">Overview</div>
+            <div style="background:rgba(198,244,50,0.1);border:1px solid rgba(198,244,50,0.15);border-radius:7px;padding:6px 10px;display:flex;align-items:center;gap:8px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;background:rgba(198,244,50,0.2);border-radius:3px;display:flex;align-items:center;justify-content:center;">
+                <div style="width:7px;height:7px;background:#C6F432;border-radius:1px;"></div>
+              </div>
+              <span style="font-size:11px;font-weight:500;color:#C6F432;">Dashboard</span>
+            </div>
+          </div>
+
+          <!-- Group: Sales & Operations -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8.5px;font-weight:700;color:#3f3f46;letter-spacing:0.1em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;">Operations</div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Orders</span>
+              <div style="margin-left:auto;background:rgba(239,68,68,0.15);border-radius:20px;padding:1px 6px;font-size:8px;font-weight:700;color:#f87171;">12</div>
+            </div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">POS</span>
+            </div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Delivery</span>
+            </div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Cash</span>
+            </div>
+          </div>
+
+          <!-- Group: Catalog -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8.5px;font-weight:700;color:#3f3f46;letter-spacing:0.1em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;">Catalog</div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Products</span>
+            </div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Categories</span>
+            </div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Inventory</span>
+            </div>
+          </div>
+
+          <!-- Group: Store (collapsed Settings + Marketing + Finance) -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:8.5px;font-weight:700;color:#3f3f46;letter-spacing:0.1em;text-transform:uppercase;padding:0 6px;margin-bottom:4px;">Store</div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Appearance</span>
+            </div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;margin-bottom:1px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Customers</span>
+            </div>
+            <div style="padding:6px 10px;display:flex;align-items:center;gap:8px;border-radius:7px;">
+              <div style="width:14px;height:14px;opacity:0.35;background:#71717a;border-radius:3px;"></div>
+              <span style="font-size:11px;color:#71717a;">Billing</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- User footer -->
+        <div style="padding:8px;border-top:1px solid rgba(255,255,255,0.07);">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;">
+            <div style="width:26px;height:26px;background:rgba(198,244,50,0.15);border:1px solid rgba(198,244,50,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="font-size:10px;font-weight:700;color:#C6F432;">A</span>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:500;color:#e4e4e7;">admin@store.dz</div>
+              <div style="font-size:8.5px;color:#52525b;">owner</div>
+            </div>
+            <div style="margin-left:auto;width:14px;height:14px;opacity:0.3;background:#71717a;border-radius:3px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main area -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+
+        <!-- Topbar -->
+        <div style="height:52px;background:#0c0e12;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;">
+          <div style="width:20px;height:20px;background:rgba(255,255,255,0.05);border-radius:5px;border:1px solid rgba(255,255,255,0.08);"></div>
+          <div style="width:1px;height:16px;background:rgba(255,255,255,0.08);"></div>
+          <span style="font-size:13px;font-weight:600;color:#f4f4f5;letter-spacing:-0.01em;">Dashboard</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+            <div style="height:28px;padding:0 10px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:6px;display:flex;align-items:center;gap:5px;">
+              <div style="width:10px;height:10px;background:rgba(255,255,255,0.2);border-radius:2px;"></div>
+              <span style="font-size:10px;color:#a1a1aa;">View Store</span>
+            </div>
+            <div style="width:28px;height:28px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:6px;"></div>
+            <div style="width:28px;height:28px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:6px;"></div>
+            <div style="width:1px;height:16px;background:rgba(255,255,255,0.08);"></div>
+            <div style="height:28px;padding:0 10px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:6px;display:flex;align-items:center;gap:5px;">
+              <div style="width:10px;height:10px;background:rgba(255,255,255,0.15);border-radius:2px;"></div>
+              <span style="font-size:10px;color:#a1a1aa;">Logout</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content area preview -->
+        <div style="flex:1;padding:20px;background:#0c0e12;overflow:hidden;">
+          <div style="font-size:9px;color:#3f3f46;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">TODAY'S SNAPSHOT</div>
+          <div style="font-size:18px;font-weight:600;color:#f4f4f5;letter-spacing:-0.02em;margin-bottom:14px;">Good morning, My Store</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div style="background:#0f1117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#C6F432,transparent);"></div>
+              <div style="font-size:7.5px;color:#52525b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Total Revenue</div>
+              <div style="font-size:18px;font-weight:600;color:#f4f4f5;">42,800</div>
+            </div>
+            <div style="background:#0f1117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#60a5fa,transparent);"></div>
+              <div style="font-size:7.5px;color:#52525b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Orders Revenue</div>
+              <div style="font-size:18px;font-weight:600;color:#f4f4f5;">31,200</div>
+            </div>
+            <div style="background:#0f1117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#818cf8,transparent);"></div>
+              <div style="font-size:7.5px;color:#52525b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">POS Revenue</div>
+              <div style="font-size:18px;font-weight:600;color:#f4f4f5;">11,600</div>
+            </div>
+            <div style="background:#0f1117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#f59e0b,transparent);"></div>
+              <div style="font-size:7.5px;color:#52525b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Orders Count</div>
+              <div style="font-size:18px;font-weight:600;color:#f4f4f5;">128</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Key changes in this section</h3>
+  <ul style="color:var(--text-secondary);font-size:13px;line-height:1.8;padding-left:20px;">
+    <li>Sidebar background slightly lifted from <code>#111318</code> → <code>#0f1117</code> for better contrast against content area</li>
+    <li>Tenant name + subdomain shown in logo area (more informative)</li>
+    <li>Nav groups collapsed from 7 → 4: <strong>Overview, Operations, Catalog, Store</strong></li>
+    <li>Badge on Orders nav item showing pending count (live data)</li>
+    <li>Active nav item uses lime background tint + lime icon (no more left-border accent bar)</li>
+    <li>Topbar height reduced 56px → 52px, buttons use consistent border style</li>
+    <li>Stat cards get a 2px colored top-border gradient per tone (brand/blue/indigo/amber)</li>
+    <li>User avatar uses lime ring instead of plain opacity ring</li>
+  </ul>
+</div>

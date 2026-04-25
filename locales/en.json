@@ -166,32 +166,38 @@
       "subtitle": "Merchants in Algeria who want a fast store and simple operations.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "User avatar",
-      "items": {
-        "nassim": {
-          "text": "We put our products online quickly. Orders come in, and everything stays in one place.",
+      "items": [
+        {
+          "quote": "We put our products online quickly. Orders come in, and everything stays in one place.",
+          "author": "Nassim",
           "role": "Owner, Nokhba Store"
         },
-        "amina": {
-          "text": "Custom domains were easy to set up, and sales are clear in the dashboard.",
+        {
+          "quote": "Custom domains were easy to set up, and sales are clear in the dashboard.",
+          "author": "Amina",
           "role": "Founder, Dzair Cosmetics"
         },
-        "yanis": {
-          "text": "Local shipping integrations save us time every day. Dispatching became a habit.",
+        {
+          "quote": "Local shipping integrations save us time every day. Dispatching became a habit.",
+          "author": "Yanis",
           "role": "Director, TechAlgeria"
         },
-        "lyes": {
-          "text": "Even with high traffic, the store stays fast. We can focus on selling.",
+        {
+          "quote": "Even with high traffic, the store stays fast. We can focus on selling.",
+          "author": "Lyes",
           "role": "Owner, Oran Fashion"
         },
-        "meriem": {
-          "text": "No more lost orders in DMs. Customers order and pay easily.",
+        {
+          "quote": "No more lost orders in DMs. Customers order and pay easily.",
+          "author": "Meriem",
           "role": "CEO, BioAtlas"
         },
-        "sofiane": {
-          "text": "We launched the store in an afternoon. Simple, clean, and ready to sell.",
+        {
+          "quote": "We launched the store in an afternoon. Simple, clean, and ready to sell.",
+          "author": "Sofiane",
           "role": "Manager, Casbah Gifts"
         }
-      }
+      ]
     },
     "finalCta": {
       "title": "Ready to get started?",
@@ -349,6 +355,55 @@
       "footer": {
         "languages": "Language",
         "madeFor": "Made for Algeria"
+      },
+      "templates": {
+        "eyebrow": "Storefront themes",
+        "titlePre": "Beautiful stores,",
+        "titleAccent": "ready to launch",
+        "titlePost": "",
+        "description": "Pick a professionally designed template and customize it to your brand. Every theme is mobile-first, RTL-ready, and blazing fast.",
+        "viewAll": "Browse all themes"
+      },
+      "integrations": {
+        "eyebrow": "Built-in integrations",
+        "titlePre": "Every tool",
+        "titleAccent": "Algerian merchants",
+        "titlePost": "actually use",
+        "description": "From local delivery couriers to WhatsApp automation, Meta Pixel tracking to AI-powered tools — it all works out of the box.",
+        "tools": {
+          "maystro": {
+            "name": "Maystro",
+            "description": "Algeria's #1 delivery network. Create and track shipments without leaving your dashboard."
+          },
+          "yalidine": {
+            "name": "Yalidine",
+            "description": "Nationwide express delivery with real-time tracking and automatic status updates."
+          },
+          "whatsapp": {
+            "name": "WhatsApp API",
+            "description": "Send order confirmations, shipping updates and promotions directly to customers."
+          },
+          "telegram": {
+            "name": "Telegram",
+            "description": "Get instant alerts for new orders, low stock and payment confirmations in your Telegram."
+          },
+          "metapixel": {
+            "name": "Meta Pixel",
+            "description": "Track conversions, optimize ad spend and retarget visitors with Facebook & Instagram ads."
+          },
+          "googlesheets": {
+            "name": "Google Sheets",
+            "description": "Export orders and inventory to Google Sheets automatically for custom reports."
+          },
+          "ai": {
+            "name": "AI Tools",
+            "description": "AI-generated product descriptions, smart pricing suggestions and demand forecasting."
+          },
+          "imagegen": {
+            "name": "Image Generation",
+            "description": "Generate professional product photos and banners with AI — no photoshoot needed."
+          }
+        }
       }
     }
   },
@@ -537,6 +592,12 @@
       "errors": {
         "invalidCredentials": "Invalid email or password",
         "generic": "An error occurred. Please try again."
+      },
+      "social": {
+        "divider": "or continue with",
+        "google": "Continue with Google",
+        "facebook": "Continue with Facebook",
+        "apple": "Continue with Apple"
       }
     },
     "register": {
@@ -605,6 +666,12 @@
       },
       "errors": {
         "generic": "An error occurred during registration."
+      },
+      "social": {
+        "divider": "or continue with",
+        "google": "Continue with Google",
+        "facebook": "Continue with Facebook",
+        "apple": "Continue with Apple"
       }
     }
   },

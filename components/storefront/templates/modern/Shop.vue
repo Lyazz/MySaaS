@@ -114,6 +114,8 @@ const pageTitle = computed(() => {
 })
 
 const isFilterDrawerOpen = ref(false)
+const mobileCategoriesDropdownOpen = ref(false)
+const desktopCategoriesDropdownOpen = ref(false)
 
 // Toggle Category Selection
 const toggleCategory = (catId: string) => {
@@ -193,10 +195,21 @@ const closeQuickView = () => {
         <div class="space-y-8">
           <!-- Categories -->
           <div>
-            <h4 class="font-bold text-slate-900 mb-4 text-xs uppercase tracking-wider">
-              {{ storefrontContent.shop.categories }}
-            </h4>
-            <div class="space-y-3">
+            <button
+              type="button"
+              class="w-full flex items-center justify-between text-left mb-4"
+              @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
+            >
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+                {{ storefrontContent.shop.categories }}
+              </h4>
+              <Icon
+                name="lucide:chevron-down"
+                class="w-4 h-4 text-slate-500 transition-transform"
+                :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
+              />
+            </button>
+            <div v-show="mobileCategoriesDropdownOpen" class="space-y-3">
               <label
                 v-for="cat in filters.categories"
                 :key="cat.id"
@@ -283,10 +296,21 @@ const closeQuickView = () => {
 
           <!-- Categories -->
           <div>
-            <h4 class="font-bold text-slate-900 mb-4 text-xs uppercase tracking-wider">
-              {{ storefrontContent.shop.categories }}
-            </h4>
-            <div class="space-y-3">
+            <button
+              type="button"
+              class="w-full flex items-center justify-between text-left mb-4"
+              @click="desktopCategoriesDropdownOpen = !desktopCategoriesDropdownOpen"
+            >
+              <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+                {{ storefrontContent.shop.categories }}
+              </h4>
+              <Icon
+                name="lucide:chevron-down"
+                class="w-4 h-4 text-slate-500 transition-transform"
+                :class="desktopCategoriesDropdownOpen ? 'rotate-180' : ''"
+              />
+            </button>
+            <div v-show="desktopCategoriesDropdownOpen" class="space-y-3">
               <label
                 v-for="cat in filters.categories"
                 :key="cat.id"

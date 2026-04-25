@@ -1,5 +1,9 @@
 <template>
-  <div class="min-h-screen bg-slate-50 flex font-sans text-slate-600" :style="superAdminStyle">
+  <div
+    class="super-admin-shell admin-shell min-h-screen flex font-sans"
+    style="background: var(--admin-content-bg); color: var(--text-secondary);"
+    :style="superAdminStyle"
+  >
     <!-- Mobile Backdrop -->
     <div 
       v-if="sidebarOpen" 
@@ -9,12 +13,12 @@
 
     <!-- Sidebar -->
     <aside :class="[
-      'bg-slate-950 text-white transition-all duration-300 flex flex-col shadow-2xl z-30',
+      'text-white transition-all duration-300 flex flex-col shadow-2xl z-30',
       'fixed inset-y-0 left-0 lg:static', // Mobile fixed, Desktop static
       sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'
-    ]">
+    ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
       <!-- Logo/Brand -->
-      <div class="h-16 flex items-center justify-between px-6 bg-slate-950 border-b border-white/5">
+      <div class="h-16 flex items-center justify-between px-6 border-b border-white/5" style="background: var(--admin-sidebar-bg);">
         <div class="flex items-center gap-3 overflow-hidden">
           <div 
             class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors [background:var(--brand)]"
@@ -121,17 +125,23 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden relative">
       <!-- Top Bar -->
-      <header class="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-200/60 shadow-sm">
+      <header
+        class="backdrop-blur-md sticky top-0 z-10 shadow-sm"
+        style="background: color-mix(in srgb, var(--admin-topbar-bg), transparent 8%); border-bottom: 1px solid var(--admin-topbar-border);"
+      >
         <div class="px-6 h-16 flex items-center justify-between">
           <div class="flex items-center gap-4">
             <button 
               @click="toggleSidebar" 
-              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+              class="p-2 -ml-2 rounded-lg transition-colors"
+              style="color: var(--text-secondary)"
+              @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }"
+              @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }"
               :aria-label="t('superAdmin.layout.toggleSidebar')"
             >
               <Icon name="lucide:menu" class="w-6 h-6" />
             </button>
-            <h1 class="text-xl font-sans font-semibold text-slate-800 tracking-tight">{{ pageTitle }}</h1>
+            <h1 class="text-xl font-sans font-semibold tracking-tight" style="color: var(--text-primary)">{{ pageTitle }}</h1>
           </div>
           
           <div class="flex items-center gap-4">
@@ -149,8 +159,8 @@
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50 custom-scrollbar">
-        <div class="max-w-7xl mx-auto animate-fadeIn">
+      <main class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar" style="background: var(--admin-content-bg);">
+        <div class="super-admin-content max-w-7xl mx-auto animate-fadeIn">
           <slot />
         </div>
       </main>
@@ -166,16 +176,30 @@ const route = useRoute()
 const sidebarOpen = ref(false)
 const { t } = useI18n({ useScope: 'global' })
 const pendingPaymentsCount = ref(0)
+const previousTheme = ref<string | null>(null)
 const superAdminStyle = {
   '--brand': '#C6F432',
   '--brand-rgb': '198 244 50'
 } as Record<string, string>
 
 onMounted(async () => {
+  if (import.meta.client) {
+    previousTheme.value = document.documentElement.dataset.theme || null
+    document.documentElement.dataset.theme = 'dark'
+  }
   if (window.innerWidth >= 1024) {
     sidebarOpen.value = true
   }
   await loadPendingCount()
+})
+
+onBeforeUnmount(() => {
+  if (!import.meta.client) return
+  if (previousTheme.value) {
+    document.documentElement.dataset.theme = previousTheme.value
+    return
+  }
+  document.documentElement.removeAttribute('data-theme')
 })
 
 async function loadPendingCount() {
@@ -238,3 +262,66 @@ function handleLogout() {
   navigateTo('/super-admin/login')
 }
 </script>
+
+<style>
+.super-admin-shell .super-admin-content .bg-white {
+  background: var(--surface-1) !important;
+}
+
+.super-admin-shell .super-admin-content .bg-slate-50,
+.super-admin-shell .super-admin-content .bg-slate-50\/50,
+.super-admin-shell .super-admin-content .bg-slate-50\/60,
+.super-admin-shell .super-admin-content .bg-slate-100 {
+  background: var(--surface-2) !important;
+}
+
+.super-admin-shell .super-admin-content .text-gray-900,
+.super-admin-shell .super-admin-content .text-gray-800,
+.super-admin-shell .super-admin-content .text-slate-900,
+.super-admin-shell .super-admin-content .text-slate-800 {
+  color: var(--text-primary) !important;
+}
+
+.super-admin-shell .super-admin-content .text-gray-700,
+.super-admin-shell .super-admin-content .text-gray-600,
+.super-admin-shell .super-admin-content .text-gray-500,
+.super-admin-shell .super-admin-content .text-slate-700,
+.super-admin-shell .super-admin-content .text-slate-600,
+.super-admin-shell .super-admin-content .text-slate-500,
+.super-admin-shell .super-admin-content .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+.super-admin-shell .super-admin-content .placeholder-gray-400,
+.super-admin-shell .super-admin-content .placeholder-slate-400 {
+  --tw-placeholder-opacity: 1 !important;
+  color: var(--text-tertiary) !important;
+}
+
+.super-admin-shell .super-admin-content .border-slate-100,
+.super-admin-shell .super-admin-content .border-slate-200,
+.super-admin-shell .super-admin-content .border-slate-300,
+.super-admin-shell .super-admin-content .divide-slate-100 {
+  border-color: var(--surface-border) !important;
+}
+
+.super-admin-shell .super-admin-content .hover\:bg-slate-50:hover,
+.super-admin-shell .super-admin-content .hover\:bg-slate-100:hover,
+.super-admin-shell .super-admin-content .hover\:bg-slate-200:hover {
+  background: var(--nav-hover-bg) !important;
+}
+
+.super-admin-shell .super-admin-content input,
+.super-admin-shell .super-admin-content select,
+.super-admin-shell .super-admin-content textarea {
+  background: var(--surface-2);
+  border-color: var(--surface-border);
+  color: var(--text-primary);
+}
+
+.super-admin-shell .super-admin-content code {
+  background: var(--surface-2) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--surface-border) !important;
+}
+</style>

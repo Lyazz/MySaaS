@@ -44,6 +44,10 @@ const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
 
 // Mobile menu
 const mobileMenuOpen = ref(false)
+const mobileCategoriesDropdownOpen = ref(false)
+watch(mobileMenuOpen, (open) => {
+    if (!open) mobileCategoriesDropdownOpen.value = false
+})
 // Build dynamic menu
 
 // Search Logic
@@ -337,8 +341,21 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
             <!-- Categories -->
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">{{ storefrontContent.nav.categories || 'Categories' }}</h4>
-              <div class="flex flex-col gap-1">
+              <button
+                type="button"
+                class="w-full flex items-center justify-between text-left"
+                @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
+              >
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  {{ storefrontContent.nav.categories || 'Categories' }}
+                </h4>
+                <Icon
+                  name="lucide:chevron-down"
+                  class="w-4 h-4 text-slate-400 transition-transform"
+                  :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
+                />
+              </button>
+              <div v-show="mobileCategoriesDropdownOpen" class="flex flex-col gap-1">
                 <NuxtLink
                   v-for="cat in tenantCategories"
                   :key="cat.id"

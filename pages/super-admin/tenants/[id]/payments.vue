@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout name="super-admin">
-    <div class="space-y-6">
+  <div class="space-y-6">
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 text-sm text-slate-500">
@@ -173,8 +172,7 @@
           </div>
         </div>
       </div>
-    </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -183,7 +181,8 @@ import { PRICING_PLANS } from '~/shared/pricing/plans'
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
-  middleware: 'super-admin'
+  middleware: 'super-admin',
+  layout: 'super-admin'
 })
 
 const { t, locale } = useI18n({ useScope: 'global' })

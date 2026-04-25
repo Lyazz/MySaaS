@@ -71,15 +71,7 @@ const currentYear = new Date().getFullYear()
 
       <div class="my-12 cinematic-divider" />
 
-      <div
-        aria-hidden="true"
-        class="select-none overflow-hidden text-center font-[Instrument_Serif] italic text-[color:var(--m-text-faint)]"
-        style="font-size: clamp(4rem, 18vw, 16rem); line-height: 0.85; letter-spacing: -0.05em;"
-      >
-        Swekly
-      </div>
-
-      <div class="mt-12 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p class="text-xs text-[color:var(--m-text-faint)] font-mono uppercase tracking-[0.18em]">
           © {{ currentYear }} Swekly — {{ t('marketing.footer.tagline') }}
         </p>

@@ -1,22 +1,22 @@
 <template>
   <div class="space-y-5">
-    <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+    <div class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
       <div>
-        <p class="text-[10.5px] font-bold uppercase tracking-widest mb-1" style="color: var(--text-tertiary)">
+        <p class="text-[9.5px] font-bold uppercase tracking-[0.1em] mb-1" style="color: var(--text-muted)">
           {{ t('admin.pages.dashboard.snapshot') }}
         </p>
-        <h2 class="text-[22px] font-semibold tracking-tight" style="color: var(--text-primary); letter-spacing: -0.02em">
+        <h2 class="text-[20px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em">
           {{ t('admin.pages.dashboard.welcomeBack', { tenant: tenantName }) }}
         </h2>
-        <p class="mt-1 text-[12px]" style="color: var(--text-tertiary)">
+        <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
           {{ t('admin.pages.dashboard.periodLabel', { from: dashboard.period.from, to: dashboard.period.to, days: dashboard.period.days }) }}
         </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-2 shrink-0">
-        <div class="flex items-center gap-2 rounded-xl px-2.5 py-2" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+        <div class="flex items-center gap-2 rounded-xl px-3 py-1.5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
           <label class="text-[11px]" style="color: var(--text-tertiary)">{{ t('admin.pages.dashboard.filters.range') }}</label>
-          <select v-model="selectedRange" class="ui-input h-8 py-1 text-[12px] min-w-[112px]" data-testid="dashboard-range-select">
+          <select v-model="selectedRange" class="ui-input h-7 py-0.5 text-[11.5px] min-w-[112px]" data-testid="dashboard-range-select">
             <option value="7d">{{ t('admin.pages.dashboard.filters.ranges.7d') }}</option>
             <option value="30d">{{ t('admin.pages.dashboard.filters.ranges.30d') }}</option>
             <option value="90d">{{ t('admin.pages.dashboard.filters.ranges.90d') }}</option>
@@ -24,17 +24,17 @@
           </select>
 
           <template v-if="selectedRange === 'custom'">
-            <input v-model="customFrom" type="date" class="ui-input h-8 py-1 text-[12px]" data-testid="dashboard-custom-from">
-            <input v-model="customTo" type="date" class="ui-input h-8 py-1 text-[12px]" data-testid="dashboard-custom-to">
+            <input v-model="customFrom" type="date" class="ui-input h-7 py-0.5 text-[11.5px]" data-testid="dashboard-custom-from">
+            <input v-model="customTo" type="date" class="ui-input h-7 py-0.5 text-[11.5px]" data-testid="dashboard-custom-to">
           </template>
         </div>
 
         <NuxtLink
           v-if="!storeSettings?.isCompleted"
           to="/admin/onboarding"
-          class="ui-btn ui-btn--md ui-btn--primary"
+          class="ui-btn ui-btn--sm ui-btn--primary"
         >
-          <Icon name="lucide:sparkles" class="h-4 w-4" />
+          <Icon name="lucide:sparkles" class="h-3.5 w-3.5" />
           {{ t('admin.pages.dashboard.finishSetup') }}
         </NuxtLink>
 
@@ -84,7 +84,7 @@
         :value="formatMoney(dashboard.revenue.pos)"
         icon="lucide:monitor-smartphone"
         :loading="pending"
-        tone="slate"
+        tone="indigo"
         to="/admin/pos"
       />
       <AdminDashboardStatCard
@@ -127,13 +127,13 @@
     />
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <div class="lg:col-span-2 rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="lg:col-span-2 rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
         <div class="flex items-center justify-between gap-4 px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
           <div class="min-w-0">
-            <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+            <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
               {{ t('admin.pages.dashboard.recentOrders.title') }}
             </h3>
-            <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
+            <p class="mt-0.5 text-[11.5px]" style="color: var(--text-tertiary)">
               {{ t('admin.pages.dashboard.recentOrders.hint') }}
             </p>
           </div>
@@ -147,7 +147,7 @@
           <table class="min-w-full">
             <thead>
               <tr style="background: var(--surface-2)">
-                <th v-for="col in tableColumns" :key="col" class="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-widest" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">
+                <th v-for="col in tableColumns" :key="col" class="px-5 py-2.5 text-left text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">
                   {{ col }}
                 </th>
               </tr>
@@ -203,11 +203,11 @@
       </div>
 
       <div class="space-y-4">
-        <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+        <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
+          <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.dashboard.orderStatus.title') }}
           </h3>
-          <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
+          <p class="mt-0.5 text-[11.5px]" style="color: var(--text-tertiary)">
             {{ t('admin.pages.dashboard.orderStatus.hint') }}
           </p>
 
@@ -227,11 +227,11 @@
           </div>
         </div>
 
-        <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+        <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
+          <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.dashboard.quickLinks.title') }}
           </h3>
-          <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
+          <p class="mt-0.5 text-[11.5px]" style="color: var(--text-tertiary)">
             {{ t('admin.pages.dashboard.quickLinks.hint') }}
           </p>
 

@@ -1,6 +1,5 @@
 <template>
-  <NuxtLayout name="super-admin">
-    <div class="space-y-6">
+  <div class="space-y-6">
       <!-- Header -->
       <div class="flex items-start justify-between gap-4">
         <div>
@@ -192,13 +191,15 @@
           </table>
         </div>
       </div>
-    </div>
-  </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+
 definePageMeta({
   middleware: 'super-admin',
+  layout: 'super-admin',
   title: 'Pending Payments'
 })
 
