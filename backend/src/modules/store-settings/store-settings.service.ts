@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export type StoreTemplateKey =
     | 'classic'
@@ -76,7 +77,20 @@ export type StoreSettingsPatchInput = Partial<{
     isCompleted: boolean
     allowedDeliveryProviders: string[]
     storePickupEnabled: boolean
+    loyaltyEnabled: boolean
+    loyaltyMinRedeemPoints: number
+    loyaltyRedeemRateDzdPerPoint: number | string
+    loyaltyBasePoints: number | string
+    loyaltyMarginFactor: number | string
 }>
+
+const toDecimalString = (value: unknown, field: string): string => {
+    const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
+    if (!Number.isFinite(n)) {
+        throw new StoreSettingsValidationError(`${field} must be a valid number`)
+    }
+    return String(n)
+}
 
 export class StoreSettingsService {
     async getOrCreate(tenantId: string) {
@@ -218,6 +232,37 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('storePickupEnabled must be a boolean')
             }
             updateSettings.storePickupEnabled = input.storePickupEnabled
+        }
+
+        if (input.loyaltyEnabled !== undefined) {
+            if (typeof input.loyaltyEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('loyaltyEnabled must be a boolean')
+            }
+            updateSettings.loyaltyEnabled = input.loyaltyEnabled
+        }
+
+        if (input.loyaltyMinRedeemPoints !== undefined) {
+            const minRedeemPoints = Math.trunc(Number(input.loyaltyMinRedeemPoints))
+            if (!Number.isFinite(minRedeemPoints) || minRedeemPoints < 0) {
+                throw new StoreSettingsValidationError('loyaltyMinRedeemPoints must be a non-negative integer')
+            }
+            updateSettings.loyaltyMinRedeemPoints = minRedeemPoints
+        }
+
+        if (input.loyaltyRedeemRateDzdPerPoint !== undefined) {
+            const value = Number(input.loyaltyRedeemRateDzdPerPoint)
+            if (!Number.isFinite(value) || value <= 0) {
+                throw new StoreSettingsValidationError('loyaltyRedeemRateDzdPerPoint must be greater than 0')
+            }
+            updateSettings.loyaltyRedeemRateDzdPerPoint = new Prisma.Decimal(toDecimalString(value, 'loyaltyRedeemRateDzdPerPoint'))
+        }
+
+        if (input.loyaltyBasePoints !== undefined) {
+            updateSettings.loyaltyBasePoints = new Prisma.Decimal(toDecimalString(input.loyaltyBasePoints, 'loyaltyBasePoints'))
+        }
+
+        if (input.loyaltyMarginFactor !== undefined) {
+            updateSettings.loyaltyMarginFactor = new Prisma.Decimal(toDecimalString(input.loyaltyMarginFactor, 'loyaltyMarginFactor'))
         }
 
         // Execute Transaction if tenant fields need updating

@@ -115,6 +115,11 @@ watchEffect(() => {
 const submitting = ref(false)
 const errorMessage = ref('')
 const couponCode = ref('')
+const loyalty = useCheckoutLoyalty()
+
+watch(() => form.value.phone, (phone) => {
+  loyalty.phone.value = phone.trim()
+}, { immediate: true })
 
 const selectedDelivery = computed(() => 
   deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption)
@@ -268,6 +273,7 @@ async function handleSubmit() {
           shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
           shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
           shippingCurrency: isMaystro ? currencyCode.value : undefined,
+          redeemPointsRequested: loyalty.redeemPointsRequested.value || undefined,
           items: cartStore.items.map(item => ({
             productId: item.productId,
             variantId: item.variantId,
@@ -284,6 +290,7 @@ async function handleSubmit() {
         })
 
         cartStore.clearCart()
+        loyalty.reset()
         router.push({
           path: '/order-success',
           query: { orderId: response.orderId }

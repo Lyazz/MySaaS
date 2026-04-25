@@ -26,6 +26,13 @@
           {{ summary?.phone || '' }}
           <span v-if="summary?.address"> · {{ summary?.address }}</span>
         </p>
+        <p
+          v-if="summary?.phoneNormalized"
+          class="mt-1 text-sm"
+          style="color: var(--text-tertiary)"
+        >
+          Brut: {{ summary?.phoneRaw || summary?.phone }} · Normalise: +{{ summary?.phoneNormalized }}
+        </p>
       </div>
 
       <div class="flex flex-wrap gap-3 justify-end">
@@ -59,6 +66,22 @@
           </div>
           <div class="text-lg font-semibold" :class="currentBalance >= 0 ? 'text-amber-700' : 'text-emerald-700'">
             {{ formatCurrency(currentBalance) }}
+          </div>
+        </div>
+        <div class="ui-card px-4 py-3">
+          <div class="text-xs" style="color: var(--text-tertiary)">
+            Points disponibles
+          </div>
+          <div class="text-lg font-semibold" style="color: var(--text-primary)">
+            {{ pointsSummary.availablePoints }}
+          </div>
+        </div>
+        <div class="ui-card px-4 py-3">
+          <div class="text-xs" style="color: var(--text-tertiary)">
+            Points consommes
+          </div>
+          <div class="text-lg font-semibold" style="color: var(--text-primary)">
+            {{ pointsSummary.redeemedPointsTotal }}
           </div>
         </div>
       </div>
@@ -101,6 +124,54 @@
     </div>
 
     <div v-else class="space-y-6">
+      <div class="ui-card overflow-hidden">
+        <div class="px-6 py-4" style="border-bottom: 1px solid var(--surface-border)">
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">Points fidelite</h3>
+        </div>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
+            <div class="text-xs" style="color: var(--text-tertiary)">Disponibles</div>
+            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.availablePoints }}</div>
+          </div>
+          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
+            <div class="text-xs" style="color: var(--text-tertiary)">En attente</div>
+            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.pendingRedeemPoints }}</div>
+          </div>
+          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
+            <div class="text-xs" style="color: var(--text-tertiary)">Gagnes</div>
+            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.earnedPointsTotal }}</div>
+          </div>
+          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
+            <div class="text-xs" style="color: var(--text-tertiary)">Consommes</div>
+            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.redeemedPointsTotal }}</div>
+          </div>
+        </div>
+        <div v-if="pointItems.length > 0" class="overflow-x-auto">
+          <table class="ui-table">
+            <thead class="ui-thead">
+              <tr>
+                <th class="ui-th">Date</th>
+                <th class="ui-th">Type</th>
+                <th class="ui-th">Statut</th>
+                <th class="ui-th">Source</th>
+                <th class="ui-th text-right">Points</th>
+              </tr>
+            </thead>
+            <tbody class="ui-tbody">
+              <tr v-for="entry in pointItems" :key="entry.id" class="ui-tr">
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ formatDate(entry.createdAt) }}</td>
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-primary)">{{ entry.direction }}</td>
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ entry.status }}</td>
+                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ entry.sourceType }} #{{ entry.sourceId.slice(0, 8) }}</td>
+                <td class="ui-td whitespace-nowrap text-right font-semibold" :class="entry.direction === 'REDEEM' ? 'text-red-600' : 'text-emerald-700'">
+                  {{ entry.direction === 'REDEEM' ? '-' : '+' }}{{ entry.points }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div v-if="sales.length > 0" class="ui-card overflow-hidden">
         <div class="px-6 py-4" style="border-bottom: 1px solid var(--surface-border)">
           <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.nav.salesItem') }}</h3>
@@ -236,7 +307,6 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import BaseInput from '~/components/ui/BaseInput.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -273,10 +343,50 @@ interface CustomerPayment {
   createdAt: string
 }
 
+interface CustomerPointLedgerEntry {
+  id: string
+  direction: 'EARN' | 'REDEEM' | 'ADJUST'
+  status: 'PENDING' | 'AVAILABLE' | 'CANCELLED' | 'CONSUMED'
+  sourceType: 'SALE' | 'ORDER' | 'MANUAL'
+  sourceId: string
+  points: number
+  createdAt: string
+}
+
+interface CustomerDetailsResponse {
+  summary: {
+    id: string
+    phone: string
+    phoneRaw: string | null
+    phoneNormalized: string
+    name: string
+    email: string | null
+    address: string | null
+    openingBalance: number
+    currentBalance: number
+    lastSaleAt: string | null
+    lastSaleId: string | null
+  } | null
+  sales?: CustomerSale[]
+  payments?: CustomerPayment[]
+}
+
+interface CustomerPointsResponse {
+  summary?: {
+    availablePoints?: number
+    pendingRedeemPoints?: number
+    earnedPointsTotal?: number
+    redeemedPointsTotal?: number
+  }
+  items?: CustomerPointLedgerEntry[]
+}
+
 const loading = ref(true)
 const summary = ref<{
   id: string
   phone: string
+  phoneRaw: string | null
+  phoneNormalized: string
   name: string
   email: string | null
   address: string | null
@@ -287,6 +397,13 @@ const summary = ref<{
 } | null>(null)
 const sales = ref<CustomerSale[]>([])
 const payments = ref<CustomerPayment[]>([])
+const pointsSummary = reactive({
+  availablePoints: 0,
+  pendingRedeemPoints: 0,
+  earnedPointsTotal: 0,
+  redeemedPointsTotal: 0
+})
+const pointItems = ref<CustomerPointLedgerEntry[]>([])
 
 const totalSpent = computed(() => sales.value.reduce((acc, o) => acc + (o.totalAmount || 0), 0))
 const totalPaid = computed(() => payments.value.reduce((acc, p) => acc + (Number(p.amount) || 0), 0))
@@ -295,15 +412,27 @@ const currentBalance = computed(() => summary.value?.currentBalance ?? (summary.
 async function fetchCustomer() {
   loading.value = true
   try {
-    const data = await $fetch(`/api/admin/customers/${encodeURIComponent(customerId.value)}`, {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      }
-    })
+    const [data, points] = await Promise.all([
+      $fetch(`/api/admin/customers/${encodeURIComponent(customerId.value)}`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`
+        }
+      }) as Promise<CustomerDetailsResponse>,
+      $fetch(`/api/admin/customers/${encodeURIComponent(customerId.value)}/points`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`
+        }
+      }).catch((): CustomerPointsResponse => ({ summary: { availablePoints: 0, pendingRedeemPoints: 0, earnedPointsTotal: 0, redeemedPointsTotal: 0 }, items: [] }))
+    ])
 
     summary.value = data.summary
     sales.value = data.sales ?? []
     payments.value = data.payments ?? []
+    pointsSummary.availablePoints = points.summary?.availablePoints ?? 0
+    pointsSummary.pendingRedeemPoints = points.summary?.pendingRedeemPoints ?? 0
+    pointsSummary.earnedPointsTotal = points.summary?.earnedPointsTotal ?? 0
+    pointsSummary.redeemedPointsTotal = points.summary?.redeemedPointsTotal ?? 0
+    pointItems.value = points.items ?? []
   } catch (error) {
     console.error('Failed to fetch customer:', error)
   } finally {

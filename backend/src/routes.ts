@@ -34,6 +34,7 @@ import usersRouter from './modules/users/routes'
 import adminAuditLogsRouter from './modules/audit-logs/routes'
 import staffRolesRouter from './modules/staff-roles/routes'
 import filesRouter from './modules/files/routes'
+import loyaltyRouter from './modules/loyalty/routes'
 
 const router = Router()
 
@@ -79,6 +80,7 @@ router.use('/admin/meta-pixels', metaPixelsRouter)
 router.use('/admin/users', usersRouter)
 router.use('/admin/staff-roles', staffRolesRouter)
 router.use('/admin/audit-logs', adminAuditLogsRouter)
+router.use('/admin/loyalty', loyaltyRouter)
 
 // Super Admin
 router.use('/super-admin', superAdminRouter)

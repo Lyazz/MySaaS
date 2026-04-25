@@ -20,6 +20,7 @@ model Tenant {
   staffRoles           TenantStaffRole[]
   staffRolePermissions TenantStaffRolePermission[]
   customers            Customer[]
+  customerPointsLedger CustomerPointsLedger[]
   customerPayments     CustomerPayment[]
   cashboxes            Cashbox[]
   cashSessions         CashSession[]
@@ -310,6 +311,13 @@ model StoreSettings {
   allowedDeliveryProviders String[] @default(["SELF"])
   storePickupEnabled       Boolean  @default(false)
 
+  loyaltyEnabled                Boolean @default(false)
+  loyaltyMinRedeemPoints        Int     @default(0)
+  loyaltyRedeemRateDzdPerPoint  Decimal @default(1)
+  loyaltyBasePoints             Decimal @default(0)
+  loyaltyMarginFactor           Decimal @default(0)
+  loyaltyPublicFormulaMode      String  @default("SUMMARY")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -355,6 +363,7 @@ model User {
   inventoryMovements      InventoryMovement[]
   purchaseOrdersCreated   PurchaseOrder[]     @relation("PurchaseOrderCreatedBy")
   salesCreated            Sale[]              @relation("SaleCreatedBy")
+  customerPointsCreated   CustomerPointsLedger[]
   customerPaymentsCreated CustomerPayment[]   @relation("CustomerPaymentCreatedBy")
   supplierPaymentsCreated SupplierPayment[]   @relation("SupplierPaymentCreatedBy")
   cashSessionsOpened      CashSession[]       @relation("CashSessionOpenedBy")
@@ -740,6 +749,9 @@ model Sale {
 
   totalAmount Float
   status      String @default("COMPLETED") // COMPLETED | REFUNDED (future)
+  earnedPointsTotal   Int   @default(0)
+  redeemedPointsTotal Int   @default(0)
+  redeemedAmount      Float @default(0)
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
@@ -754,6 +766,7 @@ model Sale {
   createdBy       User?   @relation("SaleCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
 
   items            SaleItem[]
+  pointsLedger     CustomerPointsLedger[]
   movements        InventoryMovement[]
   cashTransactions CashTransaction[]   @relation("CashTxSale")
   customerPayments CustomerPayment[]
@@ -880,6 +893,9 @@ model Order {
   status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
   totalAmount Float
   totalWithShippingAmount Float?
+  earnedPointsTotal   Int   @default(0)
+  redeemedPointsTotal Int   @default(0)
+  redeemedAmount      Float @default(0)
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
@@ -907,6 +923,7 @@ model Order {
   shippingPickupPoint  Int?
 
   items              OrderItem[]
+  pointsLedger       CustomerPointsLedger[]
   shipments          Shipment[]
   maystroMappings    MaystroOrderMapping[]
   inventoryMovements InventoryMovement[]
@@ -928,6 +945,8 @@ model Customer {
 
   name           String
   phone          String
+  phoneNormalized String
+  phoneRaw       String?
   email          String?
   address        String?
   openingBalance Decimal @default(0)
@@ -937,17 +956,78 @@ model Customer {
 
   orders           Order[]
   sales            Sale[]
+  pointsLedger     CustomerPointsLedger[]
   payments         CustomerPayment[]
   cashTransactions CashTransaction[] @relation("CashTxCustomer")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([tenantId, phone])
+  @@unique([tenantId, phoneNormalized])
   @@unique([tenantId, email])
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, createdAt])
+  @@index([tenantId, phone])
+  @@index([tenantId, phoneNormalized])
+}
+
+enum CustomerPointsDirection {
+  EARN
+  REDEEM
+  ADJUST
+}
+
+enum CustomerPointsStatus {
+  PENDING
+  AVAILABLE
+  CANCELLED
+  CONSUMED
+}
+
+enum CustomerPointsSourceType {
+  SALE
+  ORDER
+  MANUAL
+}
+
+model CustomerPointsLedger {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Cascade)
+
+  direction CustomerPointsDirection
+  status    CustomerPointsStatus
+  sourceType CustomerPointsSourceType
+  sourceId   String
+
+  points Int
+
+  saleId String?
+  sale   Sale?   @relation(fields: [tenantId, saleId], references: [tenantId, id], onDelete: SetNull)
+
+  orderId String?
+  order   Order?  @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: SetNull)
+
+  formulaSnapshot Json?
+  expiresAt DateTime?
+
+  createdByUserId String?
+  createdBy       User?   @relation(fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, sourceType, sourceId, direction])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, customerId, createdAt])
+  @@index([tenantId, customerId, status])
+  @@index([tenantId, saleId])
+  @@index([tenantId, orderId])
 }
 
 model CustomerPayment {

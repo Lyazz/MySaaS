@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import { OrdersService, OrderValidationError } from './orders.service'
-import { DeliveryService } from '../delivery/delivery.service'
+import { DeliveryConfigurationError, DeliveryService } from '../delivery/delivery.service'
 import { MaystroIntegrationError } from '../delivery/maystro/maystro.errors'
 
 const service = new OrdersService()
@@ -122,14 +122,45 @@ export class OrdersController {
                         })
                         return res.json(updated)
                     } catch (shipmentErr: any) {
-                        // The order status was successfully changed; report the Maystro error
-                        // as a warning so the admin can see it and retry.
                         console.error('Auto Maystro shipment failed after confirm:', shipmentErr)
-                        const msg =
-                            shipmentErr instanceof MaystroIntegrationError
-                                ? shipmentErr.statusMessage
-                                : String(shipmentErr?.message || 'Failed to push order to Maystro')
-                        return res.json({ ...order, _maystroError: msg })
+                        try {
+                            await service.rollbackCarrierConfirmation(tenant.id, order.id)
+                        } catch (rollbackErr) {
+                            console.error('Carrier confirmation rollback failed:', rollbackErr)
+                            return res.status(500).json({
+                                statusCode: 500,
+                                statusMessage: 'Carrier sync failed and order rollback could not be completed automatically'
+                            })
+                        }
+
+                        if (shipmentErr instanceof OrderValidationError) {
+                            return res.status(shipmentErr.statusCode).json({
+                                statusCode: shipmentErr.statusCode,
+                                statusMessage: shipmentErr.statusMessage,
+                                code: shipmentErr.code,
+                                meta: shipmentErr.meta
+                            })
+                        }
+
+                        if (shipmentErr instanceof DeliveryConfigurationError) {
+                            return res.status(shipmentErr.statusCode).json({
+                                statusCode: shipmentErr.statusCode,
+                                statusMessage: shipmentErr.statusMessage
+                            })
+                        }
+
+                        if (shipmentErr instanceof MaystroIntegrationError) {
+                            return res.status(shipmentErr.statusCode).json({
+                                statusCode: shipmentErr.statusCode,
+                                statusMessage: shipmentErr.statusMessage,
+                                code: shipmentErr.code
+                            })
+                        }
+
+                        return res.status(502).json({
+                            statusCode: 502,
+                            statusMessage: String(shipmentErr?.message || 'Failed to push order to delivery carrier')
+                        })
                     }
                 }
 
@@ -285,7 +316,7 @@ export class OrdersController {
         }
 
         try {
-            const order = await service.createPublicOrder({
+            const result = await service.createPublicOrder({
                 tenantId: tenant.id,
                 customerName: req.body?.customerName,
                 customerPhone: req.body?.customerPhone,
@@ -300,6 +331,7 @@ export class OrdersController {
                 deliveryMode: req.body?.deliveryMode,
                 shippingProvider: req.body?.shippingProvider,
                 shippingPickupPoint: req.body?.shippingPickupPoint,
+                redeemPointsRequested: req.body?.redeemPointsRequested,
                 items: req.body?.items ?? []
             }, req.subscription ? {
                 planCode: req.subscription.planCode,
@@ -308,7 +340,7 @@ export class OrdersController {
                 currentPeriodEnd: req.subscription.currentPeriodEnd
             } : null)
 
-            res.status(201).json({ success: true, orderId: order?.id, order })
+            res.status(201).json({ success: true, orderId: result.order?.id, order: result.order, loyaltySummary: result.loyaltySummary })
         } catch (error: any) {
             if (error instanceof OrderValidationError) {
                 return res.status(error.statusCode).json({

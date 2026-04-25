@@ -71,6 +71,8 @@ describe('Admin POS (direct sale) flow', () => {
                 tenantId,
                 name: 'POS Customer',
                 phone: '0550000001',
+                phoneRaw: '0550000001',
+                phoneNormalized: '213550000001',
                 email: `pos-${slug}@example.com`,
                 address: 'Algiers'
             }
@@ -85,6 +87,8 @@ describe('Admin POS (direct sale) flow', () => {
                 tenantId: otherTenantId,
                 name: 'Other Customer',
                 phone: '0550000002',
+                phoneRaw: '0550000002',
+                phoneNormalized: '213550000002',
                 email: `other-${slug}@example.com`,
                 address: 'Oran'
             }

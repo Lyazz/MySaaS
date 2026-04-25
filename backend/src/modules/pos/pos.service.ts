@@ -3,6 +3,8 @@ import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
+import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
+import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
 
 export class PosValidationError extends Error {
     statusCode: number
@@ -40,6 +42,9 @@ const addUtcYears = (date: Date, years: number) =>
     new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
 
 export class PosService {
+    private loyaltyFormula = new LoyaltyFormulaService()
+    private loyaltyLedger = new LoyaltyLedgerService()
+
     private async enforceOrderLimit(tenantId: string, subscription?: SubscriptionContext | null) {
         if (!subscription) return
 
@@ -138,7 +143,7 @@ export class PosService {
         const variantsById = variantIds.length
             ? await tx.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
             : []
 
@@ -154,7 +159,7 @@ export class PosService {
                     isActive: true,
                     optionValues: { none: {} }
                 },
-                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
             : []
 
@@ -219,10 +224,26 @@ export class PosService {
                 productTitle: product.title,
                 quantity: item.quantity,
                 price,
+                referencePrice: Number(variant.price ?? product.price ?? 0),
+                variantCost: Number(variant.cost ?? 0),
                 trackInventory: variant.trackInventory,
                 isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
             }
         })
+
+        const loyaltySettings = await tx.storeSettings.upsert({
+            where: { tenantId },
+            create: { tenantId },
+            update: {}
+        })
+        const pointsPreview = this.loyaltyFormula.computeTotal(
+            loyaltySettings,
+            validatedItems.map((item) => ({
+                quantity: item.quantity,
+                referencePrice: item.referencePrice,
+                cost: item.variantCost
+            }))
+        )
 
         const touchedProductIds = new Set<string>()
         const createdSale = await tx.sale.create({
@@ -235,6 +256,7 @@ export class PosService {
                 notes: 'POS sale',
                 totalAmount: total,
                 status: 'COMPLETED',
+                earnedPointsTotal: resolvedCustomer?.id ? pointsPreview.totalPoints : 0,
                 createdByUserId: actor?.userId ?? null
             }
         })
@@ -308,6 +330,24 @@ export class PosService {
         }
 
         await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
+
+        if (resolvedCustomer?.id && loyaltySettings.loyaltyEnabled === true && pointsPreview.totalPoints !== 0) {
+            await this.loyaltyLedger.createLedgerEntry(tx, {
+                tenantId,
+                customerId: resolvedCustomer.id,
+                direction: 'EARN',
+                status: 'AVAILABLE',
+                sourceType: 'SALE',
+                sourceId: createdSale.id,
+                saleId: createdSale.id,
+                points: pointsPreview.totalPoints,
+                createdByUserId: actor?.userId ?? null,
+                formulaSnapshot: {
+                    lines: pointsPreview.lines,
+                    source: 'POS'
+                }
+            })
+        }
 
         return tx.sale.findFirst({
             where: { id: createdSale.id, tenantId },

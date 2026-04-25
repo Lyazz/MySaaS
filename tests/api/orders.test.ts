@@ -1,8 +1,10 @@
 import request from 'supertest'
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
 import { signAccessToken } from '../../backend/src/lib/jwt'
+import { DeliveryService } from '../../backend/src/modules/delivery/delivery.service'
+import { MaystroIntegrationError } from '../../backend/src/modules/delivery/maystro/maystro.errors'
 
 describe('Public checkout order flow', () => {
     const slug = `checkout-${Date.now()}`
@@ -179,7 +181,7 @@ describe('Public checkout order flow', () => {
         expect(saved?.items[0].variantId).toBe(variantId)
         expect(saved?.items[0].quantity).toBe(2)
 
-        expect(saved?.customerId).toBeNull()
+        expect(saved?.customerId).toBeTruthy()
         expect(saved?.shippingServiceLevel).toBe('home')
         expect(saved?.shippingAmount).toBe(499)
         expect(saved?.shippingCurrency).toBe('DZD')
@@ -421,6 +423,52 @@ describe('Public checkout order flow', () => {
             .set('Authorization', `Bearer ${adminToken}`)
             .send({ status: 'RETURNED' })
         expect(blocked.status).toBe(400)
+    })
+
+    it('does not confirm the order when automatic carrier creation fails', async () => {
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Carrier Failure Buyer',
+                customerPhone: '0550666777',
+                shippingProvider: 'MAYSTRO',
+                shippingWilayaCode: '16',
+                shippingCommuneCode: '1605',
+                shippingAddressLine1: '456 Rue Carrier',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(created.status).toBe(201)
+        const orderId = created.body.orderId as string
+
+        const variantBeforeConfirm = await prisma.productVariant.findUnique({ where: { id: variantId } })
+
+        const shipmentSpy = vi
+            .spyOn(DeliveryService.prototype, 'createShipment')
+            .mockRejectedValue(new MaystroIntegrationError({ statusCode: 502, statusMessage: 'Carrier unavailable' }))
+
+        const confirm = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'CONFIRMED' })
+
+        expect(confirm.status).toBe(502)
+        expect(confirm.body.statusMessage).toBe('Carrier unavailable')
+        expect(shipmentSpy).toHaveBeenCalledTimes(1)
+
+        const saved = await prisma.order.findUnique({ where: { id: orderId } })
+        expect(saved?.status).toBe('PENDING')
+
+        const variantAfter = await prisma.productVariant.findUnique({ where: { id: variantId } })
+        expect(variantAfter?.stock).toBe(variantBeforeConfirm?.stock)
+        expect(variantAfter?.reserved).toBe(0)
+
+        const shipmentCount = await prisma.shipment.count({
+            where: { tenantId, orderId, provider: 'MAYSTRO' }
+        })
+        expect(shipmentCount).toBe(0)
     })
 
     it('prioritizes promotional price at checkout even when promotion flags/date window are inactive', async () => {

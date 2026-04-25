@@ -21,6 +21,12 @@ type Product = {
   categoryId?: string | null
   categoryIds?: string[]
   categories?: Array<{ id: string; title: string; slug: string }>
+  loyaltyPreview?: {
+    enabled: boolean
+    estimatedPoints: number
+    displayText: string
+    formulaBreakdown?: { detail?: string }
+  } | null
 }
 
 const productUrl = useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`)
@@ -155,6 +161,22 @@ const layoutName = computed(() => isLandingMode.value ? 'landing' : 'store')
 
 <template>
   <NuxtLayout :name="layoutName">
+    <div
+      v-if="product?.loyaltyPreview?.enabled"
+      class="mx-auto max-w-6xl px-4 pt-4"
+    >
+      <div class="rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm">
+        <div class="font-semibold">
+          {{ product.loyaltyPreview.displayText }}
+        </div>
+        <div
+          v-if="product.loyaltyPreview.formulaBreakdown?.detail"
+          class="mt-1 text-xs text-amber-800/90"
+        >
+          {{ product.loyaltyPreview.formulaBreakdown.detail }}
+        </div>
+      </div>
+    </div>
     <component
         :is="ActiveTemplate"
         :product="product"

@@ -11,7 +11,7 @@
       </div>
       <div v-if="uploading" class="flex items-center gap-1.5 text-xs font-medium [color:var(--brand)]">
         <Icon name="lucide:loader-2" class="h-3 w-3 animate-spin" />
-        {{ t('admin.common.uploading') }}
+        {{ t('admin.common.uploading') }} {{ uploadProgress }}%
       </div>
     </div>
 
@@ -113,12 +113,14 @@ const emit = defineEmits<{
 }>()
 
 const uploading = ref(false)
+const uploadProgress = ref(0)
 const selectedFile = ref<File | null>(null)
 const cropperOpen = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
+const { uploadWithProgress } = useUploadWithProgress()
 
 const policy = computed(() =>
   resolveImageUploadPolicy({
@@ -183,22 +185,18 @@ const closeCropper = () => {
 
 const uploadFile = async (file: File) => {
   uploading.value = true
+  uploadProgress.value = 0
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-
     const token = getAuthToken()
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      body: formData
+    const data = await uploadWithProgress<{ url: string; error?: string }>({
+      url: '/api/upload',
+      file,
+      token,
+      fallbackErrorMessage: t('admin.components.imageUploader.errors.uploadFailed'),
+      onProgress: (percent) => {
+        uploadProgress.value = percent
+      }
     })
-
-    const data = await response.json().catch(() => ({}))
-
-    if (!response.ok) {
-      throw new Error(data.error || t('admin.components.imageUploader.errors.uploadFailed'))
-    }
 
     emit('update:modelValue', data.url)
   } catch (error) {
@@ -206,6 +204,7 @@ const uploadFile = async (file: File) => {
     alert(error instanceof Error ? error.message : t('admin.components.imageUploader.errors.uploadFailed'))
   } finally {
     uploading.value = false
+    uploadProgress.value = 0
     closeCropper()
   }
 }

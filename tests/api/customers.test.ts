@@ -34,6 +34,8 @@ describe('Admin customers API', () => {
                 tenantId: tenantAId,
                 name: 'Customer One',
                 phone: '0550000100',
+                phoneRaw: '0550000100',
+                phoneNormalized: '213550000100',
                 address: 'Address 1',
                 openingBalance: 100
             }
@@ -42,7 +44,9 @@ describe('Admin customers API', () => {
             data: {
                 tenantId: tenantAId,
                 name: 'Customer Two',
-                phone: '0550000200'
+                phone: '0550000200',
+                phoneRaw: '0550000200',
+                phoneNormalized: '213550000200'
             }
         })
 
@@ -50,7 +54,9 @@ describe('Admin customers API', () => {
             data: {
                 tenantId: tenantBId,
                 name: 'Other Tenant',
-                phone: '0550000100'
+                phone: '0550000100',
+                phoneRaw: '0550000100',
+                phoneNormalized: '213550000100'
             }
         })
         otherTenantCustomerId = otherTenantCustomer.id
@@ -217,6 +223,28 @@ describe('Admin customers API', () => {
         const created = list.body.find((c: any) => c.phone === '0550000300')
         expect(created.ordersCount).toBe(0)
         expect(created.currentBalance).toBe(0)
+    })
+
+    it('deduplicates customers by normalized Algerian phone number', async () => {
+        const res = await request(app)
+            .post('/api/admin/customers')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminTokenA}`)
+            .send({ name: 'Duplicate Phone', phone: '+213 550 00 01 00' })
+
+        expect(res.status).toBe(409)
+        expect(res.body.statusMessage).toContain('phone number already exists')
+    })
+
+    it('finds a customer by normalized phone even when the query format differs', async () => {
+        const res = await request(app)
+            .get('/api/admin/customers/by-phone/%2B213550000100')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminTokenA}`)
+
+        expect(res.status).toBe(200)
+        expect(res.body.summary?.phoneNormalized).toBe('213550000100')
+        expect(res.body.summary?.phone).toBe('0550000100')
     })
 
     it('does not allow cross-tenant access by id', async () => {

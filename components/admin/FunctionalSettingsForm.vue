@@ -131,6 +131,79 @@
         </div>
       </div>
 
+      <div class="ui-card overflow-hidden">
+        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
+          <div class="md:col-span-1">
+            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+              Programme de points
+            </h3>
+            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
+              Configurez le calcul des points, le seuil minimum de redemption et la valeur en DZD de chaque point.
+            </p>
+          </div>
+
+          <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
+            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
+              <div class="flex-1 pr-4">
+                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
+                  <Icon name="lucide:badge-percent" class="w-4 h-4 [color:var(--brand)]" />
+                  Activer les points
+                </h4>
+                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
+                  Active le calcul des points pour les produits et la redemption au checkout.
+                </p>
+              </div>
+              <BaseToggle v-model="form.loyaltyEnabled" sr-label="Activer les points" />
+            </div>
+
+            <div v-if="form.loyaltyEnabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="ui-label mb-1.5 block">Points de base</label>
+                <input
+                  v-model.number="form.loyaltyBasePoints"
+                  type="number"
+                  step="1"
+                  class="ui-input block w-full rounded-lg"
+                  placeholder="0"
+                >
+              </div>
+              <div>
+                <label class="ui-label mb-1.5 block">Facteur de pourcentage</label>
+                <input
+                  v-model.number="form.loyaltyMarginFactor"
+                  type="number"
+                  step="0.01"
+                  class="ui-input block w-full rounded-lg"
+                  placeholder="0.10"
+                >
+              </div>
+              <div>
+                <label class="ui-label mb-1.5 block">Seuil minimum de redemption</label>
+                <input
+                  v-model.number="form.loyaltyMinRedeemPoints"
+                  type="number"
+                  min="0"
+                  step="1"
+                  class="ui-input block w-full rounded-lg"
+                  placeholder="0"
+                >
+              </div>
+              <div>
+                <label class="ui-label mb-1.5 block">Valeur DZD par point</label>
+                <input
+                  v-model.number="form.loyaltyRedeemRateDzdPerPoint"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  class="ui-input block w-full rounded-lg"
+                  placeholder="1"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Currency -->
       <div class="ui-card overflow-hidden">
         <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
@@ -283,7 +356,12 @@ const form = reactive({
   currencyCountry: 'DZ',
   language: 'en',
   announcementText: '',
-  announcementScrolling: false
+  announcementScrolling: false,
+  loyaltyEnabled: false,
+  loyaltyBasePoints: 0,
+  loyaltyMarginFactor: 0,
+  loyaltyMinRedeemPoints: 0,
+  loyaltyRedeemRateDzdPerPoint: 1
 })
 
 const languages = computed(() => [
@@ -345,6 +423,11 @@ const updateForm = (data: any) => {
   form.language = data.language || 'en'
   form.announcementText = data.announcementText || ''
   form.announcementScrolling = data.announcementScrolling || false
+  form.loyaltyEnabled = data.loyaltyEnabled ?? false
+  form.loyaltyBasePoints = Number(data.loyaltyBasePoints ?? 0)
+  form.loyaltyMarginFactor = Number(data.loyaltyMarginFactor ?? 0)
+  form.loyaltyMinRedeemPoints = Number(data.loyaltyMinRedeemPoints ?? 0)
+  form.loyaltyRedeemRateDzdPerPoint = Number(data.loyaltyRedeemRateDzdPerPoint ?? 1)
 }
 
 const fetchSettings = async () => {
@@ -377,7 +460,12 @@ const save = async () => {
         currencyCountry: form.currencyCountry,
         language: form.language,
         announcementText: form.announcementText,
-        announcementScrolling: form.announcementScrolling
+        announcementScrolling: form.announcementScrolling,
+        loyaltyEnabled: form.loyaltyEnabled,
+        loyaltyBasePoints: form.loyaltyBasePoints,
+        loyaltyMarginFactor: form.loyaltyMarginFactor,
+        loyaltyMinRedeemPoints: form.loyaltyMinRedeemPoints,
+        loyaltyRedeemRateDzdPerPoint: form.loyaltyRedeemRateDzdPerPoint
       }
     })
     useState<any>('storeSettings').value = updated

@@ -1438,8 +1438,11 @@ function orderStatusLabel(code: string) {
   const statusLocked = computed(() => {
     const o = order.value
     if (!o) return false
-    const hasCarrier = Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
-    return hasCarrier && o.status !== 'PENDING'
+    
+    const provider = String(o.shippingProvider || (o.shipments && o.shipments.length ? o.shipments[0].provider : '') || '').toUpperCase()
+    const hasApiCarrier = Boolean(provider) && provider !== 'SELF'
+    
+    return hasApiCarrier && o.status !== 'PENDING'
   })
 
   const canPrintBordereau = computed(() => {

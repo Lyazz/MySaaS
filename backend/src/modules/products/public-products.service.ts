@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma'
 import { coalesceProductImageUrls } from '../../lib/product-images'
+import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 
 const extractMetaPixelIds = (metaPixels: any[]): string[] => {
     return (metaPixels || [])
@@ -35,8 +36,35 @@ const mapProductCategories = (product: any) => {
 }
 
 export class PublicProductsService {
+    private loyalty = new LoyaltyFormulaService()
+
+    private buildProductLoyaltyPreview(settings: any, product: any) {
+        const candidateVariant =
+            Array.isArray(product?.variants) && product.variants.length > 0
+                ? (product.variants.find((variant: any) => Array.isArray(variant.optionValues) && variant.optionValues.length === 0) ?? product.variants[0])
+                : null
+
+        const referencePrice = candidateVariant?.price ?? product?.price ?? 0
+        const cost = candidateVariant?.cost ?? 0
+
+        return this.loyalty.buildPublicPreview(settings, {
+            quantity: 1,
+            referencePrice,
+            cost
+        })
+    }
+
     async listProducts(tenantId: string, search?: string) {
         const now = new Date()
+        const settings = await prisma.storeSettings.findUnique({
+            where: { tenantId },
+            select: {
+                loyaltyEnabled: true,
+                loyaltyBasePoints: true,
+                loyaltyMarginFactor: true,
+                loyaltyPublicFormulaMode: true
+            }
+        })
 
         const where: any = { tenantId, isActive: true }
         if (search) {
@@ -58,6 +86,17 @@ export class PublicProductsService {
                 metaPixels: {
                     include: { metaPixel: { select: { pixelId: true, isActive: true } } }
                 },
+                variants: {
+                    where: { isActive: true },
+                    orderBy: { createdAt: 'asc' },
+                    take: 1,
+                    select: {
+                        id: true,
+                        price: true,
+                        cost: true,
+                        optionValues: { select: { optionValueId: true } }
+                    }
+                },
                 bundleDeals: {
                     where: {
                         isActive: true,
@@ -70,19 +109,29 @@ export class PublicProductsService {
             orderBy: { createdAt: 'desc' }
         })
 
-        return products.map(({ metaPixels, productImages, images, ...rest }: any) => {
+        return products.map(({ metaPixels, productImages, images, variants, ...rest }: any) => {
             const withCategories = mapProductCategories(rest)
             return {
                 ...withCategories,
                 productImages,
                 images: coalesceProductImageUrls(images, productImages),
-                metaPixelIds: extractMetaPixelIds(metaPixels)
+                metaPixelIds: extractMetaPixelIds(metaPixels),
+                loyaltyPreview: this.buildProductLoyaltyPreview(settings, { ...rest, variants })
             }
         })
     }
 
     async getProductBySlug(tenantId: string, slug: string) {
         const now = new Date()
+        const settings = await prisma.storeSettings.findUnique({
+            where: { tenantId },
+            select: {
+                loyaltyEnabled: true,
+                loyaltyBasePoints: true,
+                loyaltyMarginFactor: true,
+                loyaltyPublicFormulaMode: true
+            }
+        })
         const product = await prisma.product.findUnique({
             where: { tenantId_slug: { tenantId, slug } },
             include: {
@@ -100,8 +149,24 @@ export class PublicProductsService {
                 },
                 variants: {
                     where: { isActive: true },
-                    include: {
-                        optionValues: { include: { optionValue: true } },
+                    select: {
+                        id: true,
+                        productId: true,
+                        sku: true,
+                        barcode: true,
+                        price: true,
+                        compareAtPrice: true,
+                        isActive: true,
+                        trackInventory: true,
+                        stock: true,
+                        reserved: true,
+                        safetyStock: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        cost: true,
+                        optionValues: {
+                            include: { optionValue: true }
+                        },
                         images: { include: { image: true }, orderBy: { position: 'asc' } }
                     },
                     orderBy: { createdAt: 'asc' }
@@ -120,12 +185,24 @@ export class PublicProductsService {
 
         if (!product) return null
 
-        const { metaPixels, productImages, images, ...rest }: any = product
+        const { metaPixels, productImages, images, variants, ...rest }: any = product
         return {
             ...mapProductCategories(rest),
+            variants: Array.isArray(variants)
+                ? variants.map((variant: any) => ({
+                    ...variant,
+                    loyaltyPreview: this.loyalty.buildPublicPreview(settings, {
+                        quantity: 1,
+                        referencePrice: variant.price ?? rest.price ?? 0,
+                        cost: variant.cost ?? 0
+                    }),
+                    cost: undefined
+                }))
+                : [],
             productImages,
             images: coalesceProductImageUrls(images, productImages),
-            metaPixelIds: extractMetaPixelIds(metaPixels)
+            metaPixelIds: extractMetaPixelIds(metaPixels),
+            loyaltyPreview: this.buildProductLoyaltyPreview(settings, { ...rest, variants })
         }
     }
 }

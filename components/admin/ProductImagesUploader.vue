@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between">
       <label class="ui-label">{{ t('admin.imageUploader.title') }}</label>
       <div v-if="uploading" class="text-sm text-blue-600">
-        {{ t('admin.common.uploading') }}
+        {{ t('admin.common.uploading') }} {{ uploadProgress }}%
       </div>
     </div>
 
@@ -139,8 +139,10 @@ const acceptMimes = computed(() => policy.value.allowedMimeTypes.join(','))
 
 const images = ref<ProductImage[]>([...props.modelValue])
 const uploading = ref(false)
+const uploadProgress = ref(0)
 const dragging = ref<number | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+const { uploadWithProgress } = useUploadWithProgress()
 
 const cropperOpen = ref(false)
 const cropperFile = ref<File | null>(null)
@@ -210,20 +212,17 @@ const handleCropperError = (message: string) => {
 }
 
 const uploadImage = async (file: File): Promise<string> => {
-  const formData = new FormData()
-  formData.append('file', file)
-
+  uploadProgress.value = 0
   const token = getAuthToken()
-  const response = await fetch('/api/upload', {
-    method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    body: formData
+  const payload = await uploadWithProgress<{ url: string; error?: string }>({
+    url: '/api/upload',
+    file,
+    token,
+    fallbackErrorMessage: t('admin.imageUploader.errors.uploadFailed'),
+    onProgress: (percent) => {
+      uploadProgress.value = percent
+    }
   })
-
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    throw new Error(payload?.error || t('admin.imageUploader.errors.uploadFailed'))
-  }
 
   return payload.url
 }
@@ -233,6 +232,7 @@ const handleFileSelect = async (event: Event) => {
   if (!input.files?.length) return
 
   uploading.value = true
+  uploadProgress.value = 0
 
   try {
     for (const file of Array.from(input.files)) {
@@ -272,6 +272,7 @@ const handleFileSelect = async (event: Event) => {
     alert(error instanceof Error ? error.message : t('admin.imageUploader.errors.uploadFailed'))
   } finally {
     uploading.value = false
+    uploadProgress.value = 0
     clearFileInput()
     if (cropperOpen.value) {
       finishCropper(null)

@@ -1,6 +1,9 @@
 <template>
   <ClientOnly>
     <div class="rich-text-editor-wrapper">
+      <div v-if="isUploading" class="upload-progress-badge">
+        {{ t('admin.common.uploading') }} {{ uploadProgress }}%
+      </div>
       <QuillEditor
         ref="quillRef"
         v-model:content="content"
@@ -27,10 +30,13 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 const { showToast } = useToast()
 const { t } = useI18n({ useScope: 'global' })
+const authStore = useAuthStore()
+const { uploadWithProgress } = useUploadWithProgress()
 
 const quillRef = ref<any>(null)
 const content = ref(props.modelValue || '')
 const isUploading = ref(false)
+const uploadProgress = ref(0)
 
 // Toolbar configuration - RTL direction is a toggle button in the toolbar
 const editorOptions = {
@@ -96,24 +102,19 @@ const handleImageUpload = async (quill: any) => {
     }
     
     isUploading.value = true
+    uploadProgress.value = 0
     
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${useAuthStore().token}`
-        },
-        body: formData,
+      const token = authStore.token || useCookie('auth_token').value
+      const data = await uploadWithProgress<{ url: string; error?: string }>({
+        url: '/api/upload',
+        file,
+        token,
+        fallbackErrorMessage: t('admin.components.richTextEditor.errors.uploadFailed'),
+        onProgress: (percent) => {
+          uploadProgress.value = percent
+        }
       })
-      
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.error || t('admin.components.richTextEditor.errors.uploadFailed'))
-      }
       
       // Insert the image at current cursor position
       const range = quill.getSelection(true)
@@ -125,6 +126,7 @@ const handleImageUpload = async (quill: any) => {
       showToast(message, 'error')
     } finally {
       isUploading.value = false
+      uploadProgress.value = 0
     }
   }
   
@@ -158,11 +160,26 @@ const onContentUpdate = (value: string) => {
    WRAPPER STYLES
    ============================== */
 .rich-text-editor-wrapper {
+  position: relative;
   border: 1px solid var(--surface-border);
   border-radius: 0.75rem;
   overflow: hidden;
   background: var(--surface-1);
   transition: border-color 0.2s;
+}
+
+.upload-progress-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  border-radius: 9999px;
+  background: rgba(15, 118, 110, 0.12);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0f766e;
 }
 
 .rich-text-editor-wrapper:focus-within {

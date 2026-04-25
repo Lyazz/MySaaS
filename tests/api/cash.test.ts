@@ -64,7 +64,13 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
 
         const [customerA, supplierA] = await prisma.$transaction([
             prisma.customer.create({
-                data: { tenantId: tenantAId, name: 'Cash Customer', phone: `0551${Date.now()}` }
+                data: {
+                    tenantId: tenantAId,
+                    name: 'Cash Customer',
+                    phone: '0551000001',
+                    phoneRaw: '0551000001',
+                    phoneNormalized: '213551000001'
+                }
             }),
             prisma.supplier.create({
                 data: { tenantId: tenantAId, name: `Cash Supplier ${Date.now()}` }

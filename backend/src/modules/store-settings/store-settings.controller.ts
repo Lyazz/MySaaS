@@ -88,7 +88,11 @@ export class StoreSettingsController {
                     currencyCode: settings.currencyCode,
                     currencyCountry: settings.currencyCountry,
                     allowedDeliveryProviders: settings.allowedDeliveryProviders,
-                    storePickupEnabled: settings.storePickupEnabled
+                    storePickupEnabled: settings.storePickupEnabled,
+                    loyaltyEnabled: settings.loyaltyEnabled,
+                    loyaltyMinRedeemPoints: settings.loyaltyMinRedeemPoints,
+                    loyaltyRedeemRateDzdPerPoint: settings.loyaltyRedeemRateDzdPerPoint,
+                    loyaltyPublicFormulaMode: settings.loyaltyPublicFormulaMode
                 }
             })
         } catch (error) {

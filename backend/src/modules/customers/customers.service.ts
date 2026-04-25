@@ -1,5 +1,7 @@
 import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
+import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
+import { PhoneNormalizationError, PhoneNormalizationService } from '../loyalty/phone-normalization.service'
 
 export class CustomerValidationError extends Error {
     statusCode: number
@@ -24,6 +26,8 @@ export interface CustomersListPagination {
 export interface CustomerSummary {
     id: string
     phone: string
+    phoneRaw: string | null
+    phoneNormalized: string
     name: string
     email: string | null
     address: string | null
@@ -49,11 +53,16 @@ const toMoneyString = (value: unknown): string | null => {
 }
 
 export class CustomersService {
+    private loyalty = new LoyaltyLedgerService()
+    private phone = new PhoneNormalizationService()
+
     private async summarizeCustomers(
         tenantId: string,
         customers: Array<{
             id: string
             phone: string
+            phoneRaw: string | null
+            phoneNormalized: string
             name: string
             email: string | null
             address: string | null
@@ -104,6 +113,8 @@ export class CustomersService {
             return {
                 id: c.id,
                 phone: c.phone,
+                phoneRaw: c.phoneRaw ?? null,
+                phoneNormalized: c.phoneNormalized,
                 name: c.name,
                 email: c.email ?? null,
                 address: c.address ?? null,
@@ -125,13 +136,15 @@ export class CustomersService {
             ...(search
                 ? {
                     OR: [
-                        { name: { contains: search, mode: 'insensitive' } },
+                        { name: { contains: search, mode: 'insensitive' as const } },
                         { phone: { contains: search } },
-                        { email: { contains: search, mode: 'insensitive' } }
+                        { phoneRaw: { contains: search } },
+                        { phoneNormalized: { contains: search } },
+                        { email: { contains: search, mode: 'insensitive' as const } }
                     ]
                 }
                 : {})
-        }
+        } satisfies Prisma.CustomerWhereInput
     }
 
     async list(tenantId: string, filters: CustomersListFilters): Promise<CustomerSummary[]> {
@@ -142,6 +155,8 @@ export class CustomersService {
             select: {
                 id: true,
                 phone: true,
+                phoneRaw: true,
+                phoneNormalized: true,
                 name: true,
                 email: true,
                 address: true,
@@ -172,6 +187,8 @@ export class CustomersService {
                 select: {
                     id: true,
                     phone: true,
+                    phoneRaw: true,
+                    phoneNormalized: true,
                     name: true,
                     email: true,
                     address: true,
@@ -195,7 +212,7 @@ export class CustomersService {
     async getById(tenantId: string, id: string) {
         const customer = await prisma.customer.findUnique({
             where: { tenantId_id: { tenantId, id } },
-            select: { id: true, phone: true, name: true, email: true, address: true, openingBalance: true }
+            select: { id: true, phone: true, phoneRaw: true, phoneNormalized: true, name: true, email: true, address: true, openingBalance: true }
         })
 
         const sales = await prisma.sale.findMany({
@@ -239,6 +256,8 @@ export class CustomersService {
             ? {
                 id: customer.id,
                 phone: customer.phone,
+                phoneRaw: customer.phoneRaw ?? null,
+                phoneNormalized: customer.phoneNormalized,
                 name: customer.name,
                 email: customer.email ?? null,
                 address: customer.address ?? null,
@@ -253,10 +272,15 @@ export class CustomersService {
     }
 
     async getByPhone(tenantId: string, phone: string) {
-        const customer = await prisma.customer.findUnique({
-            where: { tenantId_phone: { tenantId, phone } },
-            select: { id: true, phone: true, name: true, email: true, address: true, openingBalance: true }
-        })
+        let customer
+        try {
+            customer = await this.loyalty.findCustomerByPhone(prisma, tenantId, phone)
+        } catch (error) {
+            if (error instanceof PhoneNormalizationError) {
+                throw new CustomerValidationError(error.statusCode, error.statusMessage)
+            }
+            throw error
+        }
 
         const sales = await prisma.sale.findMany({
             where: { tenantId, status: 'COMPLETED', customerId: customer?.id ?? '__nope__' },
@@ -299,6 +323,8 @@ export class CustomersService {
             ? {
                 id: customer.id,
                 phone: customer.phone,
+                phoneRaw: customer.phoneRaw ?? null,
+                phoneNormalized: customer.phoneNormalized,
                 name: customer.name,
                 email: customer.email ?? null,
                 address: customer.address ?? null,
@@ -318,6 +344,16 @@ export class CustomersService {
         if (!name) throw new CustomerValidationError(400, 'Name is required')
         if (!phone) throw new CustomerValidationError(400, 'Phone is required')
 
+        let normalizedPhone
+        try {
+            normalizedPhone = this.phone.normalizeAlgerianPhone(phone, 'Phone')
+        } catch (error) {
+            if (error instanceof PhoneNormalizationError) {
+                throw new CustomerValidationError(error.statusCode, error.statusMessage)
+            }
+            throw error
+        }
+
         const email = typeof input?.email === 'string' ? input.email.trim() : ''
         const address = typeof input?.address === 'string' ? input.address.trim() : ''
         const openingBalanceStr = toMoneyString(input?.openingBalance)
@@ -329,6 +365,8 @@ export class CustomersService {
                     tenantId,
                     name,
                     phone,
+                    phoneRaw: normalizedPhone.raw,
+                    phoneNormalized: normalizedPhone.normalized,
                     email: email || null,
                     address: address || null,
                     openingBalance
@@ -338,7 +376,7 @@ export class CustomersService {
             if (error?.code === 'P2002') {
                 const target = error.meta?.target
                 if (Array.isArray(target)) {
-                    if (target.includes('phone')) {
+                    if (target.includes('phoneNormalized') || target.includes('phone')) {
                         throw new CustomerValidationError(409, 'A customer with this phone number already exists')
                     }
                     if (target.includes('email')) {
@@ -360,6 +398,18 @@ export class CustomersService {
         if (name !== undefined && !name) throw new CustomerValidationError(400, 'Name is required')
         if (phone !== undefined && !phone) throw new CustomerValidationError(400, 'Phone is required')
 
+        let normalizedPhone: ReturnType<PhoneNormalizationService['normalizeAlgerianPhone']> | undefined
+        if (phone !== undefined) {
+            try {
+                normalizedPhone = this.phone.normalizeAlgerianPhone(phone, 'Phone')
+            } catch (error) {
+                if (error instanceof PhoneNormalizationError) {
+                    throw new CustomerValidationError(error.statusCode, error.statusMessage)
+                }
+                throw error
+            }
+        }
+
         const email = input?.email !== undefined ? (typeof input.email === 'string' ? input.email.trim() || null : null) : undefined
         const address = input?.address !== undefined ? (typeof input.address === 'string' ? input.address.trim() || null : null) : undefined
 
@@ -369,6 +419,8 @@ export class CustomersService {
                 data: {
                     name,
                     phone,
+                    phoneRaw: normalizedPhone?.raw,
+                    phoneNormalized: normalizedPhone?.normalized,
                     email,
                     address
                 }
@@ -380,7 +432,7 @@ export class CustomersService {
 
         return prisma.customer.findUnique({
             where: { tenantId_id: { tenantId, id } },
-            select: { id: true, phone: true, name: true, email: true, address: true, openingBalance: true }
+            select: { id: true, phone: true, phoneRaw: true, phoneNormalized: true, name: true, email: true, address: true, openingBalance: true }
         })
     }
 

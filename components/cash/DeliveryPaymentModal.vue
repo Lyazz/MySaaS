@@ -5,19 +5,19 @@
       class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 py-8"
       @click.self="handleCancel"
     >
-      <div class="relative w-full max-w-lg rounded-lg bg-white shadow-xl flex flex-col max-h-[90vh]">
-        <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-100 shrink-0">
+      <div class="relative w-full max-w-lg rounded-lg surface-1 border border-[var(--surface-border)] shadow-xl flex flex-col max-h-[90vh]">
+        <div class="flex items-start justify-between gap-4 px-6 py-4 border-b border-[var(--surface-border)] shrink-0">
           <div class="min-w-0">
-            <h3 class="text-lg font-semibold text-gray-900">
+            <h3 class="text-lg font-semibold text-primary">
               {{ title }}
             </h3>
-            <p class="mt-1 text-sm text-gray-500">
+            <p class="mt-1 text-sm text-secondary">
               {{ subtitle }}
             </p>
           </div>
           <button
             type="button"
-            class="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            class="rounded-md p-2 text-tertiary hover:surface-2 hover:text-primary transition-colors"
             @click="handleCancel"
           >
             <Icon name="lucide:x" class="h-5 w-5" />
@@ -25,17 +25,17 @@
         </div>
 
         <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
-          <div class="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <div class="rounded-md border border-[var(--surface-border)] surface-2 px-4 py-3">
+            <p class="text-xs font-medium uppercase tracking-wide text-tertiary">
               {{ t('admin.pages.cash.modals.delivery.amountLabel') }}
             </p>
-            <p class="mt-1 text-lg font-semibold text-slate-900">
+            <p class="mt-1 text-lg font-semibold text-primary">
               {{ formatCurrency(amount) }}
             </p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="ui-label">
               {{ t('admin.pages.cash.modals.delivery.cashboxLabel') }}
             </label>
             <BaseSelect v-model="cashboxId">
@@ -51,14 +51,14 @@
                 {{ c.name }}{{ c.openSession ? '' : ` (${t('admin.pages.cash.modals.delivery.noOpenSession')})` }}
               </option>
             </BaseSelect>
-            <p class="mt-1 text-xs text-slate-500">
+            <p class="mt-1 text-xs text-secondary">
               {{ t('admin.pages.cash.modals.delivery.cashboxHint') }}
             </p>
           </div>
 
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label">
                 {{ t('admin.pages.cash.modals.delivery.methodLabel') }}
               </label>
               <BaseSelect v-model="method">
@@ -70,7 +70,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
+              <label class="ui-label">
                 {{ t('admin.pages.cash.modals.delivery.referenceLabel') }}
               </label>
               <BaseInput
@@ -81,34 +81,37 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="ui-label">
               {{ t('admin.pages.cash.modals.delivery.noteLabel') }}
             </label>
             <textarea
               v-model="note"
               rows="2"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
+              class="ui-input resize-none"
               :placeholder="t('admin.pages.cash.modals.delivery.notePlaceholder')"
             />
           </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-3 rounded-b-lg shrink-0">
+        <div class="px-6 py-4 border-t border-[var(--surface-border)] surface-2 flex items-center justify-end gap-3 rounded-b-lg shrink-0">
           <button
             type="button"
-            class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="ui-btn ui-btn--ghost"
             @click="handleCancel"
           >
             {{ t('admin.common.cancel') }}
           </button>
           <button
             type="button"
-            class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="ui-btn ui-btn--primary"
             :disabled="!canConfirm || loading"
             @click="handleConfirm"
           >
             <span v-if="!loading">{{ confirmText }}</span>
-            <span v-else>{{ t('admin.common.updating') }}</span>
+            <span v-else>
+              <Icon name="lucide:loader-2" class="h-4 w-4 animate-spin mr-2 inline" />
+              {{ t('admin.common.updating') }}
+            </span>
           </button>
         </div>
       </div>

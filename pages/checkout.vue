@@ -50,5 +50,8 @@ definePageMeta({
 </script>
 
 <template>
-  <component :is="ActiveTemplate" />
+  <div class="space-y-4">
+    <CheckoutLoyaltyPanel />
+    <component :is="ActiveTemplate" />
+  </div>
 </template>

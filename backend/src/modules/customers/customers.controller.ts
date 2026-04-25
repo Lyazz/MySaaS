@@ -1,7 +1,10 @@
 import type { Request, Response } from 'express'
 import { CustomersService, CustomerValidationError } from './customers.service'
+import prisma from '../../lib/prisma'
+import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
 
 const service = new CustomersService()
+const loyalty = new LoyaltyLedgerService()
 
 export class CustomersController {
     async list(req: Request, res: Response) {
@@ -99,6 +102,33 @@ export class CustomersController {
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
             console.error('Update customer error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async getPoints(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Customer ID is required' })
+            }
+
+            const customer = await prisma.customer.findUnique({
+                where: { tenantId_id: { tenantId: tenant.id, id } },
+                select: { id: true }
+            })
+            if (!customer) {
+                return res.status(404).json({ statusCode: 404, statusMessage: 'Customer not found' })
+            }
+
+            const data = await loyalty.getCustomerPointsDetails(prisma, tenant.id, id)
+            res.json(data)
+        } catch (error: any) {
+            if (error instanceof CustomerValidationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get customer points error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

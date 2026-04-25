@@ -37,7 +37,7 @@ describe('ProductImagesUploader policy behavior', () => {
     })
 
     const modal = wrapper.getComponent({ name: 'ImageCropperModal' })
-    expect(modal.props('defaultPreset')).toBe('4:5')
+    expect(modal.props('defaultPreset')).toBe('free')
     expect(modal.props('cropPresets')).toContain('free')
   })
 

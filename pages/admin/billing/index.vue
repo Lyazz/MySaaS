@@ -282,7 +282,7 @@
                         <Icon v-else name="lucide:upload-cloud" class="w-8 h-8 text-slate-400 mb-2" />
                         
                         <p class="mb-1 text-sm font-semibold" :class="proofUrl ? 'text-emerald-400' : ''" :style="!proofUrl ? 'color: var(--text-secondary)' : ''">
-                          {{ uploading ? t('admin.common.uploading', 'Uploading...') : proofUrl ? t('admin.pages.billing.payment.uploadSuccess', 'Receipt attached successfully') : t('admin.common.clickToUpload', 'Click to upload receipt') }}
+                          {{ uploading ? `${t('admin.common.uploading', 'Uploading...')} ${uploadProgress}%` : proofUrl ? t('admin.pages.billing.payment.uploadSuccess', 'Receipt attached successfully') : t('admin.common.clickToUpload', 'Click to upload receipt') }}
                         </p>
                         <p v-if="!proofUrl && !uploading" class="text-xs" style="color: var(--text-muted)">PNG, JPG, WEBP, PDF (Max 10MB)</p>
                       </div>
@@ -421,6 +421,7 @@ import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 
 const { t, locale } = useI18n({ useScope: 'global' })
+const { uploadWithProgress } = useUploadWithProgress()
 
 definePageMeta({
   middleware: 'auth',
@@ -564,6 +565,7 @@ watch(
 const selectedMethod = ref('')
 const proofUrl = ref('')
 const uploading = ref(false)
+const uploadProgress = ref(0)
 const uploadError = ref('')
 const submitting = ref(false)
 const submitError = ref('')
@@ -627,18 +629,20 @@ async function handleFileUpload(event: Event) {
   if (!file) return
 
   uploading.value = true
+  uploadProgress.value = 0
   uploadError.value = ''
   
   const token = (authStore as any).token?.value ?? (authStore as any).token
   
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    const res = await $fetch('/api/admin/billing/proofs/upload', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData
+    const res = await uploadWithProgress<{ url: string; error?: string }>({
+      url: '/api/admin/billing/proofs/upload',
+      file,
+      token,
+      fallbackErrorMessage: t('admin.pages.billing.payment.errors.uploadFailed'),
+      onProgress: (percent) => {
+        uploadProgress.value = percent
+      }
     }) as { url: string }
     
     proofUrl.value = res.url
@@ -646,6 +650,7 @@ async function handleFileUpload(event: Event) {
     uploadError.value = e?.message || e?.data?.error || t('admin.pages.billing.payment.errors.uploadFailed')
   } finally {
     uploading.value = false
+    uploadProgress.value = 0
   }
 }
 

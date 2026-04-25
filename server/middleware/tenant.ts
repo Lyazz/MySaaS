@@ -74,7 +74,12 @@ export default defineEventHandler(async (event) => {
             update: {}
         })
 
-        event.context.storeSettings = storeSettings
+        event.context.storeSettings = {
+            ...storeSettings,
+            loyaltyRedeemRateDzdPerPoint: storeSettings.loyaltyRedeemRateDzdPerPoint.toNumber(),
+            loyaltyBasePoints: storeSettings.loyaltyBasePoints.toNumber(),
+            loyaltyMarginFactor: storeSettings.loyaltyMarginFactor.toNumber()
+        }
 
         const contactInfos = await prisma.tenantContactInfo.findMany({
             where: { tenantId: tenant.id, isActive: true },

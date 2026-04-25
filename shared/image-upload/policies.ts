@@ -38,7 +38,7 @@ const MODE_DEFAULTS: Record<ImageUploaderMode, Omit<ImageUploadPolicy, 'mode'>> 
     product: {
         allowedMimeTypes: ALLOWED_IMAGE_MIME_TYPES,
         cropPresets: ['free', '1:1', '3:4', '4:5', '16:9'],
-        defaultPreset: '4:5',
+        defaultPreset: 'free',
         requireSquare: false,
         maxFileSizeMb: 5
     },

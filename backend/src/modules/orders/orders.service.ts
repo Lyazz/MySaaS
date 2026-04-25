@@ -12,6 +12,10 @@ import { renderGenericBordereauPdf } from './bordereau-pdf'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
 import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
 import { MaystroPickupPointService } from '../delivery/maystro/maystro-pickup-point.service'
+import { LoyaltyCheckoutError, LoyaltyCheckoutService } from '../loyalty/loyalty-checkout.service'
+import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
+import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
+import { PhoneNormalizationError } from '../loyalty/phone-normalization.service'
 
 const telegramService = new TelegramService()
 
@@ -51,6 +55,7 @@ export type PublicOrderInput = {
     deliveryMode?: string | null
     shippingProvider?: string | null
     shippingPickupPoint?: number | string | null
+    redeemPointsRequested?: number | null
     items: PublicOrderItemInput[]
 }
 
@@ -130,9 +135,28 @@ const addUtcYears = (date: Date, years: number) =>
 export class OrdersService {
     private maystroBordereau = new MaystroBordereauService()
     private maystroPickupPoints = new MaystroPickupPointService()
+    private loyaltyFormula = new LoyaltyFormulaService()
+    private loyaltyLedger = new LoyaltyLedgerService()
+    private loyaltyCheckout = new LoyaltyCheckoutService()
 
     private static normalizePickupPointLabel(value: string) {
         return value.trim().toLowerCase().replace(/\s+/g, ' ')
+    }
+
+    private buildLoyaltyResponse(args: {
+        availablePoints: number
+        pendingRedeemPoints?: number
+        earnedPoints: number
+        redeemedPoints: number
+        redeemedAmount: number
+    }) {
+        return {
+            availablePoints: args.availablePoints,
+            pendingRedeemPoints: args.pendingRedeemPoints ?? 0,
+            pointsToEarn: args.earnedPoints,
+            redeemedPoints: args.redeemedPoints,
+            redeemedAmount: args.redeemedAmount
+        }
     }
 
     private async resolveShippingPickupPoint(input: {
@@ -287,7 +311,19 @@ export class OrdersService {
     private async ensureDeliveredOrderSale(
         tx: any,
         tenantId: string,
-        order: { id: string; tenantId: string; totalAmount: number; customerId: string | null; customerName: string; customerPhone: string; customerAddress: string | null; items: Array<{ productId: string; variantId: string | null; quantity: number; price: number }> },
+        order: {
+            id: string
+            tenantId: string
+            totalAmount: number
+            customerId: string | null
+            customerName: string
+            customerPhone: string
+            customerAddress: string | null
+            earnedPointsTotal?: number
+            redeemedPointsTotal?: number
+            redeemedAmount?: number
+            items: Array<{ productId: string; variantId: string | null; quantity: number; price: number }>
+        },
         actor?: { userId?: string | null }
     ) {
         const existingSale = await tx.sale.findFirst({
@@ -308,6 +344,9 @@ export class OrdersService {
                 customerName: order.customerName,
                 customerPhone: order.customerPhone,
                 customerAddress: order.customerAddress,
+                earnedPointsTotal: order.earnedPointsTotal ?? 0,
+                redeemedPointsTotal: order.redeemedPointsTotal ?? 0,
+                redeemedAmount: order.redeemedAmount ?? 0,
                 notes: 'Converted from delivered order',
                 createdByUserId: actor?.userId ?? null
             }
@@ -488,6 +527,7 @@ export class OrdersService {
                 })
             }
 
+            await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, id)
             await tx.orderItem.deleteMany({ where: { tenantId, orderId: id } })
             const deleted = await tx.order.deleteMany({ where: { tenantId, id } })
             if (deleted.count !== 1) throw new OrderValidationError(404, 'Order not found')
@@ -536,6 +576,9 @@ export class OrdersService {
 
             const deletableIds = orders.map((o) => o.id)
 
+            for (const orderId of deletableIds) {
+                await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, orderId)
+            }
             await tx.orderItem.deleteMany({ where: { tenantId, orderId: { in: deletableIds } } })
             const deleted = await tx.order.deleteMany({ where: { tenantId, id: { in: deletableIds }, status: 'PENDING' } })
 
@@ -622,6 +665,8 @@ export class OrdersService {
                 status: true,
                 totalAmount: true,
                 totalWithShippingAmount: true,
+                redeemedPointsTotal: true,
+                redeemedAmount: true,
                 customerId: true,
                 customerName: true,
                 customerPhone: true,
@@ -657,6 +702,9 @@ export class OrdersService {
         ) {
             throw new OrderValidationError(409, 'Order cannot be edited because it has linked records')
         }
+        if ((existing.redeemedPointsTotal ?? 0) > 0) {
+            throw new OrderValidationError(409, 'Orders with pending loyalty redemption cannot be edited')
+        }
 
         const nextCustomerName =
             input.customerName === undefined ? existing.customerName : String(input.customerName ?? '').trim()
@@ -665,10 +713,6 @@ export class OrdersService {
 
         if (!nextCustomerName) throw new OrderValidationError(400, 'Customer name is required')
         if (!nextCustomerPhone) throw new OrderValidationError(400, 'Customer phone is required')
-
-        if (!/^\d+$/.test(nextCustomerPhone)) {
-            throw new OrderValidationError(400, 'Phone number must contain only digits')
-        }
 
         const nextDeliveryMode =
             input.deliveryMode === undefined ? normalizeDeliveryMode(existing.deliveryMode) : normalizeDeliveryMode(input.deliveryMode)
@@ -952,6 +996,24 @@ export class OrdersService {
         }
 
         await prisma.$transaction(async (tx) => {
+            let resolvedNextCustomerId = nextCustomerId
+            if (!resolvedNextCustomerId && nextCustomerPhone) {
+                try {
+                    const resolvedCustomer = await this.loyaltyLedger.ensureCustomerByPhone(tx, {
+                        tenantId,
+                        phone: nextCustomerPhone,
+                        name: nextCustomerName,
+                        address: nextCustomerAddress
+                    })
+                    resolvedNextCustomerId = resolvedCustomer?.id ?? null
+                } catch (error) {
+                    if (error instanceof PhoneNormalizationError) {
+                        throw new OrderValidationError(error.statusCode, error.statusMessage)
+                    }
+                    throw error
+                }
+            }
+
             if (shouldUpdateItems) {
                 await tx.orderItem.deleteMany({ where: { tenantId, orderId: id } })
                 await tx.orderItem.createMany({
@@ -987,7 +1049,7 @@ export class OrdersService {
             }
 
             const updateData: any = {
-                customerId: nextCustomerId,
+                customerId: resolvedNextCustomerId,
                 customerName: nextCustomerName,
                 customerPhone: nextCustomerPhone,
                 customerAddress: nextCustomerAddress,
@@ -1065,9 +1127,8 @@ export class OrdersService {
             return prisma.order.findFirst({ where: { id, tenantId } })
         }
 
-        const isCarrierControlled =
-            (existing as any).shippingProvider != null ||
-            (Array.isArray((existing as any).shipments) && (existing as any).shipments.length > 0)
+        const provider = String((existing as any).shippingProvider || (Array.isArray((existing as any).shipments) && (existing as any).shipments.length > 0 ? (existing as any).shipments[0].provider : '') || '').toUpperCase()
+        const isCarrierControlled = Boolean(provider) && provider !== 'SELF'
         if (opts?.source !== 'carrier' && isCarrierControlled && fromStatus !== 'PENDING') {
             throw new OrderValidationError(409, 'Order status is controlled by the delivery carrier and cannot be changed manually')
         }
@@ -1353,7 +1414,36 @@ export class OrdersService {
 
             await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
 
+            if (toStatus === 'CANCELLED' || toStatus === 'RETURNED') {
+                await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, id)
+            }
+
             if (fromStatus === 'SHIPPED' && toStatus === 'DELIVERED') {
+                let resolvedCustomerId = existing.customerId ?? null
+                if (existing.customerPhone) {
+                    try {
+                        const resolvedCustomer = await this.loyaltyLedger.ensureCustomerByPhone(tx, {
+                            tenantId,
+                            phone: existing.customerPhone,
+                            name: existing.customerName,
+                            address: existing.customerAddress ?? null
+                        })
+                        resolvedCustomerId = resolvedCustomer?.id ?? resolvedCustomerId
+                    } catch (error) {
+                        if (error instanceof PhoneNormalizationError) {
+                            throw new OrderValidationError(error.statusCode, error.statusMessage)
+                        }
+                        throw error
+                    }
+                }
+
+                if (resolvedCustomerId && resolvedCustomerId !== existing.customerId) {
+                    await tx.order.updateMany({
+                        where: { tenantId, id },
+                        data: { customerId: resolvedCustomerId }
+                    })
+                }
+
                 const sale = await this.ensureDeliveredOrderSale(
                     tx,
                     tenantId,
@@ -1364,10 +1454,13 @@ export class OrdersService {
                             typeof (existing as any).totalWithShippingAmount === 'number' && Number.isFinite((existing as any).totalWithShippingAmount)
                                 ? (existing as any).totalWithShippingAmount
                                 : computeTotalWithShipping(existing.totalAmount, (existing as any).shippingAmount ?? null),
-                        customerId: existing.customerId ?? null,
+                        customerId: resolvedCustomerId,
                         customerName: existing.customerName,
                         customerPhone: existing.customerPhone,
                         customerAddress: existing.customerAddress ?? null,
+                        earnedPointsTotal: existing.earnedPointsTotal ?? 0,
+                        redeemedPointsTotal: existing.redeemedPointsTotal ?? 0,
+                        redeemedAmount: existing.redeemedAmount ?? 0,
                         items: items.map((i: any) => ({
                             productId: i.productId,
                             variantId: i.variantId ?? null,
@@ -1377,6 +1470,74 @@ export class OrdersService {
                     },
                     actor
                 )
+
+                await this.loyaltyLedger.consumePendingOrderRedemption(tx, {
+                    tenantId,
+                    orderId: existing.id,
+                    saleId: sale.id
+                })
+
+                const loyaltySettings = await tx.storeSettings.findUnique({
+                    where: { tenantId },
+                    select: {
+                        loyaltyEnabled: true,
+                        loyaltyBasePoints: true,
+                        loyaltyMarginFactor: true,
+                        loyaltyPublicFormulaMode: true,
+                        currencyCode: true
+                    }
+                })
+
+                if (loyaltySettings?.loyaltyEnabled === true && resolvedCustomerId) {
+                    const productIds = Array.from(new Set(items.map((item) => item.productId)))
+                    const variantIds = Array.from(
+                        new Set(items.map((item) => item.variantId).filter((variantId): variantId is string => !!variantId))
+                    )
+                    const [products, variants] = await Promise.all([
+                        tx.product.findMany({
+                            where: { tenantId, id: { in: productIds } },
+                            select: { id: true, price: true }
+                        }),
+                        variantIds.length > 0
+                            ? tx.productVariant.findMany({
+                                where: { tenantId, id: { in: variantIds } },
+                                select: { id: true, price: true, cost: true, productId: true }
+                            })
+                            : Promise.resolve([])
+                    ])
+
+                    const productPriceById = new Map(products.map((product) => [product.id, Number(product.price ?? 0)]))
+                    const variantById = new Map(variants.map((variant) => [variant.id, variant]))
+                    const earnPreview = this.loyaltyFormula.computeTotal(
+                        loyaltySettings,
+                        items.map((item) => ({
+                            quantity: item.quantity,
+                            referencePrice: item.variantId
+                                ? Number(variantById.get(item.variantId)?.price ?? item.price ?? 0)
+                                : Number(productPriceById.get(item.productId) ?? item.price ?? 0),
+                            cost: Number(item.variantId ? variantById.get(item.variantId)?.cost ?? 0 : 0)
+                        }))
+                    )
+
+                    if (earnPreview.totalPoints !== 0) {
+                        await this.loyaltyLedger.createLedgerEntry(tx, {
+                            tenantId,
+                            customerId: resolvedCustomerId,
+                            direction: 'EARN',
+                            status: 'AVAILABLE',
+                            sourceType: 'SALE',
+                            sourceId: sale.id,
+                            saleId: sale.id,
+                            orderId: existing.id,
+                            points: earnPreview.totalPoints,
+                            createdByUserId: actor?.userId ?? null,
+                            formulaSnapshot: {
+                                lines: earnPreview.lines,
+                                orderId: existing.id
+                            }
+                        })
+                    }
+                }
 
                 let cashboxId: string
                 let sessionId: string
@@ -1415,7 +1576,7 @@ export class OrdersService {
                         amount,
                         currency,
                         method,
-                        customerId: existing.customerId ?? null,
+                        customerId: resolvedCustomerId,
                         saleId: sale.id,
                         orderId: existing.id,
                         reference,
@@ -1433,6 +1594,89 @@ export class OrdersService {
 
             const updated = await tx.order.updateMany({ where: { tenantId, id }, data: updateData })
             if (updated.count !== 1) throw new OrderValidationError(404, 'Order not found')
+        })
+
+        return prisma.order.findFirst({ where: { id, tenantId } })
+    }
+
+    async rollbackCarrierConfirmation(tenantId: string, id: string) {
+        const existing = await prisma.order.findFirst({
+            where: { id, tenantId },
+            include: { items: true }
+        })
+        if (!existing) throw new OrderValidationError(404, 'Order not found')
+        if (existing.status !== 'CONFIRMED') {
+            throw new OrderValidationError(409, 'Only confirmed orders can be rolled back to pending')
+        }
+
+        await prisma.$transaction(async (tx) => {
+            const touchedProductIds = new Set<string>()
+            const items = existing.items
+            const legacyAlreadyDecremented =
+                (await tx.inventoryMovement.count({ where: { tenantId, orderId: id, type: 'ORDER_DECREMENT' } })) > 0
+            const confirmReservationApplied =
+                (await tx.inventoryMovement.count({
+                    where: { tenantId, orderId: id, type: 'RESERVED_ADJUSTMENT', reason: 'order_confirm' }
+                })) > 0
+
+            for (const item of items) {
+                if (!item.variantId) continue
+                if (legacyAlreadyDecremented || !confirmReservationApplied) continue
+
+                const variantBefore = await tx.productVariant.findFirst({
+                    where: { tenantId, id: item.variantId },
+                    select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                })
+                if (!variantBefore) continue
+                if (variantBefore.trackInventory === false) continue
+
+                const qty = item.quantity
+                if (variantBefore.reserved < qty) throw new OrderValidationError(409, 'Insufficient reserved stock')
+
+                const result = await tx.productVariant.updateMany({
+                    where: {
+                        tenantId,
+                        id: item.variantId,
+                        stock: variantBefore.stock,
+                        reserved: variantBefore.reserved,
+                        safetyStock: variantBefore.safetyStock
+                    },
+                    data: { reserved: { decrement: qty } }
+                })
+                if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                touchedProductIds.add(variantBefore.productId)
+
+                const after = await tx.productVariant.findFirst({
+                    where: { tenantId, id: item.variantId },
+                    select: { stock: true, reserved: true, safetyStock: true }
+                })
+
+                await tx.inventoryMovement.create({
+                    data: {
+                        tenantId,
+                        variantId: item.variantId,
+                        type: 'RESERVED_ADJUSTMENT',
+                        delta: 0,
+                        reservedDelta: -qty,
+                        safetyStockDelta: 0,
+                        reason: 'order_confirm_rollback',
+                        note: 'carrier_sync_failed',
+                        orderId: id,
+                        stockAfter: after?.stock ?? null,
+                        reservedAfter: after?.reserved ?? null,
+                        safetyStockAfter: after?.safetyStock ?? null,
+                        createdByUserId: null
+                    }
+                })
+            }
+
+            await syncProductStockForProducts(tx as any, tenantId, Array.from(touchedProductIds))
+
+            const updated = await tx.order.updateMany({
+                where: { tenantId, id, status: 'CONFIRMED' },
+                data: { status: 'PENDING' }
+            })
+            if (updated.count !== 1) throw new OrderValidationError(409, 'Order rollback conflict, please retry')
         })
 
         return prisma.order.findFirst({ where: { id, tenantId } })
@@ -1507,10 +1751,6 @@ export class OrdersService {
 
         if (!customerPhone) {
             throw new OrderValidationError(400, 'Customer phone is required')
-        }
-
-        if (!/^\d+$/.test(customerPhone)) {
-            throw new OrderValidationError(400, 'Phone number must contain only digits')
         }
 
         if (!customerName) {
@@ -1598,7 +1838,7 @@ export class OrdersService {
         const variantsById = variantIds.length
             ? await prisma.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
             : []
 
@@ -1614,7 +1854,7 @@ export class OrdersService {
                     isActive: true,
                     optionValues: { none: {} }
                 },
-                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
             : []
 
@@ -1715,6 +1955,8 @@ export class OrdersService {
                 variantId: variant.id,
                 quantity: item.quantity,
                 price,
+                referencePrice: Number(variant.price ?? product.price ?? 0),
+                variantCost: Number(variant.cost ?? 0),
                 lineTotal: centsToMoney(pricing.bestTotalCents),
                 pricingBreakdown: pricing,
                 trackInventory,
@@ -1748,15 +1990,53 @@ export class OrdersService {
 
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
         const totalAmount = centsToMoney(totalCents)
-        const totalWithShippingAmount = computeTotalWithShipping(totalAmount, effectiveShippingAmount)
+        const pointsPreview = this.loyaltyFormula.computeTotal(
+            storeSettings,
+            validatedItems.map((item) => ({
+                quantity: item.quantity,
+                referencePrice: item.referencePrice,
+                cost: item.variantCost
+            }))
+        )
 
-        const order = await prisma.$transaction(async (tx) => {
+        const orderResult = await prisma.$transaction(async (tx) => {
+            let resolvedCustomer
+            try {
+                resolvedCustomer = await this.loyaltyLedger.ensureCustomerByPhone(tx, {
+                    tenantId: input.tenantId,
+                    phone: customerPhone,
+                    name: customerName,
+                    address: input.customerAddress || null
+                })
+            } catch (error) {
+                if (error instanceof PhoneNormalizationError) {
+                    throw new OrderValidationError(error.statusCode, error.statusMessage)
+                }
+                throw error
+            }
+
+            let redemption
+            try {
+                redemption = await this.loyaltyCheckout.evaluateRedemption(tx, {
+                    tenantId: input.tenantId,
+                    customerId: resolvedCustomer?.id ?? null,
+                    requestedPoints: input.redeemPointsRequested,
+                    itemsSubtotal: totalAmount,
+                    settings: storeSettings
+                })
+            } catch (error) {
+                if (error instanceof LoyaltyCheckoutError) {
+                    throw new OrderValidationError(error.statusCode, error.statusMessage)
+                }
+                throw error
+            }
+
+            const payableItemsTotal = Math.max(0, Number((totalAmount - redemption.redeemedAmount).toFixed(2)))
+            const totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, effectiveShippingAmount)
             const createdOrder = await tx.order.create({
                 data: {
                     tenantId: input.tenantId,
-                    // Guest checkout: keep customerId null.
-                    // Authenticated customer checkout (future): will set customerId explicitly.
-                    customerId: null,
+                    customerId: resolvedCustomer?.id ?? null,
                     customerName,
                     customerPhone,
                     customerAddress: input.customerAddress || null,
@@ -1772,6 +2052,9 @@ export class OrdersService {
                     shippingPickupPoint: shippingPickupPoint ?? undefined,
                     totalAmount,
                     totalWithShippingAmount,
+                    earnedPointsTotal: pointsPreview.totalPoints,
+                    redeemedPointsTotal: redemption.pointsReserved,
+                    redeemedAmount: redemption.redeemedAmount,
                     status: 'PENDING'
                 }
             })
@@ -1809,12 +2092,32 @@ export class OrdersService {
                 }
             }
 
-            return createdOrder
+            if (redemption.pointsReserved > 0 && resolvedCustomer?.id) {
+                await this.loyaltyCheckout.createPendingOrderRedemption(tx, {
+                    tenantId: input.tenantId,
+                    customerId: resolvedCustomer.id,
+                    orderId: createdOrder.id,
+                    pointsReserved: redemption.pointsReserved,
+                    redeemedAmount: redemption.redeemedAmount,
+                    rateDzdPerPoint: Number(storeSettings.loyaltyRedeemRateDzdPerPoint || 0)
+                })
+            }
+
+            return {
+                createdOrder,
+                loyaltySummary: this.buildLoyaltyResponse({
+                    availablePoints: redemption.availablePoints - redemption.pointsReserved,
+                    pendingRedeemPoints: redemption.pendingRedeemPoints + redemption.pointsReserved,
+                    earnedPoints: pointsPreview.totalPoints,
+                    redeemedPoints: redemption.pointsReserved,
+                    redeemedAmount: redemption.redeemedAmount
+                })
+            }
         })
 
         // Fire and forget notification
         const finalOrder = await prisma.order.findFirst({
-            where: { id: order.id, tenantId: input.tenantId },
+            where: { id: orderResult.createdOrder.id, tenantId: input.tenantId },
             include: {
                 items: {
                     include: { product: true, variant: true }
@@ -1826,7 +2129,10 @@ export class OrdersService {
             telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
         }
 
-        return finalOrder
+        return {
+            order: finalOrder,
+            loyaltySummary: orderResult.loyaltySummary
+        }
     }
 
     async createAdminOrder(tenantId: string, input: AdminOrderInput, actor?: { userId?: string | null }) {
@@ -1835,10 +2141,6 @@ export class OrdersService {
         const customerName = (input.customerName || '').trim()
         const customerPhone = (input.customerPhone || '').trim()
         const deliveryMode = normalizeDeliveryMode(input.deliveryMode)
-
-        if (customerPhone && !/^\d+$/.test(customerPhone)) {
-            throw new OrderValidationError(400, 'Phone number must contain only digits')
-        }
 
         // For admin orders, we can make customer info optional if they just want to create a quick order,
         // but typically an order has a customer. Let's enforce name if phone is missing, or vice versa,
@@ -1921,7 +2223,7 @@ export class OrdersService {
         const variantsById = variantIds.length
             ? await prisma.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
             : []
 
@@ -1937,7 +2239,7 @@ export class OrdersService {
                     isActive: true,
                     optionValues: { none: {} }
                 },
-                select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
             })
             : []
 
@@ -2038,6 +2340,8 @@ export class OrdersService {
                 variantId: variant.id,
                 quantity: item.quantity,
                 price,
+                referencePrice: Number(variant.price ?? product.price ?? 0),
+                variantCost: Number(variant.cost ?? 0),
                 lineTotal: centsToMoney(pricing.bestTotalCents),
                 pricingBreakdown: pricing,
                 trackInventory,
@@ -2071,9 +2375,22 @@ export class OrdersService {
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
         const totalAmount = centsToMoney(totalCents)
         const totalWithShippingAmount = computeTotalWithShipping(totalAmount, effectiveShippingAmount)
+        const pointsPreview = this.loyaltyFormula.computeTotal(
+            await prisma.storeSettings.upsert({
+                where: { tenantId },
+                create: { tenantId },
+                update: {}
+            }),
+            validatedItems.map((item) => ({
+                quantity: item.quantity,
+                referencePrice: item.referencePrice,
+                cost: item.variantCost
+            }))
+        )
 
         let actualCustomerName = customerName
         let actualCustomerPhone = customerPhone
+        let actualCustomerId = input.customerId || null
 
         // If customerId is provided, we should probably fetch the customer details
         if (input.customerId && (!actualCustomerName || !actualCustomerPhone)) {
@@ -2087,10 +2404,27 @@ export class OrdersService {
         }
 
         const order = await prisma.$transaction(async (tx) => {
+            if (!actualCustomerId && actualCustomerPhone) {
+                try {
+                    const resolvedCustomer = await this.loyaltyLedger.ensureCustomerByPhone(tx, {
+                        tenantId,
+                        phone: actualCustomerPhone,
+                        name: actualCustomerName,
+                        address: input.customerAddress || null
+                    })
+                    actualCustomerId = resolvedCustomer?.id ?? null
+                } catch (error) {
+                    if (error instanceof PhoneNormalizationError) {
+                        throw new OrderValidationError(error.statusCode, error.statusMessage)
+                    }
+                    throw error
+                }
+            }
+
             const createdOrder = await tx.order.create({
                 data: {
                     tenantId: input.tenantId,
-                    customerId: input.customerId || null,
+                    customerId: actualCustomerId,
                     customerName: actualCustomerName,
                     customerPhone: actualCustomerPhone,
                     customerAddress: input.customerAddress || null,
@@ -2106,6 +2440,7 @@ export class OrdersService {
                     shippingPickupPoint: shippingPickupPoint ?? undefined,
                     totalAmount,
                     totalWithShippingAmount,
+                    earnedPointsTotal: pointsPreview.totalPoints,
                     status: 'PENDING'
                 }
             })
