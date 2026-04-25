@@ -127,7 +127,7 @@ const capturePreviewClicks = (e: MouseEvent) => {
        </div>
 
        <div class="flex items-center gap-3">
-          <button @click="goBack" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+          <button @click="goBack" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-black text-sm font-medium rounded-lg shadow-sm transition-colors">
             Sélectionner ce template
           </button>
        </div>

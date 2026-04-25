@@ -13,7 +13,7 @@
 
       <!-- Actions Menu -->
       <Menu as="div" class="relative hidden md:block">
-        <MenuButton class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
+        <MenuButton class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2.5 text-sm font-medium text-black shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
           <Icon name="lucide:plus" class="h-4 w-4" />
           {{ t('admin.pages.cash.actions.newAction') }}
           <Icon name="lucide:chevron-down" class="h-4 w-4" />
@@ -88,7 +88,7 @@
 
     <!-- Mobile FAB -->
     <Menu as="div" class="fixed bottom-6 right-6 z-40 md:hidden">
-      <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full [background:var(--brand)] text-white shadow-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
+      <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full [background:var(--brand)] text-black shadow-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
         <Icon name="lucide:plus" class="h-6 w-6" />
       </MenuButton>
       <transition

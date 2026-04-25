@@ -15,10 +15,11 @@ const DEFAULT_ALLOWED_TAGS = [
     'h2',
     'h3',
     'h4',
-    'a'
+    'a',
+    'img'
 ]
 
-const DEFAULT_ALLOWED_ATTR = ['href', 'target', 'rel']
+const DEFAULT_ALLOWED_ATTR = ['href', 'target', 'rel', 'src', 'alt']
 
 export const useSafeRichText = () => {
     const sanitize = (

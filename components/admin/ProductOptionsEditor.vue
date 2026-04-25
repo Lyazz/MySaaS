@@ -339,7 +339,7 @@
                  </div>
                  <div class="flex justify-end mt-3 gap-2">
                      <button type="button" class="text-xs px-2 py-1 hover:text-white transition-colors" style="color: var(--text-tertiary)" @click="cancelCreatingOption">{{ t('admin.common.cancel') }}</button>
-                     <button type="button" class="text-xs [background:var(--brand)] text-white px-3 py-1 rounded hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]" @click="createOption">{{ t('admin.productOptionsEditor.actions.done') }}</button>
+                     <button type="button" class="text-xs [background:var(--brand)] text-black px-3 py-1 rounded hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]" @click="createOption">{{ t('admin.productOptionsEditor.actions.done') }}</button>
                  </div>
             </div>
         </div>

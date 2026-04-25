@@ -278,7 +278,7 @@ export class ProductsService {
 
         const images = normalizeImages(data.images)
 
-        const sanitizedDescription = sanitizeOptionalRichText(data.description)
+        const sanitizedDescription = sanitizeOptionalRichText(data.description, { allowImages: true })
         const sanitizedMiniDescription = sanitizeOptionalRichText(data.miniDescription)
 
         const created = await prisma.$transaction(async (tx) => {
@@ -463,7 +463,9 @@ export class ProductsService {
         const categoryAssignment = await this.resolveCategoryAssignment(tenantId, data)
 
         const images = normalizeImages(data.images)
-        const sanitizedDescription = this.hasOwn(data, 'description') ? sanitizeOptionalRichText(data.description) : undefined
+        const sanitizedDescription = this.hasOwn(data, 'description')
+            ? sanitizeOptionalRichText(data.description, { allowImages: true })
+            : undefined
         const sanitizedMiniDescription = this.hasOwn(data, 'miniDescription')
             ? sanitizeOptionalRichText(data.miniDescription)
             : undefined

@@ -295,7 +295,7 @@
               </div>
               <div class="mt-4 flex justify-end">
                 <button
-                  class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+                  class="px-4 py-2 text-sm font-medium text-black bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
                   :disabled="metaPixelsSaving || !newPixelForm.pixelId"
                   @click="createPixel"
                 >
@@ -309,7 +309,7 @@
             <div />
             <div class="flex gap-3">
               <button @click="closeFacebookModal" class="ui-btn ui-btn--secondary text-sm">{{ t('admin.common.cancel') }}</button>
-              <button @click="closeFacebookModal" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg">{{ t('admin.common.done') }}</button>
+              <button @click="closeFacebookModal" class="px-4 py-2 text-sm font-medium text-black bg-blue-600 hover:bg-blue-700 rounded-lg">{{ t('admin.common.done') }}</button>
             </div>
           </div>
         </div>

@@ -235,7 +235,7 @@
                     <Icon name="lucide:download" class="w-3.5 h-3.5 mr-1.5" />
                     Download
                 </button>
-                <button v-if="hasGenerated" class="px-4 py-1.5 [background:var(--brand)] hover:opacity-90 text-white text-xs font-bold rounded-lg transition-all flex items-center">
+                <button v-if="hasGenerated" class="px-4 py-1.5 [background:var(--brand)] hover:opacity-90 text-black text-xs font-bold rounded-lg transition-all flex items-center">
                     Publish
                     <Icon name="lucide:arrow-right" class="w-3.5 h-3.5 ml-1.5" />
                 </button>

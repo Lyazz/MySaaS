@@ -331,7 +331,7 @@ describe('Security hardening', () => {
 
     it('sanitizes rich text on product write paths', async () => {
         const slug = `unsafe-rich-${stamp}`
-        const payload = `<p>Safe paragraph</p><script>alert('xss')</script><a href="javascript:alert(1)">bad link</a>`
+        const payload = `<p>Safe paragraph</p><img src="/uploads/${orderTenantId}/desc.webp" alt="desc image" onerror="alert('xss')" /><img src="javascript:alert(1)" alt="bad image" /><script>alert('xss')</script><a href="javascript:alert(1)">bad link</a>`
 
         await productsService.createProduct(orderTenantId, {
             title: 'Unsafe Rich Product',
@@ -349,7 +349,10 @@ describe('Security hardening', () => {
         })
 
         expect(saved?.description || '').toContain('<p>Safe paragraph</p>')
+        expect(saved?.description || '').toContain(`<img src="/uploads/${orderTenantId}/desc.webp" alt="desc image"`)
+        expect(saved?.description || '').not.toContain('onerror=')
         expect(saved?.description || '').not.toContain('<script')
+        expect(saved?.description || '').not.toContain('<img src="javascript:')
         expect(saved?.description || '').not.toContain('javascript:')
         expect(saved?.miniDescription || '').not.toContain('<script')
     })

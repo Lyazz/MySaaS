@@ -389,7 +389,9 @@ export class BulkProductsService {
                 if (hasColumn('stock') && stock === null && (record.stock ?? '').trim()) throw new Error('Invalid stock')
                 if (stock !== null && stock < 0) throw new Error('stock must be >= 0')
 
-                const description = hasColumn('description') ? sanitizeOptionalRichText(record.description ?? '') : undefined
+                const description = hasColumn('description')
+                    ? sanitizeOptionalRichText(record.description ?? '', { allowImages: true })
+                    : undefined
                 const miniDescription = hasColumn('miniDescription')
                     ? sanitizeOptionalRichText(record.miniDescription ?? '')
                     : undefined

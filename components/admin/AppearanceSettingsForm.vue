@@ -114,7 +114,7 @@
                         type="text"
                         pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
                         class="ui-input block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm font-mono uppercase"
-                        placeholder="#0F766E"
+                        placeholder="#C6F432"
                       >
                       <p class="mt-1.5 text-xs" style="color: var(--text-tertiary)">
                         {{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.hint') }}
@@ -346,7 +346,7 @@ const message = reactive({ type: '', text: '' })
 
 // Default colors
 const presetColors = [
-  '#0F766E', // Teal (Default)
+  '#C6F432', // Lime (Default)
   '#0f172a', // Slate
   '#4F46E5', // Indigo
   '#F43F5E', // Rose
@@ -361,7 +361,7 @@ const form = reactive({
   slug: '',
   logoUrl: null as string | null,
   faviconUrl: null as string | null,
-  primaryColor: '#0F766E',
+  primaryColor: '#C6F432',
   templateKey: 'classic'
 })
 
@@ -733,7 +733,7 @@ const updateForm = (data: any) => {
   form.slug = data.slug || ''
   form.logoUrl = data.logoUrl || null
   form.faviconUrl = data.faviconUrl || null
-  form.primaryColor = data.primaryColor || '#0F766E'
+  form.primaryColor = data.primaryColor || '#C6F432'
   form.templateKey = data.templateKey || 'classic'
   
   initialFormString.value = JSON.stringify(form)
