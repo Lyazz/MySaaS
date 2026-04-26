@@ -22,6 +22,11 @@ describe('Admin slug availability endpoints', () => {
     let productAId = ''
     let categoryAId = ''
 
+    it('preserves Arabic characters when normalizing slugs', () => {
+        expect(arabicProductSlug).toBe('منتج-عربي-فاخر')
+        expect(arabicCategorySlug).toBe('تصنيف-عربي-فاخر')
+    })
+
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
             prisma.tenant.create({ data: { name: 'Slug Check A', slug: slugA } }),
