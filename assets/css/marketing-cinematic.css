@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap');
 
 @layer components {
   .marketing-shell--cinematic {
@@ -117,12 +116,19 @@
   }
 
   .cinematic-headline em {
-    font-family: 'Instrument Serif', serif;
-    font-style: italic;
-    font-weight: 400;
+    font-family: 'Geist', system-ui, sans-serif;
+    font-style: normal;
+    font-weight: 500;
     color: var(--m-accent);
-    letter-spacing: -0.02em;
-    padding-right: 0.15em;
+    letter-spacing: -0.035em;
+    margin: 0 0.18em;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.18em;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M3 7 Q 100 1 197 7' stroke='%23C6F432' stroke-width='3' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: 50% 100%;
+    background-size: 100% 0.18em;
   }
 
   .cinematic-eyebrow {
@@ -328,12 +334,13 @@
   }
 
   .cinematic-stat-num {
-    font-family: 'Instrument Serif', serif;
-    font-style: italic;
-    font-weight: 400;
+    font-family: 'Geist', system-ui, sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-feature-settings: 'tnum' 1, 'ss01' 1;
     font-size: clamp(3rem, 6vw, 5.5rem);
     line-height: 0.9;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.045em;
     background: linear-gradient(180deg, #FFFFFF 0%, #6B7378 100%);
     -webkit-background-clip: text;
     background-clip: text;

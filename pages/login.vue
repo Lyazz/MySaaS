@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { ref, onMounted, onUnmounted } from 'vue'
+import SaaSLogo from '~/components/branding/SaaSLogo.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -148,11 +149,7 @@ onUnmounted(stopTimer)
             <!-- Header -->
             <div class="mb-7">
               <div class="flex items-center gap-2.5 mb-4">
-                <span class="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-lime-neon">
-                  <span class="absolute inset-0 rounded-full bg-lime-neon/40 blur-md" />
-                  <Icon name="lucide:hexagon" class="relative h-3.5 w-3.5 text-[color:var(--m-bg)]" />
-                </span>
-                <span class="cinematic-eyebrow">Swekly</span>
+                <SaaSLogo size="sm" class="shrink-0" />
               </div>
               <h2 class="cinematic-headline mt-1 !text-3xl md:!text-4xl">
                 {{ t('auth.login.form.title') }}

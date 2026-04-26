@@ -61,6 +61,21 @@
       },
       "pills": {
         "mobile": "Boutiques pensées pour le mobile"
+      },
+      "orb": {
+        "newOrder": "Nouvelle commande",
+        "shipping": "Livraison",
+        "live": "en direct",
+        "payment": "Paiement",
+        "codAccepted": "Paiement à la livraison",
+        "today": "Aujourd'hui",
+        "metrics": {
+          "ordersPerHour": "Commandes / h",
+          "avgBasket": "Panier moyen · DA",
+          "conversion": "Conversion",
+          "activeWilayas": "Wilayas actives",
+          "deliveredToday": "Livrées aujourd'hui"
+        }
       }
     },
     "storyteller": {
@@ -158,6 +173,7 @@
       }
     },
     "testimonials": {
+      "eyebrow": "Témoignages",
       "heading": {
         "prefix": "Fait pour",
         "accent": "des gens",
@@ -301,7 +317,7 @@
         "ctaPrimary": "Commencer gratuitement",
         "ctaSecondary": "Voir la démo"
       },
-      "logoCloud": "Intégrations de confiance",
+      "logoCloud": "Nos intégrations +50",
       "howItWorks": {
         "titlePre": "De l'idée au",
         "titleAccent": "revenu",
@@ -405,6 +421,32 @@
           }
         }
       }
+    },
+    "extras": {
+      "heroProof": {
+        "rating": "4,9 / 5",
+        "ratingLabel": "par 800+ marchands",
+        "merchants": "1 200+",
+        "merchantsLabel": "boutiques actives en DZ",
+        "cod": "Paiement à la livraison",
+        "codLabel": "intégré",
+        "noCard": "Sans carte bancaire",
+        "noCardLabel": "essai gratuit 14 jours"
+      },
+      "trustStrip": {
+        "eyebrow": "Conçu pour l'Algérie",
+        "items": {
+          "cod": { "title": "Paiement à la livraison", "description": "COD intégré avec réconciliation auto sur toutes les wilayas." },
+          "wilayas": { "title": "58 wilayas couvertes", "description": "Yalidine, Maystro, ZR & Noest — activation en un clic." },
+          "rtl": { "title": "Boutique en arabe", "description": "RTL complet, UI compatible Darija, AR/FR/EN en un clic." },
+          "dzd": { "title": "Tarification en DZD", "description": "Devise locale, taxes et factures — sans surprise de change." }
+        }
+      },
+      "stickyCta": {
+        "label": "Ouvrir ma boutique",
+        "subtle": "Gratuit · Sans carte"
+      },
+      "demoStore": "Voir la boutique de démo"
     }
   },
   "marketing": {
@@ -431,6 +473,18 @@
         "builder": {
           "title": "Mise en place rapide",
           "description": "Lancez une boutique propre, pensée pour le mobile, et adaptez-la rapidement à vos produits."
+        },
+        "tenancy": {
+          "title": "Multi-boutique par conception",
+          "description": "Chaque boutique a ses propres données, son domaine et son image — isolée et sécurisée dès le départ."
+        },
+        "localization": {
+          "title": "Pensé pour l'Algérie",
+          "description": "Arabe, français et anglais avec support RTL complet, devise locale et parcours livraison adaptés."
+        },
+        "mobile": {
+          "title": "Expérience mobile d'abord",
+          "description": "Boutique et back-office se manient comme une app native sur mobile, là où vos clients et équipes travaillent."
         },
         "payments": {
           "title": "Commande pensée pour vos clients",

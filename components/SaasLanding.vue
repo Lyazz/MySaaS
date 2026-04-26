@@ -7,25 +7,79 @@ const isRtl = computed(() => locale.value === 'ar')
 
 useSeoMeta({
   title: computed(() => t('saasLanding.seo.title')),
-  description: computed(() => t('saasLanding.seo.description'))
+  description: computed(() => t('saasLanding.seo.description')),
+  ogTitle: computed(() => t('saasLanding.seo.title')),
+  ogDescription: computed(() => t('saasLanding.seo.description')),
+  ogType: 'website',
+  ogImage: '/swekly-logo-mark.svg',
+  twitterCard: 'summary_large_image',
+  twitterTitle: computed(() => t('saasLanding.seo.title')),
+  twitterDescription: computed(() => t('saasLanding.seo.description')),
+  twitterImage: '/swekly-logo-mark.svg'
 })
 
-const heroProof = computed(() => [
-  { icon: 'lucide:store', value: '1,200+', label: t('saasLanding.stats.activeMerchants') },
-  { icon: 'lucide:wallet', value: '50M+ DA', label: t('saasLanding.stats.revenueGenerated') },
-  { icon: 'lucide:shield-check', value: '99.9%', label: t('saasLanding.stats.uptime') }
+const heroProofPoints = computed(() => [
+  { icon: 'lucide:star', value: t('saasLanding.extras.heroProof.rating'), label: t('saasLanding.extras.heroProof.ratingLabel') },
+  { icon: 'lucide:store', value: t('saasLanding.extras.heroProof.merchants'), label: t('saasLanding.extras.heroProof.merchantsLabel') },
+  { icon: 'lucide:banknote', value: t('saasLanding.extras.heroProof.cod'), label: t('saasLanding.extras.heroProof.codLabel') },
+  { icon: 'lucide:credit-card', value: t('saasLanding.extras.heroProof.noCard'), label: t('saasLanding.extras.heroProof.noCardLabel') }
 ])
 
+const trustStripItems = computed(() => [
+  { icon: 'lucide:banknote', title: t('saasLanding.extras.trustStrip.items.cod.title'), description: t('saasLanding.extras.trustStrip.items.cod.description') },
+  { icon: 'lucide:map', title: t('saasLanding.extras.trustStrip.items.wilayas.title'), description: t('saasLanding.extras.trustStrip.items.wilayas.description') },
+  { icon: 'lucide:languages', title: t('saasLanding.extras.trustStrip.items.rtl.title'), description: t('saasLanding.extras.trustStrip.items.rtl.description') },
+  { icon: 'lucide:badge-dollar-sign', title: t('saasLanding.extras.trustStrip.items.dzd.title'), description: t('saasLanding.extras.trustStrip.items.dzd.description') }
+])
+
+const jsonLd = computed(() => {
+  const org = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Swekly',
+    url: 'https://swekly.com',
+    logo: 'https://swekly.com/swekly-logo-mark.svg',
+    sameAs: [] as string[]
+  }
+  const faq = faqItems.value.length
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqItems.value.map(i => ({
+          '@type': 'Question',
+          name: i.q,
+          acceptedAnswer: { '@type': 'Answer', text: i.a }
+        }))
+      }
+    : null
+  return faq ? [org, faq] : [org]
+})
+
+useHead({
+  script: computed(() => jsonLd.value.map(data => ({ type: 'application/ld+json', innerHTML: JSON.stringify(data) })))
+})
+
 const integrationLogos = [
-  { name: 'Maystro', icon: 'lucide:truck' },
   { name: 'Yalidine', icon: 'lucide:package' },
-  { name: 'Stripe', icon: 'lucide:credit-card' },
-  { name: 'WhatsApp', icon: 'lucide:message-circle' },
-  { name: 'Telegram', icon: 'lucide:send' },
+  { name: 'Maystro', icon: 'lucide:truck' },
+  { name: 'ZR Express', icon: 'lucide:truck' },
+  { name: 'Noest Express', icon: 'lucide:truck' },
+  { name: 'E-COM Delivery', icon: 'lucide:truck' },
+  { name: 'Meta Pixel', icon: 'lucide:facebook' },
+  { name: 'TikTok Pixel', icon: 'lucide:music' },
   { name: 'Meta Ads', icon: 'lucide:megaphone' },
-  { name: 'Google Pixel', icon: 'lucide:bar-chart-2' },
-  { name: 'AWS S3', icon: 'lucide:cloud' }
+  { name: 'Meta Catalog', icon: 'lucide:layout-grid' },
+  { name: 'Google Sheets', icon: 'lucide:sheet' },
+  { name: 'SMS OTP', icon: 'lucide:smartphone' },
+  { name: 'Telegram Notifications', icon: 'lucide:send' },
+  { name: 'WhatsApp', icon: 'lucide:message-circle' },
+  { name: 'Import / Export', icon: 'lucide:arrow-down-up' },
+  { name: 'Realtime Orders', icon: 'lucide:radio' },
+  { name: 'Multi Templates', icon: 'lucide:layout-template' },
+  { name: 'Store Customization', icon: 'lucide:palette' }
 ]
+const integrationLogosRow1 = integrationLogos.slice(0, Math.ceil(integrationLogos.length / 2))
+const integrationLogosRow2 = integrationLogos.slice(Math.ceil(integrationLogos.length / 2))
 
 const stepCards = computed(() => [
   {
@@ -155,15 +209,45 @@ const faqItems = computed<Array<{ q: string; a: string }>>(() => {
       :headline-post="t('saasLanding.cinematic.hero.headlinePost')"
       :subhead="t('saasLanding.cinematic.hero.subhead')"
       :primary-cta="{ label: t('saasLanding.cinematic.hero.ctaPrimary'), to: '/register' }"
-      :secondary-cta="{ label: t('saasLanding.cinematic.hero.ctaSecondary'), to: '/features' }"
-      :proof-points="heroProof"
+      :secondary-cta="{ label: t('saasLanding.extras.demoStore'), to: '/themes' }"
+      :proof-points="heroProofPoints"
     />
 
     <!-- ─── Logo cloud ─── -->
     <section class="border-y border-white/[0.04] bg-white/[0.01] py-10">
       <div class="cinematic-container !max-w-[88rem]">
         <p class="cinematic-eyebrow mb-6 text-center">{{ t('saasLanding.cinematic.logoCloud') }}</p>
-        <MarketingCinematicLogoCloud :logos="integrationLogos" />
+        <div class="space-y-3">
+          <MarketingCinematicLogoCloud :logos="integrationLogosRow1" />
+          <MarketingCinematicLogoCloud :logos="integrationLogosRow2" :reverse="true" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Algeria trust strip ─── -->
+    <section class="cinematic-section !py-16 md:!py-20">
+      <div class="cinematic-container">
+        <div class="mb-10 text-center">
+          <span class="cinematic-pill">
+            <span class="cinematic-pill__dot" />
+            {{ t('saasLanding.extras.trustStrip.eyebrow') }}
+          </span>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div
+            v-for="item in trustStripItems"
+            :key="item.title"
+            class="cinematic-card flex items-start gap-4 p-5"
+          >
+            <div class="flex-none rounded-xl border border-lime-neon/30 bg-lime-neon/[0.06] p-2.5">
+              <Icon :name="item.icon" class="h-5 w-5 text-lime-neon" />
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-[15px] font-medium text-white">{{ item.title }}</h3>
+              <p class="mt-1 text-sm text-[color:var(--m-text-dim)]">{{ item.description }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -225,7 +309,7 @@ const faqItems = computed<Array<{ q: string; a: string }>>(() => {
                 </div>
               </div>
               <div class="flex-1 grid grid-rows-3 gap-3">
-                <div v-for="(row, i) in 3" :key="i" class="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5">
+                <div v-for="i in 3" :key="i" class="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5">
                   <span class="cinematic-mono-num text-xs text-[color:var(--m-text-dim)]">#{{ 1024 + i }}</span>
                   <div class="flex-1 min-w-0">
                     <div class="h-2 w-2/3 rounded bg-white/10" />
@@ -333,7 +417,7 @@ const faqItems = computed<Array<{ q: string; a: string }>>(() => {
       </div>
 
       <div class="space-y-5">
-        <MarketingCinematicMarquee :duration="55">
+        <MarketingCinematicMarquee :speed="40">
           <div v-for="(item, i) in testimonialsRow1" :key="`r1-${i}`" class="mx-3 w-[340px] flex-none cinematic-card p-6">
             <Icon name="lucide:quote" class="h-5 w-5 text-lime-neon" />
             <p class="mt-3 text-[15px] leading-relaxed text-white/90">{{ item.quote }}</p>
@@ -343,7 +427,7 @@ const faqItems = computed<Array<{ q: string; a: string }>>(() => {
             </div>
           </div>
         </MarketingCinematicMarquee>
-        <MarketingCinematicMarquee :duration="55" direction="reverse">
+        <MarketingCinematicMarquee :speed="40">
           <div v-for="(item, i) in testimonialsRow2" :key="`r2-${i}`" class="mx-3 w-[340px] flex-none cinematic-card p-6">
             <Icon name="lucide:quote" class="h-5 w-5 text-lime-neon" />
             <p class="mt-3 text-[15px] leading-relaxed text-white/90">{{ item.quote }}</p>
@@ -379,5 +463,22 @@ const faqItems = computed<Array<{ q: string; a: string }>>(() => {
       :primary-cta="{ label: t('saasLanding.cinematic.cta.button'), to: '/register' }"
       :secondary-cta="{ label: t('saasLanding.cinematic.cta.secondary'), to: '/contact' }"
     />
+
+    <!-- ─── Sticky mobile CTA ─── -->
+    <div class="fixed inset-x-3 bottom-3 z-40 md:hidden">
+      <NuxtLink
+        to="/register"
+        class="cinematic-card flex items-center justify-between gap-3 px-4 py-3 backdrop-blur-md"
+      >
+        <div class="min-w-0">
+          <div class="text-sm font-medium text-white">{{ t('saasLanding.extras.stickyCta.label') }}</div>
+          <div class="text-[11px] text-[color:var(--m-text-dim)]">{{ t('saasLanding.extras.stickyCta.subtle') }}</div>
+        </div>
+        <span class="inline-flex h-9 items-center gap-1.5 rounded-full bg-lime-neon px-4 text-sm font-medium text-black">
+          {{ t('saasLanding.cinematic.hero.ctaPrimary') }}
+          <Icon name="lucide:arrow-right" class="h-4 w-4" />
+        </span>
+      </NuxtLink>
+    </div>
   </div>
 </template>

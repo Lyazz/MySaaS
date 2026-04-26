@@ -104,18 +104,24 @@ export class PublicProductsService {
                     },
                     orderBy: { bundleQty: 'asc' },
                     select: { id: true, bundleQty: true, bundlePrice: true, tag: true }
+                },
+                _count: {
+                    select: {
+                        options: true
+                    }
                 }
             },
             orderBy: { createdAt: 'desc' }
         })
 
-        return products.map(({ metaPixels, productImages, images, variants, ...rest }: any) => {
+        return products.map(({ metaPixels, productImages, images, variants, _count, ...rest }: any) => {
             const withCategories = mapProductCategories(rest)
             return {
                 ...withCategories,
                 productImages,
                 images: coalesceProductImageUrls(images, productImages),
                 metaPixelIds: extractMetaPixelIds(metaPixels),
+                hasVariants: Number(_count?.options || 0) > 0,
                 loyaltyPreview: this.buildProductLoyaltyPreview(settings, { ...rest, variants })
             }
         })

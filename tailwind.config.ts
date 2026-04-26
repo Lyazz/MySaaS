@@ -25,7 +25,7 @@ export default {
                 jetbrains: ['JetBrains Mono', 'monospace'],
                 wellness: ['Solway', 'serif'],
                 cinematic: ['Geist', 'system-ui', 'sans-serif'],
-                cinematicDisplay: ['Instrument Serif', 'serif'],
+                cinematicDisplay: ['Geist', 'system-ui', 'sans-serif'],
             },
             colors: {
                 brand: {

@@ -73,4 +73,34 @@ describe('ProductImagesUploader policy behavior', () => {
     expect(alertSpy).toHaveBeenCalled()
     expect(fetchSpy).not.toHaveBeenCalled()
   })
+
+  it('renders product image previews uncropped in admin grid', () => {
+    const wrapper = mount(ProductImagesUploader, {
+      props: {
+        modelValue: [
+          {
+            id: 'img-1',
+            url: '/uploads/product-full-height.png',
+            alt: 'Tall product',
+            position: 0,
+            isMain: true
+          }
+        ]
+      },
+      global: {
+        stubs: {
+          Icon: true,
+          ImageCropperModal: {
+            name: 'ImageCropperModal',
+            template: '<div data-testid="cropper-modal" />',
+            props: ['open', 'file', 'cropPresets', 'defaultPreset']
+          }
+        }
+      }
+    })
+
+    const preview = wrapper.get('img[src="/uploads/product-full-height.png"]')
+    expect(preview.classes()).toContain('object-contain')
+    expect(preview.classes()).not.toContain('object-cover')
+  })
 })

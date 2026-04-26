@@ -45,6 +45,8 @@
                 class="h-[60vh]"
                 :src="sourceUrl"
                 :stencil-props="stencilProps"
+                :default-size="defaultSize"
+                :default-position="defaultPosition"
                 :image-restriction="'fit-area'"
                 :canvas="true"
                 @error="onCropperError"
@@ -128,6 +130,65 @@ const stencilProps = computed(() => {
     aspectRatio: ratio
   }
 })
+
+type CropperArea = {
+  width: number
+  height: number
+}
+
+type CropperDefaultSizeArgs = {
+  imageSize?: CropperArea | null
+}
+
+type CropperDefaultPositionArgs = {
+  imageSize?: CropperArea | null
+  coordinates?: CropperArea | null
+}
+
+const defaultSize = ({ imageSize }: CropperDefaultSizeArgs) => {
+  if (!imageSize) {
+    return { width: 0, height: 0 }
+  }
+
+  if (selectedPreset.value === 'free') {
+    return {
+      width: imageSize.width,
+      height: imageSize.height
+    }
+  }
+
+  const ratio = CROP_PRESET_RATIO[selectedPreset.value]
+  if (!ratio || !Number.isFinite(ratio)) {
+    return {
+      width: imageSize.width,
+      height: imageSize.height
+    }
+  }
+
+  const imageRatio = imageSize.width / imageSize.height
+  if (imageRatio > ratio) {
+    return {
+      width: imageSize.height * ratio,
+      height: imageSize.height
+    }
+  }
+
+  return {
+    width: imageSize.width,
+    height: imageSize.width / ratio
+  }
+}
+
+const defaultPosition = ({ imageSize, coordinates }: CropperDefaultPositionArgs) => {
+  if (!imageSize || !coordinates) {
+    return { left: 0, top: 0 }
+  }
+
+  return {
+    left: Math.max(0, (imageSize.width - coordinates.width) / 2),
+    top: Math.max(0, (imageSize.height - coordinates.height) / 2)
+  }
+}
 
 const clearObjectUrl = () => {
   if (sourceUrl.value) {

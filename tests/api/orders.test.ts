@@ -699,6 +699,10 @@ describe('Admin Order Creation', () => {
         adminUserId = admin.id
         adminToken = signAccessToken({ userId: admin.id, email: admin.email, role: admin.role, tenantId: admin.tenantId })
 
+        await prisma.storeSettings.create({
+            data: { tenantId, cartEnabled: true, codEnabled: true, minimumOrderAmountDzd: 0, hideOptionalAddress: true }
+        })
+
         const product = await prisma.product.create({
             data: {
                 tenantId,
@@ -729,6 +733,7 @@ describe('Admin Order Creation', () => {
         await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
+        await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { tenantId } })
         await prisma.tenant.deleteMany({ where: { id: tenantId } })
     })
@@ -769,6 +774,60 @@ describe('Admin Order Creation', () => {
         expect(saved?.items[0].quantity).toBe(3)
         // Admin orders start as PENDING by default based on our implementation
         expect(saved?.status).toBe('PENDING')
+    })
+
+    it('ignores optional address fields for admin orders when hideOptionalAddress is enabled', async () => {
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { hideOptionalAddress: true }
+        })
+
+        const res = await request(app)
+            .post('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerName: 'Admin No Address Customer',
+                customerPhone: '0550333000',
+                customerAddress: 'Hidden Address',
+                shippingAddressLine1: 'Hidden Shipping Address',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(res.status).toBe(201)
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            select: { customerAddress: true, shippingAddressLine1: true }
+        })
+        expect(saved?.customerAddress).toBeNull()
+        expect(saved?.shippingAddressLine1).toBeNull()
+    })
+
+    it('stores optional address fields for admin orders when hideOptionalAddress is disabled', async () => {
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { hideOptionalAddress: false }
+        })
+
+        const res = await request(app)
+            .post('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerName: 'Admin Address Customer',
+                customerPhone: '0550444000',
+                customerAddress: 'Stored Address',
+                shippingAddressLine1: 'Stored Shipping Address',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(res.status).toBe(201)
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            select: { customerAddress: true, shippingAddressLine1: true }
+        })
+        expect(saved?.customerAddress).toBe('Stored Address')
+        expect(saved?.shippingAddressLine1).toBe('Stored Shipping Address')
     })
 
     it('prioritizes promotional price on admin order creation when promo is set', async () => {

@@ -2209,16 +2209,17 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
         }
 
-        if (deliveryMode === 'store') {
-            const settings = await prisma.storeSettings.upsert({
-                where: { tenantId },
-                create: { tenantId },
-                update: {}
-            })
-            if (settings.storePickupEnabled !== true) {
-                throw new OrderValidationError(403, 'Store pickup is disabled for this store')
-            }
+        const storeSettings = await prisma.storeSettings.upsert({
+            where: { tenantId },
+            create: { tenantId },
+            update: {}
+        })
+
+        if (deliveryMode === 'store' && storeSettings.storePickupEnabled !== true) {
+            throw new OrderValidationError(403, 'Store pickup is disabled for this store')
         }
+
+        const hideOptionalAddress = (storeSettings as any).hideOptionalAddress !== false
 
         const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
         const variantIds = Array.from(
@@ -2398,12 +2399,13 @@ export class OrdersService {
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
         const totalAmount = centsToMoney(totalCents)
         const totalWithShippingAmount = computeTotalWithShipping(totalAmount, effectiveShippingAmount)
+        const normalizedCustomerAddress = hideOptionalAddress ? null : (input.customerAddress || null)
+        const normalizedShippingAddressLine1 = hideOptionalAddress
+            ? null
+            : (input.shippingAddressLine1 || input.customerAddress || null)
+
         const pointsPreview = this.loyaltyFormula.computeTotal(
-            await prisma.storeSettings.upsert({
-                where: { tenantId },
-                create: { tenantId },
-                update: {}
-            }),
+            storeSettings,
             validatedItems.map((item) => ({
                 quantity: item.quantity,
                 referencePrice: item.referencePrice,
@@ -2433,7 +2435,7 @@ export class OrdersService {
                         tenantId,
                         phone: actualCustomerPhone,
                         name: actualCustomerName,
-                        address: input.customerAddress || null
+                        address: normalizedCustomerAddress
                     })
                     actualCustomerId = resolvedCustomer?.id ?? null
                 } catch (error) {
@@ -2450,7 +2452,7 @@ export class OrdersService {
                     customerId: actualCustomerId,
                     customerName: actualCustomerName,
                     customerPhone: actualCustomerPhone,
-                    customerAddress: input.customerAddress || null,
+                    customerAddress: normalizedCustomerAddress,
                     deliveryMode,
                     shippingProvider,
                     shippingWilayaCode: input.shippingWilayaCode || null,
@@ -2458,7 +2460,7 @@ export class OrdersService {
                     shippingServiceLevel: shippingServiceLevel || null,
                     shippingAmount: effectiveShippingAmount,
                     shippingCurrency: shippingCurrency || undefined,
-                    shippingAddressLine1: input.shippingAddressLine1 || input.customerAddress || null,
+                    shippingAddressLine1: normalizedShippingAddressLine1,
                     shippingNotes: input.shippingNotes || null,
                     shippingPickupPoint: shippingPickupPoint ?? undefined,
                     totalAmount,

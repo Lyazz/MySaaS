@@ -200,7 +200,7 @@
                  </div>
                </div>
 
-               <div>
+               <div v-if="!hideOptionalAddress">
                  <label class="ui-label mb-1">
                    {{ t('admin.pages.orders.create.address') }}
                  </label>
@@ -503,6 +503,7 @@ type CartItem = {
 const cartItems = ref<CartItem[]>([])
 const productSearch = ref('')
 const submitting = ref(false)
+const hideOptionalAddress = ref(true)
 
 // Variant Selection State
 const variantModalOpen = ref(false)
@@ -543,12 +544,17 @@ const canSubmit = computed(() => {
 // Methods
 onMounted(async () => {
     try {
-        const [custRes, prodRes] = await Promise.all([
+        const [custRes, prodRes, settingsRes] = await Promise.all([
              $fetch('/api/admin/customers', { headers: { Authorization: `Bearer ${authStore.token}` } }),
-             $fetch('/api/admin/products', { headers: { Authorization: `Bearer ${authStore.token}` }, query: { limit: 200 } })
+             $fetch('/api/admin/products', { headers: { Authorization: `Bearer ${authStore.token}` }, query: { limit: 200 } }),
+             $fetch('/api/admin/store-settings', { headers: { Authorization: `Bearer ${authStore.token}` } }).catch(() => null)
         ])
         customers.value = custRes as any[]
         products.value = prodRes as any[]
+        hideOptionalAddress.value = (settingsRes as any)?.hideOptionalAddress !== false
+        if (hideOptionalAddress.value) {
+            form.value.shippingAddressLine1 = ''
+        }
     } catch (e) {
         console.error('Failed to load initial data', e)
     }
@@ -743,6 +749,7 @@ async function submitOrder() {
     try {
         const payload = {
             ...form.value,
+            shippingAddressLine1: hideOptionalAddress.value ? undefined : (form.value.shippingAddressLine1 || undefined),
             items: cartItems.value.map(i => ({
                 productId: i.productId,
                 variantId: i.variantId || null,

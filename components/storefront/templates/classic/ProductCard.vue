@@ -41,6 +41,7 @@ const displayPrice = computed(() => pricing.value.effectivePrice)
 const promotionApplied = computed(() => pricing.value.promotionApplied)
 
 const cartStore = useCartStore()
+const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
 const { currencyCode } = useCurrency()
 const storefrontContent = useStorefrontContent()
@@ -76,7 +77,8 @@ const triggerSuccessToast = (title: string, message: string) => {
     setTimeout(() => { showSuccess.value = false }, 3000)
 }
 
-function handleAddToCart() {
+async function handleAddToCart() {
+  if (await requireVariantSelectionBeforeQuickAdd(props.product)) return
   cartStore.addItem({
     productId: props.product.id,
     title: props.product.title,

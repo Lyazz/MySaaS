@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import SaaSLogo from '~/components/branding/SaaSLogo.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -48,11 +49,7 @@ const handleLogout = () => {
       <div class="cinematic-container !max-w-[88rem]">
         <div class="flex h-16 md:h-[72px] items-center justify-between">
           <NuxtLink to="/" class="group flex items-center gap-2.5">
-            <span class="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-lime-neon">
-              <span class="absolute inset-0 rounded-full bg-lime-neon/40 blur-md" />
-              <Icon name="lucide:hexagon" class="relative h-3.5 w-3.5 text-[color:var(--m-bg)]" />
-            </span>
-            <span class="text-[17px] font-medium tracking-tight text-white">Swekly</span>
+            <SaaSLogo size="lg" class="shrink-0" />
           </NuxtLink>
 
           <div class="hidden items-center gap-1 lg:flex">

@@ -20,11 +20,12 @@
       <!-- Logo/Brand -->
       <div class="h-16 flex items-center justify-between px-6 border-b border-white/5" style="background: var(--admin-sidebar-bg);">
         <div class="flex items-center gap-3 overflow-hidden">
-          <div 
-            class="w-8 h-8 rounded-lg flex items-center justify-center font-sans font-bold text-white shadow-lg shrink-0 transition-colors [background:var(--brand)]"
-          >
-            S
-          </div>
+          <SaaSLogo
+            size="md"
+            :show-wordmark="false"
+            :alt="t('superAdmin.layout.brand')"
+            class="shrink-0"
+          />
           <span 
             class="font-sans font-semibold text-lg tracking-wide truncate transition-all duration-300"
             :class="sidebarOpen ? 'opacity-100' : 'opacity-0 lg:hidden'"
@@ -170,6 +171,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import SaaSLogo from '~/components/branding/SaaSLogo.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()

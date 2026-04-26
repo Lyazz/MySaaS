@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="sweklyMarkGlow" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E7FF8A"/>
+      <stop offset="1" stop-color="#C6F432"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="40" height="40" rx="12" fill="#111827"/>
+  <rect x="4" y="4" width="40" height="40" rx="12" stroke="#334155"/>
+  <path d="M32.533 15.176L36.326 18.969L27.782 27.514L24.424 24.156L16.413 32.167L12.62 28.374L24.424 16.57L27.782 19.928L32.533 15.176Z" fill="url(#sweklyMarkGlow)"/>
+</svg>

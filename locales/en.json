@@ -61,6 +61,21 @@
       },
       "pills": {
         "mobile": "Mobile-friendly storefronts"
+      },
+      "orb": {
+        "newOrder": "New order",
+        "shipping": "Shipping",
+        "live": "live",
+        "payment": "Payment",
+        "codAccepted": "COD · accepted",
+        "today": "Today",
+        "metrics": {
+          "ordersPerHour": "Orders / hr",
+          "avgBasket": "Avg basket · DA",
+          "conversion": "Conversion",
+          "activeWilayas": "Active wilayas",
+          "deliveredToday": "Delivered today"
+        }
       }
     },
     "storyteller": {
@@ -158,6 +173,7 @@
       }
     },
     "testimonials": {
+      "eyebrow": "Testimonials",
       "heading": {
         "prefix": "Made for",
         "accent": "people",
@@ -301,7 +317,7 @@
         "ctaPrimary": "Start for free",
         "ctaSecondary": "See it work"
       },
-      "logoCloud": "Trusted integrations",
+      "logoCloud": "Our integrations +50",
       "howItWorks": {
         "titlePre": "From idea to",
         "titleAccent": "income",
@@ -405,6 +421,32 @@
           }
         }
       }
+    },
+    "extras": {
+      "heroProof": {
+        "rating": "4.9 / 5 rating",
+        "ratingLabel": "from 800+ merchants",
+        "merchants": "1,200+",
+        "merchantsLabel": "active stores in DZ",
+        "cod": "COD ready",
+        "codLabel": "out of the box",
+        "noCard": "No credit card",
+        "noCardLabel": "free 14-day trial"
+      },
+      "trustStrip": {
+        "eyebrow": "Made for Algeria",
+        "items": {
+          "cod": { "title": "Cash on delivery", "description": "Built-in COD with auto reconciliation across every wilaya." },
+          "wilayas": { "title": "58 wilayas covered", "description": "Yalidine, Maystro, ZR & Noest — one-click activation." },
+          "rtl": { "title": "Arabic-first storefront", "description": "Full RTL, Darija-friendly UI, AR/FR/EN with one switch." },
+          "dzd": { "title": "DZD pricing", "description": "Local currency, taxes, and invoicing — no FX surprises." }
+        }
+      },
+      "stickyCta": {
+        "label": "Open my store",
+        "subtle": "Free · No card"
+      },
+      "demoStore": "View live demo store"
     }
   },
   "marketing": {
@@ -431,6 +473,18 @@
         "builder": {
           "title": "Easy store setup",
           "description": "Launch a clean, mobile-first store and customize it around your products in a short time."
+        },
+        "tenancy": {
+          "title": "Multi-tenant by design",
+          "description": "Each store has its own data, domain, and brand — fully isolated and secure from day one."
+        },
+        "localization": {
+          "title": "Built for Algeria",
+          "description": "Arabic, French, and English with full RTL support, plus local currency and delivery flows."
+        },
+        "mobile": {
+          "title": "Mobile-first experience",
+          "description": "Storefronts and admin both feel native on mobile, where most of your customers and team work."
         },
         "payments": {
           "title": "Checkout that fits local buying habits",

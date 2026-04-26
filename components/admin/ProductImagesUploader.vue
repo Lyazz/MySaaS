@@ -23,7 +23,7 @@
         <img
           :src="image.url"
           :alt="image.alt || t('admin.imageUploader.imageAlt')"
-          class="h-full w-full object-cover"
+          class="h-full w-full object-contain"
         >
 
         <div v-if="image.isMain" class="absolute left-2 top-2">

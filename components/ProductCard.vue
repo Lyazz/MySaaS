@@ -86,6 +86,7 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
+const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
 const { format: formatCurrency } = useCurrency()
 const storefrontContent = useStorefrontContent()
@@ -103,7 +104,8 @@ const mainImage = computed(() => {
   return null
 })
 
-function handleAddToCart() {
+async function handleAddToCart() {
+  if (await requireVariantSelectionBeforeQuickAdd(props.product)) return
   cartStore.addItem({
     productId: props.product.id,
     title: props.product.title,

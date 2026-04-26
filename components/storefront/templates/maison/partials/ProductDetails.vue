@@ -1,44 +1,63 @@
 <script setup lang="ts">
-import { getOptionValueState, type OptionValueState, type SelectedOptions } from '../variant-ux'
+import {
+  getOptionValueState,
+  type OptionValueState,
+  type SelectedOptions,
+} from '../variant-ux';
 
 const props = defineProps<{
-  product: any
-  currentPrice: number
-  selectedOptions: SelectedOptions
-}>()
+  product: any;
+  currentPrice: number;
+  selectedOptions: SelectedOptions;
+}>();
 
-const emit = defineEmits(['update:selectedOptions'])
-const { format: formatPrice } = useCurrency()
+const emit = defineEmits(['update:selectedOptions']);
+const { format: formatPrice } = useCurrency();
 
 const setOption = (optionId: string, valueId: string) => {
-  emit('update:selectedOptions', { ...props.selectedOptions, [optionId]: valueId })
-}
+  emit('update:selectedOptions', {
+    ...props.selectedOptions,
+    [optionId]: valueId,
+  });
+};
 
-const optionValueState = (optionId: string, valueId: string): OptionValueState => {
-  if (!props.product?.variants || props.product.variants.length === 0) return 'available'
-  return getOptionValueState({ product: props.product, selectedOptions: props.selectedOptions, optionId, valueId })
-}
+const optionValueState = (
+  optionId: string,
+  valueId: string
+): OptionValueState => {
+  if (!props.product?.variants || props.product.variants.length === 0)
+    return 'available';
+  return getOptionValueState({
+    product: props.product,
+    selectedOptions: props.selectedOptions,
+    optionId,
+    valueId,
+  });
+};
 
 const isOptionValueUnavailable = (optionId: string, valueId: string): boolean =>
-  optionValueState(optionId, valueId) === 'unavailable'
+  optionValueState(optionId, valueId) === 'unavailable';
 
 const optionValueSuffix = (optionId: string, valueId: string): string => {
-  const state = optionValueState(optionId, valueId)
-  if (state === 'out_of_stock') return '(Rupture)'
-  if (state === 'unavailable') return '(Indisponible)'
-  return ''
-}
+  const state = optionValueState(optionId, valueId);
+  if (state === 'out_of_stock') return '(Rupture)';
+  if (state === 'unavailable') return '(Indisponible)';
+  return '';
+};
 
 const setOptionIfAllowed = (optionId: string, valueId: string) => {
-  if (!isOptionValueUnavailable(optionId, valueId)) setOption(optionId, valueId)
-}
+  if (!isOptionValueUnavailable(optionId, valueId))
+    setOption(optionId, valueId);
+};
 </script>
 
 <template>
   <div class="details">
     <!-- Title block -->
     <div class="details__head">
-      <span class="at-label">{{ product?.category?.title || 'Maison & Déco' }}</span>
+      <span class="at-label">{{
+        product?.category?.title || 'Maison & Déco'
+      }}</span>
       <h1 class="details__title">{{ product?.title }}</h1>
 
       <StorefrontSharedCountdownTimer
@@ -58,63 +77,114 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     </div>
 
     <!-- Options -->
-    <div v-if="product?.options && product.options.length > 0" class="details__options">
-      <div v-for="option in product.options" :key="option.id" class="details__option">
+    <div
+      v-if="product?.options && product.options.length > 0"
+      class="details__options"
+    >
+      <div
+        v-for="option in product.options"
+        :key="option.id"
+        class="details__option"
+      >
         <label class="details__option-label">{{ option.name }}</label>
 
         <!-- Dropdown -->
-        <div v-if="option.displayType === 'dropdown'" class="details__select-wrap">
+        <div
+          v-if="option.displayType === 'dropdown'"
+          class="details__select-wrap"
+        >
           <select
-            :value="selectedOptions[option.id]"
+            :value="selectedOptions[option.id] || ''"
             class="at-select"
-            @change="setOption(option.id, ($event.target as HTMLSelectElement).value)"
+            @change="
+              setOption(option.id, ($event.target as HTMLSelectElement).value)
+            "
           >
-            <option v-for="value in option.values" :key="value.id" :value="value.id" :disabled="isOptionValueUnavailable(option.id, value.id)">
+            <option value="" disabled>{{ option.name }}</option>
+            <option
+              v-for="value in option.values"
+              :key="value.id"
+              :value="value.id"
+              :disabled="isOptionValueUnavailable(option.id, value.id)"
+            >
               {{ value.label }} {{ optionValueSuffix(option.id, value.id) }}
             </option>
           </select>
-          <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="details__select-arrow">
-            <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
+          <svg
+            width="8"
+            height="5"
+            viewBox="0 0 8 5"
+            fill="none"
+            class="details__select-arrow"
+          >
+            <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85" />
           </svg>
         </div>
 
         <!-- Color swatch -->
-        <div v-else-if="option.displayType === 'color'" class="details__swatches">
+        <div
+          v-else-if="option.displayType === 'color'"
+          class="details__swatches"
+        >
           <button
             v-for="value in option.values"
             :key="value.id"
             type="button"
             class="details__color-swatch"
             :class="[
-              optionValueState(option.id, value.id) === 'unavailable' ? 'is-unavailable' : '',
-              selectedOptions[option.id] === value.id ? 'is-selected' : ''
+              optionValueState(option.id, value.id) === 'unavailable'
+                ? 'is-unavailable'
+                : '',
+              selectedOptions[option.id] === value.id ? 'is-selected' : '',
             ]"
             :style="{ backgroundColor: value.meta || '#555' }"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
             @click="setOptionIfAllowed(option.id, value.id)"
           >
-            <svg v-if="selectedOptions[option.id] === value.id" width="10" height="8" viewBox="0 0 10 8" fill="none">
-              <path d="M1 4l3 3 5-6" stroke="white" stroke-width="1" filter="drop-shadow(0 0 1px rgba(0,0,0,0.6))"/>
+            <svg
+              v-if="selectedOptions[option.id] === value.id"
+              width="10"
+              height="8"
+              viewBox="0 0 10 8"
+              fill="none"
+            >
+              <path
+                d="M1 4l3 3 5-6"
+                stroke="white"
+                stroke-width="1"
+                filter="drop-shadow(0 0 1px rgba(0,0,0,0.6))"
+              />
             </svg>
           </button>
         </div>
 
         <!-- Image swatch -->
-        <div v-else-if="option.displayType === 'image'" class="details__img-swatches">
+        <div
+          v-else-if="option.displayType === 'image'"
+          class="details__img-swatches"
+        >
           <button
             v-for="value in option.values"
             :key="value.id"
             type="button"
             class="details__img-swatch"
             :class="[
-              optionValueState(option.id, value.id) === 'unavailable' ? 'is-unavailable' : '',
-              selectedOptions[option.id] === value.id ? 'is-selected' : ''
+              optionValueState(option.id, value.id) === 'unavailable'
+                ? 'is-unavailable'
+                : '',
+              selectedOptions[option.id] === value.id ? 'is-selected' : '',
             ]"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
             @click="setOptionIfAllowed(option.id, value.id)"
           >
-            <img v-if="value.meta" :src="value.meta" class="details__img-swatch-img">
-            <span v-else class="details__img-swatch-label">{{ value.label }}</span>
+            <img
+              v-if="value.meta"
+              :src="value.meta"
+              class="details__img-swatch-img"
+            />
+            <span v-else class="details__img-swatch-label">{{
+              value.label
+            }}</span>
           </button>
         </div>
 
@@ -125,9 +195,13 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             :key="value.id"
             class="details__option-btn"
             :class="[
-              optionValueState(option.id, value.id) === 'unavailable' ? 'is-unavailable' : '',
+              optionValueState(option.id, value.id) === 'unavailable'
+                ? 'is-unavailable'
+                : '',
               selectedOptions[option.id] === value.id ? 'is-selected' : '',
-              optionValueState(option.id, value.id) === 'out_of_stock' ? 'is-oos' : ''
+              optionValueState(option.id, value.id) === 'out_of_stock'
+                ? 'is-oos'
+                : '',
             ]"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
             @click="setOptionIfAllowed(option.id, value.id)"
@@ -146,9 +220,15 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 </template>
 
 <style scoped>
-.details { display: flex; flex-direction: column; gap: 0; }
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
 
-.details__head { margin-bottom: 24px; }
+.details__head {
+  margin-bottom: 24px;
+}
 .details__title {
   font-family: var(--at-f-display);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
@@ -158,8 +238,14 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   color: var(--at-cream);
   margin: 8px 0 16px;
 }
-.details__countdown { margin-bottom: 12px; }
-.details__price-row { display: flex; align-items: baseline; gap: 12px; }
+.details__countdown {
+  margin-bottom: 12px;
+}
+.details__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
 .details__price {
   font-family: var(--at-f-display);
   font-size: 2rem;
@@ -182,7 +268,11 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   padding-top: 20px;
   border-top: 1px solid var(--at-border);
 }
-.details__option { display: flex; flex-direction: column; gap: 10px; }
+.details__option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .details__option-label {
   font-family: var(--at-f-mono);
   font-size: 9px;
@@ -192,7 +282,10 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   color: var(--at-sub);
 }
 
-.details__select-wrap { position: relative; max-width: 280px; }
+.details__select-wrap {
+  position: relative;
+  max-width: 280px;
+}
 .details__select-arrow {
   position: absolute;
   right: 12px;
@@ -202,7 +295,11 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   pointer-events: none;
 }
 
-.details__swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.details__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .details__color-swatch {
   width: 32px;
   height: 32px;
@@ -211,12 +308,25 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.15s, opacity 0.15s, transform 0.15s;
+  transition:
+    border-color 0.15s,
+    opacity 0.15s,
+    transform 0.15s;
 }
-.details__color-swatch.is-selected { border-color: var(--at-gold); transform: scale(1.1); }
-.details__color-swatch.is-unavailable { opacity: 0.25; cursor: not-allowed; }
+.details__color-swatch.is-selected {
+  border-color: var(--at-gold);
+  transform: scale(1.1);
+}
+.details__color-swatch.is-unavailable {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
 
-.details__img-swatches { display: flex; flex-wrap: wrap; gap: 6px; }
+.details__img-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .details__img-swatch {
   width: 56px;
   height: 56px;
@@ -226,21 +336,37 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   position: relative;
   background: none;
   padding: 0;
-  transition: border-color 0.15s, opacity 0.15s;
+  transition:
+    border-color 0.15s,
+    opacity 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.details__img-swatch.is-selected { border-color: var(--at-gold); }
-.details__img-swatch.is-unavailable { opacity: 0.35; filter: grayscale(1); cursor: not-allowed; }
-.details__img-swatch-img { width: 100%; height: 100%; object-fit: cover; }
+.details__img-swatch.is-selected {
+  border-color: var(--at-gold);
+}
+.details__img-swatch.is-unavailable {
+  opacity: 0.35;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
+.details__img-swatch-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .details__img-swatch-label {
   font-family: var(--at-f-mono);
   font-size: 9px;
   color: var(--at-sub);
 }
 
-.details__option-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.details__option-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .details__option-btn {
   padding: 8px 14px;
   font-family: var(--at-f-mono);
@@ -252,12 +378,29 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   background: transparent;
   color: var(--at-sub);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
 }
-.details__option-btn:hover { border-color: var(--at-gold); color: var(--at-gold); }
-.details__option-btn.is-selected { border-color: var(--at-cream); background: var(--at-cream); color: var(--at-bg); }
-.details__option-btn.is-unavailable { opacity: 0.25; cursor: not-allowed; text-decoration: line-through; }
-.details__option-btn.is-oos { color: #C0392B; border-color: rgba(192,57,43,0.3); }
+.details__option-btn:hover {
+  border-color: var(--at-gold);
+  color: var(--at-gold);
+}
+.details__option-btn.is-selected {
+  border-color: var(--at-cream);
+  background: var(--at-cream);
+  color: var(--at-bg);
+}
+.details__option-btn.is-unavailable {
+  opacity: 0.25;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.details__option-btn.is-oos {
+  color: #c0392b;
+  border-color: rgba(192, 57, 43, 0.3);
+}
 
 /* Mini desc */
 .details__mini-desc {
