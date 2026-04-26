@@ -47,7 +47,6 @@
             placeholder="product-slug"
             hint="URL-friendly version of the title"
             required
-            pattern="[a-z0-9-]+"
           />
 
         <AdminFormField
@@ -198,6 +197,7 @@ import AdminFormField from '~/components/admin/FormField.vue'
 import ProductImagesUploader from '~/components/admin/ProductImagesUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import { normalizeContentSlug } from '~/shared/content-slug'
 
 interface Category {
   id: string
@@ -331,10 +331,7 @@ watch(images, (val) => {
 }, { deep: true })
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeContentSlug(text)
 }
 </script>
 

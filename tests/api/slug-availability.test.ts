@@ -3,10 +3,15 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import app from '../../backend/src/app'
 import prisma from '../../backend/src/lib/prisma'
 import { signAccessToken } from '../../backend/src/lib/jwt'
+import { normalizeContentSlug } from '../../shared/content-slug'
 
 describe('Admin slug availability endpoints', () => {
     const slugA = `slug-check-a-${Date.now()}`
     const slugB = `slug-check-b-${Date.now()}`
+    const arabicProductSlugInput = 'منتج عربي فاخر'
+    const arabicCategorySlugInput = 'تصنيف عربي فاخر'
+    const arabicProductSlug = normalizeContentSlug(arabicProductSlugInput)
+    const arabicCategorySlug = normalizeContentSlug(arabicCategorySlugInput)
     const hostA = `${slugA}.localhost:3000`
     const hostB = `${slugB}.localhost:3000`
 
@@ -64,6 +69,22 @@ describe('Admin slug availability endpoints', () => {
             }
         })
         productAId = productA.id
+
+        await prisma.category.create({
+            data: { tenantId: tenantAId, title: 'Arabic Tenant A Category', slug: arabicCategorySlug }
+        })
+
+        await prisma.product.create({
+            data: {
+                tenantId: tenantAId,
+                title: 'Arabic Tenant A Product',
+                slug: arabicProductSlug,
+                price: 150,
+                stock: 3,
+                isActive: true,
+                categoryId: categoryA.id
+            }
+        })
     })
 
     afterAll(async () => {
@@ -112,6 +133,26 @@ describe('Admin slug availability endpoints', () => {
 
         expect(availableWhenEditingCurrent.status).toBe(200)
         expect(availableWhenEditingCurrent.body.available).toBe(true)
+
+        const arabicTakenOnTenantA = await request(app)
+            .get('/api/admin/products/slug-availability')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .query({ slug: arabicProductSlugInput })
+
+        expect(arabicTakenOnTenantA.status).toBe(200)
+        expect(arabicTakenOnTenantA.body.slug).toBe(arabicProductSlug)
+        expect(arabicTakenOnTenantA.body.available).toBe(false)
+
+        const arabicAvailableOnTenantB = await request(app)
+            .get('/api/admin/products/slug-availability')
+            .set('X-Forwarded-Host', hostB)
+            .set('Authorization', `Bearer ${adminBToken}`)
+            .query({ slug: arabicProductSlugInput })
+
+        expect(arabicAvailableOnTenantB.status).toBe(200)
+        expect(arabicAvailableOnTenantB.body.slug).toBe(arabicProductSlug)
+        expect(arabicAvailableOnTenantB.body.available).toBe(true)
     })
 
     it('checks category slug availability per tenant', async () => {
@@ -141,5 +182,25 @@ describe('Admin slug availability endpoints', () => {
 
         expect(availableWhenEditingCurrent.status).toBe(200)
         expect(availableWhenEditingCurrent.body.available).toBe(true)
+
+        const arabicTakenOnTenantA = await request(app)
+            .get('/api/admin/categories/slug-availability')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .query({ slug: arabicCategorySlugInput })
+
+        expect(arabicTakenOnTenantA.status).toBe(200)
+        expect(arabicTakenOnTenantA.body.slug).toBe(arabicCategorySlug)
+        expect(arabicTakenOnTenantA.body.available).toBe(false)
+
+        const arabicAvailableOnTenantB = await request(app)
+            .get('/api/admin/categories/slug-availability')
+            .set('X-Forwarded-Host', hostB)
+            .set('Authorization', `Bearer ${adminBToken}`)
+            .query({ slug: arabicCategorySlugInput })
+
+        expect(arabicAvailableOnTenantB.status).toBe(200)
+        expect(arabicAvailableOnTenantB.body.slug).toBe(arabicCategorySlug)
+        expect(arabicAvailableOnTenantB.body.available).toBe(true)
     })
 })

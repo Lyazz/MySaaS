@@ -105,7 +105,6 @@
           @change="handleSlugChange"
           @blur="handleSlugChange"
           required
-          pattern="[a-z0-9-]+"
         />
 
         <BaseSelect
@@ -187,6 +186,7 @@ import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import SingleImageUploader from '~/components/admin/SingleImageUploader.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import { CONTENT_SLUG_PATTERN, CONTENT_SLUG_RULE_HINT, normalizeContentSlug } from '~/shared/content-slug'
 
 definePageMeta({
   middleware: 'auth',
@@ -222,7 +222,7 @@ const submitting = ref(false)
 const loading = ref(true)
 const showDeleteModal = ref(false)
 const lastAutoSlug = ref('')
-const slugPattern = /^[a-z0-9-]+$/
+const slugPattern = CONTENT_SLUG_PATTERN
 const slugSuggestionSeq = ref(0)
 
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
@@ -282,10 +282,7 @@ watch(() => form.value.title, (newTitle) => {
 })
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeContentSlug(text)
 }
 
 function normalizeSlugInput(): string {
@@ -359,7 +356,7 @@ async function checkSlugAvailability(): Promise<boolean> {
     return false
   }
   if (!slugPattern.test(slug)) {
-    errors.value.slug = 'Slug must contain only lowercase letters, numbers, and hyphens'
+    errors.value.slug = CONTENT_SLUG_RULE_HINT
     return false
   }
 

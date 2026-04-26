@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { ProductsService } from './products.service'
+import { isValidContentSlug, normalizeContentSlug } from '../../../../shared/content-slug'
 
 const productsService = new ProductsService()
 
@@ -13,13 +14,14 @@ export class ProductsController {
     async checkSlugAvailability(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            const slug = typeof req.query.slug === 'string' ? req.query.slug.trim() : ''
+            const rawSlug = typeof req.query.slug === 'string' ? req.query.slug : ''
+            const slug = normalizeContentSlug(rawSlug)
             const excludeId = typeof req.query.excludeId === 'string' ? req.query.excludeId.trim() : undefined
 
             if (!slug) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Slug is required' })
             }
-            if (!/^[a-z0-9-]+$/.test(slug)) {
+            if (!isValidContentSlug(slug)) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid slug format' })
             }
 

@@ -52,6 +52,7 @@
     "pinia": "^3.0.4",
     "sanitize-html": "^2.17.3",
     "sharp": "^0.34.5",
+    "slugify": "^1.6.9",
     "telegraf": "^4.16.3",
     "unstorage": "^1.15.0",
     "vue": "^3.4.0",
