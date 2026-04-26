@@ -24,6 +24,11 @@ const withSecurityHeaders = (headers: Record<string, string> = {}) => ({ ...secu
 
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
+  experimental: {
+    // Prevent client boot failures when CDN/browser serves an older entry chunk
+    // that references a removed /_nuxt/builds/meta/<old-build-id>.json file.
+    appManifest: false
+  },
   ssr: ssrEnabled,
   devtools: { enabled: process.env.NODE_ENV !== 'production' },
   runtimeConfig: {
