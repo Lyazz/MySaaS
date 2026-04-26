@@ -32,6 +32,12 @@ const trustStripItems = computed(() => [
   { icon: 'lucide:badge-dollar-sign', title: t('saasLanding.extras.trustStrip.items.dzd.title'), description: t('saasLanding.extras.trustStrip.items.dzd.description') }
 ])
 
+const faqItems = computed<Array<{ q: string; a: string }>>(() => {
+  const raw = tm('saasLanding.faq.items') as any
+  if (!Array.isArray(raw)) return []
+  return raw.map((i: any) => ({ q: rt(i.question), a: rt(i.answer) }))
+})
+
 const jsonLd = computed(() => {
   const org = {
     '@context': 'https://schema.org',
@@ -191,12 +197,6 @@ const testimonials = computed<Array<{ quote: string; author: string; role: strin
 })
 const testimonialsRow1 = computed(() => testimonials.value.slice(0, Math.ceil(testimonials.value.length / 2)))
 const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testimonials.value.length / 2)))
-
-const faqItems = computed<Array<{ q: string; a: string }>>(() => {
-  const raw = tm('saasLanding.faq.items') as any
-  if (!Array.isArray(raw)) return []
-  return raw.map((i: any) => ({ q: rt(i.question), a: rt(i.answer) }))
-})
 </script>
 
 <template>
