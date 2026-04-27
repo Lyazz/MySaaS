@@ -310,6 +310,7 @@ model StoreSettings {
   currencyCountry String  @default("DZ") // ISO country for flag/locale
 
   isCompleted              Boolean  @default(false)
+  checklistDismissed       Boolean  @default(false)
   allowedDeliveryProviders String[] @default(["SELF"])
   storePickupEnabled       Boolean  @default(false)
 

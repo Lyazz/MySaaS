@@ -67,6 +67,28 @@ export class StoreSettingsController {
         }
     }
 
+    async getChecklist(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const checklist = await service.getOnboardingChecklist(tenant.id)
+            res.json(checklist)
+        } catch (error) {
+            console.error('Get onboarding checklist error:', error)
+            res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
+    async publish(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            await service.publishStore(tenant.id)
+            res.json({ success: true })
+        } catch (error) {
+            console.error('Publish store error:', error)
+            res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
     async getPublic(req: Request, res: Response) {
         try {
             const tenant = req.tenant

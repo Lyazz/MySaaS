@@ -3311,16 +3311,29 @@
       "onboarding": {
         "metaTitle": "Store setup",
         "title": "Store setup",
-        "subtitle": "Choose your brand color, template, and language.",
+        "subtitle": "Set up your store in a few quick steps.",
         "loadingSettings": "Loading your store settings…",
         "progress": {
           "stepOf": "Step {current} of {total}"
         },
         "steps": {
-          "brand": "Brand",
-          "template": "Template",
+          "storeInfo": "Store Info",
+          "template": "Choose Template",
+          "brandColor": "Brand Color",
           "language": "Language",
-          "summary": "Summary"
+          "firstProduct": "First Product",
+          "done": "All Done"
+        },
+        "storeInfo": {
+          "title": "Tell us about your store",
+          "nameLabel": "Store name",
+          "namePlaceholder": "My Store",
+          "logoLabel": "Store logo",
+          "logoHint": "Recommended: 200×200px PNG or SVG",
+          "logoUpload": "Upload logo",
+          "logoChange": "Change logo",
+          "descriptionLabel": "Short description (optional)",
+          "descriptionPlaceholder": "A few words about your store…"
         },
         "brand": {
           "title": "Brand color",
@@ -3333,39 +3346,51 @@
         "template": {
           "title": "Store template"
         },
-        "templates": {
-          "classic": {
-            "label": "Classic",
-            "description": "Clean layout, ideal for most stores."
-          },
-          "modern": {
-            "label": "Modern",
-            "description": "Bolder typography and more visual spacing."
-          }
-        },
         "language": {
           "title": "Language",
           "label": "Language",
-          "rtlHint": "If Arabic, consider RTL layout."
+          "rtlHint": "Selecting Arabic will enable right-to-left layout."
         },
-        "summary": {
-          "title": "Summary",
-          "cards": {
-            "template": "Template",
-            "primaryColor": "Primary color",
-            "language": "Language"
-          },
-          "aiTitle": "Frontend AI summary",
-          "generate": "Generate",
-          "generating": "Generating…",
-          "placeholder": "Click Generate to create a brief for your frontend agent."
+        "firstProduct": {
+          "title": "Add your first product",
+          "subtitle": "You can always add more from the Products section.",
+          "nameLabel": "Product name",
+          "namePlaceholder": "e.g. T-Shirt, Phone Case…",
+          "priceLabel": "Price (DZD)",
+          "imageLabel": "Product image (optional)",
+          "imageUpload": "Upload image",
+          "imageChange": "Change image",
+          "skipLink": "Skip for now",
+          "errorCreate": "Failed to create product. You can skip and add it later."
         },
-        "saveFinish": "Save & finish",
+        "done": {
+          "title": "Your store is ready!",
+          "subtitle": "Here's what you set up:",
+          "storeUrlLabel": "Your store URL",
+          "offlineNote": "Your store is currently offline. Publish it from the dashboard when you're ready.",
+          "ctaDashboard": "Go to Dashboard",
+          "ctaProducts": "Add More Products"
+        },
+        "saveFinish": "Finish Setup",
         "errors": {
           "loadFailed": "Failed to load store settings.",
-          "saveFailed": "Failed to save store settings.",
-          "summaryFailed": "Failed to generate summary."
+          "saveFailed": "Failed to save store settings."
         }
+      },
+      "gettingStarted": {
+        "title": "Getting Started",
+        "progress": "{done} of {total} completed",
+        "dismiss": "Dismiss",
+        "complete": "Setup complete",
+        "items": {
+          "logo": "Upload your logo",
+          "product": "Add your first product",
+          "category": "Create a category",
+          "delivery": "Configure delivery",
+          "publish": "Publish your store"
+        },
+        "publishBtn": "Publish now",
+        "publishing": "Publishing…"
       },
       "purchases": {
         "index": {
