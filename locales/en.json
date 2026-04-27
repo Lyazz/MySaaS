@@ -703,15 +703,32 @@
           "label": "Work Email",
           "placeholder": "name{'@'}company.com"
         },
+        "phone": {
+          "label": "Phone Number",
+          "placeholder": "+213 540 80 14 36"
+        },
+        "otp": {
+          "label": "OTP Confirmation",
+          "placeholder": "Enter OTP code",
+          "send": "Send Code",
+          "verify": "Verify Code",
+          "placeholderNotice": "OTP placeholder sent. Use any code to continue this temporary flow.",
+          "verified": "Phone confirmed (placeholder)."
+        },
         "password": {
           "label": "Password"
         },
+        "confirmPassword": {
+          "label": "Confirm Password"
+        },
         "submit": {
           "creating": "Creating Account...",
-          "register": "Register & Create Store"
+          "register": "Register & Create Store",
+          "verifyOtp": "Verify OTP to Continue"
         },
         "haveAccount": "Already have an account?",
-        "logIn": "Log in"
+        "logIn": "Log in",
+        "forgotPassword": "Forgot password?"
       },
       "success": {
         "title": "You're in!",
@@ -720,7 +737,16 @@
       },
       "errors": {
         "generic": "An error occurred during registration.",
-        "sessionMissing": "Your account was created, but automatic sign-in failed. Please log in to continue."
+        "sessionMissing": "Your account was created, but automatic sign-in failed. Please log in to continue.",
+        "emailInvalid": "Enter a valid email address.",
+        "passwordTooShort": "Password must be at least {min} characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "phoneRequired": "Phone number is required.",
+        "phoneInvalid": "Enter a valid Algerian phone number.",
+        "phoneRestricted": "Registration is currently unavailable.",
+        "otpRequired": "Enter the OTP code.",
+        "otpSendFirst": "Send OTP code first.",
+        "otpVerifyFirst": "Verify OTP before creating your account."
       },
       "social": {
         "divider": "or continue with",
@@ -728,6 +754,20 @@
         "facebook": "Continue with Facebook",
         "apple": "Continue with Apple"
       }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email and we will send reset instructions when this feature is enabled.",
+      "placeholderNotice": "This screen is a placeholder for now. Reset emails are not active yet.",
+      "email": {
+        "label": "Email Address",
+        "placeholder": "name{'@'}company.com"
+      },
+      "submit": {
+        "send": "Send Reset Link",
+        "sent": "Request Saved (Placeholder)"
+      },
+      "backToLogin": "Back to login"
     }
   },
   "pricing": {

@@ -5,6 +5,7 @@ test.describe('Storefront i18n', () => {
   const slug = `i18n-store-${timestamp}`
   const email = `admin-i18n-store-${timestamp}@example.com`
   const password = 'Password123!'
+  const phone = '+213550000001'
 
   test('switches tenant storefront UI to French and Arabic', async ({ page }) => {
     test.setTimeout(120000)
@@ -15,7 +16,12 @@ test.describe('Storefront i18n', () => {
     await page.fill('input[name="name"]', `I18n Store ${timestamp}`)
     await page.fill('input[name="slug"]', slug)
     await page.fill('input[name="email"]', email)
+    await page.fill('input[name="phone"]', phone)
+    await page.getByTestId('register-send-otp').click()
+    await page.fill('input[name="otp"]', '123456')
+    await page.getByTestId('register-verify-otp').click()
     await page.fill('input[name="password"]', password)
+    await page.fill('input[name="confirmPassword"]', password)
     const registerResponsePromise = page.waitForResponse(
       (r) => r.url().includes('/api/register') && r.request().method() === 'POST'
     )

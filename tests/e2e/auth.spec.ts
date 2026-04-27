@@ -6,6 +6,7 @@ test.describe('Authentication Flow', () => {
     const slug = `test-${timestamp}`
     const email = `admin-${timestamp}@example.com`
     const password = 'Password123!'
+    const phone = '+213550000001'
 
     test('should register a new tenant and access admin without re-login', async ({ page }) => {
         test.setTimeout(120000)
@@ -14,7 +15,12 @@ test.describe('Authentication Flow', () => {
         await page.getByTestId('register-company').fill(`Test Tenant ${timestamp}`)
         await page.getByTestId('register-slug').fill(slug)
         await page.getByTestId('register-email').fill(email)
+        await page.getByTestId('register-phone').fill(phone)
+        await page.getByTestId('register-send-otp').click()
+        await page.getByTestId('register-otp').fill('123456')
+        await page.getByTestId('register-verify-otp').click()
         await page.getByTestId('register-password').fill(password)
+        await page.getByTestId('register-confirm-password').fill(password)
         const registerResponsePromise = page.waitForResponse((r) => r.url().includes('/api/register') && r.request().method() === 'POST')
         await page.click('button[type="submit"]')
         const registerRes = await registerResponsePromise

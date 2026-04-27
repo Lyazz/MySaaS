@@ -231,7 +231,7 @@ onUnmounted(stopTimer)
               <div>
                 <div class="mb-2 flex items-center justify-between">
                   <label for="password" class="cinematic-eyebrow">{{ t('auth.login.form.password.label') }}</label>
-                  <a href="#" class="text-[11px] font-mono uppercase tracking-[0.12em] text-lime-neon hover:text-lime-neon/80 transition-colors">{{ t('auth.login.form.password.forgot') }}</a>
+                  <NuxtLink to="/forgot-password" class="text-[11px] font-mono uppercase tracking-[0.12em] text-lime-neon hover:text-lime-neon/80 transition-colors">{{ t('auth.login.form.password.forgot') }}</NuxtLink>
                 </div>
                 <input
                   id="password"

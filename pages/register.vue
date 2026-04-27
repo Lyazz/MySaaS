@@ -14,16 +14,26 @@ definePageMeta({
   title: 'Register - Swekly'
 })
 
+const MIN_PASSWORD_LENGTH = 8
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const form = ref({
   name: '',
   slug: '',
   email: '',
-  password: ''
+  phone: '',
+  otp: '',
+  password: '',
+  confirmPassword: ''
 })
 
 const loading = ref(false)
 const error = ref('')
 const successData = ref<any>(null)
+const otpSent = ref(false)
+const otpVerified = ref(false)
+const otpFeedback = ref('')
+const otpFeedbackTone = ref<'info' | 'success'>('info')
 const platformBaseDomain = usePlatformBaseDomain()
 
 type RegisterResponse = {
@@ -68,6 +78,19 @@ const storePreview = computed(() => {
   return `${form.value.slug || fallbackSlug}${subdomainSuffix.value}`
 })
 
+const normalizeAlgerianPhone = (input: string): string | null => {
+  const digits = input.replace(/\D/g, '')
+
+  if (/^0[567]\d{8}$/.test(digits)) return `213${digits.slice(1)}`
+  if (/^[567]\d{8}$/.test(digits)) return `213${digits}`
+  if (/^213[567]\d{8}$/.test(digits)) return digits
+  if (/^00213[567]\d{8}$/.test(digits)) return digits.slice(2)
+
+  return null
+}
+
+const normalizedPhone = computed(() => normalizeAlgerianPhone(form.value.phone))
+
 watch(() => form.value.name, (newName) => {
   if (!successData.value) {
     form.value.slug = newName
@@ -77,15 +100,96 @@ watch(() => form.value.name, (newName) => {
   }
 })
 
+watch(() => form.value.phone, () => {
+  otpSent.value = false
+  otpVerified.value = false
+  form.value.otp = ''
+  otpFeedback.value = ''
+})
+
+function sendOtpPlaceholder() {
+  error.value = ''
+
+  if (!form.value.phone.trim()) {
+    error.value = t('auth.register.errors.phoneRequired')
+    return
+  }
+
+  if (!normalizedPhone.value) {
+    error.value = t('auth.register.errors.phoneInvalid')
+    return
+  }
+
+  otpSent.value = true
+  otpVerified.value = false
+  otpFeedbackTone.value = 'info'
+  otpFeedback.value = t('auth.register.form.otp.placeholderNotice')
+}
+
+function verifyOtpPlaceholder() {
+  error.value = ''
+
+  if (!otpSent.value) {
+    error.value = t('auth.register.errors.otpSendFirst')
+    return
+  }
+
+  if (!form.value.otp.trim()) {
+    error.value = t('auth.register.errors.otpRequired')
+    return
+  }
+
+  otpVerified.value = true
+  otpFeedbackTone.value = 'success'
+  otpFeedback.value = t('auth.register.form.otp.verified')
+}
+
 async function register() {
-  loading.value = true
   error.value = ''
   successData.value = null
+
+  if (!EMAIL_REGEX.test(form.value.email.trim())) {
+    error.value = t('auth.register.errors.emailInvalid')
+    return
+  }
+
+  if (form.value.password.length < MIN_PASSWORD_LENGTH) {
+    error.value = t('auth.register.errors.passwordTooShort', { min: MIN_PASSWORD_LENGTH })
+    return
+  }
+
+  if (form.value.password !== form.value.confirmPassword) {
+    error.value = t('auth.register.errors.passwordMismatch')
+    return
+  }
+
+  if (!form.value.phone.trim()) {
+    error.value = t('auth.register.errors.phoneRequired')
+    return
+  }
+
+  if (!normalizedPhone.value) {
+    error.value = t('auth.register.errors.phoneInvalid')
+    return
+  }
+
+  if (!otpVerified.value) {
+    error.value = t('auth.register.errors.otpVerifyFirst')
+    return
+  }
+
+  loading.value = true
 
   try {
     const data = await $fetch<RegisterResponse>('/api/register', {
       method: 'POST',
-      body: form.value
+      body: {
+        name: form.value.name,
+        slug: form.value.slug,
+        email: form.value.email,
+        password: form.value.password,
+        phone: form.value.phone
+      }
     })
 
     if (!data?.token || !data.user || !data.tenant) {
@@ -312,6 +416,60 @@ async function register() {
               </div>
 
               <div>
+                <label for="phone-number" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.phone.label') }}</label>
+                <input
+                  id="phone-number"
+                  v-model="form.phone"
+                  data-testid="register-phone"
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+                  required
+                  class="cinematic-input"
+                  :placeholder="t('auth.register.form.phone.placeholder')"
+                >
+              </div>
+
+              <div>
+                <label for="otp-code" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.otp.label') }}</label>
+                <div class="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+                  <input
+                    id="otp-code"
+                    v-model="form.otp"
+                    data-testid="register-otp"
+                    name="otp"
+                    type="text"
+                    class="cinematic-input"
+                    :placeholder="t('auth.register.form.otp.placeholder')"
+                  >
+                  <button
+                    type="button"
+                    data-testid="register-send-otp"
+                    class="register-submit-btn !py-2.5 !text-xs"
+                    @click="sendOtpPlaceholder"
+                  >
+                    {{ t('auth.register.form.otp.send') }}
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="register-verify-otp"
+                    class="register-submit-btn !py-2.5 !text-xs"
+                    :disabled="!otpSent"
+                    @click="verifyOtpPlaceholder"
+                  >
+                    {{ t('auth.register.form.otp.verify') }}
+                  </button>
+                </div>
+                <p
+                  v-if="otpFeedback"
+                  class="mt-2 text-xs"
+                  :class="otpFeedbackTone === 'success' ? 'text-emerald-300' : 'text-amber-200'"
+                >
+                  {{ otpFeedback }}
+                </p>
+              </div>
+
+              <div>
                 <label for="password" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.password.label') }}</label>
                 <input
                   id="password"
@@ -326,15 +484,30 @@ async function register() {
                 >
               </div>
 
+              <div>
+                <label for="confirm-password" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.confirmPassword.label') }}</label>
+                <input
+                  id="confirm-password"
+                  v-model="form.confirmPassword"
+                  data-testid="register-confirm-password"
+                  name="confirmPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  class="cinematic-input"
+                  placeholder="••••••••"
+                >
+              </div>
+
               <div v-if="error" class="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-300">
                 {{ error }}
               </div>
 
-              <button type="submit" :disabled="loading" class="register-submit-btn w-full">
+              <button type="submit" :disabled="loading || !otpVerified" class="register-submit-btn w-full">
                 <span class="relative z-10 flex items-center justify-center gap-2">
                   <Icon v-if="loading" name="lucide:loader-2" class="h-4 w-4 animate-spin" />
-                  <span>{{ loading ? t('auth.register.form.submit.creating') : t('auth.register.form.submit.register') }}</span>
-                  <Icon v-if="!loading" name="lucide:arrow-right" class="h-4 w-4" />
+                  <span>{{ loading ? t('auth.register.form.submit.creating') : (otpVerified ? t('auth.register.form.submit.register') : t('auth.register.form.submit.verifyOtp')) }}</span>
+                  <Icon v-if="!loading && otpVerified" name="lucide:arrow-right" class="h-4 w-4" />
                 </span>
               </button>
 
@@ -342,6 +515,10 @@ async function register() {
                 {{ t('auth.register.form.haveAccount') }}
                 <NuxtLink to="/login" class="font-medium text-lime-neon hover:underline">
                   {{ t('auth.register.form.logIn') }}
+                </NuxtLink>
+                <span class="mx-2 text-white/20">·</span>
+                <NuxtLink to="/forgot-password" class="font-medium text-lime-neon hover:underline">
+                  {{ t('auth.register.form.forgotPassword') }}
                 </NuxtLink>
               </div>
             </form>

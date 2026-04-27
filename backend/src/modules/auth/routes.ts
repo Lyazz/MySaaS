@@ -4,14 +4,30 @@ import { Prisma } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { signAccessToken } from '../../lib/jwt'
 import { seedStaffRolePresets } from '../staff-roles/presets'
+import { PhoneNormalizationService } from '../loyalty/phone-normalization.service'
 
 const router = Router()
 const MIN_PASSWORD_LENGTH = 8
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const DUMMY_PASSWORD_HASH = '$2b$10$X9pL7vT6A2mQjO5k9sXXuuBkEFGhqUJSTjhRLuVVU3hV3MGWST5Oi'
+const phoneNormalization = new PhoneNormalizationService()
 
 const addUtcMonths = (date: Date, months: number) =>
     new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
+
+const isTemporaryPhoneLockEnabled = () => {
+    const configured = process.env.REGISTER_PHONE_LOCK_ENABLED
+    if (configured === 'true') return true
+    if (configured === 'false') return false
+    return process.env.NODE_ENV !== 'test'
+}
+
+const getAllowedRegistrationPhoneNormalized = () => {
+    const configuredPhone = process.env.REGISTER_ALLOWED_PHONE?.trim() || ''
+    if (!configuredPhone) return null
+    const normalized = phoneNormalization.tryNormalizeAlgerianPhone(configuredPhone)
+    return normalized?.normalized ?? null
+}
 
 router.post('/register', async (req, res) => {
     // Tenants must register from the SaaS host (root domain), not from a tenant subdomain.
@@ -22,9 +38,10 @@ router.post('/register', async (req, res) => {
         })
     }
 
-    const { name, slug, email, password } = req.body
+    const { name, slug, email, password, phone } = req.body
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
     const normalizedSlug = typeof slug === 'string' ? slug.trim() : ''
+    const isPhoneLockEnabled = isTemporaryPhoneLockEnabled()
 
     if (typeof name !== 'string' || !name.trim() || !normalizedSlug || !normalizedEmail || typeof password !== 'string') {
         return res.status(400).json({
@@ -54,6 +71,18 @@ router.post('/register', async (req, res) => {
             statusCode: 400,
             statusMessage: 'Invalid slug format. Use lowercase letters, numbers, and hyphens only.'
         })
+    }
+
+    if (isPhoneLockEnabled) {
+        const normalizedPhone = phoneNormalization.tryNormalizeAlgerianPhone(phone)
+        const allowedPhone = getAllowedRegistrationPhoneNormalized()
+
+        if (!allowedPhone || !normalizedPhone || normalizedPhone.normalized !== allowedPhone) {
+            return res.status(403).json({
+                statusCode: 403,
+                statusMessage: 'Registration is currently unavailable'
+            })
+        }
     }
 
     try {

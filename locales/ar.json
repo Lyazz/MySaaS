@@ -703,15 +703,32 @@
           "label": "البريد المهني",
           "placeholder": "name{'@'}company.com"
         },
+        "phone": {
+          "label": "رقم الهاتف",
+          "placeholder": "+213 540 80 14 36"
+        },
+        "otp": {
+          "label": "تأكيد OTP",
+          "placeholder": "أدخل رمز OTP",
+          "send": "إرسال الرمز",
+          "verify": "تأكيد الرمز",
+          "placeholderNotice": "تم إرسال رمز OTP تجريبي. يمكنك إدخال أي رمز للمتابعة في هذا المسار المؤقت.",
+          "verified": "تم تأكيد الهاتف (تجريبي)."
+        },
         "password": {
           "label": "كلمة المرور"
         },
+        "confirmPassword": {
+          "label": "تأكيد كلمة المرور"
+        },
         "submit": {
           "creating": "جارٍ إنشاء الحساب...",
-          "register": "سجّل وأنشئ المتجر"
+          "register": "سجّل وأنشئ المتجر",
+          "verifyOtp": "أكد OTP للمتابعة"
         },
         "haveAccount": "لديك حساب بالفعل؟",
-        "logIn": "تسجيل الدخول"
+        "logIn": "تسجيل الدخول",
+        "forgotPassword": "نسيت كلمة المرور؟"
       },
       "success": {
         "title": "تم بنجاح!",
@@ -720,7 +737,16 @@
       },
       "errors": {
         "generic": "حدث خطأ أثناء التسجيل.",
-        "sessionMissing": "تم إنشاء حسابك، لكن تسجيل الدخول التلقائي فشل. سجّل الدخول للمتابعة."
+        "sessionMissing": "تم إنشاء حسابك، لكن تسجيل الدخول التلقائي فشل. سجّل الدخول للمتابعة.",
+        "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا.",
+        "passwordTooShort": "يجب أن تكون كلمة المرور {min} أحرف على الأقل.",
+        "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+        "phoneRequired": "رقم الهاتف مطلوب.",
+        "phoneInvalid": "أدخل رقم هاتف جزائري صالحًا.",
+        "phoneRestricted": "التسجيل غير متاح حاليًا.",
+        "otpRequired": "أدخل رمز OTP.",
+        "otpSendFirst": "أرسل رمز OTP أولًا.",
+        "otpVerifyFirst": "أكد OTP قبل إنشاء الحساب."
       },
       "social": {
         "divider": "أو المتابعة عبر",
@@ -728,6 +754,20 @@
         "facebook": "المتابعة عبر Facebook",
         "apple": "المتابعة عبر Apple"
       }
+    },
+    "forgotPassword": {
+      "title": "نسيت كلمة المرور",
+      "subtitle": "أدخل بريدك الإلكتروني وسنرسل تعليمات إعادة التعيين عند تفعيل هذه الميزة.",
+      "placeholderNotice": "هذه الصفحة مجرد Placeholder حاليًا. رسائل إعادة التعيين غير مفعلة بعد.",
+      "email": {
+        "label": "البريد الإلكتروني",
+        "placeholder": "name{'@'}company.com"
+      },
+      "submit": {
+        "send": "إرسال رابط إعادة التعيين",
+        "sent": "تم حفظ الطلب (تجريبي)"
+      },
+      "backToLogin": "الرجوع لتسجيل الدخول"
     }
   },
   "pricing": {
