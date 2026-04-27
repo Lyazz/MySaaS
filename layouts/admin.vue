@@ -14,7 +14,7 @@
       'fixed inset-y-0 left-0 lg:relative transition-all duration-300',
       sidebarOpen
         ? 'translate-x-0 w-[220px]'
-        : '-translate-x-full w-[220px] lg:translate-x-0 lg:w-[52px]'
+        : '-translate-x-full w-[220px] lg:translate-x-0 lg:w-[64px]'
     ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
 
       <!-- Logo -->
@@ -107,7 +107,7 @@
               <!-- Tooltip (collapsed) -->
               <div
                 v-if="!sidebarOpen"
-                class="fixed left-[60px] px-2.5 py-1.5 text-[11px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                class="fixed left-[72px] px-2.5 py-1.5 text-[11px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
                 style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary); top: auto"
               >
                 {{ t(item.labelKey) }}
