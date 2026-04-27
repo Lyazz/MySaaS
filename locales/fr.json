@@ -705,7 +705,8 @@
         "cta": "Aller au tableau de bord"
       },
       "errors": {
-        "generic": "Une erreur est survenue lors de l’inscription."
+        "generic": "Une erreur est survenue lors de l’inscription.",
+        "sessionMissing": "Votre compte a été créé, mais la connexion automatique a échoué. Connectez-vous pour continuer."
       },
       "social": {
         "divider": "ou continuer avec",

@@ -123,14 +123,26 @@ router.post('/register', async (req, res) => {
             return { tenant, user }
         })
 
+        const token = signAccessToken({
+            userId: result.user.id,
+            email: result.user.email,
+            role: result.user.role,
+            tenantId: result.user.tenantId
+        })
+
+        const { passwordHash: _passwordHash, ...userInfo } = result.user
+        const responseTenant = { ...result.tenant, isOffline: result.tenant.isOffline }
+
         return res.json({
             success: true,
-            tenant: {
-                id: result.tenant.id,
-                name: result.tenant.name,
-                slug: result.tenant.slug,
-                url: `http://${result.tenant.slug}.localhost:3000` // Helper for dev
+            token,
+            user: {
+                ...userInfo,
+                tenant: responseTenant
             },
+            tenant: responseTenant,
+            staffRole: null,
+            staffPermissions: null,
             onboarding: {
                 required: true
             }

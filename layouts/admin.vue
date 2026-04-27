@@ -18,7 +18,11 @@
     ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
 
       <!-- Logo -->
-      <div class="h-[52px] flex items-center shrink-0 px-3 gap-2.5 overflow-hidden" style="border-bottom: 1px solid var(--admin-sidebar-border)">
+      <div
+        class="h-[52px] flex items-center shrink-0 gap-2.5 overflow-hidden"
+        :class="sidebarOpen ? 'px-3' : 'justify-center px-0'"
+        style="border-bottom: 1px solid var(--admin-sidebar-border)"
+      >
         <template v-if="storeSettings?.logoUrl">
           <img
             :src="storeSettings.logoUrl"

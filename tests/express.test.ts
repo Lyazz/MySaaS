@@ -30,6 +30,8 @@ describe('Express Backend Migration', async () => {
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
         expect(res.body.tenant.slug).toBe(slug)
+        expect(typeof res.body.token).toBe('string')
+        expect(res.body.user?.tenantId).toBe(res.body.tenant?.id)
 
         const tenant = await prisma.tenant.findUnique({ where: { slug }, select: { id: true } })
         expect(tenant?.id).toBeTruthy()
@@ -42,6 +44,17 @@ describe('Express Backend Migration', async () => {
         const cashboxes = tenant?.id ? await prisma.cashbox.findMany({ where: { tenantId: tenant.id } }) : []
         expect(cashboxes.length).toBeGreaterThan(0)
         expect(cashboxes.some((c) => c.id === settings?.defaultCashboxId)).toBe(true)
+
+        const meRes = await request(app)
+            .get('/api/me')
+            .set('Host', 'localhost:3000')
+            .set('X-Forwarded-Host', 'localhost:3000')
+            .set('Authorization', `Bearer ${res.body.token}`)
+
+        expect(meRes.status).toBe(200)
+        expect(meRes.body.success).toBe(true)
+        expect(meRes.body.user?.tenantId).toBe(res.body.tenant?.id)
+        expect(meRes.body.tenant?.id).toBe(res.body.tenant?.id)
 
         // Cleanup
         await prisma.user.deleteMany({ where: { tenant: { slug } } })

@@ -719,7 +719,8 @@
         "cta": "Go to Dashboard"
       },
       "errors": {
-        "generic": "An error occurred during registration."
+        "generic": "An error occurred during registration.",
+        "sessionMissing": "Your account was created, but automatic sign-in failed. Please log in to continue."
       },
       "social": {
         "divider": "or continue with",

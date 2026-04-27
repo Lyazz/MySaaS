@@ -2,9 +2,11 @@
 import { computed, ref, watch } from 'vue'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import SaaSLogo from '~/components/branding/SaaSLogo.vue'
+import { useAuthStore } from '~/stores/auth'
 
 const { t } = useI18n({ useScope: 'global' })
 const year = new Date().getFullYear()
+const authStore = useAuthStore()
 
 definePageMeta({
   middleware: 'saas-only',
@@ -23,6 +25,16 @@ const loading = ref(false)
 const error = ref('')
 const successData = ref<any>(null)
 const platformBaseDomain = usePlatformBaseDomain()
+
+type RegisterResponse = {
+  success: boolean
+  token?: string
+  user?: any
+  tenant?: any
+  staffRole?: { id: string; name: string } | null
+  staffPermissions?: string[] | null
+  onboarding?: { required: boolean }
+}
 
 const launchHighlights = [
   { icon: 'lucide:package', labelKey: 'auth.register.hero.panel.pills.orders' },
@@ -71,10 +83,17 @@ async function register() {
   successData.value = null
 
   try {
-    const data = await $fetch('/api/register', {
+    const data = await $fetch<RegisterResponse>('/api/register', {
       method: 'POST',
       body: form.value
     })
+
+    if (!data?.token || !data.user || !data.tenant) {
+      error.value = t('auth.register.errors.sessionMissing')
+      return
+    }
+
+    authStore.setAuth(data.token, data.user, data.tenant, data.staffRole ?? null, data.staffPermissions ?? null)
     successData.value = data
   } catch (e: any) {
     error.value = e.data?.statusMessage || t('auth.register.errors.generic')
@@ -232,10 +251,10 @@ async function register() {
                   <p class="mt-3 text-sm leading-7 text-emerald-100/90">
                     {{ t('auth.register.success.message', { name: successData.tenant.name }) }}
                   </p>
-                  <a :href="successData.tenant.url" class="register-submit-btn mt-5 inline-flex">
+                  <NuxtLink to="/admin" data-testid="register-go-dashboard" class="register-submit-btn mt-5 inline-flex">
                     {{ t('auth.register.success.cta') }}
                     <Icon name="lucide:arrow-right" class="h-4 w-4" />
-                  </a>
+                  </NuxtLink>
                 </div>
               </div>
             </div>
