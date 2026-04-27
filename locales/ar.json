@@ -3258,21 +3258,34 @@
       "onboarding": {
         "metaTitle": "إعداد المتجر",
         "title": "إعداد المتجر",
-        "subtitle": "اختر لون العلامة والقالب واللغة.",
-        "loadingSettings": "جارٍ تحميل إعدادات المتجر…",
+        "subtitle": "أعدّ متجرك في خطوات بسيطة.",
+        "loadingSettings": "جارٍ تحميل الإعدادات…",
         "progress": {
           "stepOf": "الخطوة {current} من {total}"
         },
         "steps": {
-          "brand": "العلامة",
-          "template": "القالب",
+          "storeInfo": "معلومات المتجر",
+          "template": "اختر القالب",
+          "brandColor": "لون العلامة التجارية",
           "language": "اللغة",
-          "summary": "الملخص"
+          "firstProduct": "المنتج الأول",
+          "done": "تم !"
+        },
+        "storeInfo": {
+          "title": "أخبرنا عن متجرك",
+          "nameLabel": "اسم المتجر",
+          "namePlaceholder": "متجري",
+          "logoLabel": "شعار المتجر",
+          "logoHint": "موصى به: PNG أو SVG بحجم 200×200 بكسل",
+          "logoUpload": "رفع الشعار",
+          "logoChange": "تغيير الشعار",
+          "descriptionLabel": "وصف قصير (اختياري)",
+          "descriptionPlaceholder": "بضع كلمات عن متجرك…"
         },
         "brand": {
-          "title": "لون العلامة",
+          "title": "اللون الأساسي",
           "pickColor": "اختر لوناً",
-          "hexValue": "قيمة HEX",
+          "hexValue": "قيمة اللون (Hex)",
           "example": "مثال: {value}",
           "preview": "معاينة",
           "primaryButton": "زر أساسي"
@@ -3280,39 +3293,51 @@
         "template": {
           "title": "قالب المتجر"
         },
-        "templates": {
-          "classic": {
-            "label": "كلاسيكي",
-            "description": "تصميم نظيف ومناسب لمعظم المتاجر."
-          },
-          "modern": {
-            "label": "حديث",
-            "description": "خطوط أوضح ومساحات بصرية أكبر."
-          }
-        },
         "language": {
           "title": "اللغة",
           "label": "اللغة",
-          "rtlHint": "إذا كانت العربية، فكر في واجهة RTL."
+          "rtlHint": "اختيار العربية سيفعّل تخطيط من اليمين إلى اليسار."
         },
-        "summary": {
-          "title": "الملخص",
-          "cards": {
-            "template": "القالب",
-            "primaryColor": "اللون الأساسي",
-            "language": "اللغة"
-          },
-          "aiTitle": "ملخص واجهة المتجر (AI)",
-          "generate": "إنشاء",
-          "generating": "جارٍ الإنشاء…",
-          "placeholder": "اضغط «إنشاء» لتوليد موجز لوكيل الواجهة."
+        "firstProduct": {
+          "title": "أضف منتجك الأول",
+          "subtitle": "يمكنك إضافة المزيد من قسم المنتجات.",
+          "nameLabel": "اسم المنتج",
+          "namePlaceholder": "مثال: قميص، غطاء هاتف…",
+          "priceLabel": "السعر (دج)",
+          "imageLabel": "صورة المنتج (اختياري)",
+          "imageUpload": "رفع صورة",
+          "imageChange": "تغيير الصورة",
+          "skipLink": "تخطي الآن",
+          "errorCreate": "فشل إنشاء المنتج. يمكنك التخطي وإضافته لاحقاً."
         },
-        "saveFinish": "حفظ وإنهاء",
+        "done": {
+          "title": "متجرك جاهز !",
+          "subtitle": "إليك ما قمت بإعداده:",
+          "storeUrlLabel": "رابط متجرك",
+          "offlineNote": "متجرك غير منشور حالياً. انشره من لوحة التحكم عندما تكون مستعداً.",
+          "ctaDashboard": "الذهاب إلى لوحة التحكم",
+          "ctaProducts": "إضافة منتجات"
+        },
+        "saveFinish": "إنهاء الإعداد",
         "errors": {
-          "loadFailed": "تعذر تحميل إعدادات المتجر.",
-          "saveFailed": "تعذر حفظ إعدادات المتجر.",
-          "summaryFailed": "تعذر إنشاء الملخص."
+          "loadFailed": "فشل تحميل الإعدادات.",
+          "saveFailed": "فشل حفظ الإعدادات."
         }
+      },
+      "gettingStarted": {
+        "title": "البدء السريع",
+        "progress": "{done} من {total} مكتملة",
+        "dismiss": "تجاهل",
+        "complete": "اكتمل الإعداد",
+        "items": {
+          "logo": "رفع شعارك",
+          "product": "إضافة منتجك الأول",
+          "category": "إنشاء تصنيف",
+          "delivery": "ضبط التوصيل",
+          "publish": "نشر متجرك"
+        },
+        "publishBtn": "نشر الآن",
+        "publishing": "جارٍ النشر…"
       },
       "purchases": {
         "index": {

@@ -3245,21 +3245,34 @@
       "onboarding": {
         "metaTitle": "Configuration de la boutique",
         "title": "Configuration de la boutique",
-        "subtitle": "Choisissez votre couleur, votre template et votre langue.",
+        "subtitle": "Configurez votre boutique en quelques étapes.",
         "loadingSettings": "Chargement des paramètres…",
         "progress": {
           "stepOf": "Étape {current} sur {total}"
         },
         "steps": {
-          "brand": "Marque",
-          "template": "Template",
+          "storeInfo": "Infos boutique",
+          "template": "Choisir un template",
+          "brandColor": "Couleur de marque",
           "language": "Langue",
-          "summary": "Résumé"
+          "firstProduct": "Premier produit",
+          "done": "C’est fait !"
+        },
+        "storeInfo": {
+          "title": "Parlez-nous de votre boutique",
+          "nameLabel": "Nom de la boutique",
+          "namePlaceholder": "Ma Boutique",
+          "logoLabel": "Logo de la boutique",
+          "logoHint": "Recommandé : PNG ou SVG 200×200px",
+          "logoUpload": "Télécharger le logo",
+          "logoChange": "Changer le logo",
+          "descriptionLabel": "Courte description (optionnel)",
+          "descriptionPlaceholder": "Quelques mots sur votre boutique…"
         },
         "brand": {
-          "title": "Couleur de marque",
+          "title": "Couleur principale",
           "pickColor": "Choisir une couleur",
-          "hexValue": "Valeur hex",
+          "hexValue": "Valeur hexadécimale",
           "example": "Exemple : {value}",
           "preview": "Aperçu",
           "primaryButton": "Bouton principal"
@@ -3267,39 +3280,51 @@
         "template": {
           "title": "Template de boutique"
         },
-        "templates": {
-          "classic": {
-            "label": "Classique",
-            "description": "Mise en page propre, idéale pour la plupart des boutiques."
-          },
-          "modern": {
-            "label": "Moderne",
-            "description": "Typographie plus marquée et plus d’espace visuel."
-          }
-        },
         "language": {
           "title": "Langue",
           "label": "Langue",
-          "rtlHint": "Si arabe, pensez à l’affichage RTL."
+          "rtlHint": "L’arabe activera la mise en page de droite à gauche."
         },
-        "summary": {
-          "title": "Résumé",
-          "cards": {
-            "template": "Template",
-            "primaryColor": "Couleur principale",
-            "language": "Langue"
-          },
-          "aiTitle": "Résumé IA du frontend",
-          "generate": "Générer",
-          "generating": "Génération…",
-          "placeholder": "Cliquez sur Générer pour créer un brief pour votre agent frontend."
+        "firstProduct": {
+          "title": "Ajoutez votre premier produit",
+          "subtitle": "Vous pourrez en ajouter d’autres depuis la section Produits.",
+          "nameLabel": "Nom du produit",
+          "namePlaceholder": "ex. T-Shirt, Coque de téléphone…",
+          "priceLabel": "Prix (DZD)",
+          "imageLabel": "Image du produit (optionnel)",
+          "imageUpload": "Télécharger une image",
+          "imageChange": "Changer l’image",
+          "skipLink": "Passer pour l’instant",
+          "errorCreate": "Échec de la création du produit. Vous pouvez passer et l’ajouter plus tard."
         },
-        "saveFinish": "Enregistrer et terminer",
+        "done": {
+          "title": "Votre boutique est prête !",
+          "subtitle": "Voici ce que vous avez configuré :",
+          "storeUrlLabel": "URL de votre boutique",
+          "offlineNote": "Votre boutique est actuellement hors ligne. Publiez-la depuis le tableau de bord quand vous serez prêt.",
+          "ctaDashboard": "Aller au tableau de bord",
+          "ctaProducts": "Ajouter des produits"
+        },
+        "saveFinish": "Terminer la configuration",
         "errors": {
-          "loadFailed": "Impossible de charger les paramètres de la boutique.",
-          "saveFailed": "Impossible d’enregistrer les paramètres de la boutique.",
-          "summaryFailed": "Impossible de générer le résumé."
+          "loadFailed": "Impossible de charger les paramètres.",
+          "saveFailed": "Impossible de sauvegarder les paramètres."
         }
+      },
+      "gettingStarted": {
+        "title": "Démarrage rapide",
+        "progress": "{done} sur {total} complétés",
+        "dismiss": "Ignorer",
+        "complete": "Configuration terminée",
+        "items": {
+          "logo": "Télécharger votre logo",
+          "product": "Ajouter un premier produit",
+          "category": "Créer une catégorie",
+          "delivery": "Configurer la livraison",
+          "publish": "Publier votre boutique"
+        },
+        "publishBtn": "Publier maintenant",
+        "publishing": "Publication…"
       },
       "purchases": {
         "index": {
