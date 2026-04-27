@@ -62,6 +62,9 @@
       </div>
     </div>
 
+    <!-- Getting Started checklist (shown to tenants that completed onboarding) -->
+    <AdminGettingStartedChecklist v-if="storeSettings?.isCompleted" />
+
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <AdminDashboardStatCard
         :label="t('admin.pages.dashboard.stats.totalRevenue')"
