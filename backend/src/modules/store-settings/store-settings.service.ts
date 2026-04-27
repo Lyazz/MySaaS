@@ -77,6 +77,7 @@ export type StoreSettingsPatchInput = Partial<{
     currencyCode: string
     currencyCountry: string
     isCompleted: boolean
+    checklistDismissed: boolean
     allowedDeliveryProviders: string[]
     storePickupEnabled: boolean
     loyaltyEnabled: boolean
@@ -237,6 +238,13 @@ export class StoreSettingsService {
             updateSettings.isCompleted = input.isCompleted
         }
 
+        if (input.checklistDismissed !== undefined) {
+            if (typeof input.checklistDismissed !== 'boolean') {
+                throw new StoreSettingsValidationError('checklistDismissed must be a boolean')
+            }
+            updateSettings.checklistDismissed = input.checklistDismissed
+        }
+
         if (input.allowedDeliveryProviders !== undefined) {
             if (!Array.isArray(input.allowedDeliveryProviders) || !input.allowedDeliveryProviders.every(p => typeof p === 'string')) {
                 throw new StoreSettingsValidationError('allowedDeliveryProviders must be an array of strings')
@@ -305,6 +313,33 @@ export class StoreSettingsService {
         // We need to fetch tenant data to return consistent shape
         const t = await prisma.tenant.findUnique({ where: { id: tenantId } })
         return { ...s, name: t?.name, slug: t?.slug }
+    }
+
+    async getOnboardingChecklist(tenantId: string) {
+        const [settings, tenant, productCount, categoryCount] = await Promise.all([
+            prisma.storeSettings.findUnique({ where: { tenantId } }),
+            prisma.tenant.findUnique({ where: { id: tenantId } }),
+            prisma.product.count({ where: { tenantId } }),
+            prisma.category.count({ where: { tenantId } })
+        ])
+
+        const hasLogo = settings?.logoUrl != null
+        const hasProducts = productCount > 0
+        const hasCategories = categoryCount > 0
+        const hasDelivery = (settings?.allowedDeliveryProviders ?? []).some(
+            (p: string) => ['MAYSTRO', 'YALIDINE'].includes(p)
+        )
+        const isPublished = tenant?.isOffline === false
+        const checklistDismissed = settings?.checklistDismissed ?? false
+
+        return { hasLogo, hasProducts, hasCategories, hasDelivery, isPublished, checklistDismissed }
+    }
+
+    async publishStore(tenantId: string) {
+        await prisma.tenant.update({
+            where: { id: tenantId },
+            data: { isOffline: false }
+        })
     }
 
     buildFrontendAgentSummary(args: {
