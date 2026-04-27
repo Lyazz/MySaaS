@@ -323,6 +323,10 @@ export class StoreSettingsService {
             prisma.category.count({ where: { tenantId } })
         ])
 
+        if (!tenant) {
+            throw new Error(`Tenant not found: ${tenantId}`)
+        }
+
         const hasLogo = settings?.logoUrl != null
         const hasProducts = productCount > 0
         const hasCategories = categoryCount > 0
