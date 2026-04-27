@@ -39,6 +39,7 @@ watch(
 <template>
   <component :is="StoreShell" :hide-navigation="false" :mobile-header-hidden="true" :hide-announcement-bar="true">
     <slot />
+    <StorefrontSharedProductCardVariantModalHost />
     <noscript v-if="pixelNoscriptEnabled">
       <img
         height="1"

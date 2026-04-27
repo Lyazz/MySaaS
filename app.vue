@@ -33,7 +33,6 @@ const facebookPixelId = useState<string | null>(
   'facebookPixelId',
   () => (event?.context as any)?.facebookPixelId ?? null
 );
-const variantModal = useProductCardVariantModalState();
 
 const faviconUrl = computed(() =>
   resolveFaviconUrl({
@@ -74,14 +73,6 @@ watchEffect(() => {
   }
 });
 
-watch(
-  () => tenant.value,
-  (nextTenant) => {
-    // Prevent storefront variant modal state from leaking into non-storefront pages.
-    if (!nextTenant) variantModal.close();
-  },
-  { immediate: true }
-);
 </script>
 
 <template>
@@ -89,5 +80,4 @@ watch(
     <NuxtPage />
   </NuxtLayout>
   <Toast />
-  <StorefrontSharedProductCardVariantModalHost v-if="tenant" />
 </template>

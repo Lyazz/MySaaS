@@ -14,13 +14,13 @@
       'fixed inset-y-0 left-0 lg:relative transition-all duration-300',
       sidebarOpen
         ? 'translate-x-0 w-[220px]'
-        : '-translate-x-full w-[220px] lg:translate-x-0 lg:w-[52px]'
+        : '-translate-x-full w-[220px] lg:translate-x-0 lg:w-[64px]'
     ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
 
       <!-- Logo -->
       <div
-        class="h-[52px] flex items-center shrink-0 gap-2.5 overflow-hidden"
-        :class="sidebarOpen ? 'px-3' : 'justify-center px-0'"
+        class="h-[52px] flex items-center shrink-0 overflow-hidden"
+        :class="sidebarOpen ? 'px-3 gap-2.5' : 'justify-center px-0 gap-0'"
         style="border-bottom: 1px solid var(--admin-sidebar-border)"
       >
         <template v-if="storeSettings?.logoUrl">
@@ -58,7 +58,7 @@
       </div>
 
       <!-- Nav -->
-      <nav class="flex-1 py-2.5 overflow-y-auto custom-scrollbar" :class="sidebarOpen ? 'px-2.5' : 'px-1.5'">
+      <nav class="flex-1 py-2.5 overflow-y-auto custom-scrollbar" :class="sidebarOpen ? 'px-2.5' : 'px-2'">
         <div v-for="entry in visibleNavGroups" :key="entry.originalIndex" class="mb-3">
           <!-- Group label (expanded) -->
           <div
@@ -94,8 +94,8 @@
               />
 
               <span
-                class="text-[12.5px] font-medium truncate transition-all duration-300 whitespace-nowrap leading-none flex-1"
-                :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0 pointer-events-none'"
+                class="text-[12.5px] font-medium truncate transition-all duration-300 whitespace-nowrap leading-none"
+                :class="sidebarOpen ? 'opacity-100 flex-1' : 'opacity-0 w-0 pointer-events-none flex-none'"
                 :style="isActive(item.path) ? 'color: var(--brand)' : 'color: var(--text-secondary)'"
               >
                 {{ t(item.labelKey) }}
@@ -111,7 +111,7 @@
               <!-- Tooltip (collapsed) -->
               <div
                 v-if="!sidebarOpen"
-                class="fixed left-[60px] px-2.5 py-1.5 text-[11px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                class="fixed left-[72px] px-2.5 py-1.5 text-[11px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
                 style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary); top: auto"
               >
                 {{ t(item.labelKey) }}

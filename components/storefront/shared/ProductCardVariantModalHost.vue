@@ -22,6 +22,7 @@ type TemplateKey =
 type ThemeTokens = {
   overlay: string
   panel: string
+  font: string
   title: string
   subtitle: string
   row: string
@@ -60,6 +61,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   modern: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-brand-300 hover:bg-brand-50/30',
@@ -73,6 +75,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   interior: {
     overlay: 'bg-slate-900/65',
     panel: 'bg-white border border-slate-200 rounded-3xl',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40',
@@ -86,6 +89,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   minimal: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-slate-400',
@@ -99,6 +103,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   classic: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-serif',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-brand-300 hover:bg-brand-50/30',
@@ -112,6 +117,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   food: {
     overlay: 'bg-stone-900/55',
     panel: 'bg-white border border-stone-200 rounded-[2rem]',
+    font: 'font-sans',
     title: 'text-stone-900',
     subtitle: 'text-stone-500',
     row: 'border-stone-200 hover:border-emerald-300 hover:bg-emerald-50/30',
@@ -125,6 +131,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   cozy: {
     overlay: 'bg-amber-900/35',
     panel: 'bg-white border border-amber-100 rounded-[2rem]',
+    font: 'font-cozy',
     title: 'text-amber-900',
     subtitle: 'text-amber-700/80',
     row: 'border-amber-200 hover:border-brand-300 hover:bg-amber-50/60',
@@ -138,6 +145,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   cyber: {
     overlay: 'bg-black/80',
     panel: 'bg-[#140b24] border border-pink-500/40',
+    font: '',
     title: 'text-pink-200',
     subtitle: 'text-purple-300/80',
     row: 'border-purple-500/30 hover:border-pink-400/60 hover:bg-pink-500/10',
@@ -151,6 +159,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   stationnery: {
     overlay: 'bg-stone-900/60',
     panel: 'bg-white border border-stone-200',
+    font: 'font-stationery',
     title: 'text-stone-900',
     subtitle: 'text-stone-500',
     row: 'border-stone-200 hover:border-red-300 hover:bg-red-50/20',
@@ -164,6 +173,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   street: {
     overlay: 'bg-black/70',
     panel: 'bg-[#fffdf6] border-2 border-black',
+    font: 'font-street',
     title: 'text-black',
     subtitle: 'text-black/65',
     row: 'border-2 border-black/20 hover:border-black hover:bg-[#ffe9d2]',
@@ -177,6 +187,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   wellness: {
     overlay: 'bg-stone-900/55',
     panel: 'bg-white border border-stone-200 rounded-3xl',
+    font: 'font-wellness',
     title: 'text-stone-900',
     subtitle: 'text-stone-500',
     row: 'border-stone-200 hover:border-emerald-300 hover:bg-emerald-50/40',
@@ -190,6 +201,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   playful: {
     overlay: 'bg-violet-900/55',
     panel: 'bg-white border-2 border-violet-200 rounded-3xl',
+    font: 'font-sans',
     title: 'text-violet-800',
     subtitle: 'text-violet-500',
     row: 'border-violet-200 hover:border-pink-300 hover:bg-pink-50/40',
@@ -203,6 +215,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   activewear: {
     overlay: 'bg-black/75',
     panel: 'bg-[#101010] border-2 border-[#333]',
+    font: 'font-activewear',
     title: 'text-white',
     subtitle: 'text-zinc-400',
     row: 'border-2 border-[#333] hover:border-brand-500 hover:bg-zinc-900',
@@ -216,6 +229,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   chrono: {
     overlay: 'bg-[#06080f]/85',
     panel: 'bg-[#111827] border border-[#3d4b63]',
+    font: 'font-serif',
     title: 'text-[#E8E0D5]',
     subtitle: 'text-[#A6A19A]',
     row: 'border-[#3d4b63] hover:border-[#A67C52] hover:bg-[#1a2538]',
@@ -229,6 +243,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   maison: {
     overlay: 'bg-stone-900/60',
     panel: 'bg-[#f8f5ef] border border-[#d8d0c0]',
+    font: '',
     title: 'text-[#3c3428]',
     subtitle: 'text-[#6f6659]',
     row: 'border-[#d8d0c0] hover:border-[#a58d6a] hover:bg-[#f2ece1]',
@@ -242,6 +257,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   default: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-brand-300 hover:bg-brand-50/30',
@@ -292,29 +308,28 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-150"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-150"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+  <Transition
+    enter-active-class="transition-opacity duration-150"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="transition-opacity duration-150"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
+  >
+    <div
+      v-if="open"
+      class="fixed inset-0 z-[120] flex items-center justify-center p-4"
     >
       <div
-        v-if="open"
-        class="fixed inset-0 z-[90] flex items-center justify-center p-4"
-      >
-        <div
-          class="absolute inset-0"
-          :class="tokens.overlay"
-          @click="handleClose"
-        />
+        class="absolute inset-0"
+        :class="tokens.overlay"
+        @click="handleClose"
+      />
 
-        <div
-          class="relative z-10 w-full max-w-xl rounded-2xl p-5 sm:p-6 shadow-2xl"
-          :class="tokens.panel"
-        >
+      <div
+        class="relative z-10 w-full max-w-xl rounded-2xl p-5 sm:p-6 shadow-2xl"
+        :class="[tokens.panel, tokens.font]"
+      >
           <div class="flex items-start justify-between gap-3">
             <div>
               <h3 class="text-xl font-semibold leading-tight" :class="tokens.title">
@@ -382,8 +397,7 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
               </div>
             </div>
           </div>
-        </div>
       </div>
-    </Transition>
-  </Teleport>
+    </div>
+  </Transition>
 </template>

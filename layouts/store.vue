@@ -45,6 +45,7 @@ watch(
 <template>
   <component :is="StoreShell">
     <slot />
+    <StorefrontSharedProductCardVariantModalHost />
     <noscript v-if="pixelNoscriptEnabled">
       <img
         height="1"
