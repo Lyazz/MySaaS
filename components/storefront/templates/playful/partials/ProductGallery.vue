@@ -3,6 +3,7 @@ const props = defineProps<{
     images: string[]
     title?: string
 }>()
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const activeImageIndex = ref(0)
 const autoplayTimer = ref<ReturnType<typeof setInterval> | null>(null)
@@ -60,8 +61,9 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
       class="relative bg-white rounded-3xl border-3 border-violet-100 shadow-[0_6px_0_0_#ddd6fe] overflow-hidden group cursor-zoom-in mb-5 aspect-[4/5]"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
+      @mousemove="onPointerMove"
       @mouseenter="stopAutoplay"
-      @mouseleave="startAutoplay"
+      @mouseleave="startAutoplay(); onPointerLeave()"
     >
       <!-- Tape detail -->
       <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-amber-200/70 border border-amber-200 z-20 rotate-[-1deg] rounded-sm shadow-sm pointer-events-none" />
@@ -74,7 +76,8 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
           :key="img || idx"
           :src="img"
           :alt="title"
-          class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+          class="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-700"
+          :style="zoomStyle"
         >
       </transition-group>
 

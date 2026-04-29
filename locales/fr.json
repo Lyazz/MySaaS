@@ -698,8 +698,8 @@
           "placeholder": "Entrez le code OTP",
           "send": "Envoyer le code",
           "verify": "Vérifier le code",
-          "placeholderNotice": "Code OTP fictif envoyé. Utilisez n’importe quel code pour continuer ce flux temporaire.",
-          "verified": "Téléphone confirmé (placeholder)."
+          "placeholderNotice": "Code OTP envoyé.",
+          "verified": "Téléphone confirmé."
         },
         "password": {
           "label": "Mot de passe"
@@ -1240,7 +1240,17 @@
       "error": "Une erreur s'est produite. Veuillez réessayer.",
       "saved": "Enregistré !",
       "filters": "Filtres",
-      "noDataAvailable": "Aucune donnée disponible"
+      "noDataAvailable": "Aucune donnée disponible",
+      "unsavedChanges": "Modifications non enregistrées",
+      "unsavedChangesHint": "N'oubliez pas d'enregistrer vos modifications.",
+      "discard": "Annuler",
+      "search": "Rechercher",
+      "noResults": "Aucun résultat",
+      "replace": "Remplacer",
+      "soon": "Bientôt",
+      "active": "Actif",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
     },
     "confirmModal": {
       "defaults": {
@@ -1396,6 +1406,11 @@
         "noImage": "Aucune image",
         "uploadImage": "Téléverser une image",
         "addSlide": "Ajouter une diapositive",
+        "slide": "diapositive",
+        "slides": "diapositives",
+        "untitled": "Diapositive sans titre",
+        "noSlides": "Aucune diapositive",
+        "createFirst": "Créer la première diapositive",
         "defaults": {
           "title": "Nouvelle diapositive"
         }
@@ -1409,7 +1424,9 @@
         "imageUrl": "URL de l’image",
         "imageUrlHint": "Ou collez une URL si vous en avez déjà une.",
         "eyebrow": "Sur-titre",
-        "limit": "Limite"
+        "limit": "Limite",
+        "sectionTitle": "Titre de la section",
+        "numberOfProducts": "Nombre de produits"
       },
       "sections": {
         "title": "Sections de la page d’accueil",
@@ -1453,6 +1470,8 @@
         }
       },
       "checkoutRules": {
+        "title": "Règles de checkout",
+        "subtitle": "Conditions de commande et comportement du checkout.",
         "minimumOrder": {
           "title": "Montant minimum de commande",
           "subtitle": "Bloquer le checkout si le sous-total panier est inférieur à ce montant.",
@@ -1463,6 +1482,16 @@
           "subtitle": "Retirer le champ adresse optionnelle du checkout et des formulaires de commande rapide.",
           "toggle": "Masquer l'adresse optionnelle"
         }
+      },
+      "loyalty": {
+        "title": "Programme de points",
+        "subtitle": "Configurez le calcul et la redemption des points.",
+        "enable": "Activer les points",
+        "enableSubtitle": "Activer le calcul des points et leur redemption au checkout.",
+        "basePoints": "Points de base",
+        "marginFactor": "Facteur de marge",
+        "minRedeem": "Seuil minimum (points)",
+        "dzdPerPoint": "DZD par point"
       },
       "currency": {
         "title": "Devise de la boutique",
@@ -1748,7 +1777,10 @@
         "logo": {
           "label": "Logo de la marque",
           "upload": "Téléverser le logo",
-          "hint": "Carré (1:1), PNG recommandé."
+          "hint": "Carré (1:1), PNG recommandé.",
+          "magicIdentity": "Identité magique",
+          "magicHint": "Téléversez d'abord un logo pour générer une identité.",
+          "magicSuccess": "Identité magique appliquée."
         },
         "favicon": {
           "label": "Favicon",
@@ -1757,7 +1789,8 @@
         },
         "primaryColor": {
           "label": "Couleur principale",
-          "hint": "Utilisée pour les boutons, liens et accents."
+          "hint": "Utilisée pour les boutons, liens et accents.",
+          "suggested": "Palettes suggérées"
         }
       },
       "announcement": {
@@ -1875,7 +1908,10 @@
       "homepage": "Page d’accueil",
       "contactInfo": "Infos de contact",
       "functional": "Fonctionnel",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "storefront": "Boutique",
+      "account": "Compte",
+      "connections": "Connexions"
     },
     "roles": {
       "owner": "Propriétaire",

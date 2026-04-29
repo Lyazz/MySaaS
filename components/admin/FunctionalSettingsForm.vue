@@ -1,382 +1,269 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="ui-card overflow-hidden">
-      <div class="p-6 md:p-8 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-        <div>
-          <h2 class="text-xl font-bold" style="color: var(--text-primary)">
-            {{ t('admin.pages.settings.functional.title') }}
-          </h2>
-          <p style="color: var(--text-secondary)" class="mt-2 max-w-2xl">
-            {{ t('admin.pages.settings.functional.subtitle') }}
-          </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            class="ui-btn ui-btn--secondary"
-            :disabled="loading || saving"
-            @click="reset"
-          >
-            {{ t('admin.common.reset') }}
-          </button>
-          <button
-            type="button"
-            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
-            :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
-            :disabled="loading || saving"
-            @click="save"
-          >
-            <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-            {{ t('admin.common.saveChanges') }}
-          </button>
-        </div>
+  <div class="functional-form">
+    <SettingsPageHeader
+      :eyebrow="t('admin.nav.storefront') || 'Storefront'"
+      :title="t('admin.pages.settings.functional.title')"
+      :subtitle="t('admin.pages.settings.functional.subtitle')"
+    />
+
+    <SettingsAnchorTabs :tabs="tabs" :active-id="activeTab" @select="activeTab = $event" />
+
+    <Transition name="status-fade">
+      <div v-if="successMessage || errorMessage" class="status-toast" :class="errorMessage ? 'error' : 'success'">
+        <Icon :name="errorMessage ? 'lucide:alert-triangle' : 'lucide:check-circle-2'" class="w-4 h-4" />
+        {{ successMessage || errorMessage }}
       </div>
-    </div>
+    </Transition>
 
-    <form @submit.prevent="save" class="space-y-6">
-      
-      <!-- Store Features -->
-      <div class="ui-card overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-              {{ t('admin.functionalSettingsForm.features.title') }}
-            </h3>
-            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
-              {{ t('admin.functionalSettingsForm.features.subtitle') }}
-            </p>
+    <form @submit.prevent="save" class="functional-sections">
+      <!-- Features -->
+      <SettingsSection
+        anchor-id="features"
+        icon="lucide:toggle-right"
+        :title="t('admin.functionalSettingsForm.features.title')"
+        :subtitle="t('admin.functionalSettingsForm.features.subtitle')"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:handbag" class="w-4 h-4" />
+              </div>
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.features.cart.title') }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.features.cart.subtitle') }}</p>
+              </div>
+            </div>
+            <BaseToggle v-model="form.cartEnabled" :sr-label="t('admin.functionalSettingsForm.features.cart.toggle')" />
           </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
-            <!-- Cart Toggle -->
-            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-              <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:handbag" class="w-4 h-4 [color:var(--brand)]" />
-                  {{ t('admin.functionalSettingsForm.features.cart.title') }}
-                </h4>
-                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
-                  {{ t('admin.functionalSettingsForm.features.cart.subtitle') }}
-                </p>
-              </div>
-              <BaseToggle v-model="form.cartEnabled" :sr-label="t('admin.functionalSettingsForm.features.cart.toggle')" />
-            </div>
 
-            <!-- COD Toggle -->
-            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-              <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:banknote" class="w-4 h-4 [color:var(--brand)]" />
-                  {{ t('admin.functionalSettingsForm.features.cod.title') }}
-                </h4>
-                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
-                  {{ t('admin.functionalSettingsForm.features.cod.subtitle') }}
-                </p>
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:banknote" class="w-4 h-4" />
               </div>
-              <BaseToggle v-model="form.codEnabled" :sr-label="t('admin.functionalSettingsForm.features.cod.toggle')" />
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.features.cod.title') }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.features.cod.subtitle') }}</p>
+              </div>
             </div>
+            <BaseToggle v-model="form.codEnabled" :sr-label="t('admin.functionalSettingsForm.features.cod.toggle')" />
+          </div>
 
-            <!-- Minimum order amount -->
-            <div class="p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-              <div class="flex items-start gap-2">
-                <Icon name="lucide:badge-cent" class="w-4 h-4 mt-0.5 [color:var(--brand)]" />
-                <div class="w-full">
-                  <h4 class="text-sm font-semibold" style="color: var(--text-primary)">
-                    {{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.title') }}
-                  </h4>
-                  <p class="text-sm mt-1" style="color: var(--text-tertiary)">
-                    {{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.subtitle') }}
-                  </p>
-                  <div class="mt-3 flex items-center gap-2">
-                    <input
-                      v-model.number="form.minimumOrderAmountDzd"
-                      type="number"
-                      min="0"
-                      step="100"
-                      class="ui-input block w-full rounded-lg max-w-xs"
-                    >
-                    <span class="text-xs font-semibold" style="color: var(--text-muted)">
-                      {{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.unit') }}
-                    </span>
-                  </div>
+          <div class="toggle-row toggle-row-disabled">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:search" class="w-4 h-4" />
+              </div>
+              <div>
+                <p class="toggle-row-title">
+                  {{ t('admin.functionalSettingsForm.storefrontSearch.title') }}
+                  <span class="toggle-row-soon">{{ t('admin.common.soon') || 'Soon' }}</span>
+                </p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.storefrontSearch.subtitle') }}</p>
+              </div>
+            </div>
+            <BaseToggle :model-value="false" disabled :sr-label="t('admin.functionalSettingsForm.storefrontSearch.title')" />
+          </div>
+        </div>
+      </SettingsSection>
+
+      <!-- Checkout rules -->
+      <SettingsSection
+        anchor-id="checkout"
+        icon="lucide:credit-card"
+        :title="t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout rules'"
+        :subtitle="t('admin.functionalSettingsForm.checkoutRules.subtitle') || 'Order conditions and checkout behavior.'"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:badge-cent" class="w-4 h-4" />
+              </div>
+              <div class="toggle-row-flex">
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.title') }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.subtitle') }}</p>
+                <div class="toggle-row-input">
+                  <input
+                    v-model.number="form.minimumOrderAmountDzd"
+                    type="number"
+                    min="0"
+                    step="100"
+                    class="field-input field-input-narrow"
+                  >
+                  <span class="field-suffix-text">{{ t('admin.functionalSettingsForm.checkoutRules.minimumOrder.unit') }}</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Optional address visibility -->
-            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-              <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:map-pin-off" class="w-4 h-4 [color:var(--brand)]" />
-                  {{ t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.title') }}
-                </h4>
-                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
-                  {{ t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.subtitle') }}
-                </p>
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:map-pin-off" class="w-4 h-4" />
               </div>
-              <BaseToggle
-                v-model="form.hideOptionalAddress"
-                :sr-label="t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.toggle')"
-              />
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.title') }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.subtitle') }}</p>
+              </div>
             </div>
+            <BaseToggle
+              v-model="form.hideOptionalAddress"
+              :sr-label="t('admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.toggle')"
+            />
           </div>
         </div>
-      </div>
+      </SettingsSection>
 
-      <!-- Announcement Bar -->
-      <div class="ui-card overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-              {{ t('admin.appearanceSettingsForm.announcement.title') }}
-            </h3>
-            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
-              {{ t('admin.appearanceSettingsForm.announcement.subtitle') }}
-            </p>
-          </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
-            <!-- Announcement Bar -->
-            <div class="flex items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-              <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:megaphone" class="w-4 h-4 [color:var(--brand)]" />
-                  {{ t('admin.appearanceSettingsForm.announcement.marquee') }}
-                </h4>
+      <!-- Announcement bar -->
+      <SettingsSection
+        anchor-id="announcement"
+        icon="lucide:megaphone"
+        :title="t('admin.appearanceSettingsForm.announcement.title')"
+        :subtitle="t('admin.appearanceSettingsForm.announcement.subtitle')"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:megaphone" class="w-4 h-4" />
               </div>
-              <BaseToggle v-model="form.announcementScrolling" :sr-label="t('admin.appearanceSettingsForm.announcement.marquee')" />
-            </div>
-
-            <div v-if="form.announcementScrolling" class="animate-fadeIn mt-4">
-               <label class="ui-label mb-1.5 block">{{ t('admin.appearanceSettingsForm.announcement.message.label') }}</label>
-                <input
-                  v-model="form.announcementText"
-                  type="text"
-                  class="ui-input block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm"
-                  :placeholder="t('admin.appearanceSettingsForm.announcement.message.placeholder')"
-                >
-            </div>
-
-            <!-- Future Option Placeholder -->
-            <div class="flex items-center justify-between p-4 rounded-xl transition-all duration-200 opacity-60" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-              <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:search" class="w-4 h-4 [color:var(--brand)]" />
-                  {{ t('admin.functionalSettingsForm.storefrontSearch.title') }}
-                </h4>
-                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
-                  {{ t('admin.functionalSettingsForm.storefrontSearch.subtitle') }}
-                </p>
+              <div>
+                <p class="toggle-row-title">{{ t('admin.appearanceSettingsForm.announcement.marquee') }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.appearanceSettingsForm.announcement.subtitle') }}</p>
               </div>
-              <BaseToggle :model-value="false" disabled :sr-label="t('admin.functionalSettingsForm.storefrontSearch.title')" />
             </div>
+            <BaseToggle
+              v-model="form.announcementScrolling"
+              :sr-label="t('admin.appearanceSettingsForm.announcement.marquee')"
+            />
           </div>
+
+          <Transition name="reveal">
+            <div v-if="form.announcementScrolling" class="reveal-block">
+              <label class="field-label">{{ t('admin.appearanceSettingsForm.announcement.message.label') }}</label>
+              <input
+                v-model="form.announcementText"
+                type="text"
+                class="field-input"
+                :placeholder="t('admin.appearanceSettingsForm.announcement.message.placeholder')"
+              >
+            </div>
+          </Transition>
         </div>
-      </div>
+      </SettingsSection>
 
-      <div class="ui-card overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-              Programme de points
-            </h3>
-            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
-              Configurez le calcul des points, le seuil minimum de redemption et la valeur en DZD de chaque point.
-            </p>
-          </div>
-
-          <div class="mt-6 md:mt-0 md:col-span-2 space-y-4">
-            <div class="flex items-start md:items-center justify-between p-4 rounded-xl transition-all duration-200" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-              <div class="flex-1 pr-4">
-                <h4 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary)">
-                  <Icon name="lucide:badge-percent" class="w-4 h-4 [color:var(--brand)]" />
-                  Activer les points
-                </h4>
-                <p class="text-sm mt-1" style="color: var(--text-tertiary)">
-                  Active le calcul des points pour les produits et la redemption au checkout.
-                </p>
-              </div>
-              <BaseToggle v-model="form.loyaltyEnabled" sr-label="Activer les points" />
-            </div>
-
-            <div v-if="form.loyaltyEnabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="ui-label mb-1.5 block">Points de base</label>
-                <input
-                  v-model.number="form.loyaltyBasePoints"
-                  type="number"
-                  step="1"
-                  class="ui-input block w-full rounded-lg"
-                  placeholder="0"
-                >
+      <!-- Loyalty -->
+      <SettingsSection
+        anchor-id="loyalty"
+        icon="lucide:badge-percent"
+        :title="t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty points'"
+        :subtitle="t('admin.functionalSettingsForm.loyalty.subtitle') || 'Configure points calculation and redemption rules.'"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:badge-percent" class="w-4 h-4" />
               </div>
               <div>
-                <label class="ui-label mb-1.5 block">Facteur de pourcentage</label>
-                <input
-                  v-model.number="form.loyaltyMarginFactor"
-                  type="number"
-                  step="0.01"
-                  class="ui-input block w-full rounded-lg"
-                  placeholder="0.10"
-                >
-              </div>
-              <div>
-                <label class="ui-label mb-1.5 block">Seuil minimum de redemption</label>
-                <input
-                  v-model.number="form.loyaltyMinRedeemPoints"
-                  type="number"
-                  min="0"
-                  step="1"
-                  class="ui-input block w-full rounded-lg"
-                  placeholder="0"
-                >
-              </div>
-              <div>
-                <label class="ui-label mb-1.5 block">Valeur DZD par point</label>
-                <input
-                  v-model.number="form.loyaltyRedeemRateDzdPerPoint"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  class="ui-input block w-full rounded-lg"
-                  placeholder="1"
-                >
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.loyalty.enable') || 'Enable points' }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.loyalty.enableSubtitle') || 'Activate points calculation and checkout redemption.' }}</p>
               </div>
             </div>
+            <BaseToggle v-model="form.loyaltyEnabled" :sr-label="t('admin.functionalSettingsForm.loyalty.enable') || 'Enable points'" />
           </div>
+
+          <Transition name="reveal">
+            <div v-if="form.loyaltyEnabled" class="reveal-block">
+              <div class="field-grid">
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.loyalty.basePoints') || 'Base points' }}</label>
+                  <input v-model.number="form.loyaltyBasePoints" type="number" step="1" class="field-input" placeholder="0" >
+                </div>
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.loyalty.marginFactor') || 'Margin factor' }}</label>
+                  <input v-model.number="form.loyaltyMarginFactor" type="number" step="0.01" class="field-input" placeholder="0.10" >
+                </div>
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.loyalty.minRedeem') || 'Minimum redemption' }}</label>
+                  <input v-model.number="form.loyaltyMinRedeemPoints" type="number" min="0" step="1" class="field-input" placeholder="0" >
+                </div>
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.loyalty.dzdPerPoint') || 'DZD per point' }}</label>
+                  <input v-model.number="form.loyaltyRedeemRateDzdPerPoint" type="number" min="0.01" step="0.01" class="field-input" placeholder="1" >
+                </div>
+              </div>
+            </div>
+          </Transition>
         </div>
-      </div>
+      </SettingsSection>
 
       <!-- Currency -->
-      <div class="ui-card overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-              {{ t('admin.functionalSettingsForm.currency.title') }}
-            </h3>
-            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
-              {{ t('admin.functionalSettingsForm.currency.subtitle') }}
-            </p>
-          </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2">
-            <label class="ui-label mb-2 block">{{ t('admin.functionalSettingsForm.currency.selectLabel') }}</label>
-            <BaseSelect
-                v-model="form.currencyCountry"
-                :disabled="loadingCurrencies"
-                @change="onCountryChange"
-            >
-                <option v-if="loadingCurrencies" value="" disabled>{{ t('admin.functionalSettingsForm.currency.loadingCurrencies') }}</option>
-                <option
-                  v-for="c in currencies"
-                  :key="c.country"
-                  :value="c.country"
-                >
-                  {{ c.label }}
-                </option>
-            </BaseSelect>
-            <p class="mt-2 text-xs" style="color: var(--text-tertiary)">
-              {{ t('admin.functionalSettingsForm.currency.note') }}
-            </p>
-          </div>
+      <SettingsSection
+        anchor-id="currency"
+        icon="lucide:dollar-sign"
+        :title="t('admin.functionalSettingsForm.currency.title')"
+        :subtitle="t('admin.functionalSettingsForm.currency.subtitle')"
+      >
+        <div class="field">
+          <label class="field-label">{{ t('admin.functionalSettingsForm.currency.selectLabel') }}</label>
+          <BaseSelect
+            v-model="form.currencyCountry"
+            :disabled="loadingCurrencies"
+            @change="onCountryChange"
+          >
+            <option v-if="loadingCurrencies" value="" disabled>{{ t('admin.functionalSettingsForm.currency.loadingCurrencies') }}</option>
+            <option v-for="c in currencies" :key="c.country" :value="c.country">{{ c.label }}</option>
+          </BaseSelect>
+          <p class="field-hint">{{ t('admin.functionalSettingsForm.currency.note') }}</p>
         </div>
-      </div>
+      </SettingsSection>
 
       <!-- Localization -->
-      <div class="ui-card overflow-hidden">
-        <div class="p-6 md:p-8 md:grid md:grid-cols-3 md:gap-8">
-          <div class="md:col-span-1">
-            <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-              {{ t('admin.functionalSettingsForm.localization.title') }}
-            </h3>
-            <p class="mt-2 text-sm leading-relaxed" style="color: var(--text-tertiary)">
-              {{ t('admin.functionalSettingsForm.localization.subtitle') }}
-            </p>
+      <SettingsSection
+        anchor-id="localization"
+        icon="lucide:languages"
+        :title="t('admin.functionalSettingsForm.localization.title')"
+        :subtitle="t('admin.functionalSettingsForm.localization.subtitle')"
+      >
+        <div class="field">
+          <label class="field-label">{{ t('admin.functionalSettingsForm.localization.defaultLanguage') }}</label>
+          <div class="lang-grid">
+            <button
+              v-for="l in languages"
+              :key="l.key"
+              type="button"
+              class="lang-card"
+              :class="{ 'is-active': form.language === l.key }"
+              @click="form.language = l.key"
+            >
+              <span class="lang-flag">{{ l.flag }}</span>
+              <span class="lang-label">{{ l.label }}</span>
+              <Icon v-if="form.language === l.key" name="lucide:check" class="lang-check" />
+            </button>
           </div>
-          
-          <div class="mt-6 md:mt-0 md:col-span-2">
-            <label class="ui-label mb-2 block">{{ t('admin.functionalSettingsForm.localization.defaultLanguage') }}</label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div 
-                v-for="l in languages" 
-                :key="l.key"
-                class="cursor-pointer relative rounded-xl border p-3 flex flex-col items-center justify-center text-center transition-all hover:[border-color:rgba(var(--brand-rgb)/0.4)]"
-                :class="form.language === l.key ? '[border-color:var(--brand)] [background:rgba(var(--brand-rgb)/0.08)]/50 ring-1 [--tw-ring-color:var(--brand)]' : ''"
-                :style="form.language !== l.key ? 'background: var(--surface-1); border-color: var(--surface-border)' : ''"
-                @click="form.language = l.key"
-              >
-                 <span class="text-2xl mb-2">{{ l.flag }}</span>
-                 <span class="text-sm font-medium" :class="form.language === l.key ? '[color:var(--brand)]' : ''" :style="form.language !== l.key ? 'color: var(--text-secondary)' : ''">{{ l.label }}</span>
-                 <Icon v-if="form.language === l.key" name="lucide:check-circle-2" class="w-4 h-4 [color:var(--brand)] absolute top-2 right-2" />
+
+          <Transition name="reveal">
+            <div v-if="form.language === 'ar'" class="lang-rtl-banner">
+              <Icon name="lucide:rotate-3d" class="w-4 h-4" />
+              <div>
+                <p class="lang-rtl-title">{{ t('admin.functionalSettingsForm.localization.rtl.title') }}</p>
+                <p class="lang-rtl-subtitle">{{ t('admin.functionalSettingsForm.localization.rtl.subtitle') }}</p>
               </div>
             </div>
-
-            <div
-              v-if="form.language === 'ar'"
-              class="mt-4 flex items-start gap-3 rounded-lg border p-3"
-              style="background: var(--accent-soft); border-color: var(--accent-border)"
-            >
-               <Icon name="lucide:languages" class="mt-0.5 h-5 w-5 shrink-0" style="color: var(--accent)" />
-               <div>
-                 <p class="text-sm font-medium" style="color: var(--accent)">{{ t('admin.functionalSettingsForm.localization.rtl.title') }}</p>
-                 <p class="mt-0.5 text-xs" style="color: color-mix(in srgb, var(--accent) 78%, white 22%)">
-                   {{ t('admin.functionalSettingsForm.localization.rtl.subtitle') }}
-                 </p>
-               </div>
-            </div>
-          </div>
+          </Transition>
         </div>
-      </div>
-
-      <!-- Action Footer -->
-      <div class="fixed bottom-6 right-6 md:static md:flex md:justify-end">
-         <div class="md:bg-transparent p-2 md:p-0 rounded-full shadow-lg md:shadow-none md:border-none flex items-center gap-3" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
-            <div
-              v-if="successMessage"
-              class="hidden md:block text-sm text-emerald-600 font-medium animate-fadeIn px-3"
-            >
-              {{ successMessage }}
-            </div>
-            <div
-              v-if="errorMessage"
-              class="hidden md:block text-sm text-red-600 font-medium animate-fadeIn px-3"
-            >
-              {{ errorMessage }}
-            </div>
-            
-            <button
-              type="button"
-              class="hidden md:inline-flex ui-btn ui-btn--secondary"
-              :disabled="loading || saving"
-              @click="reset"
-            >
-              {{ t('admin.functionalSettingsForm.actions.discardChanges') }}
-            </button>
-            
-            <button
-              type="submit"
-              class="inline-flex px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 justify-center"
-              :class="saving ? 'opacity-50 cursor-not-allowed' : ''"
-              :disabled="loading || saving"
-            >
-              <Icon v-if="saving" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
-              {{ saving ? t('admin.common.saving') : t('admin.common.saveChanges') }}
-            </button>
-         </div>
-      </div>
-      
-      <!-- Mobile Notifications (Toast style) -->
-      <div v-if="successMessage || errorMessage" class="md:hidden fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm px-4">
-        <div class="text-white px-4 py-3 rounded-xl shadow-lg flex items-center justify-between" style="background: var(--surface-3)">
-           <span class="text-sm font-medium">{{ successMessage || errorMessage }}</span>
-           <button @click="successMessage = ''; errorMessage = ''" class="ml-4 hover:text-white" style="color: var(--text-muted)">
-             <Icon name="lucide:x" class="w-4 h-4" />
-           </button>
-        </div>
-      </div>
-
+      </SettingsSection>
     </form>
+
+    <SettingsSaveBar
+      :is-dirty="isDirty"
+      :saving="saving"
+      @save="save"
+      @discard="reset"
+    />
   </div>
 </template>
 
@@ -384,9 +271,14 @@
 import { useAuthStore } from '~/stores/auth'
 import BaseToggle from '~/components/ui/BaseToggle.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import SettingsPageHeader from './settings/SettingsPageHeader.vue'
+import SettingsSection from './settings/SettingsSection.vue'
+import SettingsSaveBar from './settings/SettingsSaveBar.vue'
+import SettingsAnchorTabs from './settings/SettingsAnchorTabs.vue'
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
+
 const loading = ref(false)
 const saving = ref(false)
 const successMessage = ref('')
@@ -410,6 +302,19 @@ const form = reactive({
   hideOptionalAddress: true
 })
 
+const initialFormString = ref(JSON.stringify(form))
+const isDirty = computed(() => initialFormString.value !== JSON.stringify(form))
+
+const activeTab = ref('features')
+const tabs = computed(() => [
+  { id: 'features', label: t('admin.functionalSettingsForm.features.title'), icon: 'lucide:toggle-right' },
+  { id: 'checkout', label: t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout', icon: 'lucide:credit-card' },
+  { id: 'announcement', label: t('admin.appearanceSettingsForm.announcement.title'), icon: 'lucide:megaphone' },
+  { id: 'loyalty', label: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty', icon: 'lucide:badge-percent' },
+  { id: 'currency', label: t('admin.functionalSettingsForm.currency.title'), icon: 'lucide:dollar-sign' },
+  { id: 'localization', label: t('admin.functionalSettingsForm.localization.title'), icon: 'lucide:languages' }
+])
+
 const languages = computed(() => [
   { key: 'en', label: t('i18n.locales.en'), flag: '🇬🇧' },
   { key: 'fr', label: t('i18n.locales.fr'), flag: '🇫🇷' },
@@ -431,7 +336,6 @@ const fetchCurrencies = async () => {
     const response = await fetch('https://restcountries.com/v3.1/all?fields=name,currencies,cca2,flag')
     if (!response.ok) throw new Error('Failed to fetch countries')
     const data = await response.json()
-    
     const formatted: CurrencyOption[] = data
       .filter((c: any) => c.currencies && Object.keys(c.currencies).length > 0)
       .map((c: any) => {
@@ -444,21 +348,18 @@ const fetchCurrencies = async () => {
         }
       })
       .sort((a: CurrencyOption, b: CurrencyOption) => a.label.localeCompare(b.label))
-      
     currencies.value = formatted
-    
   } catch (e) {
     console.error('Failed to load currencies', e)
     currencies.value = [
-       { code: 'DZD', country: 'DZ', flag: '🇩🇿', label: '🇩🇿 Algeria (DZD)' },
-       { code: 'USD', country: 'US', flag: '🇺🇸', label: '🇺🇸 United States (USD)' },
-       { code: 'EUR', country: 'FR', flag: '🇪🇺', label: '🇪🇺 Euro (EUR)' },
+      { code: 'DZD', country: 'DZ', flag: '🇩🇿', label: '🇩🇿 Algeria (DZD)' },
+      { code: 'USD', country: 'US', flag: '🇺🇸', label: '🇺🇸 United States (USD)' },
+      { code: 'EUR', country: 'FR', flag: '🇪🇺', label: '🇪🇺 Euro (EUR)' }
     ]
   } finally {
     loadingCurrencies.value = false
   }
 }
-
 
 const updateForm = (data: any) => {
   if (!data) return
@@ -476,6 +377,7 @@ const updateForm = (data: any) => {
   form.loyaltyRedeemRateDzdPerPoint = Number(data.loyaltyRedeemRateDzdPerPoint ?? 1)
   form.minimumOrderAmountDzd = Number(data.minimumOrderAmountDzd ?? 1000)
   form.hideOptionalAddress = data.hideOptionalAddress ?? true
+  initialFormString.value = JSON.stringify(form)
 }
 
 const fetchSettings = async () => {
@@ -519,6 +421,7 @@ const save = async () => {
       }
     })
     useState<any>('storeSettings').value = updated
+    updateForm(updated)
     successMessage.value = t('admin.functionalSettingsForm.messages.saved')
     setTimeout(() => (successMessage.value = ''), 4000)
   } catch (e: any) {
@@ -538,13 +441,345 @@ const reset = () => {
 
 const onCountryChange = () => {
   const cur = currencies.value.find((c) => c.country === form.currencyCountry)
-  if (cur) {
-    form.currencyCode = cur.code
-  }
+  if (cur) form.currencyCode = cur.code
+}
+
+function setupScrollSpy() {
+  if (typeof window === 'undefined') return
+  const ids = ['features', 'checkout', 'announcement', 'loyalty', 'currency', 'localization']
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+      if (visible.length > 0 && visible[0].target.id) {
+        activeTab.value = visible[0].target.id
+      }
+    },
+    { rootMargin: '-80px 0px -50% 0px', threshold: [0.1, 0.3, 0.6] }
+  )
+  nextTick(() => {
+    ids.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+  })
+  onBeforeUnmount(() => observer.disconnect())
 }
 
 onMounted(() => {
   fetchCurrencies()
   fetchSettings()
+  setupScrollSpy()
 })
 </script>
+
+<style scoped>
+.functional-form {
+  padding-bottom: 120px;
+}
+
+.status-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.status-toast.success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.status-toast.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.status-fade-enter-from,
+.status-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.status-fade-enter-active,
+.status-fade-leave-active {
+  transition: all 0.18s ease;
+}
+
+.functional-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Toggle list */
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.toggle-row:hover {
+  border-color: color-mix(in srgb, var(--surface-border) 70%, var(--text-muted));
+}
+
+.toggle-row-disabled {
+  opacity: 0.5;
+}
+
+.toggle-row-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.toggle-row-flex {
+  flex: 1;
+  min-width: 0;
+}
+
+.toggle-row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  border: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.toggle-row-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-row-soon {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+.toggle-row-subtitle {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+.toggle-row-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Reveal block */
+.reveal-block {
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reveal-enter-from,
+.reveal-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-4px);
+}
+
+.reveal-enter-to,
+.reveal-leave-from {
+  opacity: 1;
+  max-height: 320px;
+}
+
+.reveal-enter-active,
+.reveal-leave-active {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 720px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.field-hint {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+.field-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.18);
+}
+
+.field-input-narrow {
+  max-width: 200px;
+}
+
+.field-suffix-text {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+}
+
+/* Languages grid */
+.lang-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .lang-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lang-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  background: var(--surface-1);
+  border: 2px solid var(--surface-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lang-card:hover {
+  border-color: color-mix(in srgb, var(--surface-border) 50%, var(--text-muted));
+  transform: translateY(-1px);
+}
+
+.lang-card.is-active {
+  border-color: var(--brand);
+  background: rgba(var(--brand-rgb) / 0.06);
+}
+
+.lang-flag {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.lang-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.lang-card.is-active .lang-label {
+  color: var(--brand);
+}
+
+.lang-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 14px;
+  height: 14px;
+  color: var(--brand);
+}
+
+.lang-rtl-banner {
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(var(--brand-rgb) / 0.08);
+  border: 1px solid rgba(var(--brand-rgb) / 0.22);
+  border-radius: 10px;
+  color: var(--brand);
+}
+
+.lang-rtl-title {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.lang-rtl-subtitle {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: color-mix(in srgb, var(--brand) 70%, var(--text-secondary));
+  line-height: 1.4;
+}
+</style>

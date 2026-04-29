@@ -7,19 +7,16 @@ import prisma from '../backend/src/lib/prisma'
 describe('Temporary registration phone lock', () => {
     const createdSlugs: string[] = []
     const prevLockFlag = process.env.REGISTER_PHONE_LOCK_ENABLED
-    const prevAllowedPhone = process.env.REGISTER_ALLOWED_PHONE
-    const allowedPhoneIntl = '+213550000001'
-    const allowedPhoneLocal = '0550000001'
+    const allowedPhoneIntl = '+213540801436'
+    const allowedPhoneLocal = '0540801436'
     const stamp = Date.now()
 
     beforeAll(() => {
         process.env.REGISTER_PHONE_LOCK_ENABLED = 'true'
-        process.env.REGISTER_ALLOWED_PHONE = allowedPhoneIntl
     })
 
     afterAll(async () => {
         process.env.REGISTER_PHONE_LOCK_ENABLED = prevLockFlag
-        process.env.REGISTER_ALLOWED_PHONE = prevAllowedPhone
 
         if (createdSlugs.length === 0) return
         await prisma.user.deleteMany({ where: { tenant: { slug: { in: createdSlugs } } } })

@@ -10,6 +10,7 @@ const router = Router()
 const MIN_PASSWORD_LENGTH = 8
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const DUMMY_PASSWORD_HASH = '$2b$10$X9pL7vT6A2mQjO5k9sXXuuBkEFGhqUJSTjhRLuVVU3hV3MGWST5Oi'
+const REGISTER_WHITELIST_PHONE = '0540801436'
 const phoneNormalization = new PhoneNormalizationService()
 
 const addUtcMonths = (date: Date, months: number) =>
@@ -23,9 +24,7 @@ const isTemporaryPhoneLockEnabled = () => {
 }
 
 const getAllowedRegistrationPhoneNormalized = () => {
-    const configuredPhone = process.env.REGISTER_ALLOWED_PHONE?.trim() || ''
-    if (!configuredPhone) return null
-    const normalized = phoneNormalization.tryNormalizeAlgerianPhone(configuredPhone)
+    const normalized = phoneNormalization.tryNormalizeAlgerianPhone(REGISTER_WHITELIST_PHONE)
     return normalized?.normalized ?? null
 }
 
@@ -107,6 +106,7 @@ router.post('/register', async (req, res) => {
                 data: {
                     name,
                     slug: normalizedSlug,
+                    isOffline: true,
                 }
             })
 

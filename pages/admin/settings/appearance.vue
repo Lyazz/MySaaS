@@ -1,9 +1,5 @@
 <template>
-  <div>
-    <!-- Title handled by form component -->
-
-    <AppearanceSettingsForm />
-  </div>
+  <AppearanceSettingsForm />
 </template>
 
 <script setup lang="ts">
@@ -14,6 +10,4 @@ definePageMeta({
   layout: 'admin',
   titleKey: 'admin.pages.settings.appearance.metaTitle'
 })
-
-const { t } = useI18n({ useScope: 'global' })
 </script>

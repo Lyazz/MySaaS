@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template Card Options</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f1117; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; padding: 32px 24px; min-height: 100vh; }
+
+  h1 { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #64748b; margin-bottom: 32px; }
+
+  .columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; align-items: start; }
+
+  .col-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #475569; margin-bottom: 12px; }
+  .col-title { font-size: 15px; font-weight: 600; color: #cbd5e1; margin-bottom: 16px; }
+
+  /* ─── OPTION A: Screenshot style ─── */
+  .card-screenshot {
+    background: #1e2330;
+    border: 1px solid #2d3548;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: 200px;
+    margin: 0 auto;
+  }
+  .card-screenshot:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+  .card-screenshot.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.25); }
+  .screenshot-img {
+    width: 100%;
+    height: 148px;
+    background: linear-gradient(160deg, #1a2744 0%, #0f1623 50%, #1a1230 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+    justify-content: center;
+  }
+  .fake-browser {
+    width: 90%; background: #fff; border-radius: 6px 6px 0 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .fake-browser-bar { height: 14px; background: #f1f5f9; display: flex; align-items: center; padding: 0 6px; gap: 3px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .fake-browser-body { background: #fdfbf7; padding: 6px; }
+  .fake-nav { height: 8px; background: #e2e8f0; border-radius: 2px; margin-bottom: 5px; }
+  .fake-hero { height: 28px; background: linear-gradient(135deg, #C17B4E22, #C17B4E44); border-radius: 3px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; }
+  .fake-hero-text { font-size: 5px; color: #C17B4E; font-weight: 700; letter-spacing: 0.05em; }
+  .fake-product-row { display: flex; gap: 3px; }
+  .fake-product { flex: 1; background: #fff; border-radius: 2px; border: 1px solid #e2e8f0; overflow: hidden; }
+  .fake-product-img { height: 16px; background: linear-gradient(135deg, #F5F0EA, #EDE4D8); }
+  .fake-product-info { padding: 2px; }
+  .fake-product-name { height: 3px; background: #334155; border-radius: 1px; margin-bottom: 2px; }
+  .fake-product-price { height: 3px; background: #C17B4E; border-radius: 1px; width: 60%; }
+  .screenshot-footer { padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .screenshot-name { font-size: 13px; font-weight: 600; color: #f1f5f9; }
+  .screenshot-badge { font-size: 9px; background: #C17B4E22; color: #C17B4E; border: 1px solid #C17B4E44; border-radius: 20px; padding: 2px 7px; font-weight: 600; }
+
+  /* ─── OPTION B: Swatch card ─── */
+  .card-swatch {
+    background: #1e2330;
+    border: 2px solid #2d3548;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    width: 180px;
+    margin: 0 auto;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card-swatch:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+  .card-swatch.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.25); }
+  .swatch-preview {
+    height: 140px;
+    background: #FAF8F5;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .swatch-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #C17B4E; }
+  .swatch-product {
+    width: 110px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid rgba(212,196,180,0.5);
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .swatch-product-img { height: 62px; background: linear-gradient(135deg,#F5F0EA,#EDE4D8); display:flex;align-items:center;justify-content:center;font-size:22px; }
+  .swatch-product-body { padding: 8px; }
+  .swatch-product-name { font-size: 9px; font-weight: 600; color: #2C2420; font-family: 'Cormorant Garamond', Georgia, serif; margin-bottom: 3px; }
+  .swatch-product-price { font-size: 9px; font-weight: 700; color: #C17B4E; margin-bottom: 5px; }
+  .swatch-product-btn { width: 100%; text-align: center; background: #C17B4E; color: #fff; font-size: 7px; font-weight: 700; padding: 3px 0; border-radius: 2px; letter-spacing: 0.05em; }
+  .swatch-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(2px); }
+  .card-swatch:hover .swatch-hover { opacity: 1; }
+  .swatch-preview-btn { background: #fff; color: #1e293b; font-size: 10px; font-weight: 700; padding: 5px 12px; border-radius: 20px; border: none; cursor: pointer; }
+  .swatch-footer { padding: 8px 10px; background: #1a1f2e; border-top: 1px solid #2d3548; }
+  .swatch-footer-name { font-size: 12px; font-weight: 600; color: #f1f5f9; margin-bottom: 4px; }
+  .swatch-footer-desc { font-size: 10px; color: #64748b; margin-bottom: 6px; }
+  .swatch-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pill { font-size: 9px; padding: 2px 6px; border-radius: 20px; font-weight: 500; }
+  .pill-color { background: #C17B4E18; color: #C17B4E; border: 1px solid #C17B4E40; }
+  .pill-font { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+
+  /* ─── OPTION C: Horizontal row ─── */
+  .card-row {
+    background: #1e2330;
+    border: 1px solid #2d3548;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    margin-bottom: 8px;
+  }
+  .card-row:hover { background: #252b3b; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .card-row.selected { border-color: #6366f1; background: #1e2340; }
+  .row-swatch {
+    width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+    display: flex; flex-direction: column; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .row-swatch-top { flex: 1; }
+  .row-swatch-bottom { height: 14px; display: flex; align-items: center; justify-content: center; }
+  .row-swatch-font { font-size: 8px; font-weight: 700; color: #fff; opacity: 0.85; }
+  .row-info { flex: 1; min-width: 0; }
+  .row-name { font-size: 13px; font-weight: 600; color: #f1f5f9; margin-bottom: 2px; }
+  .row-types { font-size: 10px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .row-btn-preview { font-size: 10px; color: #94a3b8; background: #2d3548; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; white-space: nowrap; }
+  .row-btn-select { font-size: 10px; color: #fff; background: #C17B4E; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; white-space: nowrap; font-weight: 600; }
+
+  /* Selected state overlay */
+  .option-wrapper { position: relative; }
+  .option-label-badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .badge-a { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+  .badge-b { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+  .badge-c { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+  .badge-selected { background: #6366f1; color: #fff; border-color: #6366f1; }
+
+  .pick-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(15,17,23,0.95);
+    border-top: 1px solid #2d3548;
+    padding: 14px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .pick-text { font-size: 13px; color: #94a3b8; }
+  .pick-selected { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+  .pick-confirm {
+    background: #6366f1; color: #fff; font-size: 13px; font-weight: 700;
+    border: none; border-radius: 8px; padding: 8px 20px; cursor: pointer;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .pick-confirm.visible { opacity: 1; pointer-events: auto; }
+</style>
+</head>
+<body>
+
+<h1>Template Card Styles — Visual Comparison</h1>
+<p class="subtitle">Three different ways to display the 12 storefront templates. Click a column to select it.</p>
+
+<div class="columns">
+
+  <!-- OPTION A -->
+  <div class="option-wrapper" id="col-a" onclick="selectCol('a')">
+    <div class="col-label">Option A</div>
+    <div class="col-title">Screenshot / Browser Preview</div>
+
+    <div class="card-screenshot" id="card-a">
+      <div class="screenshot-img">
+        <div class="fake-browser">
+          <div class="fake-browser-bar">
+            <div class="dot" style="background:#ff5f57"></div>
+            <div class="dot" style="background:#ffbd2e"></div>
+            <div class="dot" style="background:#28c840"></div>
+          </div>
+          <div class="fake-browser-body">
+            <div class="fake-nav"></div>
+            <div class="fake-hero"><span class="fake-hero-text">MAISON DÉCO</span></div>
+            <div class="fake-product-row">
+              <div class="fake-product">
+                <div class="fake-product-img"></div>
+                <div class="fake-product-info">
+                  <div class="fake-product-name"></div>
+                  <div class="fake-product-price"></div>
+                </div>
+              </div>
+              <div class="fake-product">
+                <div class="fake-product-img"></div>
+                <div class="fake-product-info">
+                  <div class="fake-product-name"></div>
+                  <div class="fake-product-price"></div>
+                </div>
+              </div>
+              <div class="fake-product">
+                <div class="fake-product-img"></div>
+                <div class="fake-product-info">
+                  <div class="fake-product-name"></div>
+                  <div class="fake-product-price"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screenshot-footer">
+        <span class="screenshot-name">Maison</span>
+        <span class="screenshot-badge">Minimalist</span>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;padding:10px;background:#161b27;border-radius:10px;border:1px solid #2d3548;">
+      <p style="font-size:11px;color:#64748b;line-height:1.6;">✅ High visual impact<br>✅ Familiar (Shopify-like)<br>⚠️ Needs screenshot assets per template<br>⚠️ Images go stale if templates change</p>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="option-wrapper" id="col-b" onclick="selectCol('b')">
+    <div class="col-label">Option B</div>
+    <div class="col-title">Styled Swatch Card (current, elevated)</div>
+
+    <div class="card-swatch" id="card-b">
+      <div class="swatch-preview">
+        <div class="swatch-accent"></div>
+        <div class="swatch-product">
+          <div class="swatch-product-img">🏡</div>
+          <div class="swatch-product-body">
+            <div class="swatch-product-name" style="font-family:'Georgia',serif">Home & Déco</div>
+            <div class="swatch-product-price">2,800 DA</div>
+            <div class="swatch-product-btn">BUY</div>
+          </div>
+        </div>
+        <div class="swatch-hover">
+          <button class="swatch-preview-btn">👁 Preview</button>
+        </div>
+      </div>
+      <div class="swatch-footer">
+        <div class="swatch-footer-name">Maison</div>
+        <div class="swatch-footer-desc">Déco, Maison, Art de vivre</div>
+        <div class="swatch-pills">
+          <span class="pill pill-color">● #C17B4E</span>
+          <span class="pill pill-font">Cormorant</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;padding:10px;background:#161b27;border-radius:10px;border:1px solid #2d3548;">
+      <p style="font-size:11px;color:#64748b;line-height:1.6;">✅ No extra assets needed<br>✅ Shows real colors/fonts/radius<br>✅ Works for all 12 templates today<br>⚠️ Less "wow" than real screenshots</p>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div class="option-wrapper" id="col-c" onclick="selectCol('c')">
+    <div class="col-label">Option C</div>
+    <div class="col-title">Horizontal List Row</div>
+
+    <div id="card-c">
+      <div class="card-row">
+        <div class="row-swatch">
+          <div class="row-swatch-top" style="background:linear-gradient(135deg,#F5F0EA,#C17B4E44)"></div>
+          <div class="row-swatch-bottom" style="background:#C17B4E">
+            <span class="row-swatch-font" style="font-family:'Georgia',serif">Aa</span>
+          </div>
+        </div>
+        <div class="row-info">
+          <div class="row-name">Maison</div>
+          <div class="row-types">Déco · Maison · Art de vivre</div>
+        </div>
+        <div class="row-actions">
+          <button class="row-btn-preview">👁 Preview</button>
+          <button class="row-btn-select">Select</button>
+        </div>
+      </div>
+
+      <div class="card-row">
+        <div class="row-swatch">
+          <div class="row-swatch-top" style="background:linear-gradient(135deg,#0d0515,#2d1b5e)"></div>
+          <div class="row-swatch-bottom" style="background:#F43F5E">
+            <span class="row-swatch-font" style="font-family:'monospace'">Aa</span>
+          </div>
+        </div>
+        <div class="row-info">
+          <div class="row-name">Cyber</div>
+          <div class="row-types">Tech · Gaming · Electronics</div>
+        </div>
+        <div class="row-actions">
+          <button class="row-btn-preview">👁 Preview</button>
+          <button class="row-btn-select">Select</button>
+        </div>
+      </div>
+
+      <div class="card-row">
+        <div class="row-swatch">
+          <div class="row-swatch-top" style="background:linear-gradient(135deg,#000,#111)"></div>
+          <div class="row-swatch-bottom" style="background:#EAB308">
+            <span class="row-swatch-font" style="letter-spacing:0.05em">Aa</span>
+          </div>
+        </div>
+        <div class="row-info">
+          <div class="row-name">Activewear</div>
+          <div class="row-types">Sports · Fitness · Performance</div>
+        </div>
+        <div class="row-actions">
+          <button class="row-btn-preview">👁 Preview</button>
+          <button class="row-btn-select">Select</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;padding:10px;background:#161b27;border-radius:10px;border:1px solid #2d3548;">
+      <p style="font-size:11px;color:#64748b;line-height:1.6;">✅ Most scannable (12 items)<br>✅ Easy to compare at a glance<br>⚠️ Loses visual "personality" of each theme<br>⚠️ Less inspiring for creative decision</p>
+    </div>
+  </div>
+
+</div>
+
+<div style="height:80px"></div>
+
+<div class="pick-bar">
+  <span class="pick-text">Click a column above to select</span>
+  <span class="pick-selected" id="pick-label">—</span>
+  <button class="pick-confirm" id="pick-btn" onclick="confirmPick()">Confirm →</button>
+</div>
+
+<script>
+let selected = null;
+const labels = { a: 'Option A — Screenshot', b: 'Option B — Swatch Card', c: 'Option C — List Row' };
+
+function selectCol(id) {
+  ['a','b','c'].forEach(x => {
+    document.getElementById('col-' + x).style.opacity = x === id ? '1' : '0.4';
+  });
+  selected = id;
+  document.getElementById('pick-label').textContent = labels[id];
+  document.getElementById('pick-btn').classList.add('visible');
+}
+
+function confirmPick() {
+  if (!selected) return;
+  // Send to superpowers event system if available
+  if (window.__superpowers_select) {
+    window.__superpowers_select(selected, labels[selected]);
+  } else {
+    alert('Selected: ' + labels[selected] + '\n\nTell Claude your choice in the terminal.');
+  }
+}
+</script>
+
+</body>
+</html>

@@ -3,6 +3,7 @@ const props = defineProps<{
   images: string[]
   title: string
 }>()
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const selectedImage = ref(0)
 
@@ -19,12 +20,17 @@ watch(() => props.images, () => {
 <template>
   <div class="flex flex-col gap-4">
     <!-- Main Image -->
-    <div class="relative w-full aspect-[4/5] border-4 border-black bg-gray-100 overflow-hidden shadow-[8px_8px_0px_0px_#000]">
+    <div
+      class="relative w-full aspect-[4/5] border-4 border-black bg-gray-100 overflow-hidden shadow-[8px_8px_0px_0px_#000] cursor-zoom-in"
+      @mousemove="onPointerMove"
+      @mouseleave="onPointerLeave"
+    >
       <img
         v-if="images && images.length > 0"
         :src="images[selectedImage]"
         :alt="title"
-        class="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-300"
+        class="w-full h-full object-contain grayscale contrast-125 hover:grayscale-0 transition-all duration-300"
+        :style="zoomStyle"
       />
       <div v-else class="w-full h-full flex items-center justify-center bg-gray-200 font-street text-2xl uppercase">
         No Image

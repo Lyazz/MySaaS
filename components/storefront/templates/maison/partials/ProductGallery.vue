@@ -3,6 +3,7 @@ const props = defineProps<{
   images: string[]
   title: string
 }>()
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const selectedImage = ref(0)
 
@@ -14,7 +15,11 @@ watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
 <template>
   <div class="gallery">
     <!-- Main image -->
-    <div class="gallery__main">
+    <div
+      class="gallery__main"
+      @mousemove="onPointerMove"
+      @mouseleave="onPointerLeave"
+    >
       <Transition name="gallery-fade" mode="out-in">
         <img
           v-if="images && images.length > 0"
@@ -22,6 +27,7 @@ watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
           :src="images[selectedImage]"
           :alt="title"
           class="gallery__main-img"
+          :style="zoomStyle"
         >
         <div v-else class="gallery__main-empty">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -61,14 +67,14 @@ watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
   aspect-ratio: 4/5;
   background: var(--at-surface-2);
   overflow: hidden;
+  cursor: zoom-in;
 }
 .gallery__main-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.5s ease;
 }
-.gallery__main:hover .gallery__main-img { transform: scale(1.03); }
 .gallery__main-empty {
   width: 100%;
   height: 100%;

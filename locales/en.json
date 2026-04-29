@@ -712,8 +712,8 @@
           "placeholder": "Enter OTP code",
           "send": "Send Code",
           "verify": "Verify Code",
-          "placeholderNotice": "OTP placeholder sent. Use any code to continue this temporary flow.",
-          "verified": "Phone confirmed (placeholder)."
+          "placeholderNotice": "OTP code sent.",
+          "verified": "Phone confirmed."
         },
         "password": {
           "label": "Password"
@@ -1254,7 +1254,17 @@
       "error": "An error occurred. Please try again.",
       "saved": "Saved!",
       "filters": "Filters",
-      "noDataAvailable": "No data available"
+      "noDataAvailable": "No data available",
+      "unsavedChanges": "Unsaved changes",
+      "unsavedChangesHint": "Don't forget to save your changes.",
+      "discard": "Discard",
+      "search": "Search",
+      "noResults": "No results",
+      "replace": "Replace",
+      "soon": "Soon",
+      "active": "Active",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     },
     "confirmModal": {
       "defaults": {
@@ -1410,6 +1420,11 @@
         "noImage": "No image",
         "uploadImage": "Upload image",
         "addSlide": "Add slide",
+        "slide": "slide",
+        "slides": "slides",
+        "untitled": "Untitled slide",
+        "noSlides": "No slides yet",
+        "createFirst": "Create your first slide",
         "defaults": {
           "title": "New slide"
         }
@@ -1422,8 +1437,10 @@
         "buttonLinkHint": "Use internal paths like \"/products\" or \"/category/shoes\".",
         "imageUrl": "Image URL",
         "imageUrlHint": "Or paste a URL if you already have one.",
-        "eyebrow": "Eyebrow",
-        "limit": "Limit"
+        "eyebrow": "Eyebrow text",
+        "limit": "Limit",
+        "sectionTitle": "Section title",
+        "numberOfProducts": "Number of products"
       },
       "sections": {
         "title": "Homepage sections",
@@ -1467,6 +1484,8 @@
         }
       },
       "checkoutRules": {
+        "title": "Checkout rules",
+        "subtitle": "Order conditions and checkout behavior.",
         "minimumOrder": {
           "title": "Minimum order amount",
           "subtitle": "Block checkout when cart subtotal is below this amount.",
@@ -1477,6 +1496,16 @@
           "subtitle": "Remove the optional address input from checkout and quick order forms.",
           "toggle": "Hide optional address"
         }
+      },
+      "loyalty": {
+        "title": "Loyalty points",
+        "subtitle": "Configure points calculation and redemption rules.",
+        "enable": "Enable points",
+        "enableSubtitle": "Activate points calculation and checkout redemption.",
+        "basePoints": "Base points per order",
+        "marginFactor": "Margin factor",
+        "minRedeem": "Minimum redemption (points)",
+        "dzdPerPoint": "DZD per point"
       },
       "currency": {
         "title": "Store currency",
@@ -1762,7 +1791,10 @@
         "logo": {
           "label": "Brand logo",
           "upload": "Upload logo",
-          "hint": "Square (1:1), PNG recommended."
+          "hint": "Square (1:1), PNG recommended.",
+          "magicIdentity": "Magic identity",
+          "magicHint": "Upload a logo first to generate a brand identity.",
+          "magicSuccess": "Magic identity applied."
         },
         "favicon": {
           "label": "Favicon",
@@ -1771,7 +1803,8 @@
         },
         "primaryColor": {
           "label": "Primary color",
-          "hint": "Used for buttons, links, and highlights."
+          "hint": "Used for buttons, links, and highlights.",
+          "suggested": "Suggested palettes"
         }
       },
       "announcement": {
@@ -1891,7 +1924,10 @@
       "functional": "Functional",
       "apps": "Apps",
       "integrations": "Integrations",
-      "users": "Users"
+      "users": "Users",
+      "storefront": "Storefront",
+      "account": "Account",
+      "connections": "Connections"
     },
     "roles": {
       "owner": "Owner",

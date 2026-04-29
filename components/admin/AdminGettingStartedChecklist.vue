@@ -19,7 +19,7 @@
       >
         {{ t('admin.pages.gettingStarted.dismiss') }}
       </button>
-      <span v-else class="text-xs font-medium text-emerald-600 flex items-center gap-1">
+      <span v-else class="text-xs font-medium flex items-center gap-1" style="color: var(--brand)">
         <Icon name="lucide:check-circle" class="w-4 h-4" />
         {{ t('admin.pages.gettingStarted.complete') }}
       </span>
@@ -28,7 +28,7 @@
     <!-- Progress bar -->
     <div class="h-1.5 rounded-full mb-4 overflow-hidden" style="background: var(--surface-3)">
       <div
-        class="h-1.5 rounded-full bg-emerald-500 transition-all duration-500"
+        class="h-1.5 rounded-full transition-all duration-500 [background:var(--brand)]"
         :style="{ width: `${(completedCount / items.length) * 100}%` }"
       />
     </div>
@@ -38,10 +38,9 @@
       <li v-for="item in items" :key="item.key" class="flex items-center gap-3">
         <div
           class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors"
-          :class="item.done ? 'bg-emerald-500' : ''"
-          :style="item.done ? '' : 'border: 2px solid var(--surface-border)'"
+          :style="item.done ? 'background: var(--brand)' : 'border: 2px solid var(--surface-border)'"
         >
-          <Icon v-if="item.done" name="lucide:check" class="w-3 h-3 text-white" />
+          <Icon v-if="item.done" name="lucide:check" class="w-3 h-3" style="color: #05070A" />
         </div>
         <span
           class="text-sm flex-1"
@@ -89,7 +88,7 @@ const dismissed = ref(false)
 const publishing = ref(false)
 
 const items = computed(() => [
-  { key: 'logo',     done: data.value?.hasLogo ?? false,       label: t('admin.pages.gettingStarted.items.logo'),     href: '/admin/settings' },
+  { key: 'logo',     done: data.value?.hasLogo ?? false,       label: t('admin.pages.gettingStarted.items.logo'),     href: '/admin/settings/appearance' },
   { key: 'product',  done: data.value?.hasProducts ?? false,   label: t('admin.pages.gettingStarted.items.product'),  href: '/admin/products/create' },
   { key: 'category', done: data.value?.hasCategories ?? false, label: t('admin.pages.gettingStarted.items.category'), href: '/admin/categories' },
   { key: 'delivery', done: data.value?.hasDelivery ?? false,   label: t('admin.pages.gettingStarted.items.delivery'), href: '/admin/settings' },

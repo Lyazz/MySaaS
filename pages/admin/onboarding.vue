@@ -32,12 +32,11 @@
 
       <!-- Step content -->
       <div class="rounded-xl p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-        <AdminOnboardingOnboardingStepStoreInfo v-if="step === 0" v-model="form" />
-        <AdminOnboardingOnboardingStepTemplate v-else-if="step === 1" v-model="form" />
-        <AdminOnboardingOnboardingStepBrandColor v-else-if="step === 2" v-model="form" />
-        <AdminOnboardingOnboardingStepLanguage v-else-if="step === 3" v-model="form" />
-        <AdminOnboardingOnboardingStepFirstProduct v-else-if="step === 4" v-model="form" :product-error="productError" @skip="skipProduct" />
-        <AdminOnboardingOnboardingStepDone v-else v-model="form" />
+        <AdminOnboardingStepStoreInfo v-if="step === 0" v-model="form" />
+        <AdminOnboardingStepTemplate v-else-if="step === 1" v-model="form" />
+        <AdminOnboardingStepBrandColor v-else-if="step === 2" v-model="form" />
+        <AdminOnboardingStepLanguage v-else-if="step === 3" v-model="form" />
+        <AdminOnboardingStepDone v-else v-model="form" />
 
         <div v-if="error" class="mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">
           {{ error }}
@@ -68,7 +67,7 @@
           <button
             v-else
             type="button"
-            class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:opacity-50"
+            class="px-4 py-2 rounded-lg [background:var(--brand)] hover:opacity-90 font-medium disabled:opacity-50" style="color: #05070A"
             :disabled="saving"
             @click="finish"
           >
@@ -82,7 +81,6 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import { normalizeContentSlug } from '~/shared/content-slug'
 
 definePageMeta({
   middleware: 'auth',
@@ -94,18 +92,16 @@ const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
 
 const STEPS = computed(() => [
-  { key: 'storeInfo',     label: t('admin.pages.onboarding.steps.storeInfo') },
-  { key: 'template',      label: t('admin.pages.onboarding.steps.template') },
-  { key: 'brandColor',    label: t('admin.pages.onboarding.steps.brandColor') },
-  { key: 'language',      label: t('admin.pages.onboarding.steps.language') },
-  { key: 'firstProduct',  label: t('admin.pages.onboarding.steps.firstProduct') },
-  { key: 'done',          label: t('admin.pages.onboarding.steps.done') },
+  { key: 'storeInfo',  label: t('admin.pages.onboarding.steps.storeInfo') },
+  { key: 'template',   label: t('admin.pages.onboarding.steps.template') },
+  { key: 'brandColor', label: t('admin.pages.onboarding.steps.brandColor') },
+  { key: 'language',   label: t('admin.pages.onboarding.steps.language') },
+  { key: 'done',       label: t('admin.pages.onboarding.steps.done') },
 ])
 
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
-const productError = ref('')
 const step = ref(0)
 const progressPercent = computed(() => Math.round(((step.value + 1) / STEPS.value.length) * 100))
 
@@ -114,9 +110,8 @@ const form = reactive({
   logoUrl: null as string | null,
   description: '',
   templateKey: 'modern',
-  primaryColor: '#0d9488',
+  primaryColor: '#C6F432',
   language: 'fr',
-  product: { name: '', price: null as number | null, imageUrl: null as string | null }
 })
 
 async function loadSettings() {
@@ -165,46 +160,9 @@ async function save(extra?: Record<string, unknown>) {
   }
 }
 
-async function createFirstProduct() {
-  if (!form.product.name || form.product.price === null) return null
-  productError.value = ''
-  try {
-    const slug = normalizeContentSlug(form.product.name) || `product-${Date.now()}`
-    const product = await $fetch<any>('/api/admin/products', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { title: form.product.name, slug, price: form.product.price, isActive: true }
-    })
-    if (form.product.imageUrl && product?.id) {
-      await $fetch(`/api/admin/products/${product.id}/images`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${authStore.token}` },
-        body: { url: form.product.imageUrl, isMain: true }
-      }).catch(() => {})
-    }
-    return product
-  } catch (e: any) {
-    productError.value = t('admin.pages.onboarding.firstProduct.errorCreate')
-    return null
-  }
-}
-
 async function nextStep() {
-  if (step.value === 4) {
-    if (form.product.name && form.product.price !== null) {
-      const created = await createFirstProduct()
-      if (!created && productError.value) return
-    }
-    step.value++
-    return
-  }
   const ok = await save()
   if (ok) step.value++
-}
-
-function skipProduct() {
-  productError.value = ''
-  step.value++
 }
 
 async function finish() {

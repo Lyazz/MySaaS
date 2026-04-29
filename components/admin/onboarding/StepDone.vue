@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6 text-center py-4">
     <div class="flex justify-center">
-      <div class="w-16 h-16 rounded-full flex items-center justify-center bg-emerald-100">
-        <Icon name="lucide:check" class="w-8 h-8 text-emerald-600" />
+      <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background: var(--accent-soft)">
+        <Icon name="lucide:check" class="w-8 h-8" style="color: var(--brand)" />
       </div>
     </div>
 
@@ -54,7 +54,6 @@ import { useAuthStore } from '~/stores/auth'
 interface OnboardingForm {
   name: string; logoUrl: string | null; description: string
   templateKey: string; primaryColor: string; language: string
-  product: { name: string; price: number | null; imageUrl: string | null }
 }
 const props = defineProps<{ modelValue: OnboardingForm }>()
 const { t } = useI18n({ useScope: 'global' })
