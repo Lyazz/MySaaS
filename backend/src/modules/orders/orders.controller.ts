@@ -2,6 +2,16 @@ import type { Request, Response } from 'express'
 import { OrdersService, OrderValidationError } from './orders.service'
 import { DeliveryConfigurationError, DeliveryService } from '../delivery/delivery.service'
 import { MaystroIntegrationError } from '../delivery/maystro/maystro.errors'
+import {
+  fetchForExport,
+  toRows,
+  generateCsv,
+  generateTxt,
+  generateXlsx,
+  generatePdf,
+  DEFAULT_COLUMNS,
+  EXPORT_COLUMNS,
+} from './orders-export.service'
 
 const service = new OrdersService()
 const deliveryService = new DeliveryService()
@@ -356,6 +366,36 @@ export class OrdersController {
         }
     }
 
+    async loyaltySummaryPublic(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) {
+            return res.status(404).json({ statusCode: 404, statusMessage: 'Tenant not found' })
+        }
+
+        try {
+            const summary = await service.getPublicLoyaltySummary({
+                tenantId: tenant.id,
+                customerPhone: req.body?.customerPhone,
+                redeemPointsRequested: req.body?.redeemPointsRequested,
+                items: req.body?.items ?? []
+            })
+
+            res.json(summary)
+        } catch (error) {
+            if (error instanceof OrderValidationError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
+            }
+
+            console.error('Public loyalty summary error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async createAdmin(req: Request, res: Response) {
         const tenant = req.tenant
         const user = req.user
@@ -396,6 +436,77 @@ export class OrdersController {
             }
 
             console.error('Create admin order error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async export(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { format, columns, status, search, startDate, endDate } = req.query as Record<string, string>
+
+            const VALID_FORMATS = ['csv', 'xlsx', 'pdf', 'txt', 'gsheet']
+            if (!format || !VALID_FORMATS.includes(format)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid or missing format. Must be one of: csv, xlsx, pdf, txt, gsheet' })
+            }
+
+            const selectedColumns = columns
+                ? columns.split(',').map(c => c.trim()).filter(c => EXPORT_COLUMNS.some(ec => ec.key === c))
+                : DEFAULT_COLUMNS
+
+            if (selectedColumns.length === 0) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'No valid columns specified' })
+            }
+
+            const { orders, truncated } = await fetchForExport(
+                tenant.id,
+                { status, search, startDate, endDate },
+                selectedColumns
+            )
+
+            const headers = selectedColumns.map(k => EXPORT_COLUMNS.find(c => c.key === k)!.label)
+            const rows = toRows(orders, selectedColumns)
+
+            if (truncated) {
+                res.setHeader('X-Export-Truncated', 'true')
+            }
+
+            const filename = `orders-export-${new Date().toISOString().split('T')[0]}`
+
+            if (format === 'csv') {
+                const buf = generateCsv(rows, headers)
+                res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}.csv"`)
+                return res.send(buf)
+            }
+
+            if (format === 'txt') {
+                const buf = generateTxt(rows, headers)
+                res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}.txt"`)
+                return res.send(buf)
+            }
+
+            if (format === 'xlsx') {
+                const buf = await generateXlsx(rows, headers)
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}.xlsx"`)
+                return res.send(buf)
+            }
+
+            if (format === 'pdf') {
+                const buf = await generatePdf(rows, headers, tenant.name ?? 'Store')
+                res.setHeader('Content-Type', 'application/pdf')
+                res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`)
+                return res.send(buf)
+            }
+
+            if (format === 'gsheet') {
+                // Phase 2 — Google Sheets not yet implemented
+                return res.status(501).json({ statusCode: 501, statusMessage: 'Google Sheets export requires OAuth setup. See Phase 2.' })
+            }
+        } catch (error) {
+            console.error('Export orders error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
