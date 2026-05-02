@@ -26,13 +26,19 @@
       :subtitle="t('admin.pages.orders.index.subtitle')"
       :stats="orderStats"
     >
-      <NuxtLink
-        to="/admin/orders/create"
-        class="ui-btn ui-btn--primary flex items-center gap-2"
-      >
-        <Icon name="lucide:plus" class="w-5 h-5" />
-        {{ t('admin.pages.orders.index.addBtn') }}
-      </NuxtLink>
+      <div class="flex items-center gap-3">
+        <AdminOrderExportButton
+          :filters="exportFilters"
+          :tenant-id="tenantId"
+        />
+        <NuxtLink
+          to="/admin/orders/create"
+          class="ui-btn ui-btn--primary flex items-center gap-2"
+        >
+          <Icon name="lucide:plus" class="w-5 h-5" />
+          {{ t('admin.pages.orders.index.addBtn') }}
+        </NuxtLink>
+      </div>
     </AdminPageHeader>
 
     <!-- Tab filter -->
@@ -361,6 +367,7 @@ import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
+import AdminOrderExportButton from '~/components/admin/AdminOrderExportButton.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -371,6 +378,7 @@ definePageMeta({
 const authStore = useAuthStore()
 const route = useRoute()
 const storeSettings = useState<any>('storeSettings')
+const tenantId = computed(() => storeSettings.value?.tenantId ?? '')
 const { format: formatCurrency } = useCurrency()
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -409,6 +417,15 @@ const currentPage = ref(1)
 const itemsPerPage = 25
 const sortBy = ref('createdAt')
 const sortOrder = ref<'asc' | 'desc'>('desc')
+
+const exportFilters = computed(() => ({
+  status: selectedStatus.value || undefined,
+  search: searchQuery.value || undefined,
+  startDate: startDate.value || undefined,
+  endDate: endDate.value || undefined,
+  sortBy: sortBy.value,
+  sortOrder: sortOrder.value,
+}))
 
 const selectedIds = ref<string[]>([])
 const singleDeleteOpen = ref(false)
