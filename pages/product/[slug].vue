@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { productTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
 import type { TemplateKey } from '~/components/storefront/templates/registry'
+import type { PublicLoyaltyPreview } from '~/composables/useActiveProductLoyaltyPreview'
 import { normalizeMiniDescription, normalizeRichDescription } from '~/shared/product-content'
 
 const route = useRoute()
 const slug = route.params.slug as string
 const storeSettings = useState<any>('storeSettings')
 const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
 
 type Product = {
   id: string
@@ -25,9 +27,11 @@ type Product = {
   categories?: Array<{ id: string; title: string; slug: string }>
   loyaltyPreview?: {
     enabled: boolean
-    estimatedPoints: number
+    basePoints: number
+    productPoints: number
+    totalPoints: number
     displayText: string
-    formulaBreakdown?: { detail?: string }
+    mode?: string | null
   } | null
 }
 
@@ -174,25 +178,20 @@ const ActiveTemplate = computed(() => {
 })
 
 const layoutName = computed(() => isLandingMode.value ? 'landing' : 'store')
+const displayedLoyaltyPreview = computed<PublicLoyaltyPreview>(() => {
+  if (activeLoyaltyPreview.preview.value?.enabled) return activeLoyaltyPreview.preview.value
+  return normalizedProduct.value?.loyaltyPreview ?? null
+})
+
+onUnmounted(() => {
+  activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
   <NuxtLayout :name="layoutName">
-    <div
-      v-if="normalizedProduct?.loyaltyPreview?.enabled"
-      class="mx-auto max-w-6xl px-4 pt-4"
-    >
-      <div class="rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm">
-        <div class="font-semibold">
-          {{ normalizedProduct.loyaltyPreview.displayText }}
-        </div>
-        <div
-          v-if="normalizedProduct.loyaltyPreview.formulaBreakdown?.detail"
-          class="mt-1 text-xs text-amber-800/90"
-        >
-          {{ normalizedProduct.loyaltyPreview.formulaBreakdown.detail }}
-        </div>
-      </div>
+    <div v-if="displayedLoyaltyPreview?.enabled" class="mx-auto max-w-6xl px-4 pt-4">
+      <ProductLoyaltyPreview :preview="displayedLoyaltyPreview" />
     </div>
     <component
         :is="ActiveTemplate"

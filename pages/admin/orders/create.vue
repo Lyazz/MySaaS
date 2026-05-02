@@ -452,7 +452,8 @@ import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } fro
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
-import { buildProductPricing } from '~/shared/pricing/product-pricing'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
+import { buildProductPricing, buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   layout: 'admin',
@@ -591,14 +592,16 @@ async function addProductToCart(product: any) {
             }) as any
             
             availableVariantsForSelection.value = (response.variants || []).map((v: any) => {
-              const variantPricing = buildProductPricing(response, v.price)
+              const variantPricing = buildScopedProductPricing(response, v)
               const label = v.optionValues
                 ? v.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ')
                 : 'Default'
               return {
                 ...v,
                 label,
-                availableStock: v.stock - (v.reserved || 0),
+                availableStock: Number(
+                  v.availableStock ?? getVariantAvailableStock(v, { infiniteValue: PRODUCT_INFINITE_STOCK })
+                ),
                 displayPrice: variantPricing.effectivePrice,
                 originalPrice: variantPricing.originalPrice,
                 promotionApplied: variantPricing.promotionApplied,
@@ -718,10 +721,10 @@ function removeCartItem(index: number) {
 
 	    maystroPickupPointsLoading.value = true
 	    try {
-	      const data = await $fetch<any[]>(
+	      const data = await $fetch(
 	        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(normalizedCommune)}&wilaya=${encodeURIComponent(normalizedWilaya)}&deliveryType=3&nearby=true`,
 	        { headers: { Authorization: `Bearer ${authStore.token}` } }
-	      )
+	      ) as any[]
 	      maystroPickupPoints.value = Array.isArray(data)
 	        ? data
 	            .map((p: any) => ({

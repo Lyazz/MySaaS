@@ -2,13 +2,14 @@ import { describe, it, expect } from 'vitest'
 import {
     buildActiveProductPricing,
     buildProductPricing,
+    buildScopedProductPricing,
     getPromotionalPrice,
     isPromotionActiveNow,
     toFiniteNumber
 } from '../../shared/pricing/product-pricing'
 
 describe('product pricing helper', () => {
-    it('prioritizes promotional price whenever it is set', () => {
+    it('buildProductPricing prioritizes promotional price whenever it is set', () => {
         const pricing = buildProductPricing({
             price: 200,
             promotionalPrice: 120,
@@ -81,5 +82,93 @@ describe('product pricing helper', () => {
         expect(pricing.effectivePrice).toBe(1000)
         expect(pricing.promotionApplied).toBe(false)
         expect(pricing.promotionDiscountPercent).toBeNull()
+    })
+
+    it('applies active variant promotions for variant-priced products', () => {
+        const now = new Date('2026-04-20T12:00:00.000Z')
+        const pricing = buildScopedProductPricing(
+            {
+                price: 1000,
+                promotionalPrice: 700,
+                isPromotionActive: true,
+                hasVariants: true
+            },
+            {
+                price: 1200,
+                promotionalPrice: 900,
+                isPromotionActive: true,
+                promotionStartDate: '2026-04-19T00:00:00.000Z',
+                promotionEndDate: '2026-04-21T00:00:00.000Z',
+                optionValues: [{ id: 'ov_1' }]
+            } as any,
+            now
+        )
+
+        expect(pricing.originalPrice).toBe(1200)
+        expect(pricing.effectivePrice).toBe(900)
+        expect(pricing.promotionApplied).toBe(true)
+    })
+
+    it('ignores inactive or out-of-window variant promotions', () => {
+        const now = new Date('2026-04-20T12:00:00.000Z')
+        const product = { price: 1000, hasVariants: true }
+        const inactiveVariant = {
+            price: 1200,
+            promotionalPrice: 900,
+            isPromotionActive: false,
+            optionValues: [{ id: 'ov_1' }]
+        }
+        const futureVariant = {
+            price: 1200,
+            promotionalPrice: 850,
+            isPromotionActive: true,
+            promotionStartDate: '2026-04-21T00:00:00.000Z',
+            optionValues: [{ id: 'ov_1' }]
+        }
+
+        expect(buildScopedProductPricing(product as any, inactiveVariant as any, now).effectivePrice).toBe(1200)
+        expect(buildScopedProductPricing(product as any, futureVariant as any, now).effectivePrice).toBe(1200)
+    })
+
+    it('falls back to product-level promotion for simple products', () => {
+        const now = new Date('2026-04-20T12:00:00.000Z')
+        const pricing = buildScopedProductPricing(
+            {
+                price: 1000,
+                promotionalPrice: 750,
+                isPromotionActive: true,
+                promotionStartDate: '2026-04-19T00:00:00.000Z',
+                promotionEndDate: '2026-04-21T00:00:00.000Z'
+            },
+            null,
+            now
+        )
+
+        expect(pricing.originalPrice).toBe(1000)
+        expect(pricing.effectivePrice).toBe(750)
+        expect(pricing.promotionApplied).toBe(true)
+    })
+
+    it('ignores legacy product-level promo on products that use variant pricing', () => {
+        const now = new Date('2026-04-20T12:00:00.000Z')
+        const pricing = buildScopedProductPricing(
+            {
+                price: 1000,
+                promotionalPrice: 700,
+                isPromotionActive: true,
+                hasVariants: true
+            },
+            {
+                price: 1200,
+                promotionalPrice: null,
+                isPromotionActive: false,
+                optionValues: [{ id: 'ov_1' }]
+            } as any,
+            now
+        )
+
+        expect(pricing.originalPrice).toBe(1200)
+        expect(pricing.effectivePrice).toBe(1200)
+        expect(pricing.promotionApplied).toBe(false)
     })
 })

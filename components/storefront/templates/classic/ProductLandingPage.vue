@@ -3,7 +3,7 @@ import { useCartStore } from '~/stores/cart';
 import ProductGallery from './partials/ProductGallery.vue';
 import ProductDetails from './partials/ProductDetails.vue';
 import ProductOrderForm from './partials/ProductOrderForm.vue';
-import { buildProductPricing } from '~/shared/pricing/product-pricing';
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing';
 
 const props = defineProps<{
   product: any;
@@ -46,13 +46,9 @@ const currentVariant = computed(() => {
   });
 });
 
-const currentPrice = computed(() => {
-  if (currentVariant.value) {
-    return buildProductPricing(props.product, currentVariant.value.price)
-      .effectivePrice;
-  }
-  return buildProductPricing(props.product).effectivePrice;
-});
+const currentPrice = computed(() =>
+  buildScopedProductPricing(props.product, currentVariant.value).effectivePrice
+);
 
 const currentStock = computed(() => {
   if (!currentVariant.value) return props.product?.stock;
@@ -83,6 +79,16 @@ const images = computed(() => {
 });
 
 const cartImage = computed(() => images.value[0]);
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>

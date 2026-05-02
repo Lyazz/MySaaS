@@ -2,7 +2,7 @@ import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
-import { buildProductPricing } from '../../../../shared/pricing/product-pricing'
+import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
@@ -38,6 +38,27 @@ type PublicOrderItemInput = {
     productId: string
     variantId?: string | null
     quantity: number
+}
+
+type NormalizedPublicOrderItem = {
+    productId: string
+    variantId?: string
+    quantity: number
+}
+
+type PreparedPublicOrderItem = {
+    productId: string
+    variantId: string
+    quantity: number
+    price: number
+    referencePrice: number
+    variantCost: number
+    lineTotal: number
+    pricingBreakdown: ReturnType<typeof computeBestBundleTotal>
+    trackInventory: boolean
+    reserved: number
+    safetyStock: number
+    isDefaultVariant: boolean
 }
 
 export type PublicOrderInput = {
@@ -146,16 +167,250 @@ export class OrdersService {
     private buildLoyaltyResponse(args: {
         availablePoints: number
         pendingRedeemPoints?: number
-        earnedPoints: number
+        basePointsToEarn: number
+        productPointsToEarn: number
+        totalPointsToEarn: number
         redeemedPoints: number
         redeemedAmount: number
+        redeemError?: string | null
     }) {
         return {
             availablePoints: args.availablePoints,
             pendingRedeemPoints: args.pendingRedeemPoints ?? 0,
-            pointsToEarn: args.earnedPoints,
+            basePointsToEarn: args.basePointsToEarn,
+            productPointsToEarn: args.productPointsToEarn,
+            totalPointsToEarn: args.totalPointsToEarn,
+            pointsToEarn: args.totalPointsToEarn,
             redeemedPoints: args.redeemedPoints,
-            redeemedAmount: args.redeemedAmount
+            redeemedAmount: args.redeemedAmount,
+            redeemError: args.redeemError ?? null
+        }
+    }
+
+    private normalizePublicOrderItems(items: PublicOrderItemInput[]) {
+        if (!Array.isArray(items) || items.length === 0) {
+            throw new OrderValidationError(400, 'At least one item is required')
+        }
+
+        const normalizedItems: NormalizedPublicOrderItem[] = items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId || undefined,
+            quantity: Number(item.quantity || 0)
+        }))
+
+        normalizedItems.forEach((item) => {
+            if (!item.productId) {
+                throw new OrderValidationError(400, 'Product ID is required for each item')
+            }
+            if (!Number.isFinite(item.quantity) || item.quantity < 1) {
+                throw new OrderValidationError(400, 'Quantity must be at least 1')
+            }
+        })
+
+        return normalizedItems
+    }
+
+    private async preparePublicOrderItems(tenantId: string, items: NormalizedPublicOrderItem[]) {
+        const storeSettings = await prisma.storeSettings.upsert({
+            where: { tenantId },
+            create: { tenantId },
+            update: {}
+        })
+
+        const productIds = Array.from(new Set(items.map((item) => item.productId)))
+        const variantIds = Array.from(
+            new Set(
+                items
+                    .map((item) => item.variantId)
+                    .filter((variantId): variantId is string => typeof variantId === 'string' && variantId.length > 0)
+            )
+        )
+        const productIdsWithoutVariant = Array.from(
+            new Set(items.filter((item) => !item.variantId).map((item) => item.productId))
+        )
+
+        const products = await prisma.product.findMany({
+            where: { id: { in: productIds }, tenantId, isActive: true },
+            select: {
+                id: true,
+                slug: true,
+                price: true,
+                title: true,
+                stock: true,
+                isPromotionActive: true,
+                promotionalPrice: true,
+                promotionStartDate: true,
+                promotionEndDate: true,
+                _count: {
+                    select: { options: true }
+                }
+            }
+        })
+
+        if (products.length !== productIds.length) {
+            throw new OrderValidationError(400, 'Some products are invalid or unavailable')
+        }
+
+        const productMap = new Map(products.map((product) => [product.id, { ...product, hasVariants: (product as any)._count?.options > 0 }]))
+
+        const variantsById = variantIds.length
+            ? await prisma.productVariant.findMany({
+                where: { id: { in: variantIds }, tenantId, isActive: true },
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
+            })
+            : []
+
+        if (variantsById.length !== variantIds.length) {
+            throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
+        }
+
+        const defaultVariants = productIdsWithoutVariant.length
+            ? await prisma.productVariant.findMany({
+                where: {
+                    tenantId,
+                    productId: { in: productIdsWithoutVariant },
+                    isActive: true,
+                    optionValues: { none: {} }
+                },
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
+            })
+            : []
+
+        const variantMap = new Map(variantsById.map((variant) => [variant.id, variant]))
+        const defaultVariantByProductId = new Map(defaultVariants.map((variant) => [variant.productId, variant]))
+
+        if (productIdsWithoutVariant.length > 0) {
+            const optionRows = await prisma.productOption.findMany({
+                where: { tenantId, productId: { in: productIdsWithoutVariant } },
+                select: { productId: true },
+                distinct: ['productId']
+            })
+            const productsWithOptions = new Set(optionRows.map((row) => row.productId))
+
+            for (const productId of productIdsWithoutVariant) {
+                if (defaultVariantByProductId.has(productId)) continue
+                if (productsWithOptions.has(productId)) continue
+
+                const product = productMap.get(productId)
+                if (!product) continue
+
+                const created = await prisma.productVariant.create({
+                    data: {
+                        tenantId,
+                        productId,
+                        sku: suggestSkuFromProduct(product.slug, ''),
+                        price: product.price,
+                        stock: product.stock,
+                        reserved: 0,
+                        safetyStock: 0,
+                        trackInventory: true,
+                        isActive: true
+                    }
+                })
+                defaultVariantByProductId.set(productId, created as any)
+            }
+        }
+
+        const now = new Date()
+        const activeBundleDeals = await prisma.productBundleDeal.findMany({
+            where: {
+                tenantId,
+                productId: { in: productIds },
+                isActive: true,
+                AND: [
+                    { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+                    { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }
+                ]
+            },
+            select: { productId: true, bundleQty: true, bundlePrice: true }
+        })
+
+        const bundleDealsByProductId = new Map<string, { bundleQty: number; bundlePrice: number }[]>()
+        for (const deal of activeBundleDeals) {
+            const rows = bundleDealsByProductId.get(deal.productId) ?? []
+            rows.push({ bundleQty: deal.bundleQty, bundlePrice: Number(deal.bundlePrice) })
+            bundleDealsByProductId.set(deal.productId, rows)
+        }
+
+        let totalCents = 0
+        const validatedItems: PreparedPublicOrderItem[] = items.map((item) => {
+            const product = productMap.get(item.productId)!
+            const variant = item.variantId ? variantMap.get(item.variantId) : defaultVariantByProductId.get(product.id)
+
+            if (!variant || variant.productId !== product.id) {
+                throw new OrderValidationError(400, 'Variant selection is required for this product')
+            }
+
+            const price = buildScopedProductPricing(product as any, variant as any).effectivePrice
+            const availableStock = variant.trackInventory
+                ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
+                : Number.POSITIVE_INFINITY
+            const trackInventory = variant.trackInventory
+
+            if (trackInventory && item.quantity > availableStock) {
+                throw new OrderValidationError(400, `Insufficient stock for ${product.title}`)
+            }
+
+            const unitPriceCents = moneyToCents(price)
+            const bundleDeals = bundleDealsByProductId.get(product.id) ?? []
+            const pricing = computeBestBundleTotal({
+                quantity: item.quantity,
+                unitPriceCents,
+                bundleDeals: bundleDeals.map((deal) => ({
+                    bundleQty: deal.bundleQty,
+                    bundlePriceCents: moneyToCents(deal.bundlePrice)
+                }))
+            })
+            totalCents += pricing.bestTotalCents
+
+            return {
+                productId: product.id,
+                variantId: variant.id,
+                quantity: item.quantity,
+                price,
+                referencePrice: Number(variant.price ?? product.price ?? 0),
+                variantCost: Number(variant.cost ?? 0),
+                lineTotal: centsToMoney(pricing.bestTotalCents),
+                pricingBreakdown: pricing,
+                trackInventory,
+                reserved: variant.reserved,
+                safetyStock: variant.safetyStock,
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
+            }
+        })
+
+        return {
+            storeSettings,
+            validatedItems,
+            totalAmount: centsToMoney(totalCents)
         }
     }
 
@@ -306,6 +561,99 @@ export class OrdersService {
         })
 
         return { filename: `bordereau-${order.id}.pdf`, pdf }
+    }
+
+    async getPublicLoyaltySummary(input: {
+        tenantId: string
+        customerPhone?: string | null
+        redeemPointsRequested?: number | null
+        items: PublicOrderItemInput[]
+    }) {
+        const normalizedItems = this.normalizePublicOrderItems(input.items)
+        const { storeSettings, validatedItems, totalAmount } = await this.preparePublicOrderItems(input.tenantId, normalizedItems)
+        const customerPhone = (input.customerPhone || '').trim()
+
+        const pointsPreview = this.loyaltyFormula.computeTotal(
+            storeSettings,
+            validatedItems.map((item) => ({
+                quantity: item.quantity,
+                referencePrice: item.referencePrice,
+                cost: item.variantCost
+            }))
+        )
+
+        if (!customerPhone) {
+            return this.buildLoyaltyResponse({
+                availablePoints: 0,
+                pendingRedeemPoints: 0,
+                basePointsToEarn: pointsPreview.basePointsTotal,
+                productPointsToEarn: pointsPreview.productPointsTotal,
+                totalPointsToEarn: pointsPreview.totalPoints,
+                redeemedPoints: 0,
+                redeemedAmount: 0,
+                redeemError: null
+            })
+        }
+
+        try {
+            const customer = await this.loyaltyLedger.findCustomerByPhone(prisma, input.tenantId, customerPhone)
+            const summary = customer
+                ? await this.loyaltyLedger.getCustomerPointsSummary(prisma, input.tenantId, customer.id)
+                : { availablePoints: 0, pendingRedeemPoints: 0, earnedPointsTotal: 0, redeemedPointsTotal: 0 }
+            const requestedPoints = Math.max(0, Math.trunc(Number(input.redeemPointsRequested || 0) || 0))
+
+            if (requestedPoints <= 0) {
+                return this.buildLoyaltyResponse({
+                    availablePoints: summary.availablePoints,
+                    pendingRedeemPoints: summary.pendingRedeemPoints,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
+                    redeemedPoints: 0,
+                    redeemedAmount: 0,
+                    redeemError: null
+                })
+            }
+
+            try {
+                const redemption = await this.loyaltyCheckout.evaluateRedemption(prisma, {
+                    tenantId: input.tenantId,
+                    customerId: customer?.id ?? null,
+                    requestedPoints,
+                    itemsSubtotal: totalAmount,
+                    settings: storeSettings
+                })
+
+                return this.buildLoyaltyResponse({
+                    availablePoints: redemption.availablePoints - redemption.pointsReserved,
+                    pendingRedeemPoints: redemption.pendingRedeemPoints + redemption.pointsReserved,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
+                    redeemedPoints: redemption.pointsReserved,
+                    redeemedAmount: redemption.redeemedAmount,
+                    redeemError: null
+                })
+            } catch (error) {
+                if (!(error instanceof LoyaltyCheckoutError)) throw error
+
+                return this.buildLoyaltyResponse({
+                    availablePoints: summary.availablePoints,
+                    pendingRedeemPoints: summary.pendingRedeemPoints,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
+                    redeemedPoints: 0,
+                    redeemedAmount: 0,
+                    redeemError: error.statusMessage
+                })
+            }
+        } catch (error) {
+            if (error instanceof PhoneNormalizationError) {
+                throw new OrderValidationError(error.statusCode, error.statusMessage)
+            }
+            throw error
+        }
     }
 
     private async ensureDeliveredOrderSale(
@@ -873,16 +1221,32 @@ export class OrdersService {
                     isPromotionActive: true,
                     promotionalPrice: true,
                     promotionStartDate: true,
-                    promotionEndDate: true
+                    promotionEndDate: true,
+                    _count: {
+                        select: { options: true }
+                    }
                 }
             })
             if (products.length !== productIds.length) throw new OrderValidationError(400, 'Some products are invalid or unavailable')
-            const productMap = new Map(products.map((p) => [p.id, p]))
+            const productMap = new Map(products.map((p) => [p.id, { ...p, hasVariants: (p as any)._count?.options > 0 }]))
 
             const variantsById = variantIds.length
                 ? await prisma.productVariant.findMany({
                     where: { id: { in: variantIds }, tenantId, isActive: true },
-                    select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    select: {
+                        id: true,
+                        productId: true,
+                        price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
+                        stock: true,
+                        reserved: true,
+                        safetyStock: true,
+                        trackInventory: true
+                    }
                 })
                 : []
             if (variantsById.length !== variantIds.length) throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
@@ -890,7 +1254,20 @@ export class OrdersService {
             const defaultVariants = productIdsWithoutVariant.length
                 ? await prisma.productVariant.findMany({
                     where: { tenantId, productId: { in: productIdsWithoutVariant }, isActive: true, optionValues: { none: {} } },
-                    select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    select: {
+                        id: true,
+                        productId: true,
+                        price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
+                        stock: true,
+                        reserved: true,
+                        safetyStock: true,
+                        trackInventory: true
+                    }
                 })
                 : []
 
@@ -961,7 +1338,7 @@ export class OrdersService {
                     throw new OrderValidationError(400, 'Variant selection is required for this product')
                 }
 
-                const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
+                const price = buildScopedProductPricing(product as any, variant as any).effectivePrice
 
                 const availableStock = variant.trackInventory
                     ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
@@ -1757,24 +2134,7 @@ export class OrdersService {
             throw new OrderValidationError(400, 'Customer name is required')
         }
 
-        if (!Array.isArray(input.items) || input.items.length === 0) {
-            throw new OrderValidationError(400, 'At least one item is required')
-        }
-
-        const normalizedItems = input.items.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId || undefined,
-            quantity: Number(item.quantity || 0)
-        }))
-
-        normalizedItems.forEach((item) => {
-            if (!item.productId) {
-                throw new OrderValidationError(400, 'Product ID is required for each item')
-            }
-            if (!Number.isFinite(item.quantity) || item.quantity < 1) {
-                throw new OrderValidationError(400, 'Quantity must be at least 1')
-            }
-        })
+        const normalizedItems = this.normalizePublicOrderItems(input.items)
 
         const shippingServiceLevel =
             input.shippingServiceLevel == null ? null : String(input.shippingServiceLevel || '').trim()
@@ -1794,11 +2154,7 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
         }
 
-        const storeSettings = await prisma.storeSettings.upsert({
-            where: { tenantId: input.tenantId },
-            create: { tenantId: input.tenantId },
-            update: {}
-        })
+        const { storeSettings, validatedItems, totalAmount } = await this.preparePublicOrderItems(input.tenantId, normalizedItems)
 
         if (storeSettings.cartEnabled === false) {
             throw new OrderValidationError(403, 'Checkout is disabled for this store')
@@ -1818,160 +2174,6 @@ export class OrdersService {
                 ? Math.trunc(minimumOrderAmountDzdRaw)
                 : 1000
         const hideOptionalAddress = (storeSettings as any).hideOptionalAddress !== false
-
-        const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
-        const variantIds = Array.from(
-            new Set(
-                normalizedItems
-                    .map((item) => item.variantId)
-                    .filter((v): v is string => typeof v === 'string' && v.length > 0)
-            )
-        )
-        const productIdsWithoutVariant = Array.from(
-            new Set(normalizedItems.filter((item) => !item.variantId).map((item) => item.productId))
-        )
-
-        const products = await prisma.product.findMany({
-            where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true, isPromotionActive: true, promotionalPrice: true, promotionStartDate: true, promotionEndDate: true }
-        })
-
-        if (products.length !== productIds.length) {
-            throw new OrderValidationError(400, 'Some products are invalid or unavailable')
-        }
-
-        const productMap = new Map(products.map((p) => [p.id, p]))
-
-        const variantsById = variantIds.length
-            ? await prisma.productVariant.findMany({
-                where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
-            })
-            : []
-
-        if (variantsById.length !== variantIds.length) {
-            throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
-        }
-
-        const defaultVariants = productIdsWithoutVariant.length
-            ? await prisma.productVariant.findMany({
-                where: {
-                    tenantId: input.tenantId,
-                    productId: { in: productIdsWithoutVariant },
-                    isActive: true,
-                    optionValues: { none: {} }
-                },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
-            })
-            : []
-
-        const variantMap = new Map(variantsById.map((v) => [v.id, v]))
-        const defaultVariantByProductId = new Map(defaultVariants.map((v) => [v.productId, v]))
-
-        // Back-compat / safety: if a product has no variantId but also has no default variant,
-        // create one on-the-fly only when the product has no options.
-        if (productIdsWithoutVariant.length > 0) {
-            const optionRows = await prisma.productOption.findMany({
-                where: { tenantId: input.tenantId, productId: { in: productIdsWithoutVariant } },
-                select: { productId: true },
-                distinct: ['productId']
-            })
-            const productsWithOptions = new Set(optionRows.map((r) => r.productId))
-
-            for (const pid of productIdsWithoutVariant) {
-                if (defaultVariantByProductId.has(pid)) continue
-                if (productsWithOptions.has(pid)) continue
-
-                const product = productMap.get(pid)
-                if (!product) continue
-
-                const created = await prisma.productVariant.create({
-                    data: {
-                        tenantId: input.tenantId,
-                        productId: pid,
-                        sku: suggestSkuFromProduct(product.slug, ''),
-                        price: product.price,
-                        stock: product.stock,
-                        reserved: 0,
-                        safetyStock: 0,
-                        trackInventory: true,
-                        isActive: true
-                    }
-                })
-                defaultVariantByProductId.set(pid, created as any)
-            }
-        }
-
-        const now = new Date()
-        const activeBundleDeals = await prisma.productBundleDeal.findMany({
-            where: {
-                tenantId: input.tenantId,
-                productId: { in: productIds },
-                isActive: true,
-                AND: [
-                    { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-                    { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }
-                ]
-            },
-            select: { productId: true, bundleQty: true, bundlePrice: true }
-        })
-
-        const bundleDealsByProductId = new Map<string, { bundleQty: number; bundlePrice: number }[]>()
-        for (const d of activeBundleDeals) {
-            const arr = bundleDealsByProductId.get(d.productId) ?? []
-            arr.push({ bundleQty: d.bundleQty, bundlePrice: Number(d.bundlePrice) })
-            bundleDealsByProductId.set(d.productId, arr)
-        }
-
-        let totalCents = 0
-        const validatedItems = normalizedItems.map((item) => {
-            const product = productMap.get(item.productId)!
-            const variant =
-                item.variantId
-                    ? variantMap.get(item.variantId)
-                    : defaultVariantByProductId.get(product.id)
-
-            if (!variant || variant.productId !== product.id) {
-                throw new OrderValidationError(400, 'Variant selection is required for this product')
-            }
-
-            const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
-            const availableStock = variant.trackInventory
-                ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
-                : Number.POSITIVE_INFINITY
-            const trackInventory = variant.trackInventory
-
-            if (trackInventory && item.quantity > availableStock) {
-                throw new OrderValidationError(400, `Insufficient stock for ${product.title}`)
-            }
-
-            const unitPriceCents = moneyToCents(price)
-            const bundleDeals = bundleDealsByProductId.get(product.id) ?? []
-            const pricing = computeBestBundleTotal({
-                quantity: item.quantity,
-                unitPriceCents,
-                bundleDeals: bundleDeals.map((d) => ({
-                    bundleQty: d.bundleQty,
-                    bundlePriceCents: moneyToCents(d.bundlePrice)
-                }))
-            })
-            totalCents += pricing.bestTotalCents
-
-            return {
-                productId: product.id,
-                variantId: variant.id,
-                quantity: item.quantity,
-                price,
-                referencePrice: Number(variant.price ?? product.price ?? 0),
-                variantCost: Number(variant.cost ?? 0),
-                lineTotal: centsToMoney(pricing.bestTotalCents),
-                pricingBreakdown: pricing,
-                trackInventory,
-                reserved: variant.reserved,
-                safetyStock: variant.safetyStock,
-                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
-            }
-        })
 
         // Validate and normalize shippingProvider
         let shippingProvider = null
@@ -1996,7 +2198,6 @@ export class OrdersService {
         })
 
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
-        const totalAmount = centsToMoney(totalCents)
         if (minimumOrderAmountDzd > 0 && totalAmount < minimumOrderAmountDzd) {
             throw new OrderValidationError(
                 400,
@@ -2131,7 +2332,9 @@ export class OrdersService {
                 loyaltySummary: this.buildLoyaltyResponse({
                     availablePoints: redemption.availablePoints - redemption.pointsReserved,
                     pendingRedeemPoints: redemption.pendingRedeemPoints + redemption.pointsReserved,
-                    earnedPoints: pointsPreview.totalPoints,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
                     redeemedPoints: redemption.pointsReserved,
                     redeemedAmount: redemption.redeemedAmount
                 })
@@ -2235,19 +2438,46 @@ export class OrdersService {
 
         const products = await prisma.product.findMany({
             where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true, isPromotionActive: true, promotionalPrice: true, promotionStartDate: true, promotionEndDate: true }
+            select: {
+                id: true,
+                slug: true,
+                price: true,
+                title: true,
+                stock: true,
+                isPromotionActive: true,
+                promotionalPrice: true,
+                promotionStartDate: true,
+                promotionEndDate: true,
+                _count: {
+                    select: { options: true }
+                }
+            }
         })
 
         if (products.length !== productIds.length) {
             throw new OrderValidationError(400, 'Some products are invalid or unavailable')
         }
 
-        const productMap = new Map(products.map((p) => [p.id, p]))
+        const productMap = new Map(products.map((p) => [p.id, { ...p, hasVariants: (p as any)._count?.options > 0 }]))
 
         const variantsById = variantIds.length
             ? await prisma.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -2263,7 +2493,21 @@ export class OrdersService {
                     isActive: true,
                     optionValues: { none: {} }
                 },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -2335,7 +2579,7 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
+            const price = buildScopedProductPricing(product as any, variant as any).effectivePrice
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY

@@ -5,6 +5,7 @@ import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
 import RelatedProducts from './partials/RelatedProducts.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     product: any
@@ -28,22 +29,9 @@ const currentVariant = computed(() => {
     return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
-const isPromoValid = computed(() => {
-    if (!props.product?.isPromotionActive) return false
-    const now = new Date().getTime()
-    if (props.product.promotionStartDate && new Date(props.product.promotionStartDate).getTime() > now) return false
-    if (props.product.promotionEndDate && new Date(props.product.promotionEndDate).getTime() < now) return false
-    return true
-})
-
-const originalPrice = computed(() =>
-    currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
-)
-
-const currentPrice = computed(() => {
-    if (isPromoValid.value && props.product?.promotionalPrice) return Number(props.product.promotionalPrice)
-    return originalPrice.value
-})
+const pricing = computed(() => buildScopedProductPricing(props.product, currentVariant.value))
+const originalPrice = computed(() => pricing.value.originalPrice)
+const currentPrice = computed(() => pricing.value.effectivePrice)
 
 const currentStock = computed(() => {
     if (!currentVariant.value) return props.product?.stock
@@ -67,6 +55,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
     if (!product?.variants || product.variants.length === 0) return
     const best = findBestVariantForSelection({ product, selectedOptions: selectedOptions.value })
     if (!best) selectedOptions.value = getPreferredInitialSelection(product)
+})
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
 })
 </script>
 

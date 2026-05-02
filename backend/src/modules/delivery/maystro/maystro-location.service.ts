@@ -57,9 +57,9 @@ export class MaystroLocationService {
         }
 
         const wilayas: MaystroWilaya[] = data.map((w: any) => ({
-            // Maystro wilayas API returns "code" and "display_id", not "id"
-            id: Number(w?.id ?? w?.code ?? w?.display_id),
-            name: String(w?.name ?? w?.name_lt ?? w?.name_ar ?? '')
+            // Maystro API returns "code" and "display_id" (equal), not "id"
+            id: Number(w?.code ?? w?.display_id),
+            name: String(w?.name_lt ?? w?.name_ar ?? w?.name ?? '')
         }))
 
         this.wilayasCache = { value: wilayas, expiresAt: nowMs() + this.cacheTtlMs() }

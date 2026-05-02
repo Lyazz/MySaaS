@@ -35,6 +35,12 @@
               scope="col"
               class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
             >
+              {{ t('admin.variantsTable.columns.promotion', 'Promotion') }}
+            </th>
+            <th
+              scope="col"
+              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+            >
               {{ t('admin.variantsTable.columns.track') }}
             </th>
             <th
@@ -119,6 +125,71 @@
                 @change="updateVariantInfo(variant)"
               >
             </td>
+            <td class="px-3 py-4 text-sm align-top" style="color: var(--text-secondary)">
+              <div
+                v-if="supportsVariantPromotion(variant)"
+                :class="variant.isPromotionActive ? 'space-y-2 min-w-[16rem]' : 'min-w-[12rem]'"
+              >
+                <div class="flex items-center gap-2">
+                  <input
+                    :id="`variant-promo-active-${variant.id}`"
+                    v-model="variant.isPromotionActive"
+                    type="checkbox"
+                    class="admin-checkbox"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <label
+                    :for="`variant-promo-active-${variant.id}`"
+                    class="text-xs"
+                    style="color: var(--text-primary)"
+                  >
+                    {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
+                  </label>
+                </div>
+                <div
+                  v-if="variant.isPromotionActive"
+                  class="space-y-2"
+                >
+                  <input
+                    v-model.number="variant.promotionalPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="ui-input w-full py-1"
+                    :placeholder="t('admin.forms.product.promotionalPrice.label', 'Prix promotionnel')"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <input
+                    v-model="variant.promotionStartDateInput"
+                    type="datetime-local"
+                    class="ui-input w-full py-1"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <input
+                    v-model="variant.promotionEndDateInput"
+                    type="datetime-local"
+                    class="ui-input w-full py-1"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <label class="flex items-center gap-2 text-xs" style="color: var(--text-secondary)">
+                    <input
+                      v-model="variant.showCountdown"
+                      type="checkbox"
+                      class="admin-checkbox"
+                      @change="updateVariantInfo(variant)"
+                    >
+                    {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
+                  </label>
+                </div>
+              </div>
+              <p
+                v-else
+                class="max-w-[14rem] text-xs"
+                style="color: var(--text-tertiary)"
+              >
+                {{ t('admin.variantsTable.promotionSimpleProduct', 'Use the product promotion tab for the default variant of a simple product.') }}
+              </p>
+            </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm" style="color: var(--text-secondary)">
               <input
                 v-model="variant.trackInventory"
@@ -135,6 +206,7 @@
                 min="0"
                 class="ui-input w-24 py-1 font-mono"
                 :disabled="savingStockIds.has(variant.id) || variant.trackInventory === false"
+                @focus="rememberVariantServerState(variant)"
                 @change="setVariantStock(variant)"
               >
             </td>
@@ -407,6 +479,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
 
 const { t } = useI18n({ useScope: 'global' })
 
@@ -441,29 +514,125 @@ function getVariantTitle(variant: any) {
 }
 
 function getAvailable(variant: any) {
+    if (typeof variant?.availableStock === 'number') return Number(variant.availableStock)
     const stock = Number(variant.stock || 0)
     const reserved = Number(variant.reserved || 0)
     const safetyStock = Number(variant.safetyStock || 0)
     return Math.max(stock - reserved - safetyStock, 0)
 }
 
+function supportsVariantPromotion(variant: any) {
+    return Array.isArray(variant?.optionValues) && variant.optionValues.length > 0
+}
+
+function toNullableNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+function toIsoStringOrNull(value: unknown): string | null {
+    if (value === null || value === undefined || value === '') return null
+    const parsed = new Date(String(value))
+    if (Number.isNaN(parsed.getTime())) return null
+    return parsed.toISOString()
+}
+
+function rememberVariantServerState(variant: any) {
+    if (!variant || typeof variant !== 'object') return
+    if (!variant.__serverState || typeof variant.__serverState !== 'object') {
+        variant.__serverState = {}
+    }
+}
+
+function restoreVariantFromServer(variant: any) {
+    const state = variant?.__serverState
+    if (!state) return
+    variant.price = state.price
+    variant.cost = state.cost
+    variant.sku = state.sku
+    variant.barcode = state.barcode
+    variant.isActive = state.isActive
+    variant.compareAtPrice = state.compareAtPrice
+    variant.promotionalPrice = state.promotionalPrice
+    variant.isPromotionActive = state.isPromotionActive
+    variant.promotionStartDateInput = state.promotionStartDateInput
+    variant.promotionEndDateInput = state.promotionEndDateInput
+    variant.showCountdown = state.showCountdown
+    variant.stock = state.stock
+    variant.reserved = state.reserved
+    variant.safetyStock = state.safetyStock
+    variant.trackInventory = state.trackInventory
+    variant.availableStock = state.availableStock
+}
+
+function syncVariantServerState(variant: any) {
+    variant.__serverState = {
+        price: Number(variant?.price ?? 0),
+        cost: variant?.cost != null ? Number(variant.cost) : null,
+        sku: variant?.sku || '',
+        barcode: variant?.barcode || '',
+        isActive: variant?.isActive !== false,
+        compareAtPrice: variant?.compareAtPrice != null ? Number(variant.compareAtPrice) : null,
+        promotionalPrice: variant?.promotionalPrice != null ? Number(variant.promotionalPrice) : null,
+        isPromotionActive: variant?.isPromotionActive === true,
+        promotionStartDateInput: variant?.promotionStartDateInput || '',
+        promotionEndDateInput: variant?.promotionEndDateInput || '',
+        showCountdown: variant?.showCountdown === true,
+        stock: Number(variant?.stock ?? 0),
+        reserved: Number(variant?.reserved ?? 0),
+        safetyStock: Number(variant?.safetyStock ?? 0),
+        trackInventory: variant?.trackInventory !== false,
+        availableStock: Number(
+            variant?.availableStock ??
+            getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK })
+        )
+    }
+}
+
 async function updateVariantInfo(variant: any) {
+    rememberVariantServerState(variant)
     try {
-        await $fetch(`/api/admin/variants/${variant.id}`, {
+        const updated = await $fetch(`/api/admin/variants/${variant.id}`, {
             method: 'PUT',
             headers: { Authorization: `Bearer ${authStore.token}` },
             body: {
                 price: variant.price,
-                cost: variant.cost,
+                cost: toNullableNumber(variant.cost),
                 sku: variant.sku,
                 barcode: variant.barcode,
                 isActive: variant.isActive,
-                compareAtPrice: variant.compareAtPrice
+                compareAtPrice: toNullableNumber(variant.compareAtPrice),
+                promotionalPrice: supportsVariantPromotion(variant) ? toNullableNumber(variant.promotionalPrice) : null,
+                isPromotionActive: supportsVariantPromotion(variant) ? Boolean(variant.isPromotionActive) : false,
+                promotionStartDate: supportsVariantPromotion(variant) ? toIsoStringOrNull(variant.promotionStartDateInput) : null,
+                promotionEndDate: supportsVariantPromotion(variant) ? toIsoStringOrNull(variant.promotionEndDateInput) : null,
+                showCountdown: supportsVariantPromotion(variant) ? Boolean(variant.showCountdown) : false
             }
         })
+
+        if (updated && typeof updated === 'object') {
+            variant.price = Number((updated as any).price ?? variant.price ?? 0)
+            variant.cost = (updated as any).cost != null ? Number((updated as any).cost) : null
+            variant.sku = (updated as any).sku || ''
+            variant.barcode = (updated as any).barcode || ''
+            variant.isActive = (updated as any).isActive !== false
+            variant.compareAtPrice = (updated as any).compareAtPrice != null ? Number((updated as any).compareAtPrice) : null
+            variant.promotionalPrice = (updated as any).promotionalPrice != null ? Number((updated as any).promotionalPrice) : null
+            variant.isPromotionActive = (updated as any).isPromotionActive === true
+            variant.promotionStartDateInput = (updated as any).promotionStartDate ? new Date((updated as any).promotionStartDate).toISOString().slice(0, 16) : ''
+            variant.promotionEndDateInput = (updated as any).promotionEndDate ? new Date((updated as any).promotionEndDate).toISOString().slice(0, 16) : ''
+            variant.showCountdown = (updated as any).showCountdown === true
+            variant.availableStock = Number(
+                (updated as any).availableStock ??
+                getVariantAvailableStock({ ...variant, ...(updated as any) }, { infiniteValue: PRODUCT_INFINITE_STOCK })
+            )
+            syncVariantServerState(variant)
+        }
     } catch (e) {
         console.error(e)
-        alert(t('admin.variantsTable.errors.updateVariantFailed'))
+        restoreVariantFromServer(variant)
+        alert((e as any)?.data?.statusMessage || t('admin.variantsTable.errors.updateVariantFailed'))
     }
 }
 
@@ -473,6 +642,7 @@ const lockingSkuIds = ref<Set<string>>(new Set())
 const suggestingSkuIds = ref<Set<string>>(new Set())
 
 async function updateVariantInventory(variant: any, patch: any) {
+    rememberVariantServerState(variant)
     savingInventoryIds.value.add(variant.id)
     try {
         const updated = await $fetch(`/api/admin/inventory/variants/${variant.id}`, {
@@ -489,10 +659,16 @@ async function updateVariantInventory(variant: any, patch: any) {
             if (typeof (updated as any).reserved === 'number') variant.reserved = (updated as any).reserved
             if (typeof (updated as any).safetyStock === 'number') variant.safetyStock = (updated as any).safetyStock
             if (typeof (updated as any).trackInventory === 'boolean') variant.trackInventory = (updated as any).trackInventory
+            variant.availableStock = Number(
+                (updated as any).availableStock ??
+                getVariantAvailableStock({ ...variant, ...(updated as any) }, { infiniteValue: PRODUCT_INFINITE_STOCK })
+            )
+            syncVariantServerState(variant)
         }
     } catch (e) {
         console.error(e)
-        alert(t('admin.variantsTable.errors.updateInventoryFailed'))
+        restoreVariantFromServer(variant)
+        alert((e as any)?.data?.statusMessage || t('admin.variantsTable.errors.updateInventoryFailed'))
         emit('refresh')
     } finally {
         savingInventoryIds.value.delete(variant.id)
@@ -500,7 +676,8 @@ async function updateVariantInventory(variant: any, patch: any) {
 }
 
 async function setVariantStock(variant: any) {
-    const prev = Number(variant.stock || 0)
+    rememberVariantServerState(variant)
+    const prev = Number(variant.__serverState?.stock ?? 0)
     const next = Number(variant.stock || 0)
 
     if (!Number.isFinite(next) || next < 0) {
@@ -524,11 +701,16 @@ async function setVariantStock(variant: any) {
             if (typeof (updated as any).reserved === 'number') variant.reserved = (updated as any).reserved
             if (typeof (updated as any).safetyStock === 'number') variant.safetyStock = (updated as any).safetyStock
             if (typeof (updated as any).trackInventory === 'boolean') variant.trackInventory = (updated as any).trackInventory
+            variant.availableStock = Number(
+                (updated as any).availableStock ??
+                getVariantAvailableStock({ ...variant, ...(updated as any) }, { infiniteValue: PRODUCT_INFINITE_STOCK })
+            )
+            syncVariantServerState(variant)
         }
     } catch (e) {
         console.error(e)
-        variant.stock = prev
-        alert(t('admin.variantsTable.errors.updateStockFailed'))
+        restoreVariantFromServer(variant)
+        alert((e as any)?.data?.statusMessage || t('admin.variantsTable.errors.updateStockFailed'))
         emit('refresh')
     } finally {
         savingStockIds.value.delete(variant.id)
@@ -559,9 +741,9 @@ async function lockSku(variant: any) {
 async function suggestSku(variant: any) {
     suggestingSkuIds.value.add(variant.id)
     try {
-        const result = await $fetch<{ sku: string; available: boolean }>(`/api/admin/variants/${variant.id}/sku/suggest`, {
+        const result = await $fetch(`/api/admin/variants/${variant.id}/sku/suggest`, {
             headers: { Authorization: `Bearer ${authStore.token}` }
-        })
+        }) as { sku: string; available: boolean }
 
         if (!result?.sku) {
             alert(t('admin.variantsTable.errors.suggestSkuFailed'))
@@ -606,9 +788,9 @@ async function openMovements(variant: any) {
     movements.value = []
     movementsLoading.value = true
     try {
-        const data = await $fetch<Movement[]>(`/api/admin/inventory/variants/${variant.id}/movements`, {
+        const data = await $fetch(`/api/admin/inventory/variants/${variant.id}/movements`, {
             headers: { Authorization: `Bearer ${authStore.token}` }
-        })
+        }) as Movement[]
         movements.value = data
     } catch (e) {
         console.error(e)

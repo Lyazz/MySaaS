@@ -83,7 +83,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
         >
         <span
           v-if="originalPrice && originalPrice > currentPrice"
-          class="px-3 py-1 bg-pink-500 text-white text-xs font-black rounded-full border border-pink-400 rotate-[2deg] shrink-0"
+          class="px-3 py-1 bg-pink-500 text-white text-xs font-black rounded-full border border-pink-400 shrink-0"
           >-{{
             Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
           }}%</span

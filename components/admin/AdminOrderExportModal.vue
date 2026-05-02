@@ -120,7 +120,13 @@
 </template>
 
 <script setup lang="ts">
-import { EXPORT_COLUMNS_META, DEFAULT_EXPORT_COLUMNS } from '~/composables/useOrderExport'
+import {
+  EXPORT_COLUMNS_META,
+  EXPORT_FORMATS,
+  buildExportParams,
+  loadExportPrefs,
+  saveExportPrefs,
+} from '~/composables/useOrderExport'
 
 const props = defineProps<{
   modelValue: boolean
@@ -141,45 +147,19 @@ const emit = defineEmits<{
 
 const authStore = useAuthStore()
 
-const PREFS_KEY = computed(() => `orders_export_prefs_${props.tenantId}`)
-
-const formats = [
-  { value: 'csv',    label: 'CSV',    icon: 'lucide:file-text' },
-  { value: 'xlsx',   label: 'Excel',  icon: 'lucide:table-2' },
-  { value: 'pdf',    label: 'PDF',    icon: 'lucide:file-type-2' },
-  { value: 'txt',    label: 'Text',   icon: 'lucide:align-left' },
-  { value: 'gsheet', label: 'Sheets', icon: 'lucide:external-link' },
-]
+const formats = EXPORT_FORMATS
 
 const allColumns = EXPORT_COLUMNS_META
 
 const selectedFormat = ref('csv')
-const selectedColumns = ref<string[]>([...DEFAULT_EXPORT_COLUMNS])
+const selectedColumns = ref<string[]>([...loadExportPrefs(props.tenantId).columns])
 const exporting = ref(false)
 
 function loadPrefs() {
-  try {
-    const raw = localStorage.getItem(PREFS_KEY.value)
-    if (!raw) return
-    const prefs = JSON.parse(raw)
-    if (prefs.format) selectedFormat.value = prefs.format
-    if (Array.isArray(prefs.columns) && prefs.columns.length > 0) {
-      selectedColumns.value = prefs.columns
-    }
-  } catch {
-    // ignore malformed prefs
-  }
-}
-
-function savePrefs() {
-  try {
-    localStorage.setItem(PREFS_KEY.value, JSON.stringify({
-      format: selectedFormat.value,
-      columns: selectedColumns.value,
-    }))
-  } catch {
-    // ignore storage errors
-  }
+  if (!process.client) return
+  const prefs = loadExportPrefs(props.tenantId)
+  selectedFormat.value = prefs.format
+  selectedColumns.value = prefs.columns
 }
 
 function toggleColumn(key: string) {
@@ -203,18 +183,12 @@ async function doExport() {
   exporting.value = true
 
   try {
-    const params = new URLSearchParams()
-    params.set('format', selectedFormat.value)
-    params.set('columns', selectedColumns.value.join(','))
-    if (props.filters.status) params.set('status', props.filters.status)
-    if (props.filters.search) params.set('search', props.filters.search)
-    if (props.filters.startDate) params.set('startDate', props.filters.startDate)
-    if (props.filters.endDate) params.set('endDate', props.filters.endDate)
+    const params = buildExportParams(selectedFormat.value, selectedColumns.value, props.filters)
 
     if (selectedFormat.value === 'gsheet') {
       emit('update:modelValue', false)
-      window.open(`/api/admin/orders/export/google-auth-url?${params.toString()}`, '_blank')
-      savePrefs()
+      if (process.client) window.open(`/api/admin/orders/export/google-auth-url?${params.toString()}`, '_blank')
+      saveExportPrefs(props.tenantId, selectedFormat.value, selectedColumns.value)
       return
     }
 
@@ -228,6 +202,11 @@ async function doExport() {
       return
     }
 
+    const truncated = response.headers.get('X-Export-Truncated') === 'true'
+    if (truncated) {
+      alert('Note: Your export contains more than 10,000 orders. Only the first 10,000 are included.')
+    }
+
     const blob = await response.blob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -238,7 +217,7 @@ async function doExport() {
     a.click()
     URL.revokeObjectURL(url)
 
-    savePrefs()
+    saveExportPrefs(props.tenantId, selectedFormat.value, selectedColumns.value)
     emit('update:modelValue', false)
   } finally {
     exporting.value = false

@@ -125,7 +125,10 @@ describe('Admin POS (direct sale) flow', () => {
         await prisma.saleItem.deleteMany({ where: { sale: { tenantId } } })
         await prisma.sale.deleteMany({ where: { tenantId } })
         await prisma.inventoryMovement.deleteMany({ where: { tenantId } })
+        await prisma.productVariantOptionValue.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
+        await prisma.productOptionValue.deleteMany({ where: { tenantId } })
+        await prisma.productOption.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.customer.deleteMany({ where: { tenantId } })
@@ -212,6 +215,82 @@ describe('Admin POS (direct sale) flow', () => {
         expect(move?.reservedDelta).toBe(0)
         expect(move?.createdByUserId).toBe(adminId)
         expect(move?.orderId).toBeNull()
+    })
+
+    it('uses the selected variant promotional price for direct POS sales', async () => {
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'POS Variant Promo Product',
+                slug: `pos-variant-promo-${Date.now()}`,
+                price: 140,
+                stock: 15,
+                isActive: true
+            }
+        })
+
+        const option = await prisma.productOption.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                name: 'Pack',
+                position: 0,
+                displayType: 'dropdown' as any
+            }
+        })
+        const optionValue = await prisma.productOptionValue.create({
+            data: {
+                tenantId,
+                optionId: option.id,
+                label: 'XL',
+                position: 0
+            }
+        })
+
+        const promoVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                price: 140,
+                promotionalPrice: 110,
+                isPromotionActive: true,
+                promotionStartDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                stock: 8,
+                reserved: 0,
+                safetyStock: 0,
+                trackInventory: true,
+                isActive: true,
+                sku: `POS-PROMO-${Date.now()}`
+            }
+        })
+        await prisma.productVariantOptionValue.create({
+            data: {
+                tenantId,
+                variantId: promoVariant.id,
+                optionValueId: optionValue.id
+            }
+        })
+
+        const res = await request(app)
+            .post('/api/admin/pos/sales')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerId,
+                items: [{ productId: promoProduct.id, variantId: promoVariant.id, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+
+        const saved = await prisma.sale.findUnique({
+            where: { id: res.body.saleId },
+            include: { items: true }
+        })
+
+        expect(saved?.items).toHaveLength(1)
+        expect(Number(saved?.items[0].price)).toBe(110)
+        expect(Number(saved?.totalAmount)).toBe(220)
     })
 
     it('rejects cross-tenant customerId', async () => {

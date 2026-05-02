@@ -5,6 +5,7 @@ import { MaystroPickupPointService } from './maystro-pickup-point.service'
 import { MaystroDeliveryService } from './maystro-delivery.service'
 import { MaystroHooksService } from './maystro-hooks.service'
 import { MaystroBordereauService } from './maystro-bordereau.service'
+import { MaystroProductService } from './maystro-product.service'
 import { MaystroIntegrationError } from './maystro.errors'
 import { getMaystroCredentials } from './maystro.credentials'
 
@@ -14,6 +15,7 @@ export class MaystroController {
     private delivery = new MaystroDeliveryService()
     private hooks = new MaystroHooksService()
     private bordereau = new MaystroBordereauService()
+    private products = new MaystroProductService()
 
     async listWilayas(req: Request, res: Response) {
         try {
@@ -223,10 +225,10 @@ export class MaystroController {
         if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         const endpoint = typeof req.body?.endpoint === 'string' ? req.body.endpoint.trim() : ''
-        const triggerTypeId = typeof req.body?.trigger_type_id === 'number' ? req.body.trigger_type_id : Number(req.body?.trigger_type_id)
+        const triggerTypeId = typeof req.body?.trigger_type_id === 'string' ? req.body.trigger_type_id.trim() : ''
 
         if (!endpoint) return res.status(400).json({ statusCode: 400, statusMessage: 'endpoint is required' })
-        if (!Number.isFinite(triggerTypeId)) {
+        if (!triggerTypeId) {
             return res.status(400).json({ statusCode: 400, statusMessage: 'trigger_type_id is required' })
         }
 
@@ -247,8 +249,8 @@ export class MaystroController {
         const tenantId = req.tenant?.id || req.user?.tenantId
         if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
-        const id = Number(req.params.id)
-        if (!Number.isFinite(id)) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid id' })
+        const id = typeof req.params.id === 'string' ? req.params.id.trim() : ''
+        if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid id' })
 
         try {
             const creds = await getMaystroCredentials(tenantId)
@@ -259,6 +261,27 @@ export class MaystroController {
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
             console.error('Maystro delete hook error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
+    async resyncProducts(req: Request, res: Response) {
+        const tenantId = req.tenant?.id || req.user?.tenantId
+        if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        try {
+            const creds = await getMaystroCredentials(tenantId)
+            const result = await this.products.resyncNullProductIds({
+                tenantId,
+                apiToken: creds.apiToken,
+                storeId: creds.storeId
+            })
+            return res.json(result)
+        } catch (error: any) {
+            if (error instanceof MaystroIntegrationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Maystro resync products error', error)
             return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
     }

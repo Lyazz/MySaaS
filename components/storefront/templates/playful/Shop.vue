@@ -469,8 +469,6 @@ function handleQuickViewAddToCart() {
             <div
               v-for="(product, index) in paginatedProducts"
               :key="product.id"
-              :class="viewMode === 'list' ? '' : (index % 2 === 1 ? 'mt-8 lg:mt-10' : 'mt-0')"
-              :style="viewMode === 'grid' ? { transform: `rotate(${index % 3 === 1 ? '-0.6deg' : index % 3 === 2 ? '0.5deg' : '0deg'})` } : {}"
             >
               <ProductCard
                 :product="product"
@@ -526,7 +524,7 @@ function handleQuickViewAddToCart() {
           <!-- Promo badge -->
           <div
             v-if="quickViewIsPromoValid"
-            class="absolute top-3 left-3 bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full rotate-[-2deg] border border-pink-400"
+            class="absolute top-3 left-3 bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full border border-pink-400"
           >
             -{{ Math.round(((Number(quickViewProduct.price) - Number(quickViewProduct.promotionalPrice)) / Number(quickViewProduct.price)) * 100) }}%
           </div>

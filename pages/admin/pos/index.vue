@@ -262,7 +262,7 @@
                   <p v-if="productsView === 'list'" class="text-xs truncate" style="color: var(--text-muted)">{{ product.sku }}</p>
                 </div>
                 <div class="font-bold [color:rgba(var(--brand-rgb)/0.85)] text-sm md:text-lg">
-                  {{ formatCurrency(product.price) }}
+                  {{ formatCurrency(getProductListPrice(product)) }}
                 </div>
               </div>
             </button>
@@ -510,6 +510,8 @@ import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } fro
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import PosPaymentModal from '~/components/pos/PosPaymentModal.vue'
 import PosCustomerModal from '~/components/pos/PosCustomerModal.vue'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   middleware: 'auth',
@@ -664,11 +666,22 @@ function getSessionCount(index: number) {
   return Object.keys(cartSessions.value[index].items).length
 }
 
+function getProductListPrice(product: ProductListRow) {
+  return buildScopedProductPricing(product).effectivePrice
+}
+
 function handleAddProduct(product: ProductListRow) {
   if (product.options && product.options.length > 0) {
     openVariantModal(product)
   } else {
-    addToCart({ key: product.id, productId: product.id, title: product.title, price: product.price, quantity: 1, imageUrl: getProductMainImage(product) })
+    addToCart({
+      key: product.id,
+      productId: product.id,
+      title: product.title,
+      price: buildScopedProductPricing(product).effectivePrice,
+      quantity: 1,
+      imageUrl: getProductMainImage(product)
+    })
   }
 }
 
@@ -711,8 +724,16 @@ const openVariantModal = async (product: ProductListRow) => {
   try {
     const response = await $fetch(`/api/admin/products/${product.id}`, { headers: { Authorization: `Bearer ${authStore.token}` } }) as any
     variantModal.variants = (response.variants || []).map((v: any) => {
+      const pricing = buildScopedProductPricing(response, v)
       const label = v.optionValues ? v.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ') : 'Default'
-      return { ...v, label, availableStock: v.stock - (v.reserved || 0) }
+      return {
+        ...v,
+        label,
+        price: pricing.effectivePrice,
+        availableStock: Number(
+          v.availableStock ?? getVariantAvailableStock(v, { infiniteValue: PRODUCT_INFINITE_STOCK })
+        )
+      }
     })
   } catch (e) {
     console.error(e)

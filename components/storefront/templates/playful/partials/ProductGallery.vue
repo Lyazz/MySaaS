@@ -65,9 +65,6 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
       @mouseenter="stopAutoplay"
       @mouseleave="startAutoplay(); onPointerLeave()"
     >
-      <!-- Tape detail -->
-      <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-amber-200/70 border border-amber-200 z-20 rotate-[-1deg] rounded-sm shadow-sm pointer-events-none" />
-
       <!-- Images -->
       <transition-group name="fade" tag="div" class="w-full h-full relative">
         <img
@@ -119,7 +116,6 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
           activeImageIndex === idx
             ? 'border-violet-700 shadow-[0_3px_0_0_#4c1d95] -translate-y-1'
             : 'border-violet-100 hover:border-violet-300 hover:-translate-y-0.5',
-          idx % 3 === 1 ? 'rotate-[1.5deg]' : idx % 3 === 2 ? 'rotate-[-1deg]' : ''
         ]"
         @click="setActiveImage(idx)"
       >

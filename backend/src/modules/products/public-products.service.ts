@@ -1,6 +1,8 @@
 import prisma from '../../lib/prisma'
 import { coalesceProductImageUrls } from '../../lib/product-images'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '../../../../shared/inventory/variant-availability'
+import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 
 const extractMetaPixelIds = (metaPixels: any[]): string[] => {
     return (metaPixels || [])
@@ -93,6 +95,11 @@ export class PublicProductsService {
                     select: {
                         id: true,
                         price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
                         cost: true,
                         optionValues: { select: { optionValueId: true } }
                     }
@@ -116,12 +123,26 @@ export class PublicProductsService {
 
         return products.map(({ metaPixels, productImages, images, variants, _count, ...rest }: any) => {
             const withCategories = mapProductCategories(rest)
+            const hasVariants = Number(_count?.options || 0) > 0
+            const mappedVariants = Array.isArray(variants)
+                ? variants.map((variant: any) => {
+                    const pricing = buildScopedProductPricing({ ...rest, hasVariants }, variant)
+                    return {
+                        ...variant,
+                        referencePrice: variant.price,
+                        price: pricing.effectivePrice,
+                        availableStock: getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK }),
+                        cost: undefined
+                    }
+                })
+                : []
             return {
                 ...withCategories,
                 productImages,
                 images: coalesceProductImageUrls(images, productImages),
                 metaPixelIds: extractMetaPixelIds(metaPixels),
-                hasVariants: Number(_count?.options || 0) > 0,
+                hasVariants,
+                variants: mappedVariants,
                 loyaltyPreview: this.buildProductLoyaltyPreview(settings, { ...rest, variants })
             }
         })
@@ -161,6 +182,11 @@ export class PublicProductsService {
                         sku: true,
                         barcode: true,
                         price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
                         compareAtPrice: true,
                         isActive: true,
                         trackInventory: true,
@@ -195,15 +221,21 @@ export class PublicProductsService {
         return {
             ...mapProductCategories(rest),
             variants: Array.isArray(variants)
-                ? variants.map((variant: any) => ({
-                    ...variant,
-                    loyaltyPreview: this.loyalty.buildPublicPreview(settings, {
-                        quantity: 1,
-                        referencePrice: variant.price ?? rest.price ?? 0,
-                        cost: variant.cost ?? 0
-                    }),
-                    cost: undefined
-                }))
+                ? variants.map((variant: any) => {
+                    const pricing = buildScopedProductPricing({ ...rest, hasVariants: true }, variant)
+                    return {
+                        ...variant,
+                        referencePrice: variant.price,
+                        price: pricing.effectivePrice,
+                        availableStock: getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK }),
+                        loyaltyPreview: this.loyalty.buildPublicPreview(settings, {
+                            quantity: 1,
+                            referencePrice: variant.price ?? rest.price ?? 0,
+                            cost: variant.cost ?? 0
+                        }),
+                        cost: undefined
+                    }
+                })
                 : [],
             productImages,
             images: coalesceProductImageUrls(images, productImages),

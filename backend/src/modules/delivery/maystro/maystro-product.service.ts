@@ -142,11 +142,11 @@ export class MaystroProductService {
 
     async listProducts(input: { apiToken: string }) {
         const client = new MaystroClient({ apiToken: input.apiToken })
-        const products = await client.request<MaystroProduct[]>({
+        const data = await client.request<any>({
             method: 'GET',
             path: '/stock/products/'
         })
-        return Array.isArray(products) ? products : []
+        return Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []) as MaystroProduct[]
     }
 
     async deleteProduct(input: { tenantId: string; apiToken: string; localProductId: string }) {
@@ -172,6 +172,63 @@ export class MaystroProductService {
                 }
             })
         }
+    }
+
+    /**
+     * Patches all remote Maystro products that were created without a product_id (legacy bug).
+     * Iterates paginated results and PATCHes each product whose product_id is null using its UUID.
+     * Also resets any local mappings in ERROR status so they get a fresh sync attempt.
+     */
+    async resyncNullProductIds(input: { tenantId: string; apiToken: string; storeId: string }) {
+        const client = new MaystroClient({ apiToken: input.apiToken })
+        const BASE = 'https://orders-management.maystro-delivery.com/api'
+
+        const localMappings = await this.prisma.maystroProductMapping.findMany({
+            where: { tenantId: input.tenantId }
+        })
+        const byUuid = new Map(localMappings.map((m) => [m.maystroUuid, m]))
+
+        let url: string | null = `${BASE}/stock/products/`
+        let fixed = 0
+        let skipped = 0
+
+        while (url) {
+            const data: any = await client.request<any>({ method: 'GET', path: url.replace(`${BASE}`, '') })
+            const items: any[] = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : [])
+            url = typeof data?.next === 'string' ? data.next.replace(`${BASE}`, '') : null
+
+            for (const item of items) {
+                if (item.product_id != null) { skipped++; continue }
+
+                const mapping = byUuid.get(item.id)
+                const localProductId = mapping?.localProductId
+                if (!localProductId) { skipped++; continue }
+
+                try {
+                    await client.request<any>({
+                        method: 'PATCH',
+                        path: `/stock/products/${encodeURIComponent(item.id)}/`,
+                        data: { product_id: localProductId }
+                    })
+
+                    await this.prisma.maystroProductMapping.update({
+                        where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId } },
+                        data: { maystroProductId: localProductId, syncStatus: 'SYNCED', lastSyncedAt: new Date(), lastError: null }
+                    })
+                    fixed++
+                } catch {
+                    skipped++
+                }
+            }
+        }
+
+        // Reset ERROR-status mappings so next order creation retriggers sync
+        await this.prisma.maystroProductMapping.updateMany({
+            where: { tenantId: input.tenantId, syncStatus: 'ERROR' },
+            data: { syncStatus: 'PENDING', lastError: null }
+        })
+
+        return { fixed, skipped }
     }
 
     async ensureOrderProductsSynced(input: { tenantId: string; apiToken: string; storeId: string; orderId: string }) {

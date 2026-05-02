@@ -3,6 +3,7 @@ import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
+import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
 
@@ -132,18 +133,45 @@ export class PosService {
 
         const products = await tx.product.findMany({
             where: { id: { in: productIds }, tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true }
+            select: {
+                id: true,
+                slug: true,
+                price: true,
+                title: true,
+                stock: true,
+                isPromotionActive: true,
+                promotionalPrice: true,
+                promotionStartDate: true,
+                promotionEndDate: true,
+                _count: {
+                    select: { options: true }
+                }
+            }
         })
         if (products.length !== productIds.length) {
             throw new PosValidationError(400, 'Some products are invalid or unavailable')
         }
 
-        const productMap = new Map(products.map((p) => [p.id, p]))
+        const productMap = new Map(products.map((p) => [p.id, { ...p, hasVariants: (p as any)._count?.options > 0 }]))
 
         const variantsById = variantIds.length
             ? await tx.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -159,7 +187,21 @@ export class PosService {
                     isActive: true,
                     optionValues: { none: {} }
                 },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -207,7 +249,7 @@ export class PosService {
                 throw new PosValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = Number(variant.price ?? product.price)
+            const price = Number(buildScopedProductPricing(product as any, variant as any).effectivePrice)
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY

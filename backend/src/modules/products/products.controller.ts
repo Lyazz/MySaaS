@@ -1,10 +1,22 @@
 import type { Request, Response } from 'express'
 import { ProductsService } from './products.service'
 import { isValidContentSlug, normalizeContentSlug } from '../../../../shared/content-slug'
+import { ProductWorkflowError } from './product-workflow.error'
 
 const productsService = new ProductsService()
 
 export class ProductsController {
+    private respondProductWorkflowError(res: Response, error: unknown): boolean {
+        if (!(error instanceof ProductWorkflowError)) return false
+        res.status(error.statusCode).json({
+            statusCode: error.statusCode,
+            statusMessage: error.statusMessage,
+            code: error.code,
+            details: error.details
+        })
+        return true
+    }
+
     private parseBooleanQuery(value: unknown): boolean {
         if (typeof value !== 'string') return false
         const v = value.trim().toLowerCase()
@@ -121,6 +133,7 @@ export class ProductsController {
                 const product = await productsService.updateProduct(tenant.id, id, body, { userId: user?.id ?? null })
                 res.json(product)
             } catch (e: any) {
+                if (this.respondProductWorkflowError(res, e)) return
                 if (typeof e?.statusCode === 'number') {
                     return res.status(e.statusCode).json({ statusCode: e.statusCode, statusMessage: e.statusMessage || e.message })
                 }
@@ -177,6 +190,7 @@ export class ProductsController {
             const option = await productsService.createOption(tenant.id, productId, body)
             res.json(option)
         } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
             console.error('Create option error:', error)
             res.status(500).json({ statusCode: 500, message: error.message || 'Error' })
         }
@@ -190,6 +204,7 @@ export class ProductsController {
             const value = await productsService.addOptionValue(tenant.id, optionId, body)
             res.json(value)
         } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
             console.error('Add option value error:', error)
             res.status(500).json({ statusCode: 500, message: error.message || 'Error' })
         }
@@ -202,6 +217,7 @@ export class ProductsController {
             await productsService.deleteOptionValue(tenant.id, valueId)
             res.json({ success: true })
         } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
             console.error('Delete option value error:', error)
             res.status(500).json({ statusCode: 500, message: error.message })
         }
@@ -240,6 +256,7 @@ export class ProductsController {
             await productsService.deleteOption(tenant.id, optionId)
             res.json({ success: true })
         } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
             console.error('Delete option error:', error)
             res.status(500).json({ statusCode: 500, message: error.message })
         }
@@ -252,8 +269,30 @@ export class ProductsController {
             const variants = await productsService.generateVariants(tenant.id, productId)
             res.json(variants)
         } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
             console.error('Generate variants error:', error)
             res.status(500).json({ statusCode: 500, message: error.message })
+        }
+    }
+
+    async allocateVariantStock(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const productId = req.params.productId as string
+            if (!productId) return res.status(400).json({ statusCode: 400, statusMessage: 'Product ID required' })
+
+            const product = await productsService.allocateVariantStock(tenant.id, productId, req.body ?? {}, {
+                userId: user?.id ?? null
+            })
+            res.json(product)
+        } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
+            if (error?.message === 'Product not found') {
+                return res.status(404).json({ statusCode: 404, statusMessage: error.message })
+            }
+            console.error('Allocate variant stock error:', error)
+            res.status(500).json({ statusCode: 500, message: error.message || 'Error' })
         }
     }
 }

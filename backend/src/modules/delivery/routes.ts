@@ -98,6 +98,12 @@ router.post(
     requireStaffPermission('delivery', 'read'),
     maystroController.createBordereau.bind(maystroController)
 )
+router.post(
+    '/admin/delivery/providers/MAYSTRO/resync-products',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'update'),
+    maystroController.resyncProducts.bind(maystroController)
+)
 
 
 

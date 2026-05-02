@@ -5,6 +5,7 @@ import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
 import RelatedProducts from './partials/RelatedProducts.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     product: any
@@ -35,9 +36,7 @@ const currentVariant = computed(() => {
     return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
-const currentPrice = computed(() => {
-    return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
-})
+const currentPrice = computed(() => buildScopedProductPricing(props.product, currentVariant.value).effectivePrice)
 
 const currentStock = computed(() => {
     if (!currentVariant.value) return props.product?.stock
@@ -76,6 +75,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
     }
 })
 
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>

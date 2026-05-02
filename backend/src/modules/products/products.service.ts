@@ -4,6 +4,14 @@ import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { deletePublicAssetIfOwned } from '../../lib/public-assets'
 import { sanitizeOptionalRichText } from '../../lib/rich-text'
+import {
+    getVariantAvailableStock,
+    getVariantInventoryBalance,
+    hasVariantInventoryBalance,
+    PRODUCT_INFINITE_STOCK
+} from '../../../../shared/inventory/variant-availability'
+import { ProductWorkflowError } from './product-workflow.error'
+import { syncDerivedProductPrice } from './product-price-sync'
 
 const normalizeImages = (images: unknown): string[] | undefined => {
     if (images === undefined) return undefined
@@ -24,6 +32,84 @@ export class ProductsService {
 
     private isDefaultVariant(variant: any): boolean {
         return !variant?.optionValues || variant.optionValues.length === 0
+    }
+
+    private getVariantTitle(variant: any): string {
+        if (!variant?.optionValues || variant.optionValues.length === 0) return 'Default'
+        return variant.optionValues
+            .map((entry: any) => entry?.optionValue?.label)
+            .filter((label: unknown) => typeof label === 'string' && label.trim().length > 0)
+            .join(' / ')
+    }
+
+    private decorateVariant(variant: any): any {
+        if (!variant) return variant
+        return {
+            ...variant,
+            availableStock: getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK })
+        }
+    }
+
+    private buildVariantStockNotEmptyError(variant: any, action: string) {
+        const balance = getVariantInventoryBalance(variant)
+        return new ProductWorkflowError(
+            409,
+            'VARIANT_STOCK_NOT_EMPTY',
+            `Cannot ${action} variant "${this.getVariantTitle(variant)}" while it still has stock balances`,
+            {
+                variantId: variant?.id ?? null,
+                productId: variant?.productId ?? null,
+                stock: balance.stock,
+                reserved: balance.reserved,
+                safetyStock: balance.safetyStock
+            }
+        )
+    }
+
+    private buildAllocationRequiredState(product: any) {
+        const variants = Array.isArray(product?.variants) ? product.variants : []
+        const source = variants.find((variant: any) => this.isDefaultVariant(variant) && variant?.isActive === false && hasVariantInventoryBalance(variant))
+        const required = Boolean(source && Array.isArray(product?.options) && product.options.length > 0)
+
+        return {
+            required,
+            sourceVariantId: source?.id ?? null,
+            sourceVariantTitle: source ? this.getVariantTitle(source) : null,
+            balance: source ? getVariantInventoryBalance(source) : null
+        }
+    }
+
+    private decorateProduct(product: any): any {
+        const withCategories = this.mapProductCategories(product)
+        const variants = Array.isArray(withCategories?.variants)
+            ? withCategories.variants.map((variant: any) => this.decorateVariant(variant))
+            : withCategories?.variants
+        const allocationState = this.buildAllocationRequiredState({
+            ...withCategories,
+            variants
+        })
+
+        return {
+            ...withCategories,
+            variants,
+            stockAllocationRequired: allocationState.required,
+            stockAllocationSourceVariantId: allocationState.sourceVariantId,
+            stockAllocationSourceVariantTitle: allocationState.sourceVariantTitle,
+            stockAllocationSourceBalance: allocationState.balance
+        }
+    }
+
+    private async clearProductPromotionForVariantProducts(tx: Pick<typeof prisma, 'product'>, tenantId: string, productId: string) {
+        await tx.product.updateMany({
+            where: { tenantId, id: productId },
+            data: {
+                promotionalPrice: null,
+                isPromotionActive: false,
+                promotionStartDate: null,
+                promotionEndDate: null,
+                showCountdown: false
+            }
+        })
     }
 
     private async ensureUniqueSku(tx: Pick<typeof prisma, 'productVariant'>, tenantId: string, skuCandidate: string) {
@@ -439,10 +525,10 @@ export class ProductsService {
                     }
                 }
             })
-            return refreshed ? this.mapProductCategories(refreshed) : null
+            return refreshed ? this.decorateProduct(refreshed) : null
         }
 
-        return product ? this.mapProductCategories(product) : null
+        return product ? this.decorateProduct(product) : null
     }
 
     async updateProduct(tenantId: string, productId: string, data: any, actor?: { userId?: string | null }) {
@@ -461,6 +547,7 @@ export class ProductsService {
         }
 
         const categoryAssignment = await this.resolveCategoryAssignment(tenantId, data)
+        const shouldDisableProductPromotion = Array.isArray(existing.options) && existing.options.length > 0
 
         const images = normalizeImages(data.images)
         const sanitizedDescription = this.hasOwn(data, 'description')
@@ -478,16 +565,35 @@ export class ProductsService {
                     slug: data.slug,
                     description: sanitizedDescription,
                     miniDescription: sanitizedMiniDescription,
-                    price: data.price !== undefined ? String(data.price) : undefined,
                     isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
                     categoryId: categoryAssignment ? categoryAssignment.categoryId : undefined,
                     images: images,
                     lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : undefined,
-                    promotionalPrice: data.promotionalPrice !== undefined ? (data.promotionalPrice !== null ? String(data.promotionalPrice) : null) : undefined,
-                    isPromotionActive: typeof data.isPromotionActive === 'boolean' ? data.isPromotionActive : undefined,
-                    promotionStartDate: data.promotionStartDate !== undefined ? (data.promotionStartDate ? new Date(data.promotionStartDate) : null) : undefined,
-                    promotionEndDate: data.promotionEndDate !== undefined ? (data.promotionEndDate ? new Date(data.promotionEndDate) : null) : undefined,
-                    showCountdown: typeof data.showCountdown === 'boolean' ? data.showCountdown : undefined
+                    promotionalPrice: shouldDisableProductPromotion
+                        ? null
+                        : data.promotionalPrice !== undefined
+                            ? (data.promotionalPrice !== null ? String(data.promotionalPrice) : null)
+                            : undefined,
+                    isPromotionActive: shouldDisableProductPromotion
+                        ? false
+                        : typeof data.isPromotionActive === 'boolean'
+                            ? data.isPromotionActive
+                            : undefined,
+                    promotionStartDate: shouldDisableProductPromotion
+                        ? null
+                        : data.promotionStartDate !== undefined
+                            ? (data.promotionStartDate ? new Date(data.promotionStartDate) : null)
+                            : undefined,
+                    promotionEndDate: shouldDisableProductPromotion
+                        ? null
+                        : data.promotionEndDate !== undefined
+                            ? (data.promotionEndDate ? new Date(data.promotionEndDate) : null)
+                            : undefined,
+                    showCountdown: shouldDisableProductPromotion
+                        ? false
+                        : typeof data.showCountdown === 'boolean'
+                            ? data.showCountdown
+                            : undefined
                 }
             })
 
@@ -499,29 +605,6 @@ export class ProductsService {
         })
 
         if (updateResult.count === 0) throw new Error('Product not found')
-
-        const refreshed = await this.getProduct(tenantId, productId)
-        if (!refreshed) throw new Error('Product not found')
-
-        // Keep default variant in sync for no-options products (bidirectional sync handled in InventoryService too).
-        if (!refreshed.options || refreshed.options.length === 0) {
-            const defaultVariant = (refreshed.variants || []).find((v: any) => this.isDefaultVariant(v))
-            const ensured =
-                defaultVariant ??
-                (await this.ensureDefaultVariant(tenantId, {
-                    id: refreshed.id,
-                    slug: refreshed.slug,
-                    price: refreshed.price,
-                    stock: refreshed.stock
-                }))
-
-            if (data.price !== undefined) {
-                await prisma.productVariant.updateMany({
-                    where: { tenantId, id: ensured.id },
-                    data: { price: data.price }
-                })
-            }
-        }
 
         return await this.getProduct(tenantId, productId)
     }
@@ -665,6 +748,33 @@ export class ProductsService {
         })
         if (!option) throw new Error('Option not found')
 
+        const blockedVariant = await prisma.productVariant.findFirst({
+            where: {
+                tenantId,
+                productId: option.productId,
+                optionValues: {
+                    some: {
+                        optionValue: {
+                            optionId
+                        }
+                    }
+                },
+                OR: [
+                    { stock: { not: 0 } },
+                    { reserved: { not: 0 } },
+                    { safetyStock: { not: 0 } }
+                ]
+            },
+            include: {
+                optionValues: {
+                    include: { optionValue: true }
+                }
+            }
+        })
+        if (blockedVariant) {
+            throw this.buildVariantStockNotEmptyError(blockedVariant, 'remove this option from')
+        }
+
         // Deleting option will cascade delete values and variants that depend on it
         await prisma.productOption.delete({ where: { id: optionId } })
         await this.syncVariants(tenantId, option.productId)
@@ -679,12 +789,11 @@ export class ProductsService {
 
         const value = await prisma.productOptionValue.create({
             data: {
+                tenantId,
+                optionId,
                 label: data.label,
                 position: data.position || 0,
-                meta: data.meta ? (typeof data.meta === 'string' ? data.meta : JSON.stringify(data.meta)) : null,
-                option: {
-                    connect: { tenantId_id: { tenantId, id: optionId } }
-                }
+                meta: data.meta ? (typeof data.meta === 'string' ? data.meta : JSON.stringify(data.meta)) : null
             }
         })
 
@@ -698,6 +807,31 @@ export class ProductsService {
             include: { option: true }
         })
         if (!value) throw new Error('Option Value not found')
+
+        const blockedVariant = await prisma.productVariant.findFirst({
+            where: {
+                tenantId,
+                productId: value.option.productId,
+                optionValues: {
+                    some: {
+                        optionValueId: valueId
+                    }
+                },
+                OR: [
+                    { stock: { not: 0 } },
+                    { reserved: { not: 0 } },
+                    { safetyStock: { not: 0 } }
+                ]
+            },
+            include: {
+                optionValues: {
+                    include: { optionValue: true }
+                }
+            }
+        })
+        if (blockedVariant) {
+            throw this.buildVariantStockNotEmptyError(blockedVariant, 'remove this option value from')
+        }
 
         await prisma.productOptionValue.delete({ where: { id: valueId } })
         await this.syncVariants(tenantId, value.option.productId)
@@ -758,60 +892,79 @@ export class ProductsService {
         if (!product.options || product.options.length === 0) {
             const defaultVariant = (product.variants || []).find((v: any) => this.isDefaultVariant(v))
             const ensured = defaultVariant ?? (await this.ensureDefaultVariant(tenantId, product))
+            const variantsToDeactivate = (product.variants || []).filter((variant: any) => variant.id !== ensured.id)
+            const blockedVariant = variantsToDeactivate.find((variant: any) => hasVariantInventoryBalance(variant))
+            if (blockedVariant) {
+                throw this.buildVariantStockNotEmptyError(blockedVariant, 'remove options from')
+            }
 
-            // Deactivate any other variants for safety (keep history/order links intact).
-            await prisma.productVariant.updateMany({
-                where: { tenantId, productId, id: { not: ensured.id } },
-                data: { isActive: false }
+            await prisma.$transaction(async (tx) => {
+                await tx.productVariant.updateMany({
+                    where: { tenantId, id: ensured.id },
+                    data: {
+                        isActive: true,
+                        price: product.price
+                    }
+                })
+
+                if (variantsToDeactivate.length > 0) {
+                    await tx.productVariant.updateMany({
+                        where: { tenantId, id: { in: variantsToDeactivate.map((variant: any) => variant.id) } },
+                        data: { isActive: false }
+                    })
+                }
+
+                await syncDerivedProductPrice(tx as any, tenantId, productId)
+                await syncProductStockForProducts(tx as any, tenantId, [productId])
             })
 
-            await syncProductStockForProducts(prisma as any, tenantId, [productId])
-
-            return prisma.productVariant.findMany({
+            return (await prisma.productVariant.findMany({
                 where: { productId, tenantId, isActive: true },
                 include: {
                     optionValues: { include: { optionValue: true } },
                     images: { include: { image: true }, orderBy: { position: 'asc' } }
                 },
                 orderBy: { createdAt: 'asc' }
-            })
+            })).map((variant) => this.decorateVariant(variant))
         }
 
-        const cartesian = (sets: any[]) => {
-            return sets.reduce((acc, set) => {
-                return acc.flatMap((x: any) => set.map((y: any) => [...x, y]))
+        const cartesian = (sets: any[][]): any[][] => {
+            return sets.reduce<any[][]>((acc, set) => {
+                return acc.flatMap((x: any[]) => set.map((y: any) => [...x, y]))
             }, [[]])
         }
 
-        const valueSets = product.options.map((opt) => opt.values)
+        const valueSets: any[][] = product.options.map((opt: any) => opt.values)
         const combinations = cartesian(valueSets)
 
         // Map existing variants by signature
-        const existingVariants = product.variants || []
-        const existingBySignature = new Map(
-            existingVariants.map((v) => [this.buildVariantSignature(v.optionValues || []), v])
+        const existingVariants: any[] = product.variants || []
+        const existingBySignature = new Map<string, any>(
+            existingVariants.map((v: any) => [this.buildVariantSignature(v.optionValues || []), v])
         )
 
         // Determine target signatures
-        const targetSignatures = new Set(
-            combinations.map((combo) => this.buildVariantSignature(combo.map((val: any) => ({ optionValueId: val.id }))))
+        const targetSignatures = new Set<string>(
+            combinations.map((combo: any[]) => this.buildVariantSignature(combo.map((val: any) => ({ optionValueId: val.id }))))
         )
 
         // Variants to deactivate: signatures not in target (never hard-delete to preserve order history).
         const toDeactivate = existingVariants.filter(
-            (v) => !targetSignatures.has(this.buildVariantSignature(v.optionValues || []))
+            (v: any) => !this.isDefaultVariant(v) && !targetSignatures.has(this.buildVariantSignature(v.optionValues || []))
         )
 
         // Signatures to create: target not already existing
-        const toCreate = Array.from(targetSignatures).filter((sig) => !existingBySignature.has(sig))
+        const toCreate = Array.from(targetSignatures).filter((sig: string) => !existingBySignature.has(sig))
 
         const defaultVariant = existingBySignature.get('') as any | undefined
-        const carryStock = defaultVariant ? defaultVariant.stock : 0
-        const carryReserved = defaultVariant ? defaultVariant.reserved : 0
-        const carrySafety = defaultVariant ? defaultVariant.safetyStock : 0
-        const hasCarryover = carryStock !== 0 || carryReserved !== 0 || carrySafety !== 0
+        const blockedVariant = toDeactivate.find((variant: any) => hasVariantInventoryBalance(variant))
+        if (blockedVariant) {
+            throw this.buildVariantStockNotEmptyError(blockedVariant, 'archive')
+        }
 
         await prisma.$transaction(async (tx) => {
+            await this.clearProductPromotionForVariantProducts(tx as any, tenantId, productId)
+
             // Deactivate obsolete variants
             if (toDeactivate.length > 0) {
                 await tx.productVariant.updateMany({
@@ -822,8 +975,8 @@ export class ProductsService {
 
             // Ensure all target variants are active (reactivate previously deactivated ones)
             const toActivate = existingVariants
-                .filter((v) => targetSignatures.has(this.buildVariantSignature(v.optionValues || [])))
-                .map((v) => v.id)
+                .filter((v: any) => targetSignatures.has(this.buildVariantSignature(v.optionValues || [])))
+                .map((v: any) => v.id)
             if (toActivate.length > 0) {
                 await tx.productVariant.updateMany({
                     where: { tenantId, id: { in: toActivate } },
@@ -841,88 +994,231 @@ export class ProductsService {
                         productId,
                         sku,
                         price: product.price,
+                        promotionalPrice: null,
+                        isPromotionActive: false,
+                        promotionStartDate: null,
+                        promotionEndDate: null,
+                        showCountdown: false,
                         stock: 0,
                         reserved: 0,
                         safetyStock: 0,
                         isActive: true,
                         trackInventory: true,
                         optionValues: {
-                            create: valueIds.map((optionValueId) => ({ optionValueId }))
+                            create: valueIds.map((optionValueId: string) => ({ optionValueId }))
                         }
                     }
                 })
             }
 
-            // Carry over stock from default variant (no-options) into the first target variant to avoid silent loss.
-            if (defaultVariant && hasCarryover) {
-                const receiver = await tx.productVariant.findFirst({
-                    where: { tenantId, productId, optionValues: { some: {} } },
-                    orderBy: { createdAt: 'asc' }
+            // Keep the hidden default variant as the stock-allocation source until stock is
+            // explicitly distributed into selectable variants.
+            if (defaultVariant) {
+                await tx.productVariant.updateMany({
+                    where: { tenantId, id: defaultVariant.id },
+                    data: { isActive: false }
                 })
-
-                if (receiver) {
-                    await tx.productVariant.update({
-                        where: { id: receiver.id },
-                        data: {
-                            stock: { increment: carryStock },
-                            reserved: { increment: carryReserved },
-                            safetyStock: { increment: carrySafety }
-                        }
-                    })
-
-                    await tx.productVariant.update({
-                        where: { id: defaultVariant.id },
-                        data: { stock: 0, reserved: 0, safetyStock: 0, isActive: false }
-                    })
-
-                    await tx.inventoryMovement.createMany({
-                        data: [
-                            {
-                                tenantId,
-                                variantId: receiver.id,
-                                type: 'MANUAL_ADJUSTMENT' as any,
-                                delta: carryStock,
-                                reservedDelta: carryReserved,
-                                safetyStockDelta: carrySafety,
-                                reason: 'variant_sync_carryover',
-                                note: 'Carried stock from default variant after enabling options',
-                                stockAfter: receiver.stock + carryStock,
-                                reservedAfter: receiver.reserved + carryReserved,
-                                safetyStockAfter: receiver.safetyStock + carrySafety,
-                                createdByUserId: null
-                            },
-                            {
-                                tenantId,
-                                variantId: defaultVariant.id,
-                                type: 'MANUAL_ADJUSTMENT' as any,
-                                delta: -carryStock,
-                                reservedDelta: -carryReserved,
-                                safetyStockDelta: -carrySafety,
-                                reason: 'variant_sync_carryover',
-                                note: 'Moved stock into option variants; default variant deactivated',
-                                stockAfter: 0,
-                                reservedAfter: 0,
-                                safetyStockAfter: 0,
-                                createdByUserId: null
-                            }
-                        ],
-                        skipDuplicates: false
-                    })
-                }
             }
 
+            await syncDerivedProductPrice(tx as any, tenantId, productId)
             await syncProductStockForProducts(tx as any, tenantId, [productId])
         })
 
         // Return refreshed variants with relations
-        return prisma.productVariant.findMany({
+        return (await prisma.productVariant.findMany({
             where: { productId, tenantId, isActive: true },
             include: {
                 optionValues: { include: { optionValue: true } },
                 images: { include: { image: true }, orderBy: { position: 'asc' } }
             },
             orderBy: { createdAt: 'asc' }
+        })).map((variant) => this.decorateVariant(variant))
+    }
+
+    async allocateVariantStock(
+        tenantId: string,
+        productId: string,
+        input: { sourceVariantId?: unknown; allocations?: unknown },
+        actor?: { userId?: string | null }
+    ) {
+        const product = await this.getProduct(tenantId, productId, { includeInactiveVariants: true })
+        if (!product) throw new Error('Product not found')
+        if (!Array.isArray(product.options) || product.options.length === 0) {
+            throw new ProductWorkflowError(400, 'STOCK_ALLOCATION_REQUIRED', 'Stock allocation is only available for products with variants')
+        }
+
+        const explicitSourceVariantId =
+            typeof input?.sourceVariantId === 'string' && input.sourceVariantId.trim().length > 0
+                ? input.sourceVariantId.trim()
+                : null
+
+        const sourceVariant = (product.variants || []).find((variant: any) => {
+            if (!this.isDefaultVariant(variant)) return false
+            if (explicitSourceVariantId && variant.id !== explicitSourceVariantId) return false
+            return hasVariantInventoryBalance(variant)
         })
+
+        if (!sourceVariant) {
+            throw new ProductWorkflowError(409, 'STOCK_ALLOCATION_REQUIRED', 'No hidden source variant requires stock allocation', {
+                productId
+            })
+        }
+
+        const activeSelectableVariants = (product.variants || []).filter(
+            (variant: any) => variant.id !== sourceVariant.id && variant.isActive !== false && !this.isDefaultVariant(variant)
+        )
+        if (activeSelectableVariants.length === 0) {
+            throw new ProductWorkflowError(409, 'STOCK_ALLOCATION_REQUIRED', 'Create at least one active selectable variant before allocating stock', {
+                productId,
+                sourceVariantId: sourceVariant.id
+            })
+        }
+
+        if (!Array.isArray(input?.allocations) || input.allocations.length === 0) {
+            throw new ProductWorkflowError(409, 'STOCK_ALLOCATION_REQUIRED', 'Allocation must distribute the full hidden stock balance', {
+                productId,
+                sourceVariantId: sourceVariant.id
+            })
+        }
+
+        const targetVariantIds = new Set(activeSelectableVariants.map((variant: any) => variant.id))
+        const seenVariantIds = new Set<string>()
+        const allocations = input.allocations.map((row: any) => {
+            const variantId = typeof row?.variantId === 'string' ? row.variantId.trim() : ''
+            if (!variantId || !targetVariantIds.has(variantId)) {
+                throw new ProductWorkflowError(400, 'STOCK_ALLOCATION_REQUIRED', 'Allocation contains an invalid target variant', {
+                    productId,
+                    sourceVariantId: sourceVariant.id,
+                    variantId: variantId || null
+                })
+            }
+            if (seenVariantIds.has(variantId)) {
+                throw new ProductWorkflowError(400, 'STOCK_ALLOCATION_REQUIRED', 'Allocation contains duplicate target variants', {
+                    variantId
+                })
+            }
+            seenVariantIds.add(variantId)
+
+            const stock = Number(row?.stock)
+            const reserved = Number(row?.reserved ?? 0)
+            const safetyStock = Number(row?.safetyStock ?? 0)
+            if (![stock, reserved, safetyStock].every((value) => Number.isFinite(value) && value >= 0 && Number.isInteger(value))) {
+                throw new ProductWorkflowError(400, 'STOCK_ALLOCATION_REQUIRED', 'Allocation values must be non-negative integers', {
+                    variantId
+                })
+            }
+            if (reserved > stock || stock < reserved + safetyStock) {
+                throw new ProductWorkflowError(400, 'STOCK_ALLOCATION_REQUIRED', 'Each allocation must satisfy stock >= reserved + safetyStock', {
+                    variantId
+                })
+            }
+
+            return { variantId, stock, reserved, safetyStock }
+        })
+
+        const sourceBalance = getVariantInventoryBalance(sourceVariant)
+        const totals = allocations.reduce(
+            (sum, row) => ({
+                stock: sum.stock + row.stock,
+                reserved: sum.reserved + row.reserved,
+                safetyStock: sum.safetyStock + row.safetyStock
+            }),
+            { stock: 0, reserved: 0, safetyStock: 0 }
+        )
+
+        if (
+            totals.stock !== sourceBalance.stock ||
+            totals.reserved !== sourceBalance.reserved ||
+            totals.safetyStock !== sourceBalance.safetyStock
+        ) {
+            throw new ProductWorkflowError(409, 'STOCK_ALLOCATION_REQUIRED', 'Allocation must distribute the full hidden stock balance exactly', {
+                sourceVariantId: sourceVariant.id,
+                expected: sourceBalance,
+                received: totals
+            })
+        }
+
+        await prisma.$transaction(async (tx) => {
+            for (const row of allocations) {
+                const targetBefore = await tx.productVariant.findFirst({
+                    where: { tenantId, id: row.variantId, productId },
+                    select: { id: true, stock: true, reserved: true, safetyStock: true }
+                })
+                if (!targetBefore) {
+                    throw new ProductWorkflowError(404, 'STOCK_ALLOCATION_REQUIRED', 'Target variant not found during allocation', {
+                        variantId: row.variantId
+                    })
+                }
+
+                await tx.productVariant.update({
+                    where: { id: row.variantId },
+                    data: {
+                        stock: { increment: row.stock },
+                        reserved: { increment: row.reserved },
+                        safetyStock: { increment: row.safetyStock }
+                    }
+                })
+
+                const targetAfter = await tx.productVariant.findFirst({
+                    where: { tenantId, id: row.variantId },
+                    select: { stock: true, reserved: true, safetyStock: true }
+                })
+
+                await tx.inventoryMovement.create({
+                    data: {
+                        tenantId,
+                        variantId: row.variantId,
+                        type: 'MANUAL_ADJUSTMENT' as any,
+                        delta: row.stock,
+                        reservedDelta: row.reserved,
+                        safetyStockDelta: row.safetyStock,
+                        reason: 'variant_stock_allocation',
+                        note: `Allocated from hidden source variant ${sourceVariant.id}`.slice(0, 500),
+                        stockAfter: targetAfter?.stock ?? targetBefore.stock + row.stock,
+                        reservedAfter: targetAfter?.reserved ?? targetBefore.reserved + row.reserved,
+                        safetyStockAfter: targetAfter?.safetyStock ?? targetBefore.safetyStock + row.safetyStock,
+                        createdByUserId: actor?.userId ?? null
+                    }
+                })
+            }
+
+            await tx.productVariant.updateMany({
+                where: {
+                    tenantId,
+                    id: sourceVariant.id,
+                    stock: sourceBalance.stock,
+                    reserved: sourceBalance.reserved,
+                    safetyStock: sourceBalance.safetyStock
+                },
+                data: {
+                    stock: 0,
+                    reserved: 0,
+                    safetyStock: 0,
+                    isActive: false
+                }
+            })
+
+            await tx.inventoryMovement.create({
+                data: {
+                    tenantId,
+                    variantId: sourceVariant.id,
+                    type: 'MANUAL_ADJUSTMENT' as any,
+                    delta: -sourceBalance.stock,
+                    reservedDelta: -sourceBalance.reserved,
+                    safetyStockDelta: -sourceBalance.safetyStock,
+                    reason: 'variant_stock_allocation',
+                    note: 'Distributed hidden source variant stock into selectable variants',
+                    stockAfter: 0,
+                    reservedAfter: 0,
+                    safetyStockAfter: 0,
+                    createdByUserId: actor?.userId ?? null
+                }
+            })
+
+            await syncProductStockForProducts(tx as any, tenantId, [productId])
+        })
+
+        return this.getProduct(tenantId, productId, { includeInactiveVariants: true })
     }
 
     async generateVariants(tenantId: string, productId: string) {

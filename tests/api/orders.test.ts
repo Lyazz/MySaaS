@@ -141,7 +141,10 @@ describe('Public checkout order flow', () => {
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.productBundleDeal.deleteMany({ where: { tenantId } })
+        await prisma.productVariantOptionValue.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
+        await prisma.productOptionValue.deleteMany({ where: { tenantId } })
+        await prisma.productOption.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { tenantId } })
@@ -526,7 +529,7 @@ describe('Public checkout order flow', () => {
         expect(shipmentCount).toBe(0)
     })
 
-    it('prioritizes promotional price at checkout even when promotion flags/date window are inactive', async () => {
+    it('ignores product-level promotional price at checkout when promotion flags/date window are inactive', async () => {
         const promoProduct = await prisma.product.create({
             data: {
                 tenantId,
@@ -569,8 +572,80 @@ describe('Public checkout order flow', () => {
         })
 
         expect(saved?.items).toHaveLength(1)
-        expect(Number(saved?.items[0].price)).toBe(120)
-        expect(Number(saved?.totalAmount)).toBe(240)
+        expect(Number(saved?.items[0].price)).toBe(200)
+        expect(Number(saved?.totalAmount)).toBe(400)
+    })
+
+    it('applies the selected variant promotional price at checkout for variant-priced products', async () => {
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Variant Promo Checkout Product',
+                slug: `variant-promo-checkout-${Date.now()}`,
+                price: 220,
+                stock: 30,
+                isActive: true
+            }
+        })
+
+        const sizeOption = await prisma.productOption.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                name: 'Size',
+                position: 0,
+                displayType: 'dropdown' as any
+            }
+        })
+        const sizeValue = await prisma.productOptionValue.create({
+            data: {
+                tenantId,
+                optionId: sizeOption.id,
+                label: 'L',
+                position: 0
+            }
+        })
+
+        const promoVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                sku: `VARIANT-PROMO-${Date.now()}`,
+                price: 220,
+                promotionalPrice: 175,
+                isPromotionActive: true,
+                promotionStartDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                stock: 30
+            }
+        })
+        await prisma.productVariantOptionValue.create({
+            data: {
+                tenantId,
+                variantId: promoVariant.id,
+                optionValueId: sizeValue.id
+            }
+        })
+
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Variant Promo Buyer',
+                customerPhone: '0550222334',
+                items: [{ productId: promoProduct.id, variantId: promoVariant.id, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.items).toHaveLength(1)
+        expect(Number(saved?.items[0].price)).toBe(175)
+        expect(Number(saved?.totalAmount)).toBe(350)
     })
 
     it('rejects checkout when phone is missing', async () => {
@@ -731,7 +806,10 @@ describe('Admin Order Creation', () => {
         await prisma.inventoryMovement.deleteMany({ where: { tenantId } })
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
+        await prisma.productVariantOptionValue.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
+        await prisma.productOptionValue.deleteMany({ where: { tenantId } })
+        await prisma.productOption.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { tenantId } })
@@ -830,7 +908,7 @@ describe('Admin Order Creation', () => {
         expect(saved?.shippingAddressLine1).toBe('Stored Shipping Address')
     })
 
-    it('prioritizes promotional price on admin order creation when promo is set', async () => {
+    it('ignores product-level promotional price on admin order creation when the promotion is inactive', async () => {
         const promoProduct = await prisma.product.create({
             data: {
                 tenantId,
@@ -875,8 +953,81 @@ describe('Admin Order Creation', () => {
         })
 
         expect(saved?.items).toHaveLength(1)
-        expect(Number(saved?.items[0].price)).toBe(95)
-        expect(Number(saved?.totalAmount)).toBe(285)
+        expect(Number(saved?.items[0].price)).toBe(180)
+        expect(Number(saved?.totalAmount)).toBe(540)
+    })
+
+    it('applies the selected variant promotional price on admin order creation', async () => {
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Admin Variant Promo Product',
+                slug: `admin-variant-promo-${Date.now()}`,
+                price: 210,
+                stock: 35,
+                isActive: true
+            }
+        })
+
+        const option = await prisma.productOption.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                name: 'Color',
+                position: 0,
+                displayType: 'dropdown' as any
+            }
+        })
+        const optionValue = await prisma.productOptionValue.create({
+            data: {
+                tenantId,
+                optionId: option.id,
+                label: 'Black',
+                position: 0
+            }
+        })
+
+        const promoVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                sku: `ADM-VARIANT-PROMO-${Date.now()}`,
+                price: 210,
+                promotionalPrice: 160,
+                isPromotionActive: true,
+                promotionStartDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                stock: 35
+            }
+        })
+        await prisma.productVariantOptionValue.create({
+            data: {
+                tenantId,
+                variantId: promoVariant.id,
+                optionValueId: optionValue.id
+            }
+        })
+
+        const res = await request(app)
+            .post('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerName: 'Admin Variant Promo Customer',
+                customerPhone: '0550111001',
+                items: [{ productId: promoProduct.id, variantId: promoVariant.id, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.items).toHaveLength(1)
+        expect(Number(saved?.items[0].price)).toBe(160)
+        expect(Number(saved?.totalAmount)).toBe(320)
     })
 
     it('rejects admin order creation with empty items', async () => {

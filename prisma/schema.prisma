@@ -644,6 +644,11 @@ model ProductVariant {
   skuLocked      Boolean  @default(false)
   barcode        String?  @db.VarChar(32)
   price          Decimal  @default(0)
+  promotionalPrice   Decimal?
+  isPromotionActive  Boolean   @default(false)
+  promotionStartDate DateTime?
+  promotionEndDate   DateTime?
+  showCountdown      Boolean   @default(false)
   compareAtPrice Decimal?
   cost           Decimal  @default(0) // prix d'achat (latest unit cost)
   isActive       Boolean  @default(true)

@@ -82,6 +82,16 @@ const images = computed(() => {
 const cartImage = computed(() => images.value[0]);
 
 // Price Formatting handled by useCurrency
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>

@@ -92,6 +92,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
     selectedOptions.value = getPreferredInitialSelection(product);
   }
 });
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>

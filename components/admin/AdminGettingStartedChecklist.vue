@@ -10,19 +10,21 @@
           {{ t('admin.pages.gettingStarted.progress', { done: completedCount, total: items.length }) }}
         </p>
       </div>
-      <button
-        v-if="!allDone"
-        type="button"
-        class="text-xs px-2 py-1 rounded"
-        style="color: var(--text-muted); background: var(--surface-3)"
-        @click="dismiss"
-      >
-        {{ t('admin.pages.gettingStarted.dismiss') }}
-      </button>
-      <span v-else class="text-xs font-medium flex items-center gap-1" style="color: var(--brand)">
-        <Icon name="lucide:check-circle" class="w-4 h-4" />
-        {{ t('admin.pages.gettingStarted.complete') }}
-      </span>
+      <div class="flex items-center gap-2">
+        <span v-if="allDone" class="text-xs font-medium flex items-center gap-1" style="color: var(--brand)">
+          <Icon name="lucide:check-circle" class="w-4 h-4" />
+          {{ t('admin.pages.gettingStarted.complete') }}
+        </span>
+        <button
+          type="button"
+          class="text-xs px-2 py-1 rounded"
+          style="color: var(--text-muted); background: var(--surface-3)"
+          data-testid="getting-started-dismiss"
+          @click="dismiss"
+        >
+          {{ t('admin.pages.gettingStarted.dismiss') }}
+        </button>
+      </div>
     </div>
 
     <!-- Progress bar -->

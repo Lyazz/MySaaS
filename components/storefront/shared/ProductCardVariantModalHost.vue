@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ProductCardVariantModalItem } from '~/composables/useProductCardVariantGuard'
 import { useCartStore } from '~/stores/cart'
-import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
 type TemplateKey =
   | 'classic'
@@ -46,8 +45,7 @@ const {
   bundleDeals,
   metaPixelIds,
   templateKey,
-  variants,
-  pricingContext
+  variants
 } = modal
 
 onMounted(() => {
@@ -285,14 +283,12 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
   if (!variant || isOutOfStock(variant)) return
   if (!productId.value || !productSlug.value) return
 
-  const pricing = buildActiveProductPricing(pricingContext.value, variant.price)
-
   cartStore.addItem({
     productId: productId.value,
     variantId: variant.id,
     title: `${productTitle.value} (${variant.label})`,
     slug: productSlug.value,
-    price: Number(pricing.effectivePrice || 0),
+    price: Number(variant.price || 0),
     stock: variant.trackInventory ? variant.stock : 9999,
     image: variant.imageUrl || fallbackImage.value || undefined,
     bundleDeals: bundleDeals.value || [],

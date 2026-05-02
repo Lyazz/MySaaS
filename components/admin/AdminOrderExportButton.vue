@@ -19,6 +19,7 @@
 
       <!-- Right: dropdown toggle -->
       <button
+        :disabled="exporting"
         class="px-2 py-2 text-sm transition-colors hover:opacity-80"
         style="background: var(--surface-2); color: var(--text-primary)"
         @click="dropdownOpen = !dropdownOpen"
@@ -74,7 +75,11 @@
 
 <script setup lang="ts">
 import AdminOrderExportModal from '~/components/admin/AdminOrderExportModal.vue'
-import { DEFAULT_EXPORT_COLUMNS } from '~/composables/useOrderExport'
+import {
+  EXPORT_FORMATS,
+  buildExportParams,
+  loadExportPrefs,
+} from '~/composables/useOrderExport'
 
 const props = defineProps<{
   filters: {
@@ -90,34 +95,11 @@ const props = defineProps<{
 
 const authStore = useAuthStore()
 
-const PREFS_KEY = computed(() => `orders_export_prefs_${props.tenantId}`)
+const formats = EXPORT_FORMATS
 
 const dropdownOpen = ref(false)
 const modalOpen = ref(false)
 const exporting = ref(false)
-
-const formats = [
-  { value: 'csv',    label: 'CSV',          icon: 'lucide:file-text' },
-  { value: 'xlsx',   label: 'Excel (.xlsx)', icon: 'lucide:table-2' },
-  { value: 'pdf',    label: 'PDF',           icon: 'lucide:file-type-2' },
-  { value: 'txt',    label: 'Text (.txt)',   icon: 'lucide:align-left' },
-  { value: 'gsheet', label: 'Google Sheets ↗', icon: 'lucide:external-link' },
-]
-
-function loadPrefs(): { format: string; columns: string[] } {
-  try {
-    const raw = localStorage.getItem(PREFS_KEY.value)
-    if (raw) {
-      const p = JSON.parse(raw)
-      if (p.format && Array.isArray(p.columns) && p.columns.length > 0) {
-        return p
-      }
-    }
-  } catch {
-    // ignore
-  }
-  return { format: 'csv', columns: DEFAULT_EXPORT_COLUMNS }
-}
 
 function openModal() {
   dropdownOpen.value = false
@@ -126,42 +108,25 @@ function openModal() {
 
 async function exportAs(format: string) {
   dropdownOpen.value = false
-  const { columns } = loadPrefs()
+  const { columns } = loadExportPrefs(props.tenantId)
   await triggerExport(format, columns)
 }
 
 async function quickExport() {
-  const prefs = loadPrefs()
-  if (!prefs.columns.length) {
-    modalOpen.value = true
-    return
-  }
+  const prefs = loadExportPrefs(props.tenantId)
   await triggerExport(prefs.format, prefs.columns)
 }
 
 async function triggerExport(format: string, columns: string[]) {
+  const params = buildExportParams(format, columns, props.filters)
+
   if (format === 'gsheet') {
-    const params = new URLSearchParams()
-    params.set('format', 'gsheet')
-    params.set('columns', columns.join(','))
-    if (props.filters.status) params.set('status', props.filters.status)
-    if (props.filters.search) params.set('search', props.filters.search)
-    if (props.filters.startDate) params.set('startDate', props.filters.startDate)
-    if (props.filters.endDate) params.set('endDate', props.filters.endDate)
-    window.open(`/api/admin/orders/export/google-auth-url?${params.toString()}`, '_blank')
+    if (process.client) window.open(`/api/admin/orders/export/google-auth-url?${params.toString()}`, '_blank')
     return
   }
 
   exporting.value = true
   try {
-    const params = new URLSearchParams()
-    params.set('format', format)
-    params.set('columns', columns.join(','))
-    if (props.filters.status) params.set('status', props.filters.status)
-    if (props.filters.search) params.set('search', props.filters.search)
-    if (props.filters.startDate) params.set('startDate', props.filters.startDate)
-    if (props.filters.endDate) params.set('endDate', props.filters.endDate)
-
     const response = await fetch(`/api/admin/orders/export?${params.toString()}`, {
       headers: { Authorization: `Bearer ${authStore.token}` },
     })
@@ -172,14 +137,21 @@ async function triggerExport(format: string, columns: string[]) {
       return
     }
 
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    const date = new Date().toISOString().split('T')[0]
-    a.download = `orders-export-${date}.${format}`
-    a.click()
-    URL.revokeObjectURL(url)
+    const truncated = response.headers.get('X-Export-Truncated') === 'true'
+    if (truncated) {
+      alert('Note: Your export contains more than 10,000 orders. Only the first 10,000 are included.')
+    }
+
+    if (process.client) {
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const date = new Date().toISOString().split('T')[0]
+      a.download = `orders-export-${date}.${format}`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
   } finally {
     exporting.value = false
   }

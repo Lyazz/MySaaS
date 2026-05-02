@@ -8,6 +8,7 @@ import {
   getPreferredInitialSelection,
   type SelectedOptions,
 } from './variant-ux';
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing';
 
 const props = defineProps<{
   product: any;
@@ -45,30 +46,9 @@ const currentVariant = computed(() => {
   });
 });
 
-const isPromoValid = computed(() => {
-  if (!props.product?.isPromotionActive) return false;
-  const now = new Date().getTime();
-  if (
-    props.product.promotionStartDate &&
-    new Date(props.product.promotionStartDate).getTime() > now
-  )
-    return false;
-  if (
-    props.product.promotionEndDate &&
-    new Date(props.product.promotionEndDate).getTime() < now
-  )
-    return false;
-  return true;
-});
-
-const currentPrice = computed(() => {
-  const base = currentVariant.value
-    ? Number(currentVariant.value.price)
-    : Number(props.product?.price || 0);
-  if (isPromoValid.value && props.product?.promotionalPrice)
-    return Number(props.product.promotionalPrice);
-  return base;
-});
+const currentPrice = computed(() =>
+  buildScopedProductPricing(props.product, currentVariant.value).effectivePrice
+);
 
 const currentStock = computed(() => {
   if (!currentVariant.value) return props.product?.stock;
@@ -99,6 +79,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
   });
   if (!best) selectedOptions.value = getPreferredInitialSelection(product);
 });
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>

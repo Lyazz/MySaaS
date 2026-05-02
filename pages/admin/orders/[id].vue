@@ -1259,7 +1259,8 @@ import BaseInput from '~/components/ui/BaseInput.vue'
 import DeliveryPaymentModal from '~/components/cash/DeliveryPaymentModal.vue'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import { buildProductPricing, toFiniteNumber } from '~/shared/pricing/product-pricing'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
+import { buildProductPricing, buildScopedProductPricing, toFiniteNumber } from '~/shared/pricing/product-pricing'
 
 definePageMeta({
   middleware: 'auth',
@@ -2020,9 +2021,19 @@ function variantLabelFromOrderItem(item: OrderItem): string | undefined {
 
 function applyPromotionPricingToCartItems() {
   cartItems.value = cartItems.value.map((item) => {
+    const orderItem = order.value?.items?.find(
+      (entry) => entry.productId === item.productId && (entry.variantId || undefined) === (item.variantId || undefined)
+    )
+    if (item.variantId && orderItem?.variant) {
+      const pricing = buildScopedProductPricing(
+        { ...(products.value.find((p: any) => p?.id === item.productId) || {}), ...(orderItem.product || {}), hasVariants: true },
+        orderItem.variant as any
+      )
+      return { ...item, price: pricing.effectivePrice }
+    }
     const product = products.value.find((p: any) => p?.id === item.productId)
     if (!product) return item
-    const pricing = buildProductPricing(product, item.price)
+    const pricing = buildScopedProductPricing(product)
     return { ...item, price: pricing.effectivePrice }
   })
 }
@@ -2145,7 +2156,7 @@ function cancelEdit() {
 
 async function addProductToCart(product: any) {
   productSearch.value = ''
-  const pricing = buildProductPricing(product)
+  const pricing = buildScopedProductPricing(product)
 
   if (product?.options && product.options.length > 0) {
     selectedProductForVariant.value = product
@@ -2160,14 +2171,16 @@ async function addProductToCart(product: any) {
       selectedProductForVariant.value = response
 
       availableVariantsForSelection.value = (response.variants || []).map((v: any) => {
-        const variantPricing = buildProductPricing(response, v.price)
+        const variantPricing = buildScopedProductPricing(response, v)
         const label = v.optionValues
           ? v.optionValues.map((ov: any) => ov.optionValue?.label).join(' / ')
           : 'Default'
         return {
           ...v,
           label,
-          availableStock: v.stock - (v.reserved || 0),
+          availableStock: Number(
+            v.availableStock ?? getVariantAvailableStock(v, { infiniteValue: PRODUCT_INFINITE_STOCK })
+          ),
           originalPrice: variantPricing.originalPrice,
           displayPrice: variantPricing.effectivePrice,
           promotionApplied: variantPricing.promotionApplied,

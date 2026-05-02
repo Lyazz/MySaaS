@@ -2,20 +2,49 @@ import prisma from '../../lib/prisma'
 import { InventoryService } from '../inventory/inventory.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { normalizeBarcodeInput, normalizeSkuInput, suggestSkuFromProduct } from '../../lib/variant-identifiers'
+import { getVariantAvailableStock, hasVariantInventoryBalance, PRODUCT_INFINITE_STOCK } from '../../../../shared/inventory/variant-availability'
+import { ProductWorkflowError } from './product-workflow.error'
+import { syncDerivedProductPrice } from './product-price-sync'
 
 export class VariantsService {
     private inventory = new InventoryService()
 
-    private toNonNegativeMoneyString(value: unknown): string | undefined {
+    private toNonNegativeMoneyString(
+        value: unknown,
+        field: string,
+        opts?: { nullable?: boolean }
+    ): string | null | undefined {
         if (value === undefined) return undefined
+        if (opts?.nullable && (value === null || value === '')) return null
         const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
         if (!Number.isFinite(n) || n < 0) {
-            const err = new Error('cost must be a non-negative number') as any
+            const err = new Error(`${field} must be a non-negative number`) as any
             err.statusCode = 400
-            err.statusMessage = 'cost must be a non-negative number'
+            err.statusMessage = `${field} must be a non-negative number`
             throw err
         }
         return String(n)
+    }
+
+    private toNullableDate(value: unknown): Date | null | undefined {
+        if (value === undefined) return undefined
+        if (value === null || value === '') return null
+        const parsed = value instanceof Date ? value : new Date(String(value))
+        if (Number.isNaN(parsed.getTime())) {
+            const err = new Error('promotion date is invalid') as any
+            err.statusCode = 400
+            err.statusMessage = 'promotion date is invalid'
+            throw err
+        }
+        return parsed
+    }
+
+    private decorateVariant(variant: any) {
+        if (!variant) return variant
+        return {
+            ...variant,
+            availableStock: getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK })
+        }
     }
 
     private async assertVariantCanBeActivated(tenantId: string, variant: { id: string; productId: string }) {
@@ -86,6 +115,20 @@ export class VariantsService {
         if (body?.isActive !== undefined && Boolean(body.isActive) === true) {
             await this.assertVariantCanBeActivated(tenantId, { id: variantId, productId: variant.productId })
         }
+        if (body?.isActive !== undefined && Boolean(body.isActive) === false && hasVariantInventoryBalance(variant)) {
+            throw new ProductWorkflowError(
+                409,
+                'VARIANT_STOCK_NOT_EMPTY',
+                'Cannot archive or deactivate a variant that still has stock balances',
+                {
+                    variantId,
+                    productId: variant.productId,
+                    stock: variant.stock,
+                    reserved: variant.reserved,
+                    safetyStock: variant.safetyStock
+                }
+            )
+        }
 
         const nextSku = body?.sku === undefined ? undefined : normalizeSkuInput(body?.sku, 'sku')
         const nextBarcode = body?.barcode === undefined ? undefined : normalizeBarcodeInput(body?.barcode)
@@ -123,7 +166,14 @@ export class VariantsService {
             }
         }
 
-        const cost = this.toNonNegativeMoneyString(body?.cost)
+        const cost = this.toNonNegativeMoneyString(body?.cost, 'cost')
+        const promotionalPrice = this.toNonNegativeMoneyString(body?.promotionalPrice, 'promotional price', { nullable: true })
+        const promotionStartDate = this.toNullableDate(body?.promotionStartDate)
+        const promotionEndDate = this.toNullableDate(body?.promotionEndDate)
+        const productOptionCount = await prisma.productOption.count({
+            where: { tenantId, productId: variant.productId }
+        })
+        const allowVariantPromotion = productOptionCount > 0
 
         const updateInfoResult = await prisma.productVariant.updateMany({
             where: { id: variantId, tenantId },
@@ -131,6 +181,17 @@ export class VariantsService {
                 sku: nextSku,
                 barcode: nextBarcode,
                 price: body?.price !== undefined ? body.price : undefined,
+                promotionalPrice: allowVariantPromotion
+                    ? (promotionalPrice !== undefined ? promotionalPrice : undefined)
+                    : undefined,
+                isPromotionActive: allowVariantPromotion
+                    ? (body?.isPromotionActive !== undefined ? Boolean(body.isPromotionActive) : undefined)
+                    : undefined,
+                promotionStartDate: allowVariantPromotion ? promotionStartDate : undefined,
+                promotionEndDate: allowVariantPromotion ? promotionEndDate : undefined,
+                showCountdown: allowVariantPromotion
+                    ? (body?.showCountdown !== undefined ? Boolean(body.showCountdown) : undefined)
+                    : undefined,
                 compareAtPrice: body?.compareAtPrice !== undefined ? body.compareAtPrice : undefined,
                 cost,
                 isActive: body?.isActive !== undefined ? Boolean(body.isActive) : undefined
@@ -166,7 +227,12 @@ export class VariantsService {
             await syncProductStockForProducts(prisma as any, tenantId, [variant.productId])
         }
 
-        return prisma.productVariant.findFirst({ where: { id: variantId, tenantId } })
+        if (body?.price !== undefined || body?.isActive !== undefined) {
+            await syncDerivedProductPrice(prisma as any, tenantId, variant.productId)
+        }
+
+        const refreshed = await prisma.productVariant.findFirst({ where: { id: variantId, tenantId } })
+        return this.decorateVariant(refreshed)
     }
 
     async lockSku(tenantId: string, variantId: string) {
@@ -299,13 +365,32 @@ export class VariantsService {
     async deleteVariant(tenantId: string, variantId: string) {
         const variant = await prisma.productVariant.findFirst({
             where: { id: variantId, tenantId },
-            select: { id: true, productId: true }
+            include: {
+                optionValues: {
+                    include: { optionValue: true }
+                }
+            }
         })
         if (!variant) {
             const err = new Error('Variant not found') as any
             err.statusCode = 404
             err.statusMessage = 'Variant not found'
             throw err
+        }
+
+        if (hasVariantInventoryBalance(variant)) {
+            throw new ProductWorkflowError(
+                409,
+                'VARIANT_STOCK_NOT_EMPTY',
+                'Cannot delete or archive a variant that still has stock balances',
+                {
+                    variantId,
+                    productId: variant.productId,
+                    stock: variant.stock,
+                    reserved: variant.reserved,
+                    safetyStock: variant.safetyStock
+                }
+            )
         }
 
         const [movementCount, purchaseCount, saleCount, orderCount] = await prisma.$transaction([
@@ -321,6 +406,7 @@ export class VariantsService {
                 where: { tenantId, id: variantId },
                 data: { isActive: false }
             })
+            await syncDerivedProductPrice(prisma as any, tenantId, variant.productId)
             await syncProductStockForProducts(prisma as any, tenantId, [variant.productId])
             return {
                 success: true,
@@ -344,6 +430,7 @@ export class VariantsService {
         }
 
         await syncProductStockForProducts(prisma as any, tenantId, [variant.productId])
+        await syncDerivedProductPrice(prisma as any, tenantId, variant.productId)
         return { success: true, deleted: true, archived: false }
     }
 }

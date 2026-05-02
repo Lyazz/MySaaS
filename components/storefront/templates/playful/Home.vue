@@ -66,78 +66,78 @@ const categories = computed(() => {
 <template>
   <div class="bg-[#fffbf0] min-h-screen pb-24" style="font-family: 'DM Sans', sans-serif">
 
-    <!-- Hero: Diagonal Split -->
+    <!-- Hero: Full-bleed image + bottom overlay bar -->
     <div
-      class="relative w-full h-[480px] md:h-[560px] lg:h-[640px] overflow-hidden"
+      class="relative w-full h-[520px] md:h-[620px] lg:h-[700px] overflow-hidden bg-stone-900"
       @touchstart.passive="pauseSlideAutoplay"
       @touchend.passive="resumeSlideAutoplay"
     >
+      <!-- Slides -->
       <div
         v-for="(slide, index) in heroSlides"
         :key="index"
-        class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+        class="absolute inset-0 transition-opacity duration-700 ease-in-out"
         :class="index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'"
       >
-        <!-- Right: full image -->
-        <img :src="slide.imageUrl" class="absolute inset-0 w-full h-full object-cover" :alt="slide.title">
+        <img
+          :src="slide.imageUrl"
+          :alt="slide.title"
+          class="absolute inset-0 w-full h-full object-cover"
+        >
+        <!-- Bottom gradient scrim — only covers bottom third -->
+        <div class="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
+      </div>
 
-        <!-- Left diagonal panel -->
-        <div class="absolute inset-0" style="clip-path: polygon(0 0, 60% 0, 45% 100%, 0 100%)">
-          <div class="w-full h-full bg-violet-700" />
-        </div>
-        <!-- Soft edge blend -->
-        <div class="absolute inset-0 bg-gradient-to-r from-violet-700/80 via-violet-700/20 to-transparent" style="clip-path: polygon(0 0, 70% 0, 55% 100%, 0 100%)" />
-
-        <!-- Text content -->
-        <div class="absolute inset-0 flex items-center">
-          <div class="max-w-7xl mx-auto px-6 md:px-12 w-full">
-            <div
-              class="max-w-sm md:max-w-lg text-white transform transition-all duration-1000 delay-300"
-              :class="index === currentSlide ? 'translate-x-0 opacity-100' : '-translate-x-12 opacity-0'"
-            >
-              <!-- Badge -->
-              <span class="inline-block px-4 py-1.5 bg-amber-400 text-amber-900 rounded-full text-xs font-black mb-5 border-2 border-amber-300 shadow-[0_3px_0_0_#d97706] -rotate-1">
+      <!-- Text overlay — bottom left, compact -->
+      <div class="absolute inset-x-0 bottom-0 z-20 px-6 md:px-12 pb-10 md:pb-12">
+        <div
+          class="transition-all duration-500"
+          :class="'translate-y-0 opacity-100'"
+        >
+          <div class="flex items-end justify-between gap-6">
+            <div class="max-w-lg">
+              <p class="text-amber-400 text-xs font-black tracking-widest uppercase mb-2">
                 {{ storefrontContent.home.welcomeTo(tenantName) }}
-              </span>
-              <h2 class="text-4xl md:text-5xl lg:text-6xl font-black mb-5 leading-tight tracking-tight drop-shadow-sm" style="font-family: 'Fredoka', sans-serif">
-                {{ slide.title }}
+              </p>
+              <h2 class="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-3" style="font-family: 'Fredoka', sans-serif">
+                {{ heroSlides[currentSlide]?.title }}
               </h2>
-              <p class="text-base md:text-lg mb-8 text-violet-100 max-w-md leading-relaxed font-medium line-clamp-2">
-                {{ slide.subtitle }}
+              <p class="text-sm md:text-base text-white/70 line-clamp-1 mb-5">
+                {{ heroSlides[currentSlide]?.subtitle }}
               </p>
               <NuxtLink
-                :to="slideTo(slide.buttonHref)"
-                class="group inline-flex items-center gap-3 px-8 py-4 bg-amber-400 text-amber-900 font-black rounded-full border-2 border-amber-300 shadow-[0_5px_0_0_#d97706] hover:-translate-y-1 hover:bg-amber-300 active:translate-y-1 active:shadow-none transition-all text-base"
+                :to="slideTo(heroSlides[currentSlide]?.buttonHref)"
+                class="group inline-flex items-center gap-2 px-6 py-3 bg-amber-400 text-amber-900 font-black rounded-full border-2 border-amber-300 shadow-[0_4px_0_0_#d97706] hover:-translate-y-0.5 hover:bg-amber-300 active:translate-y-0.5 active:shadow-none transition-all text-sm"
               >
-                {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
-                <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform stroke-[3]" />
+                {{ heroSlides[currentSlide]?.buttonText || storefrontContent.home.cta.shopNow }}
+                <Icon name="lucide:arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform stroke-[3]" />
               </NuxtLink>
+            </div>
+
+            <!-- Dots + Arrows stacked on the right -->
+            <div class="flex-shrink-0 flex flex-col items-end gap-3 pb-1">
+              <div v-if="hasMultipleSlides" class="flex gap-2">
+                <button
+                  class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition-all"
+                  @click="prevSlide"
+                ><Icon name="lucide:chevron-left" class="w-4 h-4 stroke-[2.5]" /></button>
+                <button
+                  class="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition-all"
+                  @click="nextSlide"
+                ><Icon name="lucide:chevron-right" class="w-4 h-4 stroke-[2.5]" /></button>
+              </div>
+              <div v-if="hasMultipleSlides" class="flex gap-1.5">
+                <button
+                  v-for="(_, idx) in heroSlides"
+                  :key="idx"
+                  class="h-1.5 rounded-full transition-all duration-300"
+                  :class="idx === currentSlide ? 'bg-amber-400 w-6' : 'bg-white/40 w-1.5 hover:bg-white/70'"
+                  @click="currentSlide = idx"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Arrows -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-3">
-        <button
-          class="w-11 h-11 rounded-full bg-white/90 border-2 border-violet-200 flex items-center justify-center text-violet-700 hover:-translate-y-0.5 shadow-[0_3px_0_0_#ddd6fe] active:translate-y-0.5 active:shadow-none transition-all"
-          @click="prevSlide"
-        ><Icon name="lucide:chevron-left" class="w-5 h-5 stroke-[2.5]" /></button>
-        <button
-          class="w-11 h-11 rounded-full bg-white/90 border-2 border-violet-200 flex items-center justify-center text-violet-700 hover:-translate-y-0.5 shadow-[0_3px_0_0_#ddd6fe] active:translate-y-0.5 active:shadow-none transition-all"
-          @click="nextSlide"
-        ><Icon name="lucide:chevron-right" class="w-5 h-5 stroke-[2.5]" /></button>
-      </div>
-
-      <!-- Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-8 left-8 z-20 flex gap-2">
-        <button
-          v-for="(_, index) in heroSlides"
-          :key="index"
-          class="h-2 rounded-full transition-all duration-300"
-          :class="index === currentSlide ? 'bg-amber-400 w-8 shadow-sm' : 'bg-white/50 w-3 hover:bg-white/80'"
-          @click="currentSlide = index"
-        />
       </div>
     </div>
 
@@ -225,11 +225,11 @@ const categories = computed(() => {
           </div>
         </div>
 
-        <!-- Scroll container with stagger tilt -->
+        <!-- Scroll container -->
         <div
           v-else
           ref="featuredScrollContainer"
-          class="flex gap-5 overflow-x-scroll pb-6 scrollbar-hide pt-4"
+          class="flex gap-5 overflow-x-scroll pb-6 scrollbar-hide pt-2"
           style="scroll-behavior: auto;"
           @mouseenter="isHoveringFeatured = true"
           @mouseleave="isHoveringFeatured = false"
@@ -237,8 +237,7 @@ const categories = computed(() => {
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-0.625rem)] sm:w-56 md:w-64 transition-transform duration-300"
-            :style="{ marginTop: index % 2 === 0 ? '0px' : '24px', transform: `rotate(${index % 2 === 0 ? '0.8deg' : '-0.8deg'})` }"
+            class="flex-shrink-0 w-[calc(50%-0.625rem)] sm:w-56 md:w-64"
           >
             <ProductCard :product="product" />
           </div>
@@ -284,7 +283,7 @@ const categories = computed(() => {
         <div
           v-else
           ref="bestSellersScrollContainer"
-          class="flex gap-5 overflow-x-scroll pb-6 scrollbar-hide pt-4"
+          class="flex gap-5 overflow-x-scroll pb-6 scrollbar-hide pt-2"
           style="scroll-behavior: auto;"
           @mouseenter="isHoveringBestSellers = true"
           @mouseleave="isHoveringBestSellers = false"
@@ -292,8 +291,7 @@ const categories = computed(() => {
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-0.625rem)] sm:w-56 md:w-64 transition-transform duration-300"
-            :style="{ marginTop: index % 2 === 1 ? '0px' : '24px', transform: `rotate(${index % 2 === 1 ? '0.8deg' : '-0.8deg'})` }"
+            class="flex-shrink-0 w-[calc(50%-0.625rem)] sm:w-56 md:w-64"
           >
             <ProductCard :product="product" />
           </div>

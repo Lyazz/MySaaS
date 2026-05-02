@@ -11,6 +11,7 @@ describe('Loyalty points flows', () => {
     let adminToken: string
     let customerId: string
     let productId: string
+    let productSlug: string
     let variantId: string
     let cashboxId: string
 
@@ -68,11 +69,12 @@ describe('Loyalty points flows', () => {
             }
         })
 
+        productSlug = `loyalty-product-${Date.now()}`
         const product = await prisma.product.create({
             data: {
                 tenantId,
                 title: 'Loyalty Product',
-                slug: `loyalty-product-${Date.now()}`,
+                slug: productSlug,
                 price: 100,
                 stock: 20,
                 isActive: true
@@ -135,6 +137,9 @@ describe('Loyalty points flows', () => {
             })
 
         expect(created.status).toBe(201)
+        expect(created.body.loyaltySummary?.basePointsToEarn).toBe(2)
+        expect(created.body.loyaltySummary?.productPointsToEarn).toBe(6)
+        expect(created.body.loyaltySummary?.totalPointsToEarn).toBe(8)
         expect(created.body.loyaltySummary?.redeemedPoints).toBe(50)
         expect(created.body.loyaltySummary?.redeemedAmount).toBe(50)
 
@@ -175,6 +180,48 @@ describe('Loyalty points flows', () => {
         expect(consumedRedeem?.status).toBe('CONSUMED')
         expect(earned?.status).toBe('AVAILABLE')
         expect(earned?.points).toBe(8)
+    })
+
+    it('returns a public product loyalty preview with base and product points only', async () => {
+        const response = await request(app)
+            .get(`/api/products/${productSlug}`)
+            .set('X-Forwarded-Host', host)
+
+        expect(response.status).toBe(200)
+        expect(response.body.loyaltyPreview).toMatchObject({
+            enabled: true,
+            basePoints: 2,
+            productPoints: 6,
+            totalPoints: 8
+        })
+        expect(response.body.loyaltyPreview).not.toHaveProperty('estimatedPoints')
+        expect(response.body.loyaltyPreview).not.toHaveProperty('formulaBreakdown')
+        expect(response.body.variants[0].loyaltyPreview).toMatchObject({
+            basePoints: 2,
+            productPoints: 6,
+            totalPoints: 8
+        })
+        expect(response.body.variants[0]).not.toHaveProperty('cost')
+    })
+
+    it('returns checkout loyalty summary with balance and earn breakdown', async () => {
+        const response = await request(app)
+            .post('/api/orders/loyalty/summary')
+            .set('X-Forwarded-Host', host)
+            .send({
+                customerPhone: '0550 12 34 56',
+                redeemPointsRequested: 50,
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(response.status).toBe(200)
+        expect(response.body.availablePoints).toBe(150)
+        expect(response.body.pendingRedeemPoints).toBe(50)
+        expect(response.body.basePointsToEarn).toBe(2)
+        expect(response.body.productPointsToEarn).toBe(6)
+        expect(response.body.totalPointsToEarn).toBe(8)
+        expect(response.body.redeemedPoints).toBe(50)
+        expect(response.body.redeemedAmount).toBe(50)
     })
 
     it('credits POS sale points once for a known customer', async () => {

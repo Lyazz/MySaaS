@@ -67,6 +67,7 @@ router.delete('/:id', controller.deleteProduct.bind(controller))
 
 // POST /products/:productId/variants/generate - Generate variants from options
 router.post('/:productId/variants/generate', controller.generateVariants.bind(controller))
+router.post('/:productId/variants/allocate-stock', controller.allocateVariantStock.bind(controller))
 
 // POST /products/:productId/options - Create option
 router.post('/:productId/options', controller.createOption.bind(controller))
