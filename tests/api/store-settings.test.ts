@@ -53,6 +53,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(getBody.isCompleted).toBe(false)
         expect(getBody).toHaveProperty('cartEnabled')
         expect(getBody).toHaveProperty('codEnabled')
+        expect(getBody).toHaveProperty('orderIdPrefix')
         expect(getBody).toHaveProperty('minimumOrderAmountDzd')
         expect(getBody).toHaveProperty('hideOptionalAddress')
         expect(getBody).toHaveProperty('currencyCode')
@@ -70,6 +71,7 @@ describe('Store Settings (Tenant Admin)', async () => {
                 language: 'ar',
                 cartEnabled: false,
                 codEnabled: false,
+                orderIdPrefix: 'shop1',
                 minimumOrderAmountDzd: 2500,
                 hideOptionalAddress: false,
                 currencyCode: 'EUR',
@@ -84,6 +86,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(patchBody.language).toBe('ar')
         expect(patchBody.cartEnabled).toBe(false)
         expect(patchBody.codEnabled).toBe(false)
+        expect(patchBody.orderIdPrefix).toBe('SHOP1')
         expect(patchBody.minimumOrderAmountDzd).toBe(2500)
         expect(patchBody.hideOptionalAddress).toBe(false)
         expect(patchBody.currencyCode).toBe('EUR')
@@ -106,6 +109,23 @@ describe('Store Settings (Tenant Admin)', async () => {
         const patchBody = await patchRes.json()
         expect(patchRes.status).toBe(200)
         expect(patchBody.templateKey).toBe('maison')
+    })
+
+    it('rejects invalid order id prefixes', async () => {
+        const patchRes = await fetch('/api/admin/store-settings', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokenA}`
+            },
+            body: JSON.stringify({
+                orderIdPrefix: 'ab'
+            })
+        })
+
+        const patchBody = await patchRes.json()
+        expect(patchRes.status).toBe(400)
+        expect(String(patchBody.statusMessage || '')).toContain('orderIdPrefix')
     })
 
     it('denies cross-tenant access when host tenant mismatches token tenant', async () => {
@@ -162,6 +182,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(res.status).toBe(200)
         expect(body.tenant.slug).toBe(slugA)
         expect(body.storeSettings).toHaveProperty('templateKey')
+        expect(body.storeSettings.orderIdPrefix).toBe('SHOP1')
         expect(body.storeSettings.minimumOrderAmountDzd).toBeTypeOf('number')
         expect(body.storeSettings).toHaveProperty('hideOptionalAddress')
     })

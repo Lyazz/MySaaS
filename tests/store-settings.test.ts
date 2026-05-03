@@ -38,7 +38,8 @@ describe('Store Settings API', () => {
                 name: 'Updated Name',
                 slug: slug,
                 primaryColor: '#0F766E',
-                templateKey: 'modern'
+                templateKey: 'modern',
+                orderIdPrefix: 'shop1'
             })
 
         if (res.status !== 200) {
@@ -47,6 +48,7 @@ describe('Store Settings API', () => {
         expect(res.status).toBe(200)
         expect(res.body.logoUrl).toBe(logoUrl)
         expect(res.body.faviconUrl).toBe(faviconUrl)
+        expect(res.body.orderIdPrefix).toBe('SHOP1')
 
         // Verify in DB
         const settings = await prisma.storeSettings.findUnique({
@@ -54,6 +56,7 @@ describe('Store Settings API', () => {
         })
         expect(settings?.logoUrl).toBe(logoUrl)
         expect(settings?.faviconUrl).toBe(faviconUrl)
+        expect(settings?.orderIdPrefix).toBe('SHOP1')
     })
 
     it('fails with invalid faviconUrl type', async () => {

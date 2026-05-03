@@ -350,7 +350,13 @@ export class OrdersController {
                 currentPeriodEnd: req.subscription.currentPeriodEnd
             } : null)
 
-            res.status(201).json({ success: true, orderId: result.order?.id, order: result.order, loyaltySummary: result.loyaltySummary })
+            res.status(201).json({
+                success: true,
+                orderId: result.order?.id,
+                publicOrderId: result.order?.publicId,
+                order: result.order,
+                loyaltySummary: result.loyaltySummary
+            })
         } catch (error: any) {
             if (error instanceof OrderValidationError) {
                 return res.status(error.statusCode).json({
@@ -424,7 +430,7 @@ export class OrdersController {
                 items: req.body?.items ?? []
             }, { userId: user?.id })
 
-            res.status(201).json({ success: true, orderId: order?.id, order })
+            res.status(201).json({ success: true, orderId: order?.id, publicOrderId: order?.publicId, order })
         } catch (error: any) {
             if (error instanceof OrderValidationError) {
                 return res.status(error.statusCode).json({

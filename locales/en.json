@@ -1491,6 +1491,12 @@
           "subtitle": "Block checkout when cart subtotal is below this amount.",
           "unit": "DZD"
         },
+        "orderIdPrefix": {
+          "title": "Customer order prefix",
+          "subtitle": "Prefix used in the public order reference shown to customers.",
+          "placeholder": "ORDR",
+          "hint": "4-5 chars"
+        },
         "hideOptionalAddress": {
           "title": "Hide optional address field",
           "subtitle": "Remove the optional address input from checkout and quick order forms.",

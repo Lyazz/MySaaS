@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
+import { isValidOrderIdPrefix, sanitizeOrderIdPrefix } from '../../lib/order-public-id'
 
 export type StoreTemplateKey =
     | 'classic'
@@ -72,6 +73,7 @@ export type StoreSettingsPatchInput = Partial<{
     language: string
     cartEnabled: boolean
     codEnabled: boolean
+    orderIdPrefix: string
     minimumOrderAmountDzd: number
     hideOptionalAddress: boolean
     currencyCode: string
@@ -200,6 +202,14 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('codEnabled must be a boolean')
             }
             updateSettings.codEnabled = input.codEnabled
+        }
+
+        if (input.orderIdPrefix !== undefined) {
+            const orderIdPrefix = sanitizeOrderIdPrefix(input.orderIdPrefix)
+            if (!isValidOrderIdPrefix(orderIdPrefix)) {
+                throw new StoreSettingsValidationError('orderIdPrefix must be 4 to 5 uppercase letters or numbers')
+            }
+            updateSettings.orderIdPrefix = orderIdPrefix
         }
 
         if (input.minimumOrderAmountDzd !== undefined) {
@@ -362,6 +372,7 @@ export class StoreSettingsService {
             hideOptionalAddress: boolean
             currencyCode: string
             currencyCountry: string
+            orderIdPrefix: string
         }
         apiBasePath?: string
     }): { markdown: string; data: any } {
@@ -406,6 +417,7 @@ export class StoreSettingsService {
             `- Language: ${args.settings.language}`,
             `- Cart + checkout enabled: ${args.settings.cartEnabled ? 'yes' : 'no'}`,
             `- Product page COD form: ${args.settings.codEnabled ? 'enabled' : 'disabled'}`,
+            `- Customer order prefix: ${args.settings.orderIdPrefix}`,
             `- Minimum order amount: ${args.settings.minimumOrderAmountDzd} DZD`,
             `- Hide optional address at checkout: ${args.settings.hideOptionalAddress ? 'yes' : 'no'}`,
             `- Currency: ${args.settings.currencyCode} (${args.settings.currencyCountry})`,

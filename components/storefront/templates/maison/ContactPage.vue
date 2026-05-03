@@ -42,15 +42,6 @@ const submitForm = () => {
               </div>
               <span>Algérie</span>
             </div>
-            <div class="contact__info-item">
-              <div class="contact__info-icon">
-                <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-                  <rect x="1" y="3" width="12" height="8" stroke="currentColor" stroke-width="0.75"/>
-                  <path d="M1 3l6 5 6-5" stroke="currentColor" stroke-width="0.75"/>
-                </svg>
-              </div>
-              <span>contact@maison.dz</span>
-            </div>
           </div>
 
           <p class="contact__info-tagline">Maison — Art de vivre</p>

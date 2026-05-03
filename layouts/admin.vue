@@ -45,7 +45,7 @@
           :class="sidebarOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 pointer-events-none'"
         >
           <p class="font-semibold text-[12.5px] truncate leading-tight" style="color: var(--text-primary)">{{ tenantName }}</p>
-          <p class="text-[10px] truncate leading-tight mt-0.5" style="color: var(--text-tertiary)">{{ tenantSlug }}.swekly.dz</p>
+          <p class="text-[10px] truncate leading-tight mt-0.5" style="color: var(--text-tertiary)">{{ tenantSlug }}.swekly.com</p>
         </div>
 
         <button
@@ -353,11 +353,24 @@ function hexToRgb(hex: string) {
     : '79 70 229'
 }
 
+function getBrandContrast(hex: string) {
+  const normalized = hex.replace('#', '')
+  if (normalized.length !== 6) return '#05070A'
+
+  const r = parseInt(normalized.slice(0, 2), 16)
+  const g = parseInt(normalized.slice(2, 4), 16)
+  const b = parseInt(normalized.slice(4, 6), 16)
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000
+
+  return yiq >= 150 ? '#05070A' : '#F8FAFC'
+}
+
 const adminStyle = computed(() => {
   const primaryColor = '#C6F432'
   return {
     '--brand': primaryColor,
-    '--brand-rgb': hexToRgb(primaryColor)
+    '--brand-rgb': hexToRgb(primaryColor),
+    '--brand-contrast': getBrandContrast(primaryColor)
   } as Record<string, string>
 })
 

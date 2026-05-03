@@ -22,6 +22,7 @@
     /* Brand — default admin primary, aligned with marketing */
     --brand: #C6F432;
     --brand-rgb: 198 244 50;
+    --brand-contrast: #05070A;
 
     /* Admin shell palette — fixed dark chrome */
     --admin-sidebar-bg: #0f1117;
@@ -71,26 +72,31 @@
 
   [data-theme="light"] {
     /* Admin shell — light chrome */
-    --admin-sidebar-bg: #ffffff;
-    --admin-sidebar-surface: #f8fafc;
-    --admin-sidebar-border: rgba(0,0,0,0.08);
-    --admin-topbar-bg: #ffffff;
-    --admin-topbar-border: rgba(0,0,0,0.08);
-    --admin-content-bg: #f1f5f9;
+    --admin-sidebar-bg: #f4f7fb;
+    --admin-sidebar-surface: #edf2f7;
+    --admin-sidebar-border: rgba(15,23,42,0.1);
+    --admin-topbar-bg: #f8fbff;
+    --admin-topbar-border: rgba(15,23,42,0.1);
+    --admin-content-bg: #e6edf4;
 
     /* Surface layers */
-    --surface-1: #ffffff;
-    --surface-2: #f8fafc;
-    --surface-3: #f1f5f9;
-    --surface-border: rgba(0,0,0,0.08);
-    --surface-border-hover: rgba(0,0,0,0.15);
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --surface-1: #fbfdff;
+    --surface-2: #f3f7fb;
+    --surface-3: #eaf0f6;
+    --surface-border: rgba(15,23,42,0.12);
+    --surface-border-hover: rgba(15,23,42,0.18);
+    --card-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 12px 30px rgba(15,23,42,0.06);
 
     /* Text hierarchy */
     --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #94a3b8;
-    --text-muted: #cbd5e1;
+    --text-secondary: #334155;
+    --text-tertiary: #64748b;
+    --text-muted: #94a3b8;
+
+    /* Brand — darkened for readability on light backgrounds */
+    --brand: #5a7a0a;
+    --brand-rgb: 90 122 10;
+    --brand-contrast: #ffffff;
 
     /* Accent */
     --accent: #84A60D;
@@ -113,7 +119,7 @@
     --status-returned-text: #7e22ce;
 
     /* Nav hover */
-    --nav-hover-bg: rgba(0,0,0,0.04);
+    --nav-hover-bg: rgba(15,23,42,0.06);
   }
 }
 
@@ -151,23 +157,26 @@
 
   .ui-btn--primary {
     background-color: var(--brand);
-    color: #05070A;
+    color: var(--brand-contrast);
     @apply shadow-sm hover:opacity-90 active:scale-[0.98];
   }
 
-  /* Admin: keep readable text/icons on light brand color buttons */
-  .admin-shell :is(button, a, [role="button"])[class*='[background:var(--brand)]'],
-  .admin-shell :is(button, a, [role="button"])[class*='bg-brand-'],
-  .admin-shell :is(button, a, [role="button"])[style*='background: var(--brand)'],
-  .admin-shell :is(button, a, [role="button"])[style*='background-color: var(--brand)'],
-  .admin-shell .ui-btn--primary {
-    color: #05070A !important;
+  /* Admin: keep readable text/icons on bright brand surfaces */
+  .admin-shell :is(
+    [class*='[background:var(--brand)]'],
+    [style*='background: var(--brand)'],
+    [style*='background-color: var(--brand)'],
+    .ui-btn--primary
+  ) {
+    color: var(--brand-contrast) !important;
   }
 
-  .admin-shell :is(button, a, [role="button"])[class*='[background:var(--brand)]'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[class*='bg-brand-'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[style*='background: var(--brand)'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[style*='background-color: var(--brand)'] :is(svg, i, span) {
+  .admin-shell :is(
+    [class*='[background:var(--brand)]'],
+    [style*='background: var(--brand)'],
+    [style*='background-color: var(--brand)'],
+    .ui-btn--primary
+  ) :is(svg, i, span, p, strong, small) {
     color: inherit !important;
   }
 
@@ -311,30 +320,34 @@
   }
 
   /* ── Checkboxes ── */
-  .admin-checkbox {
-    @apply h-4 w-4 rounded cursor-pointer;
-    color: var(--brand);
-    accent-color: var(--brand);
+  .admin-checkbox,
+  .admin-shell input[type="checkbox"]:not(.sr-only) {
+    @apply inline-grid h-4 w-4 cursor-pointer place-content-center rounded;
+    appearance: none;
+    -webkit-appearance: none;
     border: 1px solid var(--surface-border);
     background-color: var(--surface-2);
-    color-scheme: dark;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .admin-checkbox:checked {
+  .admin-checkbox:checked,
+  .admin-shell input[type="checkbox"]:not(.sr-only):checked {
     background-color: var(--brand);
     border-color: var(--brand);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2305070A' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.4' d='M3.5 8.5l2.6 2.6 6-6.2'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.7rem 0.7rem;
   }
 
-  .admin-checkbox:focus-visible {
+  .admin-checkbox:focus-visible,
+  .admin-shell input[type="checkbox"]:not(.sr-only):focus-visible {
     border-color: rgba(var(--brand-rgb) / 0.5);
     box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.15);
   }
 
-  [data-theme="light"] .admin-checkbox {
-    color-scheme: light;
-  }
-
-  .admin-checkbox:disabled {
+  .admin-checkbox:disabled,
+  .admin-shell input[type="checkbox"]:not(.sr-only):disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }

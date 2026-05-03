@@ -5,6 +5,7 @@ import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
 import { MaystroProvider } from '../../backend/src/modules/delivery/providers/maystro.provider'
 import { YalidineProvider } from '../../backend/src/modules/delivery/providers/yalidine.provider'
+import { MaystroClient } from '../../backend/src/modules/delivery/maystro/maystro.client'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -111,7 +112,9 @@ describe('Delivery API', () => {
         await prisma.shipment.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.deliveryRate.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.tenantDeliveryAccount.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.maystroProductMapping.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.maystroOrderMapping.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.maystroInventoryEvent.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.orderItem.deleteMany({ where: { order: { tenantId: { in: tenantIds } } } })
         await prisma.order.deleteMany({ where: { tenantId: { in: tenantIds } } })
         await prisma.product.deleteMany({ where: { tenantId: { in: tenantIds } } })
@@ -361,6 +364,122 @@ describe('Delivery API', () => {
 
         const updatedOrder = await prisma.order.findUnique({ where: { id: orderA.id } })
         expect(updatedOrder?.status).toBe('DELIVERED')
+    })
+
+    it('uses the synced Maystro product id when creating a shipment for a confirmed order', async () => {
+        const mappedProduct = await prisma.product.create({
+            data: {
+                tenantId: tenantA.id,
+                title: 'Mapped Product',
+                slug: `mapped-product-${Date.now()}`,
+                price: 250
+            }
+        })
+
+        const mappedOrder = await prisma.order.create({
+            data: {
+                tenantId: tenantA.id,
+                status: 'PENDING',
+                totalAmount: 250,
+                customerName: 'Mapped Alice',
+                customerPhone: '0550555555',
+                items: {
+                    create: [{ productId: mappedProduct.id, quantity: 1, price: 250 }]
+                }
+            }
+        })
+
+        await prisma.storeSettings.upsert({
+            where: { tenantId: tenantA.id },
+            create: { tenantId: tenantA.id, allowedDeliveryProviders: ['MAYSTRO'] },
+            update: { allowedDeliveryProviders: ['MAYSTRO'] }
+        })
+
+        await prisma.tenantDeliveryAccount.upsert({
+            where: { tenantId_provider: { tenantId: tenantA.id, provider: 'MAYSTRO' } },
+            create: {
+                tenantId: tenantA.id,
+                provider: 'MAYSTRO',
+                isActive: true,
+                config: { apiToken: 'tenant-maystro-token', storeId: 'store-123' }
+            },
+            update: {
+                isActive: true,
+                config: { apiToken: 'tenant-maystro-token', storeId: 'store-123' }
+            }
+        })
+
+        await prisma.maystroProductMapping.create({
+            data: {
+                tenantId: tenantA.id,
+                localProductId: mappedProduct.id,
+                maystroProductId: 'remote-product-123',
+                maystroUuid: 'remote-uuid-123',
+                syncStatus: 'SYNCED',
+                lastSyncedAt: new Date()
+            }
+        })
+
+        const calls: any[] = []
+        vi.spyOn(MaystroClient.prototype, 'request').mockImplementation(async (opts: any) => {
+            calls.push({ method: opts.method, path: opts.path, params: opts.params, data: opts.data })
+
+            if (opts.method === 'PATCH' && opts.path === '/stock/products/remote-product-123/') {
+                return {
+                    id: 'remote-uuid-123',
+                    product_id: 'remote-product-123',
+                    logistical_description: opts.data.logistical_description,
+                    store: 'store-123'
+                }
+            }
+
+            if (opts.method === 'GET' && opts.path === '/base/wilayas/') {
+                return [{ id: 16, name: 'Alger' }]
+            }
+
+            if (opts.method === 'GET' && opts.path === '/base/communes/') {
+                return [{ id: 1605, wilaya: 16, name: 'Hydra' }]
+            }
+
+            if (opts.method === 'POST' && opts.path === '/orders/') {
+                expect(opts.data.details?.[0]?.product).toBe('remote-product-123')
+                return {
+                    id: 'mx-order-remote-1',
+                    external_id: opts.data.external_id,
+                    tracking: 'TRK-REMOTE-1',
+                    success: true,
+                    delivery_price: 300
+                }
+            }
+
+            return {}
+        })
+
+        const res = await request(app)
+            .post('/api/shipments')
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .send({
+                provider: 'MAYSTRO',
+                orderId: mappedOrder.id,
+                contactName: 'Mapped Alice',
+                contactPhone: '0550555555',
+                wilayaCode: '16',
+                communeCode: '1605',
+                addressLine1: '456 Rue Sync'
+            })
+
+        expect(res.status).toBe(201)
+        expect(res.body.providerShipmentId).toBe('TRK-REMOTE-1')
+
+        const orderCall = calls.find((c) => c.method === 'POST' && c.path === '/orders/')
+        expect(orderCall?.data?.details?.[0]?.product).toBe('remote-product-123')
+
+        const mapping = await prisma.maystroProductMapping.findUnique({
+            where: { tenantId_localProductId: { tenantId: tenantA.id, localProductId: mappedProduct.id } }
+        })
+        expect(mapping?.syncStatus).toBe('SYNCED')
+        expect(mapping?.maystroProductId).toBe('remote-product-123')
     })
 
     it('allows tenant admins to configure carrier credentials without leaking secrets', async () => {

@@ -304,6 +304,7 @@ model StoreSettings {
 
   cartEnabled     Boolean @default(true)
   codEnabled      Boolean @default(true)
+  orderIdPrefix   String  @default("ORDR")
   minimumOrderAmountDzd Int @default(1000)
   hideOptionalAddress   Boolean @default(true)
   currencyCode    String  @default("DZD") // ISO currency code
@@ -896,6 +897,7 @@ model PurchaseOrderItem {
 
 model Order {
   id          String @id @default(uuid())
+  publicId    String?
   tenantId    String
   tenant      Tenant @relation(fields: [tenantId], references: [id])
   status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
@@ -942,6 +944,7 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, id])
+  @@unique([tenantId, publicId])
   @@index([tenantId])
   @@index([tenantId, customerId])
 }
@@ -1289,4 +1292,18 @@ model AuditLog {
   targetId  String? // ID of the target entity (e.g. tenantId)
   tenantId  String? // Tenant context usually null for super admin actions but good to have
   createdAt DateTime @default(now())
+}
+
+model GoogleOAuthToken {
+  id           String    @id @default(uuid())
+  tenantId     String
+  userId       String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
 }

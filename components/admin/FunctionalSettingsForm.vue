@@ -101,6 +101,29 @@
           <div class="toggle-row">
             <div class="toggle-row-info">
               <div class="toggle-row-icon">
+                <Icon name="lucide:hash" class="w-4 h-4" />
+              </div>
+              <div class="toggle-row-flex">
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.checkoutRules.orderIdPrefix.title') }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.checkoutRules.orderIdPrefix.subtitle') }}</p>
+                <div class="toggle-row-input">
+                  <input
+                    v-model="form.orderIdPrefix"
+                    type="text"
+                    maxlength="5"
+                    class="field-input field-input-narrow"
+                    :placeholder="t('admin.functionalSettingsForm.checkoutRules.orderIdPrefix.placeholder')"
+                    @input="sanitizeOrderIdPrefixInput"
+                  >
+                  <span class="field-suffix-text">{{ t('admin.functionalSettingsForm.checkoutRules.orderIdPrefix.hint') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
                 <Icon name="lucide:map-pin-off" class="w-4 h-4" />
               </div>
               <div>
@@ -298,6 +321,7 @@ const form = reactive({
   loyaltyMarginFactor: 0,
   loyaltyMinRedeemPoints: 0,
   loyaltyRedeemRateDzdPerPoint: 1,
+  orderIdPrefix: 'ORDR',
   minimumOrderAmountDzd: 1000,
   hideOptionalAddress: true
 })
@@ -365,6 +389,7 @@ const updateForm = (data: any) => {
   if (!data) return
   form.cartEnabled = data.cartEnabled ?? true
   form.codEnabled = data.codEnabled ?? true
+  form.orderIdPrefix = data.orderIdPrefix || 'ORDR'
   form.currencyCode = data.currencyCode || 'DZD'
   form.currencyCountry = data.currencyCountry || 'DZ'
   form.language = data.language || 'en'
@@ -406,6 +431,7 @@ const save = async () => {
       body: {
         cartEnabled: form.cartEnabled,
         codEnabled: form.codEnabled,
+        orderIdPrefix: form.orderIdPrefix,
         currencyCode: form.currencyCode,
         currencyCountry: form.currencyCountry,
         language: form.language,
@@ -442,6 +468,13 @@ const reset = () => {
 const onCountryChange = () => {
   const cur = currencies.value.find((c) => c.country === form.currencyCountry)
   if (cur) form.currencyCode = cur.code
+}
+
+const sanitizeOrderIdPrefixInput = () => {
+  form.orderIdPrefix = String(form.orderIdPrefix || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 5)
 }
 
 function setupScrollSpy() {

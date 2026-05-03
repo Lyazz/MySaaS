@@ -208,8 +208,11 @@
                   :to="`/admin/orders/${order.id}`"
                   class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
                 >
-                  #{{ order.id.substring(0, 8) }}
+                  {{ order.publicId || `#${order.id.substring(0, 8)}` }}
                 </NuxtLink>
+                <div v-if="order.publicId" class="text-xs font-mono" style="color: var(--text-tertiary)">
+                  {{ order.id.substring(0, 8) }}
+                </div>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
@@ -384,6 +387,7 @@ const { t, locale } = useI18n({ useScope: 'global' })
 
 interface Order {
   id: string
+  publicId?: string | null
   customerName: string
   customerPhone: string
   customerAddress: string

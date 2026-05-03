@@ -126,7 +126,11 @@ export class MaystroOrderService {
         const mappings = await this.prisma.maystroProductMapping.findMany({
             where: { tenantId: input.tenantId, localProductId: { in: order.items.map((i) => i.productId) } }
         })
-        const mappedSet = new Set(mappings.filter((m) => m.syncStatus === 'SYNCED').map((m) => m.localProductId))
+        const syncedMappings = mappings.filter((m) => m.syncStatus === 'SYNCED')
+        const mappedSet = new Set(syncedMappings.map((m) => m.localProductId))
+        const maystroProductIdByLocalProductId = new Map(
+            syncedMappings.map((mapping) => [mapping.localProductId, mapping.maystroProductId])
+        )
         const missing = Array.from(new Set(order.items.map((i) => i.productId))).filter((id) => !mappedSet.has(id))
         if (missing.length) {
             throw new MaystroIntegrationError({
@@ -153,11 +157,22 @@ export class MaystroOrderService {
             })
         }
 
-        const details: MaystroOrderDetail[] = order.items.map((item) => ({
-            product: item.productId,
-            description: item.product?.title ? String(item.product.title) : undefined,
-            quantity: item.quantity
-        }))
+        const details: MaystroOrderDetail[] = order.items.map((item) => {
+            const maystroProductId = maystroProductIdByLocalProductId.get(item.productId)
+            if (!maystroProductId) {
+                throw new MaystroIntegrationError({
+                    statusCode: 400,
+                    statusMessage: 'Cannot create Maystro order: some products are not synced',
+                    details: { missingProductIds: [item.productId] }
+                })
+            }
+
+            return {
+                product: maystroProductId,
+                description: item.product?.title ? String(item.product.title) : undefined,
+                quantity: item.quantity
+            }
+        })
 
         const payload: MaystroOrderPayload = {
             customer_name: input.customerName,

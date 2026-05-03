@@ -16,6 +16,7 @@ import { LoyaltyCheckoutError, LoyaltyCheckoutService } from '../loyalty/loyalty
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
 import { PhoneNormalizationError } from '../loyalty/phone-normalization.service'
+import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
 
 const telegramService = new TelegramService()
 
@@ -159,6 +160,24 @@ export class OrdersService {
     private loyaltyFormula = new LoyaltyFormulaService()
     private loyaltyLedger = new LoyaltyLedgerService()
     private loyaltyCheckout = new LoyaltyCheckoutService()
+
+    private async generateUniquePublicId(tx: Prisma.TransactionClient, tenantId: string, configuredPrefix: unknown) {
+        const prefix = normalizeOrderIdPrefix(configuredPrefix)
+
+        for (let attempt = 0; attempt < 12; attempt += 1) {
+            const candidate = generatePublicOrderId(prefix)
+            const existing = await tx.order.findFirst({
+                where: { tenantId, publicId: candidate },
+                select: { id: true }
+            })
+
+            if (!existing) {
+                return candidate
+            }
+        }
+
+        throw new OrderValidationError(503, 'Unable to generate a unique order reference')
+    }
 
     private static normalizePickupPointLabel(value: string) {
         return value.trim().toLowerCase().replace(/\s+/g, ' ')
@@ -467,6 +486,7 @@ export class OrdersService {
             where: { tenantId, id: orderId },
             select: {
                 id: true,
+                publicId: true,
                 createdAt: true,
                 customerName: true,
                 customerPhone: true,
@@ -533,7 +553,7 @@ export class OrdersService {
         const pdf = await renderGenericBordereauPdf({
             tenantName,
             order: {
-                id: order.id,
+                id: order.publicId || order.id,
                 createdAt: order.createdAt,
                 customerName: order.customerName,
                 customerPhone: order.customerPhone,
@@ -725,6 +745,7 @@ export class OrdersService {
 
         if (filters.search) {
             where.OR = [
+                { publicId: { contains: filters.search, mode: 'insensitive' } },
                 { customerName: { contains: filters.search, mode: 'insensitive' } },
                 { customerPhone: { contains: filters.search } }
             ]
@@ -767,6 +788,7 @@ export class OrdersService {
                 where,
                 select: {
                     id: true,
+                    publicId: true,
                     status: true,
                     callStatus: true,
                     totalAmount: true,
@@ -939,6 +961,7 @@ export class OrdersService {
             where: { tenantId, id: orderId },
             select: {
                 id: true,
+                publicId: true,
                 totalAmount: true,
                 items: {
                     select: {
@@ -978,6 +1001,7 @@ export class OrdersService {
 
         return {
             orderId: order.id,
+            publicOrderId: order.publicId,
             value: order.totalAmount,
             currency,
             numItems,
@@ -2222,6 +2246,7 @@ export class OrdersService {
                 cost: item.variantCost
             }))
         )
+        const orderIdPrefix = normalizeOrderIdPrefix((storeSettings as any).orderIdPrefix)
 
         const orderResult = await prisma.$transaction(async (tx) => {
             let resolvedCustomer
@@ -2257,9 +2282,11 @@ export class OrdersService {
 
             const payableItemsTotal = Math.max(0, Number((totalAmount - redemption.redeemedAmount).toFixed(2)))
             const totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, effectiveShippingAmount)
+            const publicId = await this.generateUniquePublicId(tx, input.tenantId, orderIdPrefix)
             const createdOrder = await tx.order.create({
                 data: {
                     tenantId: input.tenantId,
+                    publicId,
                     customerId: resolvedCustomer?.id ?? null,
                     customerName,
                     customerPhone,
@@ -2656,6 +2683,7 @@ export class OrdersService {
                 cost: item.variantCost
             }))
         )
+        const orderIdPrefix = normalizeOrderIdPrefix((storeSettings as any).orderIdPrefix)
 
         let actualCustomerName = customerName
         let actualCustomerPhone = customerPhone
@@ -2690,9 +2718,11 @@ export class OrdersService {
                 }
             }
 
+            const publicId = await this.generateUniquePublicId(tx, input.tenantId, orderIdPrefix)
             const createdOrder = await tx.order.create({
                 data: {
                     tenantId: input.tenantId,
+                    publicId,
                     customerId: actualCustomerId,
                     customerName: actualCustomerName,
                     customerPhone: actualCustomerPhone,

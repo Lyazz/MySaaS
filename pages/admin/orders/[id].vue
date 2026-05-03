@@ -182,7 +182,7 @@
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-3">
                 <h1 class="min-w-0 truncate text-xl font-semibold" style="color: var(--text-primary)">
-                  {{ t('admin.pages.orders.detail.breadcrumb', { id: order.id.substring(0, 8) }) }}
+                  {{ order.publicId || t('admin.pages.orders.detail.breadcrumb', { id: order.id.substring(0, 8) }) }}
                 </h1>
                 <AdminOrderStatusBadge :status="order.status" />
               </div>
@@ -229,6 +229,20 @@
               </div>
 
               <div class="mt-2 flex items-center gap-2 text-xs" style="color: var(--text-tertiary)">
+                <span class="font-mono">{{ order.publicId || order.id }}</span>
+                <button
+                  type="button"
+                  class="rounded-md p-1 hover:[color:var(--brand)] transition-colors" style="color: var(--text-tertiary)"
+                  :aria-label="t('common.copy', 'Copy')"
+                  @click="copyToClipboard(order.publicId || order.id)"
+                >
+                  <Icon
+                    name="lucide:copy"
+                    class="h-4 w-4"
+                  />
+                </button>
+              </div>
+              <div v-if="order.publicId" class="mt-1 flex items-center gap-2 text-[11px]" style="color: var(--text-tertiary)">
                 <span class="font-mono">{{ order.id }}</span>
                 <button
                   type="button"
@@ -1293,6 +1307,7 @@ interface OrderItem {
 
   interface Order {
     id: string
+    publicId?: string | null
     customerName: string
     customerPhone: string
     customerAddress: string | null

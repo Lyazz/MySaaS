@@ -38,7 +38,7 @@
     <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
       <p class="text-xs mb-1" style="color: var(--text-tertiary)">{{ t('admin.pages.onboarding.done.storeUrlLabel') }}</p>
       <p class="font-mono font-semibold text-sm" style="color: var(--text-primary)">
-        https://{{ tenantSlug }}.swekly.dz
+        https://{{ tenantSlug }}.swekly.com
       </p>
     </div>
 

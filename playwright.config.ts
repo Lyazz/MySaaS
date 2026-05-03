@@ -2,6 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 process.env.JWT_SECRET ||= 'test-jwt-secret'
 process.env.TRUST_PROXY ||= 'true'
+const port = process.env.PLAYWRIGHT_PORT || '3000'
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${port}`
+const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_SERVER === 'true' || (!process.env.CI && port === '3000')
 
 export default defineConfig({
     testDir: './tests/e2e',
@@ -11,18 +14,18 @@ export default defineConfig({
     workers: process.env.CI ? 1 : undefined,
     reporter: 'html',
     use: {
-        baseURL: 'http://localhost:3000',
+        baseURL,
         trace: 'on-first-retry',
     },
     projects: [
         {
             name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
+            use: { ...devices['Desktop Chrome'], channel: 'chrome' },
         },
     ],
     webServer: {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: !process.env.CI,
+        command: `npm run dev:no-fork -- --port ${port}`,
+        url: baseURL,
+        reuseExistingServer,
     },
 });

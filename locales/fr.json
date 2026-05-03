@@ -1477,6 +1477,12 @@
           "subtitle": "Bloquer le checkout si le sous-total panier est inférieur à ce montant.",
           "unit": "DZD"
         },
+        "orderIdPrefix": {
+          "title": "Préfixe de commande client",
+          "subtitle": "Préfixe utilisé dans la référence publique de commande affichée au client.",
+          "placeholder": "ORDR",
+          "hint": "4-5 caractères"
+        },
         "hideOptionalAddress": {
           "title": "Masquer le champ adresse optionnelle",
           "subtitle": "Retirer le champ adresse optionnelle du checkout et des formulaires de commande rapide.",

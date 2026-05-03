@@ -1,17 +1,18 @@
 <template>
   <button
     type="button"
-    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
-    :class="[modelValue ? activeColor : 'bg-slate-200']"
+    class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    :class="[modelValue ? activeColor : '[background:var(--surface-3)] [border-color:var(--surface-border)]']"
     role="switch"
     :aria-checked="modelValue"
+    :disabled="disabled"
     @click="toggle"
   >
     <span class="sr-only">{{ srLabel }}</span>
     <span
       aria-hidden="true"
-      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-      :class="[modelValue ? 'translate-x-5' : 'translate-x-0']"
+      class="pointer-events-none inline-block h-[18px] w-[18px] transform rounded-full bg-[color:var(--surface-1)] shadow-sm ring-0 transition duration-200 ease-in-out"
+      :class="[modelValue ? 'translate-x-[22px]' : 'translate-x-0.5']"
     />
   </button>
 </template>
@@ -26,15 +27,20 @@ const props = defineProps({
     type: String,
     default: 'Toggle'
   },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
   activeColor: {
     type: String,
-    default: 'bg-teal-600'
+    default: 'bg-brand border-brand'
   }
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 function toggle() {
+  if (props.disabled) return
   emit('update:modelValue', !props.modelValue)
 }
 </script>

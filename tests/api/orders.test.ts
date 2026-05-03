@@ -174,6 +174,7 @@ describe('Public checkout order flow', () => {
 
         expect(res.status).toBe(201)
         expect(res.body.orderId).toBeDefined()
+        expect(res.body.publicOrderId).toMatch(/^ORDR-[A-Z0-9]{6}$/)
 
         const saved = await prisma.order.findUnique({
             where: { id: res.body.orderId },
@@ -181,6 +182,7 @@ describe('Public checkout order flow', () => {
         })
 
         expect(saved?.tenantId).toBe(tenantId)
+        expect(saved?.publicId).toBe(res.body.publicOrderId)
         expect(saved?.items[0].variantId).toBe(variantId)
         expect(saved?.items[0].quantity).toBe(2)
 
@@ -211,6 +213,40 @@ describe('Public checkout order flow', () => {
         const afterCancel = await prisma.productVariant.findUnique({ where: { id: variantId } })
         expect(afterCancel?.stock).toBe(variantStockBefore)
         expect(afterCancel?.reserved).toBe(0)
+    })
+
+    it('uses the tenant order prefix and lets admins search by public order id', async () => {
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { orderIdPrefix: 'SHOP1' }
+        })
+
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Searchable Buyer',
+                customerPhone: '0550999000',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(created.status).toBe(201)
+        expect(created.body.publicOrderId).toMatch(/^SHOP1-[A-Z0-9]{6}$/)
+
+        const listed = await request(app)
+            .get('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .query({ search: created.body.publicOrderId })
+
+        expect(listed.status).toBe(200)
+        expect(Array.isArray(listed.body.items)).toBe(true)
+        expect(listed.body.items.some((order: any) => order.id === created.body.orderId && order.publicId === created.body.publicOrderId)).toBe(true)
+
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { orderIdPrefix: 'ORDR' }
+        })
     })
 
     it('enforces tenant minimum order amount from settings', async () => {

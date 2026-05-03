@@ -144,9 +144,13 @@ export class TelegramService {
     }
 
     private formatOrderMessage(order: any, adminUrl: string): string {
+        const orderReference = typeof order.publicId === 'string' && order.publicId.trim().length > 0
+            ? order.publicId.trim()
+            : order.id.slice(0, 8)
+
         const lines = [
             `📦 *Nouvelle Commande Reçue !*`,
-            `Commande #${order.id.slice(0, 8)}`,
+            `Commande #${orderReference}`,
             ``,
             `👤 *Client :* ${order.customerName} (${order.customerPhone})`,
             `💰 *Total :* ${order.totalAmount} DZD`,

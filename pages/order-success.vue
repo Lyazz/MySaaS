@@ -16,14 +16,14 @@
 
       <!-- Order Info -->
       <div
-        v-if="orderId"
+        v-if="displayOrderId"
         class="bg-white rounded-lg shadow p-6 mb-8"
       >
         <p class="text-sm text-gray-600 mb-1">
           Order ID
         </p>
         <p class="text-2xl font-mono font-semibold text-brand">
-          {{ orderId }}
+          {{ displayOrderId }}
         </p>
       </div>
 
@@ -104,18 +104,21 @@
 import { useTenantApiUrl } from '~/composables/useTenantApi'
 
 const route = useRoute()
-const orderId = ref<string | null>(null)
+const internalOrderId = ref<string | null>(null)
+const displayOrderId = ref<string | null>(null)
 const metaPixel = useMetaPixel()
 
 onMounted(() => {
-  orderId.value = route.query.orderId as string || null
+  internalOrderId.value = route.query.orderId as string || null
+  displayOrderId.value = route.query.publicOrderId as string || null
 
-  const id = orderId.value
+  const id = internalOrderId.value
   if (!id) return
 
   $fetch(useTenantApiUrl(`/api/orders/${encodeURIComponent(id)}/pixel`))
     .then((payload: any) => {
       if (!payload) return
+      displayOrderId.value = payload.publicOrderId || displayOrderId.value || id
       const contents = Array.isArray(payload.contents) ? payload.contents : []
       metaPixel.purchase({
         orderId: id,
@@ -125,7 +128,9 @@ onMounted(() => {
         pixelIds: Array.isArray(payload.pixelIds) ? payload.pixelIds : undefined
       })
     })
-    .catch(() => {})
+    .catch(() => {
+      displayOrderId.value = displayOrderId.value || id
+    })
 })
 
 definePageMeta({

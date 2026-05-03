@@ -71,13 +71,14 @@ export class MaystroProductService {
                         create: {
                             tenantId: input.tenantId,
                             localProductId: input.localProductId,
-                            maystroProductId: productId,
+                            maystroProductId: updated.product_id || productId,
                             maystroUuid: updated.id,
                             syncStatus: 'SYNCED',
                             lastSyncedAt: new Date(),
                             lastError: null
                         },
                         update: {
+                            maystroProductId: updated.product_id || productId,
                             maystroUuid: updated.id,
                             syncStatus: 'SYNCED',
                             lastSyncedAt: new Date(),
@@ -120,6 +121,7 @@ export class MaystroProductService {
             await this.prisma.maystroProductMapping.update({
                 where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
                 data: {
+                    maystroProductId: updated.product_id || existing.maystroProductId,
                     maystroUuid: updated.id || existing.maystroUuid,
                     syncStatus: 'SYNCED',
                     lastSyncedAt: new Date(),
