@@ -35,6 +35,7 @@ import adminAuditLogsRouter from './modules/audit-logs/routes'
 import staffRolesRouter from './modules/staff-roles/routes'
 import filesRouter from './modules/files/routes'
 import loyaltyRouter from './modules/loyalty/routes'
+import googleOAuthRouter from './modules/google-oauth/routes'
 
 const router = Router()
 
@@ -60,6 +61,8 @@ router.use('/pixel', integrationsPublicRouter)
 router.use('/admin/products', productsRouter)
 router.use('/admin/categories', categoriesRouter)
 router.use('/admin/variants', variantsRouter)
+// Google OAuth for orders export — must be registered before /admin/orders to avoid route shadowing
+router.use('/admin/orders/export', googleOAuthRouter)
 router.use('/admin/orders', ordersRouter)
 router.use('/admin/sales', salesRouter)
 router.use('/admin/customers', customersRouter)

@@ -90,13 +90,13 @@
               <Icon
                 :name="item.icon"
                 class="w-[15px] h-[15px] shrink-0"
-                :style="isActive(item.path) ? 'color: var(--brand)' : 'color: var(--text-tertiary)'"
+                :style="isActive(item.path) ? 'color: var(--sidebar-active-color)' : 'color: var(--text-tertiary)'"
               />
 
               <span
                 class="text-[12.5px] font-medium truncate transition-all duration-300 whitespace-nowrap leading-none"
                 :class="sidebarOpen ? 'opacity-100 flex-1' : 'opacity-0 w-0 pointer-events-none flex-none'"
-                :style="isActive(item.path) ? 'color: var(--brand)' : 'color: var(--text-secondary)'"
+                :style="isActive(item.path) ? 'color: var(--sidebar-active-color)' : 'color: var(--text-secondary)'"
               >
                 {{ t(item.labelKey) }}
               </span>

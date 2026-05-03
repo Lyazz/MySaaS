@@ -68,6 +68,9 @@
 
     /* Nav hover */
     --nav-hover-bg: rgba(255,255,255,0.04);
+
+    /* Sidebar active item — use brand directly on dark bg */
+    --sidebar-active-color: var(--brand);
   }
 
   [data-theme="light"] {
@@ -93,10 +96,8 @@
     --text-tertiary: #64748b;
     --text-muted: #94a3b8;
 
-    /* Brand — darkened for readability on light backgrounds */
-    --brand: #5a7a0a;
-    --brand-rgb: 90 122 10;
-    --brand-contrast: #ffffff;
+    /* Sidebar active item — dark readable color instead of neon lime on light bg */
+    --sidebar-active-color: #5a7a0a;
 
     /* Accent */
     --accent: #84A60D;
