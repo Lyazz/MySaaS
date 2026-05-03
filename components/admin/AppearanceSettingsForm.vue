@@ -1,6 +1,7 @@
 <template>
   <div class="appearance-form">
     <SettingsPageHeader
+      data-tour="settings-appearance-tab"
       :eyebrow="t('admin.nav.storefront') || 'Storefront'"
       :title="t('admin.pages.settings.appearance.title') || 'Appearance'"
       :subtitle="t('admin.pages.settings.appearance.subtitle') || 'Manage your store identity, brand assets, and storefront template.'"
@@ -80,6 +81,7 @@
 
       <!-- Brand -->
       <SettingsSection
+        data-tour="settings-color"
         anchor-id="brand"
         icon="lucide:palette"
         :title="t('admin.appearanceSettingsForm.brandAssets.title')"
@@ -149,6 +151,7 @@
 
       <!-- Templates -->
       <SettingsSection
+        data-tour="settings-template"
         anchor-id="templates"
         icon="lucide:layout-template"
         :title="t('admin.appearanceSettingsForm.templates.title')"

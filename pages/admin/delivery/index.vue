@@ -48,7 +48,7 @@
     </div>
 
     <!-- Providers List -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div data-tour="delivery-providers" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div 
         v-for="provider in providers" 
         :key="provider.provider"
@@ -113,6 +113,7 @@
     <!-- Provider Credentials -->
     <div
       v-if="selectedProvider"
+      data-tour="delivery-config"
       class="ui-card mb-8"
     >
       <div class="ui-card-header flex justify-between items-center">
@@ -662,9 +663,11 @@ const wilayas = [
   { code: '57', name: 'El M\'Ghair' }, { code: '58', name: 'El Meniaa' }
 ]
 
+const { autoStartIfNeeded } = useTour()
 onMounted(async () => {
   await loadStorePickupSetting()
   await loadProviders()
+  autoStartIfNeeded('delivery')
 })
 
 watch(

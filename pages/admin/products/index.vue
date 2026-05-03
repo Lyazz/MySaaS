@@ -50,6 +50,7 @@
       </Menu>
 
       <NuxtLink
+        data-tour="products-create-btn"
         to="/admin/products/create"
         class="ui-btn ui-btn--primary ui-btn--md"
       >
@@ -62,7 +63,7 @@
     <AdminTabFilter v-model="activeTab" :tabs="productTabs" />
  
     <!-- Filters -->
-    <div class="ui-card p-4 mb-6">
+    <div data-tour="products-search" class="ui-card p-4 mb-6">
       <div class="flex flex-wrap items-end gap-4">
         <div class="flex-1 min-w-[200px]">
           <label class="ui-label mb-1">{{ t('admin.pages.products.index.filters.searchLabel') }}</label>
@@ -147,6 +148,7 @@
     <!-- Products Table -->
     <div
       v-else
+      data-tour="products-table"
       class="ui-card overflow-hidden"
     >
       <div v-if="selectedIds.length > 0" class="ui-card-header flex flex-wrap items-center gap-3 justify-between" style="background: var(--surface-2)">
@@ -1325,9 +1327,11 @@ async function copyLink(path: string) {
 }
  
 // Lifecycle
+const { autoStartIfNeeded } = useTour()
 onMounted(() => {
   fetchProducts()
   fetchCategories()
+  autoStartIfNeeded('products')
 })
  
 // Watch for filter changes to reset pagination

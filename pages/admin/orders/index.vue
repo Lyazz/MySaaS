@@ -28,6 +28,7 @@
     >
       <div class="flex items-center gap-3">
         <AdminOrderExportButton
+          data-tour="orders-export"
           :filters="exportFilters"
           :tenant-id="tenantId"
         />
@@ -42,7 +43,7 @@
     </AdminPageHeader>
 
     <!-- Tab filter -->
-    <AdminTabFilter v-model="activeTab" :tabs="orderTabs" />
+    <AdminTabFilter data-tour="orders-tabs" v-model="activeTab" :tabs="orderTabs" />
 
     <div v-if="selectedIds.length" class="mb-4 flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3">
       <div class="text-sm text-red-800">
@@ -132,6 +133,7 @@
     <!-- Orders Table -->
     <div
       v-else
+      data-tour="orders-table"
       class="ui-card overflow-hidden"
     >
       <div class="overflow-x-auto">
@@ -581,9 +583,11 @@ function deliveryModeLabel(mode: any) {
 }
 
 // Fetch orders on mount and when filters change
+const { autoStartIfNeeded } = useTour()
 onMounted(() => {
   fetchOrders()
   handleGauthCallback()
+  autoStartIfNeeded('orders')
 })
 
 async function handleGauthCallback() {

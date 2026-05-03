@@ -167,7 +167,13 @@ async function nextStep() {
 
 async function finish() {
   const ok = await save({ isCompleted: true })
-  if (ok) await navigateTo('/admin')
+  if (ok) {
+    // Reset sidebar tour so it fires on first visit to /admin after onboarding
+    if (import.meta.client) {
+      localStorage.removeItem('tour_seen_sidebar')
+    }
+    await navigateTo('/admin')
+  }
 }
 
 onMounted(() => loadSettings())

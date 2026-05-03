@@ -63,9 +63,9 @@
     </div>
 
     <!-- Getting Started checklist (shown to tenants that completed onboarding) -->
-    <AdminGettingStartedChecklist v-if="storeSettings?.isCompleted" />
+    <AdminGettingStartedChecklist v-if="storeSettings?.isCompleted" data-tour="dashboard-checklist" />
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div data-tour="dashboard-stats" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <AdminDashboardStatCard
         :label="t('admin.pages.dashboard.stats.totalRevenue')"
         :value="formatMoney(dashboard.revenue.total)"
@@ -102,6 +102,7 @@
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <AdminDashboardTrendChart
+        data-tour="dashboard-chart"
         :title="t('admin.pages.dashboard.trends.revenue.title')"
         :hint="t('admin.pages.dashboard.trends.revenue.hint')"
         :trends="dashboard.trends"
@@ -415,4 +416,7 @@ const quickLinks = computed(() => [
   { to: '/admin/inventory', icon: 'lucide:warehouse', label: t('admin.pages.dashboard.quickLinks.inventory') },
   { to: '/admin/settings/appearance', icon: 'lucide:palette', label: t('admin.pages.dashboard.quickLinks.appearance') }
 ])
+
+const { autoStartIfNeeded } = useTour()
+onMounted(() => autoStartIfNeeded('sidebar'))
 </script>

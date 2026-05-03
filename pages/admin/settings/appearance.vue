@@ -10,4 +10,7 @@ definePageMeta({
   layout: 'admin',
   titleKey: 'admin.pages.settings.appearance.metaTitle'
 })
+
+const { autoStartIfNeeded } = useTour()
+onMounted(() => autoStartIfNeeded('settings'))
 </script>
