@@ -3,7 +3,7 @@
     <AdminConfirmModal
       v-model="deleteOpen"
       :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
-      :message="t('admin.pages.orders.detail.deleteConfirm', 'Delete this order? Only unconfirmed (PENDING) orders can be deleted.')"
+      :message="t('admin.pages.orders.detail.deleteConfirm', 'Delete this order? This cannot be undone. If the order is confirmed with a carrier, it will also be cancelled there.')"
       :confirm-text="t('common.delete', 'Delete')"
       :error="deleteError"
       @confirm="confirmDelete"
@@ -1653,7 +1653,7 @@ function openDelete() {
 
 async function confirmDelete() {
   if (!order.value) return
-  if (order.value.status !== 'PENDING') return
+  if (order.value.status !== 'PENDING' && order.value.status !== 'CONFIRMED') return
 
   deleteError.value = null
   try {

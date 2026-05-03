@@ -254,6 +254,12 @@ export function useOrderNBA(
             icon: 'lucide:x-circle',
             tone: 'danger'
           },
+          {
+            id: 'delete',
+            label: t('common.delete', 'Delete'),
+            icon: 'lucide:trash-2',
+            tone: 'danger'
+          },
           ...bl
         ],
         pulse: true,
@@ -279,6 +285,12 @@ export function useOrderNBA(
           id: 'cancel',
           label: t('admin.pages.orders.detail.nba.cancelOrder', 'Cancel order'),
           icon: 'lucide:x-circle',
+          tone: 'danger'
+        },
+        {
+          id: 'delete',
+          label: t('common.delete', 'Delete'),
+          icon: 'lucide:trash-2',
           tone: 'danger'
         },
         ...bl
