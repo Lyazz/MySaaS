@@ -83,7 +83,11 @@ export default defineNuxtConfig({
   icon: {
     componentName: 'Icon'
   },
-  css: ['~/assets/css/main.css'],
+  css: [
+    '~/assets/css/main.css',
+    'driver.js/dist/driver.css',
+    '~/assets/css/driver-theme.css',
+  ],
   devServer: {
     host: '0.0.0.0'
   },
