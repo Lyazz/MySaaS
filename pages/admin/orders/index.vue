@@ -583,7 +583,54 @@ function deliveryModeLabel(mode: any) {
 // Fetch orders on mount and when filters change
 onMounted(() => {
   fetchOrders()
+  handleGauthCallback()
 })
+
+async function handleGauthCallback() {
+  if (!process.client) return
+  const gauth = route.query.gauth as string | undefined
+  if (gauth !== 'success') return
+
+  // Clean up URL
+  const url = new URL(window.location.href)
+  url.searchParams.delete('gauth')
+
+  const columns = url.searchParams.get('gsheet_columns')
+  const status = url.searchParams.get('gsheet_status')
+  const search = url.searchParams.get('gsheet_search')
+  const startDateParam = url.searchParams.get('gsheet_startDate')
+  const endDateParam = url.searchParams.get('gsheet_endDate')
+
+  url.searchParams.delete('gsheet_columns')
+  url.searchParams.delete('gsheet_status')
+  url.searchParams.delete('gsheet_search')
+  url.searchParams.delete('gsheet_startDate')
+  url.searchParams.delete('gsheet_endDate')
+
+  window.history.replaceState({}, '', url.toString())
+
+  // Auto-trigger Google Sheets export
+  const params = new URLSearchParams()
+  if (columns) params.set('columns', columns)
+  if (status) params.set('status', status)
+  if (search) params.set('search', search)
+  if (startDateParam) params.set('startDate', startDateParam)
+  if (endDateParam) params.set('endDate', endDateParam)
+
+  try {
+    const response = await fetch(`/api/admin/orders/export/google-export?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+    })
+    const data = await response.json()
+    if (response.ok && data.sheetUrl) {
+      window.open(data.sheetUrl, '_blank')
+    } else {
+      alert(data.statusMessage ?? 'Google Sheets export failed')
+    }
+  } catch {
+    alert('Google Sheets export failed. Please try again.')
+  }
+}
 
 watch(activeTab, (tab) => {
   selectedStatus.value = tab === 'all' ? '' : tab
