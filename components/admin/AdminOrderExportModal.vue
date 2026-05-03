@@ -187,7 +187,20 @@ async function doExport() {
 
     if (selectedFormat.value === 'gsheet') {
       emit('update:modelValue', false)
-      if (process.client) window.open(`/api/admin/orders/export/google-auth-url?${params.toString()}`, '_blank')
+      if (process.client) {
+        const returnParams = new URLSearchParams()
+        returnParams.set('gauth', 'success')
+        returnParams.set('gsheet_columns', selectedColumns.value.join(','))
+        if (props.filters.status) returnParams.set('gsheet_status', props.filters.status)
+        if (props.filters.search) returnParams.set('gsheet_search', props.filters.search)
+        if (props.filters.startDate) returnParams.set('gsheet_startDate', props.filters.startDate)
+        if (props.filters.endDate) returnParams.set('gsheet_endDate', props.filters.endDate)
+
+        const authParams = new URLSearchParams()
+        authParams.set('returnParams', returnParams.toString())
+
+        window.open(`/api/admin/orders/export/google-auth-url?${authParams.toString()}`, '_blank')
+      }
       saveExportPrefs(props.tenantId, selectedFormat.value, selectedColumns.value)
       return
     }
