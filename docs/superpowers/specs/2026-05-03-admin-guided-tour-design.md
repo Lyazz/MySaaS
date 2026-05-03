@@ -51,6 +51,8 @@ Central composable that:
 - Exposes `startTour(id: string)` — creates driver.js instance with translated steps and starts it
 - Exposes `autoStartIfNeeded(tourId: string)` — called `onMounted` on each page; checks `localStorage` key `tour_seen_{tourId}`, launches if not seen, then marks as seen
 - Exposes `tours` (reactive list) — used by the sidebar panel to render the tour menu
+- Tracks a `activeTourId` ref — if a tour is already running, `autoStartIfNeeded` skips silently (prevents simultaneous tours)
+- When the sidebar tour completes/is dismissed, it fires `autoStartIfNeeded('dashboard')` so the dashboard tour follows naturally rather than overlapping
 
 ### Per-Section Composables — `composables/tours/`
 
@@ -120,7 +122,7 @@ Steps:
 3. Save button — "Changes apply immediately"
 
 ### 6. Settings Tour (`settings`)
-Auto-launches on first visit to `/admin/settings`.
+Auto-launches on first visit to `/admin/settings/appearance` (the default settings entry point).
 
 Steps:
 1. Appearance tab — "Logo, colors, template"
