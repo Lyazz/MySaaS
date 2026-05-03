@@ -436,10 +436,22 @@
       "trustStrip": {
         "eyebrow": "Conçu pour l'Algérie",
         "items": {
-          "cod": { "title": "Paiement à la livraison", "description": "COD intégré avec réconciliation auto sur toutes les wilayas." },
-          "wilayas": { "title": "58 wilayas couvertes", "description": "Yalidine, Maystro, ZR & Noest — activation en un clic." },
-          "rtl": { "title": "Boutique en arabe", "description": "RTL complet, UI compatible Darija, AR/FR/EN en un clic." },
-          "dzd": { "title": "Tarification en DZD", "description": "Devise locale, taxes et factures — sans surprise de change." }
+          "cod": {
+            "title": "Paiement à la livraison",
+            "description": "COD intégré avec réconciliation auto sur toutes les wilayas."
+          },
+          "wilayas": {
+            "title": "58 wilayas couvertes",
+            "description": "Yalidine, Maystro, ZR & Noest — activation en un clic."
+          },
+          "rtl": {
+            "title": "Boutique en arabe",
+            "description": "RTL complet, UI compatible Darija, AR/FR/EN en un clic."
+          },
+          "dzd": {
+            "title": "Tarification en DZD",
+            "description": "Devise locale, taxes et factures — sans surprise de change."
+          }
         }
       },
       "stickyCta": {
@@ -1244,11 +1256,9 @@
       "unsavedChanges": "Modifications non enregistrées",
       "unsavedChangesHint": "N'oubliez pas d'enregistrer vos modifications.",
       "discard": "Annuler",
-      "search": "Rechercher",
       "noResults": "Aucun résultat",
       "replace": "Remplacer",
       "soon": "Bientôt",
-      "active": "Actif",
       "moveUp": "Monter",
       "moveDown": "Descendre"
     },
@@ -3725,6 +3735,126 @@
     },
     "validation": {
       "invalidNumber": "Entrez un nombre valide"
+    },
+    "tours": {
+      "next": "Suivant",
+      "prev": "Retour",
+      "done": "Terminer",
+      "menuLabel": "Visites guidées",
+      "sidebar": {
+        "label": "Présentation de l'admin",
+        "steps": {
+          "logo": {
+            "title": "Votre boutique",
+            "desc": "Voici le nom et le logo de votre boutique. Modifiez-les dans les paramètres d'apparence."
+          },
+          "dashboard": {
+            "title": "Tableau de bord",
+            "desc": "Obtenez un aperçu rapide de vos ventes, commandes et chiffre d'affaires."
+          },
+          "products": {
+            "title": "Produits",
+            "desc": "Ajoutez et gérez tout ce que vous vendez — produits, prix, images et stock."
+          },
+          "orders": {
+            "title": "Commandes",
+            "desc": "Suivez chaque commande de la réception à la livraison. Mettez à jour les statuts et exportez des rapports."
+          },
+          "delivery": {
+            "title": "Livraison",
+            "desc": "Connectez Yalidine, Maystro ou gérez votre propre livraison. Configurez les zones et tarifs ici."
+          },
+          "settings": {
+            "title": "Paramètres",
+            "desc": "Personnalisez l'apparence, les coordonnées, la langue de votre boutique et publiez-la quand vous êtes prêt."
+          },
+          "help": {
+            "title": "Visites guidées",
+            "desc": "Cliquez ici à tout moment pour relancer cette visite ou démarrer une visite d'une section spécifique."
+          }
+        }
+      },
+      "dashboard": {
+        "label": "Visite du tableau de bord",
+        "steps": {
+          "stats": {
+            "title": "Vos indicateurs",
+            "desc": "Consultez le total des commandes, le chiffre d'affaires et les nouveaux clients pour la période sélectionnée."
+          },
+          "checklist": {
+            "title": "Liste de lancement",
+            "desc": "Complétez ces étapes pour préparer votre boutique. Vous pouvez la masquer une fois terminé."
+          },
+          "chart": {
+            "title": "Tendance des ventes",
+            "desc": "Ce graphique montre l'évolution de vos ventes dans le temps."
+          }
+        }
+      },
+      "products": {
+        "label": "Visite des produits",
+        "steps": {
+          "create": {
+            "title": "Ajouter un produit",
+            "desc": "Cliquez ici pour créer un nouveau produit. Ajoutez un nom, un prix, des images et du stock."
+          },
+          "search": {
+            "title": "Trouver des produits",
+            "desc": "Recherchez par nom, filtrez par catégorie ou statut pour trouver rapidement un produit."
+          },
+          "table": {
+            "title": "Liste des produits",
+            "desc": "Tous vos produits sont listés ici. Cliquez sur une ligne pour la modifier."
+          }
+        }
+      },
+      "orders": {
+        "label": "Visite des commandes",
+        "steps": {
+          "tabs": {
+            "title": "Filtrer par statut",
+            "desc": "Basculez entre Toutes, En attente, Confirmées, Expédiées, Livrées et Annulées."
+          },
+          "export": {
+            "title": "Exporter les commandes",
+            "desc": "Exportez vos commandes vers Excel ou Google Sheets pour les rapports et la comptabilité."
+          },
+          "table": {
+            "title": "Liste des commandes",
+            "desc": "Chaque ligne est une commande client. Cliquez dessus pour voir les détails ou mettre à jour le statut."
+          }
+        }
+      },
+      "delivery": {
+        "label": "Visite de la livraison",
+        "steps": {
+          "providers": {
+            "title": "Partenaires de livraison",
+            "desc": "Choisissez Yalidine, Maystro ou une livraison en propre. Vous pouvez en activer plusieurs à la fois."
+          },
+          "config": {
+            "title": "Configuration du prestataire",
+            "desc": "Entrez vos identifiants API et configurez les frais, zones et options de ramassage."
+          }
+        }
+      },
+      "settings": {
+        "label": "Visite des paramètres",
+        "steps": {
+          "appearance": {
+            "title": "Apparence",
+            "desc": "Changez le template, la couleur de marque et le logo de votre boutique."
+          },
+          "template": {
+            "title": "Template de boutique",
+            "desc": "Choisissez parmi 10 thèmes de vitrine. Chacun a une mise en page unique adaptée à un type de produit."
+          },
+          "color": {
+            "title": "Couleur de marque",
+            "desc": "Votre couleur de marque est utilisée sur les boutons et les accents de toute votre vitrine."
+          }
+        }
+      }
     }
   },
   "superAdmin": {

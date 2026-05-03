@@ -436,10 +436,22 @@
       "trustStrip": {
         "eyebrow": "Made for Algeria",
         "items": {
-          "cod": { "title": "Cash on delivery", "description": "Built-in COD with auto reconciliation across every wilaya." },
-          "wilayas": { "title": "58 wilayas covered", "description": "Yalidine, Maystro, ZR & Noest — one-click activation." },
-          "rtl": { "title": "Arabic-first storefront", "description": "Full RTL, Darija-friendly UI, AR/FR/EN with one switch." },
-          "dzd": { "title": "DZD pricing", "description": "Local currency, taxes, and invoicing — no FX surprises." }
+          "cod": {
+            "title": "Cash on delivery",
+            "description": "Built-in COD with auto reconciliation across every wilaya."
+          },
+          "wilayas": {
+            "title": "58 wilayas covered",
+            "description": "Yalidine, Maystro, ZR & Noest — one-click activation."
+          },
+          "rtl": {
+            "title": "Arabic-first storefront",
+            "description": "Full RTL, Darija-friendly UI, AR/FR/EN with one switch."
+          },
+          "dzd": {
+            "title": "DZD pricing",
+            "description": "Local currency, taxes, and invoicing — no FX surprises."
+          }
         }
       },
       "stickyCta": {
@@ -1258,11 +1270,9 @@
       "unsavedChanges": "Unsaved changes",
       "unsavedChangesHint": "Don't forget to save your changes.",
       "discard": "Discard",
-      "search": "Search",
       "noResults": "No results",
       "replace": "Replace",
       "soon": "Soon",
-      "active": "Active",
       "moveUp": "Move up",
       "moveDown": "Move down"
     },
@@ -3751,6 +3761,126 @@
     },
     "validation": {
       "invalidNumber": "Enter a valid number"
+    },
+    "tours": {
+      "next": "Next",
+      "prev": "Back",
+      "done": "Done",
+      "menuLabel": "Tours & Help",
+      "sidebar": {
+        "label": "Admin overview",
+        "steps": {
+          "logo": {
+            "title": "Your store",
+            "desc": "This is your store name and logo. You can change them in Appearance settings."
+          },
+          "dashboard": {
+            "title": "Dashboard",
+            "desc": "Get a quick overview of your sales, orders, and revenue at a glance."
+          },
+          "products": {
+            "title": "Products",
+            "desc": "Add and manage everything you sell — products, prices, images, and stock."
+          },
+          "orders": {
+            "title": "Orders",
+            "desc": "Track every customer order from new to delivered. Update statuses and export reports."
+          },
+          "delivery": {
+            "title": "Delivery",
+            "desc": "Connect Yalidine, Maystro, or manage your own delivery. Set up zones and rates here."
+          },
+          "settings": {
+            "title": "Settings",
+            "desc": "Customize your store's look, contact details, language, and go live when ready."
+          },
+          "help": {
+            "title": "Tours & Help",
+            "desc": "Click here anytime to relaunch this tour or start a tour for a specific section."
+          }
+        }
+      },
+      "dashboard": {
+        "label": "Dashboard tour",
+        "steps": {
+          "stats": {
+            "title": "Your metrics",
+            "desc": "See total orders, revenue, and new customers for the selected period."
+          },
+          "checklist": {
+            "title": "Launch checklist",
+            "desc": "Complete these steps to get your store fully ready. You can dismiss it once done."
+          },
+          "chart": {
+            "title": "Sales trend",
+            "desc": "This chart shows your sales volume over time so you can spot patterns."
+          }
+        }
+      },
+      "products": {
+        "label": "Products tour",
+        "steps": {
+          "create": {
+            "title": "Add a product",
+            "desc": "Click here to create a new product. Add a name, price, images, and stock."
+          },
+          "search": {
+            "title": "Find products",
+            "desc": "Search by name, filter by category or status to quickly locate any product."
+          },
+          "table": {
+            "title": "Product list",
+            "desc": "All your products are listed here. Click any row to edit it."
+          }
+        }
+      },
+      "orders": {
+        "label": "Orders tour",
+        "steps": {
+          "tabs": {
+            "title": "Filter by status",
+            "desc": "Switch between All, Pending, Confirmed, Shipped, Delivered, and Cancelled orders."
+          },
+          "export": {
+            "title": "Export orders",
+            "desc": "Export your orders to Excel or Google Sheets for reporting and accounting."
+          },
+          "table": {
+            "title": "Order list",
+            "desc": "Each row is a customer order. Click it to see details, update status, or print a receipt."
+          }
+        }
+      },
+      "delivery": {
+        "label": "Delivery tour",
+        "steps": {
+          "providers": {
+            "title": "Delivery partners",
+            "desc": "Choose Yalidine, Maystro, or self-managed delivery. You can enable multiple at once."
+          },
+          "config": {
+            "title": "Provider settings",
+            "desc": "Enter your API credentials and configure fees, zones, and pickup options."
+          }
+        }
+      },
+      "settings": {
+        "label": "Settings tour",
+        "steps": {
+          "appearance": {
+            "title": "Appearance",
+            "desc": "Change your store template, brand color, and logo to match your identity."
+          },
+          "template": {
+            "title": "Store template",
+            "desc": "Pick from 10 storefront themes. Each has a unique layout tailored to a product type."
+          },
+          "color": {
+            "title": "Brand color",
+            "desc": "Your brand color is used on buttons and accents across your entire storefront."
+          }
+        }
+      }
     }
   },
   "superAdmin": {
