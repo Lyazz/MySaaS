@@ -11,8 +11,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
     lazy: true
 })
 
-const { format: formatCurrency } = useCurrency()
-const { currencyCode } = useCurrency()
+const { format: formatCurrency, currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
@@ -548,13 +547,13 @@ function handleQuickViewAddToCart() {
 
             <div class="flex items-center gap-3 mb-5">
               <span class="text-2xl font-black text-violet-700">
-                {{ quickViewDisplayPrice.toLocaleString() }}
+                {{ formatAmount(quickViewDisplayPrice) }}
                 <span class="text-sm font-bold text-stone-400">{{ currencyCode }}</span>
               </span>
               <span
                 v-if="quickViewIsPromoValid && quickViewProduct.promotionalPrice"
                 class="text-base text-stone-400 line-through"
-              >{{ Number(quickViewProduct.price).toLocaleString() }} {{ currencyCode }}</span>
+              >{{ formatAmount(quickViewProduct.price) }} {{ currencyCode }}</span>
             </div>
 
             <p class="text-stone-600 text-sm leading-relaxed">

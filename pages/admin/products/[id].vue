@@ -146,6 +146,25 @@
             v-show="currentTab === 'general'"
             class="space-y-6"
           >
+            <!-- Active Status -->
+            <div
+              class="flex items-center justify-between rounded-xl border px-4 py-3"
+              style="border-color: var(--surface-border); background: var(--surface-2)"
+            >
+              <div>
+                <p class="text-sm font-medium" style="color: var(--text-primary)">
+                  {{ t('admin.forms.product.isActive.label') }}
+                </p>
+                <p class="text-xs" style="color: var(--text-secondary)">
+                  {{ form.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
+                </p>
+              </div>
+              <BaseToggle
+                v-model="form.isActive"
+                :sr-label="t('admin.forms.product.isActive.label')"
+              />
+            </div>
+
             <!-- Title -->
             <!-- Title -->
             <BaseInput
@@ -257,22 +276,6 @@
 
             <!-- Product Images -->
             <ProductImagesUploader v-model="productImages" />
-
-            <!-- Active Status -->
-            <div class="flex items-center">
-              <input
-                id="isActive"
-                v-model="form.isActive"
-                type="checkbox"
-                class="admin-checkbox"
-              >
-              <label
-                for="isActive"
-                class="ml-2 block text-sm" style="color: var(--text-primary)"
-              >
-                {{ t('admin.forms.product.isActive.label') }}
-              </label>
-            </div>
           </div>
 
           <!-- Promotions Tab -->
@@ -702,6 +705,7 @@ import ProductOptionsEditor from '~/components/admin/ProductOptionsEditor.vue'
 import ProductVariantsTable from '~/components/admin/ProductVariantsTable.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseToggle from '~/components/ui/BaseToggle.vue'
 import { CONTENT_SLUG_PATTERN, CONTENT_SLUG_RULE_HINT, normalizeContentSlug } from '~/shared/content-slug'
 
 definePageMeta({

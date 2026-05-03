@@ -221,11 +221,11 @@
                     {{ item.title }}
                   </h4>
                   <p class="text-xs text-stone-500 mt-1">
-                    {{ storefrontContent.checkout.summary.quantityShort }}: {{ item.quantity }} x {{ item.price }} {{ currencyCode }}
+                    {{ storefrontContent.checkout.summary.quantityShort }}: {{ item.quantity }} x {{ formatAmount(item.price) }} {{ currencyCode }}
                   </p>
                 </div>
                 <div class="font-bold text-stone-900">
-                  {{ (Number(item.lineTotal ?? (Number(item.price) * item.quantity))).toFixed(2) }} {{ currencyCode }}
+                  {{ formatAmount(item.lineTotal ?? (Number(item.price) * item.quantity)) }} {{ currencyCode }}
                 </div>
               </div>
             </div>
@@ -249,11 +249,13 @@
             <div class="space-y-3 pt-6 border-t-2 border-stone-900 border-dashed text-sm">
               <div class="flex justify-between">
                 <span class="text-stone-600 uppercase">{{ storefrontContent.cart.summary.subtotal }}</span>
-                <span class="font-bold text-stone-900">{{ cartStore.total }} {{ currencyCode }}</span>
+                <span class="font-bold text-stone-900">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</span>
               </div>
               <div v-if="selectedDelivery" class="flex justify-between">
                 <span class="text-stone-600 uppercase">{{ storefrontContent.cart.summary.shipping }}</span>
-                <span class="font-bold text-stone-900">{{ selectedDelivery.price }} {{ currencyCode }}</span>
+                <span class="font-bold text-stone-900">
+                  {{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${formatAmount(selectedDelivery.price)} ${currencyCode}` }}
+                </span>
               </div>
               <div class="flex justify-between">
                 <span class="text-stone-600 uppercase">{{ storefrontContent.cart.summary.tax }}</span>
@@ -262,7 +264,7 @@
                         
               <div class="flex justify-between items-end pt-6 mt-4 border-t-2 border-stone-900">
                 <span class="font-bold text-xl text-stone-900 uppercase">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-bold text-2xl text-stone-900">{{ grandTotal }} {{ currencyCode }}</span>
+                <span class="font-bold text-2xl text-stone-900">{{ formatAmount(grandTotal) }} {{ currencyCode }}</span>
               </div>
             </div>
 
@@ -316,7 +318,7 @@ const router = useRouter()
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 

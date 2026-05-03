@@ -32,7 +32,8 @@ export class MaystroProductService {
 
         const productId = input.localProductId
 
-        if (!existing) {
+        // Treat ERROR-status mappings as unsynced: force a fresh create attempt.
+        if (!existing || existing.syncStatus === 'ERROR') {
             try {
                 const created = await client.request<MaystroProduct>({
                     method: 'POST',
@@ -44,10 +45,18 @@ export class MaystroProductService {
                     }
                 })
 
-                await this.prisma.maystroProductMapping.create({
-                    data: {
+                await this.prisma.maystroProductMapping.upsert({
+                    where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                    create: {
                         tenantId: input.tenantId,
                         localProductId: input.localProductId,
+                        maystroProductId: created.product_id || productId,
+                        maystroUuid: created.id,
+                        syncStatus: 'SYNCED',
+                        lastSyncedAt: new Date(),
+                        lastError: null
+                    },
+                    update: {
                         maystroProductId: created.product_id || productId,
                         maystroUuid: created.id,
                         syncStatus: 'SYNCED',

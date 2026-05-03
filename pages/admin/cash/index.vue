@@ -891,7 +891,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.openSession.openingFloatLabel') }}
               </label>
-              <BaseInput v-model="openSessionForm.openingFloat" placeholder="0" />
+              <BaseInput v-model="openSessionForm.openingFloat" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -990,7 +990,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.closeSession.closingCountLabel') }}
               </label>
-              <BaseInput v-model="closeSessionForm.closingCount" placeholder="0" />
+              <BaseInput v-model="closeSessionForm.closingCount" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -1068,7 +1068,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.amountLabel') }}
               </label>
-              <BaseInput v-model="customerPaymentForm.amount" placeholder="0" />
+              <BaseInput v-model="customerPaymentForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1178,7 +1178,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.amountLabel') }}
               </label>
-              <BaseInput v-model="supplierPaymentForm.amount" placeholder="0" />
+              <BaseInput v-model="supplierPaymentForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1260,7 +1260,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.amountLabel') }}
               </label>
-              <BaseInput v-model="expenseForm.amount" placeholder="0" />
+              <BaseInput v-model="expenseForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1362,7 +1362,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.transfer.amountLabel') }}
               </label>
-              <BaseInput v-model="transferForm.amount" placeholder="0" />
+              <BaseInput v-model="transferForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1455,6 +1455,7 @@ import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
+import { parsePriceInput } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'auth',
@@ -1651,11 +1652,11 @@ const closeExpectedLoading = ref(false)
 
 const closeDifference = computed(() => {
   if (!closeExpected.value) return null
-  const closing = Number.parseFloat(String(closeSessionForm.closingCount || ''))
+  const closing = parsePriceInput(closeSessionForm.closingCount)
   if (!Number.isFinite(closing)) return null
   const expected = Number(closeExpected.value.expectedClosing)
   if (!Number.isFinite(expected)) return null
-  return closing - expected
+  return Number(closing) - expected
 })
 
 const expenseOpen = ref(false)
@@ -1746,12 +1747,12 @@ const filteredSuppliers = computed(() => {
 })
 
 const canSubmitCustomerPayment = computed(() => {
-  const amount = Number.parseFloat(String(customerPaymentForm.amount || ''))
+  const amount = parsePriceInput(customerPaymentForm.amount)
   return Boolean(customerPaymentForm.cashboxId && customerPaymentForm.customerId && Number.isFinite(amount) && amount > 0)
 })
 
 const canSubmitSupplierPayment = computed(() => {
-  const amount = Number.parseFloat(String(supplierPaymentForm.amount || ''))
+  const amount = parsePriceInput(supplierPaymentForm.amount)
   return Boolean(supplierPaymentForm.cashboxId && supplierPaymentForm.supplierId && Number.isFinite(amount) && amount > 0)
 })
 
@@ -1909,12 +1910,14 @@ async function loadCloseExpected(sessionId: string) {
 
 async function submitOpenSession() {
   if (!openSessionCashboxId.value) return
+  const openingFloat = parsePriceInput(openSessionForm.openingFloat)
+  if (!Number.isFinite(openingFloat)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cashboxes/${openSessionCashboxId.value}/sessions/open`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { openingFloat: openSessionForm.openingFloat, note: openSessionForm.note }
+      body: { openingFloat, note: openSessionForm.note }
     })
     openSessionOpen.value = false
     await refreshAll()
@@ -1928,12 +1931,14 @@ async function submitOpenSession() {
 
 async function submitCloseSession() {
   if (!closeSessionId.value) return
+  const closingCount = parsePriceInput(closeSessionForm.closingCount)
+  if (!Number.isFinite(closingCount)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cash-sessions/${closeSessionId.value}/close`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { closingCount: closeSessionForm.closingCount, note: closeSessionForm.note }
+      body: { closingCount, note: closeSessionForm.note }
     })
     closeSessionOpen.value = false
     closeExpected.value = null
@@ -1958,6 +1963,8 @@ function openExpenseModal(type: 'EXPENSE' | 'CHARGE') {
 }
 
 async function submitExpense() {
+  const amount = parsePriceInput(expenseForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transactions', {
@@ -1967,7 +1974,7 @@ async function submitExpense() {
         cashboxId: expenseForm.cashboxId,
         type: expenseType.value,
         direction: 'OUT',
-        amount: expenseForm.amount,
+        amount,
         method: expenseForm.method,
         expenseCategory: expenseForm.category,
         reference: expenseForm.reference,
@@ -1986,6 +1993,8 @@ async function submitExpense() {
 }
 
 async function submitTransfer() {
+  const amount = parsePriceInput(transferForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transfers', {
@@ -1994,7 +2003,7 @@ async function submitTransfer() {
       body: {
         fromCashboxId: transferForm.fromCashboxId,
         toCashboxId: transferForm.toCashboxId,
-        amount: transferForm.amount,
+        amount,
         reference: transferForm.reference,
         note: transferForm.note
       }
@@ -2066,6 +2075,8 @@ async function openSupplierPaymentModal() {
 
 async function submitCustomerPayment() {
   if (!canSubmitCustomerPayment.value) return
+  const amount = parsePriceInput(customerPaymentForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transactions', {
@@ -2075,7 +2086,7 @@ async function submitCustomerPayment() {
         cashboxId: customerPaymentForm.cashboxId,
         type: 'CUSTOMER_PAYMENT',
         direction: 'IN',
-        amount: customerPaymentForm.amount,
+        amount,
         customerId: customerPaymentForm.customerId,
         method: customerPaymentForm.method,
         reference: customerPaymentForm.reference,
@@ -2094,6 +2105,8 @@ async function submitCustomerPayment() {
 
 async function submitSupplierPayment() {
   if (!canSubmitSupplierPayment.value) return
+  const amount = parsePriceInput(supplierPaymentForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transactions', {
@@ -2103,7 +2116,7 @@ async function submitSupplierPayment() {
         cashboxId: supplierPaymentForm.cashboxId,
         type: 'SUPPLIER_PAYMENT',
         direction: 'OUT',
-        amount: supplierPaymentForm.amount,
+        amount,
         supplierId: supplierPaymentForm.supplierId,
         purchaseOrderId: supplierPaymentForm.purchaseOrderId || undefined,
         method: supplierPaymentForm.method,

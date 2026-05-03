@@ -10,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -428,27 +429,19 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             </div>
 
             <!-- Links Columns (Masonry style spacing) -->
-            <div class="md:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div class="md:col-span-7 grid grid-cols-2 md:grid-cols-2 gap-8">
                <div>
                  <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.contact }}</h4>
                  <ul class="space-y-4 text-sm text-stone-400">
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.contactUs }}</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.aboutUs }}</a></li>
+                    <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.contactUs }}</NuxtLink></li>
                  </ul>
                </div>
                <div>
                  <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.termsPrivacy }}</h4>
                  <ul class="space-y-4 text-sm text-stone-400">
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.termsOfService }}</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.privacyPolicy }}</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.returnPolicy }}</a></li>
-                 </ul>
-               </div>
-                <div>
-                 <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.help }}</h4>
-                 <ul class="space-y-4 text-sm text-stone-400">
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.faq }}</a></li>
-                    <li><a href="#" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.shippingInfo }}</a></li>
+                    <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                    <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                    <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
                  </ul>
                </div>
             </div>

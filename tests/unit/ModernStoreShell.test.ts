@@ -20,6 +20,14 @@ vi.mock('#imports', async () => {
         useFetch: vi.fn(() => ({ data: { value: [] } })),
         useTenantApiUrl: vi.fn((url) => url),
         useTenantApiHeaders: vi.fn(() => ({})),
+        useStoreLegalLinks: vi.fn(() =>
+            computed(() => ({
+                terms: { enabled: false, path: '/legal/terms' },
+                privacy: { enabled: false, path: '/legal/privacy' },
+                returns: { enabled: false, path: '/legal/returns' },
+                contact: { enabled: false, path: '/legal/contact' }
+            }))
+        ),
         useStorefrontContent: vi.fn(() =>
             computed(() => ({
                 nav: { home: 'Home', shop: 'Shop', contact: 'Contact' },

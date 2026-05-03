@@ -324,12 +324,17 @@
                 <span v-else style="color: var(--text-secondary)">{{ product.stock }} en stock</span>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <span
-                  class="ui-badge"
-                  :class="product.isActive ? 'ui-badge--emerald' : 'ui-badge--slate'"
-                >
-                  {{ product.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <BaseToggle
+                    :model-value="product.isActive"
+                    :disabled="loading || !!statusUpdating[product.id]"
+                    :sr-label="`${t('admin.forms.product.isActive.label')} ${product.title}`"
+                    @update:model-value="(nextValue) => toggleProductStatus(product, nextValue)"
+                  />
+                  <span class="text-xs" style="color: var(--text-secondary)">
+                    {{ product.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
+                  </span>
+                </div>
               </td>
               <td class="ui-td whitespace-nowrap text-center">
                 <Menu as="div" class="relative inline-block text-left text-sm">
@@ -739,6 +744,7 @@ import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseToggle from '~/components/ui/BaseToggle.vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useToast } from '~/composables/useToast'
 import { buildProductPricing } from '~/shared/pricing/product-pricing'
@@ -796,6 +802,7 @@ const showDeleteModal = ref(false)
 const productToDelete = ref<Product | null>(null)
 const deleteError = ref<string | null>(null)
 const selectedIds = ref<string[]>([])
+const statusUpdating = reactive<Record<string, boolean>>({})
 
 const showImportCsvModal = ref(false)
 const importingCsv = ref(false)
@@ -990,6 +997,32 @@ async function fetchProducts() {
     console.error('Failed to fetch products:', error)
   } finally {
     loading.value = false
+  }
+}
+
+async function toggleProductStatus(product: Product, nextValue: boolean) {
+  if (product.isActive === nextValue) return
+
+  const previousValue = product.isActive
+  product.isActive = nextValue
+  statusUpdating[product.id] = true
+
+  try {
+    await $fetch(`/api/admin/products/${product.id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      body: {
+        isActive: nextValue
+      }
+    })
+  } catch (error: any) {
+    product.isActive = previousValue
+    console.error('Failed to update product status:', error)
+    showToast(error?.data?.statusMessage || t('admin.pages.products.index.bulk.updateError'), 'error')
+  } finally {
+    delete statusUpdating[product.id]
   }
 }
  

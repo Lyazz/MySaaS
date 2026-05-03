@@ -48,7 +48,7 @@ const displayPrice = computed(() => {
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
@@ -246,11 +246,11 @@ async function handleAddToCart() {
         class="flex items-center gap-2" 
         :class="[ viewMode === 'list' ? '' : 'justify-center mt-2' ]"
       >
-        <span class="text-2xl font-black text-brand-500">{{ Number(product.price).toLocaleString() }} <span class="text-sm font-bold text-slate-500 ml-1">{{ currencyCode }}</span></span>
+        <span class="text-2xl font-black text-brand-500">{{ formatAmount(product.price) }} <span class="text-sm font-bold text-slate-500 ml-1">{{ currencyCode }}</span></span>
         <span
           v-if="originalPrice"
           class="text-sm text-slate-600 line-through font-bold"
-        >{{ originalPrice }} {{ currencyCode }}</span>
+        >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
       </div>
       
       <!-- List View Extra Actions -->

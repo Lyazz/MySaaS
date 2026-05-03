@@ -298,6 +298,10 @@ model StoreSettings {
   announcementText      String?
   announcementScrolling Boolean @default(false)
 
+  // Storefront legal/static pages content by language (FR/EN/AR)
+  // and per-page visibility toggles for footer links.
+  legalPages Json?
+
   // Storefront homepage configuration (carousel + sections).
   // Tenant-scoped via StoreSettings. Treated as an opaque JSON blob but validated at the API layer.
   homeConfig Json?

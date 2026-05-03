@@ -1,3 +1,5 @@
+import { formatPriceAmount } from './money-format'
+
 export type BillingInterval = 'month' | 'year'
 
 export type PlanCode = 'basic' | 'beginner' | 'merchant' | 'professional'
@@ -33,7 +35,7 @@ export interface PricingPlanCard {
     highlight: boolean
 }
 
-const dzd = (amount: number) => new Intl.NumberFormat('fr-DZ', { maximumFractionDigits: 0 }).format(amount)
+const dzd = (amount: number) => formatPriceAmount(amount)
 
 export const PRICING_PLANS: readonly PlanDefinition[] = [
     {

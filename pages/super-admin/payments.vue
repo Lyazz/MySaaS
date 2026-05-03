@@ -196,6 +196,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'super-admin',
@@ -224,7 +225,7 @@ const formatDateTime = (date: string) =>
     minute: '2-digit'
   })
 
-const formatMoney = (amount: number) => `${Number(amount || 0).toLocaleString(locale.value)} DA`
+const formatMoney = (amount: number) => `${formatPriceAmount(amount, { locale: locale.value })} DA`
 
 async function load() {
   error.value = ''

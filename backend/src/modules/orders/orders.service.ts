@@ -862,6 +862,7 @@ export class OrdersService {
                 select: {
                     id: true,
                     status: true,
+                    items: { select: { variantId: true, quantity: true } },
                     sale: { select: { id: true } },
                     _count: {
                         select: {
@@ -874,27 +875,67 @@ export class OrdersService {
             })
 
             if (!existing) throw new OrderValidationError(404, 'Order not found')
-            if (existing.status !== 'PENDING') {
-                throw new OrderValidationError(409, 'Only unconfirmed (PENDING) orders can be deleted', {
+            if (existing.status !== 'PENDING' && existing.status !== 'CONFIRMED') {
+                throw new OrderValidationError(409, 'Only PENDING or just-CONFIRMED orders can be deleted', {
                     code: 'ORDER_DELETE_STATUS_NOT_ALLOWED'
                 })
             }
 
             if (
                 existing.sale ||
-                existing._count.shipments > 0 ||
-                existing._count.cashTransactions > 0 ||
-                existing._count.inventoryMovements > 0
+                existing._count.cashTransactions > 0
             ) {
                 throw new OrderValidationError(409, 'Order cannot be deleted because it has linked records', {
                     code: 'ORDER_DELETE_HAS_LINKED_RECORDS',
                     meta: {
                         hasSale: Boolean(existing.sale),
-                        shipmentsCount: existing._count.shipments,
-                        cashTransactionsCount: existing._count.cashTransactions,
-                        inventoryMovementsCount: existing._count.inventoryMovements
+                        cashTransactionsCount: existing._count.cashTransactions
                     }
                 })
+            }
+
+            // Release reserved inventory for CONFIRMED orders
+            if (existing.status === 'CONFIRMED') {
+                for (const item of existing.items) {
+                    if (!item.variantId) continue
+                    const variant = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    })
+                    if (!variant || variant.trackInventory === false) continue
+                    if (variant.reserved < item.quantity) continue
+
+                    await tx.productVariant.updateMany({
+                        where: { tenantId, id: item.variantId },
+                        data: { reserved: { decrement: item.quantity } }
+                    })
+
+                    const after = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { stock: true, reserved: true, safetyStock: true }
+                    })
+
+                    await tx.inventoryMovement.create({
+                        data: {
+                            tenantId,
+                            variantId: item.variantId,
+                            type: 'RESERVED_ADJUSTMENT',
+                            delta: 0,
+                            reservedDelta: -item.quantity,
+                            safetyStockDelta: 0,
+                            reason: 'order_cancel',
+                            note: 'delete_confirmed_order',
+                            orderId: id,
+                            stockAfter: after?.stock ?? null,
+                            reservedAfter: after?.reserved ?? null,
+                            safetyStockAfter: after?.safetyStock ?? null,
+                            createdByUserId: null
+                        }
+                    })
+                }
+
+                // Remove Maystro mapping so it doesn't cause orphan issues
+                await tx.maystroOrderMapping.deleteMany({ where: { tenantId, localOrderId: id } })
             }
 
             await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, id)

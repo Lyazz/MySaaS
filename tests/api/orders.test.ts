@@ -5,6 +5,7 @@ import app from '../../backend/src/app'
 import { signAccessToken } from '../../backend/src/lib/jwt'
 import { DeliveryService } from '../../backend/src/modules/delivery/delivery.service'
 import { MaystroIntegrationError } from '../../backend/src/modules/delivery/maystro/maystro.errors'
+import { OrdersService } from '../../backend/src/modules/orders/orders.service'
 
 describe('Public checkout order flow', () => {
     const slug = `checkout-${Date.now()}`
@@ -563,6 +564,56 @@ describe('Public checkout order flow', () => {
             where: { tenantId, orderId, provider: 'MAYSTRO' }
         })
         expect(shipmentCount).toBe(0)
+    })
+
+    it('does not roll back inventory when carrier sync fails for an already confirmed order', async () => {
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Carrier Retry Buyer',
+                customerPhone: '0550111222',
+                shippingProvider: 'MAYSTRO',
+                shippingWilayaCode: '16',
+                shippingCommuneCode: '1605',
+                shippingAddressLine1: '789 Retry Street',
+                deliveryMode: 'pickup',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(created.status).toBe(201)
+        const orderId = created.body.orderId as string
+
+        const shipmentSpy = vi.spyOn(DeliveryService.prototype, 'createShipment')
+        const rollbackSpy = vi.spyOn(OrdersService.prototype, 'rollbackCarrierConfirmation')
+
+        shipmentSpy.mockResolvedValueOnce({ id: 'mock-shipment' } as any)
+
+        const firstConfirm = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'CONFIRMED' })
+
+        expect(firstConfirm.status).toBe(200)
+
+        shipmentSpy.mockRejectedValueOnce(
+            new MaystroIntegrationError({ statusCode: 502, statusMessage: 'Carrier unavailable on retry' })
+        )
+
+        const secondConfirm = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'CONFIRMED' })
+
+        expect(secondConfirm.status).toBe(502)
+        expect(secondConfirm.body.statusMessage).toBe('Carrier unavailable on retry')
+        expect(shipmentSpy).toHaveBeenCalledTimes(2)
+        expect(rollbackSpy).toHaveBeenCalledTimes(0)
+
+        const saved = await prisma.order.findUnique({ where: { id: orderId } })
+        expect(saved?.status).toBe('CONFIRMED')
     })
 
     it('ignores product-level promotional price at checkout when promotion flags/date window are inactive', async () => {

@@ -10,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -328,7 +329,7 @@ const props = defineProps<{
       <!-- Footer -->
       <footer class="pt-16 pb-8 border-t" style="background-color: #080B12; border-color: rgba(212,197,169,0.08); color: #7A7060;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <!-- Brand Column -->
             <div class="col-span-1 md:col-span-1">
               <div class="mb-2">
@@ -374,8 +375,7 @@ const props = defineProps<{
                 {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 text-sm" style="color: #7A7060;">
-                <li><a href="#" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.contactUs }}</a></li>
-                <li><a href="#" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.aboutUs }}</a></li>
+                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
             <div>
@@ -383,18 +383,9 @@ const props = defineProps<{
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 text-sm" style="color: #7A7060;">
-                <li><a href="#" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.termsOfService }}</a></li>
-                <li><a href="#" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                <li><a href="#" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.returnPolicy }}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="font-semibold mb-5 tracking-[0.15em] uppercase text-xs" style="color: #D4C5A9;">
-                {{ storefrontContent.footer.help }}
-              </h4>
-              <ul class="space-y-3 text-sm" style="color: #7A7060;">
-                <li><a href="#" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.faq }}</a></li>
-                <li><a href="#" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.shippingInfo }}</a></li>
+                <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
               </ul>
             </div>
           </div>

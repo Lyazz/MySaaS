@@ -18,8 +18,17 @@ export class MaystroController {
     private products = new MaystroProductService()
 
     async listWilayas(req: Request, res: Response) {
+        const tenantId = req.tenant?.id || req.user?.tenantId
         try {
+            let apiToken: string | undefined
+            if (tenantId) {
+                try {
+                    const creds = await getMaystroCredentials(tenantId)
+                    apiToken = creds.apiToken
+                } catch { /* no creds configured — attempt unauthenticated */ }
+            }
             const wilayas = await this.location.listWilayas({
+                apiToken,
                 language: typeof req.query.language === 'string' ? req.query.language : undefined,
                 country: typeof req.query.country === 'string' ? req.query.country : undefined
             })
@@ -37,8 +46,16 @@ export class MaystroController {
         const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya : ''
         if (!wilaya.trim()) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
 
+        const tenantId = req.tenant?.id || req.user?.tenantId
         try {
-            const communes = await this.location.listCommunes({ wilaya })
+            let apiToken: string | undefined
+            if (tenantId) {
+                try {
+                    const creds = await getMaystroCredentials(tenantId)
+                    apiToken = creds.apiToken
+                } catch { /* no creds configured — attempt unauthenticated */ }
+            }
+            const communes = await this.location.listCommunes({ apiToken, wilaya })
             return res.json(communes)
         } catch (error: any) {
             if (error instanceof MaystroIntegrationError) {

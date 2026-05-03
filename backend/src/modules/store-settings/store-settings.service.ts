@@ -1,6 +1,11 @@
 import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
 import { isValidOrderIdPrefix, sanitizeOrderIdPrefix } from '../../lib/order-public-id'
+import {
+    isValidStoreLegalPagesConfig,
+    normalizeStoreLegalPagesConfig,
+    type StoreLegalPagesConfig
+} from '../../../../shared/storefront/legal-pages'
 
 export type StoreTemplateKey =
     | 'classic'
@@ -87,6 +92,7 @@ export type StoreSettingsPatchInput = Partial<{
     loyaltyRedeemRateDzdPerPoint: number | string
     loyaltyBasePoints: number | string
     loyaltyMarginFactor: number | string
+    legalPages: StoreLegalPagesConfig
 }>
 
 const toDecimalString = (value: unknown, field: string): string => {
@@ -298,6 +304,15 @@ export class StoreSettingsService {
 
         if (input.loyaltyMarginFactor !== undefined) {
             updateSettings.loyaltyMarginFactor = new Prisma.Decimal(toDecimalString(input.loyaltyMarginFactor, 'loyaltyMarginFactor'))
+        }
+
+        if (input.legalPages !== undefined) {
+            if (!isValidStoreLegalPagesConfig(input.legalPages)) {
+                throw new StoreSettingsValidationError(
+                    'legalPages must include terms/privacy/returns/contact with enabled, title.{fr,en,ar} and content.{fr,en,ar}'
+                )
+            }
+            updateSettings.legalPages = normalizeStoreLegalPagesConfig(input.legalPages) as unknown as Prisma.InputJsonValue
         }
 
         // Execute Transaction if tenant fields need updating

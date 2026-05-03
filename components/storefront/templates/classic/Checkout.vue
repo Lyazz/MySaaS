@@ -7,7 +7,7 @@ const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
@@ -513,7 +513,7 @@ async function handleSubmit() {
                     </p>
                   </div>
                   <div class="font-bold text-slate-900 text-sm">
-                    {{ item.price }} {{ currencyCode }}
+                    {{ formatAmount(item.price) }} {{ currencyCode }}
                   </div>
                 </div>
               </div>
@@ -536,7 +536,7 @@ async function handleSubmit() {
             <div class="space-y-4 pt-4 border-t border-slate-200">
               <div class="flex justify-between text-sm">
                 <span class="text-slate-500 uppercase tracking-wider text-xs font-bold">{{ storefrontContent.cart.summary.subtotal }}</span>
-                <span class="font-medium text-slate-900">{{ cartStore.total }} {{ currencyCode }}</span>
+                <span class="font-medium text-slate-900">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</span>
               </div>
               <div v-if="selectedDelivery" class="flex justify-between text-sm">
                 <span class="text-slate-500 uppercase tracking-wider text-xs font-bold">{{ storefrontContent.cart.summary.shipping }}</span>
@@ -545,7 +545,7 @@ async function handleSubmit() {
                         
               <div class="flex justify-between items-end pt-6 border-t border-slate-200 mt-4">
                 <span class="font-serif font-bold text-xl text-slate-900">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-serif font-bold text-xl text-slate-900">{{ grandTotal }} {{ currencyCode }}</span>
+                <span class="font-serif font-bold text-xl text-slate-900">{{ formatAmount(grandTotal) }} {{ currencyCode }}</span>
               </div>
             </div>
 

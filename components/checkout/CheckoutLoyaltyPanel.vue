@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const storeSettings = useState<any>('storeSettings')
 const cartStore = useCartStore()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const loyalty = useCheckoutLoyalty()
 
 const enabled = computed(() => storeSettings.value?.loyaltyEnabled === true)
@@ -101,7 +101,7 @@ onUnmounted(() => {
           </div>
           <p class="mt-1 text-xs text-slate-600">
             Minimum: {{ minRedeemPoints }} points
-            <span v-if="redeemRate > 0"> · 1 point = {{ redeemRate }} {{ currencyCode }}</span>
+            <span v-if="redeemRate > 0"> · 1 point = {{ formatAmount(redeemRate) }} {{ currencyCode }}</span>
           </p>
           <label class="mt-4 block text-sm font-semibold text-slate-900">
             Points a utiliser
@@ -116,7 +116,7 @@ onUnmounted(() => {
             placeholder="0"
           >
           <p class="mt-2 text-xs text-slate-600">
-            Reduction estimee: {{ estimatedDiscount.toLocaleString() }} {{ currencyCode }}
+            Reduction estimee: {{ formatAmount(estimatedDiscount) }} {{ currencyCode }}
           </p>
           <p v-if="loyalty.pendingRedeemPoints.value > 0" class="mt-2 text-xs text-amber-700">
             {{ loyalty.pendingRedeemPoints.value }} points sont deja reserves sur une autre commande en cours.

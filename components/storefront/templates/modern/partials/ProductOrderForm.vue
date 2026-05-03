@@ -16,7 +16,7 @@ const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -774,7 +774,7 @@ const scrollToForm = () => {
                 <div class="bg-slate-50 rounded-xl border border-slate-100 p-4 space-y-3">
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-slate-500">{{ storefrontContent.cart.summary.subtotal }}</span>
-                        <span class="font-bold text-slate-800">{{ totalPrice }} {{ currencyCode }}</span>
+                        <span class="font-bold text-slate-800">{{ formatAmount(totalPrice) }} {{ currencyCode }}</span>
                     </div>
 
                     <div v-if="selectedDelivery" class="flex items-center justify-between text-sm">
@@ -787,7 +787,7 @@ const scrollToForm = () => {
                     <div class="flex items-center justify-between pt-3 border-t border-slate-200">
                         <span class="text-slate-700 font-bold">{{ storefrontContent.productForm.totalPrice }}</span>
                         <span class="text-xl font-bold text-brand-600">
-                            {{ totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0) }} {{ currencyCode }}
+                            {{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}
                         </span>
                     </div>
                 </div>
@@ -894,7 +894,7 @@ const scrollToForm = () => {
         >
             <div class="flex flex-col">
                 <span class="text-xs text-slate-500 font-medium">Total</span>
-                <span class="text-xl font-bold text-brand-600 leading-none">{{ totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0) }} {{ currencyCode }}</span>
+                <span class="text-xl font-bold text-brand-600 leading-none">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
             </div>
             <button
                 type="button"

@@ -16,7 +16,7 @@ const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -614,18 +614,18 @@ const scrollToForm = () => {
         <div class="bg-violet-50 rounded-2xl border-3 border-violet-100 p-4 space-y-2">
           <div class="flex items-center justify-between text-sm">
             <span class="text-stone-600 font-medium">{{ storefrontContent.checkout.summary.subtotal }}</span>
-            <span class="font-black text-stone-900">{{ subtotal.toLocaleString() }} {{ currencyCode }}</span>
+            <span class="font-black text-stone-900">{{ formatAmount(subtotal) }} {{ currencyCode }}</span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-stone-600 font-medium">{{ storefrontContent.checkout.summary.shipping }}</span>
             <span class="font-black" :class="deliveryFee === 0 ? 'text-emerald-600' : 'text-stone-900'">
-              {{ deliveryFee === 0 ? storefrontContent.checkout.delivery.free : `${deliveryFee.toLocaleString()} ${currencyCode}` }}
+              {{ deliveryFee === 0 ? storefrontContent.checkout.delivery.free : `${formatAmount(deliveryFee)} ${currencyCode}` }}
             </span>
           </div>
           <div class="border-t-2 border-violet-200 pt-2 flex items-center justify-between">
             <span class="font-black text-stone-900" style="font-family: 'Fredoka', sans-serif">{{ storefrontContent.checkout.summary.total }}</span>
             <span class="text-xl font-black text-violet-700" style="font-family: 'Fredoka', sans-serif">
-              {{ totalPrice.toLocaleString() }} {{ currencyCode }}
+              {{ formatAmount(totalPrice) }} {{ currencyCode }}
             </span>
           </div>
         </div>
@@ -724,7 +724,7 @@ const scrollToForm = () => {
         <div class="flex flex-col">
           <span class="text-xs text-stone-500 font-medium">Total</span>
           <span class="text-xl font-black text-violet-700 leading-none" style="font-family: 'Fredoka', sans-serif">
-            {{ totalPrice.toLocaleString() }} {{ currencyCode }}
+            {{ formatAmount(totalPrice) }} {{ currencyCode }}
           </span>
         </div>
         <button

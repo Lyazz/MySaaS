@@ -120,7 +120,8 @@ export class StoreSettingsController {
                     loyaltyEnabled: settings.loyaltyEnabled,
                     loyaltyMinRedeemPoints: settings.loyaltyMinRedeemPoints,
                     loyaltyRedeemRateDzdPerPoint: settings.loyaltyRedeemRateDzdPerPoint,
-                    loyaltyPublicFormulaMode: settings.loyaltyPublicFormulaMode
+                    loyaltyPublicFormulaMode: settings.loyaltyPublicFormulaMode,
+                    legalPages: settings.legalPages
                 }
             })
         } catch (error) {

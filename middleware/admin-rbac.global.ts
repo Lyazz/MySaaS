@@ -18,6 +18,7 @@ const pathToResource = (path: string): string | null => {
   if (path.startsWith('/admin/settings/homepage')) return 'homepageSettings'
   if (path.startsWith('/admin/settings/contact')) return 'contactInfos'
   if (path.startsWith('/admin/settings/functional')) return 'storeSettings'
+  if (path.startsWith('/admin/settings/legal')) return 'storeSettings'
   if (path.startsWith('/admin/integrations')) return 'integrations'
   if (path.startsWith('/admin/meta-pixels')) return 'metaPixels'
   if (path.startsWith('/admin/users')) return 'users'

@@ -7,7 +7,7 @@ const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
@@ -469,7 +469,7 @@ async function handleSubmit() {
                   <h4 class="font-bold text-white text-sm truncate">{{ item.title }}</h4>
                   <p class="text-xs text-gray-500 mt-1">x{{ item.quantity }}</p>
                 </div>
-                <div class="font-bold text-[#A67C52] text-sm whitespace-nowrap">{{ item.price }} {{ currencyCode }}</div>
+                <div class="font-bold text-[#A67C52] text-sm whitespace-nowrap">{{ formatAmount(item.price) }} {{ currencyCode }}</div>
               </div>
             </div>
 
@@ -499,7 +499,7 @@ async function handleSubmit() {
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">{{ storefrontContent.cart.summary.subtotal }}</span>
-                <span class="font-bold text-white">{{ cartStore.total }} {{ currencyCode }}</span>
+                <span class="font-bold text-white">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</span>
               </div>
               <div v-if="selectedDelivery" class="flex justify-between text-sm">
                 <span class="text-gray-500">{{ storefrontContent.checkout.summary.shippingFee }}</span>
@@ -508,9 +508,9 @@ async function handleSubmit() {
                         
               <div class="flex justify-between items-end pt-4 border-t border-[#A67C52]/10 mt-4">
                 <span class="font-bold text-xl text-white">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-bold text-xl text-[#A67C52]">{{ grandTotal }} {{ currencyCode }}</span>
+                <span class="font-bold text-xl text-[#A67C52]">{{ formatAmount(grandTotal) }} {{ currencyCode }}</span>
               </div>
-              <p class="text-xs text-gray-600 mt-1">{{ storefrontContent.checkout.minimumOrder(minimumOrderAmount.toLocaleString(), currencyCode) }}</p>
+              <p class="text-xs text-gray-600 mt-1">{{ storefrontContent.checkout.minimumOrder(formatAmount(minimumOrderAmount), currencyCode) }}</p>
             </div>
 
             <div v-if="errorMessage" class="mt-4 border-2 border-red-800/30 bg-red-950/30 text-red-400 text-sm px-4 py-3.5 flex items-start gap-3" style="border-radius: 2px;">

@@ -17,7 +17,7 @@ const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -551,7 +551,7 @@ const scrollToForm = () => {
                 <!-- Total Price -->
                 <div class="flex items-center justify-between px-4 py-3 border" style="background-color:#0E1117; border-color:rgba(212,197,169,0.1); border-radius:1px;">
                     <span class="text-sm font-medium" style="color:#8A8070;">{{ storefrontContent.productForm.totalPrice }}</span>
-                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0) }} {{ currencyCode }}</span>
+                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
                 </div>
 
                 <button 
@@ -624,7 +624,7 @@ const scrollToForm = () => {
             <div v-if="showStickyBar && codEnabled" class="fixed bottom-0 left-0 right-0 z-40 p-4 md:hidden flex items-center justify-between gap-4 border-t" style="background-color:#111620; border-color:rgba(166,124,82,0.15);">
                 <div class="flex flex-col">
                     <span class="text-xs" style="color:#5A5450;">Total</span>
-                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0) }} {{ currencyCode }}</span>
+                    <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
                 </div>
                 <button type="button" :disabled="!canPurchase" class="flex-1 h-12 font-medium text-sm tracking-[0.15em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-40" style="background-color:#A67C52; color:#fff; border-radius:1px;" @click="scrollToForm">
                     <span>{{ storefrontContent.productForm.cod.submit }}</span>

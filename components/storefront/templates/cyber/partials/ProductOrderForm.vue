@@ -16,7 +16,7 @@ const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -704,7 +704,7 @@ const handleAddToCart = async () => {
                 <!-- Total Price Display -->
                 <div class="flex items-center justify-between p-4 bg-purple-900/50 rounded-xl border border-purple-500/20">
                     <span class="text-purple-300 font-medium">{{ storefrontContent.productForm.totalPrice }}</span>
-                    <span class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">{{ totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0) }} {{ currencyCode }}</span>
+                    <span class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
                 </div>
 
                 <button 

@@ -150,7 +150,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.openSession.openingFloatLabel') }}
               </label>
-              <BaseInput v-model="openSessionForm.openingFloat" placeholder="0" />
+              <BaseInput v-model="openSessionForm.openingFloat" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -246,7 +246,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.closeSession.closingCountLabel') }}
               </label>
-              <BaseInput v-model="closeSessionForm.closingCount" placeholder="0" />
+              <BaseInput v-model="closeSessionForm.closingCount" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -282,6 +282,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import { parsePriceInput } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'auth',
@@ -339,11 +340,11 @@ const closeExpectedLoading = ref(false)
 
 const closeDifference = computed(() => {
   if (!closeExpected.value) return null
-  const closing = Number.parseFloat(String(closeSessionForm.closingCount || ''))
+  const closing = parsePriceInput(closeSessionForm.closingCount)
   if (!Number.isFinite(closing)) return null
   const expected = Number(closeExpected.value.expectedClosing)
   if (!Number.isFinite(expected)) return null
-  return closing - expected
+  return Number(closing) - expected
 })
 
 function typeLabel(type: string) {
@@ -416,12 +417,14 @@ async function loadCloseExpected(sessionId: string) {
 }
 
 async function submitOpenSession() {
+  const openingFloat = parsePriceInput(openSessionForm.openingFloat)
+  if (!Number.isFinite(openingFloat)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cashboxes/${cashboxId}/sessions/open`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { openingFloat: openSessionForm.openingFloat, note: openSessionForm.note }
+      body: { openingFloat, note: openSessionForm.note }
     })
     openSessionOpen.value = false
     await refresh()
@@ -435,12 +438,14 @@ async function submitOpenSession() {
 async function submitCloseSession() {
   const sessionId = cashbox.value?.openSession?.id
   if (!sessionId) return
+  const closingCount = parsePriceInput(closeSessionForm.closingCount)
+  if (!Number.isFinite(closingCount)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cash-sessions/${sessionId}/close`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { closingCount: closeSessionForm.closingCount, note: closeSessionForm.note }
+      body: { closingCount, note: closeSessionForm.note }
     })
     closeSessionOpen.value = false
     closeExpected.value = null

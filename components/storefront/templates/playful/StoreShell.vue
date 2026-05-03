@@ -10,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -367,7 +368,7 @@ const props = defineProps<{
       <!-- Footer -->
       <footer class="bg-[#1e1b4b] text-violet-200 pt-12 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
             <!-- Brand -->
             <div class="col-span-1 md:col-span-1">
               <h3 class="text-amber-400 text-2xl font-black mb-5 tracking-tight" style="font-family: 'Fredoka', sans-serif">{{ tenantName }}</h3>
@@ -405,8 +406,7 @@ const props = defineProps<{
                 {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.contactUs }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.aboutUs }}</a></li>
+                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
             <div>
@@ -415,19 +415,9 @@ const props = defineProps<{
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.termsOfService }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.returnPolicy }}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="text-white font-black text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
-                {{ storefrontContent.footer.help }}
-              </h4>
-              <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.faq }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.shippingInfo }}</a></li>
+                <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
               </ul>
             </div>
           </div>

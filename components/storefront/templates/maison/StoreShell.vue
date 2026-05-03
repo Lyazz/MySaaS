@@ -10,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Maison')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -351,8 +352,7 @@ watch(searchQuery, async (q) => {
             <div>
               <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.contact }}</span>
               <ul class="shell-footer__links">
-                <li><NuxtLink to="/contact" class="shell-footer__link">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
-                <li><NuxtLink to="/about" class="shell-footer__link">{{ storefrontContent.footer.aboutUs }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="shell-footer__link">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
 
@@ -360,9 +360,9 @@ watch(searchQuery, async (q) => {
             <div>
               <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.termsPrivacy }}</span>
               <ul class="shell-footer__links">
-                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.termsOfService }}</a></li>
-                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.returnPolicy }}</a></li>
+                <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="shell-footer__link">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="shell-footer__link">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="shell-footer__link">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
               </ul>
             </div>
           </div>

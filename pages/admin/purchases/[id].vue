@@ -479,6 +479,7 @@
             <div class="sm:col-span-2">
               <BaseInput
                 v-model="paymentForm.amount"
+                money
                 :label="t('admin.pages.purchases.detail.paymentModal.amountLabel')"
                 placeholder="0"
               />
@@ -561,6 +562,7 @@ import { useAuthStore } from '~/stores/auth'
 import VariantSelectorModal from '~/components/admin/VariantSelectorModal.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import { parsePriceInput } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'auth',
@@ -736,10 +738,9 @@ const receiveAll = async () => {
 }
 
 const toMoneyString = (value: unknown): string | null => {
-  if (value === undefined || value === null) return null
-  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
-  if (typeof value === 'string' && value.trim()) return value.trim()
-  return null
+  const parsed = parsePriceInput(value)
+  if (!Number.isFinite(parsed)) return null
+  return String(parsed)
 }
 
 const fetchCashboxes = async () => {
@@ -781,6 +782,8 @@ const canSubmitPayment = computed(() => {
 
 const submitPayment = async () => {
   if (!canSubmitPayment.value) return
+  const amountStr = toMoneyString(paymentForm.amount)
+  if (!amountStr) return
 
   savingPayment.value = true
   errorMessage.value = null
@@ -793,7 +796,7 @@ const submitPayment = async () => {
         cashboxId: paymentForm.cashboxId || undefined,
         type: 'SUPPLIER_PAYMENT',
         direction: 'OUT',
-        amount: paymentForm.amount,
+        amount: Number(amountStr),
         supplierId: order.value?.supplier?.id,
         purchaseOrderId: purchaseId,
         method: paymentForm.method,

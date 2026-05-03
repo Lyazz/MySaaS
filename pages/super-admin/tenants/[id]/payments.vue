@@ -179,6 +179,7 @@
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import { PRICING_PLANS } from '~/shared/pricing/plans'
 import { useAuthStore } from '~/stores/auth'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'super-admin',
@@ -225,7 +226,8 @@ const form = ref({
 const formatDateTime = (date: string) =>
   new Date(date).toLocaleString(locale.value, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
-const formatMoney = (amount: number, currency: string) => `${Number(amount || 0).toLocaleString(locale.value)} ${currency || 'DA'}`
+const formatMoney = (amount: number, currency: string) =>
+  `${formatPriceAmount(amount, { locale: locale.value })} ${currency || 'DA'}`
 
 async function loadTenants() {
   const res = await $fetch<any[]>('/api/super-admin/tenants', {

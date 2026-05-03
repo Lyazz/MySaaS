@@ -10,7 +10,7 @@
           Total Platform Revenue
         </h2>
         <div class="text-5xl font-bold text-teal-600">
-          ${{ revenueStats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00' }}
+          {{ formatMoney(revenueStats?.totalRevenue) }}
         </div>
         <p class="text-gray-500 mt-2">
           From confirmed, shipped, and delivered orders
@@ -86,7 +86,7 @@
             </div>
             <div class="text-right">
               <p class="text-2xl font-bold text-teal-600">
-                ${{ item.revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                {{ formatMoney(item.revenue) }}
               </p>
               <p class="text-gray-500 text-sm">
                 {{ ((item.revenue / (revenueStats?.totalRevenue || 1)) * 100).toFixed(1) }}%
@@ -156,7 +156,7 @@
                   </p>
                 </td>
                 <td class="px-4 py-3 text-right text-teal-600 font-semibold">
-                  ${{ tenant.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                  {{ formatMoney(tenant.revenue) }}
                 </td>
                 <td class="px-4 py-3 text-right text-gray-600">
                   {{ tenant._count?.orders || 0 }}
@@ -174,6 +174,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'super-admin',
@@ -211,6 +212,10 @@ const topTenants = computed(() => {
 const getTenantName = (tenantId: string) => {
   const tenant = tenants.value.find(t => t.id === tenantId)
   return tenant?.name || 'Unknown Tenant'
+}
+
+const formatMoney = (amount: number | null | undefined) => {
+  return `${formatPriceAmount(amount ?? 0)} DA`
 }
 
 onMounted(async () => {

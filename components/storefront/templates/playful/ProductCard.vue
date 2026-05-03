@@ -28,7 +28,7 @@ defineEmits(['quick-view'])
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
@@ -103,8 +103,8 @@ async function handleAddToCart() {
       </NuxtLink>
       <p class="text-sm text-stone-500 mb-3 line-clamp-1">{{ product.description || '' }}</p>
       <div class="flex items-center gap-3">
-        <span class="text-lg font-black text-violet-700">{{ displayPrice.toLocaleString() }} <span class="text-xs font-bold text-stone-400">{{ currencyCode }}</span></span>
-        <span v-if="originalPrice" class="text-xs text-stone-400 line-through">{{ originalPrice.toLocaleString() }} {{ currencyCode }}</span>
+        <span class="text-lg font-black text-violet-700">{{ formatAmount(displayPrice) }} <span class="text-xs font-bold text-stone-400">{{ currencyCode }}</span></span>
+        <span v-if="originalPrice" class="text-xs text-stone-400 line-through">{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
       </div>
     </div>
 
@@ -182,8 +182,8 @@ async function handleAddToCart() {
 
       <div class="flex items-center justify-between">
         <div class="flex flex-col">
-          <span class="text-base font-black text-violet-700">{{ displayPrice.toLocaleString() }} <span class="text-xs font-bold text-stone-400">{{ currencyCode }}</span></span>
-          <span v-if="originalPrice" class="text-xs text-stone-400 line-through">{{ originalPrice.toLocaleString() }} {{ currencyCode }}</span>
+          <span class="text-base font-black text-violet-700">{{ formatAmount(displayPrice) }} <span class="text-xs font-bold text-stone-400">{{ currencyCode }}</span></span>
+          <span v-if="originalPrice" class="text-xs text-stone-400 line-through">{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
         </div>
 
         <!-- Add to cart stamp button -->

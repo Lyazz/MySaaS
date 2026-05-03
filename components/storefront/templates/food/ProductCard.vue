@@ -48,7 +48,7 @@ const displayPrice = computed(() => {
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
@@ -213,12 +213,12 @@ async function handleAddToCart() {
         <!-- Price (Top aligned in grid) -->
         <div v-if="viewMode !== 'list'" class="flex flex-col items-end flex-shrink-0">
              <span class="text-sm font-bold text-stone-900 bg-brand-50 px-2 py-0.5 rounded-full text-brand-700 border border-brand-100 whitespace-nowrap">
-                {{ Number(product.price).toLocaleString() }} <span class="text-[10px]">{{ currencyCode }}</span>
+                {{ formatAmount(product.price) }} <span class="text-[10px]">{{ currencyCode }}</span>
             </span>
              <span
                 v-if="originalPrice"
                 class="text-[10px] text-stone-400 line-through mt-0.5"
-                >{{ originalPrice }}</span
+                >{{ formatAmount(originalPrice) }}</span
             >
         </div>
       </div>
@@ -240,11 +240,11 @@ async function handleAddToCart() {
        <!-- List View Price & Actions -->
        <div v-if="viewMode === 'list'" class="mt-4 flex items-center justify-between">
            <div class="flex items-center gap-2">
-                <span class="text-2xl font-bold text-stone-900">{{ Number(product.price).toLocaleString() }} <span class="text-sm font-normal text-stone-500">{{ currencyCode }}</span></span>
+                <span class="text-2xl font-bold text-stone-900">{{ formatAmount(product.price) }} <span class="text-sm font-normal text-stone-500">{{ currencyCode }}</span></span>
                 <span
                 v-if="originalPrice"
                 class="text-sm text-stone-400 line-through"
-                >{{ originalPrice }} {{ currencyCode }}</span>
+                >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
            </div>
 
           <button 

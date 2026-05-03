@@ -289,6 +289,29 @@ export class MaystroOrderService {
         }
     }
 
+    async cancelMaystroOrder(input: {
+        tenantId: string
+        apiToken: string
+        localOrderId: string
+    }) {
+        const mapping = await this.prisma.maystroOrderMapping.findUnique({
+            where: { tenantId_localOrderId: { tenantId: input.tenantId, localOrderId: input.localOrderId } }
+        })
+        if (!mapping?.maystroOrderId) return null
+
+        const client = new MaystroClient({ apiToken: input.apiToken })
+        try {
+            await client.request({
+                method: 'DELETE',
+                path: `/orders/${mapping.maystroOrderId}/`
+            })
+        } catch {
+            // Maystro may return 404 if already deleted/not found — treat as success
+        }
+
+        return mapping
+    }
+
     async createOrdersFromLocalOrdersBulk(input: {
         tenantId: string
         apiToken: string

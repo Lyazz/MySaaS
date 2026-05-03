@@ -10,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -371,7 +372,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
       <!-- Footer (Wellness Redesign) -->
       <footer class="bg-stone-100 text-stone-600 pt-20 pb-10 border-t border-stone-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
             <!-- Brand Column -->
             <div class="col-span-1 md:col-span-1">
               <h3 class="font-wellness text-2xl font-bold text-stone-800 mb-6 flex items-center gap-2">
@@ -414,8 +415,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             <div>
               <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.contact }}</h4>
               <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.contactUs }}</a></li>
-                <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.aboutUs }}</a></li>
+                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
 
@@ -423,20 +423,12 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             <div>
                <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.termsPrivacy }}</h4>
                <ul class="space-y-3 text-sm">
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.termsOfService }}</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.returnPolicy }}</a></li>
+                 <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                 <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                 <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
                </ul>
             </div>
 
-            <!-- Help Column -->
-            <div>
-               <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.help }}</h4>
-               <ul class="space-y-3 text-sm">
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.faq }}</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.shippingInfo }}</a></li>
-               </ul>
-            </div>
           </div>
 
           <!-- Bottom -->

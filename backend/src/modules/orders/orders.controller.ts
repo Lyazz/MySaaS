@@ -2,6 +2,9 @@ import type { Request, Response } from 'express'
 import { OrdersService, OrderValidationError } from './orders.service'
 import { DeliveryConfigurationError, DeliveryService } from '../delivery/delivery.service'
 import { MaystroIntegrationError } from '../delivery/maystro/maystro.errors'
+import { MaystroOrderService } from '../delivery/maystro/maystro-order.service'
+import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
+import prisma from '../../lib/prisma'
 import {
   fetchForExport,
   toRows,
@@ -101,6 +104,9 @@ export class OrdersController {
             }
 
             try {
+                const beforeUpdate = await service.findById(tenant.id, id)
+                const wasPendingBeforeConfirm = beforeUpdate?.status === 'PENDING' && status === 'CONFIRMED'
+
                 const updated = await service.updateStatus(
                     tenant.id,
                     id,
@@ -133,14 +139,16 @@ export class OrdersController {
                         return res.json(updated)
                     } catch (shipmentErr: any) {
                         console.error('Auto Maystro shipment failed after confirm:', shipmentErr)
-                        try {
-                            await service.rollbackCarrierConfirmation(tenant.id, order.id)
-                        } catch (rollbackErr) {
-                            console.error('Carrier confirmation rollback failed:', rollbackErr)
-                            return res.status(500).json({
-                                statusCode: 500,
-                                statusMessage: 'Carrier sync failed and order rollback could not be completed automatically'
-                            })
+                        if (wasPendingBeforeConfirm) {
+                            try {
+                                await service.rollbackCarrierConfirmation(tenant.id, order.id)
+                            } catch (rollbackErr) {
+                                console.error('Carrier confirmation rollback failed:', rollbackErr)
+                                return res.status(500).json({
+                                    statusCode: 500,
+                                    statusMessage: 'Carrier sync failed and order rollback could not be completed automatically'
+                                })
+                            }
                         }
 
                         if (shipmentErr instanceof OrderValidationError) {
@@ -271,6 +279,28 @@ export class OrdersController {
             }
 
             try {
+                // If the order is CONFIRMED and has a Maystro mapping, cancel it on Maystro first
+                const order = await service.findById(tenant.id, id)
+                if (order?.status === 'CONFIRMED') {
+                    const mapping = await prisma.maystroOrderMapping.findUnique({
+                        where: { tenantId_localOrderId: { tenantId: tenant.id, localOrderId: id } }
+                    })
+                    if (mapping?.maystroOrderId) {
+                        try {
+                            const creds = await getMaystroCredentials(tenant.id)
+                            const maystroOrders = new MaystroOrderService()
+                            await maystroOrders.cancelMaystroOrder({
+                                tenantId: tenant.id,
+                                apiToken: creds.apiToken,
+                                localOrderId: id
+                            })
+                        } catch (maystroErr: any) {
+                            console.error('Maystro order cancellation failed during delete:', maystroErr)
+                            // Non-blocking: proceed with local delete even if Maystro call fails
+                        }
+                    }
+                }
+
                 const deleted = await service.deleteUnconfirmed(tenant.id, id)
                 res.json({ success: true, ...deleted })
             } catch (err) {

@@ -419,6 +419,7 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
 
 const { t, locale } = useI18n({ useScope: 'global' })
 const { uploadWithProgress } = useUploadWithProgress()
@@ -509,8 +510,8 @@ const formatLimit = (limit: number | null | undefined) => {
 
 const formatDzd = (amount: number | null | undefined) => {
   if (typeof amount !== 'number') return '—'
-  const intlLocale = locale.value === 'fr' ? 'fr-DZ' : locale.value === 'ar' ? 'ar-DZ' : 'en-DZ'
-  return new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 0 }).format(amount)
+  const intlLocale = locale.value === 'fr' ? 'fr-DZ' : locale.value === 'ar' ? 'ar-DZ' : 'fr-DZ'
+  return formatPriceAmount(amount, { locale: intlLocale })
 }
 
 const formatPayDate = (date: string) =>

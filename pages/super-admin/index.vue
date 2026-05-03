@@ -66,7 +66,7 @@
               {{ t('superAdmin.dashboard.stats.revenue') }}
             </p>
              <p class="text-2xl font-bold text-gray-800 mt-1"> <!-- Smaller text for currency -->
-              ${{ revenueStats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0' }}
+              {{ formatMoney(revenueStats?.totalRevenue) }}
             </p>
           </div>
           <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
@@ -182,6 +182,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
 
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -197,6 +198,8 @@ const revenueStats = ref<any>(null)
 const recentLogs = ref<any[]>([])
 
 const authStore = useAuthStore()
+
+const formatMoney = (amount: number | null | undefined) => `${formatPriceAmount(amount ?? 0)} DA`
 
 onMounted(async () => {
   try {
