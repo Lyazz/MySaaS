@@ -19,6 +19,7 @@
 
       <!-- Logo -->
       <div
+        data-tour="sidebar-logo"
         class="h-[52px] flex items-center shrink-0 overflow-hidden"
         :class="sidebarOpen ? 'px-3 gap-2.5' : 'justify-center px-0 gap-0'"
         style="border-bottom: 1px solid var(--admin-sidebar-border)"
@@ -81,6 +82,7 @@
               v-for="item in entry.items"
               :key="item.path"
               :to="item.path"
+              :data-tour="navTourIds[item.path]"
               class="group relative flex items-center h-8 rounded-lg transition-all duration-150"
               :class="[
                 sidebarOpen ? 'px-2.5 gap-2.5' : 'justify-center px-0',
@@ -120,6 +122,9 @@
           </div>
         </div>
       </nav>
+
+      <!-- Tour Menu -->
+      <AdminTourMenu :sidebar-open="sidebarOpen" />
 
       <!-- User -->
       <div class="shrink-0 p-2" style="border-top: 1px solid var(--admin-sidebar-border)">
@@ -428,6 +433,14 @@ const hasAccess = (item: NavItem, role: AdminRole): boolean => {
   }
   if (item.access === 'member') return true
   return role === 'owner' || role === 'admin'
+}
+
+const navTourIds: Record<string, string> = {
+  '/admin': 'sidebar-dashboard',
+  '/admin/products': 'sidebar-products',
+  '/admin/orders': 'sidebar-orders',
+  '/admin/delivery': 'sidebar-delivery',
+  '/admin/settings/appearance': 'sidebar-settings',
 }
 
 const navGroups = ref<NavGroup[]>([
