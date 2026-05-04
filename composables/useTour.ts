@@ -1,5 +1,10 @@
 import type { DriveStep } from 'driver.js'
-
+import { useSidebarTour } from './tours/useSidebarTour'
+import { useDashboardTour } from './tours/useDashboardTour'
+import { useProductsTour } from './tours/useProductsTour'
+import { useOrdersTour } from './tours/useOrdersTour'
+import { useDeliveryTour } from './tours/useDeliveryTour'
+import { useSettingsTour } from './tours/useSettingsTour'
 export interface TourDef {
   id: string
   labelKey: string
@@ -23,12 +28,12 @@ function getRegistry(): TourDef[] {
   const { getSettingsSteps } = useSettingsTour()
 
   _registry = [
-    { id: 'sidebar',   labelKey: 'admin.tours.sidebar.label',   icon: 'lucide:layout-dashboard', getSteps: getSidebarSteps },
-    { id: 'dashboard', labelKey: 'admin.tours.dashboard.label', icon: 'lucide:bar-chart-2',      getSteps: getDashboardSteps },
-    { id: 'products',  labelKey: 'admin.tours.products.label',  icon: 'lucide:package',          getSteps: getProductsSteps },
-    { id: 'orders',    labelKey: 'admin.tours.orders.label',    icon: 'lucide:shopping-bag',     getSteps: getOrdersSteps },
-    { id: 'delivery',  labelKey: 'admin.tours.delivery.label',  icon: 'lucide:truck',            getSteps: getDeliverySteps },
-    { id: 'settings',  labelKey: 'admin.tours.settings.label',  icon: 'lucide:sliders',          getSteps: getSettingsSteps },
+    { id: 'sidebar', labelKey: 'admin.tours.sidebar.label', icon: 'lucide:layout-dashboard', getSteps: getSidebarSteps },
+    { id: 'dashboard', labelKey: 'admin.tours.dashboard.label', icon: 'lucide:bar-chart-2', getSteps: getDashboardSteps },
+    { id: 'products', labelKey: 'admin.tours.products.label', icon: 'lucide:package', getSteps: getProductsSteps },
+    { id: 'orders', labelKey: 'admin.tours.orders.label', icon: 'lucide:shopping-bag', getSteps: getOrdersSteps },
+    { id: 'delivery', labelKey: 'admin.tours.delivery.label', icon: 'lucide:truck', getSteps: getDeliverySteps },
+    { id: 'settings', labelKey: 'admin.tours.settings.label', icon: 'lucide:sliders', getSteps: getSettingsSteps },
   ]
   return _registry
 }
