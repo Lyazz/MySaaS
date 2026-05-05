@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/api_service.dart';
+import '../models/app_mode.dart';
 import '../models/product.dart';
 import '../providers/auth_provider.dart';
 import '../repositories/category_repository.dart';
@@ -44,7 +45,7 @@ class ProductsNotifier extends Notifier<ProductsState> {
   }
 
   bool get _isOfflineTenant =>
-      ref.read(authProvider).user?.isOfflineTenant ?? false;
+      ref.read(authProvider).mode == AppMode.offlineOnly;
 
   void _requireOnlineTenantFeature() {
     if (_isOfflineTenant) {

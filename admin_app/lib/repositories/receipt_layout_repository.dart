@@ -5,6 +5,7 @@ import '../models/receipt_layout.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class ReceiptLayoutRepository {
   final ApiService _apiService;
@@ -13,9 +14,15 @@ class ReceiptLayoutRepository {
 
   ReceiptLayoutRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<ReceiptLayout>> getLayouts({bool forceRefresh = false}) async {
     final db = await _dbService.database;
-    final localData = await db.query('receipt_layouts');
+    final localData = await db.query(
+      'receipt_layouts',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     final localLayouts = localData
         .map(
@@ -46,10 +53,15 @@ class ReceiptLayoutRepository {
             .toList();
 
         await db.transaction((txn) async {
-          await txn.delete('receipt_layouts', where: "syncStatus = 'synced'");
+          await txn.delete(
+            'receipt_layouts',
+            where: "tenantId = ? AND syncStatus = 'synced'",
+            whereArgs: [_tid],
+          );
           for (var r in remoteLayouts) {
             await txn.insert('receipt_layouts', {
               'id': r.id,
+              'tenantId': _tid,
               'name': r.name,
               'showLogo': r.showLogo ? 1 : 0,
               'showHeader': r.showHeader ? 1 : 0,
@@ -65,9 +77,7 @@ class ReceiptLayoutRepository {
           }
         });
         return remoteLayouts;
-      } catch (e) {
-        print('Background receipt layout fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localLayouts;
   }
@@ -93,6 +103,7 @@ class ReceiptLayoutRepository {
 
     await db.insert('receipt_layouts', {
       'id': newLayout.id,
+      'tenantId': _tid,
       'name': newLayout.name,
       'showLogo': newLayout.showLogo ? 1 : 0,
       'showHeader': newLayout.showHeader ? 1 : 0,
@@ -134,8 +145,8 @@ class ReceiptLayoutRepository {
         'showTaxBreakdown': layout.showTaxBreakdown ? 1 : 0,
         'syncStatus': online ? 'synced' : 'pending',
       },
-      where: 'id = ?',
-      whereArgs: [layout.id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [layout.id, _tid],
     );
 
     await _syncService.enqueueOperation(
@@ -147,7 +158,11 @@ class ReceiptLayoutRepository {
 
   Future<void> deleteLayout(String id) async {
     final db = await _dbService.database;
-    await db.delete('receipt_layouts', where: 'id = ?', whereArgs: [id]);
+    await db.delete(
+      'receipt_layouts',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+    );
 
     await _syncService.enqueueOperation(
       entityType: 'receiptLayout',

@@ -1,7 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../models/app_mode.dart';
 import 'auth_provider.dart';
 
 enum NetworkStatus { online, offlineTenant, noConnection }
@@ -13,13 +15,8 @@ class NetworkStatusNotifier extends Notifier<NetworkStatus> {
   @override
   NetworkStatus build() {
     _initOnce();
-
-    // Watch auth state to rebuild when tenant plan changes or user logs in/out
     final authState = ref.watch(authProvider);
-    final isOfflineTenant = authState.user?.isOfflineTenant ?? false;
-
-    // We assume default status until the async check finishes
-    return isOfflineTenant
+    return authState.mode == AppMode.offlineOnly
         ? NetworkStatus.offlineTenant
         : NetworkStatus.noConnection;
   }
@@ -27,11 +24,9 @@ class NetworkStatusNotifier extends Notifier<NetworkStatus> {
   void _initOnce() {
     if (_initialized) return;
     _initialized = true;
-
     final connectivity = Connectivity();
     _subscription = connectivity.onConnectivityChanged.listen(_checkStatus);
     connectivity.checkConnectivity().then(_checkStatus);
-
     ref.onDispose(() {
       _subscription?.cancel();
       _subscription = null;
@@ -40,13 +35,10 @@ class NetworkStatusNotifier extends Notifier<NetworkStatus> {
 
   void _checkStatus(List<ConnectivityResult> results) {
     final authState = ref.read(authProvider);
-    final isOfflineTenant = authState.user?.isOfflineTenant ?? false;
-
-    if (isOfflineTenant) {
+    if (authState.mode == AppMode.offlineOnly) {
       state = NetworkStatus.offlineTenant;
       return;
     }
-
     final hasConnection = results.any((r) => r != ConnectivityResult.none);
     state = hasConnection ? NetworkStatus.online : NetworkStatus.noConnection;
   }

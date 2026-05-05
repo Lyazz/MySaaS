@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'models/app_mode.dart';
 import 'providers/auth_provider.dart';
+import 'bootstrap.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'screens/orders_screen.dart';
@@ -88,13 +91,27 @@ String _firstAllowedPath(List<String> permissions) {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
+  final bootstrap = ref.read(bootstrapProvider);
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
+      final path = state.uri.toString();
       final isLoggedIn = authState.isAuthenticated;
-      final isLoginRoute = state.uri.toString() == '/login';
+      final mode = authState.mode;
+      final isLoginRoute = path == '/login';
+      final isRegisterRoute = path == '/register';
+      final isAuthRoute = isLoginRoute || isRegisterRoute;
 
-      if (!isLoggedIn && !isLoginRoute) {
+      // Offline-only provisioned: skip login entirely, go straight to app.
+      if (mode == AppMode.offlineOnly) {
+        if (isAuthRoute) return '/';
+        return null;
+      }
+
+      // Unprovisioned: no token and no tenantId — need login.
+      final isProvisioned = isLoggedIn || bootstrap.tenantId.isNotEmpty;
+
+      if (!isProvisioned && !isAuthRoute) {
         return '/login';
       }
 
@@ -125,6 +142,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/login',
         pageBuilder: (context, state) =>
             NoTransitionPage(key: state.pageKey, child: const LoginScreen()),
+      ),
+      GoRoute(
+        path: '/register',
+        pageBuilder: (context, state) =>
+            NoTransitionPage(key: state.pageKey, child: const RegisterScreen()),
       ),
       ShellRoute(
         builder: (context, state, child) {

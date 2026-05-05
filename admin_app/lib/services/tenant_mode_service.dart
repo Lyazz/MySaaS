@@ -1,28 +1,28 @@
+import '../models/app_mode.dart';
+
 class TenantModeService {
   static final TenantModeService _instance = TenantModeService._internal();
   factory TenantModeService() => _instance;
   TenantModeService._internal();
 
-  bool _isOfflineTenant = false;
+  AppMode _mode = AppMode.online;
+  String _tenantId = '';
 
-  bool get isOfflineTenant => _isOfflineTenant;
+  AppMode get mode => _mode;
+  String get activeTenantId => _tenantId;
+  bool get isOfflineOnly => _mode == AppMode.offlineOnly;
+  bool get allowsNetwork => _mode != AppMode.offlineOnly;
 
-  void setOfflineTenant(bool isOfflineTenant) {
-    _isOfflineTenant = isOfflineTenant;
+  void initialize({required AppMode mode, required String tenantId}) {
+    _mode = mode;
+    _tenantId = tenantId;
   }
 
   bool isRequestAllowed(String path) {
+    if (_mode != AppMode.offlineOnly) return true;
     final trimmed = path.trim();
-    if (!_isOfflineTenant) return true;
-
-    // Always allow auth/session refresh so the tenant can upgrade and become online.
     if (trimmed == '/login' || trimmed == '/me') return true;
-
-    // Optionally allow billing endpoints for upgrading from offline -> online.
     if (trimmed.startsWith('/admin/billing')) return true;
-
-    // Block everything else (admin APIs, uploads, etc.) in offline-tenant mode.
     return false;
   }
 }
-

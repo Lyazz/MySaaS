@@ -4,6 +4,7 @@ import '../models/customer_payment.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class CustomerPaymentRepository {
   final ApiService _apiService;
@@ -12,15 +13,12 @@ class CustomerPaymentRepository {
 
   CustomerPaymentRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<CustomerPayment>> getPaymentsForCustomer(
     String customerId, {
     bool forceRefresh = false,
   }) async {
-    final db = await _dbService.database;
-    // We don't cache all payments system-wide usually, just per customer as viewed.
-    // For true offline this means we only see what was requested while online, or what was created offline.
-
-    // To keep it simple, fetch online if possible
     if (forceRefresh || await _syncService.isOnline) {
       try {
         final res = await _apiService.client.get(
@@ -28,16 +26,14 @@ class CustomerPaymentRepository {
         );
         final List<dynamic> data = res.data;
         return data.map((e) => CustomerPayment.fromJson(e)).toList();
-      } catch (e) {
-        print('Background customer payments fetch failed: \$e');
-      }
+      } catch (_) {}
     }
 
-    // If offline, fetch local records created offline that haven't synced yet (or are stored)
+    final db = await _dbService.database;
     final localData = await db.query(
       'customer_payments',
-      where: 'customerId = ?',
-      whereArgs: [customerId],
+      where: 'customerId = ? AND tenantId = ?',
+      whereArgs: [customerId, _tid],
       orderBy: 'createdAt DESC',
     );
     return localData
@@ -77,6 +73,7 @@ class CustomerPaymentRepository {
 
     await db.insert('customer_payments', {
       'id': newPayment.id,
+      'tenantId': _tid,
       'customerId': customerId,
       'amount': newPayment.amount,
       'currency': newPayment.currency,

@@ -5,6 +5,7 @@ import '../models/cash.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class CashRepository {
   final ApiService _apiService;
@@ -13,22 +14,16 @@ class CashRepository {
 
   CashRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<CashboxSummary>> getCashboxes({bool forceRefresh = false}) async {
-    // For cashboxes, it's often small and static per tenant.
-    // However, sessions are dynamic. We will fetch online if possible.
     if (forceRefresh || await _syncService.isOnline) {
       try {
         final res = await _apiService.client.get('/admin/cash/cashboxes');
         final List<dynamic> data = res.data;
         return data.map((e) => CashboxSummary.fromJson(e)).toList();
-      } catch (e) {
-        print('Background cashboxes fetch failed: \$e');
-      }
+      } catch (_) {}
     }
-    // For simplicity, if offline, we might not be able to list new cashboxes.
-    // Ideally we would cache these in a `cashboxes` SQLite table too,
-    // but typically a POS belongs to 1 cashbox that it opens and closes.
-    // For now we assume the POS has already opened a session earlier or relies on cached session details.
     return [];
   }
 
@@ -52,17 +47,20 @@ class CashRepository {
         );
         final List<dynamic> data = res.data;
         return data.map((e) => CashSessionSummary.fromJson(e)).toList();
-      } catch (e) {
-        print('Background fetch failed: \$e');
-      }
+      } catch (_) {}
     }
-    final db = await _dbService.database;
-    final String where = cashboxId != null ? 'cashboxId = ?' : '';
-    final List<dynamic> whereArgs = cashboxId != null ? [cashboxId] : [];
 
-    final localData = where.isNotEmpty
-        ? await db.query('cash_sessions', where: where, whereArgs: whereArgs)
-        : await db.query('cash_sessions');
+    final db = await _dbService.database;
+    final whereStr = cashboxId != null
+        ? 'tenantId = ? AND cashboxId = ?'
+        : 'tenantId = ?';
+    final whereArgs = cashboxId != null ? [_tid, cashboxId] : [_tid];
+
+    final localData = await db.query(
+      'cash_sessions',
+      where: whereStr,
+      whereArgs: whereArgs,
+    );
 
     return localData
         .map(
@@ -105,21 +103,20 @@ class CashRepository {
         );
         final List<dynamic> data = res.data;
         return data.map((e) => CashTransactionSummary.fromJson(e)).toList();
-      } catch (e) {
-        print('Background fetch failed: \$e');
-      }
+      } catch (_) {}
     }
-    final db = await _dbService.database;
-    final String where = sessionId != null ? 'sessionId = ?' : '';
-    final List<dynamic> whereArgs = sessionId != null ? [sessionId] : [];
 
-    final localData = where.isNotEmpty
-        ? await db.query(
-            'cash_transactions',
-            where: where,
-            whereArgs: whereArgs,
-          )
-        : await db.query('cash_transactions');
+    final db = await _dbService.database;
+    final whereStr = sessionId != null
+        ? 'tenantId = ? AND sessionId = ?'
+        : 'tenantId = ?';
+    final whereArgs = sessionId != null ? [_tid, sessionId] : [_tid];
+
+    final localData = await db.query(
+      'cash_transactions',
+      where: whereStr,
+      whereArgs: whereArgs,
+    );
 
     return localData
         .map(
@@ -162,8 +159,8 @@ class CashRepository {
     final db = await _dbService.database;
     final localData = await db.query(
       'cash_sessions',
-      where: 'id = ?',
-      whereArgs: [sessionId],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [sessionId, _tid],
     );
 
     if (localData.isNotEmpty) {
@@ -193,6 +190,7 @@ class CashRepository {
 
         await db.insert('cash_sessions', {
           'id': remoteSession.id,
+          'tenantId': _tid,
           'cashboxId': remoteSession.cashboxId,
           'status': remoteSession.status,
           'openingFloat': remoteSession.openingFloat,
@@ -208,9 +206,7 @@ class CashRepository {
         }, conflictAlgorithm: ConflictAlgorithm.replace);
 
         return remoteSession;
-      } catch (e) {
-        print('Background session details fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return null;
   }
@@ -235,6 +231,7 @@ class CashRepository {
 
     await db.insert('cash_sessions', {
       'id': newSession.id,
+      'tenantId': _tid,
       'cashboxId': newSession.cashboxId,
       'status': newSession.status,
       'openingFloat': newSession.openingFloat,
@@ -274,8 +271,8 @@ class CashRepository {
         'note': note,
         'syncStatus': online ? 'synced' : 'pending',
       },
-      where: 'id = ?',
-      whereArgs: [sessionId],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [sessionId, _tid],
     );
 
     await _syncService.enqueueOperation(
@@ -290,8 +287,8 @@ class CashRepository {
 
     final localData = await db.query(
       'cash_sessions',
-      where: 'id = ?',
-      whereArgs: [sessionId],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [sessionId, _tid],
     );
     final e = localData.first;
     return CashSessionSummary.fromJson({
@@ -308,8 +305,8 @@ class CashRepository {
 
   Future<CashTransactionSummary> addTransaction({
     required String sessionId,
-    required String direction, // IN or OUT
-    required String type, // MANUAL, SALE, REFUND...
+    required String direction,
+    required String type,
     required double amount,
     String? note,
     String? expenseCategory,
@@ -321,7 +318,7 @@ class CashRepository {
     final id = const Uuid().v4();
     final newTransaction = CashTransactionSummary(
       id: id,
-      cashboxId: 'unknown', // typically derived server-side or from session
+      cashboxId: 'unknown',
       sessionId: sessionId,
       direction: direction,
       type: type,
@@ -336,6 +333,7 @@ class CashRepository {
 
     await db.insert('cash_transactions', {
       'id': newTransaction.id,
+      'tenantId': _tid,
       'cashboxId': newTransaction.cashboxId,
       'sessionId': newTransaction.sessionId,
       'direction': newTransaction.direction,

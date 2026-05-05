@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/api_service.dart';
+import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
@@ -88,7 +89,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final productsState = ref.watch(productsProvider);
     final filteredProducts = _filterProducts(productsState.products);
     final categories = ref.watch(productsProvider).categories;
-    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
+    final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
@@ -199,7 +200,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildHeader() {
-    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
+    final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -553,7 +554,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     controller: scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     children: [
-                      if (!(ref.read(authProvider).user?.isOfflineTenant ?? false))
+                      if (!(ref.read(authProvider).mode == AppMode.offlineOnly))
                         ListTile(
                           leading: const Icon(
                             LucideIcons.plus,
@@ -778,7 +779,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               style: const TextStyle(color: Color(0xFF64748B)), // Slate-500
             ),
             const SizedBox(height: 24),
-            if (!(ref.watch(authProvider).user?.isOfflineTenant ?? false))
+            if (!(ref.watch(authProvider).mode == AppMode.offlineOnly))
               AppButton.primary(
                 label: 'admin.pages.products.index.empty.newProduct'.tr(),
                 icon: LucideIcons.plus,

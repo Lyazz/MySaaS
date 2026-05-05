@@ -5,6 +5,7 @@ import '../models/order.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class OrderRepository {
   final ApiService _apiService;
@@ -12,6 +13,8 @@ class OrderRepository {
   final SyncService _syncService = SyncService();
 
   OrderRepository(this._apiService);
+
+  String get _tid => TenantModeService().activeTenantId;
 
   Future<({
     List<Order> items,
@@ -64,16 +67,20 @@ class OrderRepository {
           ? (data['totalPages'] as num).toInt()
           : 1;
 
-      // Update local cache (best-effort)
       try {
         final db = await _dbService.database;
         await db.transaction((txn) async {
           if (pageOut == 1) {
-            await txn.delete('orders', where: "syncStatus = 'synced'");
+            await txn.delete(
+              'orders',
+              where: "tenantId = ? AND syncStatus = 'synced'",
+              whereArgs: [_tid],
+            );
           }
           for (var o in orders) {
             await txn.insert('orders', {
               'id': o.id,
+              'tenantId': _tid,
               'status': o.status,
               'total': o.totalAmount,
               'createdAt': o.createdAt.toIso8601String(),
@@ -96,9 +103,13 @@ class OrderRepository {
       );
     }
 
-    // Offline/local
     final db = await _dbService.database;
-    final localData = await db.query('orders', orderBy: 'createdAt DESC');
+    final localData = await db.query(
+      'orders',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+      orderBy: 'createdAt DESC',
+    );
 
     DateTime? tryParse(String? raw) {
       if (raw == null || raw.trim().isEmpty) return null;
@@ -168,6 +179,8 @@ class OrderRepository {
     final db = await _dbService.database;
     final localData = await db.query(
       'orders',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
       limit: limit,
       offset: (page - 1) * limit,
     );
@@ -199,7 +212,11 @@ class OrderRepository {
 
         await db.transaction((txn) async {
           if (page == 1) {
-            await txn.delete('orders', where: "syncStatus = 'synced'");
+            await txn.delete(
+              'orders',
+              where: "tenantId = ? AND syncStatus = 'synced'",
+              whereArgs: [_tid],
+            );
           }
           for (var o in remoteOrders) {
             final itemsJsonList = o.items
@@ -214,6 +231,7 @@ class OrderRepository {
                 .toList();
             await txn.insert('orders', {
               'id': o.id,
+              'tenantId': _tid,
               'status': o.status,
               'total': o.totalAmount,
               'createdAt': o.createdAt.toIso8601String(),
@@ -226,9 +244,7 @@ class OrderRepository {
           }
         });
         return remoteOrders;
-      } catch (e) {
-        print('Background order fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localOrders;
   }
@@ -252,6 +268,7 @@ class OrderRepository {
             .toList();
         await db.insert('orders', {
           'id': o.id,
+          'tenantId': _tid,
           'status': o.status,
           'total': o.totalAmount,
           'createdAt': o.createdAt.toIso8601String(),
@@ -263,16 +280,14 @@ class OrderRepository {
         }, conflictAlgorithm: ConflictAlgorithm.replace);
 
         return o;
-      } catch (e) {
-        print('Background single order fetch failed: \$e');
-      }
+      } catch (_) {}
     }
 
     final db = await _dbService.database;
     final localData = await db.query(
       'orders',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
     );
     if (localData.isNotEmpty) {
       final e = localData.first;
@@ -301,8 +316,8 @@ class OrderRepository {
     await db.update(
       'orders',
       {'status': status, 'syncStatus': online ? 'synced' : 'pending'},
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
     );
 
     await _syncService.enqueueOperation(

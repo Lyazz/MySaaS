@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sidebar_provider.dart';
 import '../providers/store_settings_provider.dart';
+import '../theme/app_theme.dart';
 
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key});
@@ -33,8 +34,8 @@ class Sidebar extends ConsumerWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: isCollapsed ? 72 : 280,
-      color: const Color(0xFF020617), // Slate-950
+      width: isCollapsed ? 64 : 220,
+      color: AppColors.sidebarBg,
       child: Column(
         children: [
           _buildHeader(isCollapsed, ref),
@@ -181,13 +182,14 @@ class Sidebar extends ConsumerWidget {
     final storeName = storeState.settings.name.isNotEmpty
         ? storeState.settings.name
         : 'Swekly';
+    final storeSlug = storeState.settings.slug;
     final initial = storeName.isNotEmpty ? storeName[0].toUpperCase() : 'S';
 
     return Container(
-      height: 64,
-      padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 24),
+      height: 52,
+      padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10)),
+        border: Border(bottom: BorderSide(color: AppColors.surfaceBorder)),
       ),
       child: Row(
         mainAxisAlignment: isCollapsed
@@ -195,32 +197,50 @@ class Sidebar extends ConsumerWidget {
             : MainAxisAlignment.start,
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
-              color: const Color(0xFF0D9488), // Teal-600
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.brand,
+              borderRadius: BorderRadius.circular(7),
             ),
             alignment: Alignment.center,
             child: Text(
               initial,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.brandContrast,
                 fontWeight: FontWeight.bold,
+                fontSize: 12,
               ),
             ),
           ),
           if (!isCollapsed) ...[
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Flexible(
-              child: Text(
-                storeName,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    storeName,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                  ),
+                  if (storeSlug.isNotEmpty)
+                    Text(
+                      '$storeSlug.swekly.com',
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textTertiary,
+                        fontSize: 10,
+                        height: 1.3,
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
@@ -242,16 +262,22 @@ class Sidebar extends ConsumerWidget {
       children: [
         if (!isCollapsed)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.only(left: 10, bottom: 4, top: 4),
             child: Text(
-              title,
+              title.toUpperCase(),
               style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
+                color: AppColors.textTertiary,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.12,
               ),
             ),
+          )
+        else
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            height: 1,
+            color: AppColors.surfaceBorder,
           ),
         ...items.map((item) => _buildNavItem(context, item, isCollapsed)),
       ],
@@ -266,34 +292,25 @@ class Sidebar extends ConsumerWidget {
 
     // Base content of the nav item
     Widget content = Container(
-      height: 44, // h-11
-      padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 12),
-      margin: const EdgeInsets.only(bottom: 4),
+      height: 36,
+      padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 10),
+      margin: const EdgeInsets.only(bottom: 1),
       decoration: BoxDecoration(
-        // Allow hover effect to be handled by wrapping widget or global theme if needed,
-        // but here we manually handle active state background.
-        // For hover, InkWell provides a splash, but we want a specific hover color.
-        // Flutter's InkWell hoverColor can be set.
-        color: isActive
-            ? Colors.white.withValues(alpha: 0.1)
-            : null, // Transparent by default, hover handled by InkWell
-        borderRadius: BorderRadius.circular(8),
-        border: isActive
-            ? Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1)
-            : null,
+        color: isActive ? AppColors.brand.withValues(alpha: 0.12) : null,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Stack(
         alignment: isCollapsed ? Alignment.center : Alignment.centerLeft,
         children: [
           if (isActive)
             Positioned(
-              left: isCollapsed ? 0 : -12,
+              left: isCollapsed ? 0 : -10,
               top: 6,
               bottom: 6,
-              width: 4,
+              width: 3,
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Color(0xFF0D9488), // Teal-600
+                  color: AppColors.brand,
                   borderRadius: BorderRadius.horizontal(
                     right: Radius.circular(99),
                   ),
@@ -307,21 +324,19 @@ class Sidebar extends ConsumerWidget {
             children: [
               Icon(
                 item.icon,
-                size: 20,
-                color: isActive
-                    ? const Color(0xFF0D9488)
-                    : const Color(0xFF94A3B8), // Slate-400
+                size: 16,
+                color: isActive ? AppColors.brand : AppColors.textMuted,
               ),
               if (!isCollapsed) ...[
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Text(
                   item.label,
                   style: TextStyle(
                     color: isActive
-                        ? Colors.white
-                        : const Color(0xFF94A3B8), // Slate-400
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                    fontSize: 13,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),
               ],
@@ -380,39 +395,57 @@ class Sidebar extends ConsumerWidget {
     final email = user?.email ?? '—';
     final role = user?.role ?? '—';
 
+    final emailInitial = (user?.email ?? 'A')[0].toUpperCase();
+
     return Container(
-      padding: EdgeInsets.all(isCollapsed ? 8 : 16),
+      padding: EdgeInsets.all(isCollapsed ? 8 : 12),
       decoration: const BoxDecoration(
-        color: Colors.black26,
-        border: Border(top: BorderSide(color: Colors.white10)),
+        border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
       ),
       child: Row(
         mainAxisAlignment: isCollapsed
             ? MainAxisAlignment.center
             : MainAxisAlignment.start,
         children: [
-          const CircleAvatar(
-            backgroundColor: Color(0xFF1E293B),
-            child: Text('A', style: TextStyle(color: Colors.white)),
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: AppColors.surface3,
+              borderRadius: BorderRadius.circular(99),
+              border: Border.all(color: AppColors.surfaceBorder),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              emailInitial,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           if (!isCollapsed) ...[
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     email,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
                     role,
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    style: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -420,8 +453,8 @@ class Sidebar extends ConsumerWidget {
             IconButton(
               icon: const Icon(
                 LucideIcons.logOut,
-                color: Colors.grey,
-                size: 20,
+                color: AppColors.textMuted,
+                size: 16,
               ),
               onPressed: () {
                 ref.read(authProvider.notifier).logout();

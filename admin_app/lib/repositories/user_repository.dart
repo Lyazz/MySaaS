@@ -5,6 +5,7 @@ import '../models/admin_user.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class UserRepository {
   final ApiService _apiService;
@@ -13,12 +14,18 @@ class UserRepository {
 
   UserRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<AdminUser>> getUsers({
     bool forceRefresh = false,
     bool includeInactive = false,
   }) async {
     final db = await _dbService.database;
-    final localData = await db.query('users');
+    final localData = await db.query(
+      'users',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     var localUsers = localData
         .map(
@@ -53,10 +60,15 @@ class UserRepository {
             .toList();
 
         await db.transaction((txn) async {
-          await txn.delete('users', where: "syncStatus = 'synced'");
+          await txn.delete(
+            'users',
+            where: "tenantId = ? AND syncStatus = 'synced'",
+            whereArgs: [_tid],
+          );
           for (var u in remoteUsers) {
             await txn.insert('users', {
               'id': u.id,
+              'tenantId': _tid,
               'email': u.email,
               'role': u.role,
               'isActive': u.isActive ? 1 : 0,
@@ -69,9 +81,7 @@ class UserRepository {
           }
         });
         return remoteUsers;
-      } catch (e) {
-        print('Background user fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localUsers;
   }
@@ -89,6 +99,7 @@ class UserRepository {
 
     await db.insert('users', {
       'id': newUser.id,
+      'tenantId': _tid,
       'email': newUser.email,
       'role': newUser.role,
       'isActive': newUser.isActive ? 1 : 0,
@@ -123,7 +134,12 @@ class UserRepository {
       dataToUpdate['staffRoleId'] = payload['staffRoleId'];
     }
 
-    await db.update('users', dataToUpdate, where: 'id = ?', whereArgs: [id]);
+    await db.update(
+      'users',
+      dataToUpdate,
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+    );
 
     final syncPayload = Map<String, dynamic>.from(payload);
     syncPayload['id'] = id;
@@ -134,7 +150,11 @@ class UserRepository {
       payload: syncPayload,
     );
 
-    final res = await db.query('users', where: 'id = ?', whereArgs: [id]);
+    final res = await db.query(
+      'users',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+    );
     if (res.isNotEmpty) {
       final e = res.first;
       return AdminUser.fromJson({
@@ -153,7 +173,11 @@ class UserRepository {
 
   Future<void> deleteUser(String id) async {
     final db = await _dbService.database;
-    await db.delete('users', where: 'id = ?', whereArgs: [id]);
+    await db.delete(
+      'users',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+    );
 
     await _syncService.enqueueOperation(
       entityType: 'user',

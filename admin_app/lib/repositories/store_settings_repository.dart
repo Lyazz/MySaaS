@@ -1,8 +1,8 @@
-
 import '../models/store_settings.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class StoreSettingsRepository {
   final ApiService _apiService;
@@ -11,9 +11,15 @@ class StoreSettingsRepository {
 
   StoreSettingsRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<StoreSettings> getStoreSettings({bool forceRefresh = false}) async {
     final db = await _dbService.database;
-    final localData = await db.query('store_settings');
+    final localData = await db.query(
+      'store_settings',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     StoreSettings localSettings = StoreSettings.empty;
     if (localData.isNotEmpty) {
@@ -35,9 +41,10 @@ class StoreSettingsRepository {
           final remoteSettings = StoreSettings.fromJson(data['settings']);
 
           await db.transaction((txn) async {
-            await txn.delete('store_settings'); // Only keep one config row
+            await txn.delete('store_settings', where: 'tenantId = ?', whereArgs: [_tid]);
             await txn.insert('store_settings', {
-              'id': 'singleton', // only 1 row ever exists
+              'id': 'singleton_$_tid',
+              'tenantId': _tid,
               'name': remoteSettings.name,
               'slug': remoteSettings.slug,
               'currencyCode': remoteSettings.currencyCode,
@@ -47,9 +54,7 @@ class StoreSettingsRepository {
           });
           return remoteSettings;
         }
-      } catch (e) {
-        print('Background store settings fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localSettings;
   }

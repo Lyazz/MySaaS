@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../services/api_service.dart';
+import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/categories_provider.dart';
 import '../models/product.dart';
@@ -50,7 +51,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   Widget build(BuildContext context) {
     final categoriesState = ref.watch(categoriesProvider);
     final filteredCategories = _filterCategories(categoriesState.categories);
-    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
+    final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
@@ -108,7 +109,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   }
 
   Widget _buildHeader() {
-    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
+    final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -240,7 +241,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               style: TextStyle(color: Color(0xFF64748B)), // Slate-500
             ),
             const SizedBox(height: 24),
-            if (!(ref.watch(authProvider).user?.isOfflineTenant ?? false))
+            if (!(ref.watch(authProvider).mode == AppMode.offlineOnly))
               AppButton.primary(
                 label: 'Add Category',
                 icon: LucideIcons.plus,

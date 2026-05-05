@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../bootstrap.dart';
+import '../models/app_mode.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
+import 'sync_provider.dart';
 
-// Simple user model for now
 class User {
   final String id;
   final String email;
@@ -15,7 +16,6 @@ class User {
   final bool isSuperAdmin;
   final String tenantId;
   final String? staffRoleId;
-  final bool isOfflineTenant;
 
   User({
     required this.id,
@@ -25,15 +25,9 @@ class User {
     required this.tenantId,
     this.name,
     this.staffRoleId,
-    this.isOfflineTenant = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    bool isOffline = false;
-    if (json['tenant'] != null && json['tenant']['isOffline'] == true) {
-      isOffline = true;
-    }
-
     return User(
       id: json['id'] ?? '',
       email: json['email'] ?? '',
@@ -42,7 +36,6 @@ class User {
       isSuperAdmin: json['isSuperAdmin'] == true,
       tenantId: json['tenantId'] ?? '',
       staffRoleId: json['staffRoleId'],
-      isOfflineTenant: isOffline,
     );
   }
 
@@ -54,7 +47,6 @@ class User {
     'isSuperAdmin': isSuperAdmin,
     'tenantId': tenantId,
     'staffRoleId': staffRoleId,
-    'tenant': {'isOffline': isOfflineTenant},
   };
 }
 
@@ -74,6 +66,7 @@ class StaffRoleInfo {
 class AuthState {
   final User? user;
   final String? token;
+  final AppMode mode;
   final StaffRoleInfo? staffRole;
   final List<String> staffPermissions;
   final bool isLoading;
@@ -82,6 +75,7 @@ class AuthState {
   const AuthState({
     this.user,
     this.token,
+    this.mode = AppMode.online,
     this.staffRole,
     this.staffPermissions = const [],
     this.isLoading = false,
@@ -93,6 +87,7 @@ class AuthState {
   AuthState copyWith({
     User? user,
     String? token,
+    AppMode? mode,
     StaffRoleInfo? staffRole,
     List<String>? staffPermissions,
     bool? isLoading,
@@ -101,6 +96,7 @@ class AuthState {
     return AuthState(
       user: user ?? this.user,
       token: token ?? this.token,
+      mode: mode ?? this.mode,
       staffRole: staffRole ?? this.staffRole,
       staffPermissions: staffPermissions ?? this.staffPermissions,
       isLoading: isLoading ?? this.isLoading,
@@ -115,27 +111,32 @@ class AuthNotifier extends Notifier<AuthState> {
     final bootstrap = ref.read(bootstrapProvider);
     final apiService = ref.read(apiProvider);
 
+    // Initialize mode service from persisted bootstrap — before any network call.
+    TenantModeService().initialize(
+      mode: bootstrap.mode,
+      tenantId: bootstrap.tenantId,
+    );
+    SyncService().initialize(ref.read(apiProvider), mode: bootstrap.mode);
+
     final token = bootstrap.authToken;
     if (token != null && token.trim().isNotEmpty) {
       apiService.setToken(token);
     }
 
-    final userJson = bootstrap.userJson;
-    final staffRoleJson = bootstrap.staffRoleJson;
-    final user = userJson != null ? User.fromJson(userJson) : null;
-    final staffRole = staffRoleJson != null
-        ? StaffRoleInfo.fromJson(staffRoleJson)
+    final user = bootstrap.userJson != null
+        ? User.fromJson(bootstrap.userJson!)
+        : null;
+    final staffRole = bootstrap.staffRoleJson != null
+        ? StaffRoleInfo.fromJson(bootstrap.staffRoleJson!)
         : null;
 
     final initial = AuthState(
       token: token,
       user: user,
+      mode: bootstrap.mode,
       staffRole: staffRole,
       staffPermissions: bootstrap.staffPermissions,
     );
-
-    TenantModeService().setOfflineTenant(user?.isOfflineTenant ?? false);
-    SyncService().setOfflineTenant(user?.isOfflineTenant ?? false);
 
     if (token != null) {
       Future.microtask(() => refreshMe());
@@ -153,60 +154,121 @@ class AuthNotifier extends Notifier<AuthState> {
         data: {'email': email, 'password': password},
       );
 
-      if (response.data != null && response.data['token'] != null) {
-        final token = response.data['token']?.toString() ?? '';
-        final rawUser = (response.data['user'] as Map?)
-            ?.cast<String, dynamic>();
-        final user = User.fromJson(rawUser ?? {'id': '', 'email': email});
-        final rawStaffRole = (response.data['staffRole'] as Map?)
-            ?.cast<String, dynamic>();
-        final staffRole = rawStaffRole != null
-            ? StaffRoleInfo.fromJson(rawStaffRole)
-            : null;
-        final staffPermissionsRaw = response.data['staffPermissions'];
-        final staffPermissions = (staffPermissionsRaw is List)
-            ? staffPermissionsRaw.map((e) => e.toString()).toList()
-            : <String>[];
-
-        if (user.isSuperAdmin) {
-          apiService.setToken(null);
-          state = state.copyWith(
-            isLoading: false,
-            token: null,
-            user: null,
-            staffRole: null,
-            staffPermissions: const [],
-            error: 'Super-admin accounts must use the web super-admin console.',
-          );
-          await AppStorage.clearAuthSession();
-          throw Exception(state.error);
-        }
-
-        apiService.setToken(token);
-        TenantModeService().setOfflineTenant(user.isOfflineTenant);
-        SyncService().setOfflineTenant(user.isOfflineTenant);
-
-        state = state.copyWith(
-          isLoading: false,
-          token: token,
-          user: user,
-          staffRole: staffRole,
-          staffPermissions: staffPermissions,
-        );
-
-        await AppStorage.saveAuthSession(
-          token: token,
-          userJson: user.toJson(),
-          staffRoleJson: staffRole?.toJson(),
-          staffPermissions: staffPermissions,
-        );
-      } else {
-        throw Exception("Invalid response from server");
-      }
+      await _applyAuthResponse(
+        payload: (response.data as Map?)?.cast<String, dynamic>(),
+        fallbackEmail: email,
+        rejectSuperAdmin: true,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
+  }
+
+  Future<String?> register({
+    required String name,
+    required String slug,
+    required String email,
+    required String password,
+    required String phone,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final apiService = ref.read(apiProvider);
+      final response = await apiService.client.post(
+        '/register',
+        data: {
+          'name': name,
+          'slug': slug,
+          'email': email,
+          'password': password,
+          'phone': phone,
+        },
+      );
+
+      final payload = (response.data as Map?)?.cast<String, dynamic>();
+      await _applyAuthResponse(
+        payload: payload,
+        fallbackEmail: email,
+        rejectSuperAdmin: false,
+      );
+      final tenantRaw = payload?['tenant'];
+      if (tenantRaw is Map) {
+        final tenant = tenantRaw.cast<String, dynamic>();
+        final tenantName = tenant['name'];
+        if (tenantName is String && tenantName.trim().isNotEmpty) {
+          return tenantName.trim();
+        }
+      }
+      return null;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> _applyAuthResponse({
+    required Map<String, dynamic>? payload,
+    required String fallbackEmail,
+    required bool rejectSuperAdmin,
+  }) async {
+    if (payload == null || payload['token'] == null) {
+      throw Exception('Invalid response from server');
+    }
+
+    final apiService = ref.read(apiProvider);
+    final token = payload['token'].toString();
+    final rawUser = (payload['user'] as Map?)?.cast<String, dynamic>();
+    final user = User.fromJson(rawUser ?? {'id': '', 'email': fallbackEmail});
+
+    if (rejectSuperAdmin && user.isSuperAdmin) {
+      apiService.setToken(null);
+      state = state.copyWith(
+        isLoading: false,
+        token: null,
+        user: null,
+        staffRole: null,
+        staffPermissions: const [],
+        error: 'Super-admin accounts must use the web super-admin console.',
+      );
+      await AppStorage.clearAuthSession();
+      throw Exception(state.error);
+    }
+
+    final rawStaffRole = (payload['staffRole'] as Map?)
+        ?.cast<String, dynamic>();
+    final staffRole = rawStaffRole != null
+        ? StaffRoleInfo.fromJson(rawStaffRole)
+        : null;
+    final staffPermissionsRaw = payload['staffPermissions'];
+    final staffPermissions = (staffPermissionsRaw is List)
+        ? staffPermissionsRaw.map((e) => e.toString()).toList()
+        : <String>[];
+
+    // Derive mode from server response (tenant.isOffline flag).
+    final tenantIsOffline = payload['tenant']?['isOffline'] == true;
+    final mode = tenantIsOffline ? AppMode.offlineOnly : AppMode.online;
+
+    apiService.setToken(token);
+    TenantModeService().initialize(mode: mode, tenantId: user.tenantId);
+    SyncService().initialize(apiService, mode: mode);
+
+    await AppStorage.saveProvisioningState(mode: mode, tenantId: user.tenantId);
+    await AppStorage.saveAuthSession(
+      token: token,
+      userJson: user.toJson(),
+      staffRoleJson: staffRole?.toJson(),
+      staffPermissions: staffPermissions,
+    );
+
+    state = state.copyWith(
+      isLoading: false,
+      token: token,
+      user: user,
+      mode: mode,
+      staffRole: staffRole,
+      staffPermissions: staffPermissions,
+    );
   }
 
   Future<void> refreshMe() async {
@@ -217,14 +279,16 @@ class AuthNotifier extends Notifier<AuthState> {
       final apiService = ref.read(apiProvider);
       final response = await apiService.client.get('/me');
       final rawUser = (response.data?['user'] as Map?)?.cast<String, dynamic>();
+      if (rawUser == null) return;
 
-      if (response.data?['tenant'] != null && rawUser != null) {
+      if (response.data?['tenant'] != null) {
         rawUser['tenant'] = response.data?['tenant'];
       }
 
-      if (rawUser == null) return;
-
       final user = User.fromJson(rawUser);
+      final tenantIsOffline = response.data?['tenant']?['isOffline'] == true;
+      final mode = tenantIsOffline ? AppMode.offlineOnly : AppMode.online;
+
       final rawStaffRole = (response.data?['staffRole'] as Map?)
           ?.cast<String, dynamic>();
       final staffRole = rawStaffRole != null
@@ -235,34 +299,45 @@ class AuthNotifier extends Notifier<AuthState> {
           ? staffPermissionsRaw.map((e) => e.toString()).toList()
           : <String>[];
 
-      TenantModeService().setOfflineTenant(user.isOfflineTenant);
-      SyncService().setOfflineTenant(user.isOfflineTenant);
+      TenantModeService().initialize(mode: mode, tenantId: user.tenantId);
+      SyncService().initialize(apiService, mode: mode);
 
-      state = state.copyWith(
-        user: user,
-        staffRole: staffRole,
-        staffPermissions: staffPermissions,
+      await AppStorage.saveProvisioningState(
+        mode: mode,
+        tenantId: user.tenantId,
       );
-
       await AppStorage.saveAuthSession(
         token: token,
         userJson: user.toJson(),
         staffRoleJson: staffRole?.toJson(),
         staffPermissions: staffPermissions,
       );
+
+      state = state.copyWith(
+        user: user,
+        mode: mode,
+        staffRole: staffRole,
+        staffPermissions: staffPermissions,
+      );
     } catch (_) {
-      // Avoid logging out on transient network errors
-      // await logout();
+      // Avoid logout on transient network errors.
     }
   }
 
   Future<void> logout() async {
+    final tenantId = TenantModeService().activeTenantId;
     final apiService = ref.read(apiProvider);
     apiService.setToken(null);
-    TenantModeService().setOfflineTenant(false);
-    SyncService().setOfflineTenant(false);
+    TenantModeService().initialize(mode: AppMode.online, tenantId: '');
+    SyncService().initialize(apiService, mode: AppMode.online);
     state = const AuthState();
     await AppStorage.clearAuthSession();
+    await AppStorage.clearProvisioningState();
+    // Clear local data for this tenant on explicit logout.
+    if (tenantId.isNotEmpty) {
+      final dbService = ref.read(databaseServiceProvider);
+      await dbService.clearTenantData(tenantId);
+    }
   }
 }
 

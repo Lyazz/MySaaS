@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+
 import '../providers/auth_provider.dart';
+import '../providers/settings_provider.dart';
 import '../providers/workspace_provider.dart';
-import '../widgets/form/form_input.dart';
-import '../widgets/buttons/app_button.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,23 +22,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _workspaceController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _isLoading = false;
   String? _errorMessage;
-
-  // Colors from Tailwind config
-  static const Color slate900 = Color(0xFF0F172A);
-  static const Color slate500 = Color(0xFF64748B);
-  static const Color slate400 = Color(0xFF94A3B8);
-  static const Color slate200 = Color(0xFFE2E8F0);
-  static const Color slate50 = Color(0xFFF8FAFC);
-
-  static const Color teal600 = Color(0xFF0D9488);
-  static const Color teal500 = Color(0xFF14B8A6);
-  static const Color teal400 = Color(0xFF2DD4BF);
-  static const Color emerald400 = Color(0xFF34D399);
-  static const Color emerald500 = Color(0xFF10B981);
-
-  static const Color violet600 = Color(0xFF7C3AED);
 
   @override
   void initState() {
@@ -74,19 +60,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref
           .read(workspaceProvider.notifier)
           .setWorkspaceUrl(_workspaceController.text);
+
       await ref
           .read(authProvider.notifier)
-          .login(_emailController.text, _passwordController.text);
+          .login(_emailController.text.trim(), _passwordController.text);
+
       if (mounted) {
         context.go('/');
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          // Debugging: Show actual error
-          _errorMessage = e.toString().replaceAll('Exception: ', '');
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+      });
     } finally {
       if (mounted) {
         setState(() {
@@ -98,433 +84,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width >= 1024;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = _AuthPalette.fromTheme(isDark: isDark);
 
     return Scaffold(
-      body: Row(
+      backgroundColor: palette.pageBackground,
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Left Side - Design (Hidden on Mobile)
-          if (isDesktop)
-            Expanded(
-              flex: 1,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Background Color
-                  Container(color: slate900),
+          _buildBackdrop(palette),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isDesktop = constraints.maxWidth >= 1024;
 
-                  // Animated Background Blobs (Static approximation)
-                  Positioned(
-                    top: MediaQuery.of(context).size.height * 0.1,
-                    left: MediaQuery.of(context).size.width * 0.05,
-                    child: Container(
-                      width: 400,
-                      height: 400,
-                      decoration: BoxDecoration(
-                        color: teal600.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
-                        child: Container(color: Colors.transparent),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: MediaQuery.of(context).size.height * 0.1,
-                    right: MediaQuery.of(context).size.width * 0.05,
-                    child: Container(
-                      width: 400,
-                      height: 400,
-                      decoration: BoxDecoration(
-                        color: violet600.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
-                        child: Container(color: Colors.transparent),
-                      ),
-                    ),
-                  ),
-                  // Noise Texture Overlay (Optional, omitted for Flutter simplicity or use an image asset)
-
-                  // Content
-                  Padding(
-                    padding: const EdgeInsets.all(48),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            style: GoogleFonts.outfit(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              height: 1.1,
-                              color: Colors.white,
-                            ),
-                            children: [
-                              const TextSpan(text: 'Welcome back,\n'),
-                              WidgetSpan(
-                                child: ShaderMask(
-                                  shaderCallback: (bounds) =>
-                                      const LinearGradient(
-                                        colors: [teal400, emerald400],
-                                      ).createShader(bounds),
-                                  child: Text(
-                                    'Builder.',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.bold,
-                                      height: 1.1,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Your dashboard is ready. Continue managing your orders, products, and analytics from one central hub.',
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            color: slate400,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 48),
-
-                        // Feature Highlight Card
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                            child: Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.05),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: emerald500.withValues(
-                                        alpha: 0.2,
-                                      ), // Emerald-500/20
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      LucideIcons.trendingUp,
-                                      color: emerald400,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Revenue Tracking',
-                                        style: GoogleFonts.outfit(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Real-time insights into your store\'s performance at a glance.',
-                                        style: GoogleFonts.outfit(
-                                          color: slate400,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const Spacer(),
-                        Text(
-                          '© 2026 Swekly Inc.',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: slate500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Right Side - Form
-          Expanded(
-            flex: 1,
-            child: Scaffold(
-              // Inner scaffold to handle resize resizeToAvoidBottomInset if needed
-              backgroundColor: Colors.white,
-              body: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(32),
+                return Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 448,
-                    ), // max-w-md approx 28rem = 448px
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                    constraints: const BoxConstraints(maxWidth: 1280),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
+                      child: Row(
                         children: [
-                          Text(
-                            'Log in to your account',
-                            style: GoogleFonts.outfit(
-                              fontSize: 30, // text-3xl
-                              fontWeight: FontWeight.bold,
-                              color: slate900,
-                              letterSpacing: -0.025 * 30, // tracking-tight
+                          if (isDesktop) ...[
+                            Expanded(child: _buildHeroPanel(palette)),
+                            const SizedBox(width: 22),
+                          ],
+                          Expanded(
+                            child: _buildFormPanel(
+                              context,
+                              palette,
+                              isDesktop: isDesktop,
                             ),
-                            textAlign: isDesktop
-                                ? TextAlign.left
-                                : TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Access your xxxxxxx workspace.',
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              color: slate500,
-                            ),
-                            textAlign: isDesktop
-                                ? TextAlign.left
-                                : TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-
-                          // OAuth Buttons
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildOAuthButton(LucideIcons.chrome),
-                              ), // Google placeholder
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildOAuthButton(LucideIcons.apple),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildOAuthButton(LucideIcons.facebook),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
-                          Row(
-                            children: [
-                              Expanded(child: Divider(color: slate200)),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Text(
-                                  'Or continue with',
-                                  style: GoogleFonts.outfit(
-                                    color: slate500,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                              Expanded(child: Divider(color: slate200)),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Workspace Field
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FormInput(
-                                label: 'Workspace URL',
-                                controller: _workspaceController,
-                                keyboardType: TextInputType.url,
-                                hint: 'https://your-tenant.platform.com',
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter your workspace URL';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Tip: include http:// for localhost (e.g. http://apple.localhost:3000)',
-                                style: GoogleFonts.outfit(
-                                  color: slate500,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Email Field
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FormInput(
-                                label: 'Email Address',
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                hint: 'name@company.com',
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Password Field
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Password',
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Forgot password?',
-                                    style: GoogleFonts.outfit(
-                                      color: teal600,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              FormInput(
-                                label: 'Password',
-                                showLabel: false,
-                                controller: _passwordController,
-                                obscureText: true,
-                                hint: '••••••••',
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your password';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-
-                          if (_errorMessage != null)
-                            Container(
-                              padding: const EdgeInsets.all(16), // p-4
-                              margin: const EdgeInsets.only(bottom: 24),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEF2F2), // red-50
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: const Color(0xFFFECACA),
-                                ), // red-100
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    LucideIcons.alertCircle,
-                                    color: Color(0xFFEF4444), // red-500
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    _errorMessage!,
-                                    style: GoogleFonts.outfit(
-                                      color: const Color(0xFFB91C1C), // red-700
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          // Login Button
-                          SizedBox(
-                            height: 48, // approximate py-3.5
-                            child: AppButton.primary(
-                              label: 'Sign in',
-                              onPressed: _handleLogin,
-                              loading: _isLoading,
-                              fullWidth: true,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            children: [
-                              Text(
-                                "Don't have an account? ",
-                                style: GoogleFonts.outfit(
-                                  color: slate500,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                "Start for free",
-                                style: GoogleFonts.outfit(
-                                  color: teal600,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -532,23 +132,726 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildOAuthButton(IconData icon) {
+  Widget _buildBackdrop(_AuthPalette palette) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DecoratedBox(decoration: BoxDecoration(gradient: palette.pageGradient)),
+        Positioned(
+          top: -160,
+          left: -80,
+          child: _buildBlob(color: palette.blobPrimary),
+        ),
+        Positioned(
+          bottom: -180,
+          right: -120,
+          child: _buildBlob(color: palette.blobSecondary),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBlob({required Color color}) {
     return Container(
-      height: 48, // py-2.5 (10px) + content approx
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: slate200),
+      width: 420,
+      height: 420,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 110, sigmaY: 110),
+        child: const SizedBox.expand(),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(12),
-          hoverColor: slate50,
-          child: Center(child: Icon(icon, size: 20, color: slate900)),
+    );
+  }
+
+  Widget _buildHeroPanel(_AuthPalette palette) {
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.cardBackground,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: palette.cardBorder),
+      ),
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBadge('ADMIN CONTROL CENTER', palette),
+          const SizedBox(height: 22),
+          Text.rich(
+            TextSpan(
+              style: GoogleFonts.dmSans(
+                fontSize: 44,
+                fontWeight: FontWeight.w700,
+                height: 1.08,
+                letterSpacing: -1.5,
+                color: palette.primaryText,
+              ),
+              children: [
+                const TextSpan(text: 'Welcome back,\n'),
+                TextSpan(
+                  text: 'Builder.',
+                  style: TextStyle(color: palette.brand),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Your dashboard is ready. Continue managing orders, products, delivery, and analytics from one place.',
+            style: GoogleFonts.dmSans(
+              fontSize: 16,
+              color: palette.secondaryText,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: palette.glassBackground,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: palette.cardBorder),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: palette.brand.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    LucideIcons.trendingUp,
+                    color: palette.brand,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Revenue Tracking',
+                        style: GoogleFonts.dmSans(
+                          color: palette.primaryText,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Real-time insights into store performance.',
+                        style: GoogleFonts.dmSans(
+                          color: palette.secondaryText,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          Row(
+            children: List.generate(5, (index) {
+              final heights = [26.0, 42.0, 30.0, 52.0, 36.0];
+              return Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(right: index == 4 ? 0 : 6),
+                  height: heights[index],
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        palette.brand.withValues(alpha: 0.65),
+                        palette.brand.withValues(alpha: 0.15),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            '© 2026 Swekly Inc.',
+            style: GoogleFonts.dmSans(
+              color: palette.secondaryText,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormPanel(
+    BuildContext context,
+    _AuthPalette palette, {
+    required bool isDesktop,
+  }) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 540),
+        decoration: BoxDecoration(
+          color: palette.cardBackground,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(color: palette.cardBorder),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(28),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    _buildLogoMark(palette),
+                    const Spacer(),
+                    _buildThemeToggle(context, palette),
+                  ],
+                ),
+                const SizedBox(height: 22),
+                Text(
+                  'Log in to your account',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.8,
+                    color: palette.primaryText,
+                  ),
+                  textAlign: isDesktop ? TextAlign.left : TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Access your admin workspace securely.',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 15,
+                    color: palette.secondaryText,
+                  ),
+                  textAlign: isDesktop ? TextAlign.left : TextAlign.center,
+                ),
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSocialButton(
+                        palette,
+                        icon: LucideIcons.chrome,
+                        label: 'Google',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildSocialButton(
+                        palette,
+                        icon: LucideIcons.facebook,
+                        label: 'Facebook',
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildSocialButton(
+                        palette,
+                        icon: LucideIcons.apple,
+                        label: 'Apple',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: palette.cardBorder)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'OR CONTINUE WITH',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.5,
+                          color: palette.secondaryText,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: palette.cardBorder)),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                _buildInput(
+                  palette,
+                  label: 'Workspace URL',
+                  hint: 'http://tenant.localhost:3000/api',
+                  controller: _workspaceController,
+                  keyboardType: TextInputType.url,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your workspace URL';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 14),
+                _buildInput(
+                  palette,
+                  label: 'Email Address',
+                  hint: 'name@company.com',
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 14),
+                _buildInput(
+                  palette,
+                  label: 'Password',
+                  hint: '••••••••',
+                  controller: _passwordController,
+                  obscureText: true,
+                  trailingLabel: 'Forgot password?',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 18),
+                if (_errorMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0x44EF4444)),
+                      color: const Color(0x22EF4444),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.alertCircle,
+                          color: Color(0xFFFCA5A5),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _errorMessage!,
+                            style: GoogleFonts.dmSans(
+                              color: const Color(0xFFFCA5A5),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                _buildSubmitButton(
+                  palette,
+                  label: _isLoading ? 'Signing in...' : 'Sign in',
+                  icon: _isLoading ? null : LucideIcons.arrowRight,
+                  loading: _isLoading,
+                  onTap: _isLoading ? null : _handleLogin,
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      'Don\'t have an account? ',
+                      style: GoogleFonts.dmSans(
+                        color: palette.secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => context.go('/register'),
+                      child: Text(
+                        'Start for free',
+                        style: GoogleFonts.dmSans(
+                          color: palette.brand,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildThemeToggle(BuildContext context, _AuthPalette palette) {
+    final mode = ref.watch(settingsProvider).themeMode;
+    final isDark =
+        mode == ThemeMode.dark ||
+        (mode == ThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
+    return Tooltip(
+      message: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+      child: InkWell(
+        onTap: () => ref.read(settingsProvider.notifier).toggleTheme(),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: palette.glassBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: palette.cardBorder),
+          ),
+          child: Icon(
+            isDark ? LucideIcons.sun : LucideIcons.moon,
+            size: 18,
+            color: palette.primaryText,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoMark(_AuthPalette palette) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: palette.brand,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(
+            LucideIcons.store,
+            size: 18,
+            color: Color(0xFF05070A),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          'Swekly',
+          style: GoogleFonts.dmSans(
+            color: palette.primaryText,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBadge(String label, _AuthPalette palette) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: palette.glassBackground,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: palette.cardBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: palette.brand,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 7),
+          Text(
+            label,
+            style: GoogleFonts.dmSans(
+              color: palette.secondaryText,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(
+    _AuthPalette palette, {
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: palette.glassBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: palette.cardBorder),
+      ),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: palette.secondaryText),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.dmSans(
+                color: palette.secondaryText,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInput(
+    _AuthPalette palette, {
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    String? trailingLabel,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.dmSans(
+                color: palette.secondaryText,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.1,
+              ),
+            ),
+            if (trailingLabel != null)
+              Text(
+                trailingLabel,
+                style: GoogleFonts.dmSans(
+                  color: palette.brand,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          obscureText: obscureText,
+          validator: validator,
+          style: GoogleFonts.dmSans(
+            color: palette.primaryText,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.dmSans(
+              color: palette.mutedText,
+              fontSize: 14,
+            ),
+            filled: true,
+            fillColor: palette.inputBackground,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: palette.inputBorder),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: palette.inputBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: palette.brand, width: 1.3),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFEF4444)),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFFEF4444),
+                width: 1.3,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton(
+    _AuthPalette palette, {
+    required String label,
+    required bool loading,
+    required VoidCallback? onTap,
+    IconData? icon,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(13),
+        child: Ink(
+          height: 46,
+          decoration: BoxDecoration(
+            color: onTap == null
+                ? palette.brand.withValues(alpha: 0.55)
+                : palette.brand,
+            borderRadius: BorderRadius.circular(13),
+            border: Border.all(color: palette.brand.withValues(alpha: 0.5)),
+            boxShadow: [
+              BoxShadow(
+                color: palette.brand.withValues(alpha: 0.28),
+                blurRadius: 26,
+                spreadRadius: -8,
+              ),
+            ],
+          ),
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (loading)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFF05070A),
+                    ),
+                  ),
+                if (loading) const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: GoogleFonts.dmSans(
+                    color: const Color(0xFF05070A),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+                if (!loading && icon != null) ...[
+                  const SizedBox(width: 8),
+                  Icon(icon, size: 16, color: const Color(0xFF05070A)),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthPalette {
+  final Color pageBackground;
+  final Gradient pageGradient;
+  final Color blobPrimary;
+  final Color blobSecondary;
+  final Color cardBackground;
+  final Color glassBackground;
+  final Color cardBorder;
+  final Color primaryText;
+  final Color secondaryText;
+  final Color mutedText;
+  final Color inputBackground;
+  final Color inputBorder;
+  final Color brand;
+
+  const _AuthPalette({
+    required this.pageBackground,
+    required this.pageGradient,
+    required this.blobPrimary,
+    required this.blobSecondary,
+    required this.cardBackground,
+    required this.glassBackground,
+    required this.cardBorder,
+    required this.primaryText,
+    required this.secondaryText,
+    required this.mutedText,
+    required this.inputBackground,
+    required this.inputBorder,
+    required this.brand,
+  });
+
+  factory _AuthPalette.fromTheme({required bool isDark}) {
+    if (isDark) {
+      return _AuthPalette(
+        pageBackground: const Color(0xFF060A14),
+        pageGradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF050816), Color(0xFF0B1220), Color(0xFF080C16)],
+        ),
+        blobPrimary: const Color(0xFF16D5B3).withValues(alpha: 0.24),
+        blobSecondary: const Color(0xFF3559FF).withValues(alpha: 0.2),
+        cardBackground: const Color(0xD90F1424),
+        glassBackground: const Color(0x14FFFFFF),
+        cardBorder: const Color(0x1AFFFFFF),
+        primaryText: const Color(0xFFE7ECEE),
+        secondaryText: const Color(0xFF8A959C),
+        mutedText: const Color(0xFF4F5A60),
+        inputBackground: const Color(0x1AFFFFFF),
+        inputBorder: const Color(0x26FFFFFF),
+        brand: const Color(0xFFC6F432),
+      );
+    }
+
+    return _AuthPalette(
+      pageBackground: const Color(0xFFF2F7FF),
+      pageGradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFFF7FAFF), Color(0xFFF0F5FD), Color(0xFFE9F0F8)],
+      ),
+      blobPrimary: const Color(0xFF84A60D).withValues(alpha: 0.15),
+      blobSecondary: const Color(0xFF16D5B3).withValues(alpha: 0.13),
+      cardBackground: const Color(0xF8FBFDFF),
+      glassBackground: const Color(0xFFF2F6FB),
+      cardBorder: const Color(0x1F0F172A),
+      primaryText: const Color(0xFF0F172A),
+      secondaryText: const Color(0xFF475569),
+      mutedText: const Color(0xFF94A3B8),
+      inputBackground: const Color(0xFFF3F7FB),
+      inputBorder: const Color(0x240F172A),
+      brand: const Color(0xFFC6F432),
     );
   }
 }

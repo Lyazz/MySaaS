@@ -6,6 +6,7 @@ import '../models/purchase.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class PurchaseRepository {
   final ApiService _apiService;
@@ -14,13 +15,19 @@ class PurchaseRepository {
 
   PurchaseRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<Purchase>> getPurchases({
     bool forceRefresh = false,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
     final db = await _dbService.database;
-    final localData = await db.query('purchases');
+    final localData = await db.query(
+      'purchases',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     final localPurchases = localData.map((e) {
       final itemsJson = e['itemsJson'] != null
@@ -58,7 +65,11 @@ class PurchaseRepository {
             .toList();
 
         await db.transaction((txn) async {
-          await txn.delete('purchases', where: "syncStatus = 'synced'");
+          await txn.delete(
+            'purchases',
+            where: "tenantId = ? AND syncStatus = 'synced'",
+            whereArgs: [_tid],
+          );
           for (var p in remotePurchases) {
             final itemsJsonList = p.items
                 .map(
@@ -78,6 +89,7 @@ class PurchaseRepository {
 
             await txn.insert('purchases', {
               'id': p.id,
+              'tenantId': _tid,
               'supplierId': p.supplierId,
               'supplierName': p.supplierName,
               'supplierEmail': p.supplierEmail,
@@ -92,9 +104,7 @@ class PurchaseRepository {
           }
         });
         return remotePurchases;
-      } catch (e) {
-        print('Background purchase fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localPurchases;
   }
@@ -103,8 +113,8 @@ class PurchaseRepository {
     final db = await _dbService.database;
     final localData = await db.query(
       'purchases',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
     );
 
     Purchase? localPurchase;
@@ -132,7 +142,6 @@ class PurchaseRepository {
         final response = await _apiService.client.get('/admin/purchases/$id');
         final remotePurchase = Purchase.fromJson(response.data);
 
-        // Update local single
         final itemsJsonList = remotePurchase.items
             .map(
               (i) => {
@@ -151,6 +160,7 @@ class PurchaseRepository {
 
         await db.insert('purchases', {
           'id': remotePurchase.id,
+          'tenantId': _tid,
           'supplierId': remotePurchase.supplierId,
           'supplierName': remotePurchase.supplierName,
           'supplierEmail': remotePurchase.supplierEmail,
@@ -164,9 +174,7 @@ class PurchaseRepository {
         }, conflictAlgorithm: ConflictAlgorithm.replace);
 
         return remotePurchase;
-      } catch (e) {
-        print('Background single purchase fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localPurchase;
   }
@@ -191,6 +199,7 @@ class PurchaseRepository {
 
     await db.insert('purchases', {
       'id': newPurchase.id,
+      'tenantId': _tid,
       'supplierId': newPurchase.supplierId,
       'supplierName': newPurchase.supplierName,
       'totalAmount': newPurchase.totalAmount,
@@ -212,9 +221,6 @@ class PurchaseRepository {
   Future<void> addPurchaseItem(String purchaseId, PurchaseItem item) async {
     final online = await _syncService.isOnline;
 
-    // We would ideally update the local SQLite row's JSON buffer here immediately for offline UI
-    // but typically purchase editing happens mostly online.
-    // We queue the action for the server.
     await _syncService.enqueueOperation(
       entityType: 'purchase',
       action: 'addItem',
@@ -226,9 +232,7 @@ class PurchaseRepository {
       },
     );
 
-    // We trigger an optimistic background fetch if online so the local DB gets the real item ID
     if (online) {
-      // Small delay to let sync queue trigger
       Future.delayed(const Duration(milliseconds: 500), () {
         getPurchase(purchaseId);
       });
@@ -284,7 +288,11 @@ class PurchaseRepository {
 
   Future<void> deletePurchase(String id) async {
     final db = await _dbService.database;
-    await db.delete('purchases', where: 'id = ?', whereArgs: [id]);
+    await db.delete(
+      'purchases',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+    );
 
     await _syncService.enqueueOperation(
       entityType: 'purchase',
@@ -300,8 +308,8 @@ class PurchaseRepository {
     await db.update(
       'purchases',
       {'status': status, 'syncStatus': online ? 'synced' : 'pending'},
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
     );
 
     await _syncService.enqueueOperation(

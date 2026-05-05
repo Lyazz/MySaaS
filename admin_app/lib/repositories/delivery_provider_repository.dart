@@ -4,6 +4,7 @@ import '../models/delivery_provider.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class DeliveryProviderRepository {
   final ApiService _apiService;
@@ -12,11 +13,17 @@ class DeliveryProviderRepository {
 
   DeliveryProviderRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<DeliveryProvider>> getProviders({
     bool forceRefresh = false,
   }) async {
     final db = await _dbService.database;
-    final localData = await db.query('delivery_providers');
+    final localData = await db.query(
+      'delivery_providers',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     final localProviders = localData
         .map(
@@ -40,11 +47,13 @@ class DeliveryProviderRepository {
         await db.transaction((txn) async {
           await txn.delete(
             'delivery_providers',
-            where: "syncStatus = 'synced'",
+            where: "tenantId = ? AND syncStatus = 'synced'",
+            whereArgs: [_tid],
           );
           for (var p in remoteProviders) {
             await txn.insert('delivery_providers', {
               'id': p.id,
+              'tenantId': _tid,
               'name': p.name,
               'description': p.description,
               'isEnabled': p.isEnabled ? 1 : 0,
@@ -53,9 +62,7 @@ class DeliveryProviderRepository {
           }
         });
         return remoteProviders;
-      } catch (e) {
-        print('Background delivery provider fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localProviders;
   }

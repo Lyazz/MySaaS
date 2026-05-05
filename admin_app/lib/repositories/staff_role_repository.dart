@@ -6,6 +6,7 @@ import '../models/staff_role.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class StaffRoleRepository {
   final ApiService _apiService;
@@ -14,9 +15,15 @@ class StaffRoleRepository {
 
   StaffRoleRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<StaffRole>> getRoles({bool forceRefresh = false}) async {
     final db = await _dbService.database;
-    final localData = await db.query('staff_roles');
+    final localData = await db.query(
+      'staff_roles',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     final localRoles = localData.map((e) {
       final permissionsJson = e['permissionsJson'] != null
@@ -36,10 +43,15 @@ class StaffRoleRepository {
         final remoteRoles = data.map((e) => StaffRole.fromJson(e)).toList();
 
         await db.transaction((txn) async {
-          await txn.delete('staff_roles', where: "syncStatus = 'synced'");
+          await txn.delete(
+            'staff_roles',
+            where: "tenantId = ? AND syncStatus = 'synced'",
+            whereArgs: [_tid],
+          );
           for (var r in remoteRoles) {
             await txn.insert('staff_roles', {
               'id': r.id,
+              'tenantId': _tid,
               'name': r.name,
               'permissionsJson': jsonEncode(r.permissions),
               'syncStatus': 'synced',
@@ -47,9 +59,7 @@ class StaffRoleRepository {
           }
         });
         return remoteRoles;
-      } catch (e) {
-        print('Background staff roles fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localRoles;
   }
@@ -64,6 +74,7 @@ class StaffRoleRepository {
 
     await db.insert('staff_roles', {
       'id': id,
+      'tenantId': _tid,
       'name': name.trim(),
       'permissionsJson': jsonEncode(
         permissions.map((p) => p.toJson()).toList(),
@@ -105,8 +116,8 @@ class StaffRoleRepository {
         ),
         'syncStatus': online ? 'synced' : 'pending',
       },
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
     );
 
     await _syncService.enqueueOperation(
@@ -129,7 +140,11 @@ class StaffRoleRepository {
   Future<void> deleteRole(String id) async {
     final db = await _dbService.database;
 
-    await db.delete('staff_roles', where: 'id = ?', whereArgs: [id]);
+    await db.delete(
+      'staff_roles',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+    );
 
     await _syncService.enqueueOperation(
       entityType: 'staffRole',

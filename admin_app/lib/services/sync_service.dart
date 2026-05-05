@@ -1,55 +1,86 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:uuid/uuid.dart';
-import 'dart:async';
 
-import 'database_service.dart';
-import 'api_service.dart';
+import 'package:dio/dio.dart' show Options;
+import 'package:sqflite_sqlcipher/sqflite.dart' show Sqflite;
+
+import '../models/app_mode.dart';
 import '../utils/image_storage_manager.dart';
+import 'api_service.dart';
+import 'database_service.dart';
+import 'tenant_mode_service.dart';
 
 enum SyncStatus { pending, syncing, synced, failed }
 
+/// Represents a single durable outbox entry.
 class SyncOperation {
   final String id;
+  final String tenantId;
   final String entityType;
-  final String action; // 'create', 'update', 'delete'
+  final String action;
   final Map<String, dynamic> payload;
   final SyncStatus status;
+  final int retryCount;
+  final String? idempotencyKey;
   final DateTime createdAt;
 
   SyncOperation({
     required this.id,
+    required this.tenantId,
     required this.entityType,
     required this.action,
     required this.payload,
     required this.status,
+    required this.retryCount,
+    this.idempotencyKey,
     required this.createdAt,
   });
 
   factory SyncOperation.fromMap(Map<String, dynamic> map) {
     return SyncOperation(
-      id: map['id'],
-      entityType: map['entityType'],
-      action: map['action'],
-      payload: jsonDecode(map['payload']),
+      id: map['id'] as String,
+      tenantId: map['tenantId'] as String? ?? '',
+      entityType: map['entityType'] as String,
+      action: map['action'] as String,
+      payload: jsonDecode(map['payload'] as String) as Map<String, dynamic>,
       status: SyncStatus.values.firstWhere(
         (e) => e.name == map['status'],
         orElse: () => SyncStatus.pending,
       ),
-      createdAt: DateTime.parse(map['createdAt']),
+      retryCount: (map['retryCount'] as int?) ?? 0,
+      idempotencyKey: map['idempotencyKey'] as String?,
+      createdAt: DateTime.parse(map['createdAt'] as String),
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'entityType': entityType,
-      'action': action,
-      'payload': jsonEncode(payload),
-      'status': status.name,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'tenantId': tenantId,
+    'entityType': entityType,
+    'action': action,
+    'payload': jsonEncode(payload),
+    'status': status.name,
+    'retryCount': retryCount,
+    'idempotencyKey': idempotencyKey,
+    'createdAt': createdAt.toIso8601String(),
+  };
+}
+
+/// User-visible sync state exposed via stream.
+class SyncState {
+  final int pending;
+  final int failed;
+  final bool isSyncing;
+
+  const SyncState({
+    this.pending = 0,
+    this.failed = 0,
+    this.isSyncing = false,
+  });
 }
 
 class SyncService {
@@ -57,27 +88,25 @@ class SyncService {
   factory SyncService() => _instance;
   SyncService._internal();
 
+  static const int _maxRetries = 5;
+  static const int _batchSize = 50;
+
   final _dbService = DatabaseService();
   final Connectivity _connectivity = Connectivity();
+  final _syncStateController = StreamController<SyncState>.broadcast();
+
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   bool _connectivityInitialized = false;
-  ApiService? _apiService; // Injected later or fetched using providers
+  ApiService? _apiService;
   bool _isSyncing = false;
-  bool _isOfflineTenant = false;
+  AppMode _mode = AppMode.online;
 
-  void initialize(ApiService apiService, {bool isOfflineTenant = false}) {
+  Stream<SyncState> get syncStateStream => _syncStateController.stream;
+
+  void initialize(ApiService apiService, {required AppMode mode}) {
     _apiService = apiService;
-    _isOfflineTenant = isOfflineTenant;
-    if (!_isOfflineTenant) {
-      _ensureConnectivityListener();
-      _checkAndSync();
-    }
-  }
-
-  void setOfflineTenant(bool isOffline) {
-    _isOfflineTenant = isOffline;
-    if (_apiService == null) return;
-    if (!isOffline) {
+    _mode = mode;
+    if (_mode != AppMode.offlineOnly) {
       _ensureConnectivityListener();
       _checkAndSync();
     }
@@ -86,79 +115,90 @@ class SyncService {
   void _ensureConnectivityListener() {
     if (_connectivityInitialized) return;
     _connectivityInitialized = true;
-
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
-      List<ConnectivityResult> results,
-    ) {
-      if (_isOfflineTenant) return;
-      if (results.any((r) => r != ConnectivityResult.none)) {
-        _checkAndSync();
-      }
-    });
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+      (List<ConnectivityResult> results) {
+        if (_mode == AppMode.offlineOnly) return;
+        if (results.any((r) => r != ConnectivityResult.none)) {
+          _checkAndSync();
+        }
+      },
+    );
   }
 
   Future<bool> get isOnline async {
-    if (_isOfflineTenant) return false;
+    if (_mode == AppMode.offlineOnly) return false;
     final results = await _connectivity.checkConnectivity();
     return results.any((r) => r != ConnectivityResult.none);
   }
 
-  /// Adds an operation to the local SQLite sync queue.
+  /// Enqueues a durable outbox operation scoped to the active tenant.
+  /// An idempotency key is generated automatically so retries are safe.
   Future<void> enqueueOperation({
     required String entityType,
     required String action,
     required Map<String, dynamic> payload,
+    String? idempotencyKey,
   }) async {
+    final tenantId = TenantModeService().activeTenantId;
     final db = await _dbService.database;
     final operation = SyncOperation(
       id: const Uuid().v4(),
+      tenantId: tenantId,
       entityType: entityType,
       action: action,
       payload: payload,
       status: SyncStatus.pending,
+      retryCount: 0,
+      idempotencyKey: idempotencyKey ?? const Uuid().v4(),
       createdAt: DateTime.now(),
     );
-
     await db.insert('sync_queue', operation.toMap());
-
-    // Try to sync immediately if it's an online tenant and we might have connectivity
-    if (!_isOfflineTenant) {
+    await _emitState();
+    if (_mode != AppMode.offlineOnly) {
       _checkAndSync();
     }
   }
 
-  /// The main synchronization loop.
   Future<void> _checkAndSync() async {
-    if (_isSyncing || _apiService == null || _isOfflineTenant) return;
-
+    if (_isSyncing || _apiService == null || _mode == AppMode.offlineOnly) {
+      return;
+    }
     final online = await isOnline;
     if (!online) return;
 
     _isSyncing = true;
+    await _emitState(syncing: true);
     try {
+      final tenantId = TenantModeService().activeTenantId;
       final db = await _dbService.database;
+
       final pendingOps = await db.query(
         'sync_queue',
-        where: 'status = ? OR status = ?',
-        whereArgs: [SyncStatus.pending.name, SyncStatus.failed.name],
+        where: 'tenantId = ? AND (status = ? OR status = ?) AND retryCount < ?',
+        whereArgs: [
+          tenantId,
+          SyncStatus.pending.name,
+          SyncStatus.failed.name,
+          _maxRetries,
+        ],
         orderBy: 'createdAt ASC',
-        limit: 50, // Process in batches
+        limit: _batchSize,
       );
 
-      for (var opMap in pendingOps) {
-        final op = SyncOperation.fromMap(opMap);
-        await _processOperation(op);
+      for (final opMap in pendingOps) {
+        await _processOperation(SyncOperation.fromMap(
+          opMap.cast<String, dynamic>(),
+        ));
       }
     } finally {
       _isSyncing = false;
-      // If there are still pending items, maybe trigger again later
+      await _emitState();
     }
   }
 
   Future<void> _processOperation(SyncOperation op) async {
     final db = await _dbService.database;
 
-    // Mark as syncing
     await db.update(
       'sync_queue',
       {'status': SyncStatus.syncing.name},
@@ -167,200 +207,175 @@ class SyncService {
     );
 
     try {
-      // Pre-flight image uploads
-      op = await _processImagesInPayload(op);
-
-      await _executeApiCall(op);
-
-      // On success, delete from queue
+      final resolved = await _processImagesInPayload(op);
+      await _executeApiCall(resolved);
       await db.delete('sync_queue', where: 'id = ?', whereArgs: [op.id]);
     } catch (e) {
-      // Mark as failed to retry later
-      print('Sync failed for operation \${op.id}: \$e');
+      final newRetryCount = op.retryCount + 1;
+      final backoffSeconds = _backoffSeconds(newRetryCount);
+
       await db.update(
         'sync_queue',
-        {'status': SyncStatus.failed.name},
+        {
+          'status': SyncStatus.failed.name,
+          'retryCount': newRetryCount,
+        },
         where: 'id = ?',
         whereArgs: [op.id],
       );
+
+      // Schedule retry with exponential backoff (non-blocking).
+      if (newRetryCount < _maxRetries) {
+        Future.delayed(Duration(seconds: backoffSeconds), _checkAndSync);
+      }
     }
+  }
+
+  int _backoffSeconds(int retryCount) {
+    // 2^n seconds with jitter, capped at 5 minutes.
+    final base = pow(2, retryCount).toInt();
+    final jitter = Random().nextInt(base.clamp(1, 30));
+    return min(base + jitter, 300);
   }
 
   Future<SyncOperation> _processImagesInPayload(SyncOperation op) async {
     if (_apiService == null) return op;
 
-    bool payloadChanged = false;
-    final Map<String, dynamic> newPayload = Map.from(op.payload);
+    bool changed = false;
+    final newPayload = Map<String, dynamic>.from(op.payload);
 
-    // Recursive function to find and upload local images
-    Future<dynamic> processValue(dynamic value) async {
-      if (value is String) {
-        if (value.startsWith('app_images/')) {
-          try {
-            final file = await ImageStorageManager.getLocalImageFile(value);
-            if (await file.exists()) {
-              final remoteUrl = await _apiService!.uploadImage(file.path);
-              if (remoteUrl != null) {
-                payloadChanged = true;
-                // Delete local file after successful upload
-                await ImageStorageManager.deleteLocalImage(value);
-                return remoteUrl;
-              }
+    Future<dynamic> process(dynamic value) async {
+      if (value is String && value.startsWith('app_images/')) {
+        try {
+          final file = await ImageStorageManager.getLocalImageFile(value);
+          if (await file.exists()) {
+            final remoteUrl = await _apiService!.uploadImage(file.path);
+            if (remoteUrl != null) {
+              changed = true;
+              await ImageStorageManager.deleteLocalImage(value);
+              return remoteUrl;
             }
-          } catch (e) {
-            print("Error uploading image: \$e");
           }
-        }
+        } catch (_) {}
         return value;
       } else if (value is Map<String, dynamic>) {
-        final newMap = <String, dynamic>{};
-        for (var entry in value.entries) {
-          newMap[entry.key] = await processValue(entry.value);
+        final out = <String, dynamic>{};
+        for (final e in value.entries) {
+          out[e.key] = await process(e.value);
         }
-        return newMap;
+        return out;
       } else if (value is List) {
-        final newList = [];
-        for (var item in value) {
-          newList.add(await processValue(item));
-        }
-        return newList;
+        return [for (final item in value) await process(item)];
       }
       return value;
     }
 
-    final processedPayload =
-        await processValue(newPayload) as Map<String, dynamic>;
+    final processed = await process(newPayload) as Map<String, dynamic>;
 
-    if (payloadChanged) {
-      final newOp = SyncOperation(
-        id: op.id,
-        entityType: op.entityType,
-        action: op.action,
-        payload: processedPayload,
-        status: op.status,
-        createdAt: op.createdAt,
-      );
+    if (!changed) return op;
 
-      // Update the DB with the new payload so we don't re-upload if api call fails
-      final db = await _dbService.database;
-      await db.update(
-        'sync_queue',
-        {'payload': jsonEncode(processedPayload)},
-        where: 'id = ?',
-        whereArgs: [op.id],
-      );
-      return newOp;
-    }
+    final db = await _dbService.database;
+    await db.update(
+      'sync_queue',
+      {'payload': jsonEncode(processed)},
+      where: 'id = ?',
+      whereArgs: [op.id],
+    );
 
-    return op;
+    return SyncOperation(
+      id: op.id,
+      tenantId: op.tenantId,
+      entityType: op.entityType,
+      action: op.action,
+      payload: processed,
+      status: op.status,
+      retryCount: op.retryCount,
+      idempotencyKey: op.idempotencyKey,
+      createdAt: op.createdAt,
+    );
   }
 
   Future<void> _executeApiCall(SyncOperation op) async {
-    if (_apiService == null) throw Exception("ApiService not initialized");
+    if (_apiService == null) throw StateError('ApiService not initialized');
 
     final client = _apiService!.client;
-    String endpoint = '';
+    final id = op.payload['id'];
+    final idem = op.idempotencyKey;
+    final headers = idem != null ? {'Idempotency-Key': idem} : null;
 
-    // Define REST mapping based on entity and action
+    Options? opts = headers != null ? Options(headers: headers) : null;
+
     switch (op.entityType) {
       case 'sale':
-        endpoint = '/admin/pos/sales';
         if (op.action == 'create') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/pos/sales', data: op.payload, options: opts);
         }
-        break;
       case 'customer':
-        endpoint = '/admin/customers';
         if (op.action == 'create') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/customers', data: op.payload, options: opts);
         } else if (op.action == 'update') {
-          final id = op.payload['id'];
-          await client.put('$endpoint/$id', data: op.payload);
+          await client.put('/admin/customers/$id', data: op.payload);
         }
-        break;
       case 'user':
-        endpoint = '/admin/users';
         if (op.action == 'create') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/users', data: op.payload, options: opts);
         } else if (op.action == 'update') {
-          final id = op.payload['id'];
-          await client.patch('$endpoint/$id', data: op.payload);
+          await client.patch('/admin/users/$id', data: op.payload);
         } else if (op.action == 'delete') {
-          final id = op.payload['id'];
-          await client.delete('$endpoint/$id');
+          await client.delete('/admin/users/$id');
         }
-        break;
       case 'supplier':
-        endpoint = '/admin/suppliers';
         if (op.action == 'create') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/suppliers', data: op.payload, options: opts);
         } else if (op.action == 'update') {
-          final id = op.payload['id'];
-          await client.put('$endpoint/$id', data: op.payload);
+          await client.put('/admin/suppliers/$id', data: op.payload);
         } else if (op.action == 'delete') {
-          final id = op.payload['id'];
-          await client.delete('$endpoint/$id');
+          await client.delete('/admin/suppliers/$id');
         }
-        break;
       case 'order':
-        endpoint = '/admin/orders';
         if (op.action == 'updateStatus') {
-          final id = op.payload['id'];
-          await client.patch('$endpoint/$id', data: op.payload);
+          await client.patch('/admin/orders/$id', data: op.payload);
         }
-        break;
       case 'customerPayment':
         if (op.action == 'create') {
           final customerId = op.payload['customerId'];
-          // Or wherever the payment backend is mapped
           await client.post(
             '/admin/customers/$customerId/payments',
             data: op.payload,
+            options: opts,
           );
         }
-        break;
       case 'receiptLayout':
-        endpoint = '/admin/receipt-layouts';
         if (op.action == 'create') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/receipt-layouts', data: op.payload, options: opts);
         } else if (op.action == 'update') {
-          final id = op.payload['id'];
-          await client.put('$endpoint/$id', data: op.payload);
+          await client.put('/admin/receipt-layouts/$id', data: op.payload);
         } else if (op.action == 'delete') {
-          final id = op.payload['id'];
-          await client.delete('$endpoint/$id');
+          await client.delete('/admin/receipt-layouts/$id');
         }
-        break;
       case 'printerProfile':
-        endpoint = '/admin/printer-profiles';
         if (op.action == 'create') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/printer-profiles', data: op.payload, options: opts);
         } else if (op.action == 'update') {
-          final id = op.payload['id'];
-          await client.put('$endpoint/$id', data: op.payload);
+          await client.put('/admin/printer-profiles/$id', data: op.payload);
         } else if (op.action == 'delete') {
-          final id = op.payload['id'];
-          await client.delete('$endpoint/$id');
+          await client.delete('/admin/printer-profiles/$id');
         }
-        break;
       case 'staffRole':
-        endpoint = '/admin/staff-roles';
         if (op.action == 'create') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/staff-roles', data: op.payload, options: opts);
         } else if (op.action == 'update') {
-          final id = op.payload['id'];
-          await client.patch('$endpoint/$id', data: op.payload);
+          await client.patch('/admin/staff-roles/$id', data: op.payload);
         } else if (op.action == 'delete') {
-          final id = op.payload['id'];
-          await client.delete('$endpoint/$id');
+          await client.delete('/admin/staff-roles/$id');
         }
-        break;
       case 'cashSession':
         if (op.action == 'open') {
           final cashboxId = op.payload['cashboxId'];
           await client.post(
             '/admin/cash/cashboxes/$cashboxId/sessions/open',
             data: op.payload,
+            options: opts,
           );
         } else if (op.action == 'close') {
           final sessionId = op.payload['sessionId'];
@@ -369,43 +384,60 @@ class SyncService {
             data: op.payload,
           );
         }
-        break;
       case 'cashTransaction':
         if (op.action == 'create') {
-          await client.post('/admin/cash/cash-transactions', data: op.payload);
+          await client.post(
+            '/admin/cash/cash-transactions',
+            data: op.payload,
+            options: opts,
+          );
         }
-        break;
       case 'purchase':
-        endpoint = '/admin/purchases';
+        final pid = op.payload['purchaseId'];
         if (op.action == 'createDraft') {
-          await client.post(endpoint, data: op.payload);
+          await client.post('/admin/purchases', data: op.payload, options: opts);
         } else if (op.action == 'addItem') {
-          final pid = op.payload['purchaseId'];
-          await client.post('$endpoint/$pid/items', data: op.payload);
+          await client.post('/admin/purchases/$pid/items', data: op.payload, options: opts);
         } else if (op.action == 'receiveItem') {
-          final pid = op.payload['purchaseId'];
-          await client.post('$endpoint/$pid/receive', data: op.payload);
+          await client.post('/admin/purchases/$pid/receive', data: op.payload);
         } else if (op.action == 'updateItem') {
-          final pid = op.payload['purchaseId'];
           final iid = op.payload['itemId'];
-          await client.put('$endpoint/$pid/items/$iid', data: op.payload);
+          await client.put('/admin/purchases/$pid/items/$iid', data: op.payload);
         } else if (op.action == 'removeItem') {
-          final pid = op.payload['purchaseId'];
           final iid = op.payload['itemId'];
-          await client.delete('$endpoint/$pid/items/$iid');
+          await client.delete('/admin/purchases/$pid/items/$iid');
         } else if (op.action == 'delete') {
-          final id = op.payload['id'];
-          await client.delete('$endpoint/$id');
+          await client.delete('/admin/purchases/$id');
         } else if (op.action == 'updateStatus') {
-          final id = op.payload['id'];
-          await client.patch('$endpoint/$id/status', data: op.payload);
+          await client.patch('/admin/purchases/$id/status', data: op.payload);
         }
-        break;
-      // Add more entity mappings here as Repositories are built
       default:
-        print('Warning: Unhandled sync entity type: ${op.entityType}');
-        // We throw so it goes to 'failed' rather than getting silently deleted
         throw UnimplementedError('Cannot sync ${op.entityType}');
     }
+  }
+
+  Future<void> _emitState({bool syncing = false}) async {
+    try {
+      final tenantId = TenantModeService().activeTenantId;
+      final db = await _dbService.database;
+      final pending = Sqflite.firstIntValue(await db.rawQuery(
+        "SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND status = ?",
+        [tenantId, SyncStatus.pending.name],
+      )) ?? 0;
+      final failed = Sqflite.firstIntValue(await db.rawQuery(
+        "SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND status = ? AND retryCount < ?",
+        [tenantId, SyncStatus.failed.name, _maxRetries],
+      )) ?? 0;
+      _syncStateController.add(SyncState(
+        pending: pending,
+        failed: failed,
+        isSyncing: syncing || _isSyncing,
+      ));
+    } catch (_) {}
+  }
+
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    _syncStateController.close();
   }
 }

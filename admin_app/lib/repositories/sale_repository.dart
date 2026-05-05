@@ -4,6 +4,7 @@ import '../models/sale.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class SalesPage {
   final List<Sale> items;
@@ -27,6 +28,8 @@ class SaleRepository {
   final SyncService _syncService = SyncService();
 
   SaleRepository(this._apiService);
+
+  String get _tid => TenantModeService().activeTenantId;
 
   Future<SalesPage> listSales({
     String? search,
@@ -79,10 +82,13 @@ class SaleRepository {
       );
     }
 
-    // Offline/local POS sales
     final db = await _dbService.database;
 
-    final customersRows = await db.query('customers');
+    final customersRows = await db.query(
+      'customers',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
     final customerById = <String, Map<String, Object?>>{};
     for (final row in customersRows) {
       final id = row['id']?.toString();
@@ -91,6 +97,8 @@ class SaleRepository {
 
     final rows = await db.query(
       'sales',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
       orderBy: 'createdAt DESC',
     );
 
@@ -158,7 +166,12 @@ class SaleRepository {
 
   Future<Map<String, dynamic>?> getLocalSalePayload(String saleId) async {
     final db = await _dbService.database;
-    final res = await db.query('sales', where: 'id = ?', whereArgs: [saleId], limit: 1);
+    final res = await db.query(
+      'sales',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [saleId, _tid],
+      limit: 1,
+    );
     if (res.isEmpty) return null;
     final row = res.first;
     final payloadJson = row['payloadJson']?.toString();

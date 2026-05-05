@@ -4,6 +4,7 @@ import '../models/billing_models.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class BillingRepository {
   final ApiService _apiService;
@@ -12,8 +13,9 @@ class BillingRepository {
 
   BillingRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<Subscription> getSubscription({bool forceRefresh = false}) async {
-    // Mock for now as there is no local table or API endpoint implemented yet
     return Subscription(
       planCode: 'pro',
       status: 'ACTIVE',
@@ -23,7 +25,11 @@ class BillingRepository {
 
   Future<List<Invoice>> getInvoices({bool forceRefresh = false}) async {
     final db = await _dbService.database;
-    final localData = await db.query('billing_invoices');
+    final localData = await db.query(
+      'billing_invoices',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     final localInvoices = localData
         .map(
@@ -44,10 +50,11 @@ class BillingRepository {
         final remoteInvoices = data.map((e) => Invoice.fromJson(e)).toList();
 
         await db.transaction((txn) async {
-          await txn.delete('billing_invoices');
+          await txn.delete('billing_invoices', where: 'tenantId = ?', whereArgs: [_tid]);
           for (var i in remoteInvoices) {
             await txn.insert('billing_invoices', {
               'id': i.id,
+              'tenantId': _tid,
               'amount': i.amount,
               'status': i.status,
               'dueDate': i.dueDate?.toIso8601String(),
@@ -56,9 +63,7 @@ class BillingRepository {
           }
         });
         return remoteInvoices;
-      } catch (e) {
-        print('Background invoices fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localInvoices;
   }

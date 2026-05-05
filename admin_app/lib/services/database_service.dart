@@ -21,9 +21,8 @@ class DatabaseService {
   Future<String> _getEncryptionKey() async {
     String? key = await _secureStorage.read(key: _keyDbEncryption);
     if (key == null) {
-      // Generate a new 256-bit key (32 bytes)
       final uuid = const Uuid();
-      key = uuid.v4() + uuid.v4(); // Simple way to get a long random string
+      key = uuid.v4() + uuid.v4();
       await _secureStorage.write(key: _keyDbEncryption, value: key);
     }
     return key;
@@ -31,36 +30,36 @@ class DatabaseService {
 
   Future<Database> _initDb() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'mysaas_offline_encrypted.db');
-
+    final path = join(dbPath, 'mysaas_offline_encryptedd.db');
     final encryptionKey = await _getEncryptionKey();
-
     return await openDatabase(
       path,
       password: encryptionKey,
-      version: 2,
+      version: 3,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
   }
 
   Future<void> _createDb(Database db, int version) async {
-    // 1. Sync Queue Table
     await db.execute('''
       CREATE TABLE sync_queue(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         entityType TEXT NOT NULL,
         action TEXT NOT NULL,
         payload TEXT NOT NULL,
         status TEXT NOT NULL,
+        retryCount INTEGER NOT NULL DEFAULT 0,
+        idempotencyKey TEXT,
         createdAt TEXT NOT NULL
       )
     ''');
 
-    // 2. Categories Table
     await db.execute('''
       CREATE TABLE categories(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         title TEXT NOT NULL,
         slug TEXT NOT NULL,
         imageUrl TEXT,
@@ -69,10 +68,10 @@ class DatabaseService {
       )
     ''');
 
-    // 3. Products Table
     await db.execute('''
       CREATE TABLE products(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         title TEXT NOT NULL,
         slug TEXT NOT NULL,
         miniDescription TEXT,
@@ -80,7 +79,7 @@ class DatabaseService {
         price REAL NOT NULL,
         stock INTEGER NOT NULL,
         lowStockThreshold INTEGER DEFAULT 5,
-        isActive INTEGER NOT NULL, -- 0 or 1
+        isActive INTEGER NOT NULL,
         categoryId TEXT,
         mainImageUrl TEXT,
         syncStatus TEXT DEFAULT 'synced',
@@ -90,10 +89,10 @@ class DatabaseService {
       )
     ''');
 
-    // 4. Customers Table
     await db.execute('''
       CREATE TABLE customers(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         email TEXT,
         phone TEXT,
@@ -104,23 +103,23 @@ class DatabaseService {
       )
     ''');
 
-    // 5. Sales Table
     await db.execute('''
       CREATE TABLE sales(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         customerId TEXT,
         total REAL NOT NULL,
         status TEXT NOT NULL,
         createdAt TEXT NOT NULL,
-        payloadJson TEXT NOT NULL, -- The full API payload for sync
+        payloadJson TEXT NOT NULL,
         syncStatus TEXT DEFAULT 'synced'
       )
     ''');
 
-    // 6. Users Table
     await db.execute('''
       CREATE TABLE users(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         email TEXT NOT NULL,
         role TEXT NOT NULL,
         isActive INTEGER NOT NULL,
@@ -132,10 +131,10 @@ class DatabaseService {
       )
     ''');
 
-    // 7. Suppliers Table
     await db.execute('''
       CREATE TABLE suppliers(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         phone TEXT,
         email TEXT,
@@ -145,10 +144,10 @@ class DatabaseService {
       )
     ''');
 
-    // 8. Purchases Table
     await db.execute('''
       CREATE TABLE purchases(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         supplierId TEXT,
         supplierName TEXT,
         supplierEmail TEXT,
@@ -162,10 +161,10 @@ class DatabaseService {
       )
     ''');
 
-    // 9. Store Settings Table (Singleton cache conceptually)
     await db.execute('''
       CREATE TABLE store_settings(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         name TEXT,
         slug TEXT,
         currencyCode TEXT,
@@ -174,10 +173,10 @@ class DatabaseService {
       )
     ''');
 
-    // 10. Printer Profiles Table
     await db.execute('''
       CREATE TABLE printer_profiles(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         transport INTEGER NOT NULL,
         connectionParams TEXT,
@@ -186,10 +185,10 @@ class DatabaseService {
       )
     ''');
 
-    // 11. Receipt Layouts Table
     await db.execute('''
       CREATE TABLE receipt_layouts(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         showLogo INTEGER DEFAULT 1,
         showHeader INTEGER DEFAULT 1,
@@ -204,10 +203,10 @@ class DatabaseService {
       )
     ''');
 
-    // 12. Cash Sessions & Transactions
     await db.execute('''
       CREATE TABLE cash_sessions(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         cashboxId TEXT NOT NULL,
         status TEXT NOT NULL,
         openingFloat REAL NOT NULL,
@@ -226,6 +225,7 @@ class DatabaseService {
     await db.execute('''
       CREATE TABLE cash_transactions(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         cashboxId TEXT NOT NULL,
         sessionId TEXT NOT NULL,
         direction TEXT NOT NULL,
@@ -248,10 +248,10 @@ class DatabaseService {
       )
     ''');
 
-    // 13. Customer Payments
     await db.execute('''
       CREATE TABLE customer_payments(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         customerId TEXT,
         amount REAL NOT NULL,
         currency TEXT,
@@ -264,10 +264,10 @@ class DatabaseService {
       )
     ''');
 
-    // 14. Orders & Delivery
     await db.execute('''
       CREATE TABLE orders(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         status TEXT NOT NULL,
         total REAL NOT NULL,
         createdAt TEXT,
@@ -282,6 +282,7 @@ class DatabaseService {
     await db.execute('''
       CREATE TABLE delivery_providers(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         baseRate REAL NOT NULL,
         isActive INTEGER DEFAULT 1,
@@ -289,20 +290,20 @@ class DatabaseService {
       )
     ''');
 
-    // 15. Staff Roles
     await db.execute('''
       CREATE TABLE staff_roles(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         permissionsJson TEXT,
         syncStatus TEXT DEFAULT 'synced'
       )
     ''');
 
-    // 16. Billing
     await db.execute('''
       CREATE TABLE billing_invoices(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         amount REAL NOT NULL,
         status TEXT NOT NULL,
         dueDate TEXT,
@@ -311,33 +312,145 @@ class DatabaseService {
       )
     ''');
 
-    // 17. Dashboard Stats Cache
     await db.execute('''
       CREATE TABLE dashboard_stats(
         id TEXT PRIMARY KEY,
+        tenantId TEXT NOT NULL DEFAULT '',
         statsJson TEXT,
         lastUpdated TEXT
       )
     ''');
 
-    // Add indexes for performance
+    await _createIndexes(db);
+  }
+
+  Future<void> _createIndexes(Database db) async {
     await db.execute(
       'CREATE INDEX idx_products_category ON products(categoryId)',
     );
+    await db.execute('CREATE INDEX idx_products_tenant ON products(tenantId)');
     await db.execute(
       'CREATE INDEX idx_sync_queue_status ON sync_queue(status)',
     );
     await db.execute(
+      'CREATE INDEX idx_sync_queue_tenant ON sync_queue(tenantId)',
+    );
+    await db.execute('CREATE INDEX idx_orders_tenant ON orders(tenantId)');
+    await db.execute(
+      'CREATE INDEX idx_customers_tenant ON customers(tenantId)',
+    );
+    await db.execute('CREATE INDEX idx_sales_tenant ON sales(tenantId)');
+    await db.execute(
       'CREATE INDEX idx_customer_payments_customer ON customer_payments(customerId)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_customer_payments_tenant ON customer_payments(tenantId)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_cash_sessions_tenant ON cash_sessions(tenantId)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_cash_transactions_tenant ON cash_transactions(tenantId)',
     );
   }
 
   Future<void> _upgradeDb(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('ALTER TABLE customer_payments ADD COLUMN customerId TEXT');
+      await db.execute(
+        'ALTER TABLE customer_payments ADD COLUMN customerId TEXT',
+      );
       await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_customer_payments_customer ON customer_payments(customerId)',
       );
+    }
+    if (oldVersion < 3) {
+      // Add tenantId to every table
+      const tables = [
+        'sync_queue',
+        'categories',
+        'products',
+        'customers',
+        'sales',
+        'users',
+        'suppliers',
+        'purchases',
+        'store_settings',
+        'printer_profiles',
+        'receipt_layouts',
+        'cash_sessions',
+        'cash_transactions',
+        'customer_payments',
+        'orders',
+        'delivery_providers',
+        'staff_roles',
+        'billing_invoices',
+        'dashboard_stats',
+      ];
+      for (final table in tables) {
+        await db.execute(
+          "ALTER TABLE $table ADD COLUMN tenantId TEXT NOT NULL DEFAULT ''",
+        );
+      }
+      // Add retryCount and idempotencyKey to sync_queue
+      await db.execute(
+        'ALTER TABLE sync_queue ADD COLUMN retryCount INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute('ALTER TABLE sync_queue ADD COLUMN idempotencyKey TEXT');
+      // Add tenant indexes
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_products_tenant ON products(tenantId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sync_queue_tenant ON sync_queue(tenantId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_orders_tenant ON orders(tenantId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_customers_tenant ON customers(tenantId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sales_tenant ON sales(tenantId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_customer_payments_tenant ON customer_payments(tenantId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_cash_sessions_tenant ON cash_sessions(tenantId)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_cash_transactions_tenant ON cash_transactions(tenantId)',
+      );
+    }
+  }
+
+  /// Deletes all rows scoped to [tenantId] without dropping the database.
+  /// Call on logout or reprovisioning.
+  Future<void> clearTenantData(String tenantId) async {
+    final db = await database;
+    const tables = [
+      'sync_queue',
+      'categories',
+      'products',
+      'customers',
+      'sales',
+      'users',
+      'suppliers',
+      'purchases',
+      'store_settings',
+      'printer_profiles',
+      'receipt_layouts',
+      'cash_sessions',
+      'cash_transactions',
+      'customer_payments',
+      'orders',
+      'delivery_providers',
+      'staff_roles',
+      'billing_invoices',
+      'dashboard_stats',
+    ];
+    for (final table in tables) {
+      await db.delete(table, where: 'tenantId = ?', whereArgs: [tenantId]);
     }
   }
 
@@ -349,7 +462,6 @@ class DatabaseService {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'mysaas_offline_encrypted.db');
     await deleteDatabase(path);
-    // Also clear the encryption key so a new one is generated next time
     await _secureStorage.delete(key: _keyDbEncryption);
   }
 }
