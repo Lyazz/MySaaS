@@ -14,7 +14,9 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
   await initializeDateFormatting();
 
-  const defaultApiBaseUrl = 'http://localhost:3000/api';
+  final defaultApiBaseUrl = false
+      ? 'http://localhost:3000/api'
+      : 'https://swekly.com/api';
 
   final bootstrap = await AppStorage.loadBootstrap(
     defaultApiBaseUrl: defaultApiBaseUrl,
