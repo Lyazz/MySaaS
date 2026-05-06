@@ -8,6 +8,7 @@ import 'screens/products_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/order_detail_screen.dart';
+import 'screens/order_create_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/categories_screen.dart';
 import 'screens/category_form_screen.dart';
@@ -169,6 +170,13 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: OrdersScreen(
                 initialStatus: state.uri.queryParameters['status'],
               ),
+            ),
+          ),
+          GoRoute(
+            path: '/orders/create',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const OrderCreateScreen(),
             ),
           ),
           GoRoute(
