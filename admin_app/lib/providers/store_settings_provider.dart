@@ -51,6 +51,17 @@ class StoreSettingsNotifier extends Notifier<StoreSettingsState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<void> patch(Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final updated = await _repo.patchStoreSettings(data);
+      state = state.copyWith(settings: updated, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
 }
 
 final storeSettingsProvider =

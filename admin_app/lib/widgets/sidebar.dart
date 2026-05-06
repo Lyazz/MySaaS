@@ -158,6 +158,12 @@ class Sidebar extends ConsumerWidget {
                           label: 'admin.nav.deliveryItem'.tr(),
                           icon: LucideIcons.truck,
                         ),
+                      if (_canRead(authState, 'integrations'))
+                        _NavItem(
+                          route: '/integrations',
+                          label: 'Integrations',
+                          icon: LucideIcons.plug,
+                        ),
                       if (_canRead(authState, 'billing'))
                         _NavItem(
                           route: '/billing',

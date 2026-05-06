@@ -152,9 +152,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ],
         ),
         AppButton.primary(
-          label: 'Add Order',
+          label: 'New Order',
           icon: LucideIcons.plus,
-          onPressed: () => context.go('/pos'),
+          onPressed: () => context.push('/orders/create'),
         ),
       ],
     );

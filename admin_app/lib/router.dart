@@ -11,11 +11,13 @@ import 'screens/products_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/order_detail_screen.dart';
+import 'screens/order_create_screen.dart';
 import 'screens/inventory_screen.dart';
 import 'screens/categories_screen.dart';
 import 'screens/category_form_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/settings/printers_settings_page.dart';
+import 'screens/settings/store_settings_page.dart';
 import 'screens/customers_screen.dart';
 import 'screens/customer_detail_screen.dart';
 import 'screens/customer_form_screen.dart';
@@ -33,6 +35,8 @@ import 'screens/purchase_detail_screen.dart';
 import 'screens/pos_screen.dart';
 import 'screens/delivery_screen.dart';
 import 'screens/billing_screen.dart';
+import 'screens/integrations_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'widgets/app_shell.dart';
 
 // Custom transition that removes the slow overlay effect
@@ -68,6 +72,7 @@ String? _pathToResource(String path) {
   if (path.startsWith('/cash')) return 'cash';
   if (path.startsWith('/delivery')) return 'delivery';
   if (path.startsWith('/billing')) return 'billing';
+  if (path.startsWith('/integrations')) return 'integrations';
   return null;
 }
 
@@ -86,6 +91,7 @@ String _firstAllowedPath(List<String> permissions) {
   if (allow('delivery')) return '/delivery';
   if (allow('cash')) return '/cash';
   if (allow('billing')) return '/billing';
+  if (allow('integrations')) return '/integrations';
   return '/orders';
 }
 
@@ -191,6 +197,13 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: OrdersScreen(
                 initialStatus: state.uri.queryParameters['status'],
               ),
+            ),
+          ),
+          GoRoute(
+            path: '/orders/create',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const OrderCreateScreen(),
             ),
           ),
           GoRoute(
@@ -369,6 +382,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                   child: const PrintersSettingsPage(),
                 ),
               ),
+              GoRoute(
+                path: 'store',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const StoreSettingsPage(),
+                ),
+              ),
             ],
           ),
           GoRoute(
@@ -388,6 +408,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const BillingScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/integrations',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const IntegrationsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/onboarding',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const OnboardingScreen(),
             ),
           ),
         ],

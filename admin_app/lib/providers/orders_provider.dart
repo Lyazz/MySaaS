@@ -98,6 +98,14 @@ class OrdersNotifier extends Notifier<OrdersState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  /// Returns the new order id on success, throws on failure.
+  Future<String> createOrder(Map<String, dynamic> payload) async {
+    final result = await _repo.createOrder(payload);
+    final id = result['orderId']?.toString() ?? '';
+    if (id.isEmpty) throw Exception('No orderId returned');
+    return id;
+  }
 }
 
 final ordersProvider = NotifierProvider<OrdersNotifier, OrdersState>(

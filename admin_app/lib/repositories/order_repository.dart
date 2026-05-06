@@ -326,4 +326,18 @@ class OrderRepository {
       payload: {'id': id, 'status': status},
     );
   }
+
+  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> payload) async {
+    try {
+      final res = await _apiService.client.post('/admin/orders', data: payload);
+      final data = res.data;
+      if (data is Map && data['orderId'] != null) {
+        return Map<String, dynamic>.from(data);
+      }
+      throw Exception('createOrder: missing orderId in response');
+    } catch (e) {
+      print('Order creation failed: $e');
+      rethrow;
+    }
+  }
 }

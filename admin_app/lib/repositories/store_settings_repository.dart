@@ -54,8 +54,25 @@ class StoreSettingsRepository {
           });
           return remoteSettings;
         }
-      } catch (_) {}
+      } catch (_) {
+        // Fail silently on background fetch; local cache remains
+      }
     }
     return localSettings;
+  }
+
+  Future<StoreSettings> patchStoreSettings(Map<String, dynamic> patch) async {
+    try {
+      final res = await _apiService.client.patch(
+        '/admin/store-settings',
+        data: patch,
+      );
+      final data = res.data;
+      return StoreSettings.fromJson(
+        data is Map ? Map<String, dynamic>.from(data) : {},
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }
