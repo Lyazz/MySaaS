@@ -32,6 +32,7 @@ import 'screens/purchase_detail_screen.dart';
 import 'screens/pos_screen.dart';
 import 'screens/delivery_screen.dart';
 import 'screens/billing_screen.dart';
+import 'screens/integrations_screen.dart';
 import 'widgets/app_shell.dart';
 
 // Custom transition that removes the slow overlay effect
@@ -67,6 +68,7 @@ String? _pathToResource(String path) {
   if (path.startsWith('/cash')) return 'cash';
   if (path.startsWith('/delivery')) return 'delivery';
   if (path.startsWith('/billing')) return 'billing';
+  if (path.startsWith('/integrations')) return 'integrations';
   return null;
 }
 
@@ -85,6 +87,7 @@ String _firstAllowedPath(List<String> permissions) {
   if (allow('delivery')) return '/delivery';
   if (allow('cash')) return '/cash';
   if (allow('billing')) return '/billing';
+  if (allow('integrations')) return '/integrations';
   return '/orders';
 }
 
@@ -382,6 +385,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const BillingScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/integrations',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const IntegrationsScreen(),
             ),
           ),
         ],
