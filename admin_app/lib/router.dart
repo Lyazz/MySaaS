@@ -14,6 +14,7 @@ import 'screens/categories_screen.dart';
 import 'screens/category_form_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/settings/printers_settings_page.dart';
+import 'screens/settings/store_settings_page.dart';
 import 'screens/customers_screen.dart';
 import 'screens/customer_detail_screen.dart';
 import 'screens/customer_form_screen.dart';
@@ -353,6 +354,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                 pageBuilder: (context, state) => NoTransitionPage(
                   key: state.pageKey,
                   child: const PrintersSettingsPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'store',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const StoreSettingsPage(),
                 ),
               ),
             ],
