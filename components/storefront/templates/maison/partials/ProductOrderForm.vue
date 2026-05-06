@@ -178,7 +178,7 @@ watch([() => props.currentStock, () => props.currentVariant], () => {
 
 function getVariantTitle(variant: any) {
   if (!variant.optionValues || variant.optionValues.length === 0) return ''
-  let values = [...variant.optionValues]
+  const values = [...variant.optionValues]
   if (props.product.options && props.product.options.length > 0) {
     const optionPos = new Map(props.product.options.map((o: any) => [o.id, o.position]))
     values.sort((a: any, b: any) => ((optionPos.get(a.optionValue?.optionId) ?? 999) as number) - ((optionPos.get(b.optionValue?.optionId) ?? 999) as number))
@@ -376,7 +376,7 @@ const handleAddToCart = async () => {
           </div>
         </div>
         <div v-else class="order-form__field order-form__delivery-hint">
-          <Icon name="lucide:map-pin" style="width:14px;height:14px;margin:0 auto 4px;display:block;color:#bbb" />
+          <Icon name="lucide:map-pin" style="width:14px;height:14px;margin:0 auto 4px;display:block;color:var(--at-sub)" />
           {{ storefrontContent.checkout.help.deliveryOptions }}
         </div>
 
@@ -441,12 +441,12 @@ const handleAddToCart = async () => {
   background: var(--at-surface);
 }
 .order-form__stock { display: flex; flex-direction: column; gap: 3px; }
-.order-form__stock-label { font-family: var(--at-f-mono); font-size: 10px; font-weight: 400; letter-spacing: 0.1em; }
-.order-form__stock-label.is-ok { color: #5E9E6A; }
-.order-form__stock-label.is-low { color: #C9962A; }
+.order-form__stock-label { font-family: var(--at-f-mono); font-size: 10px; font-weight: 400; letter-spacing: 0; }
+.order-form__stock-label.is-ok { color: var(--at-success); }
+.order-form__stock-label.is-low { color: var(--at-gold); }
 .order-form__stock-label.is-oos { color: var(--at-error); }
 .order-form__stock-label.is-unavailable { color: var(--at-muted); }
-.order-form__qty-heading { font-family: var(--at-f-mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--at-muted); }
+.order-form__qty-heading { font-family: var(--at-f-mono); font-size: 9px; letter-spacing: 0; text-transform: uppercase; color: var(--at-muted); }
 
 .order-form__qty-ctrl { display: flex; align-items: center; border: 1px solid var(--at-border-2); }
 .order-form__qty-btn { width: 32px; height: 32px; background: none; border: none; color: var(--at-sub); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color 0.15s; }
@@ -458,11 +458,11 @@ const handleAddToCart = async () => {
 .order-form__cod-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--at-border); }
 .order-form__cod-icon { width: 34px; height: 34px; background: var(--at-gold-dim); display: flex; align-items: center; justify-content: center; color: var(--at-gold); flex-shrink: 0; }
 .order-form__cod-title { font-family: var(--at-f-mono); font-size: 11px; color: var(--at-text); margin-bottom: 2px; }
-.order-form__cod-badge { font-family: var(--at-f-mono); font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--at-gold); }
+.order-form__cod-badge { font-family: var(--at-f-mono); font-size: 8px; letter-spacing: 0; text-transform: uppercase; color: var(--at-gold); }
 
 .order-form__fields { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .order-form__field { display: flex; flex-direction: column; gap: 6px; }
-.order-form__label { font-family: var(--at-f-mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--at-sub); }
+.order-form__label { font-family: var(--at-f-mono); font-size: 9px; letter-spacing: 0; text-transform: uppercase; color: var(--at-sub); }
 .order-form__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .order-form__select-wrap { position: relative; }
 .order-form__select-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--at-muted); pointer-events: none; }
@@ -470,11 +470,11 @@ const handleAddToCart = async () => {
 .order-form__delivery-list { display: flex; flex-direction: column; gap: 1px; background: var(--at-border); }
 .order-form__delivery-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; background: var(--at-surface); cursor: pointer; transition: background 0.15s; }
 .order-form__delivery-opt:hover { background: var(--at-surface-2); }
-.order-form__delivery-opt.is-selected { background: rgba(184,146,74,0.07); }
+.order-form__delivery-opt.is-selected { background: rgba(213,168,93,0.07); }
 .order-form__delivery-left { display: flex; align-items: center; gap: 10px; }
 .order-form__delivery-icon-wrap { width: 28px; height: 28px; background: var(--at-surface-2); display: flex; align-items: center; justify-content: center; color: var(--at-sub); flex-shrink: 0; }
 .order-form__delivery-name { font-family: var(--at-f-mono); font-size: 10px; color: var(--at-text); margin-bottom: 1px; }
-.order-form__delivery-mode { font-family: var(--at-f-mono); font-size: 9px; color: var(--at-muted); letter-spacing: 0.08em; }
+.order-form__delivery-mode { font-family: var(--at-f-mono); font-size: 9px; color: var(--at-muted); letter-spacing: 0; }
 .order-form__delivery-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .order-form__delivery-price { font-family: var(--at-f-mono); font-size: 11px; font-weight: 400; color: var(--at-gold); }
 .order-form__delivery-radio { width: 12px; height: 12px; border: 1px solid var(--at-border-2); border-radius: 50%; flex-shrink: 0; transition: background 0.15s, border-color 0.15s; }
@@ -488,10 +488,10 @@ const handleAddToCart = async () => {
 .order-form__pickup-name svg { color: var(--at-gold); flex-shrink: 0; }
 .order-form__pickup-error { font-family: var(--at-f-mono); font-size: 10px; color: var(--at-error); margin-top: 6px; }
 
-.order-form__error { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border: 1px solid rgba(192,57,43,0.4); background: rgba(192,57,43,0.06); font-family: var(--at-f-mono); font-size: 10px; color: var(--at-error); }
+.order-form__error { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border: 1px solid rgba(224,106,85,0.4); background: rgba(224,106,85,0.08); font-family: var(--at-f-mono); font-size: 10px; color: var(--at-error); }
 
 .order-form__total { display: flex; align-items: baseline; justify-content: space-between; padding: 12px 14px; background: var(--at-surface-2); border: 1px solid var(--at-border); }
-.order-form__total-label { font-family: var(--at-f-mono); font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--at-sub); }
+.order-form__total-label { font-family: var(--at-f-mono); font-size: 9px; letter-spacing: 0; text-transform: uppercase; color: var(--at-sub); }
 .order-form__total-price { font-family: var(--at-f-display); font-size: 1.6rem; font-weight: 400; color: var(--at-gold); }
 
 .order-form__toast { position: fixed; bottom: 20px; right: 20px; z-index: 100; background: var(--at-surface); border: 1px solid var(--at-border-2); padding: 14px 18px; display: flex; align-items: center; gap: 12px; }

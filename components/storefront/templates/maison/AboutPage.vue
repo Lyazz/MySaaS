@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const tenant = useState<any>('tenant')
 const storeSettings = useState<any>('storeSettings')
-const tenantName = computed(() => tenant.value?.name || 'Maison')
+const tenantName = computed(() => tenant.value?.name || 'Pistachio')
 </script>
 
 <template>
@@ -133,7 +133,7 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   font-family: var(--at-f-display);
   font-size: clamp(3.5rem, 8vw, 8rem);
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 0.97;
   color: var(--at-cream);
   margin-top: 12px;
@@ -182,7 +182,7 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   color: var(--at-muted);
   flex-shrink: 0;
   width: 24px;
@@ -220,7 +220,7 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 300;
   color: var(--at-cream);
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 .about__values-grid {
@@ -247,7 +247,7 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
 .about__value-num {
   font-family: var(--at-f-mono);
   font-size: 8px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   color: var(--at-gold);
 }
 .about__value-icon {
@@ -285,7 +285,7 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   font-family: var(--at-f-display);
   font-size: clamp(2.5rem, 5vw, 5rem);
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1.0;
   color: var(--at-cream);
   margin-bottom: 32px;

@@ -136,7 +136,7 @@ const { format: formatCurrency } = useCurrency()
   font-family: var(--at-f-display);
   font-size: clamp(3rem, 6vw, 5rem);
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--at-cream);
   line-height: 1.0;
   margin-top: 10px;
@@ -214,7 +214,7 @@ const { format: formatCurrency } = useCurrency()
 .cart__item-ref {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   color: var(--at-muted);
   margin-top: 3px;
 }
@@ -308,7 +308,7 @@ const { format: formatCurrency } = useCurrency()
   margin-bottom: 24px;
   font-family: var(--at-f-mono);
   font-size: 10px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
 }
@@ -327,7 +327,7 @@ const { format: formatCurrency } = useCurrency()
   text-align: center;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   text-decoration: none;

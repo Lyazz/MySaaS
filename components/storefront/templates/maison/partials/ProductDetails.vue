@@ -56,7 +56,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <!-- Title block -->
     <div class="details__head">
       <span class="at-label">{{
-        product?.category?.title || 'Maison & Déco'
+        product?.category?.title || 'Pistachio'
       }}</span>
       <h1 class="details__title">{{ product?.title }}</h1>
 
@@ -233,7 +233,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   font-family: var(--at-f-display);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
   font-weight: 300;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   line-height: 1.1;
   color: var(--at-cream);
   margin: 8px 0 16px;
@@ -277,7 +277,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
 }
@@ -372,7 +372,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
   border: 1px solid var(--at-border-2);
   background: transparent;
@@ -398,8 +398,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   text-decoration: line-through;
 }
 .details__option-btn.is-oos {
-  color: #c0392b;
-  border-color: rgba(192, 57, 43, 0.3);
+  color: var(--at-error);
+  border-color: rgba(224, 106, 85, 0.35);
 }
 
 /* Mini desc */

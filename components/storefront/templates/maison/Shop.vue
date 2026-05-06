@@ -293,7 +293,7 @@ const resetFilters = () => {
   font-family: var(--at-f-display);
   font-size: clamp(3rem, 6vw, 5.5rem);
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--at-cream);
   margin-top: 10px;
   line-height: 1.0;
@@ -314,7 +314,7 @@ const resetFilters = () => {
   color: var(--at-sub);
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   padding: 10px 16px;
   cursor: pointer;
@@ -372,7 +372,7 @@ const resetFilters = () => {
   border: none;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-gold);
   cursor: pointer;
@@ -385,7 +385,7 @@ const resetFilters = () => {
 .shop__filter-title {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
   margin-bottom: 14px;
@@ -462,7 +462,7 @@ const resetFilters = () => {
   border: 1px solid var(--at-border-2);
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
 }
@@ -489,7 +489,7 @@ const resetFilters = () => {
   pointer-events: none;
 }
 .shop__sort-wrap { position: relative; }
-.shop__sort { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; min-width: 140px; }
+.shop__sort { font-size: 9px; letter-spacing: 0; text-transform: uppercase; min-width: 140px; }
 .shop__sort option { text-transform: none; font-size: 12px; }
 .shop__sort-icon {
   position: absolute;
@@ -503,7 +503,7 @@ const resetFilters = () => {
 .shop__count {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   margin-bottom: 20px;
@@ -545,7 +545,7 @@ const resetFilters = () => {
 .shop__overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(46,33,23,0.36);
   z-index: 60;
 }
 .shop__drawer {

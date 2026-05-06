@@ -15,24 +15,26 @@ onMounted(() => {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --at-bg:        #0E0D0C;
-  --at-surface:   #161412;
-  --at-surface-2: #1C1916;
-  --at-border:    #2A2622;
-  --at-border-2:  #352F2A;
-  --at-muted:     #4A4440;
-  --at-sub:       #9A9088;
-  --at-text:      #E8E2D9;
-  --at-cream:     #F2EDE5;
-  --at-gold:      #B8924A;
-  --at-gold-dim:  rgba(184,146,74,0.15);
-  --at-error:     #C0392B;
+  --at-bg:        #FBF3E6;
+  --at-surface:   #FFF9EA;
+  --at-surface-2: #F7E4BD;
+  --at-border:    #E4C58F;
+  --at-border-2:  #BE9960;
+  --at-muted:     #8F7655;
+  --at-sub:       #3F5E43;
+  --at-text:      #1D2419;
+  --at-cream:     #0B4A25;
+  --at-gold:      #B38335;
+  --at-green:     #0B4A25;
+  --at-gold-dim:  rgba(179,131,53,0.18);
+  --at-error:     #B84036;
+  --at-success:   #0B4A25;
 
-  --at-f-display: 'Cormorant Garamond', Georgia, serif;
-  --at-f-mono:    'DM Mono', 'Courier New', monospace;
+  --at-f-display: 'Fraunces', 'Noto Sans Arabic', Georgia, serif;
+  --at-f-mono:    'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
 }
 
 .atelier-theme {
@@ -57,17 +59,17 @@ onMounted(() => {
 /* Shared typography */
 .at-label {
   font-family: var(--at-f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.28em;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-gold);
 }
 
 .at-display {
   font-family: var(--at-f-display);
-  font-weight: 300;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: 0;
   line-height: 1.05;
   color: var(--at-cream);
 }
@@ -79,11 +81,11 @@ onMounted(() => {
   gap: 12px;
   padding: 14px 28px;
   background: transparent;
-  border: 1px solid rgba(232,226,217,0.3);
+  border: 1px solid rgba(11,74,37,0.24);
   font-family: var(--at-f-mono);
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-text);
   cursor: pointer;
@@ -114,9 +116,9 @@ onMounted(() => {
   background: var(--at-cream);
   border: none;
   font-family: var(--at-f-mono);
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.22em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-bg);
   cursor: pointer;
@@ -135,9 +137,9 @@ onMounted(() => {
   border: 1px solid var(--at-border-2);
   background: transparent;
   font-family: var(--at-f-mono);
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
   cursor: pointer;

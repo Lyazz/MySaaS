@@ -7,7 +7,7 @@ import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 const cartStore = useCartStore()
 const favorites = useFavorites()
 const tenant = useState<any>('tenant')
-const tenantName = computed(() => tenant.value?.name || 'Maison')
+const tenantName = computed(() => tenant.value?.name || 'Pistachio')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const legalLinks = useStoreLegalLinks()
@@ -230,7 +230,7 @@ watch(searchQuery, async (q) => {
                 </div>
                 <div class="shell-search-results__info">
                   <span class="shell-search-results__name">{{ product.title }}</span>
-                  <span class="shell-search-results__price">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></span>
+                  <span class="shell-search-results__price">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="shell-search-results__discount">-{{ product.promotionDiscountPercent }}%</span></span>
                 </div>
               </NuxtLink>
               <button
@@ -275,12 +275,12 @@ watch(searchQuery, async (q) => {
     class="w-full flex items-center justify-between text-left"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
-    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+    <h4 class="shell-drawer__cats-title">
       {{ storefrontContent.nav.categories || 'Collections' }}
     </h4>
     <Icon
       name="lucide:chevron-down"
-      class="w-4 h-4 text-slate-400 transition-transform"
+      class="shell-drawer__cats-icon"
       :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
     />
   </button>
@@ -289,7 +289,7 @@ watch(searchQuery, async (q) => {
       v-for="cat in tenantCategories"
       :key="cat.id"
       :to="'/category/' + cat.slug"
-      class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
+      class="shell-drawer__cat-link"
       @click="mobileMenuOpen = false"
     >
       {{ categoryDisplayTitle(cat) }}
@@ -310,7 +310,7 @@ watch(searchQuery, async (q) => {
             <!-- Brand -->
             <div class="shell-footer__brand">
               <span class="shell-logo__text" style="font-size:1.6rem;margin-bottom:16px;display:block">{{ tenantName }}</span>
-              <p class="shell-footer__tagline">Art de vivre, décoration intérieure & accessoires maison soigneusement sélectionnés.</p>
+              <p class="shell-footer__tagline">Pistachio, sélection premium pour une boutique chaleureuse et raffinée.</p>
               <ul v-if="primaryContactInfos.length" class="shell-footer__contacts">
                 <li v-for="info in primaryContactInfos" :key="info.id" class="shell-footer__contact-item">
                   <Icon :name="kindDef(info.kind).iconName" class="shell-footer__contact-icon" />
@@ -395,7 +395,7 @@ watch(searchQuery, async (q) => {
   transition: background 0.4s, border-color 0.4s;
 }
 .shell-header.is-scrolled {
-  background: rgba(14,13,12,0.96);
+  background: rgba(251,243,230,0.96);
   backdrop-filter: blur(12px);
   border-color: var(--at-border);
 }
@@ -421,13 +421,13 @@ watch(searchQuery, async (q) => {
   height: 32px;
   max-width: 120px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 .shell-logo__text {
   font-family: var(--at-f-display);
   font-size: 1.5rem;
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   color: var(--at-cream);
   text-decoration: none;
 }
@@ -444,9 +444,9 @@ watch(searchQuery, async (q) => {
 
 .shell-nav__link {
   font-family: var(--at-f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
   text-decoration: none;
@@ -485,9 +485,9 @@ watch(searchQuery, async (q) => {
   display: block;
   padding: 10px 16px;
   font-family: var(--at-f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
   text-decoration: none;
@@ -530,7 +530,7 @@ watch(searchQuery, async (q) => {
   width: 14px;
   height: 14px;
   background: var(--at-gold);
-  color: var(--at-bg);
+  color: var(--at-surface);
   font-family: var(--at-f-mono);
   font-size: 8px;
   font-weight: 400;
@@ -642,12 +642,17 @@ watch(searchQuery, async (q) => {
   font-size: 10px;
   color: var(--at-gold);
 }
+.shell-search-results__discount {
+  margin-left: 4px;
+  font-size: 10px;
+  color: var(--at-error);
+}
 
 /* ── Mobile drawer ──────────────────────────────────────────────── */
 .shell-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(46,33,23,0.36);
   z-index: 60;
 }
 .shell-drawer {
@@ -683,9 +688,9 @@ watch(searchQuery, async (q) => {
 .shell-drawer__link {
   padding: 14px 24px;
   font-family: var(--at-f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
   text-decoration: none;
@@ -695,12 +700,28 @@ watch(searchQuery, async (q) => {
 .shell-drawer__link:last-child { border-bottom: none; }
 .shell-drawer__link:hover { color: var(--at-gold); }
 .shell-drawer__cats { padding: 20px 24px; }
+.shell-drawer__cats-title {
+  margin: 0 0 8px;
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--at-sub);
+}
+.shell-drawer__cats-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--at-sub);
+  transition: transform 0.2s, color 0.2s;
+}
 .shell-drawer__cat-link {
   display: block;
   padding: 10px 0;
-  font-family: var(--at-f-display);
-  font-size: 1.1rem;
-  color: var(--at-text);
+  font-family: var(--at-f-mono);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--at-sub);
   text-decoration: none;
   border-bottom: 1px solid var(--at-border);
   transition: color 0.2s;
@@ -710,8 +731,8 @@ watch(searchQuery, async (q) => {
 
 /* ── Footer ─────────────────────────────────────────────────────── */
 .shell-footer {
-  border-top: 1px solid var(--at-border);
-  background: var(--at-surface);
+  border-top: 1px solid rgba(251,243,230,0.08);
+  background: #262523;
   margin-top: auto;
 }
 .shell-footer__inner {
@@ -739,41 +760,41 @@ watch(searchQuery, async (q) => {
 }
 .shell-footer__contacts { list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 10px; }
 .shell-footer__contact-item { display: flex; align-items: flex-start; gap: 10px; }
-.shell-footer__contact-icon { width: 12px; height: 12px; color: var(--at-gold); flex-shrink: 0; margin-top: 2px; }
+.shell-footer__contact-icon { width: 12px; height: 12px; color: #AEB99E; flex-shrink: 0; margin-top: 2px; }
 .shell-footer__contact-link {
   font-family: var(--at-f-mono);
   font-size: 11px;
   font-weight: 300;
-  color: var(--at-muted);
+  color: rgba(251,243,230,0.66);
   text-decoration: none;
   transition: color 0.2s;
 }
-.shell-footer__contact-link:hover { color: var(--at-text); }
+.shell-footer__contact-link:hover { color: #FFF9EA; }
 .shell-footer__socials { display: flex; gap: 8px; margin-top: 16px; }
 .shell-footer__social-btn {
   width: 32px;
   height: 32px;
-  border: 1px solid var(--at-border-2);
+  border: 1px solid rgba(251,243,230,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--at-muted);
+  color: rgba(251,243,230,0.62);
   text-decoration: none;
   transition: border-color 0.2s, color 0.2s;
 }
-.shell-footer__social-btn:hover { border-color: var(--at-gold); color: var(--at-gold); }
+.shell-footer__social-btn:hover { border-color: #AEB99E; color: #AEB99E; }
 .shell-footer__links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
 .shell-footer__link {
   font-family: var(--at-f-mono);
   font-size: 11px;
   font-weight: 300;
-  color: var(--at-muted);
+  color: rgba(251,243,230,0.7);
   text-decoration: none;
   transition: color 0.2s;
 }
-.shell-footer__link:hover { color: var(--at-text); }
+.shell-footer__link:hover { color: #FFF9EA; }
 .shell-footer__bottom {
-  border-top: 1px solid var(--at-border);
+  border-top: 1px solid rgba(251,243,230,0.16);
   padding-top: 24px;
   display: flex;
   flex-direction: column;
@@ -781,9 +802,9 @@ watch(searchQuery, async (q) => {
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
-  color: var(--at-muted);
+  color: rgba(251,243,230,0.52);
 }
 @media (min-width: 640px) {
   .shell-footer__bottom { flex-direction: row; justify-content: space-between; }

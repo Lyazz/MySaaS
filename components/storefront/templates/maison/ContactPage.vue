@@ -44,7 +44,7 @@ const submitForm = () => {
             </div>
           </div>
 
-          <p class="contact__info-tagline">Maison — Art de vivre</p>
+          <p class="contact__info-tagline">Pistachio — Art de vivre</p>
         </div>
       </aside>
 
@@ -107,7 +107,7 @@ const submitForm = () => {
   font-family: var(--at-f-display);
   font-size: clamp(3rem, 7vw, 7rem);
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1.0;
   color: var(--at-cream);
   margin-top: 10px;
@@ -146,7 +146,7 @@ const submitForm = () => {
   font-family: var(--at-f-display);
   font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 300;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   line-height: 1.05;
   color: var(--at-cream);
   margin-bottom: 20px;
@@ -192,7 +192,7 @@ const submitForm = () => {
 .contact__info-tagline {
   font-family: var(--at-f-mono);
   font-size: 8px;
-  letter-spacing: 0.22em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
 }
@@ -212,7 +212,7 @@ const submitForm = () => {
 .contact__label {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
 }

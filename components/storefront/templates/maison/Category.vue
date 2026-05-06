@@ -104,13 +104,15 @@ const categoryProducts = computed(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.4) saturate(0.7);
+  filter: brightness(0.96) saturate(0.9);
 }
 .cat-banner__placeholder { width: 100%; height: 100%; background: var(--at-surface-2); }
 .cat-banner__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(14,13,12,0.7) 0%, rgba(14,13,12,0.1) 70%);
+  background:
+    radial-gradient(circle at 90% 100%, rgba(251,243,230,0.98) 0 20%, transparent 21%),
+    linear-gradient(to right, rgba(215,174,112,0.88) 0%, rgba(225,190,135,0.32) 70%);
 }
 .cat-banner__content {
   position: absolute;
@@ -125,7 +127,7 @@ const categoryProducts = computed(() => {
   font-family: var(--at-f-display);
   font-size: clamp(2.5rem, 6vw, 5rem);
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--at-cream);
   line-height: 1.0;
   margin-bottom: 8px;
@@ -134,7 +136,7 @@ const categoryProducts = computed(() => {
   font-family: var(--at-f-mono);
   font-size: 12px;
   font-weight: 300;
-  color: rgba(232,226,217,0.55);
+  color: rgba(29,36,25,0.68);
   max-width: 440px;
 }
 
@@ -187,7 +189,7 @@ const categoryProducts = computed(() => {
 .cat-count {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   margin-bottom: 20px;

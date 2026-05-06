@@ -68,6 +68,7 @@ export default defineNuxtConfig({
     '/api/**': { headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive, nosnippet' }) },
 
     // Admin areas must not be SSR-rendered (avoid leaking data in HTML) and must not be indexed by crawlers.
+    '/admin/template-builder-preview': { ssr: false, headers: withSecurityHeaders({ 'X-Frame-Options': 'SAMEORIGIN', 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
     '/admin': { ssr: false, headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
     '/admin/**': { ssr: false, headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },
     '/super-admin': { ssr: false, headers: withSecurityHeaders({ 'x-robots-tag': 'noindex, nofollow, noarchive' }) },

@@ -104,7 +104,7 @@ async function handleAddToCart() {
 
     <!-- Info -->
     <div class="pc__info">
-      <span class="pc__cat">{{ product.category?.title || 'Maison & Déco' }}</span>
+      <span class="pc__cat">{{ product.category?.title || 'Pistachio' }}</span>
       <h3 class="pc__title">
         <NuxtLink :to="`/product/${product.slug}`" class="pc__title-link">{{ product.title }}</NuxtLink>
       </h3>
@@ -137,6 +137,16 @@ async function handleAddToCart() {
   display: flex;
   flex-direction: column;
   background: var(--at-surface);
+  border: 1px solid rgba(228,197,143,0.52);
+  border-radius: 28px 28px 38px 0;
+  box-shadow: 0 20px 50px rgba(69, 47, 20, 0.08);
+  overflow: hidden;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+.pc:hover {
+  transform: translateY(-4px);
+  border-color: rgba(11,74,37,0.24);
+  box-shadow: 0 28px 70px rgba(69, 47, 20, 0.12);
 }
 .pc--list {
   flex-direction: row;
@@ -151,6 +161,7 @@ async function handleAddToCart() {
   overflow: hidden;
   background: var(--at-surface-2);
   aspect-ratio: 3/4;
+  border-radius: 28px 28px 36px 0;
 }
 .pc--list .pc__img-wrap {
   width: 100px;
@@ -173,11 +184,11 @@ async function handleAddToCart() {
   top: 10px;
   left: 10px;
   background: var(--at-gold);
-  color: var(--at-bg);
+  color: var(--at-surface);
   font-family: var(--at-f-mono);
   font-size: 8px;
   font-weight: 400;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   padding: 4px 8px;
   z-index: 2;
 }
@@ -189,7 +200,7 @@ async function handleAddToCart() {
   right: 10px;
   width: 30px;
   height: 30px;
-  background: rgba(14,13,12,0.7);
+  background: rgba(255,249,234,0.88);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -223,12 +234,12 @@ async function handleAddToCart() {
   justify-content: center;
   gap: 7px;
   padding: 11px 0;
-  background: var(--at-cream);
-  color: var(--at-bg);
+  background: var(--at-green);
+  color: var(--at-surface);
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 400;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   border: none;
   cursor: pointer;
@@ -237,7 +248,7 @@ async function handleAddToCart() {
 }
 .pc__hover-btn:hover { background: var(--at-gold); }
 .pc__hover-btn--outline {
-  background: rgba(14,13,12,0.85);
+  background: rgba(255,249,234,0.92);
   color: var(--at-text);
   border-left: 1px solid var(--at-border);
   flex: 0.7;
@@ -258,7 +269,7 @@ async function handleAddToCart() {
 
 /* Info */
 .pc__info {
-  padding: 14px 14px 16px;
+  padding: 16px 14px 18px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -269,7 +280,7 @@ async function handleAddToCart() {
   font-family: var(--at-f-mono);
   font-size: 8px;
   font-weight: 300;
-  letter-spacing: 0.22em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
 }
@@ -315,6 +326,7 @@ async function handleAddToCart() {
   display: flex;
   align-items: center;
   gap: 12px;
+  border-radius: 18px;
 }
 .pc-toast__icon {
   width: 28px;

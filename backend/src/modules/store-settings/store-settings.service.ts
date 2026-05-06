@@ -35,7 +35,7 @@ export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; descriptio
     { key: 'playful', label: 'Playful', description: 'Kids & fun' },
     { key: 'activewear', label: 'Activewear', description: 'Bold, aggressive typography and neon colors for sports.' },
     { key: 'chrono', label: 'Chrono Luxe', description: 'Luxury dark theme with gold accents for premium accessories.' },
-    { key: 'maison', label: 'Maison', description: 'Warm editorial theme for home decor and interior accessories.' }
+    { key: 'maison', label: 'Pistachio', description: 'Luxury pistachio-green theme for premium food, nuts, decor, and refined retail.' }
 ]
 
 export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [

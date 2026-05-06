@@ -88,13 +88,13 @@ watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background: rgba(14,13,12,0.75);
+  background: rgba(255,249,234,0.9);
   backdrop-filter: blur(4px);
   padding: 5px 10px;
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   color: var(--at-sub);
 }
 

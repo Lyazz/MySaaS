@@ -141,7 +141,7 @@ onUnmounted(() => {
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   text-decoration: none;
@@ -157,7 +157,7 @@ onUnmounted(() => {
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   color: var(--at-sub);
   white-space: nowrap;
   overflow: hidden;

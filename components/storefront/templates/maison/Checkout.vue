@@ -402,7 +402,7 @@ async function handleSubmit() {
   font-family: var(--at-f-display);
   font-size: clamp(3rem, 6vw, 5rem);
   font-weight: 300;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 1.0;
   color: var(--at-cream);
   margin-top: 10px;
@@ -417,11 +417,11 @@ async function handleSubmit() {
 
 .co__disabled {
   padding: 14px 18px;
-  border: 1px solid rgba(201,150,42,0.4);
-  background: rgba(201,150,42,0.06);
+  border: 1px solid rgba(213,168,93,0.42);
+  background: rgba(213,168,93,0.08);
   font-family: var(--at-f-mono);
   font-size: 11px;
-  color: #C9962A;
+  color: var(--at-gold);
   margin-bottom: 24px;
 }
 
@@ -463,7 +463,7 @@ async function handleSubmit() {
 .co__label {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
 }
@@ -522,7 +522,7 @@ async function handleSubmit() {
   transition: background 0.15s;
 }
 .co__delivery-opt:hover { background: var(--at-surface-2); }
-.co__delivery-opt.is-selected { background: rgba(184,146,74,0.07); }
+.co__delivery-opt.is-selected { background: rgba(213,168,93,0.07); }
 .co__delivery-left { display: flex; align-items: center; gap: 12px; }
 .co__delivery-icon {
   width: 32px; height: 32px;
@@ -551,8 +551,8 @@ async function handleSubmit() {
   align-items: flex-start;
   gap: 8px;
   padding: 12px 14px;
-  border: 1px solid rgba(192,57,43,0.35);
-  background: rgba(192,57,43,0.06);
+  border: 1px solid rgba(224,106,85,0.35);
+  background: rgba(224,106,85,0.08);
   font-family: var(--at-f-mono);
   font-size: 11px;
   color: var(--at-error);
@@ -595,7 +595,7 @@ async function handleSubmit() {
   padding: 0 16px;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
   cursor: pointer;
@@ -621,7 +621,7 @@ async function handleSubmit() {
   padding-top: 14px;
   border-top: 1px solid var(--at-border);
   font-size: 10px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
   margin-top: 4px;
 }
@@ -639,7 +639,7 @@ async function handleSubmit() {
   text-align: center;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   text-decoration: none;

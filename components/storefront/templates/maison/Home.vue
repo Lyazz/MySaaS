@@ -72,10 +72,10 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 <template>
   <div class="atelier-root">
-    <!-- Cormorant Garamond + DM Mono from Google Fonts -->
+    <!-- Pistachio typography from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- ─── HERO ─────────────────────────────────────────────── -->
     <section
@@ -322,17 +322,18 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 <style scoped>
 /* ── Tokens ────────────────────────────────────────────────────── */
 .atelier-root {
-  --c-bg:       #0E0D0C;
-  --c-surface:  #161412;
-  --c-border:   #2A2622;
-  --c-muted:    #4A4440;
-  --c-text:     #E8E2D9;
-  --c-sub:      #9A9088;
-  --c-gold:     #B8924A;
-  --c-cream:    #F2EDE5;
+  --c-bg:       #FBF3E6;
+  --c-surface:  #FFF9EA;
+  --c-surface-2:#F7E4BD;
+  --c-border:   #E4C58F;
+  --c-muted:    #8F7655;
+  --c-text:     #1D2419;
+  --c-sub:      #3F5E43;
+  --c-gold:     #B38335;
+  --c-cream:    #0B4A25;
 
-  --f-display: 'Cormorant Garamond', Georgia, serif;
-  --f-mono:    'DM Mono', 'Courier New', monospace;
+  --f-display: 'Fraunces', 'Noto Sans Arabic', Georgia, serif;
+  --f-mono:    'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
 
   background: var(--c-bg);
   color: var(--c-text);
@@ -345,9 +346,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-label {
   display: block;
   font-family: var(--f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.28em;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--c-gold);
   margin-bottom: 10px;
@@ -361,8 +362,8 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-section-title {
   font-family: var(--f-display);
   font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 300;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: 0;
   line-height: 1.05;
   color: var(--c-text);
 }
@@ -372,9 +373,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   align-items: center;
   gap: 10px;
   font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--c-sub);
   text-decoration: none;
@@ -392,11 +393,11 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   align-items: center;
   gap: 14px;
   padding: 14px 28px;
-  border: 1px solid rgba(232,226,217,0.35);
+  border: 1px solid rgba(11,74,37,0.24);
   font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.22em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--c-text);
   text-decoration: none;
@@ -422,7 +423,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cta span, .atelier-cta svg { position: relative; z-index: 1; }
 
 .atelier-cta--light {
-  border-color: rgba(232,226,217,0.6);
+  border-color: rgba(11,74,37,0.34);
   color: var(--c-cream);
   opacity: 1;
   transform: none;
@@ -448,6 +449,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   max-height: 920px;
   overflow: hidden;
   background: var(--c-bg);
+  border-bottom-right-radius: clamp(56px, 10vw, 150px);
 }
 
 .atelier-hero__slide {
@@ -464,7 +466,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: brightness(0.45) saturate(0.8);
+  filter: brightness(0.94) saturate(0.92);
   transition: transform 8s ease;
 }
 .atelier-hero__slide.is-active .atelier-hero__img {
@@ -475,8 +477,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to right, rgba(14,13,12,0.7) 0%, rgba(14,13,12,0.1) 60%),
-    linear-gradient(to top, rgba(14,13,12,0.5) 0%, transparent 50%);
+    radial-gradient(circle at 16% 42%, rgba(251,243,230,0.06) 0 20%, rgba(210,164,100,0.78) 21% 100%),
+    linear-gradient(to right, rgba(215,174,112,0.94) 0%, rgba(225,190,135,0.52) 62%),
+    linear-gradient(to top, rgba(251,243,230,0.68) 0%, transparent 52%);
 }
 
 .atelier-hero__body {
@@ -507,9 +510,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-hero__title {
   font-family: var(--f-display);
   font-size: clamp(3rem, 7vw, 7rem);
-  font-weight: 300;
+  font-weight: 700;
   line-height: 0.97;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--c-cream);
   margin-bottom: 20px;
   opacity: 0;
@@ -524,7 +527,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-size: clamp(11px, 1.4vw, 14px);
   font-weight: 300;
   line-height: 1.7;
-  color: rgba(232,226,217,0.55);
+  color: rgba(29,36,25,0.72);
   margin-bottom: 36px;
   max-width: 340px;
   opacity: 0;
@@ -548,7 +551,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-family: var(--f-mono);
   font-size: 10px;
   font-weight: 300;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   color: var(--c-sub);
 }
 
@@ -617,7 +620,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-family: var(--f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.2em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--c-sub);
 }
@@ -650,8 +653,8 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__grid {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: var(--c-border);
+  gap: 18px;
+  background: transparent;
 }
 @media (min-width: 768px) {
   .atelier-cats__grid {
@@ -670,6 +673,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   position: relative;
   background: var(--c-surface);
   overflow: hidden;
+  border: 1px solid rgba(228,197,143,0.48);
+  border-radius: 26px 26px 32px 0;
+  box-shadow: 0 18px 48px rgba(69, 47, 20, 0.08);
 }
 
 .atelier-cats__img-wrap {
@@ -686,11 +692,11 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.5) saturate(0.75);
+  filter: brightness(0.96) saturate(0.9);
   transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .atelier-cats__item:hover .atelier-cats__img {
-  filter: brightness(0.65) saturate(0.9);
+  filter: brightness(1) saturate(0.98);
   transform: scale(1.04);
 }
 
@@ -703,7 +709,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(14,13,12,0.75) 0%, transparent 55%);
+  background: linear-gradient(to top, rgba(251,243,230,0.78) 0%, transparent 58%);
   pointer-events: none;
 }
 
@@ -716,13 +722,13 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   background: var(--c-surface);
   transition: background 0.25s;
 }
-.atelier-cats__item:hover .atelier-cats__meta { background: #1A1714; }
+.atelier-cats__item:hover .atelier-cats__meta { background: var(--c-surface-2); }
 
 .atelier-cats__num {
   font-family: var(--f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   color: var(--c-gold);
   flex-shrink: 0;
 }
@@ -741,7 +747,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__count {
   font-family: var(--f-mono);
   font-size: 9px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   color: var(--c-muted);
   text-transform: uppercase;
 }
@@ -769,7 +775,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   border: 1px solid var(--c-border);
   font-family: var(--f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--c-sub);
   text-decoration: none;
@@ -897,7 +903,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-size: clamp(2.8rem, 6vw, 5.5rem);
   font-weight: 300;
   line-height: 1.02;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--c-cream);
   margin: 0 0 28px;
 }

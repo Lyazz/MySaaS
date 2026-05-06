@@ -1,5 +1,9 @@
 # Git worktrees
 .worktrees/
+.claude/worktrees/
+
+# Android build outputs
+admin_app/android/build/
 
 # Nuxt dev/build outputs
 .output
