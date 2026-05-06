@@ -266,6 +266,28 @@ class SettingsScreen extends ConsumerWidget {
                 const Divider(height: 1),
                 ListTile(
                   title: const Text(
+                    'Setup Checklist',
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: const Text('Track your store setup progress'),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD1FAE5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      LucideIcons.clipboardCheck,
+                      color: Colors.green,
+                      size: 20,
+                    ),
+                  ),
+                  trailing: const Icon(LucideIcons.chevronRight, size: 20),
+                  onTap: () => context.push('/onboarding'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  title: const Text(
                     'Language',
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),

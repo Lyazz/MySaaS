@@ -33,6 +33,7 @@ import 'screens/pos_screen.dart';
 import 'screens/delivery_screen.dart';
 import 'screens/billing_screen.dart';
 import 'screens/integrations_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'widgets/app_shell.dart';
 
 // Custom transition that removes the slow overlay effect
@@ -392,6 +393,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const IntegrationsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/onboarding',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const OnboardingScreen(),
             ),
           ),
         ],
