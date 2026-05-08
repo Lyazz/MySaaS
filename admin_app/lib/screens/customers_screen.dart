@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/customers_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/customer.dart';
+import '../theme/app_theme.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
@@ -65,12 +68,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/customers/create'),
-              backgroundColor: const Color(0xFF0F172A), // Slate-900
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: AppColors.brand,
+              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
             )
           : null,
       body: SingleChildScrollView(
@@ -139,14 +141,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF111827), // Gray-900
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
               SizedBox(height: 4),
               Text(
                 'admin.pages.customers.index.subtitle'.tr(),
-                style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 14),
               ),
             ],
           ),
@@ -179,7 +181,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   Widget _buildCustomersTable(CustomersState state) {
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
 
     return ResponsiveServerPaginatedTable<Customer>(
       items: state.customers,
@@ -240,7 +244,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF), // Blue-50
+                          color: AppColors.blue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         alignment: Alignment.center,
@@ -250,7 +254,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                               : '?',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF3B82F6), // Blue-500
+                            color: AppColors.blue,
                           ),
                         ),
                       ),
@@ -262,18 +266,18 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                             Text(
                               customer.name,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF0F172A), // Slate-900
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 14,
                               ),
                             ),
                             if ((customer.email ?? '').trim().isNotEmpty)
                               Text(
                                 customer.email!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: Color(0xFF64748B), // Slate-500
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -281,9 +285,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                             else if ((customer.address ?? '').trim().isNotEmpty)
                               Text(
                                 customer.address!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: Color(0xFF64748B), // Slate-500
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -298,9 +302,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   flex: 2,
                   child: Text(
                     customer.phone.isEmpty ? '—' : customer.phone,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF475569), // Slate-600
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -312,15 +316,15 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '${customer.ordersCount}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF374151),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -329,10 +333,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   flex: 2,
                   child: Text(
                     money.format(customer.totalSpent),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF0F172A), // Slate-900
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -353,9 +357,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                     customer.lastOrderAt != null
                         ? DateFormat.yMMMd().format(customer.lastOrderAt!)
                         : '—',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF64748B), // Slate-500
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -393,7 +397,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.index.loading'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B)), // Slate-500
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -428,23 +432,23 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.users, size: 48, color: Colors.grey[400]),
+            Icon(LucideIcons.users, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.index.empty.title'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827), // Gray-900
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               hint,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF6B7280), // Gray-500
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 16),
@@ -462,8 +466,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   Widget _headerText(String text) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Color(0xFF6B7280), // Gray-500
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
         fontSize: 12,
         fontWeight: FontWeight.w600,
       ),
@@ -475,12 +479,13 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   Widget _card({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

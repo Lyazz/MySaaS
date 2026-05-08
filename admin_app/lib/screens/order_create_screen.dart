@@ -6,8 +6,11 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/orders_provider.dart';
 import '../providers/customers_provider.dart';
 import '../providers/products_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/customer.dart';
 import '../models/product.dart';
+import '../theme/app_theme.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
@@ -187,6 +190,8 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final customers = ref.watch(customersProvider).customers;
+    final storeSettings = ref.watch(storeSettingsProvider).settings;
+    final currencyCode = tenantCurrencyCode(storeSettings);
     final isWide = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
@@ -204,14 +209,23 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(child: _buildDetailsColumn(customers)),
-                  SizedBox(width: 420, child: _buildCartColumn(bounded: true)),
+                  SizedBox(
+                    width: 420,
+                    child: _buildCartColumn(
+                      bounded: true,
+                      currencyCode: currencyCode,
+                    ),
+                  ),
                 ],
               )
             : SingleChildScrollView(
                 child: Column(
                   children: [
                     _buildDetailsColumn(customers),
-                    _buildCartColumn(bounded: false),
+                    _buildCartColumn(
+                      bounded: false,
+                      currencyCode: currencyCode,
+                    ),
                   ],
                 ),
               ),
@@ -320,7 +334,10 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
     );
   }
 
-  Widget _buildCartColumn({required bool bounded}) {
+  Widget _buildCartColumn({
+    required bool bounded,
+    required String currencyCode,
+  }) {
     final searchBar = Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -336,25 +353,30 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
             onChanged: _onProductSearchChanged,
           ),
           if (_searchResults.isNotEmpty)
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.white,
-              ),
-              child: Column(
-                children: _searchResults
-                    .map((p) => ListTile(
-                          dense: true,
-                          title: Text(p.title,
-                              style: const TextStyle(fontSize: 13)),
-                          subtitle: Text(
-                              '${p.price.toStringAsFixed(0)} DA',
-                              style: const TextStyle(fontSize: 12)),
-                          onTap: () => _addToCart(p),
-                        ))
-                    .toList(),
-              ),
+            Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                  child: Column(
+                    children: _searchResults
+                        .map((p) => ListTile(
+                              dense: true,
+                              title: Text(p.title,
+                                  style: const TextStyle(fontSize: 13)),
+                              subtitle: Text(
+                                  '${p.price.toStringAsFixed(0)} $currencyCode',
+                                  style: const TextStyle(fontSize: 12)),
+                              onTap: () => _addToCart(p),
+                            ))
+                        .toList(),
+                  ),
+                );
+              },
             ),
         ],
       ),
@@ -403,7 +425,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                                       fontSize: 11,
                                       color: Color(0xFF94A3B8))),
                             Text(
-                                '${(item.price * item.quantity).toStringAsFixed(0)} DA',
+                                '${(item.price * item.quantity).toStringAsFixed(0)} $currencyCode',
                                 style: const TextStyle(
                                     color: Color(0xFF6366F1),
                                     fontWeight: FontWeight.bold)),
@@ -439,11 +461,12 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
             },
           );
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final footer = Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-        color: Colors.white,
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+        color: Theme.of(context).colorScheme.surface,
       ),
       child: Column(
         children: [
@@ -452,7 +475,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
             children: [
               const Text('Total',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('${_cartTotal.toStringAsFixed(0)} DA',
+              Text('${_cartTotal.toStringAsFixed(0)} $currencyCode',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF6366F1))),
@@ -469,8 +492,8 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
       ),
     );
 
-    final decoration = const BoxDecoration(
-      border: Border(left: BorderSide(color: Color(0xFFE2E8F0))),
+    final decoration = BoxDecoration(
+      border: Border(left: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
     );
 
     if (bounded) {
@@ -509,11 +532,12 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
       {required IconData icon,
       required String title,
       required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

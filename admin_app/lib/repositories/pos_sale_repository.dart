@@ -7,11 +7,10 @@ import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
 
 class PosSaleRepository {
-  final ApiService _apiService;
   final DatabaseService _dbService = DatabaseService();
   final SyncService _syncService = SyncService();
 
-  PosSaleRepository(this._apiService);
+  PosSaleRepository(ApiService apiService);
 
   String get _tid => TenantModeService().activeTenantId;
 
@@ -23,7 +22,13 @@ class PosSaleRepository {
     payload['offlineId'] = saleId;
 
     double total = 0.0;
-    if (payload['payment'] != null && payload['payment']['total'] != null) {
+    final payloadTotal = payload['total'];
+    if (payloadTotal is num) {
+      total = payloadTotal.toDouble();
+    } else if (payloadTotal != null) {
+      total = double.tryParse(payloadTotal.toString()) ?? 0.0;
+    } else if (payload['payment'] != null &&
+        payload['payment']['total'] != null) {
       total = payload['payment']['total'].toDouble();
     } else if (payload['items'] != null) {
       for (var item in (payload['items'] as List)) {

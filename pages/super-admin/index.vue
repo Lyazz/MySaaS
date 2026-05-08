@@ -21,8 +21,8 @@
               {{ platformStats?.tenants || 0 }}
             </p>
           </div>
-          <div class="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center">
-            <Icon name="lucide:building" class="w-6 h-6 text-teal-600" />
+          <div class="w-12 h-12 bg-lime-50 rounded-lg flex items-center justify-center">
+            <Icon name="lucide:building" class="w-6 h-6 text-lime-600" />
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@
           </h3>
           <NuxtLink
             to="/super-admin/audit-logs"
-            class="text-sm font-medium text-teal-600 hover:text-teal-700 hover:underline"
+            class="text-sm font-medium text-lime-600 hover:text-lime-700 hover:underline"
           >
             {{ t('superAdmin.dashboard.recentActivity.viewAll') }}
           </NuxtLink>
@@ -138,9 +138,9 @@
         <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <NuxtLink
             to="/super-admin/tenants" 
-            class="flex items-center p-4 border rounded-lg hover:border-teal-500 hover:bg-teal-50 hover:shadow-sm transition-all group bg-white"
+            class="flex items-center p-4 border rounded-lg hover:border-lime-500 hover:bg-lime-50 hover:shadow-sm transition-all group bg-white"
           >
-            <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center group-hover:bg-teal-200 text-teal-600 transition-colors">
+            <div class="w-10 h-10 bg-lime-100 rounded-lg flex items-center justify-center group-hover:bg-lime-200 text-lime-600 transition-colors">
               <Icon name="lucide:plus" class="w-6 h-6" />
             </div>
             <div class="ml-4">

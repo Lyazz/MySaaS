@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/sales_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/sale.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../services/api_service.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/date_range_filter_field.dart';
@@ -79,9 +81,11 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
     final salesState = ref.watch(salesProvider);
     final isMobile = MediaQuery.of(context).size.width < 800;
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB), // Gray-50

@@ -7,6 +7,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../models/order.dart';
 import '../repositories/order_repository.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
+import '../providers/store_settings_provider.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
 
@@ -82,6 +85,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -138,10 +144,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               const SizedBox(width: 8),
               Text(
                 'Order #${id.length > 8 ? id.substring(0, 8) : id}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const Spacer(),
@@ -199,7 +205,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               _InfoCard(
                 title: 'Total',
                 child: Text(
-                  NumberFormat.simpleCurrency().format(totalAmount),
+                  money.format(totalAmount),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
@@ -235,7 +241,11 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                 ? const Text('No items')
                 : Column(
                     children: [
-                      for (final item in items) _OrderItemRow(item: item),
+                      for (final item in items)
+                        _OrderItemRow(
+                          item: item,
+                          priceLabel: money.format(item.price),
+                        ),
                     ],
                   ),
           ),
@@ -253,23 +263,24 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       constraints: const BoxConstraints(minWidth: 260),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               letterSpacing: 0.2,
             ),
           ),
@@ -283,13 +294,13 @@ class _InfoCard extends StatelessWidget {
 
 class _OrderItemRow extends StatelessWidget {
   final OrderItem item;
+  final String priceLabel;
 
-  const _OrderItemRow({required this.item});
+  const _OrderItemRow({required this.item, required this.priceLabel});
 
   @override
   Widget build(BuildContext context) {
     final qty = item.quantity;
-    final price = item.price;
     final title = item.productId.isNotEmpty ? item.productId : 'Item';
 
     return Padding(
@@ -309,7 +320,7 @@ class _OrderItemRow extends StatelessWidget {
           ),
           Text('x$qty', style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(width: 16),
-          Text(NumberFormat.simpleCurrency().format(price)),
+          Text(priceLabel),
         ],
       ),
     );

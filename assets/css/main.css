@@ -235,7 +235,7 @@
     border: 1px solid rgba(99,102,241,0.2);
   }
 
-  .ui-badge--teal {
+  .ui-badge--lime {
     background: rgba(129,140,248,0.1);
     color: #818cf8;
     border: 1px solid rgba(129,140,248,0.2);
@@ -425,7 +425,7 @@
     --marketing-text-soft: #b2bfd8;
     --marketing-text-muted: #7f8ba6;
     --marketing-cobalt: #3559ff;
-    --marketing-teal: #16d5b3;
+    --marketing-lime: #84CC16;
     --marketing-orange: #ff8a4c;
     min-height: 100vh;
     color: var(--marketing-text);

@@ -9,8 +9,11 @@ import '../models/customer.dart';
 import '../models/supplier.dart';
 import '../providers/cash_provider.dart';
 import '../providers/customers_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../providers/suppliers_provider.dart';
+import '../theme/app_theme.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
@@ -84,7 +87,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 768;
 
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
     final todayStart = _startOfDay(DateTime.now());
 
     double totalIn = 0;
@@ -107,12 +112,11 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     final userById = {for (final u in cash.cashUsers) u.id: u.email};
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => _openMobileActions(context),
-              backgroundColor: const Color(0xFF0F766E), // teal-700
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: AppColors.brand,
+              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
             )
           : null,
       body: ListView(
@@ -136,6 +140,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           _buildMainPanel(
             context,
             cash: cash,
+            money: money,
             isMobile: isMobile,
             cashboxById: cashboxById,
             userById: userById,
@@ -150,7 +155,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -159,14 +164,14 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 'Cashboxes, transactions, and session history.',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 14),
               ),
             ],
           ),
@@ -221,7 +226,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             leading: Icon(
               LucideIcons.arrowLeftRight,
               size: 18,
-              color: Color(0xFF0F766E),
+              color: Color(0xFF4D7C0F),
             ),
             title: Text('Transfer'),
           ),
@@ -245,7 +250,6 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -290,7 +294,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             ListTile(
               leading: const Icon(
                 LucideIcons.arrowLeftRight,
-                color: Color(0xFF0F766E),
+                color: Color(0xFF4D7C0F),
               ),
               title: const Text('Transfer'),
               onTap: () {
@@ -377,12 +381,12 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Cashboxes',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -415,7 +419,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     height: 132,
                     margin: EdgeInsets.only(right: i == 2 ? 0 : 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
@@ -423,32 +427,34 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               ),
             )
           else if (cash.cashboxes.isEmpty)
-            Container(
+            Builder(builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: const Color(0xFFE2E8F0),
-                  style: BorderStyle.solid,
+                  color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder,
                 ),
               ),
-              child: const Column(
+              child: Column(
                 children: [
-                  Icon(LucideIcons.inbox, color: Color(0xFF94A3B8)),
-                  SizedBox(height: 8),
+                  Icon(LucideIcons.inbox, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+                  const SizedBox(height: 8),
                   Text(
                     'No cashboxes yet',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Create one to start tracking cash sessions.',
-                    style: TextStyle(color: Color(0xFF64748B)),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                   ),
                 ],
               ),
-            )
+            );
+            })
           else
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -481,17 +487,17 @@ class _CashScreenState extends ConsumerState<CashScreen> {
   Widget _buildMainPanel(
     BuildContext context, {
     required CashState cash,
+    required NumberFormat money,
     required bool isMobile,
     required Map<String, CashboxSummary> cashboxById,
     required Map<String, String> userById,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0).withValues(alpha: 0.7),
-        ),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -505,8 +511,8 @@ class _CashScreenState extends ConsumerState<CashScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
             ),
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: Row(
@@ -535,6 +541,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           if (_mainTab == 0)
             _TransactionsPanel(
               cash: cash,
+              money: money,
               isMobile: isMobile,
               cashboxById: cashboxById,
               userById: userById,
@@ -560,6 +567,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           else
             _SessionsPanel(
               cash: cash,
+              money: money,
               isMobile: isMobile,
               cashboxById: cashboxById,
               userById: userById,
@@ -875,6 +883,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
       text: expected?.expectedClosing.toStringAsFixed(2) ?? '',
     );
     final noteController = TextEditingController();
+    final money = tenantCurrencyFormatter(
+      ref.read(storeSettingsProvider).settings,
+    );
 
     final ok = await showDialog<bool>(
       context: context,
@@ -888,29 +899,26 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Expected closing: ${NumberFormat.simpleCurrency(name: 'DZD').format(expected.expectedClosing)}',
+                      'Expected closing: ${money.format(expected.expectedClosing)}',
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Opening',
-                          style: TextStyle(color: Color(0xFF64748B)),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                         ),
                         Text(
-                          NumberFormat.simpleCurrency(
-                            name: 'DZD',
-                          ).format(expected.openingFloat),
+                          money.format(expected.openingFloat),
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ],
@@ -919,12 +927,12 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'In',
-                          style: TextStyle(color: Color(0xFF64748B)),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                         ),
                         Text(
-                          '+${NumberFormat.simpleCurrency(name: 'DZD').format(expected.inSum)}',
+                          '+${money.format(expected.inSum)}',
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF059669),
@@ -936,12 +944,12 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Out',
-                          style: TextStyle(color: Color(0xFF64748B)),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                         ),
                         Text(
-                          '-${NumberFormat.simpleCurrency(name: 'DZD').format(expected.outSum)}',
+                          '-${money.format(expected.outSum)}',
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xFFE11D48),
@@ -1010,6 +1018,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
         suppliers: ref.read(suppliersProvider).suppliers,
         initialType: initialType,
         lockType: lockType,
+        initialCurrency: tenantCurrencyCode(
+          ref.read(storeSettingsProvider).settings,
+        ),
       ),
     );
     if (result == null) return;
@@ -1040,8 +1051,12 @@ class _CashScreenState extends ConsumerState<CashScreen> {
 
     final result = await showDialog<_TransferFormResult>(
       context: context,
-      builder: (ctx) =>
-          _TransferDialog(cashboxes: ref.read(cashProvider).cashboxes),
+      builder: (ctx) => _TransferDialog(
+        cashboxes: ref.read(cashProvider).cashboxes,
+        initialCurrency: tenantCurrencyCode(
+          ref.read(storeSettingsProvider).settings,
+        ),
+      ),
     );
     if (result == null) return;
 
@@ -1065,13 +1080,12 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0).withValues(alpha: 0.7),
-        ),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -1150,14 +1164,13 @@ class _CashStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0).withValues(alpha: 0.7),
-        ),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -1184,10 +1197,10 @@ class _CashStatCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1196,7 +1209,7 @@ class _CashStatCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: valueColor ?? const Color(0xFF0F172A),
+                    color: valueColor ?? Theme.of(context).colorScheme.onSurface,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -1227,13 +1240,14 @@ class _CashboxCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final open = cashbox.openSession;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1266,9 +1280,9 @@ class _CashboxCard extends StatelessWidget {
                             cashbox.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF0F172A),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -1298,7 +1312,7 @@ class _CashboxCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: open != null
                                   ? const Color(0xFF047857)
-                                  : const Color(0xFF475569),
+                                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                             ),
                           ),
                         ),
@@ -1313,19 +1327,19 @@ class _CashboxCard extends StatelessWidget {
                   if (onEdit != null)
                     IconButton(
                       onPressed: onEdit,
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.pencil,
                         size: 18,
-                        color: Color(0xFF94A3B8),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                       ),
                       tooltip: 'Edit',
                     ),
                   IconButton(
                     onPressed: onDetails,
-                    icon: const Icon(
+                    icon: Icon(
                       LucideIcons.arrowRight,
                       size: 18,
-                      color: Color(0xFF94A3B8),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
                     tooltip: 'Details',
                   ),
@@ -1388,7 +1402,7 @@ class _TopTabButton extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: selected ? const Color(0xFF0F766E) : Colors.transparent,
+              color: selected ? const Color(0xFF4D7C0F) : Colors.transparent,
               width: 2,
             ),
           ),
@@ -1397,7 +1411,7 @@ class _TopTabButton extends StatelessWidget {
           label,
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: selected ? const Color(0xFF0F766E) : const Color(0xFF475569),
+            color: selected ? const Color(0xFF4D7C0F) : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -1415,7 +1429,7 @@ class _FilterCountBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFCCFBF1), // teal-100
+        color: const Color(0xFFECFCCB), // lime-100
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -1423,7 +1437,7 @@ class _FilterCountBadge extends StatelessWidget {
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF0F766E),
+          color: Color(0xFF4D7C0F),
         ),
       ),
     );
@@ -1432,6 +1446,7 @@ class _FilterCountBadge extends StatelessWidget {
 
 class _TransactionsPanel extends StatelessWidget {
   final CashState cash;
+  final NumberFormat money;
   final bool isMobile;
   final Map<String, CashboxSummary> cashboxById;
   final Map<String, String> userById;
@@ -1454,6 +1469,7 @@ class _TransactionsPanel extends StatelessWidget {
 
   const _TransactionsPanel({
     required this.cash,
+    required this.money,
     required this.isMobile,
     required this.cashboxById,
     required this.userById,
@@ -1477,7 +1493,6 @@ class _TransactionsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
     final isCompact = MediaQuery.of(context).size.width < 640;
 
     return Column(
@@ -1543,6 +1558,7 @@ class _TransactionsPanel extends StatelessWidget {
 
 class _SessionsPanel extends StatelessWidget {
   final CashState cash;
+  final NumberFormat money;
   final bool isMobile;
   final Map<String, CashboxSummary> cashboxById;
   final Map<String, String> userById;
@@ -1561,6 +1577,7 @@ class _SessionsPanel extends StatelessWidget {
 
   const _SessionsPanel({
     required this.cash,
+    required this.money,
     required this.isMobile,
     required this.cashboxById,
     required this.userById,
@@ -1580,7 +1597,6 @@ class _SessionsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
     final isCompact = MediaQuery.of(context).size.width < 640;
 
     return Column(
@@ -1657,9 +1673,10 @@ class _FilterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: Column(
@@ -1673,9 +1690,9 @@ class _FilterPanel extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1686,7 +1703,7 @@ class _FilterPanel extends StatelessWidget {
                 Icon(
                   open ? LucideIcons.chevronUp : LucideIcons.chevronDown,
                   size: 18,
-                  color: const Color(0xFF94A3B8),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ],
             ),
@@ -1751,7 +1768,7 @@ class _TxFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'Cashbox',
         value: txCashboxId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
           const DropdownMenuItem(value: '', child: Text('All cashboxes')),
           ...cashboxes.map(
@@ -1763,7 +1780,7 @@ class _TxFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'Type',
         value: txType,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: const [
           DropdownMenuItem(value: '', child: Text('All types')),
           DropdownMenuItem(value: 'SALE_PAYMENT', child: Text('SALE_PAYMENT')),
@@ -1784,7 +1801,7 @@ class _TxFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'Direction',
         value: txDirection,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: const [
           DropdownMenuItem(value: '', child: Text('All directions')),
           DropdownMenuItem(value: 'IN', child: Text('IN')),
@@ -1795,7 +1812,7 @@ class _TxFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'Method',
         value: txMethod,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: const [
           DropdownMenuItem(value: '', child: Text('All methods')),
           DropdownMenuItem(value: 'CASH', child: Text('CASH')),
@@ -1808,7 +1825,7 @@ class _TxFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'User',
         value: txUserId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
           const DropdownMenuItem(value: '', child: Text('All users')),
           ...users.map(
@@ -1891,7 +1908,7 @@ class _SessionFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'Cashbox',
         value: cashboxId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
           const DropdownMenuItem(value: '', child: Text('All cashboxes')),
           ...cashboxes.map(
@@ -1903,7 +1920,7 @@ class _SessionFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'Status',
         value: status,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: const [
           DropdownMenuItem(value: '', child: Text('All statuses')),
           DropdownMenuItem(value: 'OPEN', child: Text('OPEN')),
@@ -1914,7 +1931,7 @@ class _SessionFilters extends StatelessWidget {
       FormSelect<String>(
         label: 'User',
         value: userId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
           const DropdownMenuItem(value: '', child: Text('All users')),
           ...users.map(
@@ -1978,7 +1995,7 @@ class _LoadingState extends StatelessWidget {
           const SizedBox(height: 12),
           const CircularProgressIndicator(),
           const SizedBox(height: 12),
-          Text(label, style: const TextStyle(color: Color(0xFF64748B))),
+          Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
         ],
       ),
     );
@@ -1997,17 +2014,17 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       child: Column(
         children: [
-          const Icon(LucideIcons.inbox, size: 40, color: Color(0xFFCBD5E1)),
+          Icon(LucideIcons.inbox, size: 40, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+          Text(subtitle, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
         ],
       ),
     );
@@ -2040,25 +2057,25 @@ class _TxMobileRow extends StatelessWidget {
               children: [
                 Text(
                   _typeLabel(tx.type),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _formatDate(tx.createdAt),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '$cashboxName · $userEmail',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF475569),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -2122,9 +2139,9 @@ class _SessionMobileRow extends StatelessWidget {
                     Expanded(
                       child: Text(
                         cashboxName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2136,9 +2153,9 @@ class _SessionMobileRow extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   '$userEmail · ${_formatDate(session.openedAt)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 if (session.closedAt != null)
@@ -2146,9 +2163,9 @@ class _SessionMobileRow extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       'Closed: ${_formatDate(session.closedAt)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF64748B),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -2209,9 +2226,9 @@ class _Metric extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
-            color: Color(0xFF94A3B8),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -2221,7 +2238,7 @@ class _Metric extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: valueColor ?? const Color(0xFF0F172A),
+            color: valueColor ?? Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -2236,18 +2253,19 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
-          color: Color(0xFF475569),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -2274,20 +2292,20 @@ class _MethodChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF334155)),
+          Icon(icon, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
           const SizedBox(width: 6),
           Text(
             method,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF334155),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -2307,7 +2325,9 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: isOpen ? const Color(0xFFECFDF5) : const Color(0xFFF1F5F9),
+        color: isOpen
+            ? const Color(0xFF10B981).withValues(alpha: 0.1)
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -2317,7 +2337,9 @@ class _StatusChip extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: isOpen ? const Color(0xFF10B981) : const Color(0xFF64748B),
+              color: isOpen
+                  ? const Color(0xFF10B981)
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               shape: BoxShape.circle,
             ),
           ),
@@ -2327,7 +2349,9 @@ class _StatusChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: isOpen ? const Color(0xFF047857) : const Color(0xFF334155),
+              color: isOpen
+                  ? const Color(0xFF047857)
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -2349,15 +2373,14 @@ class _TxTable extends StatelessWidget {
     required this.money,
   });
 
-  static const TextStyle _headerStyle = TextStyle(
-    fontWeight: FontWeight.w600,
-    fontSize: 11,
-    color: Color(0xFF64748B), // Slate-500
-    letterSpacing: 0.5,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final headerStyle = TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 11,
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+      letterSpacing: 0.5,
+    );
     return ResponsivePaginatedTable<CashTransactionSummary>(
       items: transactions,
       minWidth: 980,
@@ -2368,35 +2391,35 @@ class _TxTable extends StatelessWidget {
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.date'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.cashbox'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.user'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
               'admin.pages.cash.transactions.table.type'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.method'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
@@ -2405,7 +2428,7 @@ class _TxTable extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: Text(
                 'admin.pages.cash.transactions.table.amount'.tr().toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2420,16 +2443,16 @@ class _TxTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _formatDate(tx.createdAt),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(
                   _cashboxName(cashboxById, tx.cashboxId),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2438,7 +2461,7 @@ class _TxTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _userEmail(userById, tx.createdByUserId),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -2449,9 +2472,9 @@ class _TxTable extends StatelessWidget {
                   children: [
                     Text(
                       _typeLabel(tx.type),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (tx.expenseCategory != null &&
@@ -2460,9 +2483,9 @@ class _TxTable extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
                           tx.expenseCategory!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -2472,9 +2495,9 @@ class _TxTable extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
                           'Ref: ${tx.reference!}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -2519,15 +2542,14 @@ class _SessionsTable extends StatelessWidget {
     required this.money,
   });
 
-  static const TextStyle _headerStyle = TextStyle(
-    fontWeight: FontWeight.w600,
-    fontSize: 11,
-    color: Color(0xFF64748B), // Slate-500
-    letterSpacing: 0.5,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final headerStyle = TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 11,
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+      letterSpacing: 0.5,
+    );
     return ResponsivePaginatedTable<CashSessionSummary>(
       items: sessions,
       minWidth: 1080,
@@ -2538,35 +2560,35 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.cashbox'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.status'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.user'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.openedAt'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.closedAt'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
@@ -2577,7 +2599,7 @@ class _SessionsTable extends StatelessWidget {
                 'admin.pages.cash.sessions.table.openingFloat'
                     .tr()
                     .toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2589,7 +2611,7 @@ class _SessionsTable extends StatelessWidget {
                 'admin.pages.cash.sessions.table.expectedClosing'
                     .tr()
                     .toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2601,7 +2623,7 @@ class _SessionsTable extends StatelessWidget {
                 'admin.pages.cash.sessions.table.closingCount'
                     .tr()
                     .toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2613,7 +2635,7 @@ class _SessionsTable extends StatelessWidget {
                 'admin.pages.cash.sessions.table.difference'
                     .tr()
                     .toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2629,9 +2651,9 @@ class _SessionsTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _cashboxName(cashboxById, s.cashboxId),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2641,7 +2663,7 @@ class _SessionsTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _userEmail(userById, s.openedByUserId),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -2649,14 +2671,14 @@ class _SessionsTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _formatDate(s.openedAt),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(
                   s.closedAt == null ? '—' : _formatDate(s.closedAt),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                 ),
               ),
               Expanded(
@@ -2665,9 +2687,9 @@ class _SessionsTable extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Text(
                     money.format(s.openingFloat),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2680,9 +2702,9 @@ class _SessionsTable extends StatelessWidget {
                     s.expectedClosing == null
                         ? '—'
                         : money.format(s.expectedClosing!),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2695,9 +2717,9 @@ class _SessionsTable extends StatelessWidget {
                     s.closingCount == null
                         ? '—'
                         : money.format(s.closingCount!),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2712,7 +2734,7 @@ class _SessionsTable extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                       color: diff != null && diff != 0
                           ? const Color(0xFFE11D48)
-                          : const Color(0xFF0F172A),
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2795,12 +2817,14 @@ class _TransactionDialog extends StatefulWidget {
   final List<Customer> customers;
   final List<Supplier> suppliers;
   final String initialType;
+  final String initialCurrency;
   final bool lockType;
 
   const _TransactionDialog({
     required this.cashboxes,
     required this.customers,
     required this.suppliers,
+    required this.initialCurrency,
     this.initialType = 'EXPENSE',
     this.lockType = false,
   });
@@ -2817,7 +2841,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
   String _direction = 'OUT';
   String _method = 'CASH';
   final _amount = TextEditingController();
-  final _currency = TextEditingController(text: 'DZD');
+  late final TextEditingController _currency;
   final _reference = TextEditingController();
   final _note = TextEditingController();
   String? _customerId;
@@ -2829,6 +2853,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
   @override
   void initState() {
     super.initState();
+    _currency = TextEditingController(text: widget.initialCurrency);
     _applyType(widget.initialType);
   }
 
@@ -3118,7 +3143,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
             direction: _direction,
             amount: amount,
             currency: _currency.text.trim().isEmpty
-                ? 'DZD'
+                ? widget.initialCurrency
                 : _currency.text.trim(),
             method: _method,
             customerId: isCustomer ? _customerId : null,
@@ -3155,8 +3180,12 @@ class _TransferFormResult {
 
 class _TransferDialog extends StatefulWidget {
   final List<CashboxSummary> cashboxes;
+  final String initialCurrency;
 
-  const _TransferDialog({required this.cashboxes});
+  const _TransferDialog({
+    required this.cashboxes,
+    required this.initialCurrency,
+  });
 
   @override
   State<_TransferDialog> createState() => _TransferDialogState();
@@ -3167,9 +3196,15 @@ class _TransferDialogState extends State<_TransferDialog> {
   String? _from;
   String? _to;
   final _amount = TextEditingController();
-  final _currency = TextEditingController(text: 'DZD');
+  late final TextEditingController _currency;
   final _reference = TextEditingController();
   final _note = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _currency = TextEditingController(text: widget.initialCurrency);
+  }
 
   @override
   void dispose() {
@@ -3297,7 +3332,7 @@ class _TransferDialogState extends State<_TransferDialog> {
             toCashboxId: _to!,
             amount: amount,
             currency: _currency.text.trim().isEmpty
-                ? 'DZD'
+                ? widget.initialCurrency
                 : _currency.text.trim(),
             reference: _reference.text.trim().isEmpty
                 ? null

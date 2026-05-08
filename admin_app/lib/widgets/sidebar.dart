@@ -31,25 +31,33 @@ class Sidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isCollapsed = ref.watch(sidebarProvider);
     final authState = ref.watch(authProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final sidebarBg = isDark ? AppColors.sidebarBg : AppColors.lightSidebarBg;
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: isCollapsed ? 64 : 220,
-      color: AppColors.sidebarBg,
+      decoration: BoxDecoration(
+        color: sidebarBg,
+        border: Border(right: BorderSide(color: borderColor)),
+      ),
       child: Column(
         children: [
-          _buildHeader(isCollapsed, ref),
+          _buildHeader(context, isCollapsed, ref, isDark),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
-                vertical: 24,
-                horizontal: isCollapsed ? 8 : 12,
+                vertical: 10,
+                horizontal: isCollapsed ? 8 : 10,
               ),
               child: Column(
                 children: [
                   _buildNavGroup(
                     title: 'admin.nav.overview'.tr(),
                     isCollapsed: isCollapsed,
+                    isDark: isDark,
                     items: [
                       if (_canRead(authState, 'dashboard'))
                         _NavItem(
@@ -60,42 +68,11 @@ class Sidebar extends ConsumerWidget {
                     ],
                     context: context,
                   ),
-                  const SizedBox(height: 24),
-                  _buildNavGroup(
-                    title: 'admin.nav.catalog'.tr(),
-                    isCollapsed: isCollapsed,
-                    items: [
-                      if (_canRead(authState, 'products'))
-                        _NavItem(
-                          route: '/products',
-                          label: 'admin.nav.products'.tr(),
-                          icon: LucideIcons.package,
-                        ),
-                      if (_canRead(authState, 'inventory'))
-                        _NavItem(
-                          route: '/inventory',
-                          label: 'admin.nav.inventory'.tr(),
-                          icon: LucideIcons.warehouse,
-                        ),
-                      if (_canRead(authState, 'categories'))
-                        _NavItem(
-                          route: '/categories',
-                          label: 'admin.nav.categories'.tr(),
-                          icon: LucideIcons.tags,
-                        ),
-                      if (_canRead(authState, 'suppliers'))
-                        _NavItem(
-                          route: '/suppliers',
-                          label: 'admin.nav.suppliers'.tr(),
-                          icon: LucideIcons.truck,
-                        ),
-                    ],
-                    context: context,
-                  ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   _buildNavGroup(
                     title: 'admin.nav.sales'.tr(),
                     isCollapsed: isCollapsed,
+                    isDark: isDark,
                     items: [
                       if (_canRead(authState, 'orders'))
                         _NavItem(
@@ -103,29 +80,23 @@ class Sidebar extends ConsumerWidget {
                           label: 'admin.nav.orders'.tr(),
                           icon: LucideIcons.shoppingBag,
                         ),
-                      if (_canRead(authState, 'sales'))
-                        _NavItem(
-                          route: '/sales',
-                          label: 'admin.nav.salesItem'.tr(),
-                          icon: LucideIcons.barChart,
-                        ),
                       if (_canRead(authState, 'pos'))
                         _NavItem(
                           route: '/pos',
                           label: 'admin.nav.pos'.tr(),
                           icon: LucideIcons.monitor,
                         ),
-                      if (_canRead(authState, 'purchases'))
+                      if (_canRead(authState, 'delivery'))
                         _NavItem(
-                          route: '/purchases',
-                          label: 'admin.nav.purchases'.tr(),
-                          icon: LucideIcons.shoppingCart,
+                          route: '/delivery',
+                          label: 'admin.nav.deliveryItem'.tr(),
+                          icon: LucideIcons.truck,
                         ),
-                      if (_canRead(authState, 'customers'))
+                      if (_canRead(authState, 'sales'))
                         _NavItem(
-                          route: '/customers',
-                          label: 'admin.nav.customers'.tr(),
-                          icon: LucideIcons.users,
+                          route: '/sales',
+                          label: 'admin.nav.salesItem'.tr(),
+                          icon: LucideIcons.barChart,
                         ),
                       if (_canRead(authState, 'cash'))
                         _NavItem(
@@ -136,11 +107,57 @@ class Sidebar extends ConsumerWidget {
                     ],
                     context: context,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   _buildNavGroup(
-                    title: 'admin.nav.settings'.tr(),
+                    title: 'admin.nav.catalog'.tr(),
                     isCollapsed: isCollapsed,
+                    isDark: isDark,
                     items: [
+                      if (_canRead(authState, 'products'))
+                        _NavItem(
+                          route: '/products',
+                          label: 'admin.nav.products'.tr(),
+                          icon: LucideIcons.package,
+                        ),
+                      if (_canRead(authState, 'categories'))
+                        _NavItem(
+                          route: '/categories',
+                          label: 'admin.nav.categories'.tr(),
+                          icon: LucideIcons.tags,
+                        ),
+                      if (_canRead(authState, 'inventory'))
+                        _NavItem(
+                          route: '/inventory',
+                          label: 'admin.nav.inventory'.tr(),
+                          icon: LucideIcons.warehouse,
+                        ),
+                      if (_canRead(authState, 'suppliers'))
+                        _NavItem(
+                          route: '/suppliers',
+                          label: 'admin.nav.suppliers'.tr(),
+                          icon: LucideIcons.truck,
+                        ),
+                      if (_canRead(authState, 'purchases'))
+                        _NavItem(
+                          route: '/purchases',
+                          label: 'admin.nav.purchases'.tr(),
+                          icon: LucideIcons.shoppingCart,
+                        ),
+                    ],
+                    context: context,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildNavGroup(
+                    title: 'admin.nav.storeParameters'.tr(),
+                    isCollapsed: isCollapsed,
+                    isDark: isDark,
+                    items: [
+                      if (_canRead(authState, 'customers'))
+                        _NavItem(
+                          route: '/customers',
+                          label: 'admin.nav.customers'.tr(),
+                          icon: LucideIcons.users,
+                        ),
                       _NavItem(
                         route: '/settings',
                         label: 'admin.nav.settings'.tr(),
@@ -152,16 +169,10 @@ class Sidebar extends ConsumerWidget {
                           label: 'admin.nav.users'.tr(),
                           icon: LucideIcons.users,
                         ),
-                      if (_canRead(authState, 'delivery'))
-                        _NavItem(
-                          route: '/delivery',
-                          label: 'admin.nav.deliveryItem'.tr(),
-                          icon: LucideIcons.truck,
-                        ),
                       if (_canRead(authState, 'integrations'))
                         _NavItem(
                           route: '/integrations',
-                          label: 'Integrations',
+                          label: 'admin.nav.integrations'.tr(),
                           icon: LucideIcons.plug,
                         ),
                       if (_canRead(authState, 'billing'))
@@ -177,25 +188,33 @@ class Sidebar extends ConsumerWidget {
               ),
             ),
           ),
-          _buildUserSection(context, ref, isCollapsed),
+          _buildUserSection(context, ref, isCollapsed, isDark),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(bool isCollapsed, WidgetRef ref) {
+  Widget _buildHeader(
+    BuildContext context,
+    bool isCollapsed,
+    WidgetRef ref,
+    bool isDark,
+  ) {
     final storeState = ref.watch(storeSettingsProvider);
     final storeName = storeState.settings.name.isNotEmpty
         ? storeState.settings.name
         : 'Swekly';
     final storeSlug = storeState.settings.slug;
     final initial = storeName.isNotEmpty ? storeName[0].toUpperCase() : 'S';
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
 
     return Container(
       height: 52,
       padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.surfaceBorder)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: borderColor)),
       ),
       child: Row(
         mainAxisAlignment: isCollapsed
@@ -229,8 +248,8 @@ class Sidebar extends ConsumerWidget {
                   Text(
                     storeName,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: textPrimary,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       height: 1.2,
@@ -240,8 +259,8 @@ class Sidebar extends ConsumerWidget {
                     Text(
                       '$storeSlug.swekly.com',
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textTertiary,
+                      style: TextStyle(
+                        color: textTertiary,
                         fontSize: 10,
                         height: 1.3,
                       ),
@@ -259,8 +278,12 @@ class Sidebar extends ConsumerWidget {
     required String title,
     required List<_NavItem> items,
     required bool isCollapsed,
+    required bool isDark,
     required BuildContext context,
   }) {
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
+    final labelColor = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+
     return Column(
       crossAxisAlignment: isCollapsed
           ? CrossAxisAlignment.center
@@ -268,11 +291,11 @@ class Sidebar extends ConsumerWidget {
       children: [
         if (!isCollapsed)
           Padding(
-            padding: const EdgeInsets.only(left: 10, bottom: 4, top: 4),
+            padding: const EdgeInsets.only(left: 8, bottom: 4, top: 4),
             child: Text(
               title.toUpperCase(),
-              style: const TextStyle(
-                color: AppColors.textTertiary,
+              style: TextStyle(
+                color: labelColor,
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.12,
@@ -281,92 +304,91 @@ class Sidebar extends ConsumerWidget {
           )
         else
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
             height: 1,
-            color: AppColors.surfaceBorder,
+            color: borderColor,
           ),
-        ...items.map((item) => _buildNavItem(context, item, isCollapsed)),
+        ...items.map((item) => _buildNavItem(context, item, isCollapsed, isDark)),
       ],
     );
   }
 
-  Widget _buildNavItem(BuildContext context, _NavItem item, bool isCollapsed) {
+  Widget _buildNavItem(
+    BuildContext context,
+    _NavItem item,
+    bool isCollapsed,
+    bool isDark,
+  ) {
     final String location = GoRouterState.of(context).uri.toString();
     final bool isActive = item.route == '/'
         ? location == '/'
         : (location == item.route || location.startsWith('${item.route}/'));
 
-    // Base content of the nav item
+    final activeColor = isDark
+        ? AppColors.sidebarActiveColor
+        : AppColors.lightSidebarActiveColor;
+    final inactiveIconColor =
+        isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final inactiveLabelColor =
+        isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final hoverColor =
+        isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
+
     Widget content = Container(
-      height: 36,
+      height: 32,
       padding: EdgeInsets.symmetric(horizontal: isCollapsed ? 0 : 10),
       margin: const EdgeInsets.only(bottom: 1),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.brand.withValues(alpha: 0.12) : null,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Stack(
-        alignment: isCollapsed ? Alignment.center : Alignment.centerLeft,
+      decoration: isActive
+          ? BoxDecoration(
+              color: AppColors.brand.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.brand.withValues(alpha: 0.16),
+              ),
+            )
+          : BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+            ),
+      child: Row(
+        mainAxisAlignment: isCollapsed
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
         children: [
-          if (isActive)
-            Positioned(
-              left: isCollapsed ? 0 : -10,
-              top: 6,
-              bottom: 6,
-              width: 3,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.brand,
-                  borderRadius: BorderRadius.horizontal(
-                    right: Radius.circular(99),
-                  ),
-                ),
+          Icon(
+            item.icon,
+            size: 15,
+            color: isActive ? activeColor : inactiveIconColor,
+          ),
+          if (!isCollapsed) ...[
+            const SizedBox(width: 10),
+            Text(
+              item.label,
+              style: TextStyle(
+                color: isActive ? activeColor : inactiveLabelColor,
+                fontSize: 12.5,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
-          Row(
-            mainAxisAlignment: isCollapsed
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.start,
-            children: [
-              Icon(
-                item.icon,
-                size: 16,
-                color: isActive ? AppColors.brand : AppColors.textMuted,
-              ),
-              if (!isCollapsed) ...[
-                const SizedBox(width: 10),
-                Text(
-                  item.label,
-                  style: TextStyle(
-                    color: isActive
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                    fontSize: 13,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                ),
-              ],
-            ],
-          ),
+          ],
         ],
       ),
     );
 
-    // Wrap with Tooltip if collapsed
     if (isCollapsed) {
+      final tooltipBg = isDark ? const Color(0xFF1E293B) : const Color(0xFF334155);
       content = Tooltip(
         message: item.label,
         preferBelow: false,
         verticalOffset: 0,
-        margin: const EdgeInsets.only(left: 16), // Show to the right
+        margin: const EdgeInsets.only(left: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B), // Slate-800
+          color: tooltipBg,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(color: Colors.white10),
         ),
         textStyle: const TextStyle(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w500,
         ),
         child: content,
@@ -377,14 +399,13 @@ class Sidebar extends ConsumerWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          // Close the drawer if it's open (mobile layout)
           if (Scaffold.of(context).hasDrawer &&
               Scaffold.of(context).isDrawerOpen) {
             Navigator.of(context).pop();
           }
           context.go(item.route);
         },
-        hoverColor: Colors.white.withValues(alpha: 0.05), // hover:bg-white/5
+        hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(8),
         child: content,
       ),
@@ -395,81 +416,99 @@ class Sidebar extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     bool isCollapsed,
+    bool isDark,
   ) {
     final auth = ref.watch(authProvider);
     final user = auth.user;
     final email = user?.email ?? '—';
     final role = user?.role ?? '—';
-
     final emailInitial = (user?.email ?? 'A')[0].toUpperCase();
 
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final hoverColor = isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
+
     return Container(
-      padding: EdgeInsets.all(isCollapsed ? 8 : 12),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: borderColor)),
       ),
-      child: Row(
-        mainAxisAlignment: isCollapsed
-            ? MainAxisAlignment.center
-            : MainAxisAlignment.start,
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: AppColors.surface3,
-              borderRadius: BorderRadius.circular(99),
-              border: Border.all(color: AppColors.surfaceBorder),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: hoverColor,
+          onTap: isCollapsed
+              ? () {
+                  ref.read(authProvider.notifier).logout();
+                  context.go('/login');
+                }
+              : null,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: isCollapsed ? 4 : 6,
             ),
-            alignment: Alignment.center,
-            child: Text(
-              emailInitial,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          if (!isCollapsed) ...[
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    email,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+            child: Row(
+              mainAxisAlignment: isCollapsed
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppColors.brand.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(99),
+                    border: Border.all(
+                      color: AppColors.brand.withValues(alpha: 0.30),
                     ),
                   ),
-                  Text(
-                    role,
+                  alignment: Alignment.center,
+                  child: Text(
+                    emailInitial,
                     style: const TextStyle(
-                      color: AppColors.textMuted,
+                      color: AppColors.brand,
                       fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                if (!isCollapsed) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          email,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: textPrimary,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            height: 1.3,
+                          ),
+                        ),
+                        Text(
+                          role,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: textTertiary,
+                            fontSize: 10,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            IconButton(
-              icon: const Icon(
-                LucideIcons.logOut,
-                color: AppColors.textMuted,
-                size: 16,
-              ),
-              onPressed: () {
-                ref.read(authProvider.notifier).logout();
-                context.go('/login');
-              },
-              tooltip: 'admin.actions.logout'.tr(),
-            ),
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }

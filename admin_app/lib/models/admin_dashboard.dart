@@ -1,3 +1,36 @@
+import 'dart:convert';
+
+Map<String, dynamic> _asStringMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) {
+    return value.map((key, entryValue) => MapEntry(key.toString(), entryValue));
+  }
+  if (value is String) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return const {};
+    try {
+      return _asStringMap(jsonDecode(trimmed));
+    } catch (_) {
+      return const {};
+    }
+  }
+  return const {};
+}
+
+List<dynamic> _asList(dynamic value) {
+  if (value is List) return value;
+  if (value is String) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return const [];
+    try {
+      return _asList(jsonDecode(trimmed));
+    } catch (_) {
+      return const [];
+    }
+  }
+  return const [];
+}
+
 class AdminDashboardCounts {
   final int products;
   final int categories;
@@ -18,7 +51,11 @@ class AdminDashboardCounts {
     );
   }
 
-  static const empty = AdminDashboardCounts(products: 0, categories: 0, orders: 0);
+  static const empty = AdminDashboardCounts(
+    products: 0,
+    categories: 0,
+    orders: 0,
+  );
 }
 
 class AdminDashboardLast7d {
@@ -116,28 +153,22 @@ class AdminDashboardData {
   });
 
   factory AdminDashboardData.fromJson(Map<String, dynamic> json) {
-    final countsRaw = (json['counts'] as Map?)?.cast<String, dynamic>() ?? const {};
-    final last7dRaw = (json['last7d'] as Map?)?.cast<String, dynamic>() ?? const {};
-    final inventoryRaw =
-        (json['inventory'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final countsRaw = _asStringMap(json['counts']);
+    final last7dRaw = _asStringMap(json['last7d']);
+    final inventoryRaw = _asStringMap(json['inventory']);
 
-    final ordersByStatusRaw = json['ordersByStatus'];
+    final ordersByStatusRaw = _asStringMap(json['ordersByStatus']);
     final ordersByStatus = <String, int>{};
-    if (ordersByStatusRaw is Map) {
-      for (final entry in ordersByStatusRaw.entries) {
-        final key = entry.key.toString();
-        final value = int.tryParse(entry.value?.toString() ?? '') ?? 0;
-        ordersByStatus[key] = value;
-      }
+    for (final entry in ordersByStatusRaw.entries) {
+      final key = entry.key.toString();
+      final value = int.tryParse(entry.value?.toString() ?? '') ?? 0;
+      ordersByStatus[key] = value;
     }
 
-    final recentOrdersRaw = json['recentOrders'];
-    final recentOrders = (recentOrdersRaw is List)
-        ? recentOrdersRaw
-              .whereType<Map>()
-              .map((e) => AdminDashboardRecentOrder.fromJson(e.cast<String, dynamic>()))
-              .toList()
-        : <AdminDashboardRecentOrder>[];
+    final recentOrders = _asList(json['recentOrders'])
+        .whereType<Map>()
+        .map((e) => AdminDashboardRecentOrder.fromJson(_asStringMap(e)))
+        .toList();
 
     return AdminDashboardData(
       counts: AdminDashboardCounts.fromJson(countsRaw),
@@ -156,4 +187,3 @@ class AdminDashboardData {
     recentOrders: [],
   );
 }
-

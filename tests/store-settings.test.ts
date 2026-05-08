@@ -38,7 +38,7 @@ describe('Store Settings API', () => {
                 faviconUrl,
                 name: 'Updated Name',
                 slug: slug,
-                primaryColor: '#0F766E',
+                primaryColor: '#4D7C0F',
                 templateKey: 'modern',
                 orderIdPrefix: 'shop1'
             })

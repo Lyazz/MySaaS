@@ -5,14 +5,17 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../providers/purchases_provider.dart';
 import '../providers/products_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/purchase.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/badges/status_badges.dart';
+import '../theme/app_theme.dart';
 
 class PurchaseDetailScreen extends ConsumerStatefulWidget {
   final String purchaseId;
@@ -28,6 +31,11 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
   final _quantityDebouncer = Debouncer(milliseconds: 500);
   final _costDebouncer = Debouncer(milliseconds: 500);
   String _salePriceMode = 'replace';
+
+  NumberFormat get _money =>
+      tenantCurrencyFormatter(ref.watch(storeSettingsProvider).settings);
+  String get _currencyCode =>
+      tenantCurrencyCode(ref.watch(storeSettingsProvider).settings);
 
   @override
   void initState() {
@@ -124,8 +132,9 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
     final purchase = purchaseAsync;
     final isMobile = MediaQuery.of(context).size.width < 1024;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -231,12 +240,12 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             // Items Table
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[200]!),
-                boxShadow: [
+                border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+                boxShadow: isDark ? null : [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 2,
                     offset: const Offset(0, 1),
                   ),
@@ -265,14 +274,14 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: isDark ? AppColors.surface3 : const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '${purchase.items.length} items',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
                             ),
                           ),
                         ),
@@ -295,6 +304,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                         return _TableRow(
                           key: ValueKey(item.id),
                           item: item,
+                          money: _money,
+                          currencyCode: _currencyCode,
                           salePriceMode: _salePriceMode,
                           onUpdateMode: (val) =>
                               setState(() => _salePriceMode = val),
@@ -403,7 +414,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
         ),
         _SummaryRow(
           label: 'Estimated Total',
-          value: NumberFormat.simpleCurrency().format(purchase.totalAmount),
+          value: _money.format(purchase.totalAmount),
           isBold: true,
         ),
       ],
@@ -463,10 +474,11 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
   }
 
   Widget _buildTableFooter(Purchase purchase) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        color: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
+        border: Border(top: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
@@ -478,7 +490,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
           ),
           const SizedBox(width: 24),
           Text(
-            NumberFormat.simpleCurrency().format(purchase.totalAmount),
+            _money.format(purchase.totalAmount),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
@@ -500,15 +512,16 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        boxShadow: isDark ? null : [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -522,7 +535,7 @@ class _InfoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[500],
+              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
               letterSpacing: 0.5,
             ),
           ),
@@ -593,33 +606,33 @@ class _SummaryRow extends StatelessWidget {
 class _TableHeader extends StatelessWidget {
   const _TableHeader();
 
-  static const _headerStyle = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.bold,
-    color: Colors.grey,
-    letterSpacing: 0.5,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerStyle = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+      color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+      letterSpacing: 0.5,
+    );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        color: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
+        border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Expanded(flex: 3, child: Text('PRODUCT', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('ORDERED', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('UNIT COST', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('RECEIVED', style: _headerStyle)),
-          Expanded(flex: 3, child: Text('RECEIVE NOW', style: _headerStyle)),
+          Expanded(flex: 3, child: Text('PRODUCT', style: headerStyle)),
+          Expanded(flex: 2, child: Text('ORDERED', style: headerStyle)),
+          Expanded(flex: 2, child: Text('UNIT COST', style: headerStyle)),
+          Expanded(flex: 2, child: Text('RECEIVED', style: headerStyle)),
+          Expanded(flex: 3, child: Text('RECEIVE NOW', style: headerStyle)),
           Expanded(
             flex: 2,
             child: Text(
               'TOTAL',
-              style: _headerStyle,
+              style: headerStyle,
               textAlign: TextAlign.right,
             ),
           ),
@@ -631,6 +644,8 @@ class _TableHeader extends StatelessWidget {
 
 class _TableRow extends StatefulWidget {
   final PurchaseItem item;
+  final NumberFormat money;
+  final String currencyCode;
   final String salePriceMode;
   final Function(String val) onUpdateMode;
   final Function(String type, double val) onUpdate;
@@ -640,6 +655,8 @@ class _TableRow extends StatefulWidget {
   const _TableRow({
     super.key,
     required this.item,
+    required this.money,
+    required this.currencyCode,
     required this.salePriceMode,
     required this.onUpdateMode,
     required this.onUpdate,
@@ -697,9 +714,10 @@ class _TableRowState extends State<_TableRow> {
         widget.item.quantityReceived >= widget.item.quantityOrdered &&
         widget.item.quantityOrdered > 0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[100]!)),
+        border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
@@ -764,7 +782,7 @@ class _TableRowState extends State<_TableRow> {
               padding: const EdgeInsets.only(right: 16),
               child: widget.item.quantityReceived > 0
                   ? Text(
-                      NumberFormat.simpleCurrency().format(
+                      widget.money.format(
                         widget.item.unitCost,
                       ),
                     )
@@ -773,7 +791,7 @@ class _TableRowState extends State<_TableRow> {
                       showLabel: false,
                       controller: _costController,
                       keyboardType: TextInputType.number,
-                      prefixText: '\$ ',
+                      prefixText: '${widget.currencyCode} ',
                       borderRadius: 6,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -811,8 +829,8 @@ class _TableRowState extends State<_TableRow> {
                         ? widget.item.quantityReceived /
                               widget.item.quantityOrdered
                         : 0,
-                    backgroundColor: Colors.grey[200],
-                    color: Colors.teal[600],
+                    backgroundColor: isDark ? AppColors.surface3 : const Color(0xFFE2E8F0),
+                    color: AppColors.brand,
                     borderRadius: BorderRadius.circular(2),
                     minHeight: 4,
                   ),
@@ -856,8 +874,8 @@ class _TableRowState extends State<_TableRow> {
                     icon: const Icon(LucideIcons.check, size: 16),
                     style:
                         IconButton.styleFrom(
-                          backgroundColor: Colors.green[50],
-                          foregroundColor: Colors.green[700],
+                          backgroundColor: isDark ? AppColors.greenSurface : const Color(0xFFF0FDF4),
+                          foregroundColor: isDark ? AppColors.greenText : const Color(0xFF15803D),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -868,17 +886,17 @@ class _TableRowState extends State<_TableRow> {
                             states,
                           ) {
                             if (states.contains(WidgetState.disabled)) {
-                              return Colors.grey[100];
+                              return isDark ? AppColors.surface3 : const Color(0xFFF1F5F9);
                             }
-                            return Colors.green[50];
+                            return isDark ? AppColors.greenSurface : const Color(0xFFF0FDF4);
                           }),
                           foregroundColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
                             if (states.contains(WidgetState.disabled)) {
-                              return Colors.grey[400];
+                              return isDark ? AppColors.textTertiary : const Color(0xFF94A3B8);
                             }
-                            return Colors.green[700];
+                            return isDark ? AppColors.greenText : const Color(0xFF15803D);
                           }),
                         ),
                   ),
@@ -925,7 +943,7 @@ class _TableRowState extends State<_TableRow> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  NumberFormat.simpleCurrency().format(widget.item.total),
+                  widget.money.format(widget.item.total),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 if (widget.item.quantityReceived == 0) ...[
@@ -978,8 +996,9 @@ class _VariantSelectorDialogState
       return p.title.toLowerCase().contains(_query.toLowerCase());
     }).toList();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? AppColors.surface2 : AppColors.lightSurface2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: 600,
@@ -1044,7 +1063,7 @@ class _VariantSelectorDialogState
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: Colors.grey[100],
+                              color: isDark ? AppColors.surface3 : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: product.mainImageUrl != null

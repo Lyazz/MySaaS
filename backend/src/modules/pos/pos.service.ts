@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
@@ -33,6 +33,7 @@ type PosOrderItemInput = {
 
 export type CreatePosSaleInput = {
     customerId?: string | null
+    clientRequestId?: string | null
     items: PosOrderItemInput[]
 }
 
@@ -41,6 +42,15 @@ const addUtcMonths = (date: Date, months: number) =>
 
 const addUtcYears = (date: Date, years: number) =>
     new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
+
+const normalizeClientRequestId = (value?: string | null) => {
+    const normalized = typeof value === 'string' ? value.trim() : ''
+    if (!normalized) return null
+    if (normalized.length > 200) {
+        throw new PosValidationError(400, 'Idempotency key is too long')
+    }
+    return normalized
+}
 
 export class PosService {
     private loyaltyFormula = new LoyaltyFormulaService()
@@ -89,6 +99,15 @@ export class PosService {
         subscription?: SubscriptionContext | null,
         actor?: { userId: string | null }
     ) {
+        const clientRequestId = normalizeClientRequestId(input.clientRequestId)
+        if (clientRequestId) {
+            const existing = await tx.sale.findFirst({
+                where: { tenantId, clientRequestId },
+                include: { items: { include: { product: true, variant: true } } }
+            })
+            if (existing) return existing
+        }
+
         await this.enforceOrderLimit(tenantId, subscription)
 
         if (!Array.isArray(input.items) || input.items.length === 0) {
@@ -299,7 +318,8 @@ export class PosService {
                 totalAmount: total,
                 status: 'COMPLETED',
                 earnedPointsTotal: resolvedCustomer?.id ? pointsPreview.totalPoints : 0,
-                createdByUserId: actor?.userId ?? null
+                createdByUserId: actor?.userId ?? null,
+                clientRequestId
             }
         })
 
@@ -403,7 +423,23 @@ export class PosService {
         subscription?: SubscriptionContext | null,
         actor?: { userId: string | null }
     ) {
-        return prisma.$transaction(async (tx) => this.createSaleInTx(tx, tenantId, input, subscription ?? null, actor))
+        try {
+            return await prisma.$transaction(async (tx) => this.createSaleInTx(tx, tenantId, input, subscription ?? null, actor))
+        } catch (error) {
+            const clientRequestId = normalizeClientRequestId(input.clientRequestId)
+            if (
+                clientRequestId &&
+                error instanceof Prisma.PrismaClientKnownRequestError &&
+                error.code === 'P2002'
+            ) {
+                const existing = await prisma.sale.findFirst({
+                    where: { tenantId, clientRequestId },
+                    include: { items: { include: { product: true, variant: true } } }
+                })
+                if (existing) return existing
+            }
+            throw error
+        }
     }
 
     async lookupByCode(tenantId: string, code: string) {

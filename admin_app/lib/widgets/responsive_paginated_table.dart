@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'form/form_select.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../theme/app_theme.dart';
 
 class ResponsivePaginatedTable<T> extends StatefulWidget {
   final List<T> items;
@@ -118,11 +119,12 @@ class _ResponsivePaginatedTableState<T>
             ? availableWidth
             : widget.minWidth;
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)), // Slate-200
+            border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -161,9 +163,9 @@ class _ResponsivePaginatedTableState<T>
                   horizontal: 20,
                   vertical: 12,
                 ),
-                decoration: const BoxDecoration(
-                  border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: _buildPaginationFooter(
                   startIndex + 1,

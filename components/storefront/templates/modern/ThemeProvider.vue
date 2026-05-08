@@ -4,7 +4,7 @@ import { useCartStore } from '~/stores/cart'
 const cartStore = useCartStore()
 
 const storeStyle = computed(() => {
-  const primaryColor = '#0d9488' // Teal 600
+  const primaryColor = '#65A30D' // Lime 600
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {

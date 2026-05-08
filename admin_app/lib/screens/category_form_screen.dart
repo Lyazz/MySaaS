@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../providers/categories_provider.dart';
 import '../services/api_service.dart';
 import '../models/product.dart';
+import '../theme/app_theme.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
 
@@ -173,21 +174,13 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: Color(0xFF0F172A)),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => context.pop(),
         ),
         title: Text(
           widget.categoryId == null ? 'Add Category' : 'Edit Category',
-          style: const TextStyle(
-            color: Color(0xFF0F172A),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
         ),
       ),
       body: _isLoading && _existingCategory == null
@@ -273,16 +266,18 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Widget _buildCard({required String title, required List<Widget> children}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -291,10 +286,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 20),
@@ -317,7 +312,6 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       hint: hint,
       validator: validator,
       onChanged: onChanged,
-      fillColor: const Color(0xFFF8FAFC),
       borderRadius: 8,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
@@ -330,13 +324,15 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (hasImage) ...[
-          Container(
+          Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Container(
             height: 200,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
               image: _imageFile != null
                   ? DecorationImage(
                       image: FileImage(_imageFile!),
@@ -353,7 +349,8 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                           )
                         : null),
             ),
-          ),
+          );
+          }),
           const SizedBox(height: 12),
         ],
         Row(

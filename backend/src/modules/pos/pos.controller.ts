@@ -30,11 +30,15 @@ export class PosController {
         try {
             const tenant = req.tenant!
             const user = req.user
+            const idempotencyKey = req.get('Idempotency-Key')?.trim()
+            const offlineId = typeof req.body?.offlineId === 'string' ? req.body.offlineId.trim() : ''
+            const clientRequestId = idempotencyKey || offlineId || null
 
             const sale = await service.createSale(
                 tenant.id,
                 {
                     customerId: req.body?.customerId,
+                    clientRequestId,
                     items: req.body?.items ?? []
                 },
                 req.subscription

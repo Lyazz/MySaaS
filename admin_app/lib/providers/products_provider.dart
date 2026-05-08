@@ -93,9 +93,9 @@ class ProductsNotifier extends Notifier<ProductsState> {
   Future<void> createProduct(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
-      await apiService.client.post('/admin/products', data: data);
+      final repo = ProductRepository(apiService);
+      await repo.createProduct(data);
       await fetchProducts(); // Refresh list
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -106,9 +106,9 @@ class ProductsNotifier extends Notifier<ProductsState> {
   Future<void> updateProduct(String id, Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
-      await apiService.client.put('/admin/products/$id', data: data);
+      final repo = ProductRepository(apiService);
+      await repo.updateProduct(id, data);
       await fetchProducts(); // Refresh list
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -118,9 +118,9 @@ class ProductsNotifier extends Notifier<ProductsState> {
 
   Future<void> deleteProduct(String id) async {
     try {
-      _requireOnlineTenantFeature();
       final apiService = ref.read(apiProvider);
-      await apiService.client.delete('/admin/products/$id');
+      final repo = ProductRepository(apiService);
+      await repo.deleteProduct(id);
 
       // Remove from local state
       final updatedProducts = state.products.where((p) => p.id != id).toList();

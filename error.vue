@@ -15,11 +15,11 @@ const handleError = () => clearError({ redirect: '/' })
     <div class="max-w-md w-full text-center">
       <div class="mb-8 relative flex justify-center">
         <!-- Background blob/glow effect -->
-         <div class="absolute inset-0 bg-teal-500/10 rounded-full blur-3xl transform scale-150"></div>
+         <div class="absolute inset-0 bg-lime-500/10 rounded-full blur-3xl transform scale-150"></div>
         
         <!-- Icon container -->
         <div class="relative w-24 h-24 bg-white rounded-2xl shadow-soft flex items-center justify-center border border-slate-100">
-           <Icon name="lucide:alert-circle" class="w-12 h-12 text-teal-600" />
+           <Icon name="lucide:alert-circle" class="w-12 h-12 text-lime-600" />
         </div>
       </div>
 
@@ -36,7 +36,7 @@ const handleError = () => clearError({ redirect: '/' })
       
       <button 
         @click="handleError"
-        class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200 gap-2"
+        class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-lime-600 hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime-500 transition-all duration-200 gap-2"
       >
         <Icon name="lucide:arrow-left" class="w-4 h-4" />
         {{ t('common.errorPage.actions.backHome') }}

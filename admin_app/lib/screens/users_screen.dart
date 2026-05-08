@@ -14,6 +14,7 @@ import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/badges/status_badges.dart';
+import '../theme/app_theme.dart';
 
 class UsersScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -423,17 +424,22 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextButton(
       onPressed: onTap,
       style: TextButton.styleFrom(
-        backgroundColor: active ? Colors.white : Colors.transparent,
+        backgroundColor: active
+            ? (isDark ? AppColors.surface3 : Colors.white)
+            : Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontWeight: FontWeight.w600,
-          color: active ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+          color: active
+              ? (isDark ? AppColors.textPrimary : const Color(0xFF0F172A))
+              : const Color(0xFF64748B),
         ),
       ),
     );
@@ -1017,13 +1023,14 @@ class _PermissionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

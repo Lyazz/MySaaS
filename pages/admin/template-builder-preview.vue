@@ -123,8 +123,8 @@ const headerStyle = computed<HeaderStyle>(() => parseChoice(route.query.header, 
 const productView = computed<ProductView>(() => parseChoice(route.query.productView, ['grid', 'list', 'promo'], 'grid'))
 const backgroundStyle = computed<BackgroundStyle>(() => parseChoice(route.query.background, ['theme', 'plain', 'contrast'], 'theme'))
 
-const primaryColor = computed(() => parseHex(route.query.primary, '#0d9488'))
-const accentColor = computed(() => parseHex(route.query.accent, '#99f6e4'))
+const primaryColor = computed(() => parseHex(route.query.primary, '#65A30D'))
+const accentColor = computed(() => parseHex(route.query.accent, '#D9F99D'))
 const buttonRadius = computed(() => `${clampNumber(route.query.buttonRadius, 0, 32, 12)}px`)
 const cardRadius = computed(() => `${clampNumber(route.query.cardRadius, 0, 44, 22)}px`)
 

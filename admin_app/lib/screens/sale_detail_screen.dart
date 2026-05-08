@@ -10,7 +10,10 @@ import 'package:dio/dio.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../repositories/product_repository.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/product.dart';
+import '../theme/app_theme.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/badges/status_badges.dart';
 import '../widgets/badges/ui_badge.dart';
 import '../widgets/buttons/app_button.dart';
@@ -155,9 +158,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width < 800;
+    final tenantMoney = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -176,7 +181,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   final sale = snapshot.data;
                   if (sale == null) return _notFoundCard();
 
-                  final money = NumberFormat.simpleCurrency(name: 'DZD');
+                  final money = tenantMoney;
                   final shortId = sale.id.length > 8
                       ? sale.id.substring(0, 8)
                       : sale.id;
@@ -195,10 +200,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                               children: [
                                 Text(
                                   'Sale #$shortId',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF0F172A),
+                                    color: Theme.of(context).colorScheme.onSurface,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
@@ -210,7 +215,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                     UiBadge(
                                       label: sale.source,
                                       tone: sale.source.toUpperCase() == 'POS'
-                                          ? UiBadgeTone.teal
+                                          ? UiBadgeTone.lime
                                           : UiBadgeTone.indigo,
                                       uppercase: true,
                                     ),
@@ -234,9 +239,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                     if (sale.customerAddress.trim().isNotEmpty)
                                       sale.customerAddress.trim(),
                                   ].join(' · '),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xFF64748B),
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                   ),
                                 ),
                               ],
@@ -253,12 +258,12 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         _totalCard(money.format(sale.totalAmount)),
                       ],
                       const SizedBox(height: 20),
-                      const Text(
+                      Text(
                         'Items',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -294,16 +299,16 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             }
           },
           borderRadius: BorderRadius.circular(8),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                Icon(LucideIcons.arrowLeft, size: 16, color: Color(0xFF64748B)),
-                SizedBox(width: 6),
+                Icon(LucideIcons.arrowLeft, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                const SizedBox(width: 6),
                 Text(
                   'Sales',
                   style: TextStyle(
-                    color: Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -388,7 +393,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     children: [
                       const Text(
                         'Create refund cash outflow and mark this sale as REFUNDED.',
-                        style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                        style: TextStyle(fontSize: 13),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -524,12 +529,13 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   }
 
   Widget _totalCard(String total) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -541,21 +547,21 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Total',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             total,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -598,9 +604,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   item.label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -608,14 +614,14 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                 flex: 1,
                 child: Text(
                   item.quantity.toString(),
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(
                   money.format(item.price),
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                 ),
               ),
               Expanded(
@@ -640,8 +646,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       flex: flex,
       child: Text(
         text,
-        style: const TextStyle(
-          color: Color(0xFF64748B),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -651,19 +657,19 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 
   Widget _loadingCard() {
     return _card(
-      child: const Padding(
-        padding: EdgeInsets.all(48),
+      child: Padding(
+        padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 32,
               width: 32,
               child: CircularProgressIndicator(strokeWidth: 3),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
               'Loading sale...',
-              style: TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -698,21 +704,21 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.receipt, size: 48, color: Colors.grey[400]),
+            Icon(LucideIcons.receipt, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Sale not found',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'This sale may have been deleted.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -721,12 +727,13 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   }
 
   Widget _card({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

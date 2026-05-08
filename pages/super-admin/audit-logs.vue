@@ -5,7 +5,7 @@
           {{ t('superAdmin.auditLogs.title') }}
         </h1>
         <button
-          class="px-4 py-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-lg text-teal-700 transition-colors"
+          class="px-4 py-2 bg-lime-50 hover:bg-lime-100 border border-lime-200 rounded-lg text-lime-700 transition-colors"
           @click="loadLogs"
         >
           <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block mr-2" />
@@ -267,7 +267,7 @@ const getActionBadgeClass = (action: string) => {
     'DELETE_TENANT': 'ui-badge--red',
     'SUSPEND_TENANT': 'ui-badge--amber',
     'UNSUSPEND_TENANT': 'ui-badge--emerald',
-    'IMPERSONATE_USER': 'ui-badge--teal'
+    'IMPERSONATE_USER': 'ui-badge--lime'
   }
   return classes[action] || 'ui-badge--slate'
 }

@@ -13,6 +13,7 @@ import '../widgets/form/date_range_filter_field.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import '../theme/app_theme.dart';
 import '../widgets/badges/status_badges.dart';
 
 class PurchasesScreen extends ConsumerStatefulWidget {
@@ -92,12 +93,11 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/purchases/create'),
-              backgroundColor: const Color(0xFF0F172A),
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: AppColors.brand,
+              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
             )
           : null,
       body: SingleChildScrollView(
@@ -238,14 +238,14 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
           padding: const EdgeInsets.all(48),
           child: Column(
             children: [
-              Icon(LucideIcons.shoppingBag, size: 48, color: Colors.grey[300]),
+              Icon(LucideIcons.shoppingBag, size: 48, color: Theme.of(context).brightness == Brightness.dark ? AppColors.textTertiary : AppColors.lightTextTertiary),
               const SizedBox(height: 16),
               Text(
                 'No purchases found',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : AppColors.lightTextPrimary,
                 ),
               ),
             ],

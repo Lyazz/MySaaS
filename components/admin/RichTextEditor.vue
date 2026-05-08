@@ -179,7 +179,7 @@ const onContentUpdate = (value: string) => {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #0f766e;
+  color: #4D7C0F;
 }
 
 .rich-text-editor-wrapper:focus-within {
@@ -215,15 +215,15 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-toolbar button:hover .ql-stroke {
-  stroke: #0f766e;
+  stroke: #4D7C0F;
 }
 
 .rich-text-editor-wrapper .ql-toolbar button:hover .ql-fill {
-  fill: #0f766e;
+  fill: #4D7C0F;
 }
 
 .rich-text-editor-wrapper .ql-toolbar button.ql-active {
-  background: #0f766e;
+  background: #4D7C0F;
 }
 
 .rich-text-editor-wrapper .ql-toolbar button.ql-active .ql-stroke {
@@ -250,7 +250,7 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-toolbar .ql-picker.ql-expanded .ql-picker-label {
-  border-color: #0f766e;
+  border-color: #4D7C0F;
 }
 
 /* ==============================
@@ -316,7 +316,7 @@ const onContentUpdate = (value: string) => {
 }
 
 .rich-text-editor-wrapper .ql-editor a {
-  color: #0f766e;
+  color: #4D7C0F;
   text-decoration: underline;
 }
 
@@ -347,7 +347,7 @@ const onContentUpdate = (value: string) => {
 .rich-text-editor-wrapper .ql-editor .ql-direction-rtl blockquote,
 .rich-text-editor-wrapper .ql-editor blockquote.ql-direction-rtl {
   border-left: none;
-  border-right: 4px solid #0f766e;
+  border-right: 4px solid #4D7C0F;
   padding-left: 0;
   padding-right: 1rem;
 }
@@ -415,7 +415,7 @@ const onContentUpdate = (value: string) => {
    SNOW THEME COLOR OVERRIDES
    ============================== */
 .rich-text-editor-wrapper .ql-snow a {
-  color: #0f766e;
+  color: #4D7C0F;
 }
 
 .rich-text-editor-wrapper .ql-snow .ql-stroke {

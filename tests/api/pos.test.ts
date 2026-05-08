@@ -217,6 +217,40 @@ describe('Admin POS (direct sale) flow', () => {
         expect(move?.orderId).toBeNull()
     })
 
+    it('deduplicates POS sale sync retries by tenant-scoped idempotency key', async () => {
+        const before = await prisma.productVariant.findUnique({ where: { tenantId_id: { tenantId, id: variantId } } })
+        const key = `offline-pos-${Date.now()}`
+        const payload = {
+            offlineId: 'local-sale-1',
+            customerId,
+            items: [{ productId, variantId, quantity: 1 }]
+        }
+
+        const first = await request(app)
+            .post('/api/admin/pos/sales')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Idempotency-Key', key)
+            .send(payload)
+
+        const second = await request(app)
+            .post('/api/admin/pos/sales')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Idempotency-Key', key)
+            .send({ ...payload, offlineId: 'local-sale-1-retry' })
+
+        expect(first.status).toBe(201)
+        expect(second.status).toBe(201)
+        expect(second.body.saleId).toBe(first.body.saleId)
+
+        const sales = await prisma.sale.findMany({ where: { tenantId, clientRequestId: key } })
+        expect(sales).toHaveLength(1)
+
+        const after = await prisma.productVariant.findUnique({ where: { tenantId_id: { tenantId, id: variantId } } })
+        expect(after?.stock).toBe((before?.stock ?? 0) - 1)
+    })
+
     it('uses the selected variant promotional price for direct POS sales', async () => {
         const promoProduct = await prisma.product.create({
             data: {

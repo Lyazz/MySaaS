@@ -1270,7 +1270,8 @@
       "functional": "Functional",
       "apps": "Apps",
       "integrations": "Integrations",
-      "users": "Users"
+      "users": "Users",
+      "storeParameters": "Store Parameters"
     },
     "roles": {
       "owner": "Owner",
@@ -1441,7 +1442,7 @@
           "order": "Order {index}"
         },
         "customer": {
-          "addClient": "Add Client"
+          "addClient": "Select or create customer"
         },
         "variants": {
           "loading": "Loading variants...",

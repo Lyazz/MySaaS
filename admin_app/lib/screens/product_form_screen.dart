@@ -12,6 +12,7 @@ import '../models/product.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import '../theme/app_theme.dart';
 
 class ProductFormScreen extends ConsumerStatefulWidget {
   final String? productId;
@@ -185,9 +186,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   Widget build(BuildContext context) {
     final categories = ref.watch(productsProvider).categories;
     final isEditing = widget.productId != null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Slate-50
       body: SafeArea(
         child: Center(
           child: Container(
@@ -266,18 +267,18 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 24),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2), // Red-50
+                      color: isDark ? AppColors.redSurface : const Color(0xFFFEF2F2),
                       border: Border.all(
-                        color: const Color(0xFFFECACA),
-                      ), // Red-200
+                        color: isDark ? AppColors.redText.withValues(alpha: 0.3) : const Color(0xFFFECACA),
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       _error!,
-                      style: const TextStyle(
-                        color: Color(0xFFB91C1C),
+                      style: TextStyle(
+                        color: isDark ? AppColors.redText : const Color(0xFFB91C1C),
                         fontSize: 14,
-                      ), // Red-700
+                      ),
                     ),
                   ),
 
@@ -287,12 +288,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     length: 4,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: const Color(0xFFE2E8F0),
-                        ), // Slate-200
-                        boxShadow: [
+                          color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder,
+                        ),
+                        boxShadow: isDark ? null : [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.02),
                             blurRadius: 4,
@@ -306,11 +307,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                           const TabBar(
                             isScrollable: true, // Prevent tab text cropping
                             tabAlignment: TabAlignment.start,
-                            labelColor: Color(0xFF0D9488), // Teal-600
+                            labelColor: Color(0xFF65A30D), // Lime-600
                             unselectedLabelColor: Color(
                               0xFF64748B,
                             ), // Slate-500
-                            indicatorColor: Color(0xFF0D9488),
+                            indicatorColor: Color(0xFF65A30D),
                             indicatorSize: TabBarIndicatorSize.tab,
                             labelStyle: TextStyle(
                               fontWeight: FontWeight.w600,
@@ -499,8 +500,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                               child: Checkbox(
                                                 value: _isActive,
                                                 activeColor: const Color(
-                                                  0xFF0D9488,
-                                                ), // Teal-600
+                                                  0xFF65A30D,
+                                                ), // Lime-600
                                                 side: const BorderSide(
                                                   color: Color(0xFFCBD5E1),
                                                   width: 1.5,
@@ -575,7 +576,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                               bottom: 16,
                                             ),
                                             child: LinearProgressIndicator(
-                                              color: Color(0xFF0D9488),
+                                              color: Color(0xFF65A30D),
                                             ),
                                           ),
 
@@ -677,7 +678,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                           ),
                                                       decoration:
                                                           const BoxDecoration(
-                                                            color: Colors.white,
+                                                            color: Color(0xFFF1F5F9),
                                                             shape:
                                                                 BoxShape.circle,
                                                             boxShadow: [
@@ -882,7 +883,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                                                 variant.stock >
                                                                                     0
                                                                                 ? const Color(
-                                                                                    0xFF0D9488,
+                                                                                    0xFF65A30D,
                                                                                   )
                                                                                 : const Color(
                                                                                     0xFFEF4444,

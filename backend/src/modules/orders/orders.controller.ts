@@ -20,6 +20,17 @@ const service = new OrdersService()
 const deliveryService = new DeliveryService()
 
 export class OrdersController {
+    async unreadCount(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const unreadCount = await service.getUnreadCount(tenant.id)
+            res.json({ unreadCount })
+        } catch (error) {
+            console.error('Unread order count error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async list(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
@@ -57,6 +68,35 @@ export class OrdersController {
             res.json(order)
         } catch (error) {
             console.error('Get order error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async markRead(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+            }
+
+            try {
+                const result = await service.markAsRead(tenant.id, id)
+                res.json({ success: true, orderId: result.id, readAt: result.readAt })
+            } catch (err) {
+                if (err instanceof OrderValidationError) {
+                    return res.status(err.statusCode).json({
+                        statusCode: err.statusCode,
+                        statusMessage: err.statusMessage,
+                        code: err.code,
+                        meta: err.meta
+                    })
+                }
+                throw err
+            }
+        } catch (error) {
+            console.error('Mark order read error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

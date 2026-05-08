@@ -25,7 +25,7 @@ const newTemplateStart = `<template>
     <nav class="flex mb-6" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/orders" class="text-gray-700 hover:text-teal-600">
+          <NuxtLink to="/admin/orders" class="text-gray-700 hover:text-lime-600">
             {{ t('admin.nav.orders') }}
           </NuxtLink>
         </li>
@@ -55,7 +55,7 @@ content = content.replace(/<template>[\s\S]*?<!-- Left Column: Details -->\s*<di
 
 // Let's replace the custom slate headers with standard gray h3s
 content = content.replace(/<div class="bg-white rounded-xl shadow-sm border border-slate-200">/g, '<div class="bg-white rounded-lg shadow p-6">');
-content = content.replace(/<div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50\/50 rounded-t-xl">\s*<h2 class="font-bold text-slate-800 flex items-center gap-2">\s*<div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center text-teal-600">\s*<Icon name="lucide:user" class="w-4 h-4" \/>\s*<\/div>\s*\{\{ t\('admin.pages.orders.create.customerSection'\) \}\}\s*<\/h2>\s*<\/div>\s*<div class="p-4 md:p-5 space-y-4">/g, `<h3 class="text-lg font-medium text-gray-900 mb-4">{{ t('admin.pages.orders.create.customerSection') }}</h3>\n            <div class="space-y-4">`);
+content = content.replace(/<div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50\/50 rounded-t-xl">\s*<h2 class="font-bold text-slate-800 flex items-center gap-2">\s*<div class="w-8 h-8 rounded-lg bg-lime-50 flex items-center justify-center text-lime-600">\s*<Icon name="lucide:user" class="w-4 h-4" \/>\s*<\/div>\s*\{\{ t\('admin.pages.orders.create.customerSection'\) \}\}\s*<\/h2>\s*<\/div>\s*<div class="p-4 md:p-5 space-y-4">/g, `<h3 class="text-lg font-medium text-gray-900 mb-4">{{ t('admin.pages.orders.create.customerSection') }}</h3>\n            <div class="space-y-4">`);
 
 content = content.replace(/<div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50\/50 rounded-t-xl">\s*<h2 class="font-bold text-slate-800 flex items-center gap-2">\s*<div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">\s*<Icon name="lucide:truck" class="w-4 h-4" \/>\s*<\/div>\s*\{\{ t\('admin.pages.orders.create.shippingSection'\) \}\}\s*<\/h2>\s*<\/div>\s*<div class="p-4 md:p-5 space-y-4">/g, `<h3 class="text-lg font-medium text-gray-900 mb-4">{{ t('admin.pages.orders.create.shippingSection') }}</h3>\n            <div class="space-y-4">`);
 

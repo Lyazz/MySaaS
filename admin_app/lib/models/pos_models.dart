@@ -1,3 +1,36 @@
+enum PosDiscountType { fixed, percent }
+
+class PosDiscount {
+  final PosDiscountType type;
+  final double value;
+  final String? reason;
+
+  const PosDiscount({required this.type, required this.value, this.reason});
+
+  double amountFor(double subtotal) {
+    if (!subtotal.isFinite || subtotal <= 0) return 0;
+    if (!value.isFinite || value <= 0) return 0;
+
+    final raw = switch (type) {
+      PosDiscountType.fixed => value,
+      PosDiscountType.percent => subtotal * (value / 100),
+    };
+
+    if (raw <= 0) return 0;
+    if (raw >= subtotal) return subtotal;
+    return raw;
+  }
+
+  Map<String, dynamic> toJson(double subtotal) {
+    return {
+      'type': type.name,
+      'value': value,
+      'amount': amountFor(subtotal),
+      if (reason != null && reason!.trim().isNotEmpty) 'reason': reason!.trim(),
+    };
+  }
+}
+
 class CartItem {
   final String productId;
   final String? variantId;

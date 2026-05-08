@@ -8,6 +8,7 @@ import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/categories_provider.dart';
 import '../models/product.dart';
+import '../theme/app_theme.dart';
 import '../utils/debouncer.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/responsive_filter_bar.dart';
@@ -55,12 +56,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: (isMobile && !isOfflineTenant)
           ? FloatingActionButton(
               onPressed: () => context.go('/categories/create'),
-              backgroundColor: const Color(0xFF14B8A6), // Teal-500
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: AppColors.brand,
+              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
             )
           : null,
       body: Stack(
@@ -113,7 +113,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -121,17 +121,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF111827), // Gray-900
+                color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               'Manage your product categories',
               style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF6B7280),
-              ), // Gray-500
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -216,29 +216,29 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF1F5F9), // Slate-100
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 LucideIcons.shapes,
                 size: 32,
-                color: Color(0xFF94A3B8),
-              ), // Slate-400
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'No categories found',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B), // Slate-800
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Get started by creating a new category.',
-              style: TextStyle(color: Color(0xFF64748B)), // Slate-500
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
             const SizedBox(height: 24),
             if (!(ref.watch(authProvider).mode == AppMode.offlineOnly))
@@ -257,58 +257,23 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     return ResponsivePaginatedTable<Category>(
       items: categories,
       minWidth: 900,
-      header: const Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              'CATEGORY',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280), // Gray-500
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              'PRODUCTS',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              'LINKS',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              'ACTIONS',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
-                letterSpacing: 0.5,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
+      header: Builder(
+        builder: (context) {
+          final headerStyle = TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            letterSpacing: 0.5,
+          );
+          return Row(
+            children: [
+              Expanded(flex: 3, child: Text('CATEGORY', style: headerStyle)),
+              Expanded(flex: 1, child: Text('PRODUCTS', style: headerStyle)),
+              Expanded(flex: 1, child: Text('LINKS', style: headerStyle)),
+              Expanded(flex: 1, child: Text('ACTIONS', style: headerStyle, textAlign: TextAlign.right)),
+            ],
+          );
+        },
       ),
       rowBuilder: (context, category, index) {
         final rawImageUrl = category.imageUrl;
@@ -332,13 +297,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFB), // Gray-50
-                        borderRadius: BorderRadius.circular(
-                          8,
-                        ), // Slightly more rounded
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: const Color(0xFFE5E7EB),
-                        ), // Gray-200
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
                         image: imageUrl != null
                             ? DecorationImage(
                                 image: NetworkImage(imageUrl),
@@ -347,9 +310,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                             : null,
                       ),
                       child: imageUrl == null
-                          ? const Icon(
+                          ? Icon(
                               LucideIcons.image,
-                              color: Color(0xFF9CA3AF), // Gray-400
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                               size: 20,
                             )
                           : null,
@@ -362,10 +325,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         children: [
                           Text(
                             category.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
-                              color: Color(0xFF111827), // Gray-900
+                              color: Theme.of(context).colorScheme.onSurface,
                               letterSpacing: -0.1,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -373,8 +336,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                           const SizedBox(height: 2),
                           Text(
                             category.slug,
-                            style: const TextStyle(
-                              color: Color(0xFF6B7280), // Gray-500
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                               fontSize: 12,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -397,13 +360,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6), // Gray-100
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '${category.productCount} products',
-                      style: const TextStyle(
-                        color: Color(0xFF374151), // Gray-700
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -419,7 +382,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   children: [
                     _TableIconButton(
                       icon: LucideIcons.externalLink,
-                      color: const Color(0xFF0D9488), // Teal-600
+                      color: const Color(0xFF65A30D), // Lime-600
                       onPressed: () {
                         // Open category in web app
                       },
@@ -523,7 +486,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           margin: const EdgeInsets.all(24),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
           ),
           constraints: const BoxConstraints(maxWidth: 400),
@@ -531,14 +494,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Delete Category',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 12),
               Text(
                 'Are you sure you want to delete "${_categoryToDelete?.title}"? This action cannot be undone.',
-                style: const TextStyle(color: Color(0xFF64748B)),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
               ),
               const SizedBox(height: 24),
               Row(

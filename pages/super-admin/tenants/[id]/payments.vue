@@ -3,7 +3,7 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 text-sm text-slate-500">
-            <NuxtLink to="/super-admin/tenants" class="hover:text-teal-700 hover:underline">{{ t('superAdmin.nav.tenants') }}</NuxtLink>
+            <NuxtLink to="/super-admin/tenants" class="hover:text-lime-700 hover:underline">{{ t('superAdmin.nav.tenants') }}</NuxtLink>
             <span>/</span>
             <span class="text-slate-700 font-semibold">{{ tenantLabel }}</span>
             <span>/</span>
@@ -47,7 +47,7 @@
                 v-model="form.proofUrl"
                 type="url"
                 :placeholder="t('superAdmin.paymentsPage.import.fields.proofUrlPlaceholder')"
-                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white"
               />
               <p class="text-xs text-slate-500 mt-1">{{ t('superAdmin.paymentsPage.import.fields.proofUrlHint') }}</p>
             </div>
@@ -58,7 +58,7 @@
                 v-model="form.externalReference"
                 type="text"
                 :placeholder="t('superAdmin.paymentsPage.import.fields.externalReferencePlaceholder')"
-                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white"
               />
             </div>
 
@@ -68,12 +68,12 @@
                 v-model="form.notes"
                 rows="3"
                 :placeholder="t('superAdmin.paymentsPage.import.fields.notesPlaceholder')"
-                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 bg-white"
               />
             </div>
 
             <label class="flex items-start gap-3 text-sm text-slate-700">
-              <input v-model="form.applySubscription" type="checkbox" class="mt-1 h-4 w-4 accent-teal-600" />
+              <input v-model="form.applySubscription" type="checkbox" class="mt-1 h-4 w-4 accent-lime-600" />
               <span>
                 {{ t('superAdmin.paymentsPage.import.applySubscription.label') }}
                 <span class="block text-xs text-slate-500 mt-1">{{ t('superAdmin.paymentsPage.import.applySubscription.hint') }}</span>
@@ -83,7 +83,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              class="w-full px-4 py-2 bg-lime-600 hover:bg-lime-700 rounded-lg text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Icon v-if="submitting" name="lucide:loader-2" class="h-4 w-4 inline-block mr-2 animate-spin" />
               {{ submitting ? t('superAdmin.paymentsPage.import.actions.importing') : t('superAdmin.paymentsPage.import.actions.importProof') }}
@@ -134,14 +134,14 @@
                       :href="p.proofUrl"
                       target="_blank"
                       rel="noreferrer"
-                      class="text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                      class="text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                     >
                       {{ t('superAdmin.paymentsPage.history.proof.open') }}
                     </a>
                     <button
                       v-else-if="p.proofUrl"
                       type="button"
-                      class="text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                      class="text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                       @click="openProof(p)"
                     >
                       {{ t('superAdmin.paymentsPage.history.proof.open') }}

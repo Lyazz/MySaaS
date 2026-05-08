@@ -79,8 +79,8 @@ const switchLocale = async (code: string) => {
               type="button"
               :data-testid="`locale-switch-${locale.code}`"
               :class="[
-                active ? 'bg-slate-100/80 text-teal-700' : 'text-slate-600',
-                i18n.locale.value === locale.code ? 'font-semibold bg-teal-50/50 text-teal-700' : '',
+                active ? 'bg-slate-100/80 text-lime-700' : 'text-slate-600',
+                i18n.locale.value === locale.code ? 'font-semibold bg-lime-50/50 text-lime-700' : '',
                 'group flex w-full items-center rounded-md px-3 py-2 text-sm text-left transition-all duration-150'
               ]"
               @click="switchLocale(locale.code)"
@@ -89,7 +89,7 @@ const switchLocale = async (code: string) => {
               <Icon 
                 v-if="i18n.locale.value === locale.code"
                 name="lucide:check" 
-                class="ml-2 h-4 w-4 text-teal-600" 
+                class="ml-2 h-4 w-4 text-lime-600" 
               />
             </button>
           </MenuItem>

@@ -17,46 +17,54 @@ class OfflineBanner extends ConsumerWidget {
 
     Color bgColor;
     IconData icon;
-    String tenantText = isOfflineOnly
-        ? 'Account: Free (Offline)'
-        : 'Account: Paid (Syncing)';
-    String connectionText;
+    String debugText;
 
     if (status == NetworkStatus.noConnection) {
       bgColor = Colors.orange.shade600;
       icon = LucideIcons.wifiOff;
-      connectionText = 'Internet: Disconnected';
+      debugText = 'Offline';
     } else if (isOfflineOnly) {
-      bgColor = Colors.blue.shade600;
+      bgColor = Colors.orange.shade500;
       icon = LucideIcons.database;
-      connectionText = 'Internet: Connected (Local Mode)';
+      debugText = 'Local';
     } else {
       bgColor = Colors.green.shade600;
       icon = LucideIcons.wifi;
-      connectionText = 'Internet: Connected & Syncing';
+      debugText = 'Online';
     }
 
     return Container(
       width: double.infinity,
       color: bgColor,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SafeArea(
-        bottom: false,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 16),
-            const SizedBox(width: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white.withOpacity(0.9), size: 11),
+          const SizedBox(width: 6),
+          Text(
+            debugText,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.92),
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+              letterSpacing: 0.2,
+            ),
+          ),
+          if (isOfflineOnly) ...[
+            const SizedBox(width: 6),
             Text(
-              '$tenantText  |  $connectionText',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+              'debug',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.72),
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }

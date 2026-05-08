@@ -11,6 +11,7 @@ class DatabaseService {
   Database? _db;
   final _secureStorage = const FlutterSecureStorage();
   static const _keyDbEncryption = 'db_encryption_key';
+  static const _databaseName = 'mysaas_offline_encryptedd.db';
 
   Future<Database> get database async {
     if (_db != null) return _db!;
@@ -30,12 +31,12 @@ class DatabaseService {
 
   Future<Database> _initDb() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'mysaas_offline_encryptedd.db');
+    final path = join(dbPath, _databaseName);
     final encryptionKey = await _getEncryptionKey();
     return await openDatabase(
       path,
       password: encryptionKey,
-      version: 3,
+      version: 5,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -57,6 +58,16 @@ class DatabaseService {
     ''');
 
     await db.execute('''
+      CREATE TABLE sync_metadata(
+        tenantId TEXT NOT NULL,
+        key TEXT NOT NULL,
+        value TEXT,
+        updatedAt TEXT NOT NULL,
+        PRIMARY KEY (tenantId, key)
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE categories(
         id TEXT PRIMARY KEY,
         tenantId TEXT NOT NULL DEFAULT '',
@@ -64,7 +75,8 @@ class DatabaseService {
         slug TEXT NOT NULL,
         imageUrl TEXT,
         productCount INTEGER DEFAULT 0,
-        createdAt TEXT
+        createdAt TEXT,
+        syncStatus TEXT DEFAULT 'synced'
       )
     ''');
 
@@ -422,6 +434,22 @@ class DatabaseService {
         'CREATE INDEX IF NOT EXISTS idx_cash_transactions_tenant ON cash_transactions(tenantId)',
       );
     }
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS sync_metadata(
+          tenantId TEXT NOT NULL,
+          key TEXT NOT NULL,
+          value TEXT,
+          updatedAt TEXT NOT NULL,
+          PRIMARY KEY (tenantId, key)
+        )
+      ''');
+    }
+    if (oldVersion < 5) {
+      await db.execute(
+        "ALTER TABLE categories ADD COLUMN syncStatus TEXT DEFAULT 'synced'",
+      );
+    }
   }
 
   /// Deletes all rows scoped to [tenantId] without dropping the database.
@@ -430,6 +458,7 @@ class DatabaseService {
     final db = await database;
     const tables = [
       'sync_queue',
+      'sync_metadata',
       'categories',
       'products',
       'customers',
@@ -460,7 +489,7 @@ class DatabaseService {
       _db = null;
     }
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'mysaas_offline_encrypted.db');
+    final path = join(dbPath, _databaseName);
     await deleteDatabase(path);
     await _secureStorage.delete(key: _keyDbEncryption);
   }

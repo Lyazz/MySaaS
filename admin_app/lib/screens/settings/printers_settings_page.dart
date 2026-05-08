@@ -166,7 +166,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    const accentColor = Color(0xFF0D9488); // Teal 600
+    const accentColor = Color(0xFF65A30D); // Lime 600
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),

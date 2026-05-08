@@ -72,18 +72,18 @@ const newModal = `    <TransitionRoot
                   <button
                     v-for="v in availableVariantsForSelection"
                     :key="v.id"
-                    class="w-full p-4 rounded-xl border border-slate-100 hover:border-teal-500 hover:bg-teal-50 hover:ring-1 hover:ring-teal-500 transition-all flex justify-between items-center group"
+                    class="w-full p-4 rounded-xl border border-slate-100 hover:border-lime-500 hover:bg-lime-50 hover:ring-1 hover:ring-lime-500 transition-all flex justify-between items-center group"
                     @click="onVariantSelected(v)"
                   >
                     <div class="text-left">
-                      <div class="font-semibold text-slate-900 group-hover:text-teal-800">
+                      <div class="font-semibold text-slate-900 group-hover:text-lime-800">
                         {{ v.label }}
                       </div>
                       <div class="text-xs text-slate-500 mt-0.5">
                         {{ v.availableStock }} in stock
                       </div>
                     </div>
-                    <div class="font-bold text-teal-600">
+                    <div class="font-bold text-lime-600">
                       {{ formatCurrency(v.price) }}
                     </div>
                   </button>

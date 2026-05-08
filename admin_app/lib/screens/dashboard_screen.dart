@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_theme.dart';
 import '../widgets/admin_stat_card.dart';
 import '../widgets/buttons/app_button.dart';
 import '../providers/admin_dashboard_provider.dart';
@@ -33,7 +34,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -94,17 +94,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           children: [
             Text(
               'Welcome back, $storeName',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.5,
-                color: Color(0xFF0F172A),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'A quick snapshot of your store.',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -226,7 +226,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             label: 'Revenue (7 days)',
             value: money.format(data.last7d.revenue),
             icon: LucideIcons.banknote,
-            tone: 'teal',
+            tone: 'lime',
             isLoading: dashboardState.isLoading,
             onTap: () => context.go('/orders'),
           ),
@@ -237,7 +237,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             label: 'Products',
             value: data.counts.products.toString(),
             icon: LucideIcons.package,
-            tone: 'teal',
+            tone: 'lime',
             isLoading: dashboardState.isLoading,
             onTap: () => context.go('/products'),
           ),
@@ -297,11 +297,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     AdminDashboardState dashboardState,
     StoreSettingsState storeSettingsState,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -320,18 +323,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Recent orders',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Latest orders for this tenant.',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                     ),
                   ],
                 ),
@@ -343,7 +346,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const Divider(height: 1),
           _buildOrdersTable(context, dashboardState, storeSettingsState),
         ],
       ),
@@ -440,10 +443,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     width: 110,
                     child: Text(
                       '#$shortId',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -469,9 +472,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               : order.customerPhone.trim(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -481,10 +484,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     width: 130,
                     child: Text(
                       money.format(order.totalAmount),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -501,9 +504,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       width: 170,
                       child: Text(
                         DateFormat.yMMMd().add_jm().format(order.createdAt),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF475569),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -539,6 +542,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildOrderStatusCard(BuildContext context, AdminDashboardState dashboardState) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = Theme.of(context).colorScheme.onSurface;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+
     final rows = [
       (status: 'PENDING', label: 'Pending', dot: const Color(0xFFF59E0B)),
       (status: 'CONFIRMED', label: 'Confirmed', dot: const Color(0xFF3B82F6)),
@@ -550,9 +560,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -565,18 +575,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Order status',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: textPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Quick overview by status.',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14, color: textMuted),
           ),
           const SizedBox(height: 16),
           ...rows.map((row) {
@@ -589,7 +599,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: borderColor),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
@@ -608,10 +618,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           const SizedBox(width: 10),
                           Text(
                             row.label,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF334155),
+                              color: textSecondary,
                             ),
                           ),
                         ],
@@ -621,10 +631,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       else
                         Text(
                           count.toString(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A),
+                            color: textPrimary,
                           ),
                         ),
                     ],
@@ -646,11 +656,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       (label: 'Settings', icon: LucideIcons.settings, to: '/settings'),
     ];
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = Theme.of(context).colorScheme.onSurface;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -663,18 +680,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Quick links',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: textPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Common actions to get things done.',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14, color: textMuted),
           ),
           const SizedBox(height: 16),
           ...links.map((link) {
@@ -686,7 +703,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: borderColor),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
@@ -694,19 +711,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(link.icon, size: 18, color: const Color(0xFF334155)),
+                          Icon(link.icon, size: 18, color: textSecondary),
                           const SizedBox(width: 10),
                           Text(
                             link.label,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF334155),
+                              color: textSecondary,
                             ),
                           ),
                         ],
                       ),
-                      const Icon(LucideIcons.chevronRight, size: 18, color: Color(0xFF94A3B8)),
+                      Icon(LucideIcons.chevronRight, size: 18, color: textMuted),
                     ],
                   ),
                 ),
@@ -729,7 +746,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         fontSize: 11,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.6,
-        color: Color(0xFF64748B),
       ),
     );
     if (width == null) return child;
@@ -751,7 +767,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(radius),
       ),
     );

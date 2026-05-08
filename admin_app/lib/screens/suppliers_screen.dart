@@ -12,6 +12,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import '../theme/app_theme.dart';
 
 class SuppliersScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -68,12 +69,11 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/suppliers/create'),
-              backgroundColor: const Color(0xFF0F172A),
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: AppColors.brand,
+              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
             )
           : null,
       body: Padding(

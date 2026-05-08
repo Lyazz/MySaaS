@@ -105,10 +105,10 @@
 
               <!-- Pending orders badge -->
               <span
-                v-if="sidebarOpen && item.path === '/admin/orders' && pendingOrdersCount > 0"
+                v-if="sidebarOpen && item.path === '/admin/orders' && unreadOrderCount > 0"
                 class="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
                 style="background: rgba(239,68,68,0.15); color: #f87171;"
-              >{{ pendingOrdersCount }}</span>
+              >{{ unreadOrderCount }}</span>
 
               <!-- Tooltip (collapsed) -->
               <div
@@ -291,6 +291,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUiStore } from '~/stores/ui'
 import { toTenantHost, useRequestOrigin } from '~/composables/host'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
+import { useOrderUnreadCount } from '~/composables/useOrderUnreadCount'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 import AdminThemeToggle from '~/components/admin/AdminThemeToggle.vue'
 import HelpCenterWidget from '~/components/admin/HelpCenterWidget.vue'
@@ -302,6 +303,7 @@ const route = useRoute()
 const sidebarOpen = ref(false)
 const showLogoutModal = ref(false)
 const storeSettings = useState<any>('storeSettings')
+const { unreadOrderCount, refreshUnreadOrderCount } = useOrderUnreadCount()
 
 const { data: settings } = await useAsyncData('storeSettings', () =>
   $fetch('/api/admin/store-settings', {
@@ -333,7 +335,6 @@ const tenantName = computed(() => authStore.user?.tenant?.name || 'Swekly')
 const tenantInitial = computed(() => tenantName.value.charAt(0).toUpperCase())
 const userInitial = computed(() => authStore.user?.email.charAt(0).toUpperCase() || 'U')
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
-const pendingOrdersCount = ref(0)
 
 function isActive(path: string) {
   if (path === '/admin') return route.path === '/admin'
@@ -513,4 +514,19 @@ function handleLogout() {
   showLogoutModal.value = false
   authStore.logout()
 }
+
+onMounted(() => {
+  if (route.path.startsWith('/admin')) {
+    refreshUnreadOrderCount().catch((error) => {
+      console.error('Failed to refresh unread order count:', error)
+    })
+  }
+})
+
+watch(() => route.fullPath, () => {
+  if (!route.path.startsWith('/admin')) return
+  refreshUnreadOrderCount().catch((error) => {
+    console.error('Failed to refresh unread order count:', error)
+  })
+})
 </script>

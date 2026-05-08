@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../providers/products_provider.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
+import '../theme/app_theme.dart';
 
 class VariantEditScreen extends ConsumerStatefulWidget {
   final ProductVariant variant;
@@ -113,12 +114,9 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(widget.variant.title),
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -128,7 +126,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Basic Info Card
-              _buildCard(
+              _buildCard(context,
                 title: 'General Information',
                 children: [
                   FormInput(
@@ -236,7 +234,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                     title: const Text('Active'),
                     subtitle: const Text('Visible to customers'),
                     value: _isActive,
-                    activeThumbColor: const Color(0xFF0D9488),
+                    activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _isActive = v),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -245,13 +243,13 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
               const SizedBox(height: 24),
 
               // Inventory Card
-              _buildCard(
+              _buildCard(context,
                 title: 'Inventory',
                 children: [
                   SwitchListTile(
                     title: const Text('Track Inventory'),
                     value: _trackInventory,
-                    activeThumbColor: const Color(0xFF0D9488),
+                    activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _trackInventory = v),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -303,16 +301,17 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
     );
   }
 
-  Widget _buildCard({required String title, required List<Widget> children}) {
+  Widget _buildCard(BuildContext context, {required String title, required List<Widget> children}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        boxShadow: isDark ? null : [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),

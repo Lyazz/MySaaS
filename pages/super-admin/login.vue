@@ -2,7 +2,7 @@
   <div class="min-h-screen flex items-center justify-center p-4 font-sans" style="background: var(--admin-content-bg);">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-teal-600 rounded-2xl mb-4 shadow-lg shadow-teal-600/20">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-lime-600 rounded-2xl mb-4 shadow-lg shadow-lime-600/20">
           <Icon name="lucide:shield-check" class="h-8 w-8 text-white" />
         </div>
         <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">
@@ -36,7 +36,7 @@
                 v-model="email"
                 type="email"
                 required
-                class="w-full px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                class="w-full px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all font-sans"
                 style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary);"
                 :placeholder="t('superAdmin.login.form.email.placeholder')"
               >
@@ -51,7 +51,7 @@
                 v-model="password"
                 type="password"
                 required
-                class="w-full px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all font-sans"
+                class="w-full px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all font-sans"
                 style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary);"
                 placeholder="••••••••"
               >
@@ -62,7 +62,7 @@
           <button
             type="submit"
             :disabled="loading"
-            class="w-full px-4 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
+            class="w-full px-4 py-3 bg-lime-600 hover:bg-lime-700 rounded-lg text-white font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
           >
             <Icon v-if="loading" name="lucide:loader-2" class="h-5 w-5 animate-spin" />
             <span>{{ loading ? t('superAdmin.login.form.submit.signingIn') : t('superAdmin.login.form.submit.signIn') }}</span>
@@ -72,7 +72,7 @@
         <div class="mt-8 pt-6 text-center" style="border-top: 1px solid var(--surface-border);">
           <NuxtLink
             to="/"
-            class="inline-flex items-center text-sm hover:text-teal-600 font-medium transition-colors"
+            class="inline-flex items-center text-sm hover:text-lime-600 font-medium transition-colors"
             style="color: var(--text-secondary)"
           >
             <Icon name="lucide:arrow-left" class="h-4 w-4 mr-1.5" />

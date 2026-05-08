@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../theme/app_theme.dart';
 
 class ResponsiveServerPaginatedTable<T> extends StatefulWidget {
   final List<T> items;
@@ -117,13 +118,16 @@ class _ResponsiveServerPaginatedTableState<T>
         final tableWidth = availableWidth > widget.minWidth
             ? availableWidth
             : widget.minWidth;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+        final border = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)), // Slate-200
-            boxShadow: [
+            border: Border.all(color: border),
+            boxShadow: isDark ? null : [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 4,
@@ -141,15 +145,15 @@ class _ResponsiveServerPaginatedTableState<T>
                     horizontal: 20,
                     vertical: 16,
                   ),
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: border)),
+                    color: surface,
                   ),
                   child: DefaultTextStyle.merge(
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A), // Slate-900
+                      color: isDark ? AppColors.textPrimary : const Color(0xFF0F172A),
                     ),
                     child: widget.title!,
                   ),
@@ -176,9 +180,9 @@ class _ResponsiveServerPaginatedTableState<T>
                     horizontal: 20,
                     vertical: 12,
                   ),
-                  decoration: const BoxDecoration(
-                    border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: border)),
+                    color: surface,
                   ),
                   child: _buildPaginationFooter(),
                 ),

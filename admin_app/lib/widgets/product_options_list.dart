@@ -8,6 +8,7 @@ import 'form/form_select.dart';
 import 'buttons/app_button.dart';
 import 'dialogs/app_dialog.dart';
 import 'option_metadata_dialog.dart';
+import '../theme/app_theme.dart';
 
 class ProductOptionsList extends ConsumerStatefulWidget {
   final String productId;
@@ -138,6 +139,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -171,14 +173,14 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: const Color(0xFF0D9488).withOpacity(0.3),
+                color: AppColors.brand.withValues(alpha: 0.3),
               ),
-              boxShadow: [
+              boxShadow: isDark ? null : [
                 BoxShadow(
-                  color: const Color(0xFF0D9488).withOpacity(0.05),
+                  color: AppColors.brand.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -270,14 +272,15 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
       option.id,
       () => TextEditingController(),
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +300,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                 onPressed: () => _deleteOption(option.id),
                 icon: const Icon(LucideIcons.trash2, size: 16),
                 color: const Color(0xFF94A3B8),
-                hoverColor: Colors.red.withOpacity(0.1),
+                hoverColor: Colors.red.withValues(alpha: 0.1),
                 splashRadius: 20,
               ),
             ],

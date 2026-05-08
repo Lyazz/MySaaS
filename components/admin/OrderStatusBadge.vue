@@ -32,7 +32,7 @@ const badgeClasses = computed(() => {
   const tones: Record<string, string> = {
     PENDING: 'ui-badge--amber',
     CONFIRMED: 'ui-badge--indigo',
-    SHIPPED: 'ui-badge--teal',
+    SHIPPED: 'ui-badge--lime',
     DELIVERED: 'ui-badge--emerald',
     CANCELLED: 'ui-badge--red',
     RETURNED: 'ui-badge--slate'

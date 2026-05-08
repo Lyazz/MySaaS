@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<{
 
 const toneClasses: Record<MarketingTone, string> = {
   cobalt: 'from-[#3559ff1f] via-[#0d1633] to-[#0b1020]',
-  teal: 'from-[#16d5b31a] via-[#0b1820] to-[#09131f]',
+  lime: 'from-[#84CC161a] via-[#0b1820] to-[#09131f]',
   orange: 'from-[#ff8a4c26] via-[#14111d] to-[#0b1020]',
   neutral: 'from-white/8 via-white/3 to-white/0'
 }

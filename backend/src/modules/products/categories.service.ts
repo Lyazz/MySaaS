@@ -191,10 +191,23 @@ export class CategoriesService {
 
     async createCategory(
         tenantId: string,
-        data: { title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown }
+        data: { id?: unknown; title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown }
     ) {
         if (!data.title || !data.slug) {
             throw new Error('Title and Slug are required')
+        }
+
+        const clientId = typeof data.id === 'string' ? data.id.trim() : ''
+        if (data.id !== undefined && (!clientId || clientId.length > 100)) {
+            throw new Error('Invalid id')
+        }
+        if (clientId) {
+            const existingById = await prisma.category.findUnique({
+                where: { id: clientId },
+                select: { tenantId: true }
+            })
+            if (existingById?.tenantId === tenantId) return await this.getCategory(tenantId, clientId)
+            if (existingById) throw new Error('Invalid id')
         }
 
         const existing = await prisma.category.findFirst({
@@ -209,6 +222,7 @@ export class CategoriesService {
 
         const created = await prisma.category.create({
             data: {
+                ...(clientId ? { id: clientId } : {}),
                 tenantId,
                 title: data.title,
                 slug: data.slug,

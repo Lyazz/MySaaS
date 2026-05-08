@@ -338,13 +338,13 @@ definePageMeta({
 
 const templateCatalog: TemplateMeta[] = [
   { key: 'classic', name: 'Classic', short: 'CL', fit: 'Elegant catalogs and premium basics', primary: '#0f172a', accent: '#f8fafc', bg: '#f8fafc' },
-  { key: 'modern', name: 'Modern', short: 'MO', fit: 'Clean fashion, electronics, and general retail', primary: '#0d9488', accent: '#99f6e4', bg: '#f8fafc' },
+  { key: 'modern', name: 'Modern', short: 'MO', fit: 'Clean fashion, electronics, and general retail', primary: '#65A30D', accent: '#D9F99D', bg: '#f8fafc' },
   { key: 'street', name: 'Street', short: 'ST', fit: 'Streetwear, drops, bold youth brands', primary: '#FACC15', accent: '#000000', bg: '#ffffff' },
   { key: 'cozy', name: 'Cozy', short: 'CZ', fit: 'Home goods, handmade, soft lifestyle', primary: '#A4C3B2', accent: '#F5F2EA', bg: '#F5F2EA' },
   { key: 'cyber', name: 'Cyber', short: 'CY', fit: 'Gaming, tech, electronics, gadgets', primary: '#F43F5E', accent: '#A855F7', bg: '#0d0515' },
   { key: 'stationnery', name: 'Stationery', short: 'PA', fit: 'Books, paper, gifts, editorial stores', primary: '#334155', accent: '#fdfbf7', bg: '#fdfbf7' },
   { key: 'food', name: 'Food', short: 'FD', fit: 'Restaurants, grocery, artisanal food', primary: '#ea580c', accent: '#fed7aa', bg: '#f5f5f4' },
-  { key: 'wellness', name: 'Wellness', short: 'WE', fit: 'Beauty, natural products, calm retail', primary: '#2A9D8F', accent: '#ccfbf1', bg: '#f8fafc' },
+  { key: 'wellness', name: 'Wellness', short: 'WE', fit: 'Beauty, natural products, calm retail', primary: '#84CC16', accent: '#ECFCCB', bg: '#f8fafc' },
   { key: 'playful', name: 'Playful', short: 'PL', fit: 'Kids, toys, colorful gift shops', primary: '#9333EA', accent: '#FBBF24', bg: '#faf5ff' },
   { key: 'activewear', name: 'Activewear', short: 'AW', fit: 'Sports, performance, sharp drops', primary: '#EAB308', accent: '#000000', bg: '#000000' },
   { key: 'chrono', name: 'Chrono Luxe', short: 'CH', fit: 'Watches, jewelry, luxury accessories', primary: '#A67C52', accent: '#E8E0D5', bg: '#0E1117' },

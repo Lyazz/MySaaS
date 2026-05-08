@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../providers/billing_provider.dart';
 import '../widgets/buttons/app_button.dart';
+import '../theme/app_theme.dart';
 
 class BillingScreen extends ConsumerWidget {
   const BillingScreen({super.key});
@@ -12,36 +13,42 @@ class BillingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final billingState = ref.watch(billingProvider);
     final subscription = billingState.currentSubscription;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Billing & Subscription',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textPrimary),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Manage your plan and payment details',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: textMuted),
           ),
           const SizedBox(height: 32),
-          // Current Plan Card
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: surface1,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              border: Border.all(color: borderColor),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,38 +59,38 @@ class BillingScreen extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Current Plan',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey,
+                            color: textMuted,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           subscription?.planCode.toUpperCase() ?? 'NONE',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
+                            color: textPrimary,
                           ),
                         ),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.green[50],
+                        color: isDark ? AppColors.greenSurface : const Color(0xFFF0FDF4),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.green[200]!),
+                        border: Border.all(
+                          color: isDark ? AppColors.greenText.withValues(alpha: 0.3) : const Color(0xFFBBF7D0),
+                        ),
                       ),
                       child: Text(
                         subscription?.status ?? 'INACTIVE',
                         style: TextStyle(
-                          color: Colors.green[700],
+                          color: isDark ? AppColors.greenText : const Color(0xFF15803D),
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -92,30 +99,24 @@ class BillingScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const Divider(),
+                Divider(color: borderColor),
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    const Icon(
-                      LucideIcons.calendar,
-                      size: 20,
-                      color: Colors.grey,
-                    ),
+                    Icon(LucideIcons.calendar, size: 20, color: textMuted),
                     const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Next Billing Date',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(fontSize: 12, color: textMuted),
                         ),
                         Text(
                           subscription != null
-                              ? DateFormat.yMMMd().format(
-                                  subscription.nextBillingDate,
-                                )
+                              ? DateFormat.yMMMd().format(subscription.nextBillingDate)
                               : '-',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                          style: TextStyle(fontWeight: FontWeight.w600, color: textPrimary),
                         ),
                       ],
                     ),
@@ -125,12 +126,11 @@ class BillingScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 48),
-          const Text(
+          Text(
             'Available Plans',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textPrimary),
           ),
           const SizedBox(height: 16),
-          // Plans Grid
           LayoutBuilder(
             builder: (context, constraints) {
               return Row(
@@ -141,10 +141,12 @@ class BillingScreen extends ConsumerWidget {
                       margin: const EdgeInsets.only(right: 16),
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: isCurrent ? Colors.teal[50] : Colors.white,
+                        color: isCurrent
+                            ? AppColors.brand.withValues(alpha: isDark ? 0.08 : 0.06)
+                            : surface1,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isCurrent ? Colors.teal : Colors.grey[200]!,
+                          color: isCurrent ? AppColors.brand.withValues(alpha: 0.5) : borderColor,
                           width: isCurrent ? 2 : 1,
                         ),
                       ),
@@ -153,35 +155,32 @@ class BillingScreen extends ConsumerWidget {
                         children: [
                           Text(
                             plan.name,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             '\$${plan.price}/mo',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              color: textPrimary,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             plan.features,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
+                            style: TextStyle(fontSize: 14, color: textMuted),
                           ),
                           const SizedBox(height: 24),
                           AppButton.primary(
                             label: isCurrent ? 'Current' : 'Select',
                             onPressed: isCurrent
                                 ? null
-                                : () => ref
-                                      .read(billingProvider.notifier)
-                                      .upgradePlan(plan.code),
+                                : () => ref.read(billingProvider.notifier).upgradePlan(plan.code),
                             fullWidth: true,
                           ),
                         ],

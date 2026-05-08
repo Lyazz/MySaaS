@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../theme/app_theme.dart';
 
 class SmartCashSuggestions extends StatelessWidget {
   final double total;
@@ -96,6 +97,7 @@ class SmartCashSuggestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final suggestions = _getSuggestions();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Wrap(
       spacing: 8,
@@ -107,17 +109,18 @@ class SmartCashSuggestions extends StatelessWidget {
             isExact ? 'Exact' : currency.format(amount),
             style: TextStyle(
               fontWeight: isExact ? FontWeight.bold : FontWeight.w600,
-              color: isExact ? Colors.white : const Color(0xFF0F172A),
+              color: isExact ? AppColors.brandContrast : (isDark ? AppColors.textPrimary : const Color(0xFF0F172A)),
             ),
           ),
-          backgroundColor: isExact ? const Color(0xFF0D9488) : Colors.white,
+          backgroundColor: isExact
+              ? AppColors.brand
+              : (isDark ? AppColors.surface2 : Colors.white),
           side: isExact
               ? BorderSide.none
-              : const BorderSide(color: Color(0xFFE2E8F0)),
+              : BorderSide(color: isDark ? AppColors.surfaceBorder : const Color(0xFFE2E8F0)),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: Colors.grey.shade300),
           ),
           onPressed: () => onAmountSelected(amount),
         );

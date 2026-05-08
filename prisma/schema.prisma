@@ -290,7 +290,7 @@ model StoreSettings {
 
   logoUrl      String? // URL of the tenant's store logo
   faviconUrl   String? // URL of the tenant's store favicon
-  primaryColor String  @default("#0d9488") // teal-600
+  primaryColor String  @default("#65A30D") // lime-600
   templateKey  String  @default("modern") // e.g. classic | modern
   fontFamily   String  @default("Outfit")
   language     String  @default("fr") // ar | fr | en
@@ -773,6 +773,7 @@ model Sale {
   customerPhone   String?
   customerAddress String?
 
+  clientRequestId String?
   notes String?
 
   createdByUserId String?
@@ -789,6 +790,7 @@ model Sale {
 
   @@unique([tenantId, id])
   @@unique([tenantId, orderId])
+  @@unique([tenantId, clientRequestId])
   @@index([tenantId])
   @@index([tenantId, customerId])
 }
@@ -921,6 +923,7 @@ model Order {
 
   callStatus    String  @default("not_called")
   internalNotes String?
+  readAt        DateTime?
 
   deliveryMode         String            @default("home") // home | pickup | store
   shippingProvider     ShipmentProvider?
@@ -951,6 +954,7 @@ model Order {
   @@unique([tenantId, publicId])
   @@index([tenantId])
   @@index([tenantId, customerId])
+  @@index([tenantId, readAt])
 }
 
 model Customer {

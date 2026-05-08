@@ -109,7 +109,7 @@ Two-pane workspace, 8/12 + 4/12. At 2xl, bumps to 9/12 + 3/12 with denser sideba
 
 - **Tokens:** reuse existing `--surface-1/2/3`, `--brand`, `--brand-rgb`, `--text-primary/secondary/tertiary`, `--surface-border`. No new color system.
 - **Component classes:** reuse `ui-card`, `ui-card-header`, `ui-card-body`, `ui-btn`, `ui-btn--primary/secondary/danger/ghost`, `ui-badge--*`. No new global classes.
-- **Status anchor:** 4px left-border accent on the identity card colored by status (amber=PENDING, indigo=CONFIRMED, teal=SHIPPED, emerald=DELIVERED, red=CANCELLED, slate=RETURNED). Reuses the existing badge tone palette via the same CSS variables.
+- **Status anchor:** 4px left-border accent on the identity card colored by status (amber=PENDING, indigo=CONFIRMED, lime=SHIPPED, emerald=DELIVERED, red=CANCELLED, slate=RETURNED). Reuses the existing badge tone palette via the same CSS variables.
 - **Density:** the four big KPI tiles (Total / Shipping / With delivery / Items) collapse into a single horizontal totals strip in the identity card, separated by middle dots. Saves ~80px of vertical real estate on mobile.
 - **Iconography:** Lucide (already in use). Each section header has a 16px icon for scannability.
 - **Motion:** 200ms ease-out height transition for collapse/expand. The NBA button has a subtle 1.5s pulse on PENDING + callStatus=not_called to draw the eye; respects `prefers-reduced-motion`.

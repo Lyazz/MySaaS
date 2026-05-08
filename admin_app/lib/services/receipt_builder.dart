@@ -10,11 +10,14 @@ class ReceiptBuilder {
     required PrinterProfile profile,
     required List<CartItem> items,
     required double total,
+    double discountAmount = 0,
     Customer? customer,
     String? orderId,
     DateTime? date,
     ReceiptLayout? layout,
+    String currencyCode = 'DZD',
   }) async {
+    final money = NumberFormat.simpleCurrency(name: currencyCode);
     final effectiveLayout = layout ?? ReceiptLayout.standard();
 
     final CapabilityProfile capabilityProfile = await CapabilityProfile.load(
@@ -79,11 +82,11 @@ class ReceiptBuilder {
         bytes += generator.row([
           PosColumn(
             text:
-                '${item.quantity} x ${NumberFormat.simpleCurrency().format(item.price)}',
+                '${item.quantity} x ${money.format(item.price)}',
             width: 8,
           ),
           PosColumn(
-            text: NumberFormat.simpleCurrency().format(
+            text: money.format(
               item.price * item.quantity,
             ),
             width: 4,
@@ -141,6 +144,21 @@ class ReceiptBuilder {
     bytes += generator.hr();
 
     // 3. Totals
+    if (discountAmount > 0) {
+      bytes += generator.row([
+        PosColumn(
+          text: 'Discount',
+          width: 6,
+          styles: const PosStyles(bold: true),
+        ),
+        PosColumn(
+          text: '-${money.format(discountAmount)}',
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right, bold: true),
+        ),
+      ]);
+    }
+
     bytes += generator.row([
       PosColumn(
         text: 'TOTAL',
@@ -152,7 +170,7 @@ class ReceiptBuilder {
         ),
       ),
       PosColumn(
-        text: NumberFormat.simpleCurrency().format(total),
+        text: money.format(total),
         width: 6,
         styles: const PosStyles(
           height: PosTextSize.size2,

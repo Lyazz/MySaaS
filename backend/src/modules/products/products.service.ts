@@ -27,6 +27,14 @@ const normalizeImages = (images: unknown): string[] | undefined => {
     return normalized
 }
 
+const normalizeClientId = (value: unknown): string | undefined => {
+    if (value === undefined || value === null || value === '') return undefined
+    if (typeof value !== 'string') throw new Error('Invalid id')
+    const trimmed = value.trim()
+    if (!trimmed || trimmed.length > 100) throw new Error('Invalid id')
+    return trimmed
+}
+
 export class ProductsService {
     private inventory = new InventoryService()
 
@@ -346,6 +354,16 @@ export class ProductsService {
     }
 
     async createProduct(tenantId: string, data: any) {
+        const clientId = normalizeClientId(data?.id)
+        if (clientId) {
+            const existingById = await prisma.product.findUnique({
+                where: { id: clientId },
+                select: { tenantId: true }
+            })
+            if (existingById?.tenantId === tenantId) return await this.getProduct(tenantId, clientId)
+            if (existingById) throw new Error('Invalid id')
+        }
+
         // Check slug uniqueness within tenant
         const existing = await prisma.product.findUnique({
             where: {
@@ -370,6 +388,7 @@ export class ProductsService {
         const created = await prisma.$transaction(async (tx) => {
             const product = await tx.product.create({
                 data: {
+                    ...(clientId ? { id: clientId } : {}),
                     tenantId: tenantId,
                     title: data.title,
                     slug: data.slug,

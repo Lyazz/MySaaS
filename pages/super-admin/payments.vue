@@ -35,8 +35,8 @@
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center gap-4">
-          <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
-            <Icon name="lucide:building-2" class="h-5 w-5 text-teal-600" />
+          <div class="w-10 h-10 rounded-lg bg-lime-50 flex items-center justify-center">
+            <Icon name="lucide:building-2" class="h-5 w-5 text-lime-600" />
           </div>
           <div>
             <div class="text-2xl font-bold text-slate-900">{{ uniqueTenantCount }}</div>
@@ -68,7 +68,7 @@
 
         <!-- Loading -->
         <div v-if="loading" class="p-12 text-center">
-          <Icon name="lucide:loader-2" class="h-8 w-8 text-teal-500 animate-spin mx-auto mb-3" />
+          <Icon name="lucide:loader-2" class="h-8 w-8 text-lime-500 animate-spin mx-auto mb-3" />
           <p class="text-slate-500 text-sm">{{ t('superAdmin.paymentsPage.history.loading', 'Loading…') }}</p>
         </div>
 
@@ -108,11 +108,11 @@
                     :to="`/super-admin/tenants/${p.tenant.id}/payments`"
                     class="group flex items-center gap-2"
                   >
-                    <div class="w-7 h-7 rounded-md bg-teal-100 flex items-center justify-center shrink-0">
-                      <span class="text-xs font-bold text-teal-700">{{ p.tenant.name?.charAt(0).toUpperCase() }}</span>
+                    <div class="w-7 h-7 rounded-md bg-lime-100 flex items-center justify-center shrink-0">
+                      <span class="text-xs font-bold text-lime-700">{{ p.tenant.name?.charAt(0).toUpperCase() }}</span>
                     </div>
                     <div>
-                      <div class="font-semibold text-slate-800 text-sm group-hover:text-teal-700 transition-colors">{{ p.tenant.name }}</div>
+                      <div class="font-semibold text-slate-800 text-sm group-hover:text-lime-700 transition-colors">{{ p.tenant.name }}</div>
                       <div class="text-xs text-slate-400">{{ p.tenant.slug }}</div>
                     </div>
                   </NuxtLink>
@@ -141,7 +141,7 @@
                     :href="p.proofUrl"
                     target="_blank"
                     rel="noreferrer"
-                    class="inline-flex items-center gap-1 text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                    class="inline-flex items-center gap-1 text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                   >
                     <Icon name="lucide:external-link" class="h-3.5 w-3.5" />
                     {{ t('superAdmin.paymentsPage.history.proof.open', 'Open') }}
@@ -149,7 +149,7 @@
                   <button
                     v-else-if="p.proofUrl"
                     type="button"
-                    class="inline-flex items-center gap-1 text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                    class="inline-flex items-center gap-1 text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                     @click="openProof(p)"
                   >
                     <Icon name="lucide:external-link" class="h-3.5 w-3.5" />

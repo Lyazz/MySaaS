@@ -19,7 +19,7 @@
           v-model="searchQuery"
           type="text"
           :placeholder="t('superAdmin.tenants.search.placeholder')"
-          class="w-full px-4 py-3 pl-10 bg-white border border-slate-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+          class="w-full px-4 py-3 pl-10 bg-white border border-slate-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-500 shadow-sm"
         >
         <Icon name="lucide:search" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
@@ -116,7 +116,7 @@
                   </button>
                   <button
                     type="button"
-                    class="p-2 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded text-teal-700 transition-colors inline-flex items-center justify-center"
+                    class="p-2 bg-lime-50 hover:bg-lime-100 border border-lime-200 rounded text-lime-700 transition-colors inline-flex items-center justify-center"
                     :title="t('superAdmin.tenants.actions.payments')"
                     @click.stop="openPayments(tenant)"
                   >
@@ -179,7 +179,7 @@
               v-model="formData.name"
               type="text"
               required
-              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-lime-500"
               :placeholder="t('superAdmin.tenants.modal.fields.name.placeholder')"
             >
           </div>
@@ -191,7 +191,7 @@
               type="text"
               required
               :disabled="!!showEditModal"
-              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-50 disabled:bg-gray-100"
+              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-lime-500 disabled:opacity-50 disabled:bg-gray-100"
               :placeholder="t('superAdmin.tenants.modal.fields.slug.placeholder')"
             >
             <p class="text-xs text-gray-500 mt-1">
@@ -205,7 +205,7 @@
               v-model="formData.ownerEmail"
               type="email"
               required
-              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-lime-500"
               :placeholder="t('superAdmin.tenants.modal.fields.ownerEmail.placeholder')"
             >
           </div>
@@ -217,7 +217,7 @@
               type="password"
               required
               minlength="8"
-              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              class="w-full px-4 py-2 bg-white border border-slate-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-lime-500"
               placeholder="••••••••"
             >
           </div>
@@ -233,7 +233,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg text-white transition-colors disabled:opacity-50"
+              class="flex-1 px-4 py-2 bg-lime-600 hover:bg-lime-700 rounded-lg text-white transition-colors disabled:opacity-50"
             >
               {{ submitting ? t('admin.common.saving') : (showEditModal ? t('admin.common.update') : t('admin.common.create')) }}
             </button>

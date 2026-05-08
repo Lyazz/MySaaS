@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../theme/app_theme.dart';
 
 class AdminFormShell extends StatelessWidget {
   final String title;
@@ -18,14 +19,22 @@ class AdminFormShell extends StatelessWidget {
     required this.child,
     this.isEditing = false,
     this.error,
-    this.backPath = '/products', // Default, override as needed
+    this.backPath = '/products',
     this.backLabel = 'Back',
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final contentBg = isDark ? AppColors.contentBg : AppColors.lightContentBg;
+    final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Slate-50
+      backgroundColor: contentBg,
       body: SafeArea(
         child: Center(
           child: Container(
@@ -36,11 +45,7 @@ class AdminFormShell extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Breadcrumb and Header - Hidden on mobile to save space or adjust as needed
-                // For now, keeping logic similar to ProductFormScreen which hides breadcrumbs on very small screens if desired,
-                // but here we'll keep it simple and responsive.
                 if (MediaQuery.of(context).size.width > 600) ...[
-                  // Breadcrumb
                   Row(
                     children: [
                       Flexible(
@@ -56,19 +61,19 @@ class AdminFormShell extends StatelessWidget {
                             backLabel,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Color(0xFF475569),
+                            style: TextStyle(
+                              color: textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Icon(
                           LucideIcons.chevronRight,
                           size: 14,
-                          color: Color(0xFF94A3B8),
+                          color: textTertiary,
                         ),
                       ),
                       Flexible(
@@ -76,14 +81,12 @@ class AdminFormShell extends StatelessWidget {
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Color(0xFF94A3B8)),
+                          style: TextStyle(color: textTertiary),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
-
-                  // Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -95,10 +98,10 @@ class AdminFormShell extends StatelessWidget {
                               title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF1F2937), // Gray-800
+                                color: textPrimary,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -106,8 +109,8 @@ class AdminFormShell extends StatelessWidget {
                               subtitle,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Color(0xFF4B5563), // Gray-600
+                              style: TextStyle(
+                                color: textSecondary,
                                 fontSize: 14,
                               ),
                             ),
@@ -118,11 +121,10 @@ class AdminFormShell extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                 ] else ...[
-                  // Mobile Header (Simplified)
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(LucideIcons.arrowLeft),
+                        icon: Icon(LucideIcons.arrowLeft, color: textPrimary),
                         onPressed: () => context.pop(),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -132,10 +134,10 @@ class AdminFormShell extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
+                          color: textPrimary,
                         ),
                       ),
                     ],
@@ -148,37 +150,31 @@ class AdminFormShell extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 24),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2), // Red-50
-                      border: Border.all(
-                        color: const Color(0xFFFECACA),
-                      ), // Red-200
+                      color: AppColors.redSurface,
+                      border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       error!,
-                      style: const TextStyle(
-                        color: Color(0xFFB91C1C),
-                        fontSize: 14,
-                      ), // Red-700
+                      style: const TextStyle(color: AppColors.redText, fontSize: 14),
                     ),
                   ),
 
-                // Content Card
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: surface1,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFFE2E8F0),
-                      ), // Slate-200
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
+                      border: Border.all(color: borderColor),
+                      boxShadow: isDark
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),

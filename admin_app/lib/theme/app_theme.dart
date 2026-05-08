@@ -24,9 +24,14 @@ abstract final class AppColors {
   static const textMuted = Color(0xFF71717A); // Zinc-500
   static const textTertiary = Color(0xFF52525B); // Zinc-600
 
+  // Dark mode nav
+  static const navHoverBg = Color(0x0AFFFFFF); // rgba(255,255,255,0.04)
+  static const sidebarActiveColor = brand; // --sidebar-active-color dark
+
   // Light mode layout/surfaces
   static const lightContentBg = Color(0xFFE6EDF4);
   static const lightSidebarBg = Color(0xFFF4F7FB);
+  static const lightSidebarBorder = Color(0x1A0F172A); // rgba(15,23,42,0.1)
   static const lightSurface1 = Color(0xFFFBFDFF);
   static const lightSurface2 = Color(0xFFF3F7FB);
   static const lightSurface3 = Color(0xFFEAF0F6);
@@ -34,7 +39,11 @@ abstract final class AppColors {
   static const lightSurfaceBorderHover = Color(0x2E0F172A);
   static const lightTextPrimary = Color(0xFF0F172A);
   static const lightTextSecondary = Color(0xFF334155);
+  static const lightTextTertiary = Color(0xFF64748B); // --text-tertiary light
   static const lightTextMuted = Color(0xFF94A3B8);
+  static const lightNavHoverBg = Color(0x0F0F172A); // rgba(15,23,42,0.06)
+  static const lightSidebarActiveColor = Color(0xFF5A7A0A); // --sidebar-active-color light
+  static const lightTopbarBg = Color(0xFFF8FBFF); // --admin-topbar-bg light
 
   // Status (same across themes)
   static const red = Color(0xFFEF4444);

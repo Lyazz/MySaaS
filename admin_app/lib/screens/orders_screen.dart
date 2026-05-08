@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../theme/app_theme.dart';
 import '../models/order.dart';
 import '../providers/orders_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/responsive_server_paginated_table.dart';
 import '../widgets/form/date_range_filter_field.dart';
@@ -88,12 +91,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/pos'),
-              backgroundColor: const Color(0xFF0F172A), // Slate-900
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: AppColors.brand,
+              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
             )
           : null,
       body: SingleChildScrollView(
@@ -132,7 +134,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Column(
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -140,14 +142,14 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF111827), // Gray-900
+                color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               'Manage customer orders',
-              style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -282,23 +284,23 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.clipboardList, size: 48, color: Colors.grey[400]),
+            Icon(LucideIcons.clipboardList, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'No orders found',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827), // Gray-900
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               hint,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF6B7280), // Gray-500
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -308,7 +310,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   }
 
   Widget _buildOrdersTable(OrdersState ordersState) {
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
 
     return ResponsiveServerPaginatedTable<Order>(
       items: ordersState.orders,
@@ -352,10 +356,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                   onTap: () => context.push('/orders/${order.id}'),
                   child: Text(
                     '#$shortId',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: Color(0xFF0F172A), // Slate-900
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -365,10 +369,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 child: order.customerId == null || order.customerId!.isEmpty
                     ? Text(
                         order.customerName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
-                          color: Color(0xFF0F172A), // Slate-900
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       )
                     : InkWell(
@@ -376,10 +380,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                             context.push('/customers/${order.customerId}'),
                         child: Text(
                           order.customerName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
-                            color: Color(0xFF0F172A), // Slate-900
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -389,9 +393,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 child: Text(
                   order.customerPhone.isEmpty ? '-' : order.customerPhone,
                   style: TextStyle(
-                    color: order.customerPhone.isEmpty
-                        ? const Color(0xFF94A3B8) // Slate-400
-                        : const Color(0xFF475569), // Slate-600
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: order.customerPhone.isEmpty ? 0.3 : 0.6),
                     fontSize: 13,
                   ),
                 ),
@@ -400,10 +402,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 flex: 2,
                 child: Text(
                   money.format(order.totalAmount),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    color: Color(0xFF0F172A), // Slate-900
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -418,8 +420,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 flex: 2,
                 child: Text(
                   DateFormat.yMMMd().add_jm().format(order.createdAt),
-                  style: const TextStyle(
-                    color: Color(0xFF64748B), // Slate-500
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
@@ -446,8 +448,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   Widget _headerText(String text) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Color(0xFF6B7280), // Gray-500
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
         fontSize: 12,
         fontWeight: FontWeight.w600,
       ),
@@ -459,12 +461,13 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   }
 
   Widget _card({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

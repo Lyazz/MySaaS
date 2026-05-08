@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../models/receipt_layout.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/form/form_input.dart';
 import '../../widgets/buttons/app_button.dart';
 
@@ -97,14 +98,14 @@ class _ReceiptLayoutEditorState extends State<ReceiptLayoutEditor> {
                   ],
                   labelColor: Color(0xFF0F172A),
                   unselectedLabelColor: Colors.grey,
-                  indicatorColor: Color(0xFF0D9488),
+                  indicatorColor: Color(0xFF65A30D),
                 ),
                 actions: [
                   IconButton(
                     onPressed: () => widget.onSave(currentLayout),
                     icon: const Icon(
                       LucideIcons.save,
-                      color: Color(0xFF0D9488),
+                      color: Color(0xFF65A30D),
                     ),
                   ),
                 ],

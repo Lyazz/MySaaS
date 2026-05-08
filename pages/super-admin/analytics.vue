@@ -9,7 +9,7 @@
         <h2 class="text-xl font-semibold text-gray-800 mb-4">
           Total Platform Revenue
         </h2>
-        <div class="text-5xl font-bold text-teal-600">
+        <div class="text-5xl font-bold text-lime-600">
           {{ formatMoney(revenueStats?.totalRevenue) }}
         </div>
         <p class="text-gray-500 mt-2">
@@ -23,7 +23,7 @@
           icon="🏢"
           label="Active Tenants"
           :value="platformStats?.tenants || 0"
-          color="teal"
+          color="lime"
           class="bg-white border border-slate-200 shadow-sm"
         />
         <StatsCard
@@ -85,7 +85,7 @@
               </p>
             </div>
             <div class="text-right">
-              <p class="text-2xl font-bold text-teal-600">
+              <p class="text-2xl font-bold text-lime-600">
                 {{ formatMoney(item.revenue) }}
               </p>
               <p class="text-gray-500 text-sm">
@@ -155,7 +155,7 @@
                     {{ tenant.slug }}
                   </p>
                 </td>
-                <td class="px-4 py-3 text-right text-teal-600 font-semibold">
+                <td class="px-4 py-3 text-right text-lime-600 font-semibold">
                   {{ formatMoney(tenant.revenue) }}
                 </td>
                 <td class="px-4 py-3 text-right text-gray-600">

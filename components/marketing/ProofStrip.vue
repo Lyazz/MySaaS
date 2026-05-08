@@ -7,7 +7,7 @@ defineProps<{
 
 const toneClasses: Record<MarketingTone, string> = {
   cobalt: 'from-[#3559ff]/25 to-transparent text-[#8fa7ff]',
-  teal: 'from-[#16d5b3]/25 to-transparent text-[#77f0da]',
+  lime: 'from-[#84CC16]/25 to-transparent text-[#BEF264]',
   orange: 'from-[#ff8a4c]/25 to-transparent text-[#ffb38e]',
   neutral: 'from-white/10 to-transparent text-white/75'
 }

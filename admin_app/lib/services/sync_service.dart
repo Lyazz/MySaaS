@@ -6,7 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:dio/dio.dart' show Options;
-import 'package:sqflite_sqlcipher/sqflite.dart' show Sqflite;
+import 'package:sqflite_sqlcipher/sqflite.dart' show ConflictAlgorithm, Sqflite;
 
 import '../models/app_mode.dart';
 import '../utils/image_storage_manager.dart';
@@ -76,11 +76,7 @@ class SyncState {
   final int failed;
   final bool isSyncing;
 
-  const SyncState({
-    this.pending = 0,
-    this.failed = 0,
-    this.isSyncing = false,
-  });
+  const SyncState({this.pending = 0, this.failed = 0, this.isSyncing = false});
 }
 
 class SyncService {
@@ -115,14 +111,14 @@ class SyncService {
   void _ensureConnectivityListener() {
     if (_connectivityInitialized) return;
     _connectivityInitialized = true;
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-      (List<ConnectivityResult> results) {
-        if (_mode == AppMode.offlineOnly) return;
-        if (results.any((r) => r != ConnectivityResult.none)) {
-          _checkAndSync();
-        }
-      },
-    );
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
+      if (_mode == AppMode.offlineOnly) return;
+      if (results.any((r) => r != ConnectivityResult.none)) {
+        _checkAndSync();
+      }
+    });
   }
 
   Future<bool> get isOnline async {
@@ -140,6 +136,11 @@ class SyncService {
     String? idempotencyKey,
   }) async {
     final tenantId = TenantModeService().activeTenantId;
+    if (tenantId.trim().isEmpty) {
+      throw StateError(
+        'Cannot enqueue sync operation without an active tenant',
+      );
+    }
     final db = await _dbService.database;
     final operation = SyncOperation(
       id: const Uuid().v4(),
@@ -186,9 +187,12 @@ class SyncService {
       );
 
       for (final opMap in pendingOps) {
-        await _processOperation(SyncOperation.fromMap(
-          opMap.cast<String, dynamic>(),
-        ));
+        await _processOperation(
+          SyncOperation.fromMap(opMap.cast<String, dynamic>()),
+        );
+      }
+      if (tenantId.trim().isNotEmpty) {
+        await _pullRemoteChanges(tenantId);
       }
     } finally {
       _isSyncing = false;
@@ -202,26 +206,28 @@ class SyncService {
     await db.update(
       'sync_queue',
       {'status': SyncStatus.syncing.name},
-      where: 'id = ?',
-      whereArgs: [op.id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [op.id, op.tenantId],
     );
 
     try {
       final resolved = await _processImagesInPayload(op);
       await _executeApiCall(resolved);
-      await db.delete('sync_queue', where: 'id = ?', whereArgs: [op.id]);
+      await _markLocalOperationSynced(resolved);
+      await db.delete(
+        'sync_queue',
+        where: 'id = ? AND tenantId = ?',
+        whereArgs: [op.id, op.tenantId],
+      );
     } catch (e) {
       final newRetryCount = op.retryCount + 1;
       final backoffSeconds = _backoffSeconds(newRetryCount);
 
       await db.update(
         'sync_queue',
-        {
-          'status': SyncStatus.failed.name,
-          'retryCount': newRetryCount,
-        },
-        where: 'id = ?',
-        whereArgs: [op.id],
+        {'status': SyncStatus.failed.name, 'retryCount': newRetryCount},
+        where: 'id = ? AND tenantId = ?',
+        whereArgs: [op.id, op.tenantId],
       );
 
       // Schedule retry with exponential backoff (non-blocking).
@@ -278,8 +284,8 @@ class SyncService {
     await db.update(
       'sync_queue',
       {'payload': jsonEncode(processed)},
-      where: 'id = ?',
-      whereArgs: [op.id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [op.id, op.tenantId],
     );
 
     return SyncOperation(
@@ -308,13 +314,41 @@ class SyncService {
     switch (op.entityType) {
       case 'sale':
         if (op.action == 'create') {
-          await client.post('/admin/pos/sales', data: op.payload, options: opts);
+          await client.post(
+            '/admin/pos/sales',
+            data: op.payload,
+            options: opts,
+          );
         }
       case 'customer':
         if (op.action == 'create') {
-          await client.post('/admin/customers', data: op.payload, options: opts);
+          await client.post(
+            '/admin/customers',
+            data: op.payload,
+            options: opts,
+          );
         } else if (op.action == 'update') {
           await client.put('/admin/customers/$id', data: op.payload);
+        }
+      case 'product':
+        if (op.action == 'create') {
+          await client.post('/admin/products', data: op.payload, options: opts);
+        } else if (op.action == 'update') {
+          await client.put('/admin/products/$id', data: op.payload);
+        } else if (op.action == 'delete') {
+          await client.delete('/admin/products/$id');
+        }
+      case 'category':
+        if (op.action == 'create') {
+          await client.post(
+            '/admin/categories',
+            data: op.payload,
+            options: opts,
+          );
+        } else if (op.action == 'update') {
+          await client.put('/admin/categories/$id', data: op.payload);
+        } else if (op.action == 'delete') {
+          await client.delete('/admin/categories/$id');
         }
       case 'user':
         if (op.action == 'create') {
@@ -326,7 +360,11 @@ class SyncService {
         }
       case 'supplier':
         if (op.action == 'create') {
-          await client.post('/admin/suppliers', data: op.payload, options: opts);
+          await client.post(
+            '/admin/suppliers',
+            data: op.payload,
+            options: opts,
+          );
         } else if (op.action == 'update') {
           await client.put('/admin/suppliers/$id', data: op.payload);
         } else if (op.action == 'delete') {
@@ -347,7 +385,11 @@ class SyncService {
         }
       case 'receiptLayout':
         if (op.action == 'create') {
-          await client.post('/admin/receipt-layouts', data: op.payload, options: opts);
+          await client.post(
+            '/admin/receipt-layouts',
+            data: op.payload,
+            options: opts,
+          );
         } else if (op.action == 'update') {
           await client.put('/admin/receipt-layouts/$id', data: op.payload);
         } else if (op.action == 'delete') {
@@ -355,7 +397,11 @@ class SyncService {
         }
       case 'printerProfile':
         if (op.action == 'create') {
-          await client.post('/admin/printer-profiles', data: op.payload, options: opts);
+          await client.post(
+            '/admin/printer-profiles',
+            data: op.payload,
+            options: opts,
+          );
         } else if (op.action == 'update') {
           await client.put('/admin/printer-profiles/$id', data: op.payload);
         } else if (op.action == 'delete') {
@@ -363,7 +409,11 @@ class SyncService {
         }
       case 'staffRole':
         if (op.action == 'create') {
-          await client.post('/admin/staff-roles', data: op.payload, options: opts);
+          await client.post(
+            '/admin/staff-roles',
+            data: op.payload,
+            options: opts,
+          );
         } else if (op.action == 'update') {
           await client.patch('/admin/staff-roles/$id', data: op.payload);
         } else if (op.action == 'delete') {
@@ -395,14 +445,25 @@ class SyncService {
       case 'purchase':
         final pid = op.payload['purchaseId'];
         if (op.action == 'createDraft') {
-          await client.post('/admin/purchases', data: op.payload, options: opts);
+          await client.post(
+            '/admin/purchases',
+            data: op.payload,
+            options: opts,
+          );
         } else if (op.action == 'addItem') {
-          await client.post('/admin/purchases/$pid/items', data: op.payload, options: opts);
+          await client.post(
+            '/admin/purchases/$pid/items',
+            data: op.payload,
+            options: opts,
+          );
         } else if (op.action == 'receiveItem') {
           await client.post('/admin/purchases/$pid/receive', data: op.payload);
         } else if (op.action == 'updateItem') {
           final iid = op.payload['itemId'];
-          await client.put('/admin/purchases/$pid/items/$iid', data: op.payload);
+          await client.put(
+            '/admin/purchases/$pid/items/$iid',
+            data: op.payload,
+          );
         } else if (op.action == 'removeItem') {
           final iid = op.payload['itemId'];
           await client.delete('/admin/purchases/$pid/items/$iid');
@@ -416,23 +477,280 @@ class SyncService {
     }
   }
 
+  Future<String?> _readMetadata(String tenantId, String key) async {
+    final db = await _dbService.database;
+    final rows = await db.query(
+      'sync_metadata',
+      columns: ['value'],
+      where: 'tenantId = ? AND key = ?',
+      whereArgs: [tenantId, key],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['value']?.toString();
+  }
+
+  Future<void> _writeMetadata(
+    String tenantId,
+    String key,
+    String? value,
+  ) async {
+    final db = await _dbService.database;
+    await db.insert('sync_metadata', {
+      'tenantId': tenantId,
+      'key': key,
+      'value': value,
+      'updatedAt': DateTime.now().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> _pullRemoteChanges(String tenantId) async {
+    if (_apiService == null) return;
+
+    try {
+      final since = await _readMetadata(tenantId, 'lastPullAt');
+      final response = await _apiService!.client.get(
+        '/admin/sync/pull',
+        queryParameters: {
+          if (since != null && since.trim().isNotEmpty) 'since': since,
+        },
+      );
+      final data = response.data;
+      if (data is! Map) return;
+
+      final changes = data['changes'];
+      if (changes is! Map) return;
+
+      final db = await _dbService.database;
+      await db.transaction((txn) async {
+        for (final raw in _asList(changes['categories'])) {
+          final c = _asMap(raw);
+          if (c == null) continue;
+          final id = _string(c['id']);
+          if (id.isEmpty) continue;
+          if (await _hasPendingLocalRow(txn, 'categories', tenantId, id)) {
+            continue;
+          }
+          final countRaw = c['_count'];
+          final count = countRaw is Map
+              ? _int(countRaw['products'])
+              : _int(c['productCount']);
+          await txn.insert('categories', {
+            'id': id,
+            'tenantId': tenantId,
+            'title': _string(c['title']),
+            'slug': _string(c['slug']),
+            'imageUrl': c['imageUrl']?.toString(),
+            'productCount': count,
+            'createdAt': c['createdAt']?.toString(),
+            'syncStatus': SyncStatus.synced.name,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        for (final raw in _asList(changes['products'])) {
+          final p = _asMap(raw);
+          if (p == null) continue;
+          final id = _string(p['id']);
+          if (id.isEmpty) continue;
+          if (await _hasPendingLocalRow(txn, 'products', tenantId, id)) {
+            continue;
+          }
+          final images = _asList(p['images']);
+          await txn.insert('products', {
+            'id': id,
+            'tenantId': tenantId,
+            'title': _string(p['title']),
+            'slug': _string(p['slug']),
+            'miniDescription': p['miniDescription']?.toString(),
+            'description': p['description']?.toString(),
+            'price': _double(p['price']),
+            'stock': _int(p['stock']),
+            'lowStockThreshold': _int(p['lowStockThreshold'], fallback: 5),
+            'isActive': p['isActive'] == true ? 1 : 0,
+            'categoryId': p['categoryId']?.toString(),
+            'mainImageUrl': images.isNotEmpty ? images.first.toString() : null,
+            'syncStatus': SyncStatus.synced.name,
+            'optionsJson': jsonEncode(_asList(p['options'])),
+            'variantsJson': jsonEncode(_asList(p['variants'])),
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        for (final raw in _asList(changes['customers'])) {
+          final c = _asMap(raw);
+          if (c == null) continue;
+          final id = _string(c['id']);
+          if (id.isEmpty) continue;
+          if (await _hasPendingLocalRow(txn, 'customers', tenantId, id)) {
+            continue;
+          }
+          await txn.insert('customers', {
+            'id': id,
+            'tenantId': tenantId,
+            'name': _string(c['name']),
+            'email': c['email']?.toString(),
+            'phone': c['phone']?.toString(),
+            'address': c['address']?.toString(),
+            'totalSpent': _double(c['totalSpent']),
+            'ordersCount': _int(c['ordersCount']),
+            'syncStatus': SyncStatus.synced.name,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        for (final raw in _asList(changes['orders'])) {
+          final o = _asMap(raw);
+          if (o == null) continue;
+          final id = _string(o['id']);
+          if (id.isEmpty) continue;
+          if (await _hasPendingLocalRow(txn, 'orders', tenantId, id)) {
+            continue;
+          }
+          await txn.insert('orders', {
+            'id': id,
+            'tenantId': tenantId,
+            'status': _string(o['status']),
+            'total': _double(o['totalAmount']),
+            'createdAt': o['createdAt']?.toString(),
+            'customerName': o['customerName']?.toString(),
+            'customerPhone': o['customerPhone']?.toString(),
+            'shippingAddress': o['customerAddress']?.toString(),
+            'itemsJson': jsonEncode(_asList(o['items'])),
+            'syncStatus': SyncStatus.synced.name,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+
+        for (final raw in _asList(changes['sales'])) {
+          final s = _asMap(raw);
+          if (s == null) continue;
+          final id = _string(s['id']);
+          if (id.isEmpty) continue;
+          if (await _hasPendingLocalRow(txn, 'sales', tenantId, id)) {
+            continue;
+          }
+          await txn.insert('sales', {
+            'id': id,
+            'tenantId': tenantId,
+            'customerId': s['customerId']?.toString(),
+            'total': _double(s['totalAmount']),
+            'status': _string(s['status']),
+            'createdAt': s['createdAt']?.toString(),
+            'payloadJson': jsonEncode({
+              'items': _asList(s['items']),
+              'customerName': s['customerName'],
+              'customerPhone': s['customerPhone'],
+              'type': s['type'],
+            }),
+            'syncStatus': SyncStatus.synced.name,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+      });
+
+      final serverTime = data['serverTime']?.toString();
+      if (serverTime != null && serverTime.trim().isNotEmpty) {
+        await _writeMetadata(tenantId, 'lastPullAt', serverTime);
+      }
+    } catch (_) {
+      // Pull failures must not block queued writes; the next connectivity tick retries.
+    }
+  }
+
+  List<dynamic> _asList(dynamic value) => value is List ? value : const [];
+
+  Map<String, dynamic>? _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return value.cast<String, dynamic>();
+    return null;
+  }
+
+  Future<bool> _hasPendingLocalRow(
+    dynamic txn,
+    String table,
+    String tenantId,
+    String id,
+  ) async {
+    final rows = await txn.query(
+      table,
+      columns: ['syncStatus'],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, tenantId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return false;
+    return rows.first['syncStatus']?.toString() != SyncStatus.synced.name;
+  }
+
+  String _string(dynamic value) => value?.toString() ?? '';
+
+  int _int(dynamic value, {int fallback = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
+  }
+
+  double _double(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  Future<void> _markLocalOperationSynced(SyncOperation op) async {
+    final table = switch (op.entityType) {
+      'sale' => 'sales',
+      'customer' => 'customers',
+      'product' => 'products',
+      'category' => 'categories',
+      'user' => 'users',
+      'supplier' => 'suppliers',
+      'order' => 'orders',
+      'receiptLayout' => 'receipt_layouts',
+      'printerProfile' => 'printer_profiles',
+      'staffRole' => 'staff_roles',
+      'purchase' => 'purchases',
+      _ => null,
+    };
+    if (table == null) return;
+
+    final localId =
+        (op.payload['offlineId'] ??
+                op.payload['id'] ??
+                op.payload['purchaseId'])
+            ?.toString()
+            .trim();
+    if (localId == null || localId.isEmpty) return;
+
+    final db = await _dbService.database;
+    await db.update(
+      table,
+      {'syncStatus': SyncStatus.synced.name},
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [localId, op.tenantId],
+    );
+  }
+
   Future<void> _emitState({bool syncing = false}) async {
     try {
       final tenantId = TenantModeService().activeTenantId;
       final db = await _dbService.database;
-      final pending = Sqflite.firstIntValue(await db.rawQuery(
-        "SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND status = ?",
-        [tenantId, SyncStatus.pending.name],
-      )) ?? 0;
-      final failed = Sqflite.firstIntValue(await db.rawQuery(
-        "SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND status = ? AND retryCount < ?",
-        [tenantId, SyncStatus.failed.name, _maxRetries],
-      )) ?? 0;
-      _syncStateController.add(SyncState(
-        pending: pending,
-        failed: failed,
-        isSyncing: syncing || _isSyncing,
-      ));
+      final pending =
+          Sqflite.firstIntValue(
+            await db.rawQuery(
+              "SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND status = ?",
+              [tenantId, SyncStatus.pending.name],
+            ),
+          ) ??
+          0;
+      final failed =
+          Sqflite.firstIntValue(
+            await db.rawQuery(
+              "SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND status = ? AND retryCount < ?",
+              [tenantId, SyncStatus.failed.name, _maxRetries],
+            ),
+          ) ??
+          0;
+      _syncStateController.add(
+        SyncState(
+          pending: pending,
+          failed: failed,
+          isSyncing: syncing || _isSyncing,
+        ),
+      );
     } catch (_) {}
   }
 

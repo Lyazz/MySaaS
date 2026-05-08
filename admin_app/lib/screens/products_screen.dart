@@ -10,12 +10,15 @@ import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/badges/ui_badge.dart';
+import '../theme/app_theme.dart';
+import '../providers/store_settings_provider.dart';
 
 // Filter Notifiers
 class CategoryFilterNotifier extends Notifier<String> {
@@ -93,12 +96,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: (isMobile && !isOfflineTenant)
           ? FloatingActionButton(
               onPressed: () => context.go('/products/create'),
-              backgroundColor: const Color(0xFF0F172A), // Slate-900
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: AppColors.brand,
+              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
             )
           : null,
       body: Column(
@@ -237,12 +239,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildActionsRow() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Row(
         children: [
@@ -320,7 +323,6 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       label: 'admin.pages.products.index.sort.sortBy'.tr(),
                       showLabel: false,
                       value: sortBy,
-                      fillColor: const Color(0xFFF3F4F6),
                       borderless: true,
                       borderRadius: 6,
                       contentPadding: const EdgeInsets.symmetric(
@@ -500,7 +502,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surface2 : AppColors.lightSurface2,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -746,6 +748,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 48),
@@ -755,7 +758,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9), // Slate-100
+                color: isDark ? AppColors.surface3 : const Color(0xFFF1F5F9),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -981,14 +984,18 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildProductRow(BuildContext context, Product product) {
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
     final rawImageUrl = product.mainImageUrl;
     final imageUrl = rawImageUrl == null
         ? null
         : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
     final isSelected = _selectedProductIds.contains(product.id);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      color: isSelected ? const Color(0xFFF0FDFA) : null, // Teal-50-ish
+      color: isSelected ? AppColors.brand.withValues(alpha: 0.06) : null,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
@@ -1015,10 +1022,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
+                    color: isDark ? AppColors.surface3 : const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFFE5E7EB),
+                      color: isDark ? AppColors.surfaceBorder : const Color(0xFFE5E7EB),
                       width: 1,
                     ),
                     image: imageUrl != null
@@ -1093,7 +1100,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                '\$${product.price.toStringAsFixed(2)}',
+                money.format(product.price),
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF111827),
@@ -1147,7 +1154,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     ),
                     _LinkButton(
                       icon: LucideIcons.externalLink,
-                      color: const Color(0xFF0D9488), // Teal-600
+                      color: const Color(0xFF65A30D), // Lime-600
                       tooltip: 'admin.pages.products.index.links.openProduct'
                           .tr(),
                       onPressed: () {
@@ -1200,7 +1207,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     ),
                     _LinkButton(
                       icon: LucideIcons.externalLink,
-                      color: const Color(0xFF0D9488), // Teal-600
+                      color: const Color(0xFF65A30D), // Lime-600
                       tooltip: 'admin.pages.products.index.links.openLanding'
                           .tr(),
                       onPressed: () {
@@ -1304,7 +1311,7 @@ class _LinkButtonState extends State<_LinkButton> {
       onExit: (_) => setState(() => _isHovered = false),
       child: IconButton(
         icon: Icon(widget.icon, size: 14),
-        color: _isHovered ? widget.color.withOpacity(0.8) : widget.color,
+        color: _isHovered ? widget.color.withValues(alpha: 0.8) : widget.color,
         onPressed: widget.onPressed,
         padding: const EdgeInsets.all(4),
         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),

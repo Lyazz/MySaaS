@@ -36,6 +36,7 @@ import staffRolesRouter from './modules/staff-roles/routes'
 import filesRouter from './modules/files/routes'
 import loyaltyRouter from './modules/loyalty/routes'
 import googleOAuthRouter from './modules/google-oauth/routes'
+import syncRouter from './modules/sync/routes'
 
 const router = Router()
 
@@ -84,6 +85,7 @@ router.use('/admin/users', usersRouter)
 router.use('/admin/staff-roles', staffRolesRouter)
 router.use('/admin/audit-logs', adminAuditLogsRouter)
 router.use('/admin/loyalty', loyaltyRouter)
+router.use('/admin/sync', syncRouter)
 
 // Super Admin
 router.use('/super-admin', superAdminRouter)

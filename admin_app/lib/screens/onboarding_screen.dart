@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 
 class _ChecklistItem {
   final String id;
@@ -73,6 +74,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final done = _items.where((i) => i.done).length;
     final total = _items.length;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Setup Checklist')),
@@ -124,12 +126,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           margin: const EdgeInsets.only(bottom: 10),
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: item.done
-                                  ? const Color(0xFF6EE7B7)
-                                  : const Color(0xFFE2E8F0),
+                                  ? (isDark ? AppColors.greenText.withValues(alpha: 0.4) : const Color(0xFF6EE7B7))
+                                  : (isDark ? AppColors.surfaceBorder : const Color(0xFFE2E8F0)),
                             ),
                           ),
                           child: Row(

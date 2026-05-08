@@ -831,6 +831,7 @@ import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } fro
 import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
 import { buildProductPricing, buildScopedProductPricing, toFiniteNumber } from '~/shared/pricing/product-pricing'
 import { useOrderNBA, type NBAAction } from '~/composables/admin/useOrderNBA'
+import { useOrderUnreadCount } from '~/composables/useOrderUnreadCount'
 
 definePageMeta({
   middleware: 'auth',
@@ -845,6 +846,7 @@ const route = useRoute()
 const router = useRouter()
 const orderId = route.params.id as string
 const { t, locale } = useI18n({ useScope: 'global' })
+const { markOrderAsRead } = useOrderUnreadCount()
 
 interface OrderItem {
   id: string
@@ -1638,6 +1640,11 @@ async function fetchOrder() {
     newStatus.value = data.status
     editing.value = false
     editErrorMessage.value = ''
+    try {
+      await markOrderAsRead(orderId)
+    } catch (markReadError) {
+      console.error('Failed to mark order as read:', markReadError)
+    }
   } catch (error: any) {
     console.error('Failed to fetch order:', error)
     order.value = null

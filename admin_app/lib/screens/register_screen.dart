@@ -339,7 +339,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(width: 8),
               Expanded(child: _buildMetric(palette, '99.9%', 'Uptime')),
               const SizedBox(width: 8),
-              Expanded(child: _buildMetric(palette, 'DZD', 'COD Local')),
+              Expanded(child: _buildMetric(palette, 'LOCAL', 'COD Local')),
             ],
           ),
           const Spacer(),

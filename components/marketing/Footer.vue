@@ -40,7 +40,7 @@ const trustSignals = computed(() => [
                 :key="signal.label"
                 class="marketing-pill"
               >
-                <Icon :name="signal.icon" class="h-3.5 w-3.5 text-[#16d5b3]" />
+                <Icon :name="signal.icon" class="h-3.5 w-3.5 text-[#84CC16]" />
                 {{ signal.label }}
               </span>
             </div>

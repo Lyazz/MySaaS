@@ -1268,7 +1268,8 @@
       "homepage": "Page d’accueil",
       "contactInfo": "Infos de contact",
       "functional": "Fonctionnel",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "storeParameters": "Paramètres de la boutique"
     },
     "roles": {
       "owner": "Propriétaire",
@@ -1435,7 +1436,7 @@
           "order": "Commande {index}"
         },
         "customer": {
-          "addClient": "Ajouter client",
+          "addClient": "Choisir ou creer un client",
           "defaultClient": "Client par défaut"
         },
         "variants": {

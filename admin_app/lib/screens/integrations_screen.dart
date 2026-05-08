@@ -6,6 +6,7 @@ import '../models/integration.dart';
 import '../providers/integrations_provider.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
+import '../theme/app_theme.dart';
 
 class IntegrationsScreen extends ConsumerWidget {
   const IntegrationsScreen({super.key});
@@ -171,14 +172,15 @@ class _IntegrationCardState extends ConsumerState<_IntegrationCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isActive = widget.integration.isActive;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 480, minWidth: 300),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

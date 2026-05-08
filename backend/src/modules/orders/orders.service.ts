@@ -819,6 +819,48 @@ export class OrdersService {
         }
     }
 
+    async getUnreadCount(tenantId: string) {
+        return prisma.order.count({
+            where: {
+                tenantId,
+                readAt: null
+            }
+        })
+    }
+
+    async markAsRead(tenantId: string, id: string) {
+        const existing = await prisma.order.findFirst({
+            where: { tenantId, id },
+            select: { id: true, readAt: true }
+        })
+
+        if (!existing) {
+            throw new OrderValidationError(404, 'Order not found')
+        }
+
+        if (existing.readAt) {
+            return {
+                id: existing.id,
+                readAt: existing.readAt
+            }
+        }
+
+        const readAt = new Date()
+        await prisma.order.updateMany({
+            where: {
+                tenantId,
+                id,
+                readAt: null
+            },
+            data: { readAt }
+        })
+
+        return {
+            id,
+            readAt
+        }
+    }
+
     async findById(tenantId: string, id: string) {
         return prisma.order.findFirst({
             where: { id, tenantId },
@@ -2347,7 +2389,8 @@ export class OrdersService {
                     earnedPointsTotal: pointsPreview.totalPoints,
                     redeemedPointsTotal: redemption.pointsReserved,
                     redeemedAmount: redemption.redeemedAmount,
-                    status: 'PENDING'
+                    status: 'PENDING',
+                    readAt: null
                 }
             })
 
@@ -2781,7 +2824,8 @@ export class OrdersService {
                     totalAmount,
                     totalWithShippingAmount,
                     earnedPointsTotal: pointsPreview.totalPoints,
-                    status: 'PENDING'
+                    status: 'PENDING',
+                    readAt: new Date()
                 }
             })
 

@@ -43,13 +43,15 @@ class PrintService {
     required PrinterProfile profile,
     required List<CartItem> items,
     required double total,
+    double discountAmount = 0,
     Customer? customer,
     String? orderId,
     ReceiptLayout? layout,
+    String currencyCode = 'DZD',
   }) async {
     if (profile.transport == PrinterTransport.pdf) {
       // Handle PDF/System Printing separately
-      await _printPdf(items, total, customer, orderId);
+      await _printPdf(items, total, discountAmount, customer, orderId);
       return;
     }
 
@@ -58,9 +60,11 @@ class PrintService {
       profile: profile,
       items: items,
       total: total,
+      discountAmount: discountAmount,
       customer: customer,
       orderId: orderId,
       layout: layout,
+      currencyCode: currencyCode,
     );
 
     // 2. Get Sender
@@ -73,6 +77,7 @@ class PrintService {
   Future<void> _printPdf(
     List<CartItem> items,
     double total,
+    double discountAmount,
     Customer? customer,
     String? orderId,
   ) async {
@@ -102,13 +107,19 @@ class PrintService {
                   children: [
                     pw.Expanded(child: pw.Text(item.name)),
                     pw.Text('x${item.quantity}'),
-                    pw.Text(
-                      (item.price * item.quantity).toStringAsFixed(2),
-                    ),
+                    pw.Text((item.price * item.quantity).toStringAsFixed(2)),
                   ],
                 ),
               ),
               pw.Divider(),
+              if (discountAmount > 0)
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Text('Discount'),
+                    pw.Text('-${discountAmount.toStringAsFixed(2)}'),
+                  ],
+                ),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [

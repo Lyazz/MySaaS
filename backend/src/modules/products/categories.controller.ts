@@ -52,6 +52,9 @@ export class CategoriesController {
                 if (e.message === 'Title and Slug are required') {
                     return res.status(400).json({ statusCode: 400, statusMessage: e.message })
                 }
+                if (e.message === 'Invalid id') {
+                    return res.status(400).json({ statusCode: 400, statusMessage: e.message })
+                }
                 if (e.message === 'Category with this slug already exists') {
                     return res.status(409).json({ statusCode: 409, statusMessage: e.message })
                 }

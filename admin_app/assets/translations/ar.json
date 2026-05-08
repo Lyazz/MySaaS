@@ -1268,7 +1268,8 @@
       "homepage": "الصفحة الرئيسية",
       "contactInfo": "معلومات الاتصال",
       "functional": "إعدادات التشغيل",
-      "users": "المستخدمون"
+      "users": "المستخدمون",
+      "storeParameters": "إعدادات المتجر"
     },
     "roles": {
       "owner": "المالك",
@@ -1435,7 +1436,7 @@
           "order": "طلب {index}"
         },
         "customer": {
-          "addClient": "إضافة عميل"
+          "addClient": "اختر أو أنشئ عميلاً"
         },
         "variants": {
           "loading": "جار تحميل المتغيرات...",
