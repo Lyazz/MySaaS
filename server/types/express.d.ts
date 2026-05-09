@@ -5,6 +5,7 @@ declare global {
         interface Request {
             tenant?: Tenant
             user?: User
+            rawBody?: Buffer
         }
     }
 }

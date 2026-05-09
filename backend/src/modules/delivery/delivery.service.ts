@@ -26,6 +26,8 @@ type ProviderApiConfig = {
     // Yalidine
     apiId?: string
     yalidineApiToken?: string
+    originWilayaId?: string
+    originWilayaName?: string
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -116,7 +118,9 @@ export class DeliveryService {
         if (provider === 'YALIDINE') {
             return {
                 apiId: typeof raw.apiId === 'string' ? raw.apiId.trim() : undefined,
-                yalidineApiToken: typeof raw.apiToken === 'string' ? raw.apiToken.trim() : undefined
+                yalidineApiToken: typeof raw.apiToken === 'string' ? raw.apiToken.trim() : undefined,
+                originWilayaId: typeof raw.originWilayaId === 'string' ? raw.originWilayaId.trim() : undefined,
+                originWilayaName: typeof raw.originWilayaName === 'string' ? raw.originWilayaName.trim() : undefined
             }
         }
 
@@ -160,7 +164,9 @@ export class DeliveryService {
             return {
                 impl: new YalidineProvider({
                     apiId: cfg?.apiId,
-                    apiToken: cfg?.yalidineApiToken
+                    apiToken: cfg?.yalidineApiToken,
+                    originWilayaId: cfg?.originWilayaId,
+                    originWilayaName: cfg?.originWilayaName
                 }),
                 apiConfig: cfg
             }
@@ -496,7 +502,15 @@ export class DeliveryService {
         // Ensure order belongs to tenant
         const order = await this.prisma.order.findFirst({
             where: { id: input.orderId, tenantId: input.tenantId },
-            include: { tenant: true }
+            include: {
+                tenant: true,
+                items: {
+                    include: {
+                        product: { select: { title: true } },
+                        variant: { select: { sku: true } }
+                    }
+                }
+            }
         })
         if (!order) throw new Error('Order not found for tenant')
 
@@ -528,6 +542,17 @@ export class DeliveryService {
         const maybeAugmentedMetadata =
             baseInput.provider === 'MAYSTRO' && orderPickupPoint && baseInput.metadata?.pickupPoint == null
                 ? { ...(baseInput.metadata || {}), pickupPoint: orderPickupPoint, maystroDeliveryType: 3 }
+                : baseInput.provider === 'YALIDINE'
+                    ? {
+                        ...(baseInput.metadata || {}),
+                        items:
+                            Array.isArray(baseInput.metadata?.items) && baseInput.metadata.items.length
+                                ? baseInput.metadata.items
+                                : (order as any).items.map((item: any) => ({
+                                    title: item.product?.title || item.variant?.sku || 'Item',
+                                    quantity: item.quantity
+                                }))
+                    }
                 : baseInput.metadata
 
         const result =

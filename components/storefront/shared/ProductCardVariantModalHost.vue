@@ -17,6 +17,7 @@ type TemplateKey =
   | 'activewear'
   | 'chrono'
   | 'maison'
+  | 'arena'
 
 type ThemeTokens = {
   overlay: string
@@ -152,6 +153,20 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
     price: 'text-pink-300',
     addBtn: 'bg-gradient-to-r from-pink-500 to-orange-400 text-white hover:brightness-110',
     closeBtn: 'text-purple-200 hover:text-white',
+    unavailable: 'text-red-300'
+  },
+  arena: {
+    overlay: 'bg-black/80',
+    panel: 'bg-[#0b0f14] border border-brand-500/30',
+    font: 'font-sans',
+    title: 'text-white',
+    subtitle: 'text-slate-300',
+    row: 'border-white/10 hover:border-brand-500/50 hover:bg-brand-500/10',
+    rowLabel: 'text-white font-bold uppercase tracking-[0.08em]',
+    rowMeta: 'text-slate-400',
+    price: 'text-brand-500',
+    addBtn: 'bg-brand-500 text-[#02060a] hover:bg-brand-400',
+    closeBtn: 'text-slate-300 hover:text-white',
     unavailable: 'text-red-300'
   },
   stationnery: {

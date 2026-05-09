@@ -156,11 +156,36 @@ import MaisonProductCard from './maison/ProductCard.vue'
 import MaisonShop from './maison/Shop.vue'
 import MaisonCart from './maison/Cart.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison'
+// Arena Imports
+import ArenaHome from './arena/Home.vue'
+import ArenaStoreShell from './arena/StoreShell.vue'
+import ArenaThemeProvider from './arena/ThemeProvider.vue'
+import ArenaCategory from './arena/Category.vue'
+import ArenaContact from './arena/ContactPage.vue'
+import ArenaAbout from './arena/AboutPage.vue'
+import ArenaCheckout from './arena/Checkout.vue'
+import ArenaProduct from './arena/Product.vue'
+import ArenaProductCard from './arena/ProductCard.vue'
+import ArenaShop from './arena/Shop.vue'
+import ArenaCart from './arena/Cart.vue'
+import ArenaProductLandingPage from './arena/ProductLandingPage.vue'
+
+import ModernProductLandingPage from './modern/ProductLandingPage.vue'
+import ClassicProductLandingPage from './classic/ProductLandingPage.vue'
+import StreetProductLandingPage from './street/ProductLandingPage.vue'
+import CozyProductLandingPage from './cozy/ProductLandingPage.vue'
+import CyberProductLandingPage from './cyber/ProductLandingPage.vue'
+import StationneryProductLandingPage from './stationnery/ProductLandingPage.vue'
+import FoodProductLandingPage from './food/ProductLandingPage.vue'
+import WellnessProductLandingPage from './wellness/ProductLandingPage.vue'
+import PlayfulProductLandingPage from './playful/ProductLandingPage.vue'
+import ActivewearProductLandingPage from './activewear/ProductLandingPage.vue'
+
+export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
@@ -174,7 +199,8 @@ export const homeTemplates = {
   playful: PlayfulHome,
   activewear: ActivewearHome,
   chrono: ChronoHome,
-  maison: MaisonHome
+  maison: MaisonHome,
+  arena: ArenaHome
 } satisfies Record<TemplateKey, Component>
 
 export const productTemplates = {
@@ -189,7 +215,8 @@ export const productTemplates = {
   playful: PlayfulProduct,
   activewear: ActivewearProduct,
   chrono: ChronoProduct,
-  maison: MaisonProduct
+  maison: MaisonProduct,
+  arena: ArenaProduct
 } satisfies Record<TemplateKey, Component>
 
 export const productCardTemplates = {
@@ -204,7 +231,8 @@ export const productCardTemplates = {
   playful: PlayfulProductCard,
   activewear: ActivewearProductCard,
   chrono: ChronoProductCard,
-  maison: MaisonProductCard
+  maison: MaisonProductCard,
+  arena: ArenaProductCard
 } satisfies Record<TemplateKey, Component>
 
 export const categoryTemplates = {
@@ -219,7 +247,8 @@ export const categoryTemplates = {
   playful: PlayfulCategory,
   activewear: ActivewearCategory,
   chrono: ChronoCategory,
-  maison: MaisonCategory
+  maison: MaisonCategory,
+  arena: ArenaCategory
 } satisfies Record<TemplateKey, Component>
 
 export const storeShellTemplates = {
@@ -234,7 +263,8 @@ export const storeShellTemplates = {
   playful: PlayfulStoreShell,
   activewear: ActivewearStoreShell,
   chrono: ChronoStoreShell,
-  maison: MaisonStoreShell
+  maison: MaisonStoreShell,
+  arena: ArenaStoreShell
 } satisfies Record<TemplateKey, Component>
 
 export const shopTemplates = {
@@ -249,7 +279,8 @@ export const shopTemplates = {
   playful: PlayfulShop,
   activewear: ActivewearShop,
   chrono: ChronoShop,
-  maison: MaisonShop
+  maison: MaisonShop,
+  arena: ArenaShop
 } satisfies Record<TemplateKey, Component>
 
 export const checkoutTemplates = {
@@ -264,7 +295,8 @@ export const checkoutTemplates = {
   playful: PlayfulCheckout,
   activewear: ActivewearCheckout,
   chrono: ChronoCheckout,
-  maison: MaisonCheckout
+  maison: MaisonCheckout,
+  arena: ArenaCheckout
 } satisfies Record<TemplateKey, Component>
 
 export const cartTemplates = {
@@ -279,7 +311,8 @@ export const cartTemplates = {
   playful: PlayfulCart,
   activewear: ActivewearCart,
   chrono: ChronoCart,
-  maison: MaisonCart
+  maison: MaisonCart,
+  arena: ArenaCart
 } satisfies Record<TemplateKey, Component>
 
 export const aboutPageTemplates = {
@@ -294,7 +327,8 @@ export const aboutPageTemplates = {
   playful: PlayfulAbout,
   activewear: ActivewearAbout,
   chrono: ChronoAbout,
-  maison: MaisonAbout
+  maison: MaisonAbout,
+  arena: ArenaAbout
 } satisfies Record<TemplateKey, Component>
 
 export const contactPageTemplates = {
@@ -309,7 +343,8 @@ export const contactPageTemplates = {
   playful: PlayfulContact,
   activewear: ActivewearContact,
   chrono: ChronoContact,
-  maison: MaisonContact
+  maison: MaisonContact,
+  arena: ArenaContact
 } satisfies Record<TemplateKey, Component>
 
 export const themeProviderTemplates = {
@@ -324,7 +359,24 @@ export const themeProviderTemplates = {
   playful: PlayfulThemeProvider,
   activewear: ActivewearThemeProvider,
   chrono: ChronoThemeProvider,
-  maison: MaisonThemeProvider
+  maison: MaisonThemeProvider,
+  arena: ArenaThemeProvider
+} satisfies Record<TemplateKey, Component>
+
+export const productLandingPageTemplates = {
+  classic: ClassicProductLandingPage,
+  modern: ModernProductLandingPage,
+  street: StreetProductLandingPage,
+  cozy: CozyProductLandingPage,
+  cyber: CyberProductLandingPage,
+  stationnery: StationneryProductLandingPage,
+  food: FoodProductLandingPage,
+  wellness: WellnessProductLandingPage,
+  playful: PlayfulProductLandingPage,
+  activewear: ActivewearProductLandingPage,
+  chrono: ModernProductLandingPage,
+  maison: ModernProductLandingPage,
+  arena: ArenaProductLandingPage
 } satisfies Record<TemplateKey, Component>
 
 export const selectTemplate = (

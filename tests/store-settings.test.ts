@@ -60,6 +60,24 @@ describe('Store Settings API', () => {
         expect(settings?.orderIdPrefix).toBe('SHOP1')
     })
 
+    it('updates template key to arena successfully', async () => {
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                templateKey: 'arena'
+            })
+
+        expect(res.status).toBe(200)
+        expect(res.body.templateKey).toBe('arena')
+
+        const settings = await prisma.storeSettings.findUnique({
+            where: { tenantId }
+        })
+        expect(settings?.templateKey).toBe('arena')
+    })
+
     it('fails with invalid faviconUrl type', async () => {
         const res = await request(app)
             .patch('/api/admin/store-settings')

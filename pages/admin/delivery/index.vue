@@ -16,10 +16,10 @@
     <div class="ui-card mb-8">
       <div class="ui-card-header flex items-center justify-between">
         <div>
-          <h3 class=”text-lg font-semibold” style=”color: var(--text-primary)”>
+          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
             {{ t('admin.pages.delivery.storePickup.title', 'Store pickup') }}
           </h3>
-          <p class=”text-sm” style=”color: var(--text-secondary)”>
+          <p class="text-sm" style="color: var(--text-secondary)">
             {{ t('admin.pages.delivery.storePickup.hint', 'Enable/disable “pickup at store” as a checkout delivery option.') }}
           </p>
         </div>
@@ -211,6 +211,80 @@
                       : t('admin.pages.delivery.credentials.secretNotSet')
                   }}
                 </p>
+              </div>
+            </div>
+
+            <div
+              v-if="selectedProvider.provider === 'YALIDINE'"
+              class="rounded-xl p-4 space-y-4"
+              style="background: var(--surface-2); border: 1px solid var(--surface-border)"
+            >
+              <div>
+                <h4 class="text-sm font-semibold" style="color: var(--text-primary)">
+                  Yalidine webhook setup
+                </h4>
+                <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+                  Use this URL in the Yalidine Webhooks Dashboard so order delivery statuses update automatically in your store.
+                </p>
+              </div>
+
+              <div>
+                <label class="ui-label block mb-1">Webhook URL to give Yalidine</label>
+                <div class="flex flex-col md:flex-row gap-2">
+                  <input
+                    class="ui-input flex-1 px-3 py-2 text-sm font-mono"
+                    readonly
+                    :value="yalidineWebhookUrl"
+                  >
+                  <button
+                    type="button"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                    @click="copyYalidineWebhookUrl"
+                  >
+                    Copy URL
+                  </button>
+                </div>
+                <p class="mt-1 text-xs" style="color: var(--text-muted)">
+                  This must be a public HTTPS tenant domain. If your store uses a custom domain, replace the domain before adding it to Yalidine.
+                </p>
+                <p
+                  v-if="isLocalWebhookOrigin"
+                  class="mt-1 text-xs text-amber-600"
+                >
+                  Localhost cannot receive Yalidine webhooks, so this page shows your production tenant URL instead.
+                </p>
+                <p
+                  v-if="yalidineWebhookCopyMessage"
+                  class="mt-1 text-xs text-emerald-600"
+                >
+                  {{ yalidineWebhookCopyMessage }}
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div class="font-medium mb-2" style="color: var(--text-primary)">
+                    In Yalidine dashboard
+                  </div>
+                  <ol class="list-decimal list-inside space-y-1" style="color: var(--text-secondary)">
+                    <li>Open Webhooks Dashboard.</li>
+                    <li>Add a webhook and paste the URL above.</li>
+                    <li>Set the same secret in Yalidine and in the Webhook Secret field here.</li>
+                    <li>Test the webhook, then activate it.</li>
+                  </ol>
+                </div>
+                <div>
+                  <div class="font-medium mb-2" style="color: var(--text-primary)">
+                    Select these events
+                  </div>
+                  <ul class="space-y-1 font-mono text-xs" style="color: var(--text-secondary)">
+                    <li>parcel_created</li>
+                    <li>parcel_edited</li>
+                    <li>parcel_deleted</li>
+                    <li>parcel_status_updated</li>
+                    <li>parcel_payment_updated</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -618,6 +692,27 @@ const accountConfigDraft = ref<Record<string, string>>({})
 const clearSecrets = ref<Record<string, boolean>>({})
 const accountMessage = ref<string | null>(null)
 const accountMessageKind = ref<'success' | 'error'>('success')
+const clientOrigin = ref('')
+const yalidineWebhookCopyMessage = ref('')
+const platformBaseDomain = usePlatformBaseDomain()
+const isLocalWebhookOrigin = computed(() => {
+  if (!clientOrigin.value) return false
+  try {
+    const hostname = new URL(clientOrigin.value).hostname.toLowerCase()
+    return hostname === 'localhost' || hostname.endsWith('.localhost') || hostname === '127.0.0.1' || hostname === '::1'
+  } catch {
+    return false
+  }
+})
+const yalidineWebhookUrl = computed(() => {
+  const tenantSlug = authStore.user?.tenant?.slug
+  if (isLocalWebhookOrigin.value && tenantSlug) {
+    return `https://${tenantSlug}.${platformBaseDomain}/api/webhooks/yalidine`
+  }
+
+  const origin = clientOrigin.value || (typeof window !== 'undefined' ? window.location.origin : '')
+  return origin ? `${origin}/api/webhooks/yalidine` : '/api/webhooks/yalidine'
+})
 
 const storePickupEnabled = ref(false)
 const storePickupSaving = ref(false)
@@ -665,6 +760,7 @@ const wilayas = [
 
 const { autoStartIfNeeded } = useTour()
 onMounted(async () => {
+  clientOrigin.value = window.location.origin
   await loadStorePickupSetting()
   await loadProviders()
   autoStartIfNeeded('delivery')
@@ -897,6 +993,16 @@ const credentialPlaceholder = (provider: DeliveryProviderAdminView, field: Provi
 const clearSecret = (key: string) => {
   clearSecrets.value[key] = true
   accountConfigDraft.value[key] = ''
+}
+
+async function copyYalidineWebhookUrl() {
+  yalidineWebhookCopyMessage.value = ''
+  try {
+    await navigator.clipboard.writeText(yalidineWebhookUrl.value)
+    yalidineWebhookCopyMessage.value = 'Webhook URL copied.'
+  } catch {
+    yalidineWebhookCopyMessage.value = 'Select and copy the webhook URL manually.'
+  }
 }
 
 async function saveProviderAccount() {

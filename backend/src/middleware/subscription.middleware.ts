@@ -8,6 +8,7 @@ const isBillingPath = (path: string) => path.startsWith('/api/admin/billing')
 const isSuperAdminPath = (path: string) => path.startsWith('/api/super-admin')
 const isAuthPath = (path: string) => path === '/api/login' || path === '/api/register' || path === '/api/me'
 const isFilesPath = (path: string) => path.startsWith('/api/files')
+const isWebhookPath = (path: string) => path.startsWith('/api/webhooks/')
 
 export const expressSubscriptionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const path = req.path || ''
@@ -17,6 +18,7 @@ export const expressSubscriptionMiddleware = async (req: Request, res: Response,
     if (isAuthPath(path)) return next()
     if (isSuperAdminPath(path)) return next()
     if (isFilesPath(path)) return next()
+    if (isWebhookPath(path)) return next()
 
     // Determine tenant context:
     // - Tenant-host requests have req.tenant from Host resolution middleware.

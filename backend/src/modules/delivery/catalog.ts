@@ -36,7 +36,10 @@ export const DELIVERY_PROVIDER_CATALOG: DeliveryProviderCatalogItem[] = [
         supports: { quote: true, createShipment: true, track: true, webhooks: false },
         credentialFields: [
             { key: 'apiId', label: 'API ID', required: true, secret: true },
-            { key: 'apiToken', label: 'API Token', required: true, secret: true }
+            { key: 'apiToken', label: 'API Token', required: true, secret: true },
+            { key: 'originWilayaId', label: 'Origin Wilaya ID', required: false, secret: false },
+            { key: 'originWilayaName', label: 'Origin Wilaya Name', required: false, secret: false },
+            { key: 'webhookSecret', label: 'Webhook Secret', required: false, secret: true }
         ]
     },
     {

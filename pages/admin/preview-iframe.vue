@@ -25,6 +25,7 @@ const templatesMeta = [
   { key: 'wellness', label: 'Wellness Space' },
   { key: 'chrono', label: 'Chrono Luxe' },
   { key: 'maison', label: 'Pistachio' },
+  { key: 'arena', label: 'Arena Performance' },
 ]
 
 const activeTemplateDef = computed(() => {

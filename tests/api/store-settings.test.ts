@@ -112,6 +112,22 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(patchBody.templateKey).toBe('maison')
     })
 
+    it('allows selecting the "arena" template', async () => {
+        const patchRes = await fetch('/api/admin/store-settings', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokenA}`
+            },
+            body: JSON.stringify({
+                templateKey: 'arena'
+            })
+        })
+        const patchBody = await patchRes.json()
+        expect(patchRes.status).toBe(200)
+        expect(patchBody.templateKey).toBe('arena')
+    })
+
     it('updates tenant legal pages config in FR/EN/AR and exposes it publicly', async () => {
         const legalPages = buildDefaultStoreLegalPagesConfig()
         legalPages.terms.enabled = true

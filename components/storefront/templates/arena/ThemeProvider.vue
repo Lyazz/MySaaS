@@ -4,34 +4,24 @@ import { useCartStore } from '~/stores/cart'
 const cartStore = useCartStore()
 
 const storeStyle = computed(() => {
-  const primaryColor = '#0D9488' // Teal 600
-  
-  // Helper to convert hex to rgb
+  const primaryColor = '#00B8FC' // Logitech G signature cyan
+
   const hexToRgb = (hex: string) => {
-    // Ensure hex is valid
-    if (!hex || typeof hex !== 'string') return '13 148 136'
-    
-    // Remove hash
+    if (!hex || typeof hex !== 'string') return '0 184 252'
     hex = hex.replace('#', '')
-    
-    // Handle short hex
     if (hex.length === 3) {
-        hex = hex.split('').map(char => char + char).join('')
+      hex = hex.split('').map((char) => char + char).join('')
     }
-    
     const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    if (!result) return '13 148 136'
-    
+    if (!result) return '0 184 252'
     return `${parseInt(result[1], 16)} ${parseInt(result[2], 16)} ${parseInt(result[3], 16)}`
   }
 
-  const result = {
+  return {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+    fontFamily: "'Inter', 'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
   } as Record<string, string>
-
-  return result
 })
 
 onMounted(() => {
@@ -41,7 +31,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-slate-50 font-sans text-slate-600"
+    class="min-h-screen bg-[#06080c] font-sans text-slate-300 antialiased selection:bg-brand-500/30 selection:text-white"
     :style="storeStyle"
   >
     <slot />

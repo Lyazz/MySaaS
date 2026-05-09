@@ -1886,10 +1886,20 @@
             "description": "Bold and high-energy for sports & gym.",
             "storeTypes": "Sports, gym, outdoor gear"
           },
+          "arena": {
+            "label": "Arena",
+            "description": "Dark performance storefront with esports energy and cyan highlights.",
+            "storeTypes": "Gaming gear, peripherals, tech, esports"
+          },
           "chrono": {
             "label": "Chrono Luxe",
             "description": "Luxury dark theme with gold accents for premium accessories.",
             "storeTypes": "Watches, sunglasses, jewelry, luxury accessories"
+          },
+          "maison": {
+            "label": "Pistachio",
+            "description": "Warm premium editorial look for gourmet and refined retail.",
+            "storeTypes": "Premium food, gifts, nuts, gourmet retail"
           }
         }
       },

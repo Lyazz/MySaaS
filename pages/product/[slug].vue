@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { productTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
+import { productLandingPageTemplates, productTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
 import type { TemplateKey } from '~/components/storefront/templates/registry'
 import type { PublicLoyaltyPreview } from '~/composables/useActiveProductLoyaltyPreview'
 import { normalizeMiniDescription, normalizeRichDescription } from '~/shared/product-content'
@@ -172,7 +172,7 @@ const isLandingMode = computed(() => route.query.mode === 'landing' || route.que
 
 const ActiveTemplate = computed(() => {
   if (isLandingMode.value) {
-    return defineAsyncComponent(() => import('~/components/storefront/templates/modern/ProductLandingPage.vue')) 
+    return productLandingPageTemplates[templateKey.value]
   }
   return productTemplates[templateKey.value]
 })

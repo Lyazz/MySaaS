@@ -19,6 +19,7 @@ export type StoreTemplateKey =
     | 'playful'
     | 'activewear'
     | 'chrono'
+    | 'arena'
     | 'maison'
 export type StoreLanguage = 'ar' | 'fr' | 'en'
 
@@ -35,6 +36,7 @@ export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; descriptio
     { key: 'playful', label: 'Playful', description: 'Kids & fun' },
     { key: 'activewear', label: 'Activewear', description: 'Bold, aggressive typography and neon colors for sports.' },
     { key: 'chrono', label: 'Chrono Luxe', description: 'Luxury dark theme with gold accents for premium accessories.' },
+    { key: 'arena', label: 'Arena Performance', description: 'Dark esports and gaming gear theme with cyan performance accents.' },
     { key: 'maison', label: 'Pistachio', description: 'Luxury pistachio-green theme for premium food, nuts, decor, and refined retail.' }
 ]
 

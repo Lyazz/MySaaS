@@ -37,7 +37,14 @@ app.use(
     })
 )
 
-app.use(express.json({ limit: '1mb' }))
+app.use(
+    express.json({
+        limit: '1mb',
+        verify: (req, _res, buf) => {
+            (req as express.Request).rawBody = Buffer.from(buf)
+        }
+    })
+)
 
 // SEO safety: prevent indexing/snippetting of API responses (including auth/admin endpoints).
 app.use((req, res, next) => {

@@ -1,12 +1,15 @@
-import { timingSafeEqual } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 import type { Request, Response } from 'express'
 import { DeliveryConfigurationError, DeliveryService } from './delivery.service'
 import { ShipmentProvider } from '@prisma/client'
 import { getProviderCatalogItem } from './catalog'
 import { MaystroIntegrationError } from './maystro/maystro.errors'
+import { YalidineIntegrationError } from './yalidine/yalidine.errors'
+import { YalidineWebhookService } from './yalidine/yalidine-webhook.service'
 import prisma from '../../lib/prisma'
 
 const service = new DeliveryService()
+const yalidineWebhookService = new YalidineWebhookService()
 
 const isShipmentProvider = (value: string): value is ShipmentProvider =>
     (Object.values(ShipmentProvider) as string[]).includes(value)
@@ -134,6 +137,11 @@ export class DeliveryController {
                     .status(error.statusCode)
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
             }
+            if (error instanceof YalidineIntegrationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
+            }
             console.error('Create shipment error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
@@ -207,6 +215,65 @@ export class DeliveryController {
             }
             console.error('Maystro webhook error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async yalidineWebhookChallenge(req: Request, res: Response) {
+        const subscribePresent = Object.prototype.hasOwnProperty.call(req.query, 'subscribe')
+        const crcToken = typeof req.query.crc_token === 'string' ? req.query.crc_token : ''
+        if (!subscribePresent || !crcToken) {
+            return res.status(405).json({ statusCode: 405, statusMessage: 'Method Not Allowed' })
+        }
+
+        return res.status(200).json({ crc_token: crcToken })
+    }
+
+    private normalizeYalidineSignature(value: string) {
+        const trimmed = value.trim()
+        return trimmed.toLowerCase().startsWith('sha256=') ? trimmed.slice('sha256='.length).trim() : trimmed
+    }
+
+    private verifyYalidineSignature(input: { rawBody: Buffer; signature: string; secret: string }) {
+        const incoming = this.normalizeYalidineSignature(input.signature)
+        const expected = createHmac('sha256', input.secret).update(input.rawBody).digest('hex')
+        const incomingBuffer = Buffer.from(incoming)
+        const expectedBuffer = Buffer.from(expected)
+        return incomingBuffer.length === expectedBuffer.length && timingSafeEqual(incomingBuffer, expectedBuffer)
+    }
+
+    async yalidineWebhook(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        try {
+            const account = await prisma.tenantDeliveryAccount.findUnique({
+                where: { tenantId_provider: { tenantId: tenant.id, provider: 'YALIDINE' } },
+                select: { config: true }
+            })
+            const config = (account?.config && typeof account.config === 'object' ? account.config : {}) as Record<string, unknown>
+            const secret =
+                typeof config.webhookSecret === 'string' && config.webhookSecret.trim()
+                    ? config.webhookSecret.trim()
+                    : ''
+            const signature = req.get('x-yalidine-signature') || ''
+
+            if (!secret || !signature || !req.rawBody) {
+                return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
+            }
+
+            if (!this.verifyYalidineSignature({ rawBody: req.rawBody, signature, secret })) {
+                return res.status(401).json({ statusCode: 401, statusMessage: 'Invalid signature' })
+            }
+
+            if (!req.body || typeof req.body?.type !== 'string' || !Array.isArray(req.body?.events)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid payload' })
+            }
+
+            const result = await yalidineWebhookService.handleWebhook({ tenantId: tenant.id, payload: req.body })
+            return res.status(200).json({ success: true, ...result })
+        } catch (error) {
+            console.error('Yalidine webhook error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
     }
 

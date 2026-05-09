@@ -4,6 +4,7 @@ import { DeliveryConfigurationError, DeliveryService } from '../delivery/deliver
 import { MaystroIntegrationError } from '../delivery/maystro/maystro.errors'
 import { MaystroOrderService } from '../delivery/maystro/maystro-order.service'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
+import { YalidineIntegrationError } from '../delivery/yalidine/yalidine.errors'
 import prisma from '../../lib/prisma'
 import {
   fetchForExport,
@@ -155,14 +156,14 @@ export class OrdersController {
                     { cashboxId, method, reference, note, callStatus, internalNotes }
                 )
 
-                // When an order is confirmed and has Maystro as the shipping provider,
-                // automatically push the order to Maystro so the admin doesn't need a separate step.
-                if (status === 'CONFIRMED' && (updated as any)?.shippingProvider === 'MAYSTRO') {
+                // When an order is confirmed with an API-backed carrier, push it immediately.
+                if (status === 'CONFIRMED' && ['MAYSTRO', 'YALIDINE'].includes(String((updated as any)?.shippingProvider))) {
                     const order = updated as any
+                    const provider = String(order.shippingProvider) as 'MAYSTRO' | 'YALIDINE'
                     try {
                         await deliveryService.createShipment({
                             tenantId: tenant.id,
-                            provider: 'MAYSTRO',
+                            provider,
                             orderId: order.id,
                             contactName: order.customerName ?? '',
                             contactPhone: order.customerPhone ?? '',
@@ -172,7 +173,7 @@ export class OrdersController {
                             addressLine2: undefined,
                             notes: order.shippingNotes ?? undefined,
                             deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
-                            metadata: order.shippingPickupPoint
+                            metadata: provider === 'MAYSTRO' && order.shippingPickupPoint
                                 ? { pickupPoint: order.shippingPickupPoint, maystroDeliveryType: 3 }
                                 : undefined
                         })
@@ -208,6 +209,14 @@ export class OrdersController {
                         }
 
                         if (shipmentErr instanceof MaystroIntegrationError) {
+                            return res.status(shipmentErr.statusCode).json({
+                                statusCode: shipmentErr.statusCode,
+                                statusMessage: shipmentErr.statusMessage,
+                                code: shipmentErr.code
+                            })
+                        }
+
+                        if (shipmentErr instanceof YalidineIntegrationError) {
                             return res.status(shipmentErr.statusCode).json({
                                 statusCode: shipmentErr.statusCode,
                                 statusMessage: shipmentErr.statusMessage,

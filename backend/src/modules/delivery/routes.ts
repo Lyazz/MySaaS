@@ -123,6 +123,8 @@ router.put(
 
 // Webhooks
 router.post('/webhooks/maystro', controller.maystroWebhook.bind(controller))
+router.get('/webhooks/yalidine', controller.yalidineWebhookChallenge.bind(controller))
+router.post('/webhooks/yalidine', controller.yalidineWebhook.bind(controller))
 
 // Self delivery admin status update
 router.post(

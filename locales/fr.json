@@ -1872,10 +1872,20 @@
             "description": "Dynamique et percutant pour le sport & la gym.",
             "storeTypes": "Sport, fitness, plein air"
           },
+          "arena": {
+            "label": "Arena",
+            "description": "Vitrine sombre et performante avec énergie e-sport et accents cyan.",
+            "storeTypes": "Gaming, périphériques, tech, e-sport"
+          },
           "chrono": {
             "label": "Chrono Luxe",
             "description": "Thème sombre de luxe avec accents dorés pour accessoires premium.",
             "storeTypes": "Montres, lunettes, bijoux, accessoires de luxe"
+          },
+          "maison": {
+            "label": "Pistachio",
+            "description": "Univers éditorial chaleureux et premium pour l'épicerie fine et le retail raffiné.",
+            "storeTypes": "Food premium, cadeaux, fruits secs, retail gourmet"
           }
         }
       },

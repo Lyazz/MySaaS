@@ -17,6 +17,7 @@ type TemplateKey =
   | 'activewear'
   | 'chrono'
   | 'maison'
+  | 'arena'
 
 const TEMPLATE_KEYS: TemplateKey[] = [
   'classic',
@@ -32,7 +33,8 @@ const TEMPLATE_KEYS: TemplateKey[] = [
   'playful',
   'activewear',
   'chrono',
-  'maison'
+  'maison',
+  'arena'
 ]
 
 const resolveTemplateKey = (value?: string | null): TemplateKey => {

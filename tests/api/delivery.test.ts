@@ -1,5 +1,6 @@
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
+import { createHmac } from 'node:crypto'
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
@@ -256,6 +257,76 @@ describe('Delivery API', () => {
         expect(providerSpy.mock.calls[0]?.[0]?.codAmount).toBe(720)
     })
 
+    it('automatically creates a Yalidine shipment when confirming a Yalidine order', async () => {
+        const product = await prisma.product.create({
+            data: { tenantId: tenantA.id, title: 'Yalidine Auto Product', slug: `yal-auto-${Date.now()}`, price: 1000 }
+        })
+        const order = await prisma.order.create({
+            data: {
+                tenantId: tenantA.id,
+                status: 'PENDING',
+                totalAmount: 1000,
+                shippingAmount: 400,
+                shippingProvider: 'YALIDINE',
+                shippingWilayaCode: '05',
+                shippingCommuneCode: '501',
+                shippingAddressLine1: '123 Rue Carrier',
+                deliveryMode: 'home',
+                customerName: 'Yalidine Alice',
+                customerPhone: '0550999888',
+                items: { create: [{ productId: product.id, quantity: 1, price: 1000 }] }
+            }
+        })
+
+        await prisma.tenantDeliveryAccount.upsert({
+            where: { tenantId_provider: { tenantId: tenantA.id, provider: 'YALIDINE' } },
+            create: {
+                tenantId: tenantA.id,
+                provider: 'YALIDINE',
+                isActive: true,
+                config: { apiId: 'api-id', apiToken: 'api-token' }
+            },
+            update: {
+                isActive: true,
+                config: { apiId: 'api-id', apiToken: 'api-token' }
+            }
+        })
+
+        const providerSpy = vi.spyOn(YalidineProvider.prototype, 'createShipment').mockResolvedValue({
+            providerShipmentId: 'yal-auto-1',
+            status: 'REQUESTED',
+            price: 400,
+            currency: 'DZD'
+        })
+        providerSpy.mockClear()
+
+        const res = await request(app)
+            .patch(`/api/admin/orders/${order.id}`)
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .send({ status: 'CONFIRMED' })
+
+        expect(res.status).toBe(200)
+        expect(providerSpy).toHaveBeenCalledTimes(1)
+        expect(providerSpy.mock.calls[0]?.[0]).toMatchObject({
+            tenantId: tenantA.id,
+            provider: 'YALIDINE',
+            orderId: order.id,
+            contactName: 'Yalidine Alice',
+            contactPhone: '0550999888',
+            wilayaCode: '05',
+            communeCode: '501',
+            addressLine1: '123 Rue Carrier',
+            deliveryMode: 'home',
+            codAmount: 1400
+        })
+
+        const shipment = await prisma.shipment.findFirst({
+            where: { tenantId: tenantA.id, orderId: order.id, provider: 'YALIDINE' }
+        })
+        expect(shipment?.providerShipmentId).toBe('yal-auto-1')
+    })
+
     it('enforces tenant isolation for shipment fetch', async () => {
         const res = await request(app)
             .get(`/api/shipments/${shipmentSelfId}`)
@@ -364,6 +435,121 @@ describe('Delivery API', () => {
 
         const updatedOrder = await prisma.order.findUnique({ where: { id: orderA.id } })
         expect(updatedOrder?.status).toBe('DELIVERED')
+    })
+
+    it('handles Yalidine webhook validation, signature verification, and duplicate events', async () => {
+        const product = await prisma.product.create({
+            data: {
+                tenantId: tenantA.id,
+                title: 'Yalidine Webhook Product',
+                slug: `yal-webhook-${Date.now()}`,
+                price: 500
+            }
+        })
+        const order = await prisma.order.create({
+            data: {
+                tenantId: tenantA.id,
+                status: 'CONFIRMED',
+                totalAmount: 500,
+                customerName: 'Yalidine Webhook Alice',
+                customerPhone: '0550777666',
+                items: {
+                    create: [{ productId: product.id, quantity: 1, price: 500 }]
+                }
+            }
+        })
+        const shipment = await prisma.shipment.create({
+            data: {
+                tenantId: tenantA.id,
+                orderId: order.id,
+                provider: 'YALIDINE',
+                providerShipmentId: 'yal-webhook-1',
+                status: 'REQUESTED',
+                contactName: 'Yalidine Webhook Alice',
+                contactPhone: '0550777666',
+                wilayaCode: '16',
+                communeCode: '1605',
+                addressLine1: '123 Rue Webhook'
+            }
+        })
+
+        await prisma.tenantDeliveryAccount.upsert({
+            where: { tenantId_provider: { tenantId: tenantA.id, provider: 'YALIDINE' } },
+            create: {
+                tenantId: tenantA.id,
+                provider: 'YALIDINE',
+                isActive: true,
+                config: { apiId: 'api-id', apiToken: 'api-token', webhookSecret: 'yal-secret' }
+            },
+            update: {
+                isActive: true,
+                config: { apiId: 'api-id', apiToken: 'api-token', webhookSecret: 'yal-secret' }
+            }
+        })
+
+        const challenge = await request(app)
+            .get('/api/webhooks/yalidine?subscribe=1&crc_token=crc-123')
+            .set('Host', `${tenantA.slug}.platform.com`)
+
+        expect(challenge.status).toBe(200)
+        expect(challenge.body).toEqual({ crc_token: 'crc-123' })
+
+        const payload = {
+            type: 'parcel_status_updated',
+            events: [
+                {
+                    event_id: 'evt-yal-1',
+                    occurred_at: '2026-05-09 14:55:00',
+                    data: {
+                        tracking: 'yal-webhook-1',
+                        order_id: order.id,
+                        status: 'Expédié'
+                    }
+                }
+            ]
+        }
+        const rawBody = JSON.stringify(payload)
+        const signature = createHmac('sha256', 'yal-secret').update(rawBody).digest('hex')
+
+        const invalid = await request(app)
+            .post('/api/webhooks/yalidine')
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Content-Type', 'application/json')
+            .set('X-YALIDINE-SIGNATURE', 'bad-signature')
+            .send(rawBody)
+
+        expect(invalid.status).toBe(401)
+
+        const first = await request(app)
+            .post('/api/webhooks/yalidine')
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Content-Type', 'application/json')
+            .set('X-YALIDINE-SIGNATURE', signature)
+            .send(rawBody)
+
+        expect(first.status).toBe(200)
+        expect(first.body.processed).toBe(1)
+
+        const duplicate = await request(app)
+            .post('/api/webhooks/yalidine')
+            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Content-Type', 'application/json')
+            .set('X-YALIDINE-SIGNATURE', signature)
+            .send(rawBody)
+
+        expect(duplicate.status).toBe(200)
+        expect(duplicate.body.duplicates).toBe(1)
+
+        const updatedShipment = await prisma.shipment.findUnique({ where: { id: shipment.id } })
+        expect(updatedShipment?.status).toBe('IN_TRANSIT')
+
+        const updatedOrder = await prisma.order.findFirst({ where: { tenantId: tenantA.id, id: order.id } })
+        expect(updatedOrder?.status).toBe('SHIPPED')
+
+        const events = await prisma.shipmentEvent.findMany({
+            where: { tenantId: tenantA.id, shipmentId: shipment.id, code: 'yalidine:evt-yal-1' }
+        })
+        expect(events).toHaveLength(1)
     })
 
     it('uses the synced Maystro product id when creating a shipment for a confirmed order', async () => {

@@ -338,7 +338,7 @@ definePageMeta({
 
 const templateCatalog: TemplateMeta[] = [
   { key: 'classic', name: 'Classic', short: 'CL', fit: 'Elegant catalogs and premium basics', primary: '#0f172a', accent: '#f8fafc', bg: '#f8fafc' },
-  { key: 'modern', name: 'Modern', short: 'MO', fit: 'Clean fashion, electronics, and general retail', primary: '#65A30D', accent: '#D9F99D', bg: '#f8fafc' },
+  { key: 'modern', name: 'Modern', short: 'MO', fit: 'Clean fashion, electronics, and general retail', primary: '#0D9488', accent: '#99F6E4', bg: '#f8fafc' },
   { key: 'street', name: 'Street', short: 'ST', fit: 'Streetwear, drops, bold youth brands', primary: '#FACC15', accent: '#000000', bg: '#ffffff' },
   { key: 'cozy', name: 'Cozy', short: 'CZ', fit: 'Home goods, handmade, soft lifestyle', primary: '#A4C3B2', accent: '#F5F2EA', bg: '#F5F2EA' },
   { key: 'cyber', name: 'Cyber', short: 'CY', fit: 'Gaming, tech, electronics, gadgets', primary: '#F43F5E', accent: '#A855F7', bg: '#0d0515' },
@@ -348,7 +348,8 @@ const templateCatalog: TemplateMeta[] = [
   { key: 'playful', name: 'Playful', short: 'PL', fit: 'Kids, toys, colorful gift shops', primary: '#9333EA', accent: '#FBBF24', bg: '#faf5ff' },
   { key: 'activewear', name: 'Activewear', short: 'AW', fit: 'Sports, performance, sharp drops', primary: '#EAB308', accent: '#000000', bg: '#000000' },
   { key: 'chrono', name: 'Chrono Luxe', short: 'CH', fit: 'Watches, jewelry, luxury accessories', primary: '#A67C52', accent: '#E8E0D5', bg: '#0E1117' },
-  { key: 'maison', name: 'Pistachio', short: 'PI', fit: 'Premium food, nuts, refined retail', primary: '#0B4A25', accent: '#F7E4BD', bg: '#FBF3E6' }
+  { key: 'maison', name: 'Pistachio', short: 'PI', fit: 'Premium food, nuts, refined retail', primary: '#0B4A25', accent: '#F7E4BD', bg: '#FBF3E6' },
+  { key: 'arena', name: 'Arena', short: 'AR', fit: 'Gaming gear, peripherals, esports and dark tech storefronts', primary: '#00B8FC', accent: '#050B12', bg: '#030508' }
 ]
 
 const fontOptions = [
