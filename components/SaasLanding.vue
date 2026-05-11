@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
+import { computed, resolveComponent } from 'vue'
+import { PRICING_PLANS, buildDisplayPlan } from '~/shared/pricing/plans'
+
+const MechanismTenancy = resolveComponent('MarketingCinematicMechanismsMechanismTenancy')
+const MechanismLocalization = resolveComponent('MarketingCinematicMechanismsMechanismLocalization')
+const MechanismLogistics = resolveComponent('MarketingCinematicMechanismsMechanismLogistics')
+const MechanismAnalytics = resolveComponent('MarketingCinematicMechanismsMechanismAnalytics')
+const MechanismPayment = resolveComponent('MarketingCinematicMechanismsMechanismPayment')
+const MechanismBuilder = resolveComponent('MarketingCinematicMechanismsMechanismBuilder')
 
 const { t, locale, tm, rt } = useI18n({ useScope: 'global' })
 const isRtl = computed(() => locale.value === 'ar')
@@ -18,12 +25,22 @@ useSeoMeta({
   twitterImage: '/swekly-logo-mark.svg'
 })
 
-const heroProofPoints = computed(() => [
-  { icon: 'lucide:star', value: t('saasLanding.extras.heroProof.rating'), label: t('saasLanding.extras.heroProof.ratingLabel') },
-  { icon: 'lucide:store', value: t('saasLanding.extras.heroProof.merchants'), label: t('saasLanding.extras.heroProof.merchantsLabel') },
-  { icon: 'lucide:banknote', value: t('saasLanding.extras.heroProof.cod'), label: t('saasLanding.extras.heroProof.codLabel') },
-  { icon: 'lucide:credit-card', value: t('saasLanding.extras.heroProof.noCard'), label: t('saasLanding.extras.heroProof.noCardLabel') }
-])
+const carouselSlides = computed(() => {
+  const ids = ['delivery', 'warehouse', 'themes', 'conversion', 'pos'] as const
+  return ids.map(id => ({
+    eyebrow: t(`saasLanding.cinematic.heroCarousel.slides.${id}.eyebrow`),
+    headlinePre: t(`saasLanding.cinematic.heroCarousel.slides.${id}.headlinePre`),
+    headlineAccent: t(`saasLanding.cinematic.heroCarousel.slides.${id}.headlineAccent`),
+    headlinePost: t(`saasLanding.cinematic.heroCarousel.slides.${id}.headlinePost`),
+    subhead: t(`saasLanding.cinematic.heroCarousel.slides.${id}.subhead`),
+    meta: [
+      t(`saasLanding.cinematic.heroCarousel.slides.${id}.meta.0`),
+      t(`saasLanding.cinematic.heroCarousel.slides.${id}.meta.1`),
+      t(`saasLanding.cinematic.heroCarousel.slides.${id}.meta.2`)
+    ],
+    address: t(`saasLanding.cinematic.heroCarousel.slides.${id}.address`)
+  }))
+})
 
 const trustStripItems = computed(() => [
   { icon: 'lucide:banknote', title: t('saasLanding.extras.trustStrip.items.cod.title'), description: t('saasLanding.extras.trustStrip.items.cod.description') },
@@ -87,103 +104,54 @@ const integrationLogos = [
 const integrationLogosRow1 = integrationLogos.slice(0, Math.ceil(integrationLogos.length / 2))
 const integrationLogosRow2 = integrationLogos.slice(Math.ceil(integrationLogos.length / 2))
 
-const stepCards = computed(() => [
-  {
-    step: '01',
-    icon: 'lucide:pen-tool',
-    title: t('saasLanding.storyteller.steps.design.title'),
-    description: t('saasLanding.storyteller.steps.design.description'),
-    bullets: [
-      { icon: 'lucide:layout-template', label: t('saasLanding.features.items.templates.title') },
-      { icon: 'lucide:globe', label: t('marketing.featuresPage.items.domains.title') }
-    ]
-  },
-  {
-    step: '02',
-    icon: 'lucide:shopping-cart',
-    title: t('saasLanding.storyteller.steps.sell.title'),
-    description: t('saasLanding.storyteller.steps.sell.description'),
-    bullets: [
-      { icon: 'lucide:credit-card', label: t('marketing.featuresPage.items.payments.title') },
-      { icon: 'lucide:package', label: t('auth.login.hero.carousel.orders.title') }
-    ]
-  },
-  {
-    step: '03',
-    icon: 'lucide:truck',
-    title: t('saasLanding.storyteller.steps.ship.title'),
-    description: t('saasLanding.storyteller.steps.ship.description'),
-    bullets: [
-      { icon: 'lucide:truck', label: t('marketing.featuresPage.items.logistics.title') },
-      { icon: 'lucide:badge-dollar-sign', label: t('saasLanding.trust.secure') }
-    ]
-  },
-  {
-    step: '04',
-    icon: 'lucide:bar-chart-3',
-    title: t('saasLanding.storyteller.steps.grow.title'),
-    description: t('saasLanding.storyteller.steps.grow.description'),
-    bullets: [
-      { icon: 'lucide:line-chart', label: t('marketing.featuresPage.items.analytics.title') },
-      { icon: 'lucide:sparkles', label: t('saasLanding.features.items.aiTools.title') }
-    ]
-  }
-])
 
 const metrics = computed(() => [
-  { value: '1,200+', label: t('saasLanding.stats.activeMerchants'), detail: t('saasLanding.hero.chips.storefront') },
-  { value: '50M+', label: t('saasLanding.stats.revenueGenerated'), detail: t('saasLanding.stats.gmvDetail') },
+  { value: '500+', label: t('saasLanding.stats.activeMerchants'), detail: t('saasLanding.hero.chips.storefront') },
+  { value: '5M+', label: t('saasLanding.stats.revenueGenerated'), detail: t('saasLanding.stats.gmvDetail') },
   { value: '99.9%', label: t('saasLanding.stats.uptime'), detail: t('saasLanding.trust.cloud') }
 ])
 
 const featureGrid = computed(() => [
   {
-    icon: 'lucide:layers',
+    icon: 'lucide:zap',
+    mechanism: MechanismTenancy,
     title: t('marketing.featuresPage.items.tenancy.title'),
     description: t('marketing.featuresPage.items.tenancy.description')
   },
   {
     icon: 'lucide:languages',
+    mechanism: MechanismLocalization,
     title: t('marketing.featuresPage.items.localization.title'),
     description: t('marketing.featuresPage.items.localization.description')
   },
   {
     icon: 'lucide:truck',
+    mechanism: MechanismLogistics,
     title: t('marketing.featuresPage.items.logistics.title'),
     description: t('marketing.featuresPage.items.logistics.description')
   },
   {
     icon: 'lucide:line-chart',
+    mechanism: MechanismAnalytics,
     title: t('marketing.featuresPage.items.analytics.title'),
     description: t('marketing.featuresPage.items.analytics.description')
   },
   {
     icon: 'lucide:credit-card',
+    mechanism: MechanismPayment,
     title: t('marketing.featuresPage.items.payments.title'),
     description: t('marketing.featuresPage.items.payments.description')
   },
   {
     icon: 'lucide:smartphone',
+    mechanism: MechanismBuilder,
     title: t('marketing.featuresPage.items.mobile.title'),
     description: t('marketing.featuresPage.items.mobile.description')
   }
 ])
 
 const pricingPreview = computed(() =>
-  PRICING_PLANS.slice(0, 3).map(plan => {
-    const card = pricingPlanCardForUi(plan, 'month')
-    return {
-      code: plan.code,
-      name: t(`pricing.plans.${plan.code}.name`),
-      description: t(`pricing.plans.${plan.code}.description`),
-      price: card.priceText,
-      currency: card.currency,
-      period: t('pricing.period.perMonth'),
-      cta: t(`pricing.plans.${plan.code}.cta`),
-      popular: card.popular,
-      features: (card.features || []).slice(0, 4).map(f => f.text)
-    }
-  })
+  PRICING_PLANS.map(plan => buildDisplayPlan(plan, 'month', t))
 )
 
 const testimonials = computed<Array<{ quote: string; author: string; role: string }>>(() => {
@@ -201,16 +169,11 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
 
 <template>
   <div :dir="isRtl ? 'rtl' : 'ltr'">
-    <!-- ─── Hero ─── -->
-    <MarketingCinematicHeroCinematic
-      :eyebrow="t('saasLanding.cinematic.hero.eyebrow')"
-      :headline-pre="t('saasLanding.cinematic.hero.headlinePre')"
-      :headline-accent="t('saasLanding.cinematic.hero.headlineAccent')"
-      :headline-post="t('saasLanding.cinematic.hero.headlinePost')"
-      :subhead="t('saasLanding.cinematic.hero.subhead')"
-      :primary-cta="{ label: t('saasLanding.cinematic.hero.ctaPrimary'), to: '/register' }"
-      :secondary-cta="{ label: t('saasLanding.extras.demoStore'), to: '/themes' }"
-      :proof-points="heroProofPoints"
+    <!-- ─── Hero (carousel) ─── -->
+    <MarketingCinematicHeroCarousel
+      :slides="carouselSlides"
+      :primary-cta="{ label: t('saasLanding.cinematic.heroCarousel.ctaRegister'), to: '/register' }"
+      :secondary-cta="{ label: t('saasLanding.cinematic.heroCarousel.ctaFeatures'), to: '/features' }"
     />
 
     <!-- ─── Logo cloud ─── -->
@@ -250,28 +213,6 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
         </div>
       </div>
     </section>
-
-    <!-- ─── How it works ─── -->
-    <MarketingCinematicSectionShell
-      :eyebrow="t('saasLanding.storyteller.eyebrow')"
-      :title-pre="t('saasLanding.cinematic.howItWorks.titlePre')"
-      :title-accent="t('saasLanding.cinematic.howItWorks.titleAccent')"
-      :title-post="t('saasLanding.cinematic.howItWorks.titlePost')"
-      :description="t('saasLanding.cinematic.howItWorks.description')"
-    >
-      <div class="grid gap-5 md:grid-cols-2">
-        <MarketingCinematicFeatureCard3D
-          v-for="card in stepCards"
-          :key="card.step"
-          v-motion-slide-visible-once-bottom
-          :step="card.step"
-          :icon="card.icon"
-          :title="card.title"
-          :description="card.description"
-          :bullets="card.bullets"
-        />
-      </div>
-    </MarketingCinematicSectionShell>
 
     <!-- ─── Live preview ─── -->
     <section class="cinematic-section">
@@ -362,6 +303,7 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
           :icon="f.icon"
           :title="f.title"
           :description="f.description"
+          :mechanism="f.mechanism"
         />
       </div>
     </MarketingCinematicSectionShell>
@@ -375,7 +317,7 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
       :description="t('saasLanding.cinematic.pricing.description')"
       centered
     >
-      <div class="grid gap-5 md:grid-cols-3">
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <MarketingCinematicPricingTile
           v-for="plan in pricingPreview"
           :key="plan.code"
@@ -461,7 +403,6 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
       :headline-post="t('saasLanding.cinematic.cta.headlinePost')"
       :subhead="t('saasLanding.cinematic.cta.subhead')"
       :primary-cta="{ label: t('saasLanding.cinematic.cta.button'), to: '/register' }"
-      :secondary-cta="{ label: t('saasLanding.cinematic.cta.secondary'), to: '/contact' }"
     />
 
     <!-- ─── Sticky mobile CTA ─── -->

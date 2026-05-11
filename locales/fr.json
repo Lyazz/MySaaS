@@ -42,7 +42,7 @@
       "description": "Créez votre boutique, recevez des commandes, et gérez paiements et livraison depuis un seul tableau de bord."
     },
     "hero": {
-      "kicker": "Le SaaS pour marchands algériens",
+      "kicker": "Le SaaS pour marchands modernes",
       "title": {
         "buildSell": "Lancez. Pilotez.",
         "scale": "Grandissez."
@@ -150,9 +150,9 @@
     },
     "stats": {
       "activeMerchants": "Boutiques actives",
-      "revenueGenerated": "Ventes traitées",
+      "revenueGenerated": "Ventes mensuelles",
       "uptime": "Disponibilité",
-      "gmvDetail": "Volume de ventes mensuel"
+      "gmvDetail": "Ventes traitées par mois"
     },
     "faq": {
       "title": "Questions fréquentes",
@@ -179,7 +179,7 @@
         "accent": "des gens",
         "suffix": "comme vous."
       },
-      "subtitle": "Des commerçants en Algérie qui veulent un site rapide et une gestion simple.",
+      "subtitle": "Des commerçants qui veulent un site rapide et une gestion simple.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "Avatar utilisateur",
       "items": [
@@ -196,7 +196,7 @@
         {
           "quote": "Les intégrations de livraison nous font gagner du temps chaque jour. Expédier devient un réflexe.",
           "author": "Yanis",
-          "role": "Directeur, TechAlgeria"
+          "role": "Directeur, TechStore"
         },
         {
           "quote": "Même quand il y a beaucoup de trafic, la boutique reste rapide. On peut se concentrer sur la vente.",
@@ -309,13 +309,84 @@
     },
     "cinematic": {
       "hero": {
-        "eyebrow": "Conçu pour le commerce algérien",
+        "eyebrow": "Conçu pour le commerce moderne",
         "headlinePre": "Un seul moteur.",
         "headlineAccent": "Tous",
-        "headlinePost": "les marchands algériens.",
+        "headlinePost": "les marchands.",
         "subhead": "Boutique, paiement, livraison, analytics — tout réuni sur une plateforme qui démarre en minutes, pas en mois.",
         "ctaPrimary": "Commencer gratuitement",
         "ctaSecondary": "Voir la démo"
+      },
+      "heroCarousel": {
+        "ctaRegister": "Commencer à scaler gratuitement",
+        "ctaFeatures": "Découvrir les fonctionnalités",
+        "slides": {
+          "delivery": {
+            "eyebrow": "Réseau de livraison",
+            "headlinePre": "Livrez avec",
+            "headlineAccent": "tous",
+            "headlinePost": " vos transporteurs.",
+            "subhead": "",
+            "meta": [
+              "Intégrations multi-transporteurs",
+              "Statuts synchronisés en direct",
+              "Retours réconciliés automatiquement"
+            ],
+            "address": "swekly.com/admin/delivery"
+          },
+          "warehouse": {
+            "eyebrow": "Stock en temps réel",
+            "headlinePre": "Stock,",
+            "headlineAccent": "en direct",
+            "headlinePost": ".",
+            "subhead": "",
+            "meta": [
+              "Stock multi-entrepôts",
+              "Variantes, SKU & codes-barres",
+              "Achats & fournisseurs"
+            ],
+            "address": "swekly.com/admin/inventory"
+          },
+          "themes": {
+            "eyebrow": "Templates de boutique",
+            "headlinePre": "Plusieurs thèmes.",
+            "headlineAccent": "Un seul",
+            "headlinePost": " clic.",
+            "subhead": "",
+            "meta": [
+              "Thèmes mobile-first",
+              "RTL & multilingue",
+              "Éditeur de thème en direct"
+            ],
+            "address": "swekly.com/admin/themes"
+          },
+          "conversion": {
+            "eyebrow": "Conversion & analytics",
+            "headlinePre": "Suivez",
+            "headlineAccent": "chaque",
+            "headlinePost": " conversion.",
+            "subhead": "",
+            "meta": [
+              "Funnel temps réel",
+              "Meta Pixel intégré",
+              "Dashboard commandes en direct"
+            ],
+            "address": "swekly.com/admin/analytics"
+          },
+          "pos": {
+            "eyebrow": "POS unifié",
+            "headlinePre": "Une caisse.",
+            "headlineAccent": "Un seul",
+            "headlinePost": " stock.",
+            "subhead": "",
+            "meta": [
+              "Caisse & tiroir-caisse",
+              "Points de fidélité au checkout",
+              "Transactions hors-ligne"
+            ],
+            "address": "swekly.com/admin/pos"
+          }
+        }
       },
       "logoCloud": "Nos intégrations +50",
       "howItWorks": {
@@ -339,7 +410,7 @@
         "titlePre": "Tout ce qu'il faut.",
         "titleAccent": "Rien",
         "titlePost": "de superflu.",
-        "description": "Multi-tenant par conception. Localisé pour l'Algérie. Conçu pour scaler sans refondre votre stack."
+        "description": "Prêt pour le monde. Beau dans chaque langue. Conçu pour grandir avec votre métier."
       },
       "pricing": {
         "eyebrow": "Tarifs",
@@ -370,7 +441,7 @@
       },
       "footer": {
         "languages": "Langue",
-        "madeFor": "Fait pour l'Algérie"
+        "madeFor": "Fait pour les marchands"
       },
       "templates": {
         "eyebrow": "Thèmes boutique",
@@ -383,13 +454,13 @@
       "integrations": {
         "eyebrow": "Intégrations natives",
         "titlePre": "Tous les outils",
-        "titleAccent": "des marchands algériens",
+        "titleAccent": "des marchands",
         "titlePost": "réunis",
         "description": "Des livreurs locaux à l'automatisation WhatsApp, du pixel Meta aux outils IA — tout fonctionne dès le premier jour.",
         "tools": {
           "maystro": {
             "name": "Maystro",
-            "description": "Le réseau de livraison n°1 en Algérie. Créez et suivez vos expéditions sans quitter votre tableau de bord."
+            "description": "Le réseau de livraison n°1. Créez et suivez vos expéditions sans quitter votre tableau de bord."
           },
           "yalidine": {
             "name": "Yalidine",
@@ -426,31 +497,31 @@
       "heroProof": {
         "rating": "4,9 / 5",
         "ratingLabel": "par 800+ marchands",
-        "merchants": "1 200+",
-        "merchantsLabel": "boutiques actives en DZ",
+        "merchants": "500+",
+        "merchantsLabel": "boutiques actives",
         "cod": "Paiement à la livraison",
         "codLabel": "intégré",
         "noCard": "Sans carte bancaire",
         "noCardLabel": "essai gratuit 14 jours"
       },
       "trustStrip": {
-        "eyebrow": "Conçu pour l'Algérie",
+        "eyebrow": "Conçu pour les marchands",
         "items": {
           "cod": {
             "title": "Paiement à la livraison",
-            "description": "COD intégré avec réconciliation auto sur toutes les wilayas."
+            "description": "COD intégré avec réconciliation automatique chez tous les transporteurs."
           },
           "wilayas": {
-            "title": "58 wilayas couvertes",
-            "description": "Yalidine, Maystro, ZR & Noest — activation en un clic."
+            "title": "Intégrations de transporteurs",
+            "description": "Connectez-vous facilement aux transporteurs — activation en un clic."
           },
           "rtl": {
-            "title": "Boutique en arabe",
+            "title": "Support multilingue",
             "description": "RTL complet, UI compatible Darija, AR/FR/EN en un clic."
           },
           "dzd": {
-            "title": "Tarification en DZD",
-            "description": "Devise locale, taxes et factures — sans surprise de change."
+            "title": "Gestion des stocks",
+            "description": "Suivi d'inventaire en temps réel et alertes de réappro automatisées."
           }
         }
       },
@@ -487,12 +558,12 @@
           "description": "Lancez une boutique propre, pensée pour le mobile, et adaptez-la rapidement à vos produits."
         },
         "tenancy": {
-          "title": "Multi-boutique par conception",
-          "description": "Chaque boutique a ses propres données, son domaine et son image — isolée et sécurisée dès le départ."
+          "title": "Infrastructure évolutive",
+          "description": "Plateforme de niveau entreprise construite pour la performance et la fiabilité à n'importe quelle échelle."
         },
         "localization": {
-          "title": "Pensé pour l'Algérie",
-          "description": "Arabe, français et anglais avec support RTL complet, devise locale et parcours livraison adaptés."
+          "title": "Prêt pour le monde",
+          "description": "Arabe, français et anglais avec support RTL complet et parcours de commande multilingues."
         },
         "mobile": {
           "title": "Expérience mobile d'abord",
@@ -512,7 +583,7 @@
         },
         "logistics": {
           "title": "Connexions livraison",
-          "description": "Envoyez vos commandes vers Maystro, Yalidine ou votre propre organisation sans copier-coller."
+          "description": "Intégrez-vous facilement à vos transporteurs pour un fulfillment rationalisé."
         },
         "domains": {
           "title": "Votre domaine",
@@ -558,10 +629,10 @@
       "copyright": "© {year} Plateforme Swekly. Tous droits réservés."
     },
     "aboutPage": {
-      "heroTitle": "Pensé pour la façon dont le commerce algérien fonctionne vraiment",
+      "heroTitle": "Pensé pour la façon dont le commerce fonctionne vraiment",
       "heroSubtitle": "Swekly aide les marchands à lancer plus vite, rester organisés et garder la livraison simple dès le premier jour.",
       "storyTitle": "Pas un autre simple créateur de boutique",
-      "storyBody": "Nous avons conçu Swekly autour des réalités des marchands algériens : achat mobile-first, confirmation COD, réseaux de livraison locaux et équipes qui veulent un quotidien plus fluide.",
+      "storyBody": "Nous avons conçu Swekly autour des réalités des marchands modernes : achat mobile-first, confirmation COD, réseaux de livraison locaux et équipes qui veulent un quotidien plus fluide.",
       "context": {
         "storyLabel": "Pourquoi les marchands changent",
         "label": "Construit autour des vrais usages",
@@ -583,7 +654,7 @@
           },
           "cod": {
             "title": "Conçu pour convertir en COD",
-            "body": "Un checkout centré téléphone, des signaux de confiance clairs et des étapes adaptées à la livraison reflètent la façon dont les clients commandent en Algérie."
+            "body": "Un checkout centré téléphone, des signaux de confiance clairs et des étapes adaptées à la livraison reflètent la façon dont les clients commandent réellement."
           },
           "ops": {
             "title": "Pensé pour l'exécution quotidienne",
@@ -593,7 +664,7 @@
       },
       "final": {
         "title": "Partez d'une meilleure base storefront",
-        "subtitle": "Lancez plus vite, gardez des opérations plus propres et évoluez sur une plateforme conçue pour le commerce algérien."
+        "subtitle": "Lancez plus vite, gardez des opérations plus propres et évoluez sur une plateforme conçue pour le commerce moderne."
       }
     }
   },
@@ -740,7 +811,7 @@
         "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères.",
         "passwordMismatch": "Les mots de passe ne correspondent pas.",
         "phoneRequired": "Le numéro de téléphone est requis.",
-        "phoneInvalid": "Entrez un numéro de téléphone algérien valide.",
+        "phoneInvalid": "Entrez un numéro de téléphone valide.",
         "phoneRestricted": "L’inscription est actuellement indisponible.",
         "otpRequired": "Entrez le code OTP.",
         "otpSendFirst": "Envoyez d’abord le code OTP.",

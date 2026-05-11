@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
+import { PRICING_PLANS, buildDisplayPlan } from '~/shared/pricing/plans'
 
 definePageMeta({
   layout: 'marketing'
@@ -15,34 +15,9 @@ useSeoMeta({
 
 const isAnnual = ref(false)
 
-const plans = computed(() => {
-  return PRICING_PLANS.map((plan) => {
-    const cycle = isAnnual.value ? 'year' : 'month'
-    const card = pricingPlanCardForUi(plan, cycle)
-    const featureKeys: Record<string, string[]> = {
-      basic: ['pricing.page.features.store', 'pricing.page.features.delivery'],
-      beginner: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell'],
-      merchant: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell', 'pricing.page.features.analytics'],
-      professional: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell', 'pricing.page.features.analytics', 'pricing.page.features.team']
-    }
-
-    return {
-      code: plan.code,
-      name: t(`pricing.plans.${plan.code}.name`),
-      description: t(`pricing.plans.${plan.code}.description`),
-      price: card.priceText,
-      currency: card.currency,
-      period: isAnnual.value ? t('pricing.period.perYear') : t('pricing.period.perMonth'),
-      features: [
-        t('pricing.features.ordersPerMonth', { count: plan.ordersPerMonth }),
-        ...(featureKeys[plan.code] || []).map((key) => t(key))
-      ],
-      cta: t(`pricing.plans.${plan.code}.cta`),
-      popular: card.popular,
-      highlight: card.highlight
-    }
-  })
-})
+const plans = computed(() =>
+  PRICING_PLANS.map((plan) => buildDisplayPlan(plan, isAnnual.value ? 'year' : 'month', t))
+)
 </script>
 
 <template>

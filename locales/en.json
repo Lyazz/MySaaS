@@ -42,7 +42,7 @@
       "description": "Build your store, take orders, and manage payments and shipping from one dashboard."
     },
     "hero": {
-      "kicker": "The SaaS for Algerian merchants",
+      "kicker": "The SaaS for modern merchants",
       "title": {
         "buildSell": "Launch. Run.",
         "scale": "Grow."
@@ -150,9 +150,9 @@
     },
     "stats": {
       "activeMerchants": "Active stores",
-      "revenueGenerated": "Sales processed",
+      "revenueGenerated": "Monthly sales",
       "uptime": "Uptime",
-      "gmvDetail": "Monthly sales volume"
+      "gmvDetail": "Sales processed monthly"
     },
     "faq": {
       "title": "Frequently Asked Questions",
@@ -179,7 +179,7 @@
         "accent": "people",
         "suffix": "like you."
       },
-      "subtitle": "Merchants in Algeria who want a fast store and simple operations.",
+      "subtitle": "Merchants who want a fast store and simple operations.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "User avatar",
       "items": [
@@ -196,7 +196,7 @@
         {
           "quote": "Local shipping integrations save us time every day. Dispatching became a habit.",
           "author": "Yanis",
-          "role": "Director, TechAlgeria"
+          "role": "Director, TechStore"
         },
         {
           "quote": "Even with high traffic, the store stays fast. We can focus on selling.",
@@ -309,13 +309,84 @@
     },
     "cinematic": {
       "hero": {
-        "eyebrow": "Built for Algerian commerce",
+        "eyebrow": "Built for modern commerce",
         "headlinePre": "One commerce engine.",
         "headlineAccent": "Every",
-        "headlinePost": "Algerian merchant.",
+        "headlinePost": "merchant.",
         "subhead": "Storefront, checkout, delivery, and analytics — unified on a single platform that ships in minutes, not months.",
         "ctaPrimary": "Start for free",
         "ctaSecondary": "See it work"
+      },
+      "heroCarousel": {
+        "ctaRegister": "Start scaling for free",
+        "ctaFeatures": "Explore features",
+        "slides": {
+          "delivery": {
+            "eyebrow": "Delivery network",
+            "headlinePre": "Ship with",
+            "headlineAccent": "any",
+            "headlinePost": " carrier.",
+            "subhead": "",
+            "meta": [
+              "Multi-carrier integrations",
+              "Live status sync",
+              "Returns reconciled automatically"
+            ],
+            "address": "swekly.com/admin/delivery"
+          },
+          "warehouse": {
+            "eyebrow": "Real-time inventory",
+            "headlinePre": "Stock,",
+            "headlineAccent": "live",
+            "headlinePost": ".",
+            "subhead": "",
+            "meta": [
+              "Multi-warehouse stock",
+              "Variants, SKUs & barcodes",
+              "Purchases & suppliers"
+            ],
+            "address": "swekly.com/admin/inventory"
+          },
+          "themes": {
+            "eyebrow": "Storefront templates",
+            "headlinePre": "Several themes.",
+            "headlineAccent": "One",
+            "headlinePost": " click.",
+            "subhead": "",
+            "meta": [
+              "Mobile-first themes",
+              "RTL & multilingual",
+              "Live theme builder"
+            ],
+            "address": "swekly.com/admin/themes"
+          },
+          "conversion": {
+            "eyebrow": "Conversion & analytics",
+            "headlinePre": "Track",
+            "headlineAccent": "every",
+            "headlinePost": " conversion.",
+            "subhead": "",
+            "meta": [
+              "Real-time funnel",
+              "Meta Pixel built-in",
+              "Live order dashboard"
+            ],
+            "address": "swekly.com/admin/analytics"
+          },
+          "pos": {
+            "eyebrow": "Unified POS",
+            "headlinePre": "One register.",
+            "headlineAccent": "One",
+            "headlinePost": " inventory.",
+            "subhead": "",
+            "meta": [
+              "POS register & cash drawer",
+              "Loyalty points at checkout",
+              "Offline-first transactions"
+            ],
+            "address": "swekly.com/admin/pos"
+          }
+        }
       },
       "logoCloud": "Our integrations +50",
       "howItWorks": {
@@ -339,7 +410,7 @@
         "titlePre": "Everything you need.",
         "titleAccent": "Nothing",
         "titlePost": "you don't.",
-        "description": "Multi-tenant by design. Localized for Algeria. Engineered to scale without rewriting your stack."
+        "description": "Global-ready platform. Beautiful in every language. Built to grow with your business."
       },
       "pricing": {
         "eyebrow": "Pricing",
@@ -370,7 +441,7 @@
       },
       "footer": {
         "languages": "Language",
-        "madeFor": "Made for Algeria"
+        "madeFor": "Made for merchants"
       },
       "templates": {
         "eyebrow": "Storefront themes",
@@ -383,13 +454,13 @@
       "integrations": {
         "eyebrow": "Built-in integrations",
         "titlePre": "Every tool",
-        "titleAccent": "Algerian merchants",
+        "titleAccent": "merchants",
         "titlePost": "actually use",
         "description": "From local delivery couriers to WhatsApp automation, Meta Pixel tracking to AI-powered tools — it all works out of the box.",
         "tools": {
           "maystro": {
             "name": "Maystro",
-            "description": "Algeria's #1 delivery network. Create and track shipments without leaving your dashboard."
+            "description": "Top-rated delivery network. Create and track shipments without leaving your dashboard."
           },
           "yalidine": {
             "name": "Yalidine",
@@ -426,31 +497,31 @@
       "heroProof": {
         "rating": "4.9 / 5 rating",
         "ratingLabel": "from 800+ merchants",
-        "merchants": "1,200+",
-        "merchantsLabel": "active stores in DZ",
+        "merchants": "500+",
+        "merchantsLabel": "active stores",
         "cod": "COD ready",
         "codLabel": "out of the box",
         "noCard": "No credit card",
         "noCardLabel": "free 14-day trial"
       },
       "trustStrip": {
-        "eyebrow": "Made for Algeria",
+        "eyebrow": "Made for merchants",
         "items": {
           "cod": {
             "title": "Cash on delivery",
-            "description": "Built-in COD with auto reconciliation across every wilaya."
+            "description": "Built-in COD with auto reconciliation across all carriers."
           },
           "wilayas": {
-            "title": "58 wilayas covered",
-            "description": "Yalidine, Maystro, ZR & Noest — one-click activation."
+            "title": "Carrier integrations",
+            "description": "Connect with delivery carriers seamlessly — one-click activation."
           },
           "rtl": {
-            "title": "Arabic-first storefront",
-            "description": "Full RTL, Darija-friendly UI, AR/FR/EN with one switch."
+            "title": "Multi-language support",
+            "description": "Full RTL, Arabic-friendly UI, AR/FR/EN with one switch."
           },
           "dzd": {
-            "title": "DZD pricing",
-            "description": "Local currency, taxes, and invoicing — no FX surprises."
+            "title": "Stock management",
+            "description": "Real-time inventory tracking and automated reorder alerts."
           }
         }
       },
@@ -487,12 +558,12 @@
           "description": "Launch a clean, mobile-first store and customize it around your products in a short time."
         },
         "tenancy": {
-          "title": "Multi-tenant by design",
-          "description": "Each store has its own data, domain, and brand — fully isolated and secure from day one."
+          "title": "Scalable infrastructure",
+          "description": "Enterprise-grade platform built for performance and reliability at any scale."
         },
         "localization": {
-          "title": "Built for Algeria",
-          "description": "Arabic, French, and English with full RTL support, plus local currency and delivery flows."
+          "title": "Global-ready",
+          "description": "Arabic, French, and English with full RTL support and multi-language checkout flows."
         },
         "mobile": {
           "title": "Mobile-first experience",
@@ -512,7 +583,7 @@
         },
         "logistics": {
           "title": "Delivery connections",
-          "description": "Send orders to Maystro, Yalidine, or your own delivery workflow without copy-pasting."
+          "description": "Integrate with your carriers seamlessly for streamlined order fulfillment."
         },
         "domains": {
           "title": "Your own domain",
@@ -558,10 +629,10 @@
       "copyright": "© {year} Swekly Platform. All rights reserved."
     },
     "aboutPage": {
-      "heroTitle": "Built for the way Algerian commerce actually runs",
+      "heroTitle": "Built for the way commerce actually runs",
       "heroSubtitle": "Swekly helps merchants launch faster, stay organized, and keep delivery simple from the first day.",
       "storyTitle": "Not another generic store builder",
-      "storyBody": "We designed Swekly around the realities of Algerian merchants: mobile-first shopping, COD confirmation, local delivery networks, and teams that need a smoother daily routine.",
+      "storyBody": "We designed Swekly around the realities of modern merchants: mobile-first shopping, COD confirmation, local delivery networks, and teams that need a smoother daily routine.",
       "context": {
         "storyLabel": "Why merchants switch",
         "label": "Built around real habits",
@@ -583,7 +654,7 @@
           },
           "cod": {
             "title": "Built for COD conversion",
-            "body": "Phone-first checkout, clear trust signals, and delivery-friendly steps match how customers order in Algeria."
+            "body": "Phone-first checkout, clear trust signals, and delivery-friendly steps match how customers actually order."
           },
           "ops": {
             "title": "Made for daily execution",
@@ -593,7 +664,7 @@
       },
       "final": {
         "title": "Start with a stronger storefront foundation",
-        "subtitle": "Launch faster, keep operations cleaner, and scale on a platform designed for Algerian commerce."
+        "subtitle": "Launch faster, keep operations cleaner, and scale on a platform designed for modern commerce."
       }
     }
   },
@@ -628,7 +699,7 @@
           },
           "shipping": {
             "title": "Smart Shipping",
-            "description": "Auto-dispatch to Yalidine, Eckoz, and 50+ Algerian carriers."
+            "description": "Auto-dispatch to Yalidine, Eckoz, and 50+ local carriers."
           },
           "analytics": {
             "title": "Deep Analytics",
@@ -754,7 +825,7 @@
         "passwordTooShort": "Password must be at least {min} characters.",
         "passwordMismatch": "Passwords do not match.",
         "phoneRequired": "Phone number is required.",
-        "phoneInvalid": "Enter a valid Algerian phone number.",
+        "phoneInvalid": "Enter a valid phone number.",
         "phoneRestricted": "Registration is currently unavailable.",
         "otpRequired": "Enter the OTP code.",
         "otpSendFirst": "Send OTP code first.",

@@ -76,6 +76,51 @@ export const getPlanByCode = (code: PlanCode): PlanDefinition | null =>
 export const planPriceForInterval = (plan: PlanDefinition, interval: BillingInterval): PricingAmountDzd =>
     interval === 'year' ? plan.pricing.annualAmountDzd : plan.pricing.monthlyAmountDzd
 
+const PLAN_FEATURE_KEYS: Record<PlanCode, string[]> = {
+    basic: ['pricing.page.features.store', 'pricing.page.features.delivery'],
+    beginner: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell'],
+    merchant: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell', 'pricing.page.features.analytics'],
+    professional: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell', 'pricing.page.features.analytics', 'pricing.page.features.team']
+}
+
+export interface DisplayPlan {
+    code: PlanCode
+    name: string
+    description: string
+    price: string
+    currency: 'DA'
+    period: string
+    features: string[]
+    cta: string
+    popular: boolean
+    highlight: boolean
+}
+
+type Translator = (key: string, named?: Record<string, unknown>) => string
+
+export const buildDisplayPlan = (
+    plan: PlanDefinition,
+    interval: BillingInterval,
+    t: Translator
+): DisplayPlan => {
+    const card = pricingPlanCardForUi(plan, interval)
+    return {
+        code: plan.code,
+        name: t(`pricing.plans.${plan.code}.name`),
+        description: t(`pricing.plans.${plan.code}.description`),
+        price: card.priceText,
+        currency: card.currency,
+        period: interval === 'year' ? t('pricing.period.perYear') : t('pricing.period.perMonth'),
+        features: [
+            t('pricing.features.ordersPerMonth', { count: plan.ordersPerMonth }),
+            ...PLAN_FEATURE_KEYS[plan.code].map((k) => t(k))
+        ],
+        cta: t(`pricing.plans.${plan.code}.cta`),
+        popular: card.popular,
+        highlight: card.highlight
+    }
+}
+
 export const pricingPlanCardForUi = (plan: PlanDefinition, interval: BillingInterval): PricingPlanCard => {
     const amount = planPriceForInterval(plan, interval)
     const priceText = dzd(amount)
