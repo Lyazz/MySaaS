@@ -976,7 +976,7 @@
         },
         "whatsapp": {
           "label": "WhatsApp",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "Facebook",
@@ -1012,7 +1012,7 @@
         },
         "viber": {
           "label": "Viber",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "Pinterest",

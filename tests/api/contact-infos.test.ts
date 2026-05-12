@@ -33,7 +33,7 @@ describe('Contact Infos (Tenant Admin + Public)', async () => {
         const created = await fetch('/api/admin/contact-infos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tokenA}` },
-            body: JSON.stringify({ kind: 'phone', value: '+213550000000', label: 'Support' })
+            body: JSON.stringify({ kind: 'phone', value: '+XX X XXX XXXX', label: 'Support' })
         })
         const createdBody = await created.json()
         expect(created.status).toBe(201)

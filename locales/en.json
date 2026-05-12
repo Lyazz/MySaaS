@@ -249,7 +249,7 @@
         "sales": {
           "title": "Talk to Sales",
           "description": "Interested in our enterprise plans? Just pick up the phone to chat with a member of our sales team.",
-          "contact": "+213 550 00 00 00"
+          "contact": "+XX X XXX XXXX"
         },
         "support": {
           "title": "Contact Support",
@@ -784,7 +784,7 @@
         },
         "phone": {
           "label": "Phone Number",
-          "placeholder": "+213 540 80 14 36"
+          "placeholder": "+XX X XXX XXXX"
         },
         "otp": {
           "label": "OTP Confirmation",
@@ -1679,7 +1679,7 @@
         },
         "whatsapp": {
           "label": "WhatsApp",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "Facebook",
@@ -1715,7 +1715,7 @@
         },
         "viber": {
           "label": "Viber",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "Pinterest",
@@ -2812,7 +2812,7 @@
           "instructions": {
             "myfin": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our MyFin account:\nIBAN: BG98MYFI123123123\nName: MySaaS LLC",
             "paysera": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our Paysera account:\nEmail: payments{'@'}mysaas.com\nName: MySaaS LLC",
-            "baridimob": "Please send {amount} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +213 555 55 55 55",
+            "baridimob": "Please send {amount} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +XX X XXX XXXX",
             "ccp": "Please deposit {amount} DZD to our CCP account:\nAccount: 12345678 99\nName: MySaaS LLC"
           },
           "title": "Complete your upgrade",

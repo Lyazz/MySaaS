@@ -227,8 +227,8 @@ watchEffect(() => {
   }
 
   contactInfos.value = [
-    { id: 'phone', kind: 'phone', value: '+213 555 123 456', isActive: true, position: 1 },
-    { id: 'email', kind: 'email', value: 'hello@sahara.test', isActive: true, position: 2 },
+    { id: 'phone', kind: 'phone', value: '+XX X XXX XXXX', isActive: true, position: 1 },
+    { id: 'email', kind: 'email', value: 'hello@atlas.test', isActive: true, position: 2 },
     { id: 'instagram', kind: 'instagram', value: 'sahara.studio', isActive: true, position: 3 }
   ]
 })

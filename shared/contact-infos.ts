@@ -61,7 +61,7 @@ export const CONTACT_INFO_KIND_DEFS: ContactInfoKindDef[] = [
         placeholder: 'https://example.com'
     },
 
-    { kind: 'whatsapp', label: 'WhatsApp', category: 'social', iconName: 'simple-icons:whatsapp', placeholder: '+213550000000' },
+    { kind: 'whatsapp', label: 'WhatsApp', category: 'social', iconName: 'simple-icons:whatsapp', placeholder: '+XX X XXX XXXX' },
     { kind: 'facebook', label: 'Facebook', category: 'social', iconName: 'simple-icons:facebook', placeholder: 'https://facebook.com/yourpage' },
     {
         kind: 'instagram',
@@ -76,7 +76,7 @@ export const CONTACT_INFO_KIND_DEFS: ContactInfoKindDef[] = [
     { kind: 'linkedin', label: 'LinkedIn', category: 'social', iconName: 'simple-icons:linkedin', placeholder: 'https://linkedin.com/company/yourstore' },
     { kind: 'snapchat', label: 'Snapchat', category: 'social', iconName: 'simple-icons:snapchat', placeholder: '@yourstore' },
     { kind: 'telegram', label: 'Telegram', category: 'social', iconName: 'simple-icons:telegram', placeholder: 'https://t.me/yourstore' },
-    { kind: 'viber', label: 'Viber', category: 'social', iconName: 'simple-icons:viber', placeholder: '+213550000000' },
+    { kind: 'viber', label: 'Viber', category: 'social', iconName: 'simple-icons:viber', placeholder: '+XX X XXX XXXX' },
     { kind: 'pinterest', label: 'Pinterest', category: 'social', iconName: 'simple-icons:pinterest', placeholder: 'https://pinterest.com/yourstore' },
     { kind: 'threads', label: 'Threads', category: 'social', iconName: 'simple-icons:threads', placeholder: '@yourstore' }
 ]

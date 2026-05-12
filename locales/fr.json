@@ -249,7 +249,7 @@
         "sales": {
           "title": "Parler aux ventes",
           "description": "Intéressé par nos forfaits d'entreprise ? Appelez-nous pour discuter avec un conseiller.",
-          "contact": "+213 550 00 00 00"
+          "contact": "+XX X XXX XXXX"
         },
         "support": {
           "title": "Contacter le support",
@@ -770,7 +770,7 @@
         },
         "phone": {
           "label": "Téléphone",
-          "placeholder": "+213 540 80 14 36"
+          "placeholder": "+XX X XXX XXXX"
         },
         "otp": {
           "label": "Confirmation OTP",
@@ -1665,7 +1665,7 @@
         },
         "whatsapp": {
           "label": "WhatsApp",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "Facebook",
@@ -1701,7 +1701,7 @@
         },
         "viber": {
           "label": "Viber",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "Pinterest",
@@ -2786,7 +2786,7 @@
           "instructions": {
             "myfin": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte MyFin :\nIBAN : BG98MYFI123123123\nNom : MySaaS LLC",
             "paysera": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte Paysera :\nEmail : payments{'@'}mysaas.com\nNom : MySaaS LLC",
-            "baridimob": "Veuillez envoyer {amount} DZD via BaridiMob à :\nRIP : 00799999000000000012\nTéléphone : +213 555 55 55 55",
+            "baridimob": "Veuillez envoyer {amount} DZD via BaridiMob à :\nRIP : 00799999000000000012\nTéléphone : +XX X XXX XXXX",
             "ccp": "Veuillez déposer {amount} DZD sur notre compte CCP :\nCompte : 12345678 99\nNom : MySaaS LLC"
           },
           "title": "Finaliser votre abonnement",

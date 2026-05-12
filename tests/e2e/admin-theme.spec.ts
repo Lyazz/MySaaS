@@ -5,7 +5,7 @@ async function registerTenant(page: import('@playwright/test').Page) {
   const slug = `theme-${timestamp}`
   const email = `theme-${timestamp}@example.com`
   const password = 'Password123!'
-  const phone = '+213550000001'
+  const phone = '+XX X XXX XXXX'
 
   await page.goto('/register', { waitUntil: 'domcontentloaded' })
   await expect(page.getByTestId('register-company')).toBeVisible()

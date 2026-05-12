@@ -976,7 +976,7 @@
         },
         "whatsapp": {
           "label": "واتساب",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "فيسبوك",
@@ -1012,7 +1012,7 @@
         },
         "viber": {
           "label": "فايبر",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "بنترست",

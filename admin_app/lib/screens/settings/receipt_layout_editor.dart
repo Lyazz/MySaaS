@@ -381,7 +381,7 @@ class _ReceiptPreview extends StatelessWidget {
           if (layout.showCustomerInfo) ...[
             const SizedBox(height: 16),
             Text(
-              'Customer: Yanis M.\nPhone: +213 555 123 456',
+              'Customer: Yanis M.\nPhone: +XX X XXX XXXX',
               style: GoogleFonts.courierPrime(fontSize: 14),
             ),
           ],

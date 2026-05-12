@@ -608,7 +608,7 @@ const methodInstructions = computed(() => {
       }
       return `Please send ${eurAmount} EUR (Rate: 1€ = ${exchangeRate} DA) to our Paysera account:\nEmail: payments@mysaas.com\nName: MySaaS LLC`
     case 'BARIDIMOB':
-      return t('admin.pages.billing.payment.instructions.baridimob', { amount: formatDzd(finalAmount) }) || `Please send ${formatDzd(finalAmount)} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +213 555 55 55 55`
+      return t('admin.pages.billing.payment.instructions.baridimob', { amount: formatDzd(finalAmount) }) || `Please send ${formatDzd(finalAmount)} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +XX X XXX XXXX`
     case 'CCP':
       return t('admin.pages.billing.payment.instructions.ccp', { amount: formatDzd(finalAmount) }) || `Please deposit ${formatDzd(finalAmount)} DZD to our CCP account:\nAccount: 12345678 99\nName: MySaaS LLC`
     default:

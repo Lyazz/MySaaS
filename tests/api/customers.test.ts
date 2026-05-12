@@ -230,7 +230,7 @@ describe('Admin customers API', () => {
             .post('/api/admin/customers')
             .set('X-Forwarded-Host', hostA)
             .set('Authorization', `Bearer ${adminTokenA}`)
-            .send({ name: 'Duplicate Phone', phone: '+213 550 00 01 00' })
+            .send({ name: 'Duplicate Phone', phone: '+XX X XXX XXXX' })
 
         expect(res.status).toBe(409)
         expect(res.body.statusMessage).toContain('phone number already exists')

@@ -128,7 +128,7 @@ describe('Loyalty points flows', () => {
             .set('X-Forwarded-Host', host)
             .send({
                 customerName: 'Loyalty Customer',
-                customerPhone: '+213 550 12 34 56',
+                customerPhone: '+XX X XXX XXXX',
                 customerAddress: 'Hydra',
                 shippingAmount: 20,
                 shippingCurrency: 'DZD',
