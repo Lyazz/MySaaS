@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, resolveComponent } from 'vue'
 
 const { t } = useI18n({ useScope: 'global' })
 
@@ -12,12 +12,18 @@ useSeoMeta({
   description: computed(() => t('marketing.featuresPage.hero.subtitle'))
 })
 
+const MechanismBuilder = resolveComponent('MarketingCinematicMechanismsMechanismBuilder')
+const MechanismPayment = resolveComponent('MarketingCinematicMechanismsMechanismPayment')
+const MechanismLogistics = resolveComponent('MarketingCinematicMechanismsMechanismLogistics')
+const MechanismAnalytics = resolveComponent('MarketingCinematicMechanismsMechanismAnalytics')
+
 const featureGroups = computed(() => [
   {
     eyebrow: '01 · Storefront',
     title: t('marketing.featuresPage.items.builder.title'),
     description: t('marketing.featuresPage.items.builder.description'),
     icon: 'lucide:layout-template',
+    mechanism: MechanismBuilder,
     items: [
       { icon: 'lucide:smartphone', label: t('saasLanding.features.items.templates.title') },
       { icon: 'lucide:globe', label: t('marketing.featuresPage.items.domains.title') },
@@ -29,6 +35,7 @@ const featureGroups = computed(() => [
     title: t('marketing.featuresPage.items.payments.title'),
     description: t('marketing.featuresPage.items.payments.description'),
     icon: 'lucide:credit-card',
+    mechanism: MechanismPayment,
     items: [
       { icon: 'lucide:shield-check', label: t('saasLanding.trust.secure') },
       { icon: 'lucide:badge-dollar-sign', label: t('marketing.featuresPage.bullets.checkout') },
@@ -40,6 +47,7 @@ const featureGroups = computed(() => [
     title: t('marketing.featuresPage.items.logistics.title'),
     description: t('marketing.featuresPage.items.logistics.description'),
     icon: 'lucide:truck',
+    mechanism: MechanismLogistics,
     items: [
       { icon: 'lucide:send', label: t('marketing.featuresPage.bullets.carriers') },
       { icon: 'lucide:boxes', label: t('marketing.featuresPage.bullets.dispatch') },
@@ -51,6 +59,7 @@ const featureGroups = computed(() => [
     title: t('marketing.featuresPage.items.analytics.title'),
     description: t('marketing.featuresPage.items.analytics.description'),
     icon: 'lucide:bar-chart-3',
+    mechanism: MechanismAnalytics,
     items: [
       { icon: 'lucide:line-chart', label: t('auth.login.hero.carousel.analytics.title') },
       { icon: 'lucide:sparkles', label: t('saasLanding.features.items.aiTools.title') },
@@ -116,13 +125,9 @@ const featureGroups = computed(() => [
             <div v-motion-slide-visible-once-bottom class="cinematic-card relative aspect-[5/4] overflow-hidden p-0">
               <div class="absolute inset-0 bg-gradient-to-br from-[#0A1014] via-[#06181a] to-[#05070A]" />
               <div class="absolute inset-0 cinematic-grid-bg opacity-50" />
-              <div class="relative h-full flex items-center justify-center p-8">
-                <div class="relative">
-                  <div class="absolute inset-0 -m-8 rounded-full bg-lime-neon/15 blur-3xl" />
-                  <div class="relative flex h-32 w-32 items-center justify-center rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur">
-                    <Icon :name="group.icon" class="h-14 w-14 text-lime-neon" />
-                  </div>
-                </div>
+              <div class="absolute inset-0 -m-8 rounded-full bg-lime-neon/10 blur-3xl" />
+              <div class="relative h-full p-6 md:p-8">
+                <component :is="group.mechanism" size="full" />
               </div>
             </div>
           </div>
