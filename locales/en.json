@@ -335,15 +335,15 @@
             "address": "swekly.com/admin/delivery"
           },
           "warehouse": {
-            "eyebrow": "Real-time inventory",
+            "eyebrow": "Advanced inventory control",
             "headlinePre": "Stock,",
             "headlineAccent": "live",
             "headlinePost": ".",
             "subhead": "",
             "meta": [
-              "Multi-warehouse stock",
-              "Variants, SKUs & barcodes",
-              "Purchases & suppliers"
+              "Variants, SKUs, barcodes & batches",
+              "Reorder points & low-stock alerts",
+              "Purchases, suppliers & stock audits"
             ],
             "address": "swekly.com/admin/inventory"
           },
@@ -374,15 +374,15 @@
             "address": "swekly.com/admin/analytics"
           },
           "pos": {
-            "eyebrow": "Unified POS",
+            "eyebrow": "Cross-platform POS",
             "headlinePre": "One register.",
-            "headlineAccent": "One",
-            "headlinePost": " inventory.",
+            "headlineAccent": "Every",
+            "headlinePost": " device.",
             "subhead": "",
             "meta": [
-              "POS register & cash drawer",
-              "Loyalty points at checkout",
-              "Offline-first transactions"
+              "Native apps · iOS · Android · Windows · macOS",
+              "Offline-first checkout, instant cloud resync",
+              "Loyalty, promos & receipts in a single tap"
             ],
             "address": "swekly.com/admin/pos"
           }

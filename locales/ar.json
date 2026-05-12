@@ -335,15 +335,15 @@
             "address": "swekly.com/admin/delivery"
           },
           "warehouse": {
-            "eyebrow": "مخزون بالوقت الحقيقي",
+            "eyebrow": "تحكم متقدم في المخزون",
             "headlinePre": "مخزون",
             "headlineAccent": "حيّ",
             "headlinePost": ".",
             "subhead": "",
             "meta": [
-              "مخزون متعدد المستودعات",
-              "متغيرات و SKU و باركود",
-              "مشتريات وموردون"
+              "متغيرات، SKU، باركود ولوطات",
+              "نقاط إعادة الطلب وتنبيهات المخزون المنخفض",
+              "مشتريات، موردون وعمليات جرد"
             ],
             "address": "swekly.com/admin/inventory"
           },
@@ -374,15 +374,15 @@
             "address": "swekly.com/admin/analytics"
           },
           "pos": {
-            "eyebrow": "نقطة بيع موحّدة",
+            "eyebrow": "نقطة بيع متعددة الأنظمة",
             "headlinePre": "صندوق واحد.",
-            "headlineAccent": "مخزون",
-            "headlinePost": " واحد.",
+            "headlineAccent": "كل",
+            "headlinePost": " الأجهزة.",
             "subhead": "",
             "meta": [
-              "صندوق ودرج نقود",
-              "نقاط ولاء عند الدفع",
-              "معاملات بدون إنترنت"
+              "تطبيقات أصلية · iOS · Android · Windows · macOS",
+              "دفع بدون إنترنت، مزامنة فورية مع الاتصال",
+              "ولاء وعروض وإيصالات بنقرة واحدة"
             ],
             "address": "swekly.com/admin/pos"
           }

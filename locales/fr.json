@@ -335,15 +335,15 @@
             "address": "swekly.com/admin/delivery"
           },
           "warehouse": {
-            "eyebrow": "Stock en temps réel",
+            "eyebrow": "Contrôle d'inventaire avancé",
             "headlinePre": "Stock,",
             "headlineAccent": "en direct",
             "headlinePost": ".",
             "subhead": "",
             "meta": [
-              "Stock multi-entrepôts",
-              "Variantes, SKU & codes-barres",
-              "Achats & fournisseurs"
+              "Variantes, SKU, codes-barres & lots",
+              "Seuils de réassort & alertes stock bas",
+              "Achats, fournisseurs & inventaires"
             ],
             "address": "swekly.com/admin/inventory"
           },
@@ -374,15 +374,15 @@
             "address": "swekly.com/admin/analytics"
           },
           "pos": {
-            "eyebrow": "POS unifié",
-            "headlinePre": "Une caisse.",
-            "headlineAccent": "Un seul",
-            "headlinePost": " stock.",
+            "eyebrow": "PDV multiplateforme",
+            "headlinePre": "Une seule caisse.",
+            "headlineAccent": "Tous",
+            "headlinePost": " vos appareils.",
             "subhead": "",
             "meta": [
-              "Caisse & tiroir-caisse",
-              "Points de fidélité au checkout",
-              "Transactions hors-ligne"
+              "Apps natives · iOS · Android · Windows · macOS",
+              "Encaissement hors-ligne, resync cloud instantanée",
+              "Fidélité, promos & reçus en un seul tap"
             ],
             "address": "swekly.com/admin/pos"
           }
