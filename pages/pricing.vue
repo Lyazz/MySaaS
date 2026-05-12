@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { PRICING_PLANS, buildDisplayPlan } from '~/shared/pricing/plans'
+import { PRICING_PLANS, buildDisplayPlan, YEARLY_DISCOUNT_PERCENT } from '~/shared/pricing/plans'
 
 definePageMeta({
   layout: 'marketing'
@@ -47,11 +47,17 @@ const plans = computed(() =>
               {{ t('pricing.toggle.monthly') }}
             </button>
             <button
-              class="rounded-full px-5 py-2 text-sm font-medium transition-all"
+              class="group rounded-full px-5 py-2 text-sm font-medium transition-all inline-flex items-center gap-2"
               :class="isAnnual ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
               @click="isAnnual = true"
             >
               {{ t('pricing.toggle.annual') }}
+              <span
+                class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]"
+                :class="isAnnual ? 'bg-[color:var(--m-bg)]/15 text-[color:var(--m-bg)]' : 'bg-lime-neon/15 text-lime-neon'"
+              >
+                {{ t('pricing.toggle.save', { percent: YEARLY_DISCOUNT_PERCENT }) }}
+              </span>
             </button>
           </div>
         </div>

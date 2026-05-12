@@ -99,7 +99,7 @@
           "number": "03",
           "caption": "Ship",
           "title": "Pick the carrier. We dispatch.",
-          "description": "Native integrations with Maystro, Yalidine and self-delivery fleets."
+          "description": "Multi-carrier integrations with real-time webhook updates and self-delivery options."
         },
         "grow": {
           "number": "04",
@@ -283,7 +283,7 @@
       "today": "Today",
       "operationsRail": "What runs in the background",
       "whatsapp": "WhatsApp confirmations",
-      "carriers": "Delivery sent to Maystro or Yalidine",
+      "carriers": "Real-time carrier sync with webhooks",
       "analytics": "Sales and campaign tracking",
       "readinessLabel": "Ready to sell",
       "readinessText": "Everything stays simple for your team: your shop, your orders, your delivery options, and your daily follow-up.",
@@ -388,7 +388,7 @@
           }
         }
       },
-      "logoCloud": "Our integrations +50",
+      "logoCloud": "Our integrations — carriers, pixels, tools",
       "howItWorks": {
         "titlePre": "From idea to",
         "titleAccent": "income",
@@ -458,13 +458,9 @@
         "titlePost": "actually use",
         "description": "From local delivery couriers to WhatsApp automation, Meta Pixel tracking to AI-powered tools — it all works out of the box.",
         "tools": {
-          "maystro": {
-            "name": "Maystro",
-            "description": "Top-rated delivery network. Create and track shipments without leaving your dashboard."
-          },
-          "yalidine": {
-            "name": "Yalidine",
-            "description": "Nationwide express delivery with real-time tracking and automatic status updates."
+          "multicarrier": {
+            "name": "Multi-Carrier Support",
+            "description": "Connect with multiple carriers via real-time webhooks. Automatic dispatch, tracking, and status updates all in one place."
           },
           "whatsapp": {
             "name": "WhatsApp API",
@@ -592,7 +588,7 @@
       },
       "bullets": {
         "checkout": "Fast order form",
-        "carriers": "Maystro and Yalidine",
+        "carriers": "Multi-carrier support",
         "dispatch": "Easy dispatch follow-up"
       },
       "visual": {
@@ -699,7 +695,7 @@
           },
           "shipping": {
             "title": "Smart Shipping",
-            "description": "Auto-dispatch to Yalidine, Eckoz, and 50+ local carriers."
+            "description": "Auto-dispatch to 50+ carriers with real-time webhook updates and automatic tracking."
           },
           "analytics": {
             "title": "Deep Analytics",
@@ -876,7 +872,9 @@
       "perYear": "/yr"
     },
     "features": {
-      "ordersPerMonth": "{count} Orders/mo"
+      "ordersPerMonth": "{count} Orders/mo",
+      "maxProducts": "Up to {count} products",
+      "maxPixels": "{count} marketing pixels"
     },
     "page": {
       "title": "Simple, transparent pricing",
@@ -3869,7 +3867,7 @@
           },
           "delivery": {
             "title": "Delivery",
-            "desc": "Connect Yalidine, Maystro, or manage your own delivery. Set up zones and rates here."
+            "desc": "Connect with multiple carriers via webhooks or manage your own delivery. Set up zones and rates here."
           },
           "settings": {
             "title": "Settings",
@@ -3937,7 +3935,7 @@
         "steps": {
           "providers": {
             "title": "Delivery partners",
-            "desc": "Choose Yalidine, Maystro, or self-managed delivery. You can enable multiple at once."
+            "desc": "Choose from multiple carriers or self-managed delivery. Enable real-time webhooks for instant updates."
           },
           "config": {
             "title": "Provider settings",

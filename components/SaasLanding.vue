@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, resolveComponent } from 'vue'
-import { PRICING_PLANS, buildDisplayPlan } from '~/shared/pricing/plans'
+import { computed, ref, resolveComponent } from 'vue'
+import { PRICING_PLANS, buildDisplayPlan, YEARLY_DISCOUNT_PERCENT } from '~/shared/pricing/plans'
 
 const MechanismTenancy = resolveComponent('MarketingCinematicMechanismsMechanismTenancy')
 const MechanismLocalization = resolveComponent('MarketingCinematicMechanismsMechanismLocalization')
@@ -83,8 +83,7 @@ useHead({
 })
 
 const integrationLogos = [
-  { name: 'Yalidine', icon: 'lucide:package' },
-  { name: 'Maystro', icon: 'lucide:truck' },
+  { name: 'Multi-carrier', icon: 'lucide:truck' },
   { name: 'ZR Express', icon: 'lucide:truck' },
   { name: 'Noest Express', icon: 'lucide:truck' },
   { name: 'E-COM Delivery', icon: 'lucide:truck' },
@@ -150,8 +149,9 @@ const featureGrid = computed(() => [
   }
 ])
 
+const isAnnualPreview = ref(false)
 const pricingPreview = computed(() =>
-  PRICING_PLANS.map(plan => buildDisplayPlan(plan, 'month', t))
+  PRICING_PLANS.map(plan => buildDisplayPlan(plan, isAnnualPreview.value ? 'year' : 'month', t))
 )
 
 const testimonials = computed<Array<{ quote: string; author: string; role: string }>>(() => {
@@ -183,91 +183,6 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
         <div class="space-y-3">
           <MarketingCinematicLogoCloud :logos="integrationLogosRow1" />
           <MarketingCinematicLogoCloud :logos="integrationLogosRow2" :reverse="true" />
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Algeria trust strip ─── -->
-    <section class="cinematic-section !py-16 md:!py-20">
-      <div class="cinematic-container">
-        <div class="mb-10 text-center">
-          <span class="cinematic-pill">
-            <span class="cinematic-pill__dot" />
-            {{ t('saasLanding.extras.trustStrip.eyebrow') }}
-          </span>
-        </div>
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div
-            v-for="item in trustStripItems"
-            :key="item.title"
-            class="cinematic-card flex items-start gap-4 p-5"
-          >
-            <div class="flex-none rounded-xl border border-lime-neon/30 bg-lime-neon/[0.06] p-2.5">
-              <Icon :name="item.icon" class="h-5 w-5 text-lime-neon" />
-            </div>
-            <div class="min-w-0">
-              <h3 class="text-[15px] font-medium text-white">{{ item.title }}</h3>
-              <p class="mt-1 text-sm text-[color:var(--m-text-dim)]">{{ item.description }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Live preview ─── -->
-    <section class="cinematic-section">
-      <div class="cinematic-container">
-        <div class="grid items-center gap-10 lg:grid-cols-2">
-          <div>
-            <span class="cinematic-pill">
-              <span class="cinematic-pill__dot" />
-              {{ t('saasLanding.cinematic.preview.eyebrow') }}
-            </span>
-            <h2 class="cinematic-headline mt-6">
-              {{ t('saasLanding.cinematic.preview.titlePre') }}
-              <em>{{ t('saasLanding.cinematic.preview.titleAccent') }}</em>
-              {{ t('saasLanding.cinematic.preview.titlePost') }}
-            </h2>
-            <p class="cinematic-subhead mt-5">{{ t('saasLanding.cinematic.preview.description') }}</p>
-            <div class="mt-7 space-y-3">
-              <div v-for="point in [t('saasLanding.cinematic.preview.point1'), t('saasLanding.cinematic.preview.point2'), t('saasLanding.cinematic.preview.point3')]" :key="point" class="flex items-start gap-3 text-[15px] text-[color:var(--m-text)]/85">
-                <Icon name="lucide:check-circle-2" class="mt-0.5 h-4 w-4 flex-none text-lime-neon" />
-                <span>{{ point }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div v-motion-slide-visible-once-bottom class="cinematic-card relative aspect-[4/3] overflow-hidden p-0">
-            <div class="absolute inset-0 bg-gradient-to-br from-[#0A1014] via-[#06181a] to-[#05070A]" />
-            <div class="absolute inset-0 cinematic-grid-bg opacity-50" />
-            <div class="relative h-full p-5 md:p-7 flex flex-col">
-              <div class="flex items-center gap-2 mb-4">
-                <span class="h-2.5 w-2.5 rounded-full bg-white/10" />
-                <span class="h-2.5 w-2.5 rounded-full bg-white/10" />
-                <span class="h-2.5 w-2.5 rounded-full bg-white/10" />
-                <div class="ml-3 flex-1 rounded-md bg-white/[0.03] border border-white/[0.05] px-3 py-1 font-mono text-[10px] text-[color:var(--m-text-faint)]">
-                  store.swekly.com/admin/orders
-                </div>
-              </div>
-              <div class="flex-1 grid grid-rows-3 gap-3">
-                <div v-for="i in 3" :key="i" class="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5">
-                  <span class="cinematic-mono-num text-xs text-[color:var(--m-text-dim)]">#{{ 1024 + i }}</span>
-                  <div class="flex-1 min-w-0">
-                    <div class="h-2 w-2/3 rounded bg-white/10" />
-                    <div class="mt-1.5 h-1.5 w-1/3 rounded bg-white/[0.06]" />
-                  </div>
-                  <span class="rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider"
-                    :class="i === 0 ? 'border-lime-neon/40 bg-lime-neon/10 text-lime-neon' : 'border-white/[0.08] bg-white/[0.03] text-[color:var(--m-text-dim)]'">
-                    {{ i === 0 ? 'NEW' : i === 1 ? 'SHIPPED' : 'PAID' }}
-                  </span>
-                </div>
-              </div>
-              <div class="mt-4 flex items-center justify-between rounded-lg border border-lime-neon/30 bg-lime-neon/[0.04] px-3 py-2">
-                <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-lime-neon">live</span>
-                <span class="cinematic-mono-num text-xs text-white">+ 3 orders / 12s</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -317,6 +232,30 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
       :description="t('saasLanding.cinematic.pricing.description')"
       centered
     >
+      <div class="-mt-2 mb-10 flex flex-col items-center gap-3">
+        <div class="inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.02] p-1">
+          <button
+            class="rounded-full px-5 py-2 text-sm font-medium transition-all"
+            :class="!isAnnualPreview ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
+            @click="isAnnualPreview = false"
+          >
+            {{ t('pricing.toggle.monthly') }}
+          </button>
+          <button
+            class="rounded-full px-5 py-2 text-sm font-medium transition-all inline-flex items-center gap-2"
+            :class="isAnnualPreview ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
+            @click="isAnnualPreview = true"
+          >
+            {{ t('pricing.toggle.annual') }}
+            <span
+              class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]"
+              :class="isAnnualPreview ? 'bg-[color:var(--m-bg)]/15 text-[color:var(--m-bg)]' : 'bg-lime-neon/15 text-lime-neon'"
+            >
+              {{ t('pricing.toggle.save', { percent: YEARLY_DISCOUNT_PERCENT }) }}
+            </span>
+          </button>
+        </div>
+      </div>
       <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <MarketingCinematicPricingTile
           v-for="plan in pricingPreview"
@@ -331,7 +270,7 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
           :cta="plan.cta"
           :cta-to="`/pricing#${plan.code}`"
           :featured="plan.popular"
-          :popular-label="t('pricing.popular')"
+          :popular-label="t('pricing.badges.mostPopular')"
         />
       </div>
       <div class="mt-10 text-center">

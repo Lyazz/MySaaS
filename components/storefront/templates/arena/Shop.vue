@@ -122,28 +122,12 @@ const closeQuickView = () => {
           <div>
             <p class="flex items-center gap-3 mb-4">
               <span class="w-8 h-px bg-brand-500" />
-              <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">// Catalog</span>
             </p>
             <h1 class="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-[-0.04em] text-white leading-[0.92]">
               {{ pageTitle }}
             </h1>
           </div>
 
-          <!-- Stat trio -->
-          <div class="grid grid-cols-3 gap-4 lg:gap-6">
-            <div class="border-l-2 border-brand-500 pl-4">
-              <div class="text-2xl font-black text-white">{{ String(filteredProducts.length).padStart(2, '0') }}</div>
-              <div class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 mt-1">Items</div>
-            </div>
-            <div class="border-l-2 border-white/10 pl-4">
-              <div class="text-2xl font-black text-white">{{ String(filters.categories.length).padStart(2, '0') }}</div>
-              <div class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 mt-1">Cats</div>
-            </div>
-            <div class="border-l-2 border-white/10 pl-4">
-              <div class="text-2xl font-black text-white">{{ String(selectedCategories.length).padStart(2, '0') }}</div>
-              <div class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 mt-1">Active</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -174,7 +158,7 @@ const closeQuickView = () => {
       >
         <div class="h-[2px] bg-gradient-to-r from-transparent via-brand-500 to-transparent" />
         <div class="flex items-center justify-between px-6 py-5 border-b border-white/[0.06]">
-          <h3 class="text-[12px] font-black uppercase tracking-[0.28em] text-brand-500">// Filters</h3>
+          <h3 class="text-[12px] font-black uppercase tracking-[0.28em] text-brand-500">{{ storefrontContent.actions.filters }}</h3>
           <button class="h-8 w-8 flex items-center justify-center text-slate-400" @click="isFilterDrawerOpen = false">
             <Icon name="lucide:x" class="w-5 h-5" />
           </button>
@@ -183,7 +167,7 @@ const closeQuickView = () => {
         <div class="flex-1 px-6 py-6 space-y-8">
           <div>
             <button type="button" class="w-full flex items-center justify-between mb-4" @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen">
-              <h4 class="text-[10px] font-black uppercase tracking-[0.32em] text-white">Categories</h4>
+              <h4 class="text-[10px] font-black uppercase tracking-[0.32em] text-white">{{ storefrontContent.shop.categories }}</h4>
               <Icon name="lucide:chevron-down" class="w-4 h-4 text-slate-400 transition-transform" :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''" />
             </button>
             <div v-show="mobileCategoriesDropdownOpen" class="space-y-2.5">
@@ -195,7 +179,7 @@ const closeQuickView = () => {
           </div>
 
           <div>
-            <h4 class="text-[10px] font-black uppercase tracking-[0.32em] text-white mb-4">Price Range</h4>
+            <h4 class="text-[10px] font-black uppercase tracking-[0.32em] text-white mb-4">{{ storefrontContent.shop.priceRange.label }}</h4>
             <StorefrontPriceRangeFilter v-model:min-price="minPriceInput" v-model:max-price="maxPriceInput" :min-bound="priceRange.min" :max-bound="priceRange.max" :step="1" />
           </div>
         </div>
@@ -235,7 +219,7 @@ const closeQuickView = () => {
 
             <div class="p-6">
               <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.06]">
-                <h3 class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">// Filters</h3>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">{{ storefrontContent.actions.filters }}</h3>
                 <button class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 hover:text-brand-500 transition-colors" @click="resetFilters">
                   {{ storefrontContent.actions.reset }}
                 </button>
@@ -243,7 +227,7 @@ const closeQuickView = () => {
 
               <div class="mb-8">
                 <button type="button" class="w-full flex items-center justify-between mb-4" @click="desktopCategoriesDropdownOpen = !desktopCategoriesDropdownOpen">
-                  <h4 class="text-[10px] font-black uppercase tracking-[0.28em] text-white">Categories</h4>
+                  <h4 class="text-[10px] font-black uppercase tracking-[0.28em] text-white">{{ storefrontContent.shop.categories }}</h4>
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-slate-500 transition-transform" :class="desktopCategoriesDropdownOpen ? 'rotate-180' : ''" />
                 </button>
                 <div v-show="desktopCategoriesDropdownOpen" class="space-y-2.5">
@@ -255,7 +239,7 @@ const closeQuickView = () => {
               </div>
 
               <div class="mb-8 pt-6 border-t border-white/[0.06]">
-                <h4 class="text-[10px] font-black uppercase tracking-[0.28em] text-white mb-4">Price Range</h4>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.28em] text-white mb-4">{{ storefrontContent.shop.priceRange.label }}</h4>
                 <StorefrontPriceRangeFilter v-model:min-price="minPriceInput" v-model:max-price="maxPriceInput" :min-bound="priceRange.min" :max-bound="priceRange.max" :step="1" />
               </div>
 
@@ -316,7 +300,7 @@ const closeQuickView = () => {
             </div>
 
             <div class="hidden sm:flex items-center gap-2">
-              <span class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 whitespace-nowrap">Sort</span>
+              <span class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 whitespace-nowrap">{{ storefrontContent.shop.sortBy }}</span>
               <div class="relative">
                 <select
                   v-model="sortOption"
@@ -426,7 +410,7 @@ const closeQuickView = () => {
             <img :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" class="w-full h-full object-cover" />
           </div>
           <div class="w-full md:w-1/2 p-8 md:p-10 flex flex-col">
-            <p class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-3">// {{ storefrontContent.product.inStock }}</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-3">{{ storefrontContent.product.inStock }}</p>
             <h2 class="text-3xl font-black uppercase tracking-[-0.02em] text-white mb-3 leading-tight">{{ quickViewProduct.title }}</h2>
             <div class="text-2xl font-black text-brand-500 mb-6">{{ formatCurrency(quickViewProduct.price) }}</div>
             <p class="text-sm text-slate-400 leading-relaxed mb-8 flex-1">

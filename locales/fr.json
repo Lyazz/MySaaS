@@ -99,7 +99,7 @@
           "number": "03",
           "caption": "Expédiez",
           "title": "Choisissez le transporteur. On expédie.",
-          "description": "Intégrations natives avec Maystro, Yalidine et vos livreurs internes."
+          "description": "Intégrations multi-transporteurs avec webhooks temps réel et options de livraison personnalisées."
         },
         "grow": {
           "number": "04",
@@ -283,7 +283,7 @@
       "today": "Aujourd’hui",
       "operationsRail": "Ce qui tourne en arrière-plan",
       "whatsapp": "Confirmations WhatsApp",
-      "carriers": "Livraison envoyée vers Maystro ou Yalidine",
+      "carriers": "Synchronisation transporteur en temps réel via webhooks",
       "analytics": "Suivi des ventes et des campagnes",
       "readinessLabel": "Prêt à vendre",
       "readinessText": "Tout reste simple pour votre équipe : votre boutique, vos commandes, vos options de livraison et votre suivi quotidien.",
@@ -388,7 +388,7 @@
           }
         }
       },
-      "logoCloud": "Nos intégrations +50",
+      "logoCloud": "Nos intégrations — transporteurs, pixels, outils",
       "howItWorks": {
         "titlePre": "De l'idée au",
         "titleAccent": "revenu",
@@ -458,13 +458,9 @@
         "titlePost": "réunis",
         "description": "Des livreurs locaux à l'automatisation WhatsApp, du pixel Meta aux outils IA — tout fonctionne dès le premier jour.",
         "tools": {
-          "maystro": {
-            "name": "Maystro",
-            "description": "Le réseau de livraison n°1. Créez et suivez vos expéditions sans quitter votre tableau de bord."
-          },
-          "yalidine": {
-            "name": "Yalidine",
-            "description": "Livraison express nationale avec suivi en temps réel et mises à jour automatiques."
+          "multicarrier": {
+            "name": "Support Multi-Transporteurs",
+            "description": "Connectez plusieurs transporteurs via webhooks en temps réel. Expédition automatique, suivi et mises à jour en un seul endroit."
           },
           "whatsapp": {
             "name": "WhatsApp API",
@@ -548,7 +544,7 @@
       "hero": {
         "title": {
           "prefix": "Tout ce qu’il vous faut pour ",
-          "accent": "passer à l’échelle"
+          "accent": "scaler"
         },
         "subtitle": "Créez votre boutique, recevez des commandes, gérez la livraison et gardez le contrôle sans multiplier les outils."
       },
@@ -559,7 +555,7 @@
         },
         "tenancy": {
           "title": "Infrastructure évolutive",
-          "description": "Plateforme de niveau entreprise construite pour la performance et la fiabilité à n'importe quelle échelle."
+          "description": "Plateforme de niveau entreprise construite pour la performance et la fiabilité, peu importe à quel point vous scalez."
         },
         "localization": {
           "title": "Prêt pour le monde",
@@ -592,7 +588,7 @@
       },
       "bullets": {
         "checkout": "Formulaire de commande rapide",
-        "carriers": "Maystro et Yalidine",
+        "carriers": "Support multi-transporteurs",
         "dispatch": "Suivi dispatch simplifié"
       },
       "visual": {
@@ -862,7 +858,9 @@
       "perYear": "/an"
     },
     "features": {
-      "ordersPerMonth": "{count} commandes/mois"
+      "ordersPerMonth": "{count} commandes/mois",
+      "maxProducts": "Jusqu’à {count} produits",
+      "maxPixels": "{count} pixels marketing"
     },
     "page": {
       "title": "Tarifs simples et transparents",
@@ -3843,7 +3841,7 @@
           },
           "delivery": {
             "title": "Livraison",
-            "desc": "Connectez Yalidine, Maystro ou gérez votre propre livraison. Configurez les zones et tarifs ici."
+            "desc": "Connectez plusieurs transporteurs via webhooks ou gérez votre propre livraison. Configurez les zones et tarifs ici."
           },
           "settings": {
             "title": "Paramètres",
@@ -3911,7 +3909,7 @@
         "steps": {
           "providers": {
             "title": "Partenaires de livraison",
-            "desc": "Choisissez Yalidine, Maystro ou une livraison en propre. Vous pouvez en activer plusieurs à la fois."
+            "desc": "Choisissez parmi plusieurs transporteurs ou une livraison en propre. Activez les webhooks temps réel pour les mises à jour instantanées."
           },
           "config": {
             "title": "Configuration du prestataire",

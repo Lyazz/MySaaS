@@ -10,7 +10,7 @@ onMounted(() => {
 // Global head configuration if needed, but pages will override
 useHead({
   titleTemplate: (titleChunk) => {
-    return titleChunk ? `${titleChunk} - Swekly Platform` : 'Swekly Platform';
+    return titleChunk || '';
   },
 });
 

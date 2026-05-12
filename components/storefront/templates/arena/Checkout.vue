@@ -295,7 +295,7 @@ async function handleSubmit() {
       <div class="max-w-[1400px] mx-auto px-5 lg:px-10 py-12">
         <p class="flex items-center gap-3 mb-4">
           <span class="w-8 h-px bg-brand-500" />
-          <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">// Deploy</span>
+          
         </p>
         <div class="flex items-end justify-between gap-6">
           <h1 class="text-4xl md:text-6xl font-black uppercase tracking-[-0.04em] text-white leading-[0.92]">
@@ -303,7 +303,7 @@ async function handleSubmit() {
           </h1>
           <div v-if="cartStore.hasItems" class="border-l-2 border-brand-500 pl-4">
             <div class="text-2xl font-black text-white">{{ String(cartStore.itemCount).padStart(2, '0') }}</div>
-            <div class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 mt-1">Items</div>
+            
           </div>
         </div>
       </div>
@@ -329,8 +329,8 @@ async function handleSubmit() {
             <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
             <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
 
-            <p class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-1">// Profile</p>
-            <h2 class="text-lg font-black uppercase tracking-[-0.01em] text-white mb-6">Operator Details</h2>
+            
+            
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div class="md:col-span-1">
@@ -388,7 +388,7 @@ async function handleSubmit() {
             <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
 
             <div class="flex items-center justify-between mb-2">
-              <p class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">// Logistics</p>
+              
               <span class="text-[9px] font-black uppercase tracking-[0.28em] text-brand-500 border border-brand-500/40 bg-brand-500/10 px-2 py-1">{{ storefrontContent.checkout.required }}</span>
             </div>
             <h3 class="text-lg font-black uppercase tracking-[-0.01em] text-white mb-1">{{ storefrontContent.checkout.sections.deliveryOptions }}</h3>
@@ -470,7 +470,7 @@ async function handleSubmit() {
 
             <div class="flex items-center justify-between pb-5 mb-5 border-b border-white/[0.06]">
               <div>
-                <p class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-1">// Mission Brief</p>
+                
                 <h2 class="text-xl font-black uppercase tracking-[-0.01em] text-white">Order Summary</h2>
               </div>
               <span class="text-[9px] font-black uppercase tracking-[0.22em] text-brand-500 border border-brand-500/40 bg-brand-500/10 px-2.5 py-1.5 flex items-center gap-1.5">
@@ -505,7 +505,7 @@ async function handleSubmit() {
                   <Icon name="lucide:ticket-percent" class="w-4 h-4 text-brand-500" />
                   <h4 class="text-[10px] font-black uppercase tracking-[0.28em] text-white">{{ storefrontContent.checkout.coupon.title }}</h4>
                 </div>
-                <span class="text-[9px] font-black uppercase tracking-[0.22em] text-brand-500">// {{ storefrontContent.checkout.coupon.badge }}</span>
+                <span class="text-[9px] font-black uppercase tracking-[0.22em] text-brand-500">{{ storefrontContent.checkout.coupon.badge }}</span>
               </div>
               <div class="flex gap-2">
                 <input

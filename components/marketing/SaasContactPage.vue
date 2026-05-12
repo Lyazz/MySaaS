@@ -33,17 +33,6 @@ useSeoMeta({
                   {{ t('saasLanding.contact.cards.support.contact') }}
                 </p>
               </div>
-
-              <div class="flex flex-wrap gap-2">
-                <span class="cinematic-pill">
-                  <Icon name="lucide:shield-check" class="h-3 w-3 text-lime-neon" />
-                  {{ t('saasLanding.trust.secure') }}
-                </span>
-                <span class="cinematic-pill">
-                  <Icon name="lucide:clock-3" class="h-3 w-3 text-lime-neon" />
-                  {{ t('saasLanding.contact.supportPill') }}
-                </span>
-              </div>
             </div>
           </div>
 

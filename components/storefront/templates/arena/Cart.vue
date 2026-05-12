@@ -15,7 +15,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
       <div class="max-w-[1400px] mx-auto px-5 lg:px-10 py-12">
         <p class="flex items-center gap-3 mb-4">
           <span class="w-8 h-px bg-brand-500" />
-          <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">// Loadout</span>
+          
         </p>
         <div class="flex items-end justify-between gap-6">
           <h1 class="text-4xl md:text-6xl font-black uppercase tracking-[-0.04em] text-white leading-[0.92]">
@@ -23,7 +23,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
           </h1>
           <div v-if="cartStore.hasItems" class="border-l-2 border-brand-500 pl-4">
             <div class="text-2xl font-black text-white">{{ String(cartStore.itemCount).padStart(2, '0') }}</div>
-            <div class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-500 mt-1">Items</div>
+            
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
         <!-- Items -->
         <section class="lg:col-span-7">
           <div class="flex items-center gap-3 mb-6">
-            <span class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">// Items</span>
+            
             <div class="flex-1 h-px bg-white/[0.06]" />
             <span class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">{{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}</span>
           </div>
@@ -81,9 +81,6 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                 <div class="flex flex-1 flex-col min-w-0">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0 flex-1">
-                      <p class="text-[9px] font-black uppercase tracking-[0.32em] text-brand-500 mb-1 font-mono">
-                        // {{ String(item.productId).slice(-4).toUpperCase() }}
-                      </p>
                       <h3 class="text-base font-black uppercase tracking-[-0.01em] text-white leading-tight hover:text-brand-500 transition-colors">
                         <NuxtLink :to="`/product/${item.slug}`">{{ item.title }}</NuxtLink>
                       </h3>
@@ -104,7 +101,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
 
                   <div class="flex items-end justify-between gap-3 pt-3 mt-auto border-t border-white/[0.06]">
                     <div>
-                      <span class="block text-xs text-slate-500 uppercase tracking-[0.18em] font-bold mb-0.5">Unit</span>
+                      
                       <span class="text-lg font-black text-white tracking-[-0.02em]">{{ formatCurrency(item.price) }}</span>
                     </div>
 
@@ -141,7 +138,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
             <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
             <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
 
-            <p class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-3">// Mission Brief</p>
+            
             <h2 id="summary-heading" class="text-2xl font-black uppercase tracking-[-0.02em] text-white">
               {{ storefrontContent.cart.summary.title }}
             </h2>

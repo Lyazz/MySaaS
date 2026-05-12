@@ -238,7 +238,7 @@
 
   .cinematic-section {
     position: relative;
-    padding: clamp(4rem, 9vw, 8rem) 0;
+    padding: clamp(2.5rem, 6vw, 5rem) 0;
   }
 
   .cinematic-container {

@@ -139,7 +139,7 @@ onUnmounted(() => {
       <section class="mt-16 lg:mt-24 animate-fade-in-up" style="animation-delay: 0.2s">
         <div class="flex items-center gap-3 mb-6">
           <span class="w-8 h-px bg-brand-500" />
-          <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">// {{ storefrontContent.product.detailsTitle }}</span>
+          <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">{{ storefrontContent.product.detailsTitle }}</span>
         </div>
         <div class="relative bg-[#0b0f14] border border-white/[0.06] p-6 lg:p-10">
           <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />

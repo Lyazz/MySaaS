@@ -16,6 +16,8 @@ export interface PlanDefinition {
         annualAmountDzd: PricingAmountDzd
     }
     ordersPerMonth: number
+    maxProducts: number
+    maxPixels: number
     flags?: {
         popular?: boolean
         highlight?: boolean
@@ -37,20 +39,29 @@ export interface PricingPlanCard {
 
 const dzd = (amount: number) => formatPriceAmount(amount)
 
+export const YEARLY_DISCOUNT_PERCENT = 20
+
+export const getAnnualTotalDzd = (plan: PlanDefinition): PricingAmountDzd =>
+    Math.round(plan.pricing.monthlyAmountDzd * 12 * (1 - YEARLY_DISCOUNT_PERCENT / 100))
+
 export const PRICING_PLANS: readonly PlanDefinition[] = [
     {
         code: 'basic',
         name: 'Basic',
         description: 'Best for trying out',
         pricing: { currency: 'DA', monthlyAmountDzd: 0, annualAmountDzd: 0 },
-        ordersPerMonth: 150
+        ordersPerMonth: 150,
+        maxProducts: 30,
+        maxPixels: 1
     },
     {
         code: 'beginner',
         name: 'Beginner',
         description: 'A simple start to boost your store',
         pricing: { currency: 'DA', monthlyAmountDzd: 1490, annualAmountDzd: 1190 },
-        ordersPerMonth: 500
+        ordersPerMonth: 500,
+        maxProducts: 150,
+        maxPixels: 2
     },
     {
         code: 'merchant',
@@ -58,6 +69,8 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         description: 'Smart choice for growing businesses',
         pricing: { currency: 'DA', monthlyAmountDzd: 2990, annualAmountDzd: 2390 },
         ordersPerMonth: 1500,
+        maxProducts: 500,
+        maxPixels: 5,
         flags: { popular: true }
     },
     {
@@ -66,6 +79,8 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         description: 'Built for scaling with confidence',
         pricing: { currency: 'DA', monthlyAmountDzd: 4490, annualAmountDzd: 3590 },
         ordersPerMonth: 5000,
+        maxProducts: 2000,
+        maxPixels: 10,
         flags: { highlight: true }
     }
 ] as const
@@ -113,6 +128,8 @@ export const buildDisplayPlan = (
         period: interval === 'year' ? t('pricing.period.perYear') : t('pricing.period.perMonth'),
         features: [
             t('pricing.features.ordersPerMonth', { count: plan.ordersPerMonth }),
+            t('pricing.features.maxProducts', { count: plan.maxProducts }),
+            t('pricing.features.maxPixels', { count: plan.maxPixels }),
             ...PLAN_FEATURE_KEYS[plan.code].map((k) => t(k))
         ],
         cta: t(`pricing.plans.${plan.code}.cta`),
@@ -122,7 +139,7 @@ export const buildDisplayPlan = (
 }
 
 export const pricingPlanCardForUi = (plan: PlanDefinition, interval: BillingInterval): PricingPlanCard => {
-    const amount = planPriceForInterval(plan, interval)
+    const amount = interval === 'year' ? getAnnualTotalDzd(plan) : plan.pricing.monthlyAmountDzd
     const priceText = dzd(amount)
 
     const popular = Boolean(plan.flags?.popular)
@@ -135,7 +152,7 @@ export const pricingPlanCardForUi = (plan: PlanDefinition, interval: BillingInte
         description: plan.description,
         priceText,
         currency: plan.pricing.currency,
-        periodText: '/mo',
+        periodText: interval === 'year' ? '/yr' : '/mo',
         features: [{ text: `${plan.ordersPerMonth} Orders/mo`, included: true }],
         cta,
         popular,

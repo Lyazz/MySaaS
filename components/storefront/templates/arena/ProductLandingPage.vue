@@ -101,7 +101,7 @@ onUnmounted(() => {
       <div class="h-[2px] bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-60" />
       <div class="max-w-[1400px] mx-auto px-5 lg:px-10 py-3 flex items-center gap-3">
         <Icon name="lucide:zap" class="w-3.5 h-3.5 text-brand-500" />
-        <span class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">// Featured Drop</span>
+        
         <span class="hidden md:inline text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 ml-3">{{ product?.title }}</span>
       </div>
     </div>
@@ -117,10 +117,10 @@ onUnmounted(() => {
       <div class="max-w-[1400px] mx-auto px-5 lg:px-10 py-12">
         <p class="flex items-center gap-3 mb-3">
           <span class="w-8 h-px bg-brand-500" />
-          <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">// Spec Sheet</span>
+          
         </p>
         <p class="text-base lg:text-lg text-slate-400 leading-relaxed max-w-3xl">
-          Experience pro-grade engineering. Built for those who play to win.
+          
         </p>
       </div>
     </div>
@@ -164,7 +164,7 @@ onUnmounted(() => {
       <div class="h-[2px] bg-gradient-to-r from-transparent via-brand-500 to-transparent" />
       <div class="px-4 py-3 flex items-center justify-between gap-3">
         <div class="flex flex-col min-w-0">
-          <span class="text-[9px] font-black uppercase tracking-[0.28em] text-brand-500">// {{ storefrontContent.productForm.totalPrice }}</span>
+          <span class="text-[9px] font-black uppercase tracking-[0.28em] text-brand-500">{{ storefrontContent.productForm.totalPrice }}</span>
           <span class="text-xl font-black text-white tracking-[-0.02em] truncate">{{ formatPrice(Number(product?.price || 0)) }}</span>
         </div>
         <button

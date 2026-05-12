@@ -73,7 +73,7 @@ const categoriesDropdownOpen = ref(true)
         <div class="max-w-2xl">
           <p class="flex items-center gap-3 mb-4">
             <span class="w-8 h-px bg-brand-500" />
-            <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">// {{ storefrontContent.category.label }}</span>
+            <span class="text-[10px] font-black uppercase tracking-[0.36em] text-brand-500">{{ storefrontContent.category.label }}</span>
           </p>
           <h1 class="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-[-0.04em] text-white leading-[0.92]">
             {{ category.title }}
@@ -101,7 +101,7 @@ const categoriesDropdownOpen = ref(true)
             <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
 
             <button type="button" class="w-full flex items-center justify-between mb-5" @click="categoriesDropdownOpen = !categoriesDropdownOpen">
-              <h3 class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">// {{ storefrontContent.shop.categories }}</h3>
+              <h3 class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">{{ storefrontContent.shop.categories }}</h3>
               <Icon name="lucide:chevron-down" class="w-4 h-4 text-slate-500 transition-transform" :class="categoriesDropdownOpen ? 'rotate-180' : ''" />
             </button>
             <div v-show="categoriesDropdownOpen" class="space-y-1">
@@ -112,7 +112,7 @@ const categoriesDropdownOpen = ref(true)
                 class="flex items-center gap-3 group py-2 px-3 -mx-3 transition-colors border-l-2 hover:bg-white/[0.03]"
                 :class="cat.id === category.id ? 'border-brand-500 bg-brand-500/10 text-brand-500' : 'border-transparent text-slate-400 hover:border-white/15 hover:text-white'"
               >
-                <span class="text-xs font-mono text-slate-600">{{ String(allCategories?.indexOf(cat) ?? 0).padStart(2, '0').slice(0, 2) }}</span>
+                
                 <span class="text-sm font-bold uppercase tracking-[0.04em] flex-1">{{ categoryDisplayTitle(cat) }}</span>
                 <Icon v-if="cat.id === category.id" name="lucide:chevron-right" class="w-4 h-4 text-brand-500" />
               </NuxtLink>
@@ -124,11 +124,11 @@ const categoriesDropdownOpen = ref(true)
           <!-- Toolbar -->
           <div class="bg-[#0b0f14] border border-white/[0.06] mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
             <div>
-              <p class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-1">// Showing</p>
+              
               <p class="text-sm font-bold uppercase tracking-[0.04em] text-white">{{ storefrontContent.category.showingResults(categoryProducts.length) }}</p>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 whitespace-nowrap">Sort</span>
+              <span class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500 whitespace-nowrap">{{ storefrontContent.category.sortBy }}</span>
               <div class="relative">
                 <select
                   v-model="sortOption"

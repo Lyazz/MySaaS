@@ -131,7 +131,7 @@ async function handleAddToCart() {
         <span
           v-if="isOutOfStock"
           class="bg-rose-500 text-white text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1"
-        >Sold Out</span>
+        >Out of Stock</span>
         <span
           v-else-if="isLowStock"
           class="bg-amber-400 text-black text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1"
@@ -165,11 +165,6 @@ async function handleAddToCart() {
 
     <!-- Info area -->
     <div :class="[viewMode === 'list' ? 'flex-1 flex flex-col justify-center py-2 pr-3' : 'p-5']">
-      <!-- Product index / SKU label -->
-      <p class="text-[9px] font-black uppercase tracking-[0.32em] text-brand-500 mb-2 font-mono">
-        // {{ String(product.id).slice(-4).toUpperCase() }}
-      </p>
-
       <NuxtLink :to="`/product/${product.slug}`" class="block group/title">
         <h3
           class="font-black uppercase text-white tracking-[-0.01em] leading-tight group-hover/title:text-brand-500 transition-colors"
@@ -180,7 +175,7 @@ async function handleAddToCart() {
       </NuxtLink>
 
       <p v-if="viewMode === 'list'" class="text-sm text-slate-400 mb-4 line-clamp-2 leading-relaxed">
-        {{ product.description || 'Pro-grade gear engineered for the arena.' }}
+        {{ product.description || storefrontContent.product.descriptionFallback }}
       </p>
 
       <div class="mt-3 flex items-end justify-between gap-3 pt-3 border-t border-white/[0.06]">
@@ -199,7 +194,7 @@ async function handleAddToCart() {
           @click.prevent="handleAddToCart"
         >
           <Icon name="lucide:plus" class="w-3.5 h-3.5" />
-          <span class="hidden sm:inline">Add</span>
+          <span class="hidden sm:inline">{{ storefrontContent.actions.addToCart }}</span>
         </button>
       </div>
     </div>

@@ -255,7 +255,7 @@ const displayedProducts = computed(() => {
 
         <div class="mt-10 flex justify-center md:hidden">
           <NuxtLink to="/products" class="inline-flex border border-white/15 px-6 py-3 text-[11px] font-black uppercase tracking-[0.22em] text-slate-300 hover:border-brand-500 hover:text-brand-500 transition-colors">
-            {{ "View all products" }} →
+            View all products →
           </NuxtLink>
         </div>
       </div>
@@ -275,7 +275,7 @@ const displayedProducts = computed(() => {
             </h2>
           </div>
           <NuxtLink to="/products" class="hidden md:inline-flex border border-white/15 px-5 py-3 text-[11px] font-black uppercase tracking-[0.22em] text-slate-300 hover:border-brand-500 hover:text-brand-500 transition-colors">
-            View All
+            View all products
           </NuxtLink>
         </div>
 
