@@ -1568,6 +1568,29 @@
           "toggle": "Masquer l'adresse optionnelle"
         }
       },
+      "invoices": {
+        "title": "Factures de vente",
+        "subtitle": "Activez les factures PDF imprimables pour les ventes PDV et livrées.",
+        "enable": {
+          "title": "Activer la facturation",
+          "subtitle": "Permettre aux admins de générer et imprimer les factures depuis les ventes.",
+          "toggle": "Activer les factures de vente"
+        },
+        "prefix": {
+          "label": "Préfixe de facture",
+          "placeholder": "INV"
+        },
+        "logo": {
+          "label": "Marque",
+          "title": "Afficher le logo",
+          "subtitle": "Utilise le logo des paramètres d'apparence s'il est disponible.",
+          "toggle": "Afficher le logo sur les factures"
+        },
+        "footer": {
+          "label": "Note de bas de page",
+          "placeholder": "Merci pour votre achat."
+        }
+      },
       "loyalty": {
         "title": "Programme de points",
         "subtitle": "Configurez le calcul et la redemption des points.",
@@ -1608,6 +1631,38 @@
       },
       "confirm": {
         "discard": "Voulez-vous vraiment annuler les modifications non enregistrées ?"
+      }
+    },
+    "domainSettingsForm": {
+      "customDomain": {
+        "title": "Domaine personnalisé",
+        "subtitle": "Ajoutez le nom exact que les clients visiteront, par exemple www.example.com."
+      },
+      "fields": {
+        "domain": "Nom de domaine"
+      },
+      "actions": {
+        "add": "Ajouter le domaine"
+      },
+      "dns": {
+        "title": "Enregistrement DNS",
+        "subtitle": "Créez cet enregistrement CNAME chez votre fournisseur DNS, puis gardez le domaine ajouté ici.",
+        "apexNote": "Pour un domaine racine comme example.com, utilisez ALIAS/ANAME si votre fournisseur DNS le permet, ou redirigez-le vers www.example.com."
+      },
+      "connected": {
+        "title": "Domaines connectés",
+        "subtitle": "Les domaines listés ici sont autorisés à afficher cette boutique.",
+        "empty": "Aucun domaine personnalisé connecté."
+      },
+      "messages": {
+        "loadFailed": "Impossible de charger les domaines.",
+        "saved": "Domaine connecté.",
+        "saveFailed": "Impossible d'ajouter le domaine.",
+        "deleted": "Domaine supprimé.",
+        "deleteFailed": "Impossible de supprimer le domaine."
+      },
+      "confirm": {
+        "delete": "Supprimer ce domaine ?"
       }
     },
     "contactInfosForm": {
@@ -2004,6 +2059,7 @@
       "contactInfo": "Infos de contact",
       "legalPages": "Pages legales",
       "functional": "Fonctionnel",
+      "domains": "Domaines",
       "users": "Utilisateurs",
       "storefront": "Boutique",
       "account": "Compte",
@@ -2202,6 +2258,18 @@
           "actions": {
             "confirmPayment": "Confirmer le paiement"
           }
+        },
+        "alerts": {
+          "saleCreated": "Vente créée avec succès",
+          "saleFailed": "Échec de la vente : {message}",
+          "unknownError": "Une erreur inconnue est survenue",
+          "featureComingSoon": "La fonction {feature} arrive bientôt",
+          "reprintNotImplemented": "La réimpression de la dernière vente n'est pas encore disponible",
+          "printInvoicePrompt": "Imprimer la facture de cette vente ?",
+          "invoicePopupBlocked": "La fenêtre de facture a été bloquée par le navigateur.",
+          "invoiceFailed": "Échec de la facture : {message}",
+          "invoicesDisabled": "Les factures de vente sont désactivées dans les paramètres fonctionnels.",
+          "noLastSale": "Aucune vente récente à réimprimer."
         }
       },
       "cash": {
@@ -3676,7 +3744,9 @@
           }
         },
         "actions": {
-          "refund": "Rembourser"
+          "refund": "Rembourser",
+          "invoice": "Facture",
+          "printInvoice": "Imprimer la facture"
         },
         "refundModal": {
           "title": "Rembourser la vente",
@@ -3696,7 +3766,9 @@
           "onlyCompletedPos": "Seules les ventes PDV terminées peuvent être remboursées.",
           "noOpenCashbox": "Aucune caisse ouverte disponible. Ouvrez une session de caisse d’abord.",
           "refundSuccess": "Vente remboursée avec succès.",
-          "refundFailed": "Échec du remboursement de la vente."
+          "refundFailed": "Échec du remboursement de la vente.",
+          "invoiceFailed": "Impossible de générer la facture.",
+          "invoicePopupBlocked": "La fenêtre de facture a été bloquée par le navigateur."
         },
         "detail": {
           "metaTitle": "Vente",
@@ -3748,6 +3820,11 @@
           "metaTitle": "Fonctionnel",
           "title": "Paramètres fonctionnels",
           "subtitle": "Gérez les fonctionnalités et options principales de votre boutique."
+        },
+        "domains": {
+          "metaTitle": "Domaines",
+          "title": "Paramètres des domaines",
+          "subtitle": "Connectez un domaine acheté à cette boutique avec un enregistrement CNAME."
         }
       },
       "suppliers": {

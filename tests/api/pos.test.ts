@@ -15,6 +15,7 @@ describe('Admin POS (direct sale) flow', () => {
     let variantStockBefore = 0
     let customerId: string
     let sku: string
+    let cashboxId: string
 
     let otherTenantId: string
     let otherCustomerId: string
@@ -119,9 +120,32 @@ describe('Admin POS (direct sale) flow', () => {
             }
         })
         otherSku = (await prisma.productVariant.findFirst({ where: { tenantId: otherTenantId, productId: otherProduct.id } }))?.sku as string
+
+        const cashbox = await prisma.cashbox.create({
+            data: {
+                tenantId,
+                name: `POS Cashbox ${Date.now()}`,
+                isActive: true
+            }
+        })
+        cashboxId = cashbox.id
+        await prisma.cashSession.create({
+            data: {
+                tenantId,
+                cashboxId,
+                status: 'OPEN',
+                openingFloat: 0,
+                openedByUserId: adminId
+            }
+        })
     })
 
     afterAll(async () => {
+        await prisma.customerPayment.deleteMany({ where: { tenantId } })
+        await prisma.supplierPayment.deleteMany({ where: { tenantId } })
+        await prisma.cashTransaction.deleteMany({ where: { tenantId } })
+        await prisma.cashSession.deleteMany({ where: { tenantId } })
+        await prisma.cashbox.deleteMany({ where: { tenantId } })
         await prisma.saleItem.deleteMany({ where: { sale: { tenantId } } })
         await prisma.sale.deleteMany({ where: { tenantId } })
         await prisma.inventoryMovement.deleteMany({ where: { tenantId } })
@@ -215,6 +239,13 @@ describe('Admin POS (direct sale) flow', () => {
         expect(move?.reservedDelta).toBe(0)
         expect(move?.createdByUserId).toBe(adminId)
         expect(move?.orderId).toBeNull()
+
+        const cashTx = await prisma.cashTransaction.findFirst({
+            where: { tenantId, saleId, type: 'SALE_PAYMENT', direction: 'IN' },
+            orderBy: { createdAt: 'desc' }
+        })
+        expect(cashTx?.cashboxId).toBe(cashboxId)
+        expect(String(cashTx?.amount)).toBe(String(saved?.totalAmount))
     })
 
     it('deduplicates POS sale sync retries by tenant-scoped idempotency key', async () => {
@@ -249,6 +280,11 @@ describe('Admin POS (direct sale) flow', () => {
 
         const after = await prisma.productVariant.findUnique({ where: { tenantId_id: { tenantId, id: variantId } } })
         expect(after?.stock).toBe((before?.stock ?? 0) - 1)
+
+        const cashTxCount = await prisma.cashTransaction.count({
+            where: { tenantId, saleId: first.body.saleId, type: 'SALE_PAYMENT' }
+        })
+        expect(cashTxCount).toBe(1)
     })
 
     it('uses the selected variant promotional price for direct POS sales', async () => {

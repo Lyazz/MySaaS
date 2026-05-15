@@ -107,8 +107,7 @@ export const useCartStore = defineStore('cart', {
                             itemPrice: existingItem.price,
                             value: deltaValue,
                             currency,
-                            pixelIds: existingItem.metaPixelIds,
-                            includeGlobal: !((existingItem.metaPixelIds || []).length)
+                            pixelIds: existingItem.metaPixelIds
                         })
                     }
                 }
@@ -132,8 +131,7 @@ export const useCartStore = defineStore('cart', {
                     itemPrice: next.price,
                     value: next.lineTotal ?? (next.price * next.quantity),
                     currency,
-                    pixelIds: next.metaPixelIds,
-                    includeGlobal: !((next.metaPixelIds || []).length)
+                    pixelIds: next.metaPixelIds
                 })
             }
         },

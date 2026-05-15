@@ -39,6 +39,8 @@ export class PosController {
                 {
                     customerId: req.body?.customerId,
                     clientRequestId,
+                    cashboxId: req.body?.cashboxId ?? null,
+                    payment: req.body?.payment ?? null,
                     items: req.body?.items ?? []
                 },
                 req.subscription
@@ -58,6 +60,14 @@ export class PosController {
                 return res.status(error.statusCode).json({
                     statusCode: error.statusCode,
                     statusMessage: error.statusMessage
+                })
+            }
+            if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: typeof error?.code === 'string' ? error.code : undefined,
+                    meta: error?.meta
                 })
             }
 

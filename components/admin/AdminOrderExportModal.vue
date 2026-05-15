@@ -125,6 +125,7 @@ import {
   EXPORT_FORMATS,
   buildExportParams,
   loadExportPrefs,
+  openGoogleSheetsAuthorization,
   saveExportPrefs,
 } from '~/composables/useOrderExport'
 
@@ -186,22 +187,13 @@ async function doExport() {
     const params = buildExportParams(selectedFormat.value, selectedColumns.value, props.filters)
 
     if (selectedFormat.value === 'gsheet') {
-      emit('update:modelValue', false)
-      if (process.client) {
-        const returnParams = new URLSearchParams()
-        returnParams.set('gauth', 'success')
-        returnParams.set('gsheet_columns', selectedColumns.value.join(','))
-        if (props.filters.status) returnParams.set('gsheet_status', props.filters.status)
-        if (props.filters.search) returnParams.set('gsheet_search', props.filters.search)
-        if (props.filters.startDate) returnParams.set('gsheet_startDate', props.filters.startDate)
-        if (props.filters.endDate) returnParams.set('gsheet_endDate', props.filters.endDate)
-
-        const authParams = new URLSearchParams()
-        authParams.set('returnParams', returnParams.toString())
-
-        window.open(`/api/admin/orders/export/google-auth-url?${authParams.toString()}`, '_blank')
+      try {
+        await openGoogleSheetsAuthorization(authStore.token, selectedColumns.value, props.filters)
+        saveExportPrefs(props.tenantId, selectedFormat.value, selectedColumns.value)
+        emit('update:modelValue', false)
+      } catch (error: any) {
+        alert(error?.message ?? 'Google Sheets authorization failed.')
       }
-      saveExportPrefs(props.tenantId, selectedFormat.value, selectedColumns.value)
       return
     }
 

@@ -18,7 +18,7 @@ describe('Delivery API', () => {
     let orderA: any
     let orderB: any
     let shipmentSelfId: string
-    let inactiveCashboxAId: string
+    let deliveryCashboxAId: string
 
     beforeAll(async () => {
         tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: `tenant-a-${Date.now()}` } })
@@ -90,11 +90,20 @@ describe('Delivery API', () => {
         const cashbox = await prisma.cashbox.create({
             data: {
                 tenantId: tenantA.id,
-                name: 'Inactive Cashbox',
-                isActive: false
+                name: 'Delivery Cashbox',
+                isActive: true
             }
         })
-        inactiveCashboxAId = cashbox.id
+        deliveryCashboxAId = cashbox.id
+        await prisma.cashSession.create({
+            data: {
+                tenantId: tenantA.id,
+                cashboxId: deliveryCashboxAId,
+                status: 'OPEN',
+                openingFloat: 0,
+                openedByUserId: userA.id
+            }
+        })
     })
 
     afterAll(async () => {
@@ -366,11 +375,11 @@ describe('Delivery API', () => {
         expect(res.status).toBe(200)
         expect(res.body.status).toBe('DELIVERED')
 
-        const cashboxAfter = await prisma.cashbox.findUnique({ where: { id: inactiveCashboxAId } })
+        const cashboxAfter = await prisma.cashbox.findUnique({ where: { id: deliveryCashboxAId } })
         expect(cashboxAfter?.isActive).toBe(true)
 
         const session = await prisma.cashSession.findFirst({
-            where: { tenantId: tenantA.id, cashboxId: inactiveCashboxAId, status: 'OPEN' },
+            where: { tenantId: tenantA.id, cashboxId: deliveryCashboxAId, status: 'OPEN' },
             orderBy: { openedAt: 'desc' }
         })
         expect(session?.id).toBeTruthy()
@@ -384,7 +393,7 @@ describe('Delivery API', () => {
             },
             orderBy: { createdAt: 'desc' }
         })
-        expect(cashTx?.cashboxId).toBe(inactiveCashboxAId)
+        expect(cashTx?.cashboxId).toBe(deliveryCashboxAId)
         expect(String(cashTx?.amount)).toBe('720')
     })
 

@@ -24,12 +24,13 @@ export class DeliveryController {
             return res.status(400).json({ statusCode: 400, statusMessage: 'destination.wilayaCode is required' })
         }
 
-        const normalizedProvider =
+        const normalizedProviderRaw =
             typeof provider === 'string' && provider.trim().length > 0 ? provider.trim().toUpperCase() : undefined
 
-        if (normalizedProvider && !isShipmentProvider(normalizedProvider)) {
+        if (normalizedProviderRaw && !isShipmentProvider(normalizedProviderRaw)) {
             return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
         }
+        const normalizedProvider = normalizedProviderRaw as ShipmentProvider | undefined
 
         if (normalizedProvider === 'MAYSTRO' && !destination?.communeCode) {
             return res.status(400).json({
@@ -150,7 +151,7 @@ export class DeliveryController {
     async getShipment(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
-        const { id } = req.params
+        const id = String(req.params.id || '')
         try {
             const shipment = await service.getShipment(tenant.id, id)
             if (!shipment) return res.status(404).json({ statusCode: 404, statusMessage: 'Shipment not found' })
@@ -164,7 +165,7 @@ export class DeliveryController {
     async track(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
-        const { id } = req.params
+        const id = String(req.params.id || '')
         try {
             const result = await service.trackShipment(tenant.id, id)
             if (!result) return res.status(404).json({ statusCode: 404, statusMessage: 'Shipment not found' })
@@ -208,6 +209,14 @@ export class DeliveryController {
             if (!result) return res.status(202).json({ received: true })
             res.json({ success: true, ...result })
         } catch (error) {
+            if (typeof (error as any)?.statusCode === 'number' && typeof (error as any)?.statusMessage === 'string') {
+                return res.status((error as any).statusCode).json({
+                    statusCode: (error as any).statusCode,
+                    statusMessage: (error as any).statusMessage,
+                    code: (error as any).code,
+                    meta: (error as any).meta
+                })
+            }
             if (error instanceof MaystroIntegrationError) {
                 return res
                     .status(error.statusCode)
@@ -272,6 +281,14 @@ export class DeliveryController {
             const result = await yalidineWebhookService.handleWebhook({ tenantId: tenant.id, payload: req.body })
             return res.status(200).json({ success: true, ...result })
         } catch (error) {
+            if (typeof (error as any)?.statusCode === 'number' && typeof (error as any)?.statusMessage === 'string') {
+                return res.status((error as any).statusCode).json({
+                    statusCode: (error as any).statusCode,
+                    statusMessage: (error as any).statusMessage,
+                    code: (error as any).code,
+                    meta: (error as any).meta
+                })
+            }
             console.error('Yalidine webhook error', error)
             return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
@@ -281,14 +298,22 @@ export class DeliveryController {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
         const user = req.user
-        const { id } = req.params
+        const id = String(req.params.id || '')
         const { status } = req.body as { status: string }
         if (!status) return res.status(400).json({ statusCode: 400, statusMessage: 'status required' })
 
         try {
             const updated = await service.updateSelfStatus(tenant.id, id, status as any, { userId: user?.id ?? null })
             res.json(updated)
-        } catch (error) {
+        } catch (error: any) {
+            if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
+            }
             console.error('Self status update error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }

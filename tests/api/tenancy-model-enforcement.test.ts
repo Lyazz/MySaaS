@@ -9,6 +9,7 @@ describe('Tenancy (DB-level constraints)', () => {
     let orderAId: string
     let optionBId: string
     let shipmentAId: string
+    let userBId: string
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await prisma.$transaction([
@@ -65,9 +66,20 @@ describe('Tenancy (DB-level constraints)', () => {
             }
         })
         shipmentAId = shipmentA.id
+
+        const userB = await prisma.user.create({
+            data: {
+                tenantId: tenantBId,
+                email: `constraint-b-${Date.now()}@example.com`,
+                role: 'admin',
+                passwordHash: 'x'
+            }
+        })
+        userBId = userB.id
     })
 
     afterAll(async () => {
+        await prisma.salesInvoice.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.shipmentEvent.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.shipment.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
 
@@ -81,6 +93,7 @@ describe('Tenancy (DB-level constraints)', () => {
         await prisma.productVariant.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.product.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
 
+        await prisma.user.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
         await prisma.tenant.deleteMany({ where: { id: { in: [tenantAId, tenantBId] } } })
     })
 
@@ -146,6 +159,20 @@ describe('Tenancy (DB-level constraints)', () => {
                     productId: productBId,
                     bundleQty: 2,
                     bundlePrice: 150
+                }
+            })
+        ).rejects.toHaveProperty('code', 'P2003')
+    })
+
+    it('prevents creating a SalesInvoice with a creator from another tenant', async () => {
+        await expect(
+            prisma.salesInvoice.create({
+                data: {
+                    tenantId: tenantAId,
+                    sourceType: 'SALE',
+                    sourceId: `sale-${Date.now()}`,
+                    invoiceNumber: `INV-${Date.now()}`,
+                    createdByUserId: userBId
                 }
             })
         ).rejects.toHaveProperty('code', 'P2003')

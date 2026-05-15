@@ -130,14 +130,15 @@ onMounted(() => {
 
     const value = Number(normalizedProduct.value?.price || 0) || undefined
     const extraPixelIds = Array.isArray((normalizedProduct.value as any)?.metaPixelIds) ? ((normalizedProduct.value as any).metaPixelIds as string[]) : []
+    metaPixel.pageView({
+      pixelIds: extraPixelIds
+    })
     metaPixel.viewContent({
       productId: id,
       value,
       currency: currencyCode.value,
       contents: [{ id, quantity: 1, item_price: value }],
-      pixelIds: extraPixelIds,
-      // If this product has assigned pixels, fire ViewContent only to those pixels (not the global one).
-      includeGlobal: extraPixelIds.length === 0
+      pixelIds: extraPixelIds
     })
   })
 })

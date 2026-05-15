@@ -6,6 +6,7 @@ import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
+import { CashService } from '../cash/cash.service'
 
 export class PosValidationError extends Error {
     statusCode: number
@@ -34,6 +35,8 @@ type PosOrderItemInput = {
 export type CreatePosSaleInput = {
     customerId?: string | null
     clientRequestId?: string | null
+    cashboxId?: string | null
+    payment?: { method?: string | null; reference?: string | null; note?: string | null } | null
     items: PosOrderItemInput[]
 }
 
@@ -55,6 +58,7 @@ const normalizeClientRequestId = (value?: string | null) => {
 export class PosService {
     private loyaltyFormula = new LoyaltyFormulaService()
     private loyaltyLedger = new LoyaltyLedgerService()
+    private cashService = new CashService()
 
     private async enforceOrderLimit(tenantId: string, subscription?: SubscriptionContext | null) {
         if (!subscription) return
@@ -410,6 +414,23 @@ export class PosService {
                 }
             })
         }
+
+        await this.cashService.createTransactionInTx(
+            tx,
+            tenantId,
+            {
+                cashboxId: input.cashboxId ?? null,
+                type: 'SALE_PAYMENT',
+                direction: 'IN',
+                amount: String(total),
+                method: input.payment?.method ?? 'CASH',
+                customerId: resolvedCustomer?.id ?? null,
+                saleId: createdSale.id,
+                reference: input.payment?.reference ?? 'POS',
+                note: input.payment?.note ?? 'POS sale payment'
+            },
+            actor
+        )
 
         return tx.sale.findFirst({
             where: { id: createdSale.id, tenantId },

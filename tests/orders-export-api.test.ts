@@ -98,4 +98,82 @@ describe('GET /api/admin/orders/export', () => {
 
     expect(res.status).toBe(401)
   })
+
+  it('returns a Google OAuth consent URL when authenticated', async () => {
+    process.env.GOOGLE_OAUTH_CLIENT_ID ||= 'test-google-client-id'
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET ||= 'test-google-client-secret'
+    delete process.env.GOOGLE_OAUTH_REDIRECT_URI
+
+    const returnParams = new URLSearchParams({
+      gsheet_columns: 'id,status,customerName',
+      gsheet_status: 'PENDING',
+      unsafe_redirect: 'https://example.com',
+    })
+
+    const res = await request(app)
+      .get(`/api/admin/orders/export/google-auth-url?returnParams=${encodeURIComponent(returnParams.toString())}`)
+      .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.url).toContain('https://accounts.google.com/o/oauth2/v2/auth')
+    expect(res.body.url).toContain('scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fspreadsheets')
+    expect(res.body.url).toContain(`redirect_uri=${encodeURIComponent(`http://${slug}.localhost:3000/api/admin/orders/export/google-callback`)}`)
+    expect(res.body.url).toContain('state=')
+  })
+
+  it('fails before redirecting to Google when OAuth client config is missing', async () => {
+    const originalClientId = process.env.GOOGLE_OAUTH_CLIENT_ID
+    const originalClientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET
+    process.env.GOOGLE_OAUTH_CLIENT_ID = ''
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET = ''
+
+    try {
+      const res = await request(app)
+        .get('/api/admin/orders/export/google-auth-url')
+        .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+        .set('Authorization', `Bearer ${token}`)
+
+      expect(res.status).toBe(503)
+      expect(res.body.statusMessage).toContain('GOOGLE_OAUTH_CLIENT_ID')
+    } finally {
+      if (originalClientId === undefined) delete process.env.GOOGLE_OAUTH_CLIENT_ID
+      else process.env.GOOGLE_OAUTH_CLIENT_ID = originalClientId
+      if (originalClientSecret === undefined) delete process.env.GOOGLE_OAUTH_CLIENT_SECRET
+      else process.env.GOOGLE_OAUTH_CLIENT_SECRET = originalClientSecret
+    }
+  })
+
+  it('requires app auth before starting Google OAuth', async () => {
+    const res = await request(app)
+      .get('/api/admin/orders/export/google-auth-url')
+      .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+
+    expect(res.status).toBe(401)
+  })
+
+  it('rejects unsigned Google OAuth callback state', async () => {
+    const forgedState = Buffer.from(JSON.stringify({
+      tenantId,
+      userId: 'attacker',
+      returnParams: 'gsheet_columns=id',
+    })).toString('base64url')
+
+    const res = await request(app)
+      .get(`/api/admin/orders/export/google-callback?code=fake-code&state=${forgedState}`)
+      .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+
+    expect(res.status).toBe(400)
+    expect(res.body.statusMessage).toBe('Invalid state')
+  })
+
+  it('asks the tenant user to connect Google before sheet export', async () => {
+    const res = await request(app)
+      .get('/api/admin/orders/export/google-export?columns=id,status')
+      .set('X-Forwarded-Host', `${slug}.localhost:3000`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(res.status).toBe(401)
+    expect(res.body.statusMessage).toContain('Google account not connected')
+  })
 })

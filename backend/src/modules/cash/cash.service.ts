@@ -542,8 +542,14 @@ export class CashService {
             throw new CashValidationError(400, 'cashboxId is required', { code: 'CASHBOX_REQUIRED' })
         }
 
-        const cashbox = await tx.cashbox.findFirst({ where: { tenantId, id: cashboxId }, select: { id: true } })
+        const cashbox = await tx.cashbox.findFirst({ where: { tenantId, id: cashboxId }, select: { id: true, isActive: true } })
         if (!cashbox) throw new CashValidationError(404, 'Cashbox not found')
+        if (!cashbox.isActive) {
+            throw new CashValidationError(409, 'Cashbox is inactive', {
+                code: 'CASHBOX_INACTIVE',
+                meta: { cashboxId }
+            })
+        }
 
         const session = await this.requireOpenSession(tx, tenantId, cashboxId)
 

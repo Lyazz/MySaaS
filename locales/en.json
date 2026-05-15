@@ -1582,6 +1582,29 @@
           "toggle": "Hide optional address"
         }
       },
+      "invoices": {
+        "title": "Sales invoices",
+        "subtitle": "Enable printable PDF invoices for POS and delivered sales.",
+        "enable": {
+          "title": "Enable invoicing",
+          "subtitle": "Allow admins to generate and print invoices from Sales.",
+          "toggle": "Enable sales invoices"
+        },
+        "prefix": {
+          "label": "Invoice prefix",
+          "placeholder": "INV"
+        },
+        "logo": {
+          "label": "Branding",
+          "title": "Show store logo",
+          "subtitle": "Use the logo from Appearance settings when available.",
+          "toggle": "Show logo on invoices"
+        },
+        "footer": {
+          "label": "Footer note",
+          "placeholder": "Thank you for your purchase."
+        }
+      },
       "loyalty": {
         "title": "Loyalty points",
         "subtitle": "Configure points calculation and redemption rules.",
@@ -1622,6 +1645,38 @@
       },
       "confirm": {
         "discard": "Are you sure you want to discard your unsaved changes?"
+      }
+    },
+    "domainSettingsForm": {
+      "customDomain": {
+        "title": "Custom domain",
+        "subtitle": "Add the exact hostname customers will visit, for example www.example.com."
+      },
+      "fields": {
+        "domain": "Domain name"
+      },
+      "actions": {
+        "add": "Add domain"
+      },
+      "dns": {
+        "title": "DNS record",
+        "subtitle": "Create this CNAME record at your domain provider, then keep the domain added here.",
+        "apexNote": "For an apex domain like example.com, use ALIAS/ANAME if your DNS provider supports it, or redirect it to www.example.com."
+      },
+      "connected": {
+        "title": "Connected domains",
+        "subtitle": "Domains listed here are allowed to resolve this tenant storefront.",
+        "empty": "No custom domains connected yet."
+      },
+      "messages": {
+        "loadFailed": "Failed to load domains.",
+        "saved": "Domain connected.",
+        "saveFailed": "Failed to add domain.",
+        "deleted": "Domain removed.",
+        "deleteFailed": "Failed to remove domain."
+      },
+      "confirm": {
+        "delete": "Remove this domain?"
       }
     },
     "contactInfosForm": {
@@ -2018,6 +2073,7 @@
       "contactInfo": "Contact Info",
       "legalPages": "Legal Pages",
       "functional": "Functional",
+      "domains": "Domains",
       "apps": "Apps",
       "integrations": "Integrations",
       "users": "Users",
@@ -2227,7 +2283,12 @@
           "saleFailed": "Sale failed: {message}",
           "unknownError": "An unknown error occurred",
           "featureComingSoon": "Feature {feature} coming soon",
-          "reprintNotImplemented": "Reprinting last sale is not implemented yet"
+          "reprintNotImplemented": "Reprinting last sale is not implemented yet",
+          "printInvoicePrompt": "Print invoice for this sale?",
+          "invoicePopupBlocked": "Invoice popup was blocked by the browser.",
+          "invoiceFailed": "Invoice failed: {message}",
+          "invoicesDisabled": "Sales invoices are disabled in Functional settings.",
+          "noLastSale": "No recent sale to reprint."
         }
       },
       "cash": {
@@ -3702,7 +3763,9 @@
           }
         },
         "actions": {
-          "refund": "Refund"
+          "refund": "Refund",
+          "invoice": "Invoice",
+          "printInvoice": "Print invoice"
         },
         "refundModal": {
           "title": "Refund sale",
@@ -3722,7 +3785,9 @@
           "onlyCompletedPos": "Only completed POS sales can be refunded.",
           "noOpenCashbox": "No open cashbox available. Open a cash session first.",
           "refundSuccess": "Sale refunded successfully.",
-          "refundFailed": "Failed to refund sale."
+          "refundFailed": "Failed to refund sale.",
+          "invoiceFailed": "Failed to generate invoice.",
+          "invoicePopupBlocked": "Invoice popup was blocked by the browser."
         },
         "detail": {
           "metaTitle": "Sale",
@@ -3774,6 +3839,11 @@
           "metaTitle": "Functional",
           "title": "Functional settings",
           "subtitle": "Manage core functionality and features of your store."
+        },
+        "domains": {
+          "metaTitle": "Domains",
+          "title": "Domain settings",
+          "subtitle": "Connect a bought domain to this storefront with a CNAME record."
         }
       },
       "suppliers": {

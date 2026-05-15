@@ -437,6 +437,7 @@ const pathToResource = (path: string): string | null => {
   if (path.startsWith('/admin/settings/contact')) return 'contactInfos'
   if (path.startsWith('/admin/settings/functional')) return 'storeSettings'
   if (path.startsWith('/admin/settings/legal')) return 'storeSettings'
+  if (path.startsWith('/admin/settings/domains')) return 'storeSettings'
   if (path.startsWith('/admin/integrations')) return 'integrations'
   if (path.startsWith('/admin/meta-pixels')) return 'metaPixels'
   if (path.startsWith('/admin/users')) return 'users'
@@ -503,6 +504,7 @@ const navGroups = ref<NavGroup[]>([
       { path: '/admin/settings/contact', labelKey: 'admin.nav.contactInfo', icon: 'lucide:phone', access: 'admin' },
       { path: '/admin/settings/legal', labelKey: 'admin.nav.legalPages', icon: 'lucide:file-text', access: 'admin' },
       { path: '/admin/settings/functional', labelKey: 'admin.nav.functional', icon: 'lucide:sliders', access: 'admin' },
+      { path: '/admin/settings/domains', labelKey: 'admin.nav.domains', icon: 'lucide:globe-2', access: 'admin' },
       { path: '/admin/billing', labelKey: 'admin.nav.billing', icon: 'lucide:credit-card', access: 'admin' },
       { path: '/admin/users', labelKey: 'admin.nav.users', icon: 'lucide:user-cog', access: 'admin' },
       { path: '/admin/integrations', labelKey: 'admin.nav.integrations', icon: 'lucide:puzzle', access: 'admin' }

@@ -522,6 +522,7 @@ definePageMeta({
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
+const storeSettings = useState<any>('storeSettings')
 
 interface Category {
   id: string
@@ -597,8 +598,11 @@ const showPaymentModal = ref(false)
 const showCart = ref(false)
 const showCustomerModal = ref(false)
 const placingSale = ref(false)
+const invoicePrinting = ref(false)
+const lastSaleId = ref<string | null>(null)
 const selectedCustomerId = ref('')
 const customers = ref<any[]>([])
+const salesInvoiceEnabled = computed(() => storeSettings.value?.salesInvoiceEnabled === true)
 
 function onCustomerCreated(customer: any) {
   customers.value.push(customer)
@@ -758,10 +762,14 @@ async function handlePaymentConfirm(payment: any) {
       items: cartItems.value.map(i => ({ productId: i.productId, variantId: i.variantId, quantity: i.quantity, price: i.price })),
       payment: { method: payment.method, cashReceived: payment.cashReceived, cardAmount: payment.cardAmount }
     }
-    await $fetch('/api/admin/sales', { method: 'POST', body: payload, headers: { Authorization: `Bearer ${authStore.token}` } })
+    const result = await $fetch('/api/admin/sales', { method: 'POST', body: payload, headers: { Authorization: `Bearer ${authStore.token}` } }) as { saleId?: string }
+    lastSaleId.value = result.saleId || null
     clearCart()
     showPaymentModal.value = false
     alert(t('admin.pages.pos.alerts.saleCreated'))
+    if (lastSaleId.value && salesInvoiceEnabled.value && confirm(t('admin.pages.pos.alerts.printInvoicePrompt'))) {
+      await printSaleInvoice(lastSaleId.value)
+    }
   } catch (e: any) {
     console.error('Sale failed', e)
     alert(t('admin.pages.pos.alerts.saleFailed', { message: e.data?.statusMessage || e.data?.message || e.message || t('admin.pages.pos.alerts.unknownError') }))
@@ -771,7 +779,45 @@ async function handlePaymentConfirm(payment: any) {
 }
 
 function openExampleDialog(name: string) { alert(t('admin.pages.pos.alerts.featureComingSoon', { feature: name })) }
-function printLastSale() { alert(t('admin.pages.pos.alerts.reprintNotImplemented')) }
+
+async function printSaleInvoice(saleId: string) {
+  if (!process.client || invoicePrinting.value) return
+  invoicePrinting.value = true
+  try {
+    const blob = await $fetch(`/api/admin/sales/${saleId}/invoice/pdf`, {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      responseType: 'blob'
+    }) as Blob
+    const url = URL.createObjectURL(blob)
+    const win = window.open(url, '_blank')
+    if (win) {
+      window.setTimeout(() => {
+        win.focus()
+        win.print()
+        URL.revokeObjectURL(url)
+      }, 500)
+    } else {
+      URL.revokeObjectURL(url)
+      alert(t('admin.pages.pos.alerts.invoicePopupBlocked'))
+    }
+  } catch (e: any) {
+    alert(t('admin.pages.pos.alerts.invoiceFailed', { message: e.data?.statusMessage || e.data?.message || e.message || t('admin.pages.pos.alerts.unknownError') }))
+  } finally {
+    invoicePrinting.value = false
+  }
+}
+
+function printLastSale() {
+  if (!salesInvoiceEnabled.value) {
+    alert(t('admin.pages.pos.alerts.invoicesDisabled'))
+    return
+  }
+  if (!lastSaleId.value) {
+    alert(t('admin.pages.pos.alerts.noLastSale'))
+    return
+  }
+  printSaleInvoice(lastSaleId.value)
+}
 
 onMounted(async () => {
   try {

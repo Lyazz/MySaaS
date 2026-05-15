@@ -12,6 +12,7 @@ import publicOrdersRouter from './modules/orders/public.routes'
 import uploadRouter from './modules/upload/routes'
 import storeSettingsRouter from './modules/store-settings/routes'
 import publicStoreSettingsRouter from './modules/store-settings/public.routes'
+import customDomainsRouter from './modules/custom-domains/routes'
 import homepageSettingsRouter from './modules/homepage-settings/routes'
 import publicHomepageSettingsRouter from './modules/homepage-settings/public.routes'
 import publicContactInfosRouter from './modules/contact-infos/public.routes'
@@ -76,6 +77,7 @@ router.use('/admin/suppliers', suppliersRouter)
 router.use('/admin/purchases', purchasesRouter)
 router.use('/admin/billing', billingRouter)
 router.use('/admin/store-settings', storeSettingsRouter)
+router.use('/admin/custom-domains', customDomainsRouter)
 router.use('/admin/homepage-settings', homepageSettingsRouter)
 router.use('/upload', uploadRouter)
 router.use('/', deliveryRouter)

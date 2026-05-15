@@ -18,6 +18,7 @@ const facebookPixelId = useState<string | null>('facebookPixelId')
 const pixelScriptEnabled = computed(() => Boolean(tenant.value))
 const pixelNoscriptEnabled = computed(() => Boolean(tenant.value && facebookPixelId.value))
 const metaPixel = useMetaPixel()
+const productDetailRoute = computed(() => /^\/(?:product|p)\//.test(route.path))
 
 useHead(() => {
   if (!pixelScriptEnabled.value) return {}
@@ -36,6 +37,7 @@ watch(
   () => route.fullPath,
   () => {
     if (!process.client) return
+    if (productDetailRoute.value) return
     metaPixel.pageView()
   },
   { immediate: true }

@@ -93,13 +93,16 @@ export const useMetaPixel = () => {
     ids.forEach((id) => fbqCall('trackSingle', id, event, params))
   }
 
-  const trackGlobal = (event: MetaPixelEventName, params?: MetaPixelTrackParams) => {
+  const resolveRoutedPixelIds = (pixelIds?: string[], includeGlobal?: boolean) => {
     const global = getGlobalPixelId()
-    if (!global) return
-    trackPixels([global], event, params)
+    const extras = normalizePixelIds(pixelIds).filter((id) => id !== global)
+    const shouldIncludeGlobal = includeGlobal ?? extras.length === 0
+    return shouldIncludeGlobal && global ? [global, ...extras] : extras
   }
 
-  const pageView = () => trackGlobal('PageView')
+  const pageView = (input?: { pixelIds?: string[]; includeGlobal?: boolean }) => {
+    trackPixels(resolveRoutedPixelIds(input?.pixelIds, input?.includeGlobal), 'PageView')
+  }
 
   const viewContent = (input: {
     productId: string
@@ -116,11 +119,7 @@ export const useMetaPixel = () => {
       value: input.value,
       currency: input.currency
     }
-    const global = getGlobalPixelId()
-    const extras = normalizePixelIds(input.pixelIds).filter((id) => id !== global)
-    const includeGlobal = input.includeGlobal !== false
-    const ids = includeGlobal && global ? [global, ...extras] : extras
-    trackPixels(ids, 'ViewContent', params)
+    trackPixels(resolveRoutedPixelIds(input.pixelIds, input.includeGlobal), 'ViewContent', params)
   }
 
   const addToCart = (input: {
@@ -142,11 +141,7 @@ export const useMetaPixel = () => {
       value: input.value,
       currency: input.currency
     }
-    const global = getGlobalPixelId()
-    const extras = normalizePixelIds(input.pixelIds).filter((id) => id !== global)
-    const includeGlobal = input.includeGlobal !== false
-    const ids = includeGlobal && global ? [global, ...extras] : extras
-    trackPixels(ids, 'AddToCart', params)
+    trackPixels(resolveRoutedPixelIds(input.pixelIds, input.includeGlobal), 'AddToCart', params)
   }
 
   const initiateCheckout = (input: {
@@ -164,11 +159,7 @@ export const useMetaPixel = () => {
       value: input.value,
       currency: input.currency
     }
-    const global = getGlobalPixelId()
-    const extras = normalizePixelIds(input.pixelIds).filter((id) => id !== global)
-    const includeGlobal = input.includeGlobal !== false
-    const ids = includeGlobal && global ? [global, ...extras] : extras
-    trackPixels(ids, 'InitiateCheckout', params)
+    trackPixels(resolveRoutedPixelIds(input.pixelIds, input.includeGlobal), 'InitiateCheckout', params)
   }
 
   const purchase = (input: {
@@ -186,11 +177,7 @@ export const useMetaPixel = () => {
       currency: input.currency,
       order_id: input.orderId
     }
-    const global = getGlobalPixelId()
-    const extras = normalizePixelIds(input.pixelIds).filter((id) => id !== global)
-    const includeGlobal = input.includeGlobal !== false
-    const ids = includeGlobal && global ? [global, ...extras] : extras
-    trackPixels(ids, 'Purchase', params)
+    trackPixels(resolveRoutedPixelIds(input.pixelIds, input.includeGlobal), 'Purchase', params)
   }
 
   return {

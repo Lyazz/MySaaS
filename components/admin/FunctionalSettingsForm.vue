@@ -139,6 +139,72 @@
         </div>
       </SettingsSection>
 
+      <!-- Sales invoices -->
+      <SettingsSection
+        anchor-id="invoices"
+        icon="lucide:receipt-text"
+        :title="t('admin.functionalSettingsForm.invoices.title')"
+        :subtitle="t('admin.functionalSettingsForm.invoices.subtitle')"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:receipt-text" class="w-4 h-4" />
+              </div>
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.invoices.enable.title') }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.invoices.enable.subtitle') }}</p>
+              </div>
+            </div>
+            <BaseToggle v-model="form.salesInvoiceEnabled" :sr-label="t('admin.functionalSettingsForm.invoices.enable.toggle')" />
+          </div>
+
+          <Transition name="reveal">
+            <div v-if="form.salesInvoiceEnabled" class="reveal-block">
+              <div class="field-grid">
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.invoices.prefix.label') }}</label>
+                  <input
+                    v-model="form.invoiceNumberPrefix"
+                    type="text"
+                    maxlength="12"
+                    class="field-input"
+                    :placeholder="t('admin.functionalSettingsForm.invoices.prefix.placeholder')"
+                    @input="sanitizeInvoicePrefixInput"
+                  >
+                </div>
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.invoices.logo.label') }}</label>
+                  <div class="toggle-row compact">
+                    <div class="toggle-row-info">
+                      <div class="toggle-row-icon">
+                        <Icon name="lucide:image" class="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.invoices.logo.title') }}</p>
+                        <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.invoices.logo.subtitle') }}</p>
+                      </div>
+                    </div>
+                    <BaseToggle v-model="form.invoiceShowLogo" :sr-label="t('admin.functionalSettingsForm.invoices.logo.toggle')" />
+                  </div>
+                </div>
+                <div class="field sm:col-span-2">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.invoices.footer.label') }}</label>
+                  <textarea
+                    v-model="form.invoiceFooterText"
+                    rows="3"
+                    maxlength="1000"
+                    class="field-input"
+                    :placeholder="t('admin.functionalSettingsForm.invoices.footer.placeholder')"
+                  />
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </SettingsSection>
+
       <!-- Announcement bar -->
       <SettingsSection
         anchor-id="announcement"
@@ -323,7 +389,11 @@ const form = reactive({
   loyaltyRedeemRateDzdPerPoint: 1,
   orderIdPrefix: 'ORDR',
   minimumOrderAmountDzd: 1000,
-  hideOptionalAddress: true
+  hideOptionalAddress: true,
+  salesInvoiceEnabled: false,
+  invoiceNumberPrefix: 'INV',
+  invoiceFooterText: '',
+  invoiceShowLogo: true
 })
 
 const initialFormString = ref(JSON.stringify(form))
@@ -333,6 +403,7 @@ const activeTab = ref('features')
 const tabs = computed(() => [
   { id: 'features', label: t('admin.functionalSettingsForm.features.title'), icon: 'lucide:toggle-right' },
   { id: 'checkout', label: t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout', icon: 'lucide:credit-card' },
+  { id: 'invoices', label: t('admin.functionalSettingsForm.invoices.title'), icon: 'lucide:receipt-text' },
   { id: 'announcement', label: t('admin.appearanceSettingsForm.announcement.title'), icon: 'lucide:megaphone' },
   { id: 'loyalty', label: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty', icon: 'lucide:badge-percent' },
   { id: 'currency', label: t('admin.functionalSettingsForm.currency.title'), icon: 'lucide:dollar-sign' },
@@ -402,6 +473,10 @@ const updateForm = (data: any) => {
   form.loyaltyRedeemRateDzdPerPoint = Number(data.loyaltyRedeemRateDzdPerPoint ?? 1)
   form.minimumOrderAmountDzd = Number(data.minimumOrderAmountDzd ?? 1000)
   form.hideOptionalAddress = data.hideOptionalAddress ?? true
+  form.salesInvoiceEnabled = data.salesInvoiceEnabled ?? false
+  form.invoiceNumberPrefix = data.invoiceNumberPrefix || 'INV'
+  form.invoiceFooterText = data.invoiceFooterText || ''
+  form.invoiceShowLogo = data.invoiceShowLogo ?? true
   initialFormString.value = JSON.stringify(form)
 }
 
@@ -443,7 +518,11 @@ const save = async () => {
         loyaltyMinRedeemPoints: form.loyaltyMinRedeemPoints,
         loyaltyRedeemRateDzdPerPoint: form.loyaltyRedeemRateDzdPerPoint,
         minimumOrderAmountDzd: form.minimumOrderAmountDzd,
-        hideOptionalAddress: form.hideOptionalAddress
+        hideOptionalAddress: form.hideOptionalAddress,
+        salesInvoiceEnabled: form.salesInvoiceEnabled,
+        invoiceNumberPrefix: form.invoiceNumberPrefix,
+        invoiceFooterText: form.invoiceFooterText,
+        invoiceShowLogo: form.invoiceShowLogo
       }
     })
     useState<any>('storeSettings').value = updated
@@ -477,9 +556,16 @@ const sanitizeOrderIdPrefixInput = () => {
     .slice(0, 5)
 }
 
+const sanitizeInvoicePrefixInput = () => {
+  form.invoiceNumberPrefix = String(form.invoiceNumberPrefix || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 12)
+}
+
 function setupScrollSpy() {
   if (typeof window === 'undefined') return
-  const ids = ['features', 'checkout', 'announcement', 'loyalty', 'currency', 'localization']
+  const ids = ['features', 'checkout', 'invoices', 'announcement', 'loyalty', 'currency', 'localization']
   const observer = new IntersectionObserver(
     (entries) => {
       const visible = entries

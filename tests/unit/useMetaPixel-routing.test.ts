@@ -25,7 +25,7 @@ describe('useMetaPixel routing', () => {
     expect(calls.some((c) => c[0] === 'trackSingle' && c[1] === '1234' && c[2] === 'PageView')).toBe(true)
   })
 
-  it('tracks ViewContent only to product pixels when includeGlobal=false', async () => {
+  it('tracks ViewContent only to product pixels when product pixels are provided', async () => {
     const { useMetaPixel } = await import('../../composables/useMetaPixel')
     const metaPixel = useMetaPixel()
 
@@ -34,13 +34,43 @@ describe('useMetaPixel routing', () => {
       value: 100,
       currency: 'DZD',
       contents: [{ id: 'p_1', quantity: 1, item_price: 100 }],
-      pixelIds: ['000000'],
-      includeGlobal: false
+      pixelIds: ['000000']
     })
 
     const calls = ((window as any).fbq as any).mock.calls as any[][]
     expect(calls.some((c) => c[0] === 'init' && c[1] === '000000')).toBe(true)
     expect(calls.some((c) => c[0] === 'trackSingle' && c[1] === '000000' && c[2] === 'ViewContent')).toBe(true)
+    expect(calls.some((c) => c.includes('1234'))).toBe(false)
+  })
+
+  it('tracks product PageView only to product pixels when product pixels are provided', async () => {
+    const { useMetaPixel } = await import('../../composables/useMetaPixel')
+    const metaPixel = useMetaPixel()
+
+    metaPixel.pageView({
+      pixelIds: ['000000']
+    })
+
+    const calls = ((window as any).fbq as any).mock.calls as any[][]
+    expect(calls.some((c) => c[0] === 'trackSingle' && c[1] === '000000' && c[2] === 'PageView')).toBe(true)
+    expect(calls.some((c) => c.includes('1234'))).toBe(false)
+  })
+
+  it('tracks AddToCart only to product pixels when product pixels are provided', async () => {
+    const { useMetaPixel } = await import('../../composables/useMetaPixel')
+    const metaPixel = useMetaPixel()
+
+    metaPixel.addToCart({
+      productId: 'p_1',
+      value: 100,
+      currency: 'DZD',
+      quantity: 1,
+      itemPrice: 100,
+      pixelIds: ['000000']
+    })
+
+    const calls = ((window as any).fbq as any).mock.calls as any[][]
+    expect(calls.some((c) => c[0] === 'trackSingle' && c[1] === '000000' && c[2] === 'AddToCart')).toBe(true)
     expect(calls.some((c) => c.includes('1234'))).toBe(false)
   })
 })

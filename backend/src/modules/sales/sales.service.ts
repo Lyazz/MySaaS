@@ -1,7 +1,7 @@
 import prisma from '../../lib/prisma'
 import { PosService } from '../pos/pos.service'
-import { CashService } from '../cash/cash.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
+import { CashService } from '../cash/cash.service'
 
 export interface SalesListFilters {
     search?: string
@@ -222,55 +222,17 @@ export class SalesService {
         subscription?: { planCode: string; currentPeriodStart: Date; currentPeriodEnd: Date | null; interval: string } | null,
         actor?: { userId?: string | null }
     ) {
-        const wantsPayment = !!input?.payment
-
-        if (!wantsPayment) {
-            return posService.createSale(
-                tenantId,
-                {
-                    customerId: input.customerId ?? null,
-                    items: Array.isArray(input.items) ? input.items : []
-                },
-                subscription ?? null,
-                actor ? { userId: actor.userId ?? null } : { userId: null }
-            )
-        }
-
-        return prisma.$transaction(async (tx) => {
-            const sale = await posService.createSaleInTx(
-                tx,
-                tenantId,
-                {
-                    customerId: input.customerId ?? null,
-                    items: Array.isArray(input.items) ? input.items : []
-                },
-                subscription ?? null,
-                { userId: actor?.userId ?? null }
-            )
-
-            if (!sale) {
-                throw new Error('Failed to create POS sale')
-            }
-
-            await cashService.createTransactionInTx(
-                tx,
-                tenantId,
-                {
-                    cashboxId: input.cashboxId ?? null,
-                    type: 'SALE_PAYMENT',
-                    direction: 'IN',
-                    amount: String((sale as any).totalAmount ?? 0),
-                    method: input.payment?.method ?? 'CASH',
-                    customerId: (sale as any).customerId ?? null,
-                    saleId: (sale as any).id ?? null,
-                    reference: 'POS',
-                    note: 'POS sale payment'
-                },
-                actor
-            )
-
-            return sale
-        })
+        return posService.createSale(
+            tenantId,
+            {
+                customerId: input.customerId ?? null,
+                cashboxId: input.cashboxId ?? null,
+                payment: input.payment ?? { method: 'CASH' },
+                items: Array.isArray(input.items) ? input.items : []
+            },
+            subscription ?? null,
+            actor ? { userId: actor.userId ?? null } : { userId: null }
+        )
     }
 
     async updateStatus(

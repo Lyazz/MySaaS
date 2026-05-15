@@ -1586,6 +1586,29 @@
           "toggle": "إخفاء العنوان الاختياري"
         }
       },
+      "invoices": {
+        "title": "فواتير البيع",
+        "subtitle": "تفعيل فواتير PDF قابلة للطباعة لمبيعات نقطة البيع والمبيعات المسلّمة.",
+        "enable": {
+          "title": "تفعيل الفوترة",
+          "subtitle": "السماح للمشرفين بإنشاء وطباعة الفواتير من المبيعات.",
+          "toggle": "تفعيل فواتير البيع"
+        },
+        "prefix": {
+          "label": "بادئة الفاتورة",
+          "placeholder": "INV"
+        },
+        "logo": {
+          "label": "العلامة التجارية",
+          "title": "إظهار شعار المتجر",
+          "subtitle": "استخدام الشعار من إعدادات المظهر عند توفره.",
+          "toggle": "إظهار الشعار على الفواتير"
+        },
+        "footer": {
+          "label": "ملاحظة أسفل الفاتورة",
+          "placeholder": "شكراً لشرائك."
+        }
+      },
       "loyalty": {
         "title": "نقاط الولاء",
         "subtitle": "إعداد حساب النقاط وقواعد الاستبدال.",
@@ -1626,6 +1649,38 @@
       },
       "confirm": {
         "discard": "هل تريد حقًا تجاهل التغييرات غير المحفوظة؟"
+      }
+    },
+    "domainSettingsForm": {
+      "customDomain": {
+        "title": "نطاق مخصص",
+        "subtitle": "أضف اسم النطاق الكامل الذي سيزوره العملاء، مثل www.example.com."
+      },
+      "fields": {
+        "domain": "اسم النطاق"
+      },
+      "actions": {
+        "add": "إضافة النطاق"
+      },
+      "dns": {
+        "title": "سجل DNS",
+        "subtitle": "أنشئ سجل CNAME هذا لدى مزود النطاق، ثم أبقِ النطاق مضافًا هنا.",
+        "apexNote": "للنطاق الرئيسي مثل example.com، استخدم ALIAS/ANAME إذا كان مزود DNS يدعمه، أو وجّهه إلى www.example.com."
+      },
+      "connected": {
+        "title": "النطاقات المتصلة",
+        "subtitle": "النطاقات هنا مسموح لها بعرض واجهة هذا المتجر.",
+        "empty": "لا توجد نطاقات مخصصة متصلة بعد."
+      },
+      "messages": {
+        "loadFailed": "فشل تحميل النطاقات.",
+        "saved": "تم ربط النطاق.",
+        "saveFailed": "فشل إضافة النطاق.",
+        "deleted": "تم حذف النطاق.",
+        "deleteFailed": "فشل حذف النطاق."
+      },
+      "confirm": {
+        "delete": "إزالة هذا النطاق؟"
       }
     },
     "contactInfosForm": {
@@ -2022,6 +2077,7 @@
       "contactInfo": "معلومات الاتصال",
       "legalPages": "الصفحات القانونية",
       "functional": "إعدادات التشغيل",
+      "domains": "النطاقات",
       "users": "المستخدمون",
       "storefront": "المتجر",
       "account": "الحساب",
@@ -2219,6 +2275,18 @@
           "actions": {
             "confirmPayment": "تأكيد الدفع"
           }
+        },
+        "alerts": {
+          "saleCreated": "تم إنشاء البيع بنجاح",
+          "saleFailed": "فشل البيع: {message}",
+          "unknownError": "حدث خطأ غير معروف",
+          "featureComingSoon": "الميزة {feature} ستتوفر قريباً",
+          "reprintNotImplemented": "إعادة طباعة آخر بيع غير متاحة حالياً",
+          "printInvoicePrompt": "هل تريد طباعة فاتورة هذا البيع؟",
+          "invoicePopupBlocked": "حظر المتصفح نافذة الفاتورة.",
+          "invoiceFailed": "فشلت الفاتورة: {message}",
+          "invoicesDisabled": "فواتير البيع معطلة في الإعدادات الوظيفية.",
+          "noLastSale": "لا يوجد بيع حديث لإعادة طباعته."
         }
       },
       "cash": {
@@ -3693,7 +3761,9 @@
           }
         },
         "actions": {
-          "refund": "استرجاع"
+          "refund": "استرجاع",
+          "invoice": "فاتورة",
+          "printInvoice": "طباعة الفاتورة"
         },
         "refundModal": {
           "title": "استرجاع البيع",
@@ -3713,7 +3783,9 @@
           "onlyCompletedPos": "يمكن استرجاع مبيعات نقطة البيع المكتملة فقط.",
           "noOpenCashbox": "لا يوجد صندوق مفتوح. افتح جلسة صندوق أولاً.",
           "refundSuccess": "تم استرجاع البيع بنجاح.",
-          "refundFailed": "فشل استرجاع البيع."
+          "refundFailed": "فشل استرجاع البيع.",
+          "invoiceFailed": "فشل إنشاء الفاتورة.",
+          "invoicePopupBlocked": "حظر المتصفح نافذة الفاتورة."
         },
         "detail": {
           "metaTitle": "بيع",
@@ -3765,6 +3837,11 @@
           "metaTitle": "إعدادات التشغيل",
           "title": "إعدادات التشغيل",
           "subtitle": "إدارة الوظائف الأساسية وميزات المتجر."
+        },
+        "domains": {
+          "metaTitle": "النطاقات",
+          "title": "إعدادات النطاقات",
+          "subtitle": "اربط نطاقًا تم شراؤه بهذا المتجر باستخدام سجل CNAME."
         }
       },
       "suppliers": {

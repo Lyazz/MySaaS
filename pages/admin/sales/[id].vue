@@ -27,6 +27,17 @@
           <h2 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.sales.detail.sections.saleInfo') }}</h2>
           <div class="flex items-center gap-2">
             <button
+              v-if="salesInvoiceEnabled"
+              type="button"
+              class="ui-btn ui-btn--secondary ui-btn--sm"
+              :disabled="invoiceLoading"
+              @click="printSaleInvoice"
+            >
+              <Icon v-if="invoiceLoading" name="lucide:loader-2" class="h-4 w-4 animate-spin" />
+              <Icon v-else name="lucide:printer" class="h-4 w-4" />
+              <span>{{ t('admin.pages.sales.actions.invoice') }}</span>
+            </button>
+            <button
               type="button"
               class="ui-btn ui-btn--danger ui-btn--sm"
               :disabled="refundLoading"
@@ -208,6 +219,7 @@ const route = useRoute()
 const { format: formatCurrency } = useCurrency()
 const { t, locale } = useI18n({ useScope: 'global' })
 const { showToast } = useToast()
+const storeSettings = useState<any>('storeSettings')
 
 const saleId = String(route.params.id || '')
 const shouldPrint = computed(() => route.query.print === '1')
@@ -245,6 +257,7 @@ const cashboxes = ref<Cashbox[]>([])
 const cashboxesLoaded = ref(false)
 const refundModalOpen = ref(false)
 const refundLoading = ref(false)
+const invoiceLoading = ref(false)
 const refundForm = reactive({
   cashboxId: '',
   method: 'CASH',
@@ -254,6 +267,7 @@ const refundForm = reactive({
 
 const openCashboxes = computed(() => cashboxes.value.filter(c => !!c.openSession))
 const canSubmitRefund = computed(() => !!sale.value && !!refundForm.cashboxId)
+const salesInvoiceEnabled = computed(() => storeSettings.value?.salesInvoiceEnabled === true)
 
 const normalizeStatus = (value: unknown) => String(value || '').trim().toUpperCase()
 const normalizeType = (value: unknown) => String(value || '').trim().toUpperCase()
@@ -274,9 +288,9 @@ const refundBlockedReason = computed(() => {
 async function fetchCashboxes() {
   if (cashboxesLoaded.value) return
   try {
-    const rows = await $fetch<Cashbox[]>('/api/admin/cashboxes', {
+    const rows = await $fetch('/api/admin/cashboxes', {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    }) as Cashbox[]
     cashboxes.value = rows || []
     cashboxesLoaded.value = true
   } catch {
@@ -334,6 +348,33 @@ async function submitRefund() {
   }
 }
 
+async function printSaleInvoice() {
+  if (!process.client || !sale.value || !salesInvoiceEnabled.value) return
+  invoiceLoading.value = true
+  try {
+    const blob = await $fetch(`/api/admin/sales/${sale.value.id}/invoice/pdf`, {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      responseType: 'blob'
+    }) as Blob
+    const url = URL.createObjectURL(blob)
+    const win = window.open(url, '_blank')
+    if (win) {
+      window.setTimeout(() => {
+        win.focus()
+        win.print()
+        URL.revokeObjectURL(url)
+      }, 500)
+    } else {
+      URL.revokeObjectURL(url)
+      showToast(t('admin.pages.sales.messages.invoicePopupBlocked'), 'error')
+    }
+  } catch (e: any) {
+    showToast(e?.data?.statusMessage || t('admin.pages.sales.messages.invoiceFailed'), 'error')
+  } finally {
+    invoiceLoading.value = false
+  }
+}
+
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
@@ -349,9 +390,9 @@ function formatDate(dateString: string) {
 async function fetchSale() {
   loading.value = true
   try {
-    sale.value = await $fetch<Sale>(`/api/admin/sales/${saleId}`, {
+    sale.value = await $fetch(`/api/admin/sales/${saleId}`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    }) as Sale
     if (process.client && shouldPrint.value && sale.value) {
       await nextTick()
       window.print()

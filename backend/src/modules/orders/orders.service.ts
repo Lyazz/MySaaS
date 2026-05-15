@@ -5,9 +5,8 @@ import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../
 import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
-import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
-import { ensureActiveCashboxAndOpenSession } from '../cash/cashbox-resolver'
+import { CashService, CashValidationError } from '../cash/cash.service'
 import { renderGenericBordereauPdf } from './bordereau-pdf'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
 import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
@@ -19,6 +18,7 @@ import { PhoneNormalizationError } from '../loyalty/phone-normalization.service'
 import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
 
 const telegramService = new TelegramService()
+const cashService = new CashService()
 
 export class OrderValidationError extends Error {
     statusCode: number
@@ -2023,16 +2023,6 @@ export class OrdersService {
                     }
                 }
 
-                let cashboxId: string
-                let sessionId: string
-                try {
-                    const ensured = await ensureActiveCashboxAndOpenSession(tx, tenantId, opts?.cashboxId, actor?.userId ?? null)
-                    cashboxId = ensured.cashboxId
-                    sessionId = ensured.sessionId
-                } catch {
-                    throw new OrderValidationError(400, 'Invalid cashboxId')
-                }
-
                 const storeSettings = await tx.storeSettings.findUnique({
                     where: { tenantId },
                     select: { currencyCode: true }
@@ -2050,26 +2040,34 @@ export class OrdersService {
                 const amount = new Prisma.Decimal(String(amountNumber || 0))
                 if (!amount.isFinite() || amount.lte(0)) throw new OrderValidationError(400, 'Order total must be > 0')
 
-                const cashTx = await tx.cashTransaction.create({
-                    data: {
+                try {
+                    await cashService.createTransactionInTx(
+                        tx,
                         tenantId,
-                        cashboxId,
-                        sessionId,
-                        direction: 'IN',
-                        type: 'SALE_PAYMENT',
-                        amount,
-                        currency,
-                        method,
-                        customerId: resolvedCustomerId,
-                        saleId: sale.id,
-                        orderId: existing.id,
-                        reference,
-                        note,
-                        createdByUserId: actor?.userId ?? null
+                        {
+                            cashboxId: opts?.cashboxId ?? null,
+                            type: 'SALE_PAYMENT',
+                            direction: 'IN',
+                            amount: amount.toString(),
+                            currency,
+                            method,
+                            customerId: resolvedCustomerId,
+                            saleId: sale.id,
+                            orderId: existing.id,
+                            reference,
+                            note
+                        },
+                        actor
+                    )
+                } catch (error) {
+                    if (error instanceof CashValidationError) {
+                        throw new OrderValidationError(error.statusCode, error.statusMessage, {
+                            code: error.code,
+                            meta: error.meta
+                        })
                     }
-                })
-
-                await mirrorCashTransactionToPayments(tx, tenantId, cashTx)
+                    throw error
+                }
             }
 
             const updateData: any = { status: toStatus }

@@ -46,6 +46,7 @@ model Tenant {
   orderItems           OrderItem[]
   sales                Sale[]
   saleItems            SaleItem[]
+  salesInvoices        SalesInvoice[]
   shipments            Shipment[]
   deliveryRates        DeliveryRate[]
   deliveryAccounts     TenantDeliveryAccount[]
@@ -325,6 +326,10 @@ model StoreSettings {
   loyaltyBasePoints             Decimal @default(0)
   loyaltyMarginFactor           Decimal @default(0)
   loyaltyPublicFormulaMode      String  @default("SUMMARY")
+  salesInvoiceEnabled           Boolean @default(false)
+  invoiceNumberPrefix           String  @default("INV")
+  invoiceFooterText             String?
+  invoiceShowLogo               Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -371,6 +376,7 @@ model User {
   inventoryMovements      InventoryMovement[]
   purchaseOrdersCreated   PurchaseOrder[]     @relation("PurchaseOrderCreatedBy")
   salesCreated            Sale[]              @relation("SaleCreatedBy")
+  salesInvoicesCreated    SalesInvoice[]      @relation("SalesInvoiceCreatedBy")
   customerPointsCreated   CustomerPointsLedger[]
   customerPaymentsCreated CustomerPayment[]   @relation("CustomerPaymentCreatedBy")
   supplierPaymentsCreated SupplierPayment[]   @relation("SupplierPaymentCreatedBy")
@@ -814,6 +820,30 @@ model SaleItem {
 
   @@index([tenantId])
   @@index([tenantId, saleId])
+}
+
+model SalesInvoice {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  sourceType String // SALE | ORDER
+  sourceId   String
+
+  invoiceNumber String
+  issuedAt      DateTime @default(now())
+
+  createdByUserId String?
+  createdBy       User?   @relation("SalesInvoiceCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, sourceType, sourceId])
+  @@unique([tenantId, invoiceNumber])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, issuedAt])
 }
 
 model Supplier {

@@ -1,7 +1,9 @@
 import type { Request, Response } from 'express'
 import { SalesService, SalesValidationError } from './sales.service'
+import { SalesInvoiceService, SalesInvoiceValidationError } from './sales-invoice.service'
 
 const service = new SalesService()
+const invoiceService = new SalesInvoiceService()
 
 const parseOptionalDate = (value: unknown) => {
     if (!value || typeof value !== 'string') return null
@@ -180,6 +182,59 @@ export class SalesController {
                 })
             }
             console.error('Update sale status error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async createInvoice(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Sale ID is required' })
+            }
+
+            const invoice = await invoiceService.createOrGetInvoice(tenant.id, id, { userId: user?.id ?? null })
+            res.json({ success: true, invoice })
+        } catch (error: any) {
+            if (error instanceof SalesInvoiceValidationError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code
+                })
+            }
+            console.error('Create sales invoice error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async invoicePdf(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Sale ID is required' })
+            }
+
+            const out = await invoiceService.generatePdf(tenant.id, id, { userId: user?.id ?? null })
+            res.setHeader('Content-Type', 'application/pdf')
+            res.setHeader('Content-Disposition', `inline; filename="${out.filename}"`)
+            res.setHeader('Cache-Control', 'no-store')
+            return res.send(out.pdf)
+        } catch (error: any) {
+            if (error instanceof SalesInvoiceValidationError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code
+                })
+            }
+            console.error('Sales invoice PDF error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

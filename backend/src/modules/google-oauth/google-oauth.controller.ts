@@ -4,6 +4,10 @@ import {
     exchangeCodeForTokens,
     getValidAccessToken,
     createSheetAndWrite,
+    createGoogleOAuthState,
+    GoogleOAuthConfigurationError,
+    sanitizeGoogleReturnParams,
+    verifyGoogleOAuthState,
 } from './google-oauth.service'
 import {
     fetchForExport,
@@ -12,20 +16,42 @@ import {
     EXPORT_COLUMNS,
 } from '../orders/orders-export.service'
 
+function getRequestOrigin(req: Request): string {
+    const forwardedProto = String(req.get('x-forwarded-proto') || '').split(',')[0]?.trim()
+    const proto = forwardedProto || req.protocol || 'http'
+    const forwardedHost = String(req.get('x-forwarded-host') || '').split(',')[0]?.trim()
+    const host = forwardedHost || req.get('host') || 'localhost:3000'
+    return `${proto}://${host}`
+}
+
+function getGoogleRedirectUri(req: Request): string {
+    return process.env.GOOGLE_OAUTH_REDIRECT_URI || `${getRequestOrigin(req)}/api/admin/orders/export/google-callback`
+}
+
 export class GoogleOAuthController {
     async getAuthUrl(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
             const user = req.user!
             const { returnParams } = req.query as { returnParams?: string }
+            const redirectUri = getGoogleRedirectUri(req)
 
-            const state = Buffer.from(
-                JSON.stringify({ tenantId: tenant.id, userId: user.id, returnParams: returnParams ?? '' })
-            ).toString('base64url')
+            const state = createGoogleOAuthState({
+                tenantId: tenant.id,
+                userId: user.id,
+                returnParams: sanitizeGoogleReturnParams(returnParams),
+                redirectUri,
+            })
 
-            const url = getAuthUrl(state)
+            const url = getAuthUrl(state, redirectUri)
             return res.json({ url })
         } catch (error) {
+            if (error instanceof GoogleOAuthConfigurationError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                })
+            }
             console.error('Google OAuth getAuthUrl error:', error)
             return res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
@@ -43,16 +69,16 @@ export class GoogleOAuthController {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Missing code or state' })
             }
 
-            let decoded: { tenantId: string; userId: string; returnParams: string }
-            try {
-                decoded = JSON.parse(Buffer.from(state, 'base64url').toString('utf-8'))
-            } catch {
+            const decoded = verifyGoogleOAuthState(state)
+            if (!decoded) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid state' })
             }
 
-            await exchangeCodeForTokens(decoded.tenantId, decoded.userId, code)
+            await exchangeCodeForTokens(decoded.tenantId, decoded.userId, code, decoded.redirectUri)
 
-            const redirect = `/admin/orders?gauth=success${decoded.returnParams ? '&' + decoded.returnParams : ''}`
+            const params = new URLSearchParams(decoded.returnParams)
+            params.set('gauth', 'success')
+            const redirect = `/admin/orders?${params.toString()}`
             return res.redirect(redirect)
         } catch (error) {
             console.error('Google OAuth callback error:', error)
@@ -100,6 +126,12 @@ export class GoogleOAuthController {
 
             return res.json({ sheetUrl })
         } catch (error) {
+            if (error instanceof GoogleOAuthConfigurationError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                })
+            }
             console.error('Google Sheets export error:', error)
             return res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }

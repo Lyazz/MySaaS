@@ -167,6 +167,26 @@
               <td class="ui-td whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
+                    v-if="salesInvoiceEnabled"
+                    type="button"
+                    class="ui-btn ui-btn--secondary ui-btn--sm"
+                    :disabled="invoiceLoadingId === sale.id"
+                    :title="t('admin.pages.sales.actions.printInvoice')"
+                    @click="printSaleInvoice(sale.id)"
+                  >
+                    <Icon
+                      v-if="invoiceLoadingId === sale.id"
+                      name="lucide:loader-2"
+                      class="h-4 w-4 animate-spin"
+                    />
+                    <Icon
+                      v-else
+                      name="lucide:printer"
+                      class="h-4 w-4"
+                    />
+                    <span>{{ t('admin.pages.sales.actions.invoice') }}</span>
+                  </button>
+                  <button
                     type="button"
                     class="ui-btn ui-btn--danger ui-btn--sm"
                     :disabled="refundLoading && refundingSaleId === sale.id"
@@ -363,6 +383,7 @@ const route = useRoute()
 const { t, locale } = useI18n()
 const { format: formatCurrency } = useCurrency()
 const { showToast } = useToast()
+const storeSettings = useState<any>('storeSettings')
 
 interface Sale {
   id: string
@@ -405,6 +426,7 @@ const cashboxesLoaded = ref(false)
 const refundModalOpen = ref(false)
 const refundLoading = ref(false)
 const refundingSaleId = ref<string | null>(null)
+const invoiceLoadingId = ref<string | null>(null)
 const refundTarget = ref<Sale | null>(null)
 const refundForm = reactive({
   cashboxId: '',
@@ -423,6 +445,7 @@ const canSubmitRefund = computed(() => {
 })
 
 const openCashboxes = computed(() => cashboxes.value.filter(c => !!c.openSession))
+const salesInvoiceEnabled = computed(() => storeSettings.value?.salesInvoiceEnabled === true)
 
 const normalizeStatus = (value: unknown) => String(value || '').trim().toUpperCase()
 const normalizeType = (value: unknown) => String(value || '').trim().toUpperCase()
@@ -440,9 +463,9 @@ const getRefundBlockedReason = (sale: Sale) => {
 async function fetchCashboxes() {
   if (cashboxesLoaded.value) return
   try {
-    const rows = await $fetch<Cashbox[]>('/api/admin/cashboxes', {
+    const rows = await $fetch('/api/admin/cashboxes', {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    }) as Cashbox[]
     cashboxes.value = rows || []
     cashboxesLoaded.value = true
   } catch {
@@ -507,6 +530,33 @@ async function submitRefund() {
   } finally {
     refundLoading.value = false
     refundingSaleId.value = null
+  }
+}
+
+async function printSaleInvoice(saleId: string) {
+  if (!process.client || !salesInvoiceEnabled.value) return
+  invoiceLoadingId.value = saleId
+  try {
+    const blob = await $fetch(`/api/admin/sales/${saleId}/invoice/pdf`, {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      responseType: 'blob'
+    }) as Blob
+    const url = URL.createObjectURL(blob)
+    const win = window.open(url, '_blank')
+    if (win) {
+      window.setTimeout(() => {
+        win.focus()
+        win.print()
+        URL.revokeObjectURL(url)
+      }, 500)
+    } else {
+      URL.revokeObjectURL(url)
+      showToast(t('admin.pages.sales.messages.invoicePopupBlocked'), 'error')
+    }
+  } catch (e: any) {
+    showToast(e?.data?.statusMessage || t('admin.pages.sales.messages.invoiceFailed'), 'error')
+  } finally {
+    invoiceLoadingId.value = null
   }
 }
 

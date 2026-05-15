@@ -94,6 +94,10 @@ export type StoreSettingsPatchInput = Partial<{
     loyaltyRedeemRateDzdPerPoint: number | string
     loyaltyBasePoints: number | string
     loyaltyMarginFactor: number | string
+    salesInvoiceEnabled: boolean
+    invoiceNumberPrefix: string
+    invoiceFooterText: string | null
+    invoiceShowLogo: boolean
     legalPages: StoreLegalPagesConfig
 }>
 
@@ -103,6 +107,11 @@ const toDecimalString = (value: unknown, field: string): string => {
         throw new StoreSettingsValidationError(`${field} must be a valid number`)
     }
     return String(n)
+}
+
+export const sanitizeInvoiceNumberPrefix = (value: unknown): string => {
+    const normalized = typeof value === 'string' ? value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) : ''
+    return normalized || 'INV'
 }
 
 export class StoreSettingsService {
@@ -306,6 +315,35 @@ export class StoreSettingsService {
 
         if (input.loyaltyMarginFactor !== undefined) {
             updateSettings.loyaltyMarginFactor = new Prisma.Decimal(toDecimalString(input.loyaltyMarginFactor, 'loyaltyMarginFactor'))
+        }
+
+        if (input.salesInvoiceEnabled !== undefined) {
+            if (typeof input.salesInvoiceEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('salesInvoiceEnabled must be a boolean')
+            }
+            updateSettings.salesInvoiceEnabled = input.salesInvoiceEnabled
+        }
+
+        if (input.invoiceNumberPrefix !== undefined) {
+            updateSettings.invoiceNumberPrefix = sanitizeInvoiceNumberPrefix(input.invoiceNumberPrefix)
+        }
+
+        if (input.invoiceFooterText !== undefined) {
+            if (input.invoiceFooterText !== null && typeof input.invoiceFooterText !== 'string') {
+                throw new StoreSettingsValidationError('invoiceFooterText must be a string or null')
+            }
+            const footerText = typeof input.invoiceFooterText === 'string' ? input.invoiceFooterText.trim() : ''
+            if (footerText.length > 1000) {
+                throw new StoreSettingsValidationError('invoiceFooterText is too long (max 1000 chars)')
+            }
+            updateSettings.invoiceFooterText = footerText || null
+        }
+
+        if (input.invoiceShowLogo !== undefined) {
+            if (typeof input.invoiceShowLogo !== 'boolean') {
+                throw new StoreSettingsValidationError('invoiceShowLogo must be a boolean')
+            }
+            updateSettings.invoiceShowLogo = input.invoiceShowLogo
         }
 
         if (input.legalPages !== undefined) {
