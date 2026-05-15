@@ -271,7 +271,6 @@
       </main>
     </div>
 
-    <HelpCenterWidget />
   </div>
 </template>
 
@@ -294,7 +293,26 @@ import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import { useOrderUnreadCount } from '~/composables/useOrderUnreadCount'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 import AdminThemeToggle from '~/components/admin/AdminThemeToggle.vue'
-import HelpCenterWidget from '~/components/admin/HelpCenterWidget.vue'
+
+useHead({
+  script: [
+    {
+      src: 'https://webagent.ai/api/chatbot/ad914300-a955-4d34-9cee-686bc73e7b23',
+      async: true,
+    },
+  ],
+  style: [
+    {
+      innerHTML: `
+        iframe[src*="webagent.ai"] {
+          width: 340px !important;
+          height: 480px !important;
+          max-height: 70vh !important;
+        }
+      `,
+    },
+  ],
+})
 
 const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()

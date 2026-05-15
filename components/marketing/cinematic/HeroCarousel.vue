@@ -366,8 +366,9 @@ onBeforeUnmount(() => {
                 <g transform="translate(72,72)">
                   <circle r="32" fill="none" stroke="rgba(198,244,50,0.10)" stroke-width="4" />
                   <circle r="32" fill="none" stroke="#C6F432" stroke-width="4" stroke-linecap="round"
-                          transform="rotate(-90)" filter="url(#hcGlow)"
-                          class="anim-draw" style="--len:201; stroke-dasharray:185 201" />
+                          transform="rotate(-90)" filter="url(#hcGlow)" stroke-dasharray="0 201">
+                    <animate attributeName="stroke-dasharray" from="0 201" to="185 201" dur="1.6s" begin="0.4s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines=".2 .8 .2 1" />
+                  </circle>
                   <text y="3" text-anchor="middle" class="hc-mono" style="fill:#E7ECEE;font-size:22px;font-weight:600">92</text>
                   <text y="14" text-anchor="middle" class="hc-mono" style="font-size:7px;fill:rgba(198,244,50,0.6);letter-spacing:.20em">% HEALTHY</text>
                 </g>
