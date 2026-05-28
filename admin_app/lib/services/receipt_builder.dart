@@ -81,14 +81,11 @@ class ReceiptBuilder {
         );
         bytes += generator.row([
           PosColumn(
-            text:
-                '${item.quantity} x ${money.format(item.price)}',
+            text: '${item.quantity} x ${money.format(item.price)}',
             width: 8,
           ),
           PosColumn(
-            text: money.format(
-              item.price * item.quantity,
-            ),
+            text: money.format(item.price * item.quantity),
             width: 4,
             styles: const PosStyles(align: PosAlign.right),
           ),

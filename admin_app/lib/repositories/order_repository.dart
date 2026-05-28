@@ -1,9 +1,12 @@
 import 'dart:convert';
+
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/order.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
+import '../services/sync_conflict_policy.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
 
@@ -16,13 +19,8 @@ class OrderRepository {
 
   String get _tid => TenantModeService().activeTenantId;
 
-  Future<({
-    List<Order> items,
-    int total,
-    int page,
-    int totalPages,
-    int limit,
-  })> getOrdersPage({
+  Future<({List<Order> items, int total, int page, int totalPages, int limit})>
+  getOrdersPage({
     bool forceRefresh = false,
     String? search,
     String? status,
@@ -250,9 +248,10 @@ class OrderRepository {
   }
 
   Future<Order?> getOrder(String id) async {
+    final resolvedId = await _resolveOrderId(id);
     if (await _syncService.isOnline) {
       try {
-        final res = await _apiService.client.get('/admin/orders/$id');
+        final res = await _apiService.client.get('/admin/orders/$resolvedId');
         final o = Order.fromJson(res.data);
 
         final db = await _dbService.database;
@@ -287,7 +286,7 @@ class OrderRepository {
     final localData = await db.query(
       'orders',
       where: 'id = ? AND tenantId = ?',
-      whereArgs: [id, _tid],
+      whereArgs: [resolvedId, _tid],
     );
     if (localData.isNotEmpty) {
       final e = localData.first;
@@ -311,33 +310,100 @@ class OrderRepository {
 
   Future<void> updateStatus(String id, String status) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
+    final resolvedId = await _resolveOrderId(id);
+    final currentRows = await db.query(
+      'orders',
+      columns: ['status'],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [resolvedId, _tid],
+      limit: 1,
+    );
+    final currentStatus = currentRows.isEmpty
+        ? 'PENDING'
+        : currentRows.first['status']?.toString() ?? 'PENDING';
 
     await db.update(
       'orders',
-      {'status': status, 'syncStatus': online ? 'synced' : 'pending'},
+      {'status': status, 'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
-      whereArgs: [id, _tid],
+      whereArgs: [resolvedId, _tid],
     );
 
     await _syncService.enqueueOperation(
       entityType: 'order',
       action: 'updateStatus',
-      payload: {'id': id, 'status': status},
+      payload: {
+        'id': resolvedId,
+        'status': status,
+        'baseFingerprint': SyncConflictPolicies.fingerprintOrderStatus(
+          currentStatus,
+        ),
+      },
     );
   }
 
   Future<Map<String, dynamic>> createOrder(Map<String, dynamic> payload) async {
-    try {
-      final res = await _apiService.client.post('/admin/orders', data: payload);
-      final data = res.data;
-      if (data is Map && data['orderId'] != null) {
-        return Map<String, dynamic>.from(data);
-      }
-      throw Exception('createOrder: missing orderId in response');
-    } catch (e) {
-      print('Order creation failed: $e');
-      rethrow;
-    }
+    final db = await _dbService.database;
+    final offlineId = const Uuid().v4();
+    final items = _normalizeItems(payload['items']);
+    final total = items.fold<double>(
+      0,
+      (sum, item) =>
+          sum +
+          (double.tryParse(item['price']?.toString() ?? '0') ?? 0) *
+              (int.tryParse(item['quantity']?.toString() ?? '0') ?? 0),
+    );
+
+    await db.insert('orders', {
+      'id': offlineId,
+      'tenantId': _tid,
+      'status': 'PENDING',
+      'total': total,
+      'createdAt': DateTime.now().toIso8601String(),
+      'customerName': payload['customerName']?.toString() ?? '',
+      'customerPhone': payload['customerPhone']?.toString() ?? '',
+      'shippingAddress':
+          payload['shippingAddressLine1']?.toString() ??
+          payload['customerAddress']?.toString() ??
+          '',
+      'itemsJson': jsonEncode(items),
+      'syncStatus': SyncStatus.pending.name,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+    await _syncService.enqueueOperation(
+      entityType: 'order',
+      action: 'create',
+      payload: {...payload, 'offlineId': offlineId, 'items': items},
+    );
+
+    return {'success': true, 'orderId': offlineId, 'offline': true};
+  }
+
+  Future<String> _resolveOrderId(String id) async {
+    final trimmed = id.trim();
+    if (trimmed.isEmpty) return trimmed;
+    final db = await _dbService.database;
+    final aliasRows = await db.query(
+      'entity_aliases',
+      columns: ['remoteId'],
+      where: 'tenantId = ? AND entityType = ? AND localId = ?',
+      whereArgs: [_tid, 'order', trimmed],
+      limit: 1,
+    );
+    if (aliasRows.isEmpty) return trimmed;
+    return aliasRows.first['remoteId']?.toString() ?? trimmed;
+  }
+
+  List<Map<String, dynamic>> _normalizeItems(dynamic rawItems) {
+    if (rawItems is! List) return const [];
+    return rawItems.whereType<Map>().map((item) {
+      final map = Map<String, dynamic>.from(item);
+      return {
+        'productId': map['productId'],
+        'variantId': map['variantId'],
+        'quantity': map['quantity'],
+        'price': map['price'],
+      };
+    }).toList();
   }
 }

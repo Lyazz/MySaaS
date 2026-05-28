@@ -34,14 +34,13 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   DateTime? _endDate;
   final Set<String> _refundingSaleIds = <String>{};
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
   static DateTime _endOfDay(DateTime dt) =>
       DateTime(dt.year, dt.month, dt.day, 23, 59, 59, 999);
 
-  static DateTimeRange _normalizeRange(DateTimeRange range) => DateTimeRange(
-        start: _startOfDay(range.start),
-        end: _endOfDay(range.end),
-      );
+  static DateTimeRange _normalizeRange(DateTimeRange range) =>
+      DateTimeRange(start: _startOfDay(range.start), end: _endOfDay(range.end));
 
   void _setDefaultDateRange() {
     final now = DateTime.now();
@@ -344,8 +343,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                             final reason = isOrder
                                                 ? 'Order-origin sales must be returned from the order flow.'
                                                 : 'Only COMPLETED POS sales can be refunded.';
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
                                               SnackBar(content: Text(reason)),
                                             );
                                           },
@@ -356,8 +356,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                     icon: LucideIcons.eye,
                                     size: AppButtonSize.sm,
                                     onPressed: isOrder
-                                        ? () => context.push('/orders/${sale.id}')
-                                        : () => context.push('/sales/${sale.id}'),
+                                        ? () =>
+                                              context.push('/orders/${sale.id}')
+                                        : () =>
+                                              context.push('/sales/${sale.id}'),
                                   ),
                                 ],
                               ),
@@ -384,7 +386,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       final api = ref.read(apiProvider);
       final response = await api.client.get('/admin/cash/cashboxes');
       final raw = response.data;
-      final cashboxes = raw is List ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList() : <Map<String, dynamic>>[];
+      final cashboxes = raw is List
+          ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
+          : <Map<String, dynamic>>[];
       final openCashboxes = cashboxes
           .where((c) => c['isActive'] == true && c['openSession'] is Map)
           .toList();
@@ -392,7 +396,11 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No open cashbox available. Open a cash session first.')),
+          const SnackBar(
+            content: Text(
+              'No open cashbox available. Open a cash session first.',
+            ),
+          ),
         );
         return;
       }
@@ -400,7 +408,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       String selectedCashboxId = (openCashboxes.first['id'] ?? '').toString();
       String selectedMethod = 'CASH';
       final referenceCtrl = TextEditingController();
-      final noteCtrl = TextEditingController(text: 'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}');
+      final noteCtrl = TextEditingController(
+        text:
+            'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}',
+      );
       bool submitting = false;
       String? formError;
 
@@ -420,7 +431,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                     children: [
                       Text(
                         'Create refund cash outflow and mark this sale as REFUNDED.',
-                        style: TextStyle(color: const Color(0xFF64748B), fontSize: 13),
+                        style: TextStyle(
+                          color: const Color(0xFF64748B),
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -435,7 +449,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             .toList(),
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedCashboxId = v ?? selectedCashboxId),
+                            : (v) => setDialogState(
+                                () =>
+                                    selectedCashboxId = v ?? selectedCashboxId,
+                              ),
                         decoration: const InputDecoration(
                           labelText: 'Cashbox',
                           border: OutlineInputBorder(),
@@ -447,12 +464,21 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                         items: const [
                           DropdownMenuItem(value: 'CASH', child: Text('Cash')),
                           DropdownMenuItem(value: 'CARD', child: Text('Card')),
-                          DropdownMenuItem(value: 'TRANSFER', child: Text('Transfer')),
-                          DropdownMenuItem(value: 'OTHER', child: Text('Other')),
+                          DropdownMenuItem(
+                            value: 'TRANSFER',
+                            child: Text('Transfer'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'OTHER',
+                            child: Text('Other'),
+                          ),
                         ],
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedMethod = (v ?? 'CASH').toUpperCase()),
+                            : (v) => setDialogState(
+                                () => selectedMethod = (v ?? 'CASH')
+                                    .toUpperCase(),
+                              ),
                         decoration: const InputDecoration(
                           labelText: 'Method',
                           border: OutlineInputBorder(),
@@ -481,7 +507,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                         const SizedBox(height: 10),
                         Text(
                           formError!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ],
@@ -489,7 +518,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: submitting ? null : () => Navigator.of(dialogContext).pop(false),
+                    onPressed: submitting
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(false),
                     child: const Text('Cancel'),
                   ),
                   AppButton.danger(
@@ -504,12 +535,18 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               formError = null;
                             });
                             try {
-                              await ref.read(salesProvider.notifier).refundSale(
+                              await ref
+                                  .read(salesProvider.notifier)
+                                  .refundSale(
                                     saleId: sale.id,
                                     cashboxId: selectedCashboxId,
                                     method: selectedMethod,
-                                    reference: referenceCtrl.text.trim().isEmpty ? null : referenceCtrl.text.trim(),
-                                    note: noteCtrl.text.trim().isEmpty ? null : noteCtrl.text.trim(),
+                                    reference: referenceCtrl.text.trim().isEmpty
+                                        ? null
+                                        : referenceCtrl.text.trim(),
+                                    note: noteCtrl.text.trim().isEmpty
+                                        ? null
+                                        : noteCtrl.text.trim(),
                                   );
                               if (!dialogContext.mounted) return;
                               Navigator.of(dialogContext).pop(true);
@@ -540,9 +577,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to refund sale: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to refund sale: $e')));
     } finally {
       if (mounted) {
         setState(() => _refundingSaleIds.remove(sale.id));

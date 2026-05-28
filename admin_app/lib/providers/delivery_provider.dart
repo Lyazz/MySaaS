@@ -6,13 +6,23 @@ import '../services/api_service.dart';
 class DeliveryState {
   final List<DeliveryProvider> providers;
   final bool isLoading;
+  final String? error;
 
-  DeliveryState({this.providers = const [], this.isLoading = false});
+  DeliveryState({
+    this.providers = const [],
+    this.isLoading = false,
+    this.error,
+  });
 
-  DeliveryState copyWith({List<DeliveryProvider>? providers, bool? isLoading}) {
+  DeliveryState copyWith({
+    List<DeliveryProvider>? providers,
+    bool? isLoading,
+    String? error,
+  }) {
     return DeliveryState(
       providers: providers ?? this.providers,
       isLoading: isLoading ?? this.isLoading,
+      error: error,
     );
   }
 }
@@ -29,25 +39,45 @@ class DeliveryNotifier extends Notifier<DeliveryState> {
   }
 
   Future<void> loadProviders({bool forceRefresh = false}) async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, error: null);
     try {
       final providers = await _repo.getProviders(forceRefresh: forceRefresh);
-      state = state.copyWith(providers: providers, isLoading: false);
+      state = state.copyWith(
+        providers: providers,
+        isLoading: false,
+        error: null,
+      );
     } catch (e) {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   Future<void> toggleProvider(String id) async {
-    state = state.copyWith(isLoading: true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    final updatedProviders = state.providers.map((p) {
-      if (p.id == id) {
-        return p.copyWith(isEnabled: !p.isEnabled);
+    DeliveryProvider? existing;
+    for (final provider in state.providers) {
+      if (provider.id == id) {
+        existing = provider;
+        break;
       }
-      return p;
-    }).toList();
-    state = state.copyWith(providers: updatedProviders, isLoading: false);
+    }
+    if (existing == null) return;
+
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final updated = await _repo.setProviderEnabled(id, !existing.isEnabled);
+      final providers = [
+        for (final provider in state.providers)
+          if (provider.id == id) updated else provider,
+      ];
+      state = state.copyWith(
+        providers: providers,
+        isLoading: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
   }
 }
 

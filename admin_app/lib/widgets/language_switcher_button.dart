@@ -11,7 +11,8 @@ class LanguageSwitcherButton extends StatelessWidget {
 
   static const _locales = [Locale('en'), Locale('fr'), Locale('ar')];
 
-  String _localeLabel(Locale locale) => 'i18n.locales.${locale.languageCode}'.tr();
+  String _localeLabel(Locale locale) =>
+      'i18n.locales.${locale.languageCode}'.tr();
 
   @override
   Widget build(BuildContext context) {
@@ -52,4 +53,3 @@ class LanguageSwitcherButton extends StatelessWidget {
     );
   }
 }
-

@@ -169,7 +169,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                             fullWidth: true,
                           )
                         : AppButton.primary(
-                            label: 'admin.pages.users.roles.actions.addRole'.tr(),
+                            label: 'admin.pages.users.roles.actions.addRole'
+                                .tr(),
                             icon: LucideIcons.plus,
                             onPressed: () => _openCreateRole(context),
                             fullWidth: true,
@@ -332,7 +333,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
   Future<void> _openCreateRole(BuildContext context) async {
     final result = await showDialog<_RoleFormResult>(
       context: context,
-      builder: (ctx) => _RoleDialog(title: 'admin.pages.users.roles.createTitle'.tr()),
+      builder: (ctx) =>
+          _RoleDialog(title: 'admin.pages.users.roles.createTitle'.tr()),
     );
     if (result == null) return;
     await ref
@@ -480,10 +482,7 @@ class _UsersTable extends StatelessWidget {
         children: [
           _buildHeaderCell('admin.pages.users.columns.email'.tr(), flex: 4),
           _buildHeaderCell('admin.pages.users.columns.role'.tr(), flex: 2),
-          _buildHeaderCell(
-            'admin.pages.users.columns.staffRole'.tr(),
-            flex: 3,
-          ),
+          _buildHeaderCell('admin.pages.users.columns.staffRole'.tr(), flex: 3),
           _buildHeaderCell('admin.pages.users.columns.status'.tr(), flex: 2),
           Expanded(
             flex: 2,
@@ -632,7 +631,10 @@ class _RolesTable extends StatelessWidget {
       minWidth: 900,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.users.roles.columns.name'.tr(), flex: 5),
+          _buildHeaderCell(
+            'admin.pages.users.roles.columns.name'.tr(),
+            flex: 5,
+          ),
           _buildHeaderCell(
             'admin.pages.users.roles.columns.permissions'.tr(),
             flex: 2,
@@ -1030,7 +1032,11 @@ class _PermissionRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

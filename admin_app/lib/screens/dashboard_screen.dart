@@ -54,13 +54,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   if (dashboardState.error != null && !dashboardState.isLoading)
                     const SizedBox(height: 16),
                   LayoutBuilder(
-                    builder: (context, constraints) =>
-                        _buildStatsGrid(
-                          context,
-                          constraints,
-                          dashboardState,
-                          storeSettingsState,
-                        ),
+                    builder: (context, constraints) => _buildStatsGrid(
+                      context,
+                      constraints,
+                      dashboardState,
+                      storeSettingsState,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   _buildMainGrid(context, dashboardState, storeSettingsState),
@@ -81,7 +80,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final storeName = storeSettingsState.settings.name.trim().isEmpty
         ? 'your store'
         : storeSettingsState.settings.name.trim();
-    final showFinishSetup = !storeSettingsState.isLoading &&
+    final showFinishSetup =
+        !storeSettingsState.isLoading &&
         storeSettingsState.error == null &&
         storeSettingsState.settings.isCompleted == false;
 
@@ -104,7 +104,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             const SizedBox(height: 4),
             Text(
               'A quick snapshot of your store.',
-              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -120,7 +125,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ref
                             .read(storeSettingsProvider.notifier)
                             .fetchStoreSettings(),
-                        ref.read(adminDashboardProvider.notifier).fetchDashboard(),
+                        ref
+                            .read(adminDashboardProvider.notifier)
+                            .fetchDashboard(),
                       ]);
                     },
             ),
@@ -167,10 +174,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  message,
-                  style: const TextStyle(color: Color(0xFF7F1D1D)),
-                ),
+                Text(message, style: const TextStyle(color: Color(0xFF7F1D1D))),
               ],
             ),
           ),
@@ -269,7 +273,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     if (!wide) {
       return Column(
         children: [
-          _buildRecentOrdersSection(context, dashboardState, storeSettingsState),
+          _buildRecentOrdersSection(
+            context,
+            dashboardState,
+            storeSettingsState,
+          ),
           const SizedBox(height: 24),
           _buildSideCards(context, dashboardState),
         ],
@@ -281,13 +289,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       children: [
         Expanded(
           flex: 2,
-          child: _buildRecentOrdersSection(context, dashboardState, storeSettingsState),
+          child: _buildRecentOrdersSection(
+            context,
+            dashboardState,
+            storeSettingsState,
+          ),
         ),
         const SizedBox(width: 24),
-        Expanded(
-          flex: 1,
-          child: _buildSideCards(context, dashboardState),
-        ),
+        Expanded(flex: 1, child: _buildSideCards(context, dashboardState)),
       ],
     );
   }
@@ -299,7 +308,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     return Container(
       decoration: BoxDecoration(
         color: surfaceColor,
@@ -334,7 +345,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     const SizedBox(height: 2),
                     Text(
                       'Latest orders for this tenant.',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
                     ),
                   ],
                 ),
@@ -432,7 +448,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         const Divider(height: 1, color: Color(0xFFE2E8F0)),
         ...recent.map((order) {
-          final shortId = order.id.length > 8 ? order.id.substring(0, 8) : order.id;
+          final shortId = order.id.length > 8
+              ? order.id.substring(0, 8)
+              : order.id;
           return InkWell(
             onTap: () => context.go('/orders/${order.id}'),
             child: Padding(
@@ -474,7 +492,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -506,7 +526,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         DateFormat.yMMMd().add_jm().format(order.createdAt),
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -531,7 +553,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildSideCards(BuildContext context, AdminDashboardState dashboardState) {
+  Widget _buildSideCards(
+    BuildContext context,
+    AdminDashboardState dashboardState,
+  ) {
     return Column(
       children: [
         _buildOrderStatusCard(context, dashboardState),
@@ -541,12 +566,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildOrderStatusCard(BuildContext context, AdminDashboardState dashboardState) {
+  Widget _buildOrderStatusCard(
+    BuildContext context,
+    AdminDashboardState dashboardState,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final textPrimary = Theme.of(context).colorScheme.onSurface;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     final rows = [
@@ -594,14 +626,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(
-                onTap: () => context.go('/orders?status=${Uri.encodeComponent(row.status)}'),
+                onTap: () => context.go(
+                  '/orders?status=${Uri.encodeComponent(row.status)}',
+                ),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: borderColor),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -658,9 +695,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final textPrimary = Theme.of(context).colorScheme.onSurface;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     return Container(
@@ -705,7 +746,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: borderColor),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -723,7 +767,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                         ],
                       ),
-                      Icon(LucideIcons.chevronRight, size: 18, color: textMuted),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 18,
+                        color: textMuted,
+                      ),
                     ],
                   ),
                 ),
@@ -735,11 +783,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _tableHeader(
-    String label, {
-    double? width,
-    bool alignRight = false,
-  }) {
+  Widget _tableHeader(String label, {double? width, bool alignRight = false}) {
     final child = Text(
       label.toUpperCase(),
       style: const TextStyle(

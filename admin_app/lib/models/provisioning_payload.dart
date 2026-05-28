@@ -3,10 +3,12 @@ import 'dart:convert';
 import '../app_config.dart';
 import 'app_mode.dart';
 import 'bootstrap_config.dart';
+import 'subscription_tier.dart';
 
 class ProvisioningPayload {
   final String apiBaseUrl;
   final AppMode mode;
+  final SubscriptionTier subscriptionTier;
   final String tenantId;
   final String? workspaceId;
   final String? authToken;
@@ -17,6 +19,7 @@ class ProvisioningPayload {
   const ProvisioningPayload({
     required this.apiBaseUrl,
     required this.mode,
+    required this.subscriptionTier,
     required this.tenantId,
     this.workspaceId,
     this.authToken,
@@ -41,6 +44,7 @@ class ProvisioningPayload {
     final workspaceId = (json['workspaceId'] ?? '').toString().trim();
     final authToken = (json['authToken'] ?? '').toString().trim();
     final mode = _parseMode(json);
+    final subscriptionTier = _parseSubscriptionTier(json, mode);
 
     if (tenantId.isEmpty) {
       throw const FormatException('Provisioning payload is missing tenantId.');
@@ -53,6 +57,7 @@ class ProvisioningPayload {
     return ProvisioningPayload(
       apiBaseUrl: defaultApiBaseUrl,
       mode: mode,
+      subscriptionTier: subscriptionTier,
       tenantId: tenantId,
       workspaceId: workspaceId.isEmpty ? null : workspaceId,
       authToken: authToken.isEmpty ? null : authToken,
@@ -74,6 +79,7 @@ class ProvisioningPayload {
     return BootstrapConfig(
       apiBaseUrl: apiBaseUrl,
       mode: mode,
+      subscriptionTier: subscriptionTier,
       tenantId: tenantId,
       workspaceId: workspaceId,
       authToken: authToken,
@@ -93,6 +99,26 @@ class ProvisioningPayload {
     }
 
     if (json['isOffline'] == true) return AppMode.offlineOnly;
-    return AppMode.online;
+    return AppMode.hybrid;
+  }
+
+  static SubscriptionTier _parseSubscriptionTier(
+    Map<String, dynamic> json,
+    AppMode mode,
+  ) {
+    final raw = (json['subscriptionTier'] ?? json['tier'] ?? '')
+        .toString()
+        .trim();
+    if (raw.isNotEmpty) {
+      for (final tier in SubscriptionTier.values) {
+        if (tier.name == raw) return tier;
+      }
+      throw FormatException('Unsupported subscription tier "$raw".');
+    }
+
+    if (json['isOffline'] == true || mode == AppMode.offlineOnly) {
+      return SubscriptionTier.offlineOnly;
+    }
+    return SubscriptionTier.online;
   }
 }

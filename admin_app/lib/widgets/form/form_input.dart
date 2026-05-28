@@ -74,9 +74,15 @@ class FormInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
 
     final resolvedFillColor = fillColor ?? surface2;
@@ -109,7 +115,9 @@ class FormInput extends StatelessWidget {
     final enabledBorder = borderless ? InputBorder.none : outlineBorder;
     final resolvedFocusedBorder = borderless ? InputBorder.none : focusedBorder;
     final resolvedErrorBorder = borderless ? InputBorder.none : errorBorder;
-    final resolvedFocusedErrorBorder = borderless ? InputBorder.none : focusedErrorBorder;
+    final resolvedFocusedErrorBorder = borderless
+        ? InputBorder.none
+        : focusedErrorBorder;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +147,8 @@ class FormInput extends StatelessWidget {
           style: textStyle ?? TextStyle(fontSize: 14, color: textPrimary),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: hintStyle ?? TextStyle(color: textTertiary, fontSize: 14),
+            hintStyle:
+                hintStyle ?? TextStyle(color: textTertiary, fontSize: 14),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             prefixText: prefixText,

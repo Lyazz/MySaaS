@@ -15,7 +15,9 @@ BoxDecoration _decorationOf(WidgetTester tester, Finder root) {
 }
 
 Text _textOf(WidgetTester tester, Finder root, String text) {
-  return tester.widget<Text>(find.descendant(of: root, matching: find.text(text)));
+  return tester.widget<Text>(
+    find.descendant(of: root, matching: find.text(text)),
+  );
 }
 
 void main() {
@@ -46,14 +48,8 @@ void main() {
     expect(UiBadge.backgroundColor(UiBadgeTone.lime), const Color(0xFFF7FEE7));
     expect(UiBadge.foregroundColor(UiBadgeTone.lime), const Color(0xFF4D7C0F));
 
-    expect(
-      UiBadge.backgroundColor(UiBadgeTone.amber),
-      const Color(0xFFFFFBEB),
-    );
-    expect(
-      UiBadge.foregroundColor(UiBadgeTone.amber),
-      const Color(0xFFB45309),
-    );
+    expect(UiBadge.backgroundColor(UiBadgeTone.amber), const Color(0xFFFFFBEB));
+    expect(UiBadge.foregroundColor(UiBadgeTone.amber), const Color(0xFFB45309));
 
     expect(UiBadge.backgroundColor(UiBadgeTone.red), const Color(0xFFFEF2F2));
     expect(UiBadge.foregroundColor(UiBadgeTone.red), const Color(0xFFB91C1C));

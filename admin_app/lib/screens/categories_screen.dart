@@ -60,7 +60,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           ? FloatingActionButton(
               onPressed: () => context.go('/categories/create'),
               backgroundColor: AppColors.brand,
-              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
+              child: const Icon(
+                LucideIcons.plus,
+                color: AppColors.brandContrast,
+              ),
             )
           : null,
       body: Stack(
@@ -130,7 +133,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               'Manage your product categories',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -223,7 +228,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               child: Icon(
                 LucideIcons.shapes,
                 size: 32,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.3),
               ),
             ),
             const SizedBox(height: 16),
@@ -238,7 +245,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             const SizedBox(height: 4),
             Text(
               'Get started by creating a new category.',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 24),
             if (!(ref.watch(authProvider).mode == AppMode.offlineOnly))
@@ -262,7 +273,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           final headerStyle = TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.5),
             letterSpacing: 0.5,
           );
           return Row(
@@ -270,7 +283,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               Expanded(flex: 3, child: Text('CATEGORY', style: headerStyle)),
               Expanded(flex: 1, child: Text('PRODUCTS', style: headerStyle)),
               Expanded(flex: 1, child: Text('LINKS', style: headerStyle)),
-              Expanded(flex: 1, child: Text('ACTIONS', style: headerStyle, textAlign: TextAlign.right)),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'ACTIONS',
+                  style: headerStyle,
+                  textAlign: TextAlign.right,
+                ),
+              ),
             ],
           );
         },
@@ -297,7 +317,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: Theme.of(context).colorScheme.outline,
@@ -312,7 +334,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       child: imageUrl == null
                           ? Icon(
                               LucideIcons.image,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.3),
                               size: 20,
                             )
                           : null,
@@ -337,7 +361,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                           Text(
                             category.slug,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.5),
                               fontSize: 12,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -360,7 +386,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -496,12 +524,20 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             children: [
               Text(
                 'Delete Category',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Are you sure you want to delete "${_categoryToDelete?.title}"? This action cannot be undone.',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
               ),
               const SizedBox(height: 24),
               Row(

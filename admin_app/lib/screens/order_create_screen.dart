@@ -16,25 +16,64 @@ import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
 
 const _wilayas = [
-  ('01', 'Adrar'), ('02', 'Chlef'), ('03', 'Laghouat'),
-  ('04', 'Oum El Bouaghi'), ('05', 'Batna'), ('06', 'Béjaïa'),
-  ('07', 'Biskra'), ('08', 'Béchar'), ('09', 'Blida'), ('10', 'Bouira'),
-  ('11', 'Tamanrasset'), ('12', 'Tébessa'), ('13', 'Tlemcen'),
-  ('14', 'Tiaret'), ('15', 'Tizi Ouzou'), ('16', 'Alger'),
-  ('17', 'Djelfa'), ('18', 'Jijel'), ('19', 'Sétif'), ('20', 'Saïda'),
-  ('21', 'Skikda'), ('22', 'Sidi Bel Abbès'), ('23', 'Annaba'),
-  ('24', 'Guelma'), ('25', 'Constantine'), ('26', 'Médéa'),
-  ('27', 'Mostaganem'), ('28', "M'Sila"), ('29', 'Mascara'),
-  ('30', 'Ouargla'), ('31', 'Oran'), ('32', 'El Bayadh'),
-  ('33', 'Illizi'), ('34', 'Bordj Bou Arréridj'), ('35', 'Boumerdès'),
-  ('36', 'El Tarf'), ('37', 'Tindouf'), ('38', 'Tissemsilt'),
-  ('39', 'El Oued'), ('40', 'Khenchela'), ('41', 'Souk Ahras'),
-  ('42', 'Tipaza'), ('43', 'Mila'), ('44', 'Aïn Defla'),
-  ('45', 'Naâma'), ('46', 'Aïn Témouchent'), ('47', 'Ghardaïa'),
-  ('48', 'Relizane'), ('49', 'Timimoun'), ('50', 'Bordj Badji Mokhtar'),
-  ('51', 'Ouled Djellal'), ('52', 'Béni Abbès'), ('53', 'In Salah'),
-  ('54', 'In Guezzam'), ('55', 'Touggourt'), ('56', 'Djanet'),
-  ('57', "El M'Ghair"), ('58', 'El Meniaa'),
+  ('01', 'Adrar'),
+  ('02', 'Chlef'),
+  ('03', 'Laghouat'),
+  ('04', 'Oum El Bouaghi'),
+  ('05', 'Batna'),
+  ('06', 'Béjaïa'),
+  ('07', 'Biskra'),
+  ('08', 'Béchar'),
+  ('09', 'Blida'),
+  ('10', 'Bouira'),
+  ('11', 'Tamanrasset'),
+  ('12', 'Tébessa'),
+  ('13', 'Tlemcen'),
+  ('14', 'Tiaret'),
+  ('15', 'Tizi Ouzou'),
+  ('16', 'Alger'),
+  ('17', 'Djelfa'),
+  ('18', 'Jijel'),
+  ('19', 'Sétif'),
+  ('20', 'Saïda'),
+  ('21', 'Skikda'),
+  ('22', 'Sidi Bel Abbès'),
+  ('23', 'Annaba'),
+  ('24', 'Guelma'),
+  ('25', 'Constantine'),
+  ('26', 'Médéa'),
+  ('27', 'Mostaganem'),
+  ('28', "M'Sila"),
+  ('29', 'Mascara'),
+  ('30', 'Ouargla'),
+  ('31', 'Oran'),
+  ('32', 'El Bayadh'),
+  ('33', 'Illizi'),
+  ('34', 'Bordj Bou Arréridj'),
+  ('35', 'Boumerdès'),
+  ('36', 'El Tarf'),
+  ('37', 'Tindouf'),
+  ('38', 'Tissemsilt'),
+  ('39', 'El Oued'),
+  ('40', 'Khenchela'),
+  ('41', 'Souk Ahras'),
+  ('42', 'Tipaza'),
+  ('43', 'Mila'),
+  ('44', 'Aïn Defla'),
+  ('45', 'Naâma'),
+  ('46', 'Aïn Témouchent'),
+  ('47', 'Ghardaïa'),
+  ('48', 'Relizane'),
+  ('49', 'Timimoun'),
+  ('50', 'Bordj Badji Mokhtar'),
+  ('51', 'Ouled Djellal'),
+  ('52', 'Béni Abbès'),
+  ('53', 'In Salah'),
+  ('54', 'In Guezzam'),
+  ('55', 'Touggourt'),
+  ('56', 'Djanet'),
+  ('57', "El M'Ghair"),
+  ('58', 'El Meniaa'),
 ];
 
 class _CartItem {
@@ -137,11 +176,13 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
       if (existing != -1) {
         _cart[existing].quantity++;
       } else {
-        _cart.add(_CartItem(
-          productId: product.id,
-          title: product.title,
-          price: product.price,
-        ));
+        _cart.add(
+          _CartItem(
+            productId: product.id,
+            title: product.title,
+            price: product.price,
+          ),
+        );
       }
       _productSearchCtrl.clear();
       _searchResults = [];
@@ -164,23 +205,27 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
         if (_notesCtrl.text.trim().isNotEmpty)
           'shippingNotes': _notesCtrl.text.trim(),
         'items': _cart
-            .map((i) => {
-                  'productId': i.productId,
-                  'variantId': i.variantId,
-                  'quantity': i.quantity,
-                })
+            .map(
+              (i) => {
+                'productId': i.productId,
+                'variantId': i.variantId,
+                'quantity': i.quantity,
+                'price': i.price,
+              },
+            )
             .toList(),
       };
-      final orderId =
-          await ref.read(ordersProvider.notifier).createOrder(payload);
+      final orderId = await ref
+          .read(ordersProvider.notifier)
+          .createOrder(payload);
       if (mounted) {
         context.replace('/orders/$orderId');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -248,12 +293,17 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   value: _selectedCustomerId ?? '',
                   items: [
                     const DropdownMenuItem(
-                        value: '', child: Text('-- New customer --')),
-                    ...customers.map((c) => DropdownMenuItem(
-                          value: c.id,
-                          child: Text(
-                              '${c.name}${c.phone.isNotEmpty ? " (${c.phone})" : ""}'),
-                        )),
+                      value: '',
+                      child: Text('-- New customer --'),
+                    ),
+                    ...customers.map(
+                      (c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(
+                          '${c.name}${c.phone.isNotEmpty ? " (${c.phone})" : ""}',
+                        ),
+                      ),
+                    ),
                   ],
                   onChanged: _onCustomerSelected,
                 ),
@@ -288,13 +338,16 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   items: const [
                     DropdownMenuItem(value: '', child: Text('None')),
                     DropdownMenuItem(
-                        value: 'YALIDINE', child: Text('Yalidine')),
+                      value: 'YALIDINE',
+                      child: Text('Yalidine'),
+                    ),
                     DropdownMenuItem(value: 'MAYSTRO', child: Text('Maystro')),
                     DropdownMenuItem(
-                        value: 'SELF', child: Text('Self delivery')),
+                      value: 'SELF',
+                      child: Text('Self delivery'),
+                    ),
                   ],
-                  onChanged: (v) =>
-                      setState(() => _shippingProvider = v ?? ''),
+                  onChanged: (v) => setState(() => _shippingProvider = v ?? ''),
                 ),
                 const SizedBox(height: 12),
                 FormSelect<String>(
@@ -302,30 +355,32 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   value: _deliveryMode,
                   items: const [
                     DropdownMenuItem(value: 'home', child: Text('Home')),
-                    DropdownMenuItem(
-                        value: 'pickup', child: Text('Stop desk')),
+                    DropdownMenuItem(value: 'pickup', child: Text('Stop desk')),
                   ],
-                  onChanged: (v) =>
-                      setState(() => _deliveryMode = v ?? 'home'),
+                  onChanged: (v) => setState(() => _deliveryMode = v ?? 'home'),
                 ),
                 const SizedBox(height: 12),
                 FormSelect<String>(
                   label: 'Wilaya',
                   value: _selectedWilaya,
                   items: [
-                    const DropdownMenuItem(value: '', child: Text('-- Select --')),
-                    ..._wilayas.map((w) => DropdownMenuItem(
-                          value: w.$1,
-                          child: Text('${w.$1} - ${w.$2}'),
-                        )),
+                    const DropdownMenuItem(
+                      value: '',
+                      child: Text('-- Select --'),
+                    ),
+                    ..._wilayas.map(
+                      (w) => DropdownMenuItem(
+                        value: w.$1,
+                        child: Text('${w.$1} - ${w.$2}'),
+                      ),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _selectedWilaya = v ?? ''),
                 ),
                 const SizedBox(height: 12),
                 FormInput(label: 'Address', controller: _addressCtrl),
                 const SizedBox(height: 12),
-                FormInput(
-                    label: 'Notes', controller: _notesCtrl, maxLines: 2),
+                FormInput(label: 'Notes', controller: _notesCtrl, maxLines: 2),
               ],
             ),
           ),
@@ -358,21 +413,30 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                 final isDark = Theme.of(context).brightness == Brightness.dark;
                 return Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.surfaceBorder
+                          : AppColors.lightSurfaceBorder,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     color: Theme.of(context).colorScheme.surface,
                   ),
                   child: Column(
                     children: _searchResults
-                        .map((p) => ListTile(
-                              dense: true,
-                              title: Text(p.title,
-                                  style: const TextStyle(fontSize: 13)),
-                              subtitle: Text(
-                                  '${p.price.toStringAsFixed(0)} $currencyCode',
-                                  style: const TextStyle(fontSize: 12)),
-                              onTap: () => _addToCart(p),
-                            ))
+                        .map(
+                          (p) => ListTile(
+                            dense: true,
+                            title: Text(
+                              p.title,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                            subtitle: Text(
+                              '${p.price.toStringAsFixed(0)} $currencyCode',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            onTap: () => _addToCart(p),
+                          ),
+                        )
                         .toList(),
                   ),
                 );
@@ -389,11 +453,16 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(LucideIcons.shoppingCart,
-                      size: 32, color: Color(0xFF94A3B8)),
+                  Icon(
+                    LucideIcons.shoppingCart,
+                    size: 32,
+                    color: Color(0xFF94A3B8),
+                  ),
                   SizedBox(height: 8),
-                  Text('Cart is empty',
-                      style: TextStyle(color: Color(0xFF94A3B8))),
+                  Text(
+                    'Cart is empty',
+                    style: TextStyle(color: Color(0xFF94A3B8)),
+                  ),
                 ],
               ),
             ),
@@ -415,20 +484,28 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(item.title,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 13)),
-                            if (item.variantLabel != null)
-                              Text(item.variantLabel!,
-                                  style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF94A3B8))),
                             Text(
-                                '${(item.price * item.quantity).toStringAsFixed(0)} $currencyCode',
+                              item.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                              ),
+                            ),
+                            if (item.variantLabel != null)
+                              Text(
+                                item.variantLabel!,
                                 style: const TextStyle(
-                                    color: Color(0xFF6366F1),
-                                    fontWeight: FontWeight.bold)),
+                                  fontSize: 11,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                            Text(
+                              '${(item.price * item.quantity).toStringAsFixed(0)} $currencyCode',
+                              style: const TextStyle(
+                                color: Color(0xFF6366F1),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -447,10 +524,12 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                             onPressed: () => setState(() => item.quantity++),
                           ),
                           IconButton(
-                            icon: const Icon(LucideIcons.x,
-                                size: 16, color: Color(0xFFEF4444)),
-                            onPressed: () =>
-                                setState(() => _cart.removeAt(i)),
+                            icon: const Icon(
+                              LucideIcons.x,
+                              size: 16,
+                              color: Color(0xFFEF4444),
+                            ),
+                            onPressed: () => setState(() => _cart.removeAt(i)),
                           ),
                         ],
                       ),
@@ -465,7 +544,13 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
     final footer = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
         color: Theme.of(context).colorScheme.surface,
       ),
       child: Column(
@@ -473,12 +558,17 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Total',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('${_cartTotal.toStringAsFixed(0)} $currencyCode',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF6366F1))),
+              const Text(
+                'Total',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '${_cartTotal.toStringAsFixed(0)} $currencyCode',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF6366F1),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -493,7 +583,13 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
     );
 
     final decoration = BoxDecoration(
-      border: Border(left: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+      border: Border(
+        left: BorderSide(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
+      ),
     );
 
     if (bounded) {
@@ -503,11 +599,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
         child: Column(
           children: [
             searchBar,
-            Expanded(
-              child: SingleChildScrollView(
-                child: cartList,
-              ),
-            ),
+            Expanded(child: SingleChildScrollView(child: cartList)),
             footer,
           ],
         ),
@@ -518,26 +610,27 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
         decoration: decoration,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            searchBar,
-            cartList,
-            footer,
-          ],
+          children: [searchBar, cartList, footer],
         ),
       );
     }
   }
 
-  Widget _buildCard(
-      {required IconData icon,
-      required String title,
-      required Widget child}) {
+  Widget _buildCard({
+    required IconData icon,
+    required String title,
+    required Widget child,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -548,8 +641,10 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
               children: [
                 Icon(icon, size: 18, color: const Color(0xFF6366F1)),
                 const SizedBox(width: 8),
-                Text(title,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),

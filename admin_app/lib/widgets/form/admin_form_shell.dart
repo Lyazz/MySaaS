@@ -28,10 +28,18 @@ class AdminFormShell extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final contentBg = isDark ? AppColors.contentBg : AppColors.lightContentBg;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return Scaffold(
       backgroundColor: contentBg,
@@ -151,12 +159,17 @@ class AdminFormShell extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 24),
                     decoration: BoxDecoration(
                       color: AppColors.redSurface,
-                      border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: AppColors.red.withValues(alpha: 0.3),
+                      ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       error!,
-                      style: const TextStyle(color: AppColors.redText, fontSize: 14),
+                      style: const TextStyle(
+                        color: AppColors.redText,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
 

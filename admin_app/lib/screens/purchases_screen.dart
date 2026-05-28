@@ -30,14 +30,13 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
   DateTime? _endDate;
   String? _selectedSupplierId;
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
   static DateTime _endOfDay(DateTime dt) =>
       DateTime(dt.year, dt.month, dt.day, 23, 59, 59, 999);
 
-  static DateTimeRange _normalizeRange(DateTimeRange range) => DateTimeRange(
-        start: _startOfDay(range.start),
-        end: _endOfDay(range.end),
-      );
+  static DateTimeRange _normalizeRange(DateTimeRange range) =>
+      DateTimeRange(start: _startOfDay(range.start), end: _endOfDay(range.end));
 
   void _setDefaultDateRange() {
     final now = DateTime.now();
@@ -97,7 +96,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
           ? FloatingActionButton(
               onPressed: () => context.go('/purchases/create'),
               backgroundColor: AppColors.brand,
-              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
+              child: const Icon(
+                LucideIcons.plus,
+                color: AppColors.brandContrast,
+              ),
             )
           : null,
       body: SingleChildScrollView(
@@ -156,22 +158,22 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                 filters: [
                   SizedBox(
                     width: 320,
-                  child: DateRangeFilterField(
-                    range: (_startDate != null && _endDate != null)
-                        ? DateTimeRange(start: _startDate!, end: _endDate!)
-                        : null,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now(),
-                    normalize: _normalizeRange,
-                    onChanged: (range) {
-                      setState(() {
-                        _startDate = range?.start;
-                        _endDate = range?.end;
-                      });
-                      _fetchPurchases();
-                    },
+                    child: DateRangeFilterField(
+                      range: (_startDate != null && _endDate != null)
+                          ? DateTimeRange(start: _startDate!, end: _endDate!)
+                          : null,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                      normalize: _normalizeRange,
+                      onChanged: (range) {
+                        setState(() {
+                          _startDate = range?.start;
+                          _endDate = range?.end;
+                        });
+                        _fetchPurchases();
+                      },
+                    ),
                   ),
-                ),
                   SizedBox(
                     width: 240,
                     child: FormSelect<String?>(
@@ -238,14 +240,22 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
           padding: const EdgeInsets.all(48),
           child: Column(
             children: [
-              Icon(LucideIcons.shoppingBag, size: 48, color: Theme.of(context).brightness == Brightness.dark ? AppColors.textTertiary : AppColors.lightTextTertiary),
+              Icon(
+                LucideIcons.shoppingBag,
+                size: 48,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.textTertiary
+                    : AppColors.lightTextTertiary,
+              ),
               const SizedBox(height: 16),
               Text(
                 'No purchases found',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppColors.textPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
             ],

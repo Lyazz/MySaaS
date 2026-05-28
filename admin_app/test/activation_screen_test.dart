@@ -1,8 +1,11 @@
 import 'package:admin_app/bootstrap.dart';
 import 'package:admin_app/models/app_mode.dart';
 import 'package:admin_app/models/bootstrap_config.dart';
+import 'package:admin_app/models/provisioning_payload.dart';
+import 'package:admin_app/models/subscription_tier.dart';
 import 'package:admin_app/providers/auth_provider.dart';
 import 'package:admin_app/screens/activation_screen.dart';
+import 'package:admin_app/services/api_service.dart';
 import 'package:admin_app/services/app_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +17,25 @@ import 'helpers/pump_localized_app.dart';
 String _locationOf(Object routerObject) {
   final dynamic router = routerObject;
   return router.routeInformationProvider.value.uri.toString();
+}
+
+class _FakeApiService extends ApiService {
+  _FakeApiService({required this.payload, this.error})
+    : super(baseUrl: 'https://swekly.com/api');
+
+  final ProvisioningPayload? payload;
+  final Exception? error;
+
+  @override
+  Future<ProvisioningPayload> activateProvisioningCode(
+    String activationCode,
+  ) async {
+    if (error != null) throw error!;
+    if (activationCode.trim() != 'trusted-activation-code') {
+      throw Exception('Invalid or expired activation code');
+    }
+    return payload!;
+  }
 }
 
 GoRouter _buildTestRouter(
@@ -35,7 +57,7 @@ GoRouter _buildTestRouter(
       }
 
       if (path == '/activate') {
-        return authState.mode == AppMode.offlineOnly || isLoggedIn
+        return authState.mode.skipsAuthentication || isLoggedIn
             ? '/'
             : '/login';
       }
@@ -79,6 +101,17 @@ void main() {
               BootstrapConfig(apiBaseUrl: 'https://swekly.com/api'),
             ),
           ),
+          apiProvider.overrideWith(
+            (ref) => _FakeApiService(
+              payload: const ProvisioningPayload(
+                apiBaseUrl: 'https://swekly.com/api',
+                mode: AppMode.hybrid,
+                subscriptionTier: SubscriptionTier.online,
+                tenantId: 'tenant-42',
+                workspaceId: 'workspace-99',
+              ),
+            ),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -108,13 +141,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      await tester.enterText(find.byType(TextField), '''
-{
-  "tenantId": "tenant-42",
-  "workspaceId": "workspace-99",
-  "mode": "online"
-}
-''');
+      await tester.enterText(find.byType(TextField), 'trusted-activation-code');
       await tester.ensureVisible(find.text('Activate Device'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Activate Device'));
@@ -133,6 +160,7 @@ void main() {
         defaultApiBaseUrl: 'https://swekly.com/api',
       );
       expect(persisted.apiBaseUrl, 'https://swekly.com/api');
+      expect(persisted.subscriptionTier, SubscriptionTier.online);
       expect(persisted.tenantId, 'tenant-42');
       expect(persisted.workspaceId, 'workspace-99');
       expect(persisted.authToken, isNull);
@@ -147,6 +175,12 @@ void main() {
         bootstrapProvider.overrideWith(
           () => BootstrapNotifier(
             BootstrapConfig(apiBaseUrl: 'https://swekly.com/api'),
+          ),
+        ),
+        apiProvider.overrideWith(
+          (ref) => _FakeApiService(
+            payload: null,
+            error: Exception('Invalid or expired activation code'),
           ),
         ),
       ],
@@ -178,16 +212,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    await tester.enterText(find.byType(TextField), '{"mode":"online"}');
+    await tester.enterText(find.byType(TextField), 'bad-code');
     await tester.ensureVisible(find.text('Activate Device'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Activate Device'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Provisioning payload is missing tenantId.'),
-      findsOneWidget,
-    );
+    expect(find.text('Invalid or expired activation code'), findsOneWidget);
     expect(_locationOf(router), '/activate');
   });
 }

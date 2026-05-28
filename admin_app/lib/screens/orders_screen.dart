@@ -95,7 +95,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ? FloatingActionButton(
               onPressed: () => context.go('/pos'),
               backgroundColor: AppColors.brand,
-              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
+              child: const Icon(
+                LucideIcons.plus,
+                color: AppColors.brandContrast,
+              ),
             )
           : null,
       body: SingleChildScrollView(
@@ -149,7 +152,12 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             const SizedBox(height: 4),
             Text(
               'Manage customer orders',
-              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -284,7 +292,13 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.clipboardList, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+            Icon(
+              LucideIcons.clipboardList,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 12),
             Text(
               'No orders found',
@@ -300,7 +314,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -393,7 +409,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 child: Text(
                   order.customerPhone.isEmpty ? '-' : order.customerPhone,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: order.customerPhone.isEmpty ? 0.3 : 0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(
+                      alpha: order.customerPhone.isEmpty ? 0.3 : 0.6,
+                    ),
                     fontSize: 13,
                   ),
                 ),
@@ -421,7 +439,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 child: Text(
                   DateFormat.yMMMd().add_jm().format(order.createdAt),
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
@@ -467,7 +487,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

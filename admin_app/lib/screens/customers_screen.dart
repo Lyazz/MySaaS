@@ -72,7 +72,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
           ? FloatingActionButton(
               onPressed: () => context.go('/customers/create'),
               backgroundColor: AppColors.brand,
-              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
+              child: const Icon(
+                LucideIcons.plus,
+                color: AppColors.brandContrast,
+              ),
             )
           : null,
       body: SingleChildScrollView(
@@ -90,10 +93,12 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   ],
                   ResponsiveFilterBar(
                     searchField: FormInput(
-                      label: 'admin.pages.customers.index.filters.searchLabel'.tr(),
-                      controller: _searchController,
-                      hint: 'admin.pages.customers.index.filters.searchPlaceholder'
+                      label: 'admin.pages.customers.index.filters.searchLabel'
                           .tr(),
+                      controller: _searchController,
+                      hint:
+                          'admin.pages.customers.index.filters.searchPlaceholder'
+                              .tr(),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -114,7 +119,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   else if (customersState.customers.isEmpty)
                     _buildEmptyCard(
                       hint: _searchController.text.trim().isNotEmpty
-                          ? 'admin.pages.customers.index.empty.hintFiltered'.tr()
+                          ? 'admin.pages.customers.index.empty.hintFiltered'
+                                .tr()
                           : 'admin.pages.customers.index.empty.hint'.tr(),
                     )
                   else
@@ -148,7 +154,12 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
               SizedBox(height: 4),
               Text(
                 'admin.pages.customers.index.subtitle'.tr(),
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 14),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -203,7 +214,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             flex: 4,
           ),
           _buildHeaderCell('admin.forms.customer.phone.label'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.index.table.orders'.tr(), flex: 1),
+          _buildHeaderCell(
+            'admin.pages.customers.index.table.orders'.tr(),
+            flex: 1,
+          ),
           _buildHeaderCell(
             'admin.pages.customers.index.table.totalSpent'.tr(),
             flex: 2,
@@ -220,7 +234,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText('admin.pages.customers.index.table.actions'.tr()),
+              child: _headerText(
+                'admin.pages.customers.index.table.actions'.tr(),
+              ),
             ),
           ),
         ],
@@ -277,7 +293,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                                 customer.email!,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.5),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -287,7 +304,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                                 customer.address!,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.5),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -304,7 +322,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                     customer.phone.isEmpty ? '—' : customer.phone,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -316,7 +336,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -359,7 +381,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                         : '—',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -397,7 +421,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.index.loading'.tr(),
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -432,7 +460,13 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.users, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+            Icon(
+              LucideIcons.users,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.index.empty.title'.tr(),
@@ -448,7 +482,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 16),
@@ -485,7 +521,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

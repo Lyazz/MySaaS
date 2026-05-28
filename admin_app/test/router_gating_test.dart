@@ -3,6 +3,7 @@ import 'package:admin_app/models/admin_dashboard.dart';
 import 'package:admin_app/models/app_mode.dart';
 import 'package:admin_app/models/bootstrap_config.dart';
 import 'package:admin_app/models/store_settings.dart';
+import 'package:admin_app/models/subscription_tier.dart';
 import 'package:admin_app/providers/admin_dashboard_provider.dart';
 import 'package:admin_app/providers/auth_provider.dart';
 import 'package:admin_app/providers/network_status_provider.dart';
@@ -75,7 +76,7 @@ ProviderContainer _buildContainer({
         ),
       ),
       networkStatusProvider.overrideWith(
-        () => _TestNetworkStatusNotifier(NetworkStatus.online),
+        () => _TestNetworkStatusNotifier(NetworkStatus.connected),
       ),
     ],
   );
@@ -127,10 +128,14 @@ void main() {
       final container = _buildContainer(
         bootstrap: const BootstrapConfig(
           apiBaseUrl: 'https://api.example.com',
-          mode: AppMode.online,
+          mode: AppMode.hybrid,
+          subscriptionTier: SubscriptionTier.online,
           tenantId: 'tenant-1',
         ),
-        authState: const AuthState(mode: AppMode.online),
+        authState: const AuthState(
+          mode: AppMode.hybrid,
+          subscriptionTier: SubscriptionTier.online,
+        ),
       );
       addTearDown(container.dispose);
 
@@ -157,6 +162,7 @@ void main() {
       bootstrap: BootstrapConfig(
         apiBaseUrl: 'https://api.example.com',
         mode: AppMode.online,
+        subscriptionTier: SubscriptionTier.online,
         tenantId: 'tenant-1',
         authToken: 'token-123',
         userJson: user.toJson(),
@@ -165,6 +171,7 @@ void main() {
         user: user,
         token: 'token-123',
         mode: AppMode.online,
+        subscriptionTier: SubscriptionTier.online,
       ),
     );
     addTearDown(container.dispose);
@@ -183,9 +190,13 @@ void main() {
         bootstrap: const BootstrapConfig(
           apiBaseUrl: 'https://api.example.com',
           mode: AppMode.offlineOnly,
+          subscriptionTier: SubscriptionTier.offlineOnly,
           tenantId: 'tenant-1',
         ),
-        authState: const AuthState(mode: AppMode.offlineOnly),
+        authState: const AuthState(
+          mode: AppMode.offlineOnly,
+          subscriptionTier: SubscriptionTier.offlineOnly,
+        ),
       );
       addTearDown(container.dispose);
 
@@ -218,6 +229,7 @@ void main() {
         bootstrap: BootstrapConfig(
           apiBaseUrl: 'https://api.example.com',
           mode: AppMode.online,
+          subscriptionTier: SubscriptionTier.online,
           tenantId: 'tenant-1',
           authToken: 'token-123',
           userJson: user.toJson(),
@@ -227,6 +239,7 @@ void main() {
           user: user,
           token: 'token-123',
           mode: AppMode.online,
+          subscriptionTier: SubscriptionTier.online,
           staffPermissions: const ['orders:read'],
         ),
       );

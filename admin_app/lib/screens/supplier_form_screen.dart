@@ -144,18 +144,18 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                                   label: 'admin.forms.supplier.name.label'.tr(),
                                   hint: 'admin.forms.supplier.name.placeholder'
                                       .tr(),
-                                  validator: (v) =>
-                                      v!.isEmpty
-                                          ? 'admin.forms.supplier.name.required'
-                                                .tr()
-                                          : null,
+                                  validator: (v) => v!.isEmpty
+                                      ? 'admin.forms.supplier.name.required'
+                                            .tr()
+                                      : null,
                                 ),
                               ),
                               const SizedBox(width: 24),
                               Expanded(
                                 child: FormInput(
                                   controller: _phoneController,
-                                  label: 'admin.forms.supplier.phone.label'.tr(),
+                                  label: 'admin.forms.supplier.phone.label'
+                                      .tr(),
                                   hint: 'admin.forms.supplier.phone.placeholder'
                                       .tr(),
                                   keyboardType: TextInputType.phone,
@@ -168,10 +168,9 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                             controller: _nameController,
                             label: 'admin.forms.supplier.name.label'.tr(),
                             hint: 'admin.forms.supplier.name.placeholder'.tr(),
-                            validator: (v) =>
-                                v!.isEmpty
-                                    ? 'admin.forms.supplier.name.required'.tr()
-                                    : null,
+                            validator: (v) => v!.isEmpty
+                                ? 'admin.forms.supplier.name.required'.tr()
+                                : null,
                           ),
                           const SizedBox(height: 24),
                           FormInput(
@@ -189,7 +188,8 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                               Expanded(
                                 child: FormInput(
                                   controller: _emailController,
-                                  label: 'admin.forms.supplier.email.label'.tr(),
+                                  label: 'admin.forms.supplier.email.label'
+                                      .tr(),
                                   hint: 'admin.forms.supplier.email.placeholder'
                                       .tr(),
                                   keyboardType: TextInputType.emailAddress,
@@ -219,8 +219,8 @@ class _SupplierFormScreenState extends ConsumerState<SupplierFormScreen> {
                           FormInput(
                             controller: _addressController,
                             label: 'admin.forms.supplier.address.label'.tr(),
-                            hint:
-                                'admin.forms.supplier.address.placeholder'.tr(),
+                            hint: 'admin.forms.supplier.address.placeholder'
+                                .tr(),
                           ),
                         ],
                         const SizedBox(height: 24),

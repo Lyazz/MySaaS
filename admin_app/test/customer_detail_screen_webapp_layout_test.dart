@@ -75,9 +75,8 @@ void main() {
       ProviderScope(
         overrides: [
           customersProvider.overrideWith(
-            () => CustomersNotifier(
-              CustomersState(detailsById: {'c1': detail}),
-            ),
+            () =>
+                CustomersNotifier(CustomersState(detailsById: {'c1': detail})),
           ),
         ],
         child: buildLocalizedTestApp(routerConfig: router),
@@ -102,8 +101,9 @@ void main() {
     expect(find.byType(CustomerFormScreen), findsOneWidget);
     expect(find.byType(TextFormField), findsNWidgets(5));
 
-    final fields =
-        tester.widgetList<TextFormField>(find.byType(TextFormField)).toList();
+    final fields = tester
+        .widgetList<TextFormField>(find.byType(TextFormField))
+        .toList();
     expect(fields.any((f) => f.enabled == false), isTrue);
   });
 }

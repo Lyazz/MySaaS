@@ -177,13 +177,17 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 Icon(
                   LucideIcons.arrowLeft,
                   size: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'admin.pages.customers.index.title'.tr(),
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -235,7 +239,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         Text(
           subtitle,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.5),
             fontSize: 14,
           ),
         ),
@@ -335,10 +341,22 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
       showFooter: false,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.customers.detail.table.order'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.table.total'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.table.status'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.table.date'.tr(), flex: 3),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.order'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.total'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.status'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.date'.tr(),
+            flex: 3,
+          ),
           Expanded(
             flex: 2,
             child: Align(
@@ -394,7 +412,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                       ? DateFormat.yMMMd(locale).add_jm().format(date)
                       : '—',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
@@ -420,9 +440,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
 
   Widget _buildPaymentsTable(
     List<CustomerPayment> payments,
-    NumberFormat money,
-    {required String locale}
-  ) {
+    NumberFormat money, {
+    required String locale,
+  }) {
     return ResponsiveServerPaginatedTable<CustomerPayment>(
       items: payments,
       title: Text('admin.pages.customers.detail.stats.payments'.tr()),
@@ -435,10 +455,22 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
       showFooter: false,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.customers.detail.table.date'.tr(), flex: 3),
-          _buildHeaderCell('admin.pages.customers.detail.table.total'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.stats.method'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.stats.reference'.tr(), flex: 3),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.date'.tr(),
+            flex: 3,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.total'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.stats.method'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.stats.reference'.tr(),
+            flex: 3,
+          ),
           Expanded(
             flex: 2,
             child: Align(
@@ -466,7 +498,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                       ? DateFormat.yMMMd(locale).add_jm().format(date)
                       : '—',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
@@ -501,8 +535,12 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     color: reference.isEmpty
-                        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)
-                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.3)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -513,7 +551,11 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   child: p.saleId == null || p.saleId!.trim().isEmpty
                       ? Text(
                           '—',
-                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.3),
+                          ),
                         )
                       : AppButton.secondary(
                           label: 'admin.common.view'.tr(),
@@ -560,7 +602,11 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.detail.loading'.tr(),
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -598,7 +644,13 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.users, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+            Icon(
+              LucideIcons.users,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.detail.notFound.title'.tr(),
@@ -612,7 +664,12 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             Text(
               'admin.pages.customers.detail.notFound.hint'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 16),
             AppButton.secondary(
@@ -635,7 +692,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             Icon(
               LucideIcons.clipboardList,
               size: 48,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
             Text(
@@ -650,7 +709,12 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             Text(
               'admin.pages.customers.detail.empty.hint'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -665,7 +729,11 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

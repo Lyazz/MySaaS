@@ -17,9 +17,13 @@ class CustomerRepository {
   String get _tid => TenantModeService().activeTenantId;
 
   Customer _fromRow(Map<String, Object?> e) => Customer.fromJson({
-    'id': e['id'], 'name': e['name'], 'phone': e['phone'],
-    'email': e['email'], 'address': e['address'],
-    'totalSpent': e['totalSpent'], 'ordersCount': e['ordersCount'],
+    'id': e['id'],
+    'name': e['name'],
+    'phone': e['phone'],
+    'email': e['email'],
+    'address': e['address'],
+    'totalSpent': e['totalSpent'],
+    'ordersCount': e['ordersCount'],
   });
 
   Future<List<Customer>> getCustomers({bool forceRefresh = false}) async {
@@ -45,10 +49,15 @@ class CustomerRepository {
           );
           for (var c in remoteCustomers) {
             await txn.insert('customers', {
-              'id': c.id, 'tenantId': _tid,
-              'name': c.name, 'phone': c.phone, 'email': c.email,
-              'address': c.address, 'totalSpent': c.totalSpent,
-              'ordersCount': c.ordersCount, 'syncStatus': 'synced',
+              'id': c.id,
+              'tenantId': _tid,
+              'name': c.name,
+              'phone': c.phone,
+              'email': c.email,
+              'address': c.address,
+              'totalSpent': c.totalSpent,
+              'ordersCount': c.ordersCount,
+              'syncStatus': 'synced',
             }, conflictAlgorithm: ConflictAlgorithm.replace);
           }
         });
@@ -65,19 +74,28 @@ class CustomerRepository {
     customerData['id'] = id;
     final localCustomer = Customer.fromJson(customerData);
     await db.insert('customers', {
-      'id': localCustomer.id, 'tenantId': _tid,
-      'name': localCustomer.name, 'phone': localCustomer.phone,
-      'email': localCustomer.email, 'address': localCustomer.address,
-      'totalSpent': 0.0, 'ordersCount': 0,
+      'id': localCustomer.id,
+      'tenantId': _tid,
+      'name': localCustomer.name,
+      'phone': localCustomer.phone,
+      'email': localCustomer.email,
+      'address': localCustomer.address,
+      'totalSpent': 0.0,
+      'ordersCount': 0,
       'syncStatus': online ? 'synced' : 'pending',
     });
     await _syncService.enqueueOperation(
-      entityType: 'customer', action: 'create', payload: customerData,
+      entityType: 'customer',
+      action: 'create',
+      payload: customerData,
     );
     return localCustomer;
   }
 
-  Future<Customer?> getCustomerById(String id, {bool forceRefresh = false}) async {
+  Future<Customer?> getCustomerById(
+    String id, {
+    bool forceRefresh = false,
+  }) async {
     final trimmed = id.trim();
     if (trimmed.isEmpty) return null;
     final db = await _dbService.database;
@@ -94,12 +112,18 @@ class CustomerRepository {
         final res = await _apiService.client.get('/admin/customers/$trimmed');
         final data = res.data;
         if (data is Map && data['summary'] is Map) {
-          final summary = Customer.fromJson((data['summary'] as Map).cast<String, dynamic>());
+          final summary = Customer.fromJson(
+            (data['summary'] as Map).cast<String, dynamic>(),
+          );
           await db.insert('customers', {
-            'id': summary.id, 'tenantId': _tid,
-            'name': summary.name, 'phone': summary.phone,
-            'email': summary.email, 'address': summary.address,
-            'totalSpent': summary.totalSpent, 'ordersCount': summary.ordersCount,
+            'id': summary.id,
+            'tenantId': _tid,
+            'name': summary.name,
+            'phone': summary.phone,
+            'email': summary.email,
+            'address': summary.address,
+            'totalSpent': summary.totalSpent,
+            'ordersCount': summary.ordersCount,
             'syncStatus': 'synced',
           }, conflictAlgorithm: ConflictAlgorithm.replace);
           return summary;
@@ -109,7 +133,10 @@ class CustomerRepository {
     return local;
   }
 
-  Future<Customer> updateCustomer(String id, Map<String, dynamic> update) async {
+  Future<Customer> updateCustomer(
+    String id,
+    Map<String, dynamic> update,
+  ) async {
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Customer ID is required');
     final db = await _dbService.database;
@@ -120,17 +147,25 @@ class CustomerRepository {
     if (update.containsKey('name')) dataToUpdate['name'] = update['name'];
     if (update.containsKey('phone')) dataToUpdate['phone'] = update['phone'];
     if (update.containsKey('email')) dataToUpdate['email'] = update['email'];
-    if (update.containsKey('address')) dataToUpdate['address'] = update['address'];
+    if (update.containsKey('address'))
+      dataToUpdate['address'] = update['address'];
     await db.update(
-      'customers', dataToUpdate,
-      where: 'id = ? AND tenantId = ?', whereArgs: [trimmed, _tid],
+      'customers',
+      dataToUpdate,
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [trimmed, _tid],
     );
-    final syncPayload = Map<String, dynamic>.from(update)..[  'id'] = trimmed;
+    final syncPayload = Map<String, dynamic>.from(update)..['id'] = trimmed;
     await _syncService.enqueueOperation(
-      entityType: 'customer', action: 'update', payload: syncPayload,
+      entityType: 'customer',
+      action: 'update',
+      payload: syncPayload,
     );
     final res = await db.query(
-      'customers', where: 'id = ? AND tenantId = ?', whereArgs: [trimmed, _tid], limit: 1,
+      'customers',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [trimmed, _tid],
+      limit: 1,
     );
     if (res.isEmpty) throw Exception('Customer not found after update');
     return _fromRow(res.first);

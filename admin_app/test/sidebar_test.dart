@@ -1,5 +1,6 @@
 import 'package:admin_app/models/app_mode.dart';
 import 'package:admin_app/models/store_settings.dart';
+import 'package:admin_app/models/subscription_tier.dart';
 import 'package:admin_app/providers/auth_provider.dart';
 import 'package:admin_app/providers/store_settings_provider.dart';
 import 'package:admin_app/widgets/sidebar.dart';
@@ -66,6 +67,7 @@ void main() {
                   user: owner,
                   token: 'token-123',
                   mode: AppMode.offlineOnly,
+                  subscriptionTier: SubscriptionTier.offlineOnly,
                 ),
               ),
             ),
@@ -113,6 +115,7 @@ void main() {
                   user: owner,
                   token: 'token-123',
                   mode: AppMode.online,
+                  subscriptionTier: SubscriptionTier.online,
                 ),
               ),
             ),

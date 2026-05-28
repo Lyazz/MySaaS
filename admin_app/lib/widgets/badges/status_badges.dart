@@ -40,11 +40,7 @@ class OrderStatusBadge extends StatelessWidget {
       'RETURNED' => 'admin.orderStatus.returned'.tr(),
       _ => normalized,
     };
-    return UiBadge(
-      label: label,
-      tone: toneFor(normalized),
-      uppercase: true,
-    );
+    return UiBadge(label: label, tone: toneFor(normalized), uppercase: true);
   }
 }
 
@@ -87,7 +83,9 @@ class ActiveBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UiBadge(
-      label: isActive ? 'admin.common.active'.tr() : 'admin.common.inactive'.tr(),
+      label: isActive
+          ? 'admin.common.active'.tr()
+          : 'admin.common.inactive'.tr(),
       tone: isActive ? UiBadgeTone.emerald : UiBadgeTone.slate,
     );
   }
@@ -159,10 +157,6 @@ class SaleStatusBadge extends StatelessWidget {
       'RETURNED' => 'admin.orderStatus.returned'.tr(),
       _ => normalized,
     };
-    return UiBadge(
-      label: label,
-      tone: toneFor(normalized),
-      uppercase: true,
-    );
+    return UiBadge(label: label, tone: toneFor(normalized), uppercase: true);
   }
 }

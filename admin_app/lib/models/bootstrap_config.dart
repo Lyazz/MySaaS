@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 import 'app_mode.dart';
+import 'subscription_tier.dart';
 
 class BootstrapConfig {
   final String apiBaseUrl;
   final AppMode mode;
+  final SubscriptionTier subscriptionTier;
   final String tenantId;
   final String? workspaceId;
   final String? authToken;
@@ -16,6 +18,7 @@ class BootstrapConfig {
   const BootstrapConfig({
     required this.apiBaseUrl,
     this.mode = AppMode.online,
+    this.subscriptionTier = SubscriptionTier.online,
     this.tenantId = '',
     this.workspaceId,
     this.authToken,
@@ -28,6 +31,7 @@ class BootstrapConfig {
   BootstrapConfig copyWith({
     String? apiBaseUrl,
     AppMode? mode,
+    SubscriptionTier? subscriptionTier,
     String? tenantId,
     String? workspaceId,
     String? authToken,
@@ -44,6 +48,7 @@ class BootstrapConfig {
     return BootstrapConfig(
       apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
       mode: mode ?? this.mode,
+      subscriptionTier: subscriptionTier ?? this.subscriptionTier,
       tenantId: tenantId ?? this.tenantId,
       workspaceId: clearWorkspaceId ? null : (workspaceId ?? this.workspaceId),
       authToken: clearAuthToken ? null : (authToken ?? this.authToken),
@@ -67,6 +72,7 @@ class BootstrapConfig {
     return other is BootstrapConfig &&
         other.apiBaseUrl == apiBaseUrl &&
         other.mode == mode &&
+        other.subscriptionTier == subscriptionTier &&
         other.tenantId == tenantId &&
         other.workspaceId == workspaceId &&
         other.authToken == authToken &&
@@ -80,6 +86,7 @@ class BootstrapConfig {
   int get hashCode => Object.hash(
     apiBaseUrl,
     mode,
+    subscriptionTier,
     tenantId,
     workspaceId,
     authToken,

@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app_config.dart';
 import '../bootstrap.dart';
 import '../models/app_mode.dart';
+import '../models/bootstrap_config.dart';
+import '../models/subscription_tier.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
+import '../services/workspace_data_cleaner.dart';
 
 class User {
   final String id;
@@ -66,6 +70,7 @@ class AuthState {
   final User? user;
   final String? token;
   final AppMode mode;
+  final SubscriptionTier subscriptionTier;
   final StaffRoleInfo? staffRole;
   final List<String> staffPermissions;
   final bool isLoading;
@@ -75,6 +80,7 @@ class AuthState {
     this.user,
     this.token,
     this.mode = AppMode.online,
+    this.subscriptionTier = SubscriptionTier.online,
     this.staffRole,
     this.staffPermissions = const [],
     this.isLoading = false,
@@ -87,6 +93,7 @@ class AuthState {
     User? user,
     String? token,
     AppMode? mode,
+    SubscriptionTier? subscriptionTier,
     StaffRoleInfo? staffRole,
     List<String>? staffPermissions,
     bool? isLoading,
@@ -96,6 +103,7 @@ class AuthState {
       user: user ?? this.user,
       token: token ?? this.token,
       mode: mode ?? this.mode,
+      subscriptionTier: subscriptionTier ?? this.subscriptionTier,
       staffRole: staffRole ?? this.staffRole,
       staffPermissions: staffPermissions ?? this.staffPermissions,
       isLoading: isLoading ?? this.isLoading,
@@ -114,6 +122,7 @@ class AuthNotifier extends Notifier<AuthState> {
     TenantModeService().initialize(
       mode: bootstrap.mode,
       tenantId: bootstrap.tenantId,
+      workspaceId: bootstrap.workspaceId,
     );
     SyncService().initialize(ref.read(apiProvider), mode: bootstrap.mode);
 
@@ -133,6 +142,7 @@ class AuthNotifier extends Notifier<AuthState> {
       token: token,
       user: user,
       mode: bootstrap.mode,
+      subscriptionTier: bootstrap.subscriptionTier,
       staffRole: staffRole,
       staffPermissions: bootstrap.staffPermissions,
     );
@@ -226,6 +236,7 @@ class AuthNotifier extends Notifier<AuthState> {
         isLoading: false,
         token: null,
         user: null,
+        subscriptionTier: state.subscriptionTier,
         staffRole: null,
         staffPermissions: const [],
         error: 'Super-admin accounts must use the web super-admin console.',
@@ -244,16 +255,27 @@ class AuthNotifier extends Notifier<AuthState> {
         ? staffPermissionsRaw.map((e) => e.toString()).toList()
         : <String>[];
 
-    // Derive mode from server response (tenant.isOffline flag).
-    final tenantIsOffline = payload['tenant']?['isOffline'] == true;
-    final mode = tenantIsOffline ? AppMode.offlineOnly : AppMode.online;
-
-    apiService.setToken(token);
-    TenantModeService().initialize(mode: mode, tenantId: user.tenantId);
-    SyncService().initialize(apiService, mode: mode);
+    final runtime = _resolveTenantRuntime(
+      payload['tenant'],
+      fallbackMode: state.mode,
+      fallbackTier: state.subscriptionTier,
+    );
     final bootstrap = ref.read(bootstrapProvider);
 
-    await AppStorage.saveProvisioningState(mode: mode, tenantId: user.tenantId);
+    apiService.setToken(token);
+    TenantModeService().initialize(
+      mode: runtime.mode,
+      tenantId: user.tenantId,
+      workspaceId: bootstrap.workspaceId,
+    );
+    SyncService().initialize(apiService, mode: runtime.mode);
+
+    await AppStorage.saveProvisioningState(
+      mode: runtime.mode,
+      subscriptionTier: runtime.subscriptionTier,
+      tenantId: user.tenantId,
+      workspaceId: bootstrap.workspaceId,
+    );
     await AppStorage.saveAuthSession(
       token: token,
       userJson: user.toJson(),
@@ -265,7 +287,8 @@ class AuthNotifier extends Notifier<AuthState> {
         .replace(
           bootstrap.copyWith(
             apiBaseUrl: apiService.baseUrl,
-            mode: mode,
+            mode: runtime.mode,
+            subscriptionTier: runtime.subscriptionTier,
             tenantId: user.tenantId,
             authToken: token,
             userJson: user.toJson(),
@@ -278,7 +301,8 @@ class AuthNotifier extends Notifier<AuthState> {
       isLoading: false,
       token: token,
       user: user,
-      mode: mode,
+      mode: runtime.mode,
+      subscriptionTier: runtime.subscriptionTier,
       staffRole: staffRole,
       staffPermissions: staffPermissions,
     );
@@ -299,8 +323,11 @@ class AuthNotifier extends Notifier<AuthState> {
       }
 
       final user = User.fromJson(rawUser);
-      final tenantIsOffline = response.data?['tenant']?['isOffline'] == true;
-      final mode = tenantIsOffline ? AppMode.offlineOnly : AppMode.online;
+      final runtime = _resolveTenantRuntime(
+        response.data?['tenant'],
+        fallbackMode: state.mode,
+        fallbackTier: state.subscriptionTier,
+      );
 
       final rawStaffRole = (response.data?['staffRole'] as Map?)
           ?.cast<String, dynamic>();
@@ -313,12 +340,18 @@ class AuthNotifier extends Notifier<AuthState> {
           : <String>[];
       final bootstrap = ref.read(bootstrapProvider);
 
-      TenantModeService().initialize(mode: mode, tenantId: user.tenantId);
-      SyncService().initialize(apiService, mode: mode);
+      TenantModeService().initialize(
+        mode: runtime.mode,
+        tenantId: user.tenantId,
+        workspaceId: bootstrap.workspaceId,
+      );
+      SyncService().initialize(apiService, mode: runtime.mode);
 
       await AppStorage.saveProvisioningState(
-        mode: mode,
+        mode: runtime.mode,
+        subscriptionTier: runtime.subscriptionTier,
         tenantId: user.tenantId,
+        workspaceId: bootstrap.workspaceId,
       );
       await AppStorage.saveAuthSession(
         token: token,
@@ -331,7 +364,8 @@ class AuthNotifier extends Notifier<AuthState> {
           .replace(
             bootstrap.copyWith(
               apiBaseUrl: apiService.baseUrl,
-              mode: mode,
+              mode: runtime.mode,
+              subscriptionTier: runtime.subscriptionTier,
               tenantId: user.tenantId,
               authToken: token,
               userJson: user.toJson(),
@@ -342,7 +376,8 @@ class AuthNotifier extends Notifier<AuthState> {
 
       state = state.copyWith(
         user: user,
-        mode: mode,
+        mode: runtime.mode,
+        subscriptionTier: runtime.subscriptionTier,
         staffRole: staffRole,
         staffPermissions: staffPermissions,
       );
@@ -351,15 +386,37 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool clearProvisioning = false}) async {
     final bootstrap = ref.read(bootstrapProvider);
     final apiService = ref.read(apiProvider);
+    final dataCleaner = WorkspaceDataCleaner();
+
+    try {
+      if (state.token != null && bootstrap.mode.allowsNetworkRequests) {
+        await apiService.client.post('/logout');
+      }
+    } catch (_) {}
+
+    await dataCleaner.clearProvisionedWorkspace(bootstrap);
     apiService.setToken(null);
+    SyncService().reset();
+    await AppStorage.clearAuthSession();
+
+    if (clearProvisioning) {
+      await AppStorage.clearProvisioningState();
+      TenantModeService().initialize(mode: AppMode.online, tenantId: '');
+      ref
+          .read(bootstrapProvider.notifier)
+          .replace(const BootstrapConfig(apiBaseUrl: defaultApiBaseUrl));
+      state = const AuthState();
+      return;
+    }
+
     TenantModeService().initialize(
       mode: bootstrap.mode,
       tenantId: bootstrap.tenantId,
+      workspaceId: bootstrap.workspaceId,
     );
-    SyncService().initialize(apiService, mode: bootstrap.mode);
     ref
         .read(bootstrapProvider.notifier)
         .replace(
@@ -370,11 +427,70 @@ class AuthNotifier extends Notifier<AuthState> {
             clearStaffPermissions: true,
           ),
         );
-    state = AuthState(mode: bootstrap.mode);
-    await AppStorage.clearAuthSession();
+    state = AuthState(
+      mode: bootstrap.mode,
+      subscriptionTier: bootstrap.subscriptionTier,
+    );
+  }
+
+  _TenantRuntime _resolveTenantRuntime(
+    dynamic rawTenant, {
+    required AppMode fallbackMode,
+    required SubscriptionTier fallbackTier,
+  }) {
+    final tenant = rawTenant is Map
+        ? Map<String, dynamic>.from(rawTenant)
+        : const <String, dynamic>{};
+
+    final runtimeMode = _parseRuntimeMode(tenant);
+    final subscriptionTier = _parseSubscriptionTier(tenant);
+
+    return _TenantRuntime(
+      mode:
+          runtimeMode ??
+          (tenant['isOffline'] == true
+              ? AppMode.offlineOnly
+              : (fallbackMode == AppMode.online
+                    ? AppMode.hybrid
+                    : fallbackMode)),
+      subscriptionTier:
+          subscriptionTier ??
+          (tenant['isOffline'] == true
+              ? SubscriptionTier.offlineOnly
+              : fallbackTier),
+    );
+  }
+
+  AppMode? _parseRuntimeMode(Map<String, dynamic> tenant) {
+    final raw = (tenant['runtimeMode'] ?? tenant['mode'] ?? tenant['appMode'])
+        ?.toString()
+        .trim();
+    if (raw == null || raw.isEmpty) return null;
+    for (final mode in AppMode.values) {
+      if (mode.name == raw) return mode;
+    }
+    return null;
+  }
+
+  SubscriptionTier? _parseSubscriptionTier(Map<String, dynamic> tenant) {
+    final raw = (tenant['subscriptionTier'] ?? tenant['tier'])
+        ?.toString()
+        .trim();
+    if (raw == null || raw.isEmpty) return null;
+    for (final tier in SubscriptionTier.values) {
+      if (tier.name == raw) return tier;
+    }
+    return null;
   }
 }
 
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(
   AuthNotifier.new,
 );
+
+class _TenantRuntime {
+  final AppMode mode;
+  final SubscriptionTier subscriptionTier;
+
+  const _TenantRuntime({required this.mode, required this.subscriptionTier});
+}

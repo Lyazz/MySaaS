@@ -7,7 +7,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../app_config.dart';
 import '../bootstrap.dart';
 import '../models/app_mode.dart';
-import '../models/provisioning_payload.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
 import '../services/sync_service.dart';
@@ -35,7 +34,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   Future<void> _activate() async {
     final raw = _payloadController.text.trim();
     if (raw.isEmpty) {
-      setState(() => _error = 'Paste a mock provisioning payload first.');
+      setState(() => _error = 'Paste the activation code first.');
       return;
     }
 
@@ -45,12 +44,13 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
     });
 
     try {
-      final payload = ProvisioningPayload.fromEncoded(raw);
+      final payload = await ref.read(apiProvider).activateProvisioningCode(raw);
       final bootstrap = payload.toBootstrapConfig();
 
-      await AppStorage.saveApiBaseUrl(defaultApiBaseUrl);
+      await AppStorage.saveApiBaseUrl(payload.apiBaseUrl);
       await AppStorage.saveProvisioningState(
         mode: payload.mode,
+        subscriptionTier: payload.subscriptionTier,
         tenantId: payload.tenantId,
         workspaceId: payload.workspaceId,
       );
@@ -66,22 +66,21 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
       }
 
       ref.read(bootstrapProvider.notifier).replace(bootstrap);
-      ref.read(apiProvider).setBaseUrl(defaultApiBaseUrl);
+      ref.read(apiProvider).setBaseUrl(payload.apiBaseUrl);
       ref.read(apiProvider).setToken(payload.authToken);
       TenantModeService().initialize(
         mode: payload.mode,
         tenantId: payload.tenantId,
+        workspaceId: payload.workspaceId,
       );
       SyncService().initialize(ref.read(apiProvider), mode: payload.mode);
 
       if (!mounted) return;
-      if (payload.mode == AppMode.offlineOnly || payload.authToken != null) {
+      if (payload.mode.skipsAuthentication || payload.authToken != null) {
         context.go('/');
       } else {
         context.go('/login');
       }
-    } on FormatException catch (e) {
-      setState(() => _error = e.message);
     } catch (e) {
       setState(() => _error = e.toString().replaceAll('Exception: ', ''));
     } finally {
@@ -160,7 +159,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'This is a mock activation flow for the Flutter admin app. Paste a lightweight provisioning payload to simulate binding the install to a tenant while always targeting the production API base URL.',
+                          'Paste a trusted activation code issued by a tenant admin. The app exchanges it with the platform API and binds this install to exactly one tenant workspace.',
                           style: GoogleFonts.dmSans(
                             fontSize: 15,
                             height: 1.55,
@@ -179,7 +178,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Mock payload fields',
+                                'Trusted activation',
                                 style: GoogleFonts.dmSans(
                                   color: palette.primaryText,
                                   fontWeight: FontWeight.w600,
@@ -188,7 +187,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                '`tenantId`, `mode`, optional `workspaceId`, optional `authToken`, `user`, `staffRole`, `staffPermissions`.\nAPI base URL is fixed to `$defaultApiBaseUrl`.',
+                                'Activation uses `$defaultApiBaseUrl` and accepts an opaque, server-issued code. Tenant and workspace binding come from the trusted provisioning response, not from user-entered tenant IDs.',
                                 style: GoogleFonts.dmSans(
                                   color: palette.secondaryText,
                                   fontSize: 13,
@@ -201,17 +200,16 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                         const SizedBox(height: 18),
                         TextField(
                           controller: _payloadController,
-                          minLines: 12,
-                          maxLines: 16,
+                          minLines: 4,
+                          maxLines: 8,
                           style: GoogleFonts.dmSans(
                             color: palette.primaryText,
                             fontSize: 13,
                             height: 1.45,
                           ),
                           decoration: InputDecoration(
-                            labelText: 'Mock provisioning payload',
-                            hintText:
-                                '{\n  "tenantId": "tenant-uuid",\n  "mode": "online"\n}',
+                            labelText: 'Activation code',
+                            hintText: 'Paste the tenant-issued activation code',
                             errorText: _error,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),

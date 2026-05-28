@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../bootstrap.dart';
+import '../models/provisioning_payload.dart';
 import 'tenant_mode_service.dart';
 
 final apiProvider = Provider<ApiService>((ref) {
@@ -12,17 +13,11 @@ final apiProvider = Provider<ApiService>((ref) {
 });
 
 class ApiService {
-  static String _defaultBaseUrl() {
-    if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-      return 'http://localhost:3000/api';
-    }
-
-    return 'http://192.168.1.5:3000/api';
-  }
+  static final String _defaultBaseUrl = 'https://swekly.com/api';
 
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: _defaultBaseUrl(),
+      baseUrl: _defaultBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -99,6 +94,28 @@ class ApiService {
     } else {
       _dio.options.headers.remove('Authorization');
     }
+  }
+
+  Future<ProvisioningPayload> activateProvisioningCode(
+    String activationCode,
+  ) async {
+    final response = await _dio.post(
+      '/provisioning/activate',
+      data: {'activationCode': activationCode.trim()},
+    );
+    final data = response.data;
+    if (data is! Map) {
+      throw Exception('Invalid provisioning response');
+    }
+
+    final provisioning = data['provisioning'];
+    if (provisioning is! Map) {
+      throw Exception('Provisioning response is missing workspace data');
+    }
+
+    return ProvisioningPayload.fromJson(
+      Map<String, dynamic>.from(provisioning as Map),
+    );
   }
 
   Future<String?> uploadImage(String filePath) async {

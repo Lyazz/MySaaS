@@ -100,7 +100,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           ? FloatingActionButton(
               onPressed: () => context.go('/products/create'),
               backgroundColor: AppColors.brand,
-              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
+              child: const Icon(
+                LucideIcons.plus,
+                color: AppColors.brandContrast,
+              ),
             )
           : null,
       body: Column(
@@ -245,7 +248,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Row(
         children: [
@@ -502,7 +509,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surface2 : AppColors.lightSurface2,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.surface2
+          : AppColors.lightSurface2,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -1022,10 +1031,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.surface3 : const Color(0xFFF9FAFB),
+                    color: isDark
+                        ? AppColors.surface3
+                        : const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isDark ? AppColors.surfaceBorder : const Color(0xFFE5E7EB),
+                      color: isDark
+                          ? AppColors.surfaceBorder
+                          : const Color(0xFFE5E7EB),
                       width: 1,
                     ),
                     image: imageUrl != null

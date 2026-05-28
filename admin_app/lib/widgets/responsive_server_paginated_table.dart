@@ -120,20 +120,24 @@ class _ResponsiveServerPaginatedTableState<T>
             : widget.minWidth;
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
-        final border = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+        final border = isDark
+            ? AppColors.surfaceBorder
+            : AppColors.lightSurfaceBorder;
 
         return Container(
           decoration: BoxDecoration(
             color: surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: border),
-            boxShadow: isDark ? null : [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -153,7 +157,9 @@ class _ResponsiveServerPaginatedTableState<T>
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.textPrimary : const Color(0xFF0F172A),
+                      color: isDark
+                          ? AppColors.textPrimary
+                          : const Color(0xFF0F172A),
                     ),
                     child: widget.title!,
                   ),

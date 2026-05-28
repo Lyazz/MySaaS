@@ -73,7 +73,10 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
           ? FloatingActionButton(
               onPressed: () => context.go('/suppliers/create'),
               backgroundColor: AppColors.brand,
-              child: const Icon(LucideIcons.plus, color: AppColors.brandContrast),
+              child: const Icon(
+                LucideIcons.plus,
+                color: AppColors.brandContrast,
+              ),
             )
           : null,
       body: Padding(
@@ -122,7 +125,8 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               searchField: FormInput(
                 label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
                 controller: _searchController,
-                hint: 'admin.pages.suppliers.index.filters.searchPlaceholder'.tr(),
+                hint: 'admin.pages.suppliers.index.filters.searchPlaceholder'
+                    .tr(),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
@@ -347,7 +351,8 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                         label: 'admin.common.edit'.tr(),
                         icon: LucideIcons.pencil,
                         size: AppButtonSize.sm,
-                        onPressed: () => context.go('/suppliers/${supplier.id}'),
+                        onPressed: () =>
+                            context.go('/suppliers/${supplier.id}'),
                       ),
                       AppButton.danger(
                         label: 'admin.common.delete'.tr(),

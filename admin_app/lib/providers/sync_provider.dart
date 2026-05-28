@@ -16,3 +16,13 @@ final syncServiceProvider = Provider<SyncService>((ref) {
   service.initialize(api, mode: mode);
   return service;
 });
+
+final syncStateProvider = StreamProvider<SyncState>((ref) {
+  final service = ref.watch(syncServiceProvider);
+  return service.syncStateStream;
+});
+
+final syncIssuesProvider = FutureProvider<List<SyncIssue>>((ref) async {
+  final service = ref.watch(syncServiceProvider);
+  return service.listIssues();
+});

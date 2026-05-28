@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../models/app_mode.dart';
+import '../models/subscription_tier.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/workspace_provider.dart';
@@ -19,7 +19,7 @@ class SettingsScreen extends ConsumerWidget {
     final notifier = ref.read(settingsProvider.notifier);
     final workspace = ref.watch(workspaceProvider);
     final auth = ref.watch(authProvider);
-    final isOfflineTier = auth.mode == AppMode.offlineOnly;
+    final isOfflineTier = !auth.subscriptionTier.unlocksHostedFeatures;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
     final borderColor = isDark
@@ -64,7 +64,7 @@ class SettingsScreen extends ConsumerWidget {
     }) {
       final locked =
           lockedFeature != null &&
-          FeatureAccess.isLockedForMode(auth.mode, lockedFeature);
+          FeatureAccess.isLockedForTier(auth.subscriptionTier, lockedFeature);
 
       return ListTile(
         enabled: enabled && !locked,
@@ -145,6 +145,54 @@ class SettingsScreen extends ConsumerWidget {
                 LucideIcons.shieldCheck,
                 color: AppColors.brand,
               ),
+            ),
+            Divider(height: 1, color: borderColor),
+            ListTile(
+              title: Text(
+                'Reprovision workspace',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
+              ),
+              subtitle: Text(
+                'Clear local tenant data on this install and return to secure activation.',
+                style: TextStyle(color: textMuted, height: 1.35),
+              ),
+              leading: const Icon(LucideIcons.rotateCcw, color: AppColors.red),
+              trailing: Icon(
+                LucideIcons.chevronRight,
+                size: 18,
+                color: textMuted,
+              ),
+              onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: const Text('Reprovision workspace'),
+                    content: const Text(
+                      'This clears the local workspace database, sync queue, files, and image cache for this tenant binding on this device.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: const Text('Clear and reprovision'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm != true || !context.mounted) return;
+                await ref
+                    .read(authProvider.notifier)
+                    .logout(clearProvisioning: true);
+                if (!context.mounted) return;
+                context.go('/activate');
+              },
             ),
             Divider(height: 1, color: borderColor),
             tile(
@@ -266,7 +314,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                'This tenant is provisioned for offline-only operation. Hosted storefront and cloud features stay visible here but remain locked until the tenant upgrades to an online tier.',
+                'This tenant is on an offline-only subscription tier. Hosted storefront and cloud features stay visible here but remain locked until the tenant upgrades to an online tier.',
                 style: TextStyle(color: textPrimary, height: 1.45),
               ),
             ),

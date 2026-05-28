@@ -114,7 +114,9 @@ class AppButton extends StatelessWidget {
             height: 16,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+              color: isDark
+                  ? AppColors.textPrimary
+                  : AppColors.lightTextPrimary,
             ),
           )
         : (trailing == null
@@ -131,8 +133,12 @@ class AppButton extends StatelessWidget {
     final resolvedOnPressed = loading ? null : onPressed;
 
     final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     final button = switch (variant) {
       AppButtonVariant.primary => _buildFilled(
@@ -149,7 +155,9 @@ class AppButton extends StatelessWidget {
         child: child,
         iconSize: iconSize,
         backgroundColor: isDark ? AppColors.surface3 : AppColors.lightSurface3,
-        foregroundColor: isDark ? AppColors.textPrimary : AppColors.lightTextPrimary,
+        foregroundColor: isDark
+            ? AppColors.textPrimary
+            : AppColors.lightTextPrimary,
       ),
       AppButtonVariant.destructive => _buildFilled(
         context,
@@ -292,7 +300,9 @@ class AppButton extends StatelessWidget {
     required double iconSize,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fgColor = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final fgColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     final style = _baseStyle(context).copyWith(
       padding: WidgetStateProperty.all(

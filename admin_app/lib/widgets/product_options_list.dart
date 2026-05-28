@@ -175,16 +175,16 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             decoration: BoxDecoration(
               color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.brand.withValues(alpha: 0.3),
-              ),
-              boxShadow: isDark ? null : [
-                BoxShadow(
-                  color: AppColors.brand.withValues(alpha: 0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              border: Border.all(color: AppColors.brand.withValues(alpha: 0.3)),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: AppColors.brand.withValues(alpha: 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +280,11 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

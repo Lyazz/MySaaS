@@ -44,12 +44,8 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          salesProvider.overrideWith(() => SalesNotifier(initial)),
-        ],
-        child: buildLocalizedTestApp(
-          home: const SalesScreen(autoFetch: false),
-        ),
+        overrides: [salesProvider.overrideWith(() => SalesNotifier(initial))],
+        child: buildLocalizedTestApp(home: const SalesScreen(autoFetch: false)),
       ),
     );
     await tester.pumpAndSettle();

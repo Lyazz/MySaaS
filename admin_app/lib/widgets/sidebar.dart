@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sidebar_provider.dart';
 import '../providers/store_settings_provider.dart';
@@ -184,8 +186,8 @@ class Sidebar extends ConsumerWidget {
                           route: '/integrations',
                           label: 'admin.nav.integrations'.tr(),
                           icon: LucideIcons.plug,
-                          disabled: FeatureAccess.isLockedForMode(
-                            authState.mode,
+                          disabled: FeatureAccess.isLockedForTier(
+                            authState.subscriptionTier,
                             OnlineTierFeature.integrations,
                           ),
                           disabledReason: FeatureAccess.infoFor(
@@ -197,8 +199,8 @@ class Sidebar extends ConsumerWidget {
                           route: '/billing',
                           label: 'admin.nav.billing'.tr(),
                           icon: LucideIcons.creditCard,
-                          disabled: FeatureAccess.isLockedForMode(
-                            authState.mode,
+                          disabled: FeatureAccess.isLockedForTier(
+                            authState.subscriptionTier,
                             OnlineTierFeature.billing,
                           ),
                           disabledReason: FeatureAccess.infoFor(
@@ -504,9 +506,14 @@ class Sidebar extends ConsumerWidget {
           borderRadius: BorderRadius.circular(8),
           hoverColor: hoverColor,
           onTap: isCollapsed
-              ? () {
-                  ref.read(authProvider.notifier).logout();
-                  context.go('/login');
+              ? () async {
+                  final auth = ref.read(authProvider);
+                  final clearProvisioning = auth.mode.skipsAuthentication;
+                  await ref
+                      .read(authProvider.notifier)
+                      .logout(clearProvisioning: clearProvisioning);
+                  if (!context.mounted) return;
+                  context.go(clearProvisioning ? '/activate' : '/login');
                 }
               : null,
           child: Padding(

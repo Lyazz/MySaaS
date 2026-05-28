@@ -1,4 +1,5 @@
 import 'package:admin_app/models/app_mode.dart';
+import 'package:admin_app/models/subscription_tier.dart';
 import 'package:admin_app/services/app_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +21,7 @@ void main() {
       await AppStorage.saveApiBaseUrl('https://tenant.example.com/api');
       await AppStorage.saveProvisioningState(
         mode: AppMode.offlineOnly,
+        subscriptionTier: SubscriptionTier.offlineOnly,
         tenantId: 'tenant-1',
         workspaceId: 'workspace-7',
       );
@@ -41,6 +43,7 @@ void main() {
 
       expect(bootstrap.apiBaseUrl, 'https://swekly.com/api');
       expect(bootstrap.mode, AppMode.offlineOnly);
+      expect(bootstrap.subscriptionTier, SubscriptionTier.offlineOnly);
       expect(bootstrap.tenantId, 'tenant-1');
       expect(bootstrap.workspaceId, 'workspace-7');
       expect(bootstrap.authToken, 'token-123');
@@ -57,6 +60,7 @@ void main() {
       await AppStorage.saveApiBaseUrl('https://tenant.example.com/api');
       await AppStorage.saveProvisioningState(
         mode: AppMode.online,
+        subscriptionTier: SubscriptionTier.online,
         tenantId: 'tenant-1',
         workspaceId: 'workspace-7',
       );
@@ -74,6 +78,7 @@ void main() {
 
       expect(bootstrap.apiBaseUrl, 'https://swekly.com/api');
       expect(bootstrap.mode, AppMode.online);
+      expect(bootstrap.subscriptionTier, SubscriptionTier.online);
       expect(bootstrap.tenantId, isEmpty);
       expect(bootstrap.workspaceId, isNull);
       expect(bootstrap.authToken, isNull);

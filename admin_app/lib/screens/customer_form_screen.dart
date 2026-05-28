@@ -225,9 +225,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
                       prefixText: '$currencyCode ',
                       enabled: !isEditing,
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'[0-9.,]'),
-                        ),
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                       ],
                       validator: isEditing
                           ? null

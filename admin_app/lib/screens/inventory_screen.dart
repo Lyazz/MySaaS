@@ -146,7 +146,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(6),
                         image: imageUrl != null
                             ? DecorationImage(
@@ -159,7 +161,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           ? Icon(
                               LucideIcons.image,
                               size: 20,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.3),
                             )
                           : null,
                     ),
@@ -181,7 +185,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   product.variants.isNotEmpty
                       ? 'Multiple'
                       : (product.slug), // Using slug as dummy SKU if none
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 13),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    fontSize: 13,
+                  ),
                 ),
               ),
               Expanded(
@@ -192,7 +201,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       '${product.stock}',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: isLowStock ? AppColors.amber : Theme.of(context).colorScheme.onSurface,
+                        color: isLowStock
+                            ? AppColors.amber
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (isLowStock)
@@ -225,7 +236,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: product.isActive ? AppColors.green : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: product.isActive
+                          ? AppColors.green
+                          : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -236,7 +251,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   // Open quick edit dialog
                 },
                 icon: const Icon(LucideIcons.pencil, size: 16),
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ],
           ),

@@ -55,7 +55,9 @@ class UiBadge extends StatelessWidget {
 
     return Container(
       padding: padding,
-      constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth!),
+      constraints: maxWidth == null
+          ? null
+          : BoxConstraints(maxWidth: maxWidth!),
       decoration: BoxDecoration(
         color: backgroundColor(tone),
         borderRadius: BorderRadius.circular(radius),
@@ -70,4 +72,3 @@ class UiBadge extends StatelessWidget {
     );
   }
 }
-

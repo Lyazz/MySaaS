@@ -6,12 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/app_mode.dart';
 import '../models/bootstrap_config.dart';
+import '../models/subscription_tier.dart';
 
 class AppStorage {
   static const _secureStorage = FlutterSecureStorage();
 
   static const _keyApiBaseUrl = 'api_base_url';
   static const _keyAppMode = 'app_mode';
+  static const _keySubscriptionTier = 'subscription_tier';
   static const _keyTenantId = 'tenant_id';
   static const _keyWorkspaceId = 'workspace_id';
   static const _keyAuthToken = 'auth_token';
@@ -32,6 +34,11 @@ class AppStorage {
 
     final modeRaw = secureValues[_keyAppMode];
     final mode = _modeFromString(modeRaw) ?? AppMode.online;
+    final subscriptionTier =
+        _subscriptionTierFromString(secureValues[_keySubscriptionTier]) ??
+        (mode == AppMode.offlineOnly
+            ? SubscriptionTier.offlineOnly
+            : SubscriptionTier.online);
 
     final tenantId = secureValues[_keyTenantId] ?? '';
     final workspaceId = secureValues[_keyWorkspaceId];
@@ -46,6 +53,7 @@ class AppStorage {
     return BootstrapConfig(
       apiBaseUrl: apiBaseUrl,
       mode: mode,
+      subscriptionTier: subscriptionTier,
       tenantId: tenantId,
       workspaceId: workspaceId,
       authToken: authToken?.trim().isNotEmpty == true
@@ -63,10 +71,15 @@ class AppStorage {
 
   static Future<void> saveProvisioningState({
     required AppMode mode,
+    required SubscriptionTier subscriptionTier,
     required String tenantId,
     String? workspaceId,
   }) async {
     await _secureStorage.write(key: _keyAppMode, value: mode.name);
+    await _secureStorage.write(
+      key: _keySubscriptionTier,
+      value: subscriptionTier.name,
+    );
     await _secureStorage.write(key: _keyTenantId, value: tenantId);
     if (workspaceId != null) {
       await _secureStorage.write(key: _keyWorkspaceId, value: workspaceId);
@@ -77,6 +90,7 @@ class AppStorage {
 
   static Future<void> clearProvisioningState() async {
     await _secureStorage.delete(key: _keyAppMode);
+    await _secureStorage.delete(key: _keySubscriptionTier);
     await _secureStorage.delete(key: _keyTenantId);
     await _secureStorage.delete(key: _keyWorkspaceId);
     await _secureStorage.delete(key: _keyApiBaseUrl);
@@ -160,6 +174,15 @@ class AppStorage {
     if (raw == null) return null;
     try {
       return AppMode.values.firstWhere((e) => e.name == raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static SubscriptionTier? _subscriptionTierFromString(String? raw) {
+    if (raw == null) return null;
+    try {
+      return SubscriptionTier.values.firstWhere((e) => e.name == raw);
     } catch (_) {
       return null;
     }

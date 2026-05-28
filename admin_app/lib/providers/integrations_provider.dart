@@ -32,9 +32,9 @@ class IntegrationsState {
   }
 
   static IntegrationsState get initial => IntegrationsState(
-        facebook: Integration.empty('facebook'),
-        telegram: Integration.empty('telegram'),
-      );
+    facebook: Integration.empty('facebook'),
+    telegram: Integration.empty('telegram'),
+  );
 }
 
 class IntegrationsNotifier extends Notifier<IntegrationsState> {
@@ -77,5 +77,5 @@ class IntegrationsNotifier extends Notifier<IntegrationsState> {
 
 final integrationsProvider =
     NotifierProvider<IntegrationsNotifier, IntegrationsState>(
-  IntegrationsNotifier.new,
-);
+      IntegrationsNotifier.new,
+    );

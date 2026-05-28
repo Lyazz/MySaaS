@@ -211,9 +211,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               ),
               _InfoCard(
                 title: 'Created',
-                child: Text(
-                  DateFormat.yMd().add_jm().format(createdAt),
-                ),
+                child: Text(DateFormat.yMd().add_jm().format(createdAt)),
               ),
             ],
           ),
@@ -270,7 +268,11 @@ class _InfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +282,9 @@ class _InfoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
               letterSpacing: 0.2,
             ),
           ),

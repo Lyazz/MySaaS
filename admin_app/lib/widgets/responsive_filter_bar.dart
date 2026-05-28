@@ -24,7 +24,9 @@ class ResponsiveFilterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -86,8 +88,12 @@ class ResponsiveFilterBar extends StatelessWidget {
 
   Widget _buildMobileLayout(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final iconColor = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final iconColor = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return Row(
       children: [
@@ -123,8 +129,12 @@ class ResponsiveFilterBar extends StatelessWidget {
   void _showFilterModal(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final sheetBg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
-    final handleColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final handleColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
 
     showModalBottomSheet(
       context: context,

@@ -272,7 +272,11 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -324,33 +328,39 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (hasImage) ...[
-          Builder(builder: (context) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            return Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
-              image: _imageFile != null
-                  ? DecorationImage(
-                      image: FileImage(_imageFile!),
-                      fit: BoxFit.cover,
-                    )
-                  : (_imageUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(
-                              ref
-                                  .read(apiProvider)
-                                  .resolvePublicUrl(_imageUrl!),
-                            ),
-                            fit: BoxFit.cover,
-                          )
-                        : null),
-            ),
-          );
-          }),
+          Builder(
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.surfaceBorder
+                        : AppColors.lightSurfaceBorder,
+                  ),
+                  image: _imageFile != null
+                      ? DecorationImage(
+                          image: FileImage(_imageFile!),
+                          fit: BoxFit.cover,
+                        )
+                      : (_imageUrl != null
+                            ? DecorationImage(
+                                image: NetworkImage(
+                                  ref
+                                      .read(apiProvider)
+                                      .resolvePublicUrl(_imageUrl!),
+                                ),
+                                fit: BoxFit.cover,
+                              )
+                            : null),
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 12),
         ],
         Row(

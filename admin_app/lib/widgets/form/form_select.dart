@@ -51,9 +51,15 @@ class FormSelect<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
 
@@ -88,8 +94,9 @@ class FormSelect<T> extends StatelessWidget {
     final enabledBorder = borderless ? InputBorder.none : outlineBorder;
     final focusedBorder = borderless ? InputBorder.none : focusedOutlineBorder;
     final errorBorder = borderless ? InputBorder.none : errorOutlineBorder;
-    final focusedErrorBorder =
-        borderless ? InputBorder.none : focusedErrorOutlineBorder;
+    final focusedErrorBorder = borderless
+        ? InputBorder.none
+        : focusedErrorOutlineBorder;
 
     final safeInitialValue =
         (value != null && items.any((it) => it.value == value)) ? value : null;
@@ -111,9 +118,11 @@ class FormSelect<T> extends StatelessWidget {
               ? null
               : Text(
                   hint!,
-                  style: hintStyle ?? TextStyle(color: textTertiary, fontSize: 14),
+                  style:
+                      hintStyle ?? TextStyle(color: textTertiary, fontSize: 14),
                 ),
-          icon: icon ??
+          icon:
+              icon ??
               Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 20,

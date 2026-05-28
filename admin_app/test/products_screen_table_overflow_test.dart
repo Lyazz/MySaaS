@@ -49,7 +49,9 @@ void main() {
             ),
           ),
         ],
-        child: buildLocalizedTestApp(home: const ProductsScreen(autoFetch: false)),
+        child: buildLocalizedTestApp(
+          home: const ProductsScreen(autoFetch: false),
+        ),
       ),
     );
     await tester.pumpAndSettle();

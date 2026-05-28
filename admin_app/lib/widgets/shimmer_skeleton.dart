@@ -78,7 +78,9 @@ class ProductCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     return Container(
       decoration: BoxDecoration(
@@ -91,7 +93,9 @@ class ProductCardSkeleton extends StatelessWidget {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: const ShimmerSkeleton(borderRadius: 0),
             ),
           ),
@@ -100,12 +104,20 @@ class ProductCardSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ShimmerSkeleton(width: double.infinity, height: 16, borderRadius: 4),
+                const ShimmerSkeleton(
+                  width: double.infinity,
+                  height: 16,
+                  borderRadius: 4,
+                ),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const ShimmerSkeleton(width: 80, height: 20, borderRadius: 4),
+                    const ShimmerSkeleton(
+                      width: 80,
+                      height: 20,
+                      borderRadius: 4,
+                    ),
                     ShimmerSkeleton(width: 40, height: 40, borderRadius: 20),
                   ],
                 ),
@@ -125,7 +137,9 @@ class CategoryCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     return Container(
       decoration: BoxDecoration(
@@ -138,7 +152,9 @@ class CategoryCardSkeleton extends StatelessWidget {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: const ShimmerSkeleton(borderRadius: 0),
             ),
           ),
@@ -147,7 +163,11 @@ class CategoryCardSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ShimmerSkeleton(width: double.infinity, height: 16, borderRadius: 4),
+                ShimmerSkeleton(
+                  width: double.infinity,
+                  height: 16,
+                  borderRadius: 4,
+                ),
                 SizedBox(height: 4),
                 ShimmerSkeleton(width: 60, height: 12, borderRadius: 4),
               ],

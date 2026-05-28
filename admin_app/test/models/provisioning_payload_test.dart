@@ -1,5 +1,6 @@
 import 'package:admin_app/models/app_mode.dart';
 import 'package:admin_app/models/provisioning_payload.dart';
+import 'package:admin_app/models/subscription_tier.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -26,6 +27,7 @@ void main() {
 
     expect(payload.apiBaseUrl, 'https://swekly.com/api');
     expect(payload.mode, AppMode.offlineOnly);
+    expect(payload.subscriptionTier, SubscriptionTier.offlineOnly);
     expect(payload.tenantId, 'tenant-1');
     expect(payload.workspaceId, 'workspace-7');
     expect(payload.authToken, 'token-123');
@@ -42,6 +44,18 @@ void main() {
 
     expect(payload.apiBaseUrl, 'https://swekly.com/api');
     expect(payload.mode, AppMode.offlineOnly);
+    expect(payload.subscriptionTier, SubscriptionTier.offlineOnly);
+  });
+
+  test('ProvisioningPayload supports hybrid runtime with online tier', () {
+    final payload = ProvisioningPayload.fromJson({
+      'tenantId': 'tenant-1',
+      'mode': 'hybrid',
+      'subscriptionTier': 'online',
+    });
+
+    expect(payload.mode, AppMode.hybrid);
+    expect(payload.subscriptionTier, SubscriptionTier.online);
   });
 
   test('ProvisioningPayload rejects missing tenantId', () {

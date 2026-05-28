@@ -124,7 +124,11 @@ class _ResponsivePaginatedTableState<T>
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.surfaceBorder
+                  : AppColors.lightSurfaceBorder,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -164,7 +168,13 @@ class _ResponsivePaginatedTableState<T>
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+                  border: Border(
+                    top: BorderSide(
+                      color: isDark
+                          ? AppColors.surfaceBorder
+                          : AppColors.lightSurfaceBorder,
+                    ),
+                  ),
                   color: Theme.of(context).colorScheme.surface,
                 ),
                 child: _buildPaginationFooter(
@@ -329,17 +339,15 @@ class _ResponsivePaginatedTableState<T>
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: align,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF64748B),
-            ),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
           );
         }
 
         Widget paginationControls() {
           return Row(
-            mainAxisAlignment:
-                isSmall ? MainAxisAlignment.center : MainAxisAlignment.end,
+            mainAxisAlignment: isSmall
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
@@ -412,10 +420,7 @@ class _ResponsivePaginatedTableState<T>
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 24,
                 runSpacing: 8,
-                children: [
-                  rowsPerPageControl(),
-                  showingText(),
-                ],
+                children: [rowsPerPageControl(), showingText()],
               ),
             ),
             const SizedBox(width: 12),

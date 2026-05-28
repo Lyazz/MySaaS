@@ -51,11 +51,15 @@ class IntegrationsScreen extends ConsumerWidget {
                   iconBg: const Color(0xFFEFF6FF),
                   configFields: const [
                     _FieldDef(
-                        key: 'pixelId', label: 'Pixel ID', hint: '1234567890'),
+                      key: 'pixelId',
+                      label: 'Pixel ID',
+                      hint: '1234567890',
+                    ),
                     _FieldDef(
-                        key: 'accessToken',
-                        label: 'Conversion API Token',
-                        hint: 'EAA...'),
+                      key: 'accessToken',
+                      label: 'Conversion API Token',
+                      hint: 'EAA...',
+                    ),
                   ],
                 ),
                 _IntegrationCard(
@@ -68,11 +72,15 @@ class IntegrationsScreen extends ConsumerWidget {
                   iconBg: const Color(0xFFE0F2FE),
                   configFields: const [
                     _FieldDef(
-                        key: 'botToken',
-                        label: 'Bot Token',
-                        hint: '110201543:AAHd...'),
+                      key: 'botToken',
+                      label: 'Bot Token',
+                      hint: '110201543:AAHd...',
+                    ),
                     _FieldDef(
-                        key: 'chatId', label: 'Chat ID', hint: '-100123456'),
+                      key: 'chatId',
+                      label: 'Chat ID',
+                      hint: '-100123456',
+                    ),
                   ],
                 ),
               ],
@@ -88,11 +96,7 @@ class _FieldDef {
   final String label;
   final String hint;
 
-  const _FieldDef({
-    required this.key,
-    required this.label,
-    required this.hint,
-  });
+  const _FieldDef({required this.key, required this.label, required this.hint});
 }
 
 class _IntegrationCard extends ConsumerStatefulWidget {
@@ -154,16 +158,16 @@ class _IntegrationCardState extends ConsumerState<_IntegrationCard> {
           .read(integrationsProvider.notifier)
           .save(widget.integration.provider, config);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${widget.name} saved')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${widget.name} saved')));
         setState(() => _expanded = false);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -180,7 +184,11 @@ class _IntegrationCardState extends ConsumerState<_IntegrationCard> {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,19 +214,25 @@ class _IntegrationCardState extends ConsumerState<_IntegrationCard> {
                       Text(
                         widget.name,
                         style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 15),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
                       Text(
                         widget.description,
                         style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF64748B)),
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 4),
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isActive
                         ? const Color(0xFFD1FAE5)
@@ -243,9 +257,9 @@ class _IntegrationCardState extends ConsumerState<_IntegrationCard> {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: OutlinedButton(
               onPressed: () => setState(() => _expanded = !_expanded),
-              child: Text(_expanded
-                  ? 'Cancel'
-                  : (isActive ? 'Manage' : 'Connect')),
+              child: Text(
+                _expanded ? 'Cancel' : (isActive ? 'Manage' : 'Connect'),
+              ),
             ),
           ),
           if (_expanded) ...[

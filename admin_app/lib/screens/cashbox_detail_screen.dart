@@ -78,13 +78,17 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                 Icon(
                   LucideIcons.chevronRight,
                   size: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   cashbox?.name ?? widget.cashboxId.substring(0, 8),
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -112,7 +116,11 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                         cashbox?.openSession != null
                             ? 'Session OPEN • ${cashbox!.openSession!.id.substring(0, 8)}'
                             : 'Session CLOSED',
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
                       ),
                     ],
                   ),
@@ -158,7 +166,9 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                               'Transactions for this cashbox (last 7 days).',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.5),
                               ),
                             ),
                           ],
@@ -209,7 +219,10 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                                   child: Text(
                                     _formatDate(tx.createdAt),
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.5),
                                     ),
                                   ),
                                 ),
@@ -219,7 +232,9 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                                     _typeLabel(tx.type),
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).colorScheme.onSurface,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
                                     ),
                                   ),
                                 ),
@@ -389,7 +404,11 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -428,7 +447,13 @@ class _TableHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       child: Row(
         children: [
@@ -444,7 +469,9 @@ class _TableHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.4),
                     letterSpacing: 0.6,
                   ),
                 ),
@@ -467,7 +494,13 @@ class _TableRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       child: child,
     );
@@ -522,14 +555,22 @@ class _MethodChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+          Icon(
+            icon,
+            size: 14,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
           const SizedBox(width: 6),
           Text(
             method,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],

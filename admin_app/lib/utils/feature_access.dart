@@ -1,4 +1,4 @@
-import '../models/app_mode.dart';
+import '../models/subscription_tier.dart';
 
 enum OnlineTierFeature {
   billing,
@@ -82,7 +82,10 @@ class FeatureAccess {
     ),
   };
 
-  static bool isLockedForMode(AppMode mode, OnlineTierFeature feature) {
+  static bool isLockedForTier(
+    SubscriptionTier subscriptionTier,
+    OnlineTierFeature feature,
+  ) {
     switch (feature) {
       case OnlineTierFeature.billing:
       case OnlineTierFeature.integrations:
@@ -93,7 +96,7 @@ class FeatureAccess {
       case OnlineTierFeature.preview:
       case OnlineTierFeature.builder:
       case OnlineTierFeature.landingBuilder:
-        return mode == AppMode.offlineOnly;
+        return subscriptionTier != SubscriptionTier.online;
     }
   }
 

@@ -51,7 +51,10 @@ class SaleRepository {
         if (endDate != null) 'endDate': endDate.toIso8601String(),
       };
 
-      final res = await _apiService.client.get('/admin/sales', queryParameters: query);
+      final res = await _apiService.client.get(
+        '/admin/sales',
+        queryParameters: query,
+      );
       final data = res.data;
 
       final itemsRaw = (data is Map && data['items'] is List)
@@ -112,7 +115,9 @@ class SaleRepository {
 
     for (final row in rows) {
       final createdAt = tryParseDate(row['createdAt']?.toString());
-      if (startDate != null && createdAt != null && createdAt.isBefore(startDate)) {
+      if (startDate != null &&
+          createdAt != null &&
+          createdAt.isBefore(startDate)) {
         continue;
       }
       if (endDate != null && createdAt != null && createdAt.isAfter(endDate)) {
@@ -120,8 +125,9 @@ class SaleRepository {
       }
 
       final customerId = row['customerId']?.toString();
-      final customerRow =
-          (customerId != null) ? customerById[customerId] : null;
+      final customerRow = (customerId != null)
+          ? customerById[customerId]
+          : null;
       final customerName = customerRow?['name']?.toString() ?? '';
       final customerPhone = customerRow?['phone']?.toString() ?? '';
 
@@ -152,8 +158,12 @@ class SaleRepository {
         ? (total / resolvedLimit).ceil()
         : 1;
     final start = (resolvedPage - 1) * resolvedLimit;
-    final end = (start + resolvedLimit) > total ? total : (start + resolvedLimit);
-    final items = (start >= 0 && start < total) ? filtered.sublist(start, end) : <Sale>[];
+    final end = (start + resolvedLimit) > total
+        ? total
+        : (start + resolvedLimit);
+    final items = (start >= 0 && start < total)
+        ? filtered.sublist(start, end)
+        : <Sale>[];
 
     return SalesPage(
       items: items,

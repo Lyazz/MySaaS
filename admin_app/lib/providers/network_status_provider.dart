@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/app_mode.dart';
-import 'auth_provider.dart';
-
-enum NetworkStatus { online, offlineTenant, noConnection }
+enum NetworkStatus { connected, disconnected }
 
 class NetworkStatusNotifier extends Notifier<NetworkStatus> {
   StreamSubscription<List<ConnectivityResult>>? _subscription;
@@ -15,10 +12,7 @@ class NetworkStatusNotifier extends Notifier<NetworkStatus> {
   @override
   NetworkStatus build() {
     _initOnce();
-    final authState = ref.watch(authProvider);
-    return authState.mode == AppMode.offlineOnly
-        ? NetworkStatus.offlineTenant
-        : NetworkStatus.noConnection;
+    return NetworkStatus.disconnected;
   }
 
   void _initOnce() {
@@ -34,13 +28,10 @@ class NetworkStatusNotifier extends Notifier<NetworkStatus> {
   }
 
   void _checkStatus(List<ConnectivityResult> results) {
-    final authState = ref.read(authProvider);
-    if (authState.mode == AppMode.offlineOnly) {
-      state = NetworkStatus.offlineTenant;
-      return;
-    }
     final hasConnection = results.any((r) => r != ConnectivityResult.none);
-    state = hasConnection ? NetworkStatus.online : NetworkStatus.noConnection;
+    state = hasConnection
+        ? NetworkStatus.connected
+        : NetworkStatus.disconnected;
   }
 }
 

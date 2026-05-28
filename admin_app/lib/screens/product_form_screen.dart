@@ -267,16 +267,22 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 24),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.redSurface : const Color(0xFFFEF2F2),
+                      color: isDark
+                          ? AppColors.redSurface
+                          : const Color(0xFFFEF2F2),
                       border: Border.all(
-                        color: isDark ? AppColors.redText.withValues(alpha: 0.3) : const Color(0xFFFECACA),
+                        color: isDark
+                            ? AppColors.redText.withValues(alpha: 0.3)
+                            : const Color(0xFFFECACA),
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       _error!,
                       style: TextStyle(
-                        color: isDark ? AppColors.redText : const Color(0xFFB91C1C),
+                        color: isDark
+                            ? AppColors.redText
+                            : const Color(0xFFB91C1C),
                         fontSize: 14,
                       ),
                     ),
@@ -288,18 +294,24 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     length: 4,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
+                        color: isDark
+                            ? AppColors.surface1
+                            : AppColors.lightSurface1,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder,
+                          color: isDark
+                              ? AppColors.surfaceBorder
+                              : AppColors.lightSurfaceBorder,
                         ),
-                        boxShadow: isDark ? null : [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
+                        boxShadow: isDark
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
                       ),
                       child: Column(
                         children: [
@@ -678,7 +690,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                           ),
                                                       decoration:
                                                           const BoxDecoration(
-                                                            color: Color(0xFFF1F5F9),
+                                                            color: Color(
+                                                              0xFFF1F5F9,
+                                                            ),
                                                             shape:
                                                                 BoxShape.circle,
                                                             boxShadow: [

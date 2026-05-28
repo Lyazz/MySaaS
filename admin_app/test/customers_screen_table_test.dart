@@ -46,9 +46,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          customersProvider.overrideWith(
-            () => CustomersNotifier(initialState),
-          ),
+          customersProvider.overrideWith(() => CustomersNotifier(initialState)),
         ],
         child: buildLocalizedTestApp(
           home: const CustomersScreen(autoFetch: false),

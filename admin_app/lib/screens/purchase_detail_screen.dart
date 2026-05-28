@@ -242,14 +242,20 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
               decoration: BoxDecoration(
                 color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
-                boxShadow: isDark ? null : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
+                border: Border.all(
+                  color: isDark
+                      ? AppColors.surfaceBorder
+                      : AppColors.lightSurfaceBorder,
+                ),
+                boxShadow: isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
               ),
               child: Column(
                 children: [
@@ -274,14 +280,18 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.surface3 : const Color(0xFFF1F5F9),
+                            color: isDark
+                                ? AppColors.surface3
+                                : const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '${purchase.items.length} items',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+                              color: isDark
+                                  ? AppColors.textMuted
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                         ),
@@ -478,7 +488,13 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
-        border: Border(top: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
@@ -518,14 +534,20 @@ class _InfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -619,7 +641,13 @@ class _TableHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
-        border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       child: Row(
         children: [
@@ -717,7 +745,13 @@ class _TableRowState extends State<_TableRow> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
@@ -781,11 +815,7 @@ class _TableRowState extends State<_TableRow> {
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
               child: widget.item.quantityReceived > 0
-                  ? Text(
-                      widget.money.format(
-                        widget.item.unitCost,
-                      ),
-                    )
+                  ? Text(widget.money.format(widget.item.unitCost))
                   : FormInput(
                       label: 'Unit cost',
                       showLabel: false,
@@ -829,7 +859,9 @@ class _TableRowState extends State<_TableRow> {
                         ? widget.item.quantityReceived /
                               widget.item.quantityOrdered
                         : 0,
-                    backgroundColor: isDark ? AppColors.surface3 : const Color(0xFFE2E8F0),
+                    backgroundColor: isDark
+                        ? AppColors.surface3
+                        : const Color(0xFFE2E8F0),
                     color: AppColors.brand,
                     borderRadius: BorderRadius.circular(2),
                     minHeight: 4,
@@ -874,8 +906,12 @@ class _TableRowState extends State<_TableRow> {
                     icon: const Icon(LucideIcons.check, size: 16),
                     style:
                         IconButton.styleFrom(
-                          backgroundColor: isDark ? AppColors.greenSurface : const Color(0xFFF0FDF4),
-                          foregroundColor: isDark ? AppColors.greenText : const Color(0xFF15803D),
+                          backgroundColor: isDark
+                              ? AppColors.greenSurface
+                              : const Color(0xFFF0FDF4),
+                          foregroundColor: isDark
+                              ? AppColors.greenText
+                              : const Color(0xFF15803D),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -886,17 +922,25 @@ class _TableRowState extends State<_TableRow> {
                             states,
                           ) {
                             if (states.contains(WidgetState.disabled)) {
-                              return isDark ? AppColors.surface3 : const Color(0xFFF1F5F9);
+                              return isDark
+                                  ? AppColors.surface3
+                                  : const Color(0xFFF1F5F9);
                             }
-                            return isDark ? AppColors.greenSurface : const Color(0xFFF0FDF4);
+                            return isDark
+                                ? AppColors.greenSurface
+                                : const Color(0xFFF0FDF4);
                           }),
                           foregroundColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
                             if (states.contains(WidgetState.disabled)) {
-                              return isDark ? AppColors.textTertiary : const Color(0xFF94A3B8);
+                              return isDark
+                                  ? AppColors.textTertiary
+                                  : const Color(0xFF94A3B8);
                             }
-                            return isDark ? AppColors.greenText : const Color(0xFF15803D);
+                            return isDark
+                                ? AppColors.greenText
+                                : const Color(0xFF15803D);
                           }),
                         ),
                   ),
@@ -1063,7 +1107,9 @@ class _VariantSelectorDialogState
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.surface3 : const Color(0xFFF1F5F9),
+                              color: isDark
+                                  ? AppColors.surface3
+                                  : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: product.mainImageUrl != null

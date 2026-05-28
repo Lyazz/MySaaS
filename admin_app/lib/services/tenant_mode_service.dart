@@ -1,3 +1,4 @@
+import '../models/workspace_binding.dart';
 import '../models/app_mode.dart';
 
 class TenantModeService {
@@ -7,15 +8,28 @@ class TenantModeService {
 
   AppMode _mode = AppMode.online;
   String _tenantId = '';
+  String? _workspaceId;
 
   AppMode get mode => _mode;
   String get activeTenantId => _tenantId;
+  String? get activeWorkspaceId => _workspaceId;
+  String get activeNamespaceKey => WorkspaceBinding(
+    tenantId: _tenantId,
+    workspaceId: _workspaceId,
+  ).namespaceKey;
   bool get isOfflineOnly => _mode == AppMode.offlineOnly;
   bool get allowsNetwork => _mode != AppMode.offlineOnly;
 
-  void initialize({required AppMode mode, required String tenantId}) {
+  void initialize({
+    required AppMode mode,
+    required String tenantId,
+    String? workspaceId,
+  }) {
     _mode = mode;
     _tenantId = tenantId;
+    _workspaceId = workspaceId?.trim().isNotEmpty == true
+        ? workspaceId!.trim()
+        : null;
   }
 
   bool isRequestAllowed(String path) {

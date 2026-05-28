@@ -49,17 +49,22 @@ class NumpadWidget extends StatelessWidget {
         onTap: onClear,
       ),
       _buildButton(context, '0', isDark: isDark, onTap: () => onNumberTap('0')),
-      _buildButton(
-        context,
-        '⌫',
-        isDark: isDark,
-        onTap: onBackspace ?? onClear,
-      ),
+      _buildButton(context, '⌫', isDark: isDark, onTap: onBackspace ?? onClear),
       if (allowDecimal)
-        _buildButton(context, '.', isDark: isDark, onTap: () => onNumberTap('.'))
+        _buildButton(
+          context,
+          '.',
+          isDark: isDark,
+          onTap: () => onNumberTap('.'),
+        )
       else
         placeholder(),
-      _buildButton(context, '00', isDark: isDark, onTap: () => onNumberTap('00')),
+      _buildButton(
+        context,
+        '00',
+        isDark: isDark,
+        onTap: () => onNumberTap('00'),
+      ),
       _buildButton(
         context,
         'Enter',
@@ -89,10 +94,12 @@ class NumpadWidget extends StatelessWidget {
         final tileWidth =
             (width - ((crossAxisCount - 1) * spacing)) / crossAxisCount;
         final tileHeight = (gridHeight - ((rowCount - 1) * spacing)) / rowCount;
-        final safeTileHeight =
-            tileHeight.isFinite && tileHeight > 0 ? tileHeight : 64.0;
-        final safeTileWidth =
-            tileWidth.isFinite && tileWidth > 0 ? tileWidth : 96.0;
+        final safeTileHeight = tileHeight.isFinite && tileHeight > 0
+            ? tileHeight
+            : 64.0;
+        final safeTileWidth = tileWidth.isFinite && tileWidth > 0
+            ? tileWidth
+            : 96.0;
         final ratio = safeTileWidth / safeTileHeight;
 
         return SizedBox(
@@ -110,7 +117,9 @@ class NumpadWidget extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+                      color: isDark
+                          ? AppColors.textSecondary
+                          : AppColors.lightTextSecondary,
                     ),
                   ),
                 ),
@@ -143,8 +152,12 @@ class NumpadWidget extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final defaultBg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
-    final defaultText = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final defaultText = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     return Material(
       color: color ?? defaultBg,
@@ -154,7 +167,9 @@ class NumpadWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: color != null ? Colors.transparent : borderColor),
+            border: Border.all(
+              color: color != null ? Colors.transparent : borderColor,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(

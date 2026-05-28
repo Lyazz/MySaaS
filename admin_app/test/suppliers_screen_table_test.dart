@@ -41,7 +41,9 @@ void main() {
             ),
           ),
         ],
-        child: buildLocalizedTestApp(home: const SuppliersScreen(autoFetch: false)),
+        child: buildLocalizedTestApp(
+          home: const SuppliersScreen(autoFetch: false),
+        ),
       ),
     );
     await tester.pumpAndSettle();

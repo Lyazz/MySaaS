@@ -109,7 +109,9 @@ class SmartCashSuggestions extends StatelessWidget {
             isExact ? 'Exact' : currency.format(amount),
             style: TextStyle(
               fontWeight: isExact ? FontWeight.bold : FontWeight.w600,
-              color: isExact ? AppColors.brandContrast : (isDark ? AppColors.textPrimary : const Color(0xFF0F172A)),
+              color: isExact
+                  ? AppColors.brandContrast
+                  : (isDark ? AppColors.textPrimary : const Color(0xFF0F172A)),
             ),
           ),
           backgroundColor: isExact
@@ -117,7 +119,11 @@ class SmartCashSuggestions extends StatelessWidget {
               : (isDark ? AppColors.surface2 : Colors.white),
           side: isExact
               ? BorderSide.none
-              : BorderSide(color: isDark ? AppColors.surfaceBorder : const Color(0xFFE2E8F0)),
+              : BorderSide(
+                  color: isDark
+                      ? AppColors.surfaceBorder
+                      : const Color(0xFFE2E8F0),
+                ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),

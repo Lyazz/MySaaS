@@ -6,24 +6,27 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import '../services/api_service.dart';
+
 import '../models/customer.dart';
 import '../models/product.dart';
 import '../models/pos_models.dart';
-import '../utils/pos_payment.dart';
-import '../utils/debouncer.dart';
-import '../utils/barcode_scanner.dart';
 import '../providers/pos_provider.dart';
 import '../providers/customers_provider.dart';
 import '../providers/store_settings_provider.dart';
+import '../services/api_service.dart';
+import '../services/tenant_mode_service.dart';
+import '../services/workspace_cache_service.dart';
+import '../theme/app_theme.dart';
+import '../utils/barcode_scanner.dart';
+import '../utils/debouncer.dart';
+import '../utils/pos_payment.dart';
 import '../utils/tenant_currency.dart';
 import '../widgets/numpad_widget.dart';
-import '../widgets/shimmer_skeleton.dart';
 import '../widgets/smart_cash_suggestions.dart';
-import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/form/form_input.dart';
-import '../theme/app_theme.dart';
+import '../widgets/shimmer_skeleton.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -1537,7 +1540,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Reprinting last order…'),
-          backgroundColor: isDark ? AppColors.surface3 : AppColors.lightSurface3,
+          backgroundColor: isDark
+              ? AppColors.surface3
+              : AppColors.lightSurface3,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),
@@ -4079,6 +4084,9 @@ class _PosSafeNetworkImage extends StatefulWidget {
 }
 
 class _PosSafeNetworkImageState extends State<_PosSafeNetworkImage> {
+  static final WorkspaceCacheService _imageCacheService =
+      WorkspaceCacheService();
+
   String? get _normalizedUrl {
     final value = widget.imageUrl?.trim();
     if (value == null || value.isEmpty) return null;
@@ -4124,6 +4132,9 @@ class _PosSafeNetworkImageState extends State<_PosSafeNetworkImage> {
       child: CachedNetworkImage(
         imageUrl: url,
         cacheKey: _cacheKey,
+        cacheManager: _imageCacheService.imageCacheManager(
+          TenantModeService().activeNamespaceKey,
+        ),
         width: widget.width,
         height: widget.height,
         fit: widget.fit,

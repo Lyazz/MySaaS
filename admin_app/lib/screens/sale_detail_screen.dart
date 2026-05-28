@@ -47,7 +47,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       // POS sale details have a dedicated route on the backend.
       final res = await api.client.get('/admin/sales/pos/$id');
       final data = res.data;
-      if (data is Map) return _SaleDetail.fromJson(data.cast<String, dynamic>());
+      if (data is Map)
+        return _SaleDetail.fromJson(data.cast<String, dynamic>());
     } on DioException catch (e) {
       if (e.response?.statusCode != 404) {
         // fall through to local fallback
@@ -57,14 +58,20 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     try {
       final res = await api.client.get('/admin/sales/$id');
       final data = res.data;
-      if (data is Map) return _SaleDetail.fromJson(data.cast<String, dynamic>());
+      if (data is Map)
+        return _SaleDetail.fromJson(data.cast<String, dynamic>());
     } catch (_) {
       // fall through to local fallback
     }
 
     // Offline/local fallback: read from local `sales` table (POS sales).
     final db = await DatabaseService().database;
-    final rows = await db.query('sales', where: 'id = ?', whereArgs: [id], limit: 1);
+    final rows = await db.query(
+      'sales',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     if (rows.isEmpty) return null;
     final row = rows.first;
 
@@ -107,35 +114,35 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 
     final itemsRaw = payload?['items'];
     final items = (itemsRaw is List)
-        ? itemsRaw
-            .whereType<Map>()
-            .map((m) => m.cast<String, dynamic>())
-            .map((item) {
-              final productId = item['productId']?.toString() ?? '';
-              final variantId = item['variantId']?.toString();
-              final product = productById[productId];
-              String label = product?.title ?? (productId.isNotEmpty ? productId : 'Item');
-              if (product != null && variantId != null) {
-                ProductVariant? v;
-                for (final vv in product.variants) {
-                  if (vv.id == variantId) {
-                    v = vv;
-                    break;
-                  }
-                }
-                if (v != null) {
-                  final vLabel = variantLabel(v);
-                  if (vLabel.trim().isNotEmpty) label = '${product.title} · $vLabel';
+        ? itemsRaw.whereType<Map>().map((m) => m.cast<String, dynamic>()).map((
+            item,
+          ) {
+            final productId = item['productId']?.toString() ?? '';
+            final variantId = item['variantId']?.toString();
+            final product = productById[productId];
+            String label =
+                product?.title ?? (productId.isNotEmpty ? productId : 'Item');
+            if (product != null && variantId != null) {
+              ProductVariant? v;
+              for (final vv in product.variants) {
+                if (vv.id == variantId) {
+                  v = vv;
+                  break;
                 }
               }
-              return _SaleItem.fromJson({
-                'product': {'title': label},
-                'variant': const {},
-                'quantity': item['quantity'],
-                'price': item['price'],
-              });
-            })
-            .toList()
+              if (v != null) {
+                final vLabel = variantLabel(v);
+                if (vLabel.trim().isNotEmpty)
+                  label = '${product.title} · $vLabel';
+              }
+            }
+            return _SaleItem.fromJson({
+              'product': {'title': label},
+              'variant': const {},
+              'quantity': item['quantity'],
+              'price': item['price'],
+            });
+          }).toList()
         : <_SaleItem>[];
 
     return _SaleDetail(
@@ -203,7 +210,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
@@ -241,7 +250,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                   ].join(' · '),
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                               ],
@@ -303,12 +315,20 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                Icon(LucideIcons.arrowLeft, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                Icon(
+                  LucideIcons.arrowLeft,
+                  size: 16,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Sales',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -334,9 +354,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     final reason = isOrder
                         ? 'Order-origin sales must be returned from the order flow.'
                         : 'Only COMPLETED POS sales can be refunded.';
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(reason)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(reason)));
                   },
           ),
           const SizedBox(width: 8),
@@ -358,7 +378,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       final api = ref.read(apiProvider);
       final response = await api.client.get('/admin/cash/cashboxes');
       final raw = response.data;
-      final cashboxes = raw is List ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList() : <Map<String, dynamic>>[];
+      final cashboxes = raw is List
+          ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
+          : <Map<String, dynamic>>[];
       final openCashboxes = cashboxes
           .where((c) => c['isActive'] == true && c['openSession'] is Map)
           .toList();
@@ -366,7 +388,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No open cashbox available. Open a cash session first.')),
+          const SnackBar(
+            content: Text(
+              'No open cashbox available. Open a cash session first.',
+            ),
+          ),
         );
         return;
       }
@@ -374,7 +400,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       String selectedCashboxId = (openCashboxes.first['id'] ?? '').toString();
       String selectedMethod = 'CASH';
       final referenceCtrl = TextEditingController();
-      final noteCtrl = TextEditingController(text: 'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}');
+      final noteCtrl = TextEditingController(
+        text:
+            'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}',
+      );
       bool submitting = false;
       String? formError;
 
@@ -408,7 +437,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                             .toList(),
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedCashboxId = v ?? selectedCashboxId),
+                            : (v) => setDialogState(
+                                () =>
+                                    selectedCashboxId = v ?? selectedCashboxId,
+                              ),
                         decoration: const InputDecoration(
                           labelText: 'Cashbox',
                           border: OutlineInputBorder(),
@@ -420,12 +452,21 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         items: const [
                           DropdownMenuItem(value: 'CASH', child: Text('Cash')),
                           DropdownMenuItem(value: 'CARD', child: Text('Card')),
-                          DropdownMenuItem(value: 'TRANSFER', child: Text('Transfer')),
-                          DropdownMenuItem(value: 'OTHER', child: Text('Other')),
+                          DropdownMenuItem(
+                            value: 'TRANSFER',
+                            child: Text('Transfer'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'OTHER',
+                            child: Text('Other'),
+                          ),
                         ],
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedMethod = (v ?? 'CASH').toUpperCase()),
+                            : (v) => setDialogState(
+                                () => selectedMethod = (v ?? 'CASH')
+                                    .toUpperCase(),
+                              ),
                         decoration: const InputDecoration(
                           labelText: 'Method',
                           border: OutlineInputBorder(),
@@ -454,7 +495,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         const SizedBox(height: 10),
                         Text(
                           formError!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ],
@@ -462,7 +506,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: submitting ? null : () => Navigator.of(dialogContext).pop(false),
+                    onPressed: submitting
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(false),
                     child: const Text('Cancel'),
                   ),
                   AppButton.danger(
@@ -484,9 +530,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                   'refund': {
                                     'cashboxId': selectedCashboxId,
                                     'method': selectedMethod,
-                                    if (referenceCtrl.text.trim().isNotEmpty) 'reference': referenceCtrl.text.trim(),
-                                    if (noteCtrl.text.trim().isNotEmpty) 'note': noteCtrl.text.trim(),
-                                  }
+                                    if (referenceCtrl.text.trim().isNotEmpty)
+                                      'reference': referenceCtrl.text.trim(),
+                                    if (noteCtrl.text.trim().isNotEmpty)
+                                      'note': noteCtrl.text.trim(),
+                                  },
                                 },
                               );
                               if (!dialogContext.mounted) return;
@@ -518,9 +566,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to refund sale: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to refund sale: $e')));
     } finally {
       if (mounted) {
         setState(() => _isRefunding = false);
@@ -535,7 +583,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -552,7 +604,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
@@ -614,14 +668,22 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                 flex: 1,
                 child: Text(
                   item.quantity.toString(),
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(
                   money.format(item.price),
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
               ),
               Expanded(
@@ -669,7 +731,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             const SizedBox(height: 12),
             Text(
               'Loading sale...',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -704,7 +770,13 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.receipt, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+            Icon(
+              LucideIcons.receipt,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 12),
             Text(
               'Sale not found',
@@ -718,7 +790,12 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             Text(
               'This sale may have been deleted.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -733,7 +810,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -786,9 +867,9 @@ class _SaleDetail {
     final itemsRaw = json['items'];
     final items = (itemsRaw is List)
         ? itemsRaw
-            .whereType<Map>()
-            .map((e) => _SaleItem.fromJson(e.cast<String, dynamic>()))
-            .toList()
+              .whereType<Map>()
+              .map((e) => _SaleItem.fromJson(e.cast<String, dynamic>()))
+              .toList()
         : <_SaleItem>[];
 
     final customerAddress = json['customerAddress']?.toString() ?? '';

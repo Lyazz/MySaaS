@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+
+import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/sidebar_provider.dart';
@@ -328,10 +330,15 @@ class _AppShellState extends ConsumerState<AppShell> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.of(ctx).pop();
-                      ref.read(authProvider.notifier).logout();
-                      context.go('/login');
+                      final auth = ref.read(authProvider);
+                      final clearProvisioning = auth.mode.skipsAuthentication;
+                      await ref
+                          .read(authProvider.notifier)
+                          .logout(clearProvisioning: clearProvisioning);
+                      if (!context.mounted) return;
+                      context.go(clearProvisioning ? '/activate' : '/login');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.red,

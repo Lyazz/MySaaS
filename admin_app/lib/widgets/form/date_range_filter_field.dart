@@ -31,8 +31,8 @@ class DateRangeFilterField extends StatefulWidget {
     ),
     DateTimeRange Function(DateTimeRange range)? normalize,
     required this.onChanged,
-  })  : dateFormat = dateFormat ?? DateFormat('yyyy-MM-dd'),
-        normalize = normalize ?? _identityRange;
+  }) : dateFormat = dateFormat ?? DateFormat('yyyy-MM-dd'),
+       normalize = normalize ?? _identityRange;
 
   static DateTimeRange _identityRange(DateTimeRange range) => range;
 
@@ -66,7 +66,8 @@ class _DateRangeFilterFieldState extends State<DateRangeFilterField> {
     return '${widget.dateFormat.format(range.start)} - ${widget.dateFormat.format(range.end)}';
   }
 
-  DateTime _startOfDay(DateTime date) => DateTime(date.year, date.month, date.day);
+  DateTime _startOfDay(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 
   bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;

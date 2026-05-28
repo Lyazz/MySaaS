@@ -13,8 +13,12 @@ class DeliveryScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
     final surface3 = isDark ? AppColors.surface3 : AppColors.lightSurface3;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     return Padding(
@@ -24,7 +28,11 @@ class DeliveryScreen extends ConsumerWidget {
         children: [
           Text(
             'Delivery Settings',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textPrimary),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: textPrimary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(

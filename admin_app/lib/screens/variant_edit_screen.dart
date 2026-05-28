@@ -114,10 +114,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.variant.title),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: Text(widget.variant.title), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -126,7 +123,8 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Basic Info Card
-              _buildCard(context,
+              _buildCard(
+                context,
                 title: 'General Information',
                 children: [
                   FormInput(
@@ -243,7 +241,8 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
               const SizedBox(height: 24),
 
               // Inventory Card
-              _buildCard(context,
+              _buildCard(
+                context,
                 title: 'Inventory',
                 children: [
                   SwitchListTile(
@@ -301,21 +300,31 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
     );
   }
 
-  Widget _buildCard(BuildContext context, {required String title, required List<Widget> children}) {
+  Widget _buildCard(
+    BuildContext context, {
+    required String title,
+    required List<Widget> children,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder),
-        boxShadow: isDark ? null : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

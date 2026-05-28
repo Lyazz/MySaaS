@@ -42,7 +42,9 @@ abstract final class AppColors {
   static const lightTextTertiary = Color(0xFF64748B); // --text-tertiary light
   static const lightTextMuted = Color(0xFF94A3B8);
   static const lightNavHoverBg = Color(0x0F0F172A); // rgba(15,23,42,0.06)
-  static const lightSidebarActiveColor = Color(0xFF5A7A0A); // --sidebar-active-color light
+  static const lightSidebarActiveColor = Color(
+    0xFF5A7A0A,
+  ); // --sidebar-active-color light
   static const lightTopbarBg = Color(0xFFF8FBFF); // --admin-topbar-bg light
 
   // Status (same across themes)

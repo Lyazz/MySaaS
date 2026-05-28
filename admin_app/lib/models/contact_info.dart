@@ -28,4 +28,14 @@ class ContactInfo {
       href: json['href']?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'kind': kind,
+    'label': label,
+    'value': value,
+    'position': position,
+    'isActive': isActive,
+    'href': href,
+  };
 }
