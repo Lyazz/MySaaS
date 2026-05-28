@@ -11,23 +11,33 @@ void main() {
     TenantModeService().initialize(mode: AppMode.online, tenantId: '');
   });
 
-  test('TenantModeService blocks non-billing admin requests when offline', () {
-    TenantModeService().initialize(
-      mode: AppMode.offlineOnly,
-      tenantId: 'tenant-1',
-    );
+  test(
+    'TenantModeService blocks admin network requests for offline-only tenants',
+    () {
+      TenantModeService().initialize(
+        mode: AppMode.offlineOnly,
+        tenantId: 'tenant-1',
+      );
 
-    expect(TenantModeService().isRequestAllowed('/login'), true);
-    expect(TenantModeService().isRequestAllowed('/me'), true);
-    expect(TenantModeService().isRequestAllowed('/admin/billing/invoices'), true);
+      expect(TenantModeService().isRequestAllowed('/login'), true);
+      expect(TenantModeService().isRequestAllowed('/me'), true);
 
-    expect(TenantModeService().isRequestAllowed('/admin/products'), false);
-    expect(TenantModeService().isRequestAllowed('/admin/orders'), false);
-    expect(TenantModeService().isRequestAllowed('/upload'), false);
+      expect(
+        TenantModeService().isRequestAllowed('/admin/billing/subscription'),
+        false,
+      );
+      expect(TenantModeService().isRequestAllowed('/admin/products'), false);
+      expect(TenantModeService().isRequestAllowed('/admin/orders'), false);
+      expect(
+        TenantModeService().isRequestAllowed('/admin/contact-infos'),
+        false,
+      );
+      expect(TenantModeService().isRequestAllowed('/upload'), false);
 
-    TenantModeService().initialize(mode: AppMode.online, tenantId: '');
-    expect(TenantModeService().isRequestAllowed('/admin/products'), true);
-  });
+      TenantModeService().initialize(mode: AppMode.online, tenantId: '');
+      expect(TenantModeService().isRequestAllowed('/admin/products'), true);
+    },
+  );
 
   test('ApiService rejects blocked requests when offline tenant', () async {
     TenantModeService().initialize(

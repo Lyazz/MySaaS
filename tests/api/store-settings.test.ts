@@ -68,6 +68,7 @@ describe('Store Settings (Tenant Admin)', async () => {
             },
             body: JSON.stringify({
                 primaryColor: '#112233',
+                useBrandColor: true,
                 templateKey: 'modern',
                 language: 'ar',
                 cartEnabled: false,
@@ -83,6 +84,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         const patchBody = await patchRes.json()
         expect(patchRes.status).toBe(200)
         expect(patchBody.primaryColor).toBe('#112233'.toUpperCase())
+        expect(patchBody.useBrandColor).toBe(true)
         expect(patchBody.templateKey).toBe('modern')
         expect(patchBody.language).toBe('ar')
         expect(patchBody.cartEnabled).toBe(false)

@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('playful')
 
 const storeStyle = computed(() => {
-  const primaryColor = '#9333EA' // Purple 600
+  const primaryColor = brandColor.value.color
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {

@@ -397,7 +397,7 @@
                   <button
                     v-if="pay.proofUrl"
                     type="button"
-                    class="[color:rgba(var(--brand-rgb)/0.85)] hover:underline font-semibold inline-flex items-center gap-1"
+                    class="ui-table-action"
                     @click="openPaymentProof(pay)"
                   >
                     <Icon name="lucide:external-link" class="w-3.5 h-3.5" />

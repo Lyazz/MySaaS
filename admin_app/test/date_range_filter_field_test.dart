@@ -50,5 +50,35 @@ void main() {
 
     expect(find.byIcon(LucideIcons.x), findsNothing);
   });
-}
 
+  testWidgets('applies today preset', (tester) async {
+    DateTimeRange? changedTo;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DateRangeFilterField(
+            range: null,
+            firstDate: DateTime(2020),
+            lastDate: DateTime(2030),
+            onChanged: (r) => changedTo = r,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Custom').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Today').last);
+    await tester.pumpAndSettle();
+
+    final today = DateTime.now();
+    expect(changedTo, isNotNull);
+    expect(changedTo!.start.year, today.year);
+    expect(changedTo!.start.month, today.month);
+    expect(changedTo!.start.day, today.day);
+    expect(changedTo!.end.year, today.year);
+    expect(changedTo!.end.month, today.month);
+    expect(changedTo!.end.day, today.day);
+  });
+}

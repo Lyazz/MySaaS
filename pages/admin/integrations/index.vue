@@ -225,7 +225,7 @@
                         <span v-if="p.isGlobal" class="ui-badge ui-badge--indigo">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
                         <button
                           v-else
-                          class="text-xs font-medium text-blue-400 hover:text-blue-300"
+                          class="ui-table-action"
                           :disabled="metaPixelsSaving"
                           @click="setGlobalPixel(p.id)"
                         >
@@ -247,7 +247,7 @@
                       </td>
                       <td class="ui-td text-right">
                         <button
-                          class="ui-btn ui-btn--danger ui-btn--sm"
+                          class="ui-table-action ui-table-action--danger"
                           :disabled="metaPixelsSaving"
                           @click="deletePixel(p.id)"
                         >

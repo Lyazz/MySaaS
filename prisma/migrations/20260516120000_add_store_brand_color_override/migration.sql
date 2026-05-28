@@ -1,0 +1,1 @@
+ALTER TABLE "StoreSettings" ADD COLUMN IF NOT EXISTS "useBrandColor" BOOLEAN NOT NULL DEFAULT false;

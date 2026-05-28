@@ -241,7 +241,7 @@
                 <button
                   v-if="variant.skuLocked !== true"
                   type="button"
-                  class="text-xs px-2 py-1 rounded ui-btn ui-btn--secondary"
+                  class="ui-table-action"
                   :disabled="suggestingSkuIds.has(variant.id)"
                   @click="suggestSku(variant)"
                 >
@@ -250,7 +250,7 @@
                 <button
                   v-if="variant.skuLocked !== true"
                   type="button"
-                  class="text-xs px-2 py-1 rounded ui-btn ui-btn--secondary"
+                  class="ui-table-action"
                   :disabled="lockingSkuIds.has(variant.id)"
                   @click="lockSku(variant)"
                 >
@@ -283,7 +283,7 @@
             <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
               <button
                 type="button"
-                class="[color:var(--brand)] hover:[color:var(--brand)] font-medium"
+                class="ui-table-action"
                 @click="openImageEditor(variant)"
               >
                 {{ t('admin.variantsTable.actions.manageImages', { count: variant.images?.length || 0 }) }}
@@ -292,7 +292,7 @@
             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
               <button
                 type="button"
-                class="hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-secondary)"
+                class="ui-table-action"
                 @click="openMovements(variant)"
               >
                 {{ t('admin.variantsTable.actions.movements') }}

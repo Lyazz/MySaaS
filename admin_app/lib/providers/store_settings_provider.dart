@@ -29,7 +29,7 @@ class StoreSettingsState {
 }
 
 class StoreSettingsNotifier extends Notifier<StoreSettingsState> {
-  late final StoreSettingsRepository _repo;
+  late StoreSettingsRepository _repo;
 
   @override
   StoreSettingsState build() {

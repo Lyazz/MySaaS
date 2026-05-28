@@ -72,6 +72,7 @@ export type StoreSettingsPatchInput = Partial<{
     logoUrl: string | null
     faviconUrl: string | null
     primaryColor: string
+    useBrandColor: boolean
     templateKey: string
 
     announcementText: string
@@ -172,6 +173,13 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('primaryColor must be a hex color like #4F46E5')
             }
             updateSettings.primaryColor = input.primaryColor.toUpperCase()
+        }
+
+        if (input.useBrandColor !== undefined) {
+            if (typeof input.useBrandColor !== 'boolean') {
+                throw new StoreSettingsValidationError('useBrandColor must be a boolean')
+            }
+            updateSettings.useBrandColor = input.useBrandColor
         }
 
         if (input.templateKey !== undefined) {
@@ -417,6 +425,7 @@ export class StoreSettingsService {
             logoUrl: string | null
             faviconUrl: string | null
             primaryColor: string
+            useBrandColor?: boolean
             templateKey: string
             announcementText: string | null
             announcementScrolling: boolean
@@ -468,6 +477,7 @@ export class StoreSettingsService {
             `- Logo: ${args.settings.logoUrl ? args.settings.logoUrl : '(none)'}`,
             `- Favicon: ${args.settings.faviconUrl ? args.settings.faviconUrl : '(none)'}`,
             `- Primary color: ${args.settings.primaryColor}`,
+            `- Apply brand color to template: ${args.settings.useBrandColor ? 'yes' : 'no'}`,
             `- Announcement: ${args.settings.announcementText ? `"${args.settings.announcementText}"` : '(none)'} (scrolling: ${args.settings.announcementScrolling})`,
             `- Language: ${args.settings.language}`,
             `- Cart + checkout enabled: ${args.settings.cartEnabled ? 'yes' : 'no'}`,

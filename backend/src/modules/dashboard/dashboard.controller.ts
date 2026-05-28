@@ -13,7 +13,7 @@ const parseIsoDate = (value: unknown) => {
 
 const parseRange = (value: unknown): AdminDashboardRange | null => {
     if (value === undefined || value === null || value === '') return '7d'
-    if (value === '7d' || value === '30d' || value === '90d' || value === 'custom') return value
+    if (value === 'today' || value === '7d' || value === '30d' || value === '90d' || value === 'custom') return value
     return null
 }
 
@@ -26,7 +26,7 @@ export class DashboardController {
             if (!range) {
                 return res.status(400).json({
                     statusCode: 400,
-                    statusMessage: 'Invalid "range". Use one of: 7d, 30d, 90d, custom'
+                    statusMessage: 'Invalid "range". Use one of: today, 7d, 30d, 90d, custom'
                 })
             }
 

@@ -2,6 +2,16 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('maison')
+
+const atelierStyle = computed(() => ({
+  '--brand': brandColor.value.color,
+  '--brand-rgb': brandColor.value.rgb,
+  '--at-cream': brandColor.value.color,
+  '--at-green': brandColor.value.color,
+  '--at-success': brandColor.value.color,
+  '--at-gold-dim': `rgba(${brandColor.value.rgb.replaceAll(' ', ',')},0.18)`
+} as Record<string, string>))
 
 onMounted(() => {
   cartStore.loadFromLocalStorage()
@@ -9,7 +19,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="atelier-theme">
+  <div class="atelier-theme" :style="atelierStyle">
     <slot />
   </div>
 </template>

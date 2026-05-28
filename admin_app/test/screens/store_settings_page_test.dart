@@ -4,13 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:admin_app/screens/settings/store_settings_page.dart';
 
 void main() {
-  testWidgets('StoreSettingsPage renders General tab', (tester) async {
+  testWidgets('StoreSettingsPage renders page shell', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(home: StoreSettingsPage()),
-      ),
+      const ProviderScope(child: MaterialApp(home: StoreSettingsPage())),
     );
     await tester.pump();
-    expect(find.text('General'), findsOneWidget);
+    expect(find.text('Store Settings'), findsAtLeastNWidgets(1));
   });
 }

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // ThemeProvider for Cyber Synthwave template
+const brandColor = useStorefrontTemplateBrandColor('cyber')
+
 const storeStyle = computed(() => {
-  const primaryColor = '#F43F5E' // Rose 500
+  const primaryColor = brandColor.value.color
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {
@@ -44,23 +46,23 @@ const storeStyle = computed(() => {
 }
 
 .cyber-theme-provider ::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #ff2d95, #ff6b35);
+    background: linear-gradient(to bottom, var(--brand), #ff6b35);
     border-radius: 4px;
 }
 
 .cyber-theme-provider ::-webkit-scrollbar-thumb:hover {
-    background: #ff2d95;
+    background: var(--brand);
 }
 
 /* Selection styling */
 .cyber-theme-provider ::selection {
-    background: rgba(255, 45, 149, 0.3);
+    background: rgba(var(--brand-rgb) / 0.3);
     color: white;
 }
 
 /* Focus outline styling */
 .cyber-theme-provider *:focus-visible {
-    outline: 2px solid #ff2d95;
+    outline: 2px solid var(--brand);
     outline-offset: 2px;
 }
 </style>

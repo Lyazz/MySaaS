@@ -22,7 +22,6 @@ class TenantModeService {
     if (_mode != AppMode.offlineOnly) return true;
     final trimmed = path.trim();
     if (trimmed == '/login' || trimmed == '/me') return true;
-    if (trimmed.startsWith('/admin/billing')) return true;
     return false;
   }
 }

@@ -87,7 +87,13 @@
             <tr
               v-for="c in paginatedCustomers"
               :key="c.id"
-              class="ui-tr"
+              class="ui-tr ui-tr--clickable"
+              role="link"
+              tabindex="0"
+              :aria-label="`${t('admin.pages.customers.index.table.customer')}: ${c.name}`"
+              @click="openCustomerRow($event, c.id)"
+              @keydown.enter="openCustomerRow($event, c.id)"
+              @keydown.space="openCustomerRow($event, c.id)"
             >
               <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center">
@@ -155,20 +161,20 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
-                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <NuxtLink
                     :to="`/admin/customers/edit/${c.id}`"
-                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 rounded-md transition-colors hover:text-red-400" style="color: var(--text-muted)"
+                    class="ui-table-action ui-table-action--danger"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(c)"
                   >
@@ -388,6 +394,12 @@ function confirmDelete(customer: CustomerSummary) {
   customerToDelete.value = customer
   showDeleteModal.value = true
   deleteError.value = null
+}
+
+function openCustomerRow(event: Event, customerId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/customers/${encodeURIComponent(customerId)}`)
 }
 
 async function handleDelete() {

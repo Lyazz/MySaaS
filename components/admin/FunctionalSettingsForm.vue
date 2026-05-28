@@ -16,6 +16,11 @@
     </Transition>
 
     <form @submit.prevent="save" class="functional-sections">
+      <div class="theme-group-heading">
+        <span>{{ t('admin.functionalSettingsForm.themeGroups.sales.title') }}</span>
+        <small>{{ t('admin.functionalSettingsForm.themeGroups.sales.subtitle') }}</small>
+      </div>
+
       <!-- Features -->
       <SettingsSection
         anchor-id="features"
@@ -139,6 +144,11 @@
         </div>
       </SettingsSection>
 
+      <div class="theme-group-heading">
+        <span>{{ t('admin.functionalSettingsForm.themeGroups.invoices.title') }}</span>
+        <small>{{ t('admin.functionalSettingsForm.themeGroups.invoices.subtitle') }}</small>
+      </div>
+
       <!-- Sales invoices -->
       <SettingsSection
         anchor-id="invoices"
@@ -204,6 +214,11 @@
           </Transition>
         </div>
       </SettingsSection>
+
+      <div class="theme-group-heading">
+        <span>{{ t('admin.functionalSettingsForm.themeGroups.marketing.title') }}</span>
+        <small>{{ t('admin.functionalSettingsForm.themeGroups.marketing.subtitle') }}</small>
+      </div>
 
       <!-- Announcement bar -->
       <SettingsSection
@@ -288,6 +303,11 @@
           </Transition>
         </div>
       </SettingsSection>
+
+      <div class="theme-group-heading">
+        <span>{{ t('admin.functionalSettingsForm.themeGroups.localization.title') }}</span>
+        <small>{{ t('admin.functionalSettingsForm.themeGroups.localization.subtitle') }}</small>
+      </div>
 
       <!-- Currency -->
       <SettingsSection
@@ -636,6 +656,45 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.theme-group-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+  padding: 4px 2px 0;
+}
+
+.theme-group-heading span {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.theme-group-heading small {
+  max-width: 44ch;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .theme-group-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .theme-group-heading small {
+    max-width: none;
+    text-align: left;
+  }
 }
 
 /* Toggle list */

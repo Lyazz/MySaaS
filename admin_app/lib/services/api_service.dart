@@ -7,7 +7,7 @@ import '../bootstrap.dart';
 import 'tenant_mode_service.dart';
 
 final apiProvider = Provider<ApiService>((ref) {
-  final bootstrap = ref.read(bootstrapProvider);
+  final bootstrap = ref.watch(bootstrapProvider);
   return ApiService(baseUrl: bootstrap.apiBaseUrl);
 });
 

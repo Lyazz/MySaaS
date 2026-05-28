@@ -113,15 +113,18 @@ describe('Sales invoice API', () => {
     })
 
     afterAll(async () => {
-        await prisma.salesInvoice.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.saleItem.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.sale.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.orderItem.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.order.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.product.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.storeSettings.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.user.deleteMany({ where: { tenantId: { in: [tenantAId, tenantBId] } } })
-        await prisma.tenant.deleteMany({ where: { id: { in: [tenantAId, tenantBId] } } })
+        const tenantIds = [tenantAId, tenantBId].filter((id): id is string => typeof id === 'string' && id.length > 0)
+        if (tenantIds.length === 0) return
+
+        await prisma.salesInvoice.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.saleItem.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.sale.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.orderItem.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.order.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.product.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.storeSettings.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.user.deleteMany({ where: { tenantId: { in: tenantIds } } })
+        await prisma.tenant.deleteMany({ where: { id: { in: tenantIds } } })
     })
 
     it('requires authentication to create an invoice', async () => {

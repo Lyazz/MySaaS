@@ -1548,6 +1548,24 @@
       }
     },
     "functionalSettingsForm": {
+      "themeGroups": {
+        "sales": {
+          "title": "Sales & checkout",
+          "subtitle": "Orders, cart, and purchase rules."
+        },
+        "invoices": {
+          "title": "Invoicing",
+          "subtitle": "Documents generated from sales."
+        },
+        "marketing": {
+          "title": "Marketing & loyalty",
+          "subtitle": "Storefront announcement and customer points."
+        },
+        "localization": {
+          "title": "Localization",
+          "subtitle": "Store currency and language."
+        }
+      },
       "features": {
         "title": "Store features",
         "subtitle": "Enable or disable core functionality for your storefront.",
@@ -1640,7 +1658,7 @@
       },
       "messages": {
         "loadFailed": "Failed to load settings.",
-        "saved": "Functional settings saved successfully!",
+        "saved": "Sales settings saved successfully!",
         "saveFailed": "Failed to save changes. Please try again."
       },
       "confirm": {
@@ -1944,7 +1962,9 @@
         "primaryColor": {
           "label": "Primary color",
           "hint": "Used for buttons, links, and highlights.",
-          "suggested": "Suggested palettes"
+          "suggested": "Suggested palettes",
+          "overrideLabel": "Apply brand color to template",
+          "overrideHint": "Turn off to keep the selected template's original accent color."
         }
       },
       "announcement": {
@@ -2055,6 +2075,7 @@
       "finance": "Finance",
       "cash": "Cash",
       "storeParameters": "Store Parameters",
+      "settingsHub": "Settings",
       "settings": "Administration",
       "dashboard": "Dashboard",
       "products": "Products",
@@ -2072,7 +2093,7 @@
       "homepage": "Homepage",
       "contactInfo": "Contact Info",
       "legalPages": "Legal Pages",
-      "functional": "Functional",
+      "functional": "Sales & checkout",
       "domains": "Domains",
       "apps": "Apps",
       "integrations": "Integrations",
@@ -2080,6 +2101,63 @@
       "storefront": "Storefront",
       "account": "Account",
       "connections": "Connections"
+    },
+    "settingsHub": {
+      "empty": {
+        "title": "No settings themes available",
+        "description": "Your role does not grant access to this store's settings."
+      },
+      "themes": {
+        "identity": {
+          "title": "Identity & appearance",
+          "description": "Store name, URL, logo, favicon, color, and template."
+        },
+        "content": {
+          "title": "Homepage & content",
+          "description": "Homepage, contact details, and legal pages shown on the storefront."
+        },
+        "checkout": {
+          "title": "Sales & checkout",
+          "description": "Cart, COD, minimum amount, order prefix, and address behavior."
+        },
+        "invoices": {
+          "title": "Invoicing",
+          "description": "Sales invoices, invoice prefix, logo, and footer note."
+        },
+        "localization": {
+          "title": "Localization",
+          "description": "Default language, currency, and reference country."
+        },
+        "marketing": {
+          "title": "Marketing & loyalty",
+          "description": "Storefront announcement and loyalty points program."
+        },
+        "connections": {
+          "title": "Domains & integrations",
+          "description": "Custom domain and external connections."
+        },
+        "administration": {
+          "title": "Administration",
+          "description": "Users and subscription billing."
+        }
+      },
+      "links": {
+        "appearance": "Identity & appearance",
+        "homepage": "Homepage",
+        "contact": "Contact info",
+        "legal": "Legal pages",
+        "salesFeatures": "Sales",
+        "checkoutRules": "Checkout rules",
+        "salesInvoices": "Sales invoices",
+        "currency": "Currency",
+        "language": "Language",
+        "announcement": "Announcement",
+        "loyalty": "Loyalty",
+        "domains": "Domains",
+        "integrations": "Integrations",
+        "users": "Users",
+        "billing": "Subscription"
+      }
     },
     "roles": {
       "owner": "Owner",
@@ -2720,6 +2798,7 @@
         "filters": {
           "range": "Range",
           "ranges": {
+            "today": "Today",
             "7d": "Last 7 days",
             "30d": "Last 30 days",
             "90d": "Last 90 days",
@@ -3820,6 +3899,11 @@
         }
       },
       "settings": {
+        "index": {
+          "metaTitle": "Settings",
+          "title": "Settings by theme",
+          "subtitle": "Find each setting by business intent: storefront, sales, localization, marketing, domains, and administration."
+        },
         "appearance": {
           "metaTitle": "Appearance",
           "title": "Appearance settings",
@@ -3836,9 +3920,9 @@
           "subtitle": "Manage the contact details shown in your storefront footer."
         },
         "functional": {
-          "metaTitle": "Functional",
-          "title": "Functional settings",
-          "subtitle": "Manage core functionality and features of your store."
+          "metaTitle": "Sales & checkout",
+          "title": "Sales, checkout, and operations",
+          "subtitle": "Tune checkout, invoices, localization, announcements, and loyalty."
         },
         "domains": {
           "metaTitle": "Domains",

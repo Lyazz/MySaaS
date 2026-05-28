@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('arena')
 
 const storeStyle = computed(() => {
-  const primaryColor = '#00B8FC' // Logitech G signature cyan
+  const primaryColor = brandColor.value.color
 
   const hexToRgb = (hex: string) => {
     if (!hex || typeof hex !== 'string') return '0 184 252'

@@ -1,13 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import {
     buildInvoiceNumber,
-    buildSalesInvoicePdfModel
+    buildSalesInvoicePdfModel,
+    formatInvoiceMoney,
+    renderSalesInvoicePdf
 } from '../../backend/src/modules/sales/sales-invoice.service'
 
 describe('sales invoice template mapping', () => {
     it('sanitizes invoice prefixes and builds stable source invoice numbers', () => {
         expect(buildInvoiceNumber(' inv-2026 ', 'SALE', 'abc-def-123456')).toBe('INV2026-SALE-ABCDEF12')
         expect(buildInvoiceNumber('', 'ORDER', 'order-1')).toBe('INV-ORDER-ORDER1')
+    })
+
+    it('formats invoice money in fr-DZ style and displays DZD as DA', () => {
+        expect(formatInvoiceMoney(245000, 'DZD')).toBe('245\u202f000,00 DA')
+        expect(formatInvoiceMoney(1500.5, 'EUR')).toBe('1\u202f500,50 EUR')
     })
 
     it('maps POS sale data with footer, customer fallback, and line totals', () => {
@@ -75,5 +82,34 @@ describe('sales invoice template mapping', () => {
         expect(model.subtotal).toBe(2000)
         expect(model.shippingAmount).toBe(500)
         expect(model.total).toBe(2500)
+    })
+
+    it('renders the enhanced PDF template', async () => {
+        const model = buildSalesInvoicePdfModel({
+            tenant: { name: 'Tenant Store' },
+            settings: {
+                invoiceShowLogo: false,
+                invoiceFooterText: 'Merci pour votre achat.',
+                currencyCode: 'DZD'
+            },
+            contactInfos: [{ kind: 'email', label: 'Email', value: 'contact@example.com' }],
+            invoice: { invoiceNumber: 'INV-SALE-RENDER', issuedAt: new Date('2026-05-01T10:00:00Z') },
+            sourceType: 'SALE',
+            source: {
+                id: 'sale-render',
+                createdAt: new Date('2026-05-01T09:00:00Z'),
+                totalAmount: 1500.5,
+                customerName: 'Ahmed',
+                customerPhone: '0550000001',
+                customerAddress: 'Alger',
+                items: [
+                    { quantity: 1, price: 1500.5, product: { title: 'Premium item' }, variant: null }
+                ]
+            }
+        })
+
+        const pdf = await renderSalesInvoicePdf(model)
+        expect(pdf.subarray(0, 4).toString('utf8')).toBe('%PDF')
+        expect(pdf.length).toBeGreaterThan(1000)
     })
 })

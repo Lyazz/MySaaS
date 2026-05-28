@@ -1456,6 +1456,7 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
 import { parsePriceInput } from '~/shared/pricing/money-format'
+import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
 
 definePageMeta({
   middleware: 'auth',
@@ -1537,16 +1538,14 @@ const sessionsPerPage = ref(25)
 const sessionsTotal = ref(0)
 const sessionsTotalPages = ref(1)
 const paginatedSessions = computed(() => sessions.value)
-const today = new Date()
-const lastWeek = new Date(today)
-lastWeek.setDate(lastWeek.getDate() - 7)
+const defaultDateRange = getDashboardPresetDateRange('7d')
 
 const sessionFilters = reactive({
   cashboxId: '',
   status: '',
   userId: '',
-  startDate: lastWeek.toISOString().split('T')[0],
-  endDate: today.toISOString().split('T')[0]
+  startDate: defaultDateRange.from,
+  endDate: defaultDateRange.to
 })
 
 const actionLoading = ref(false)
@@ -1557,8 +1556,8 @@ const filters = reactive({
   direction: '',
   method: '',
   userId: '',
-  startDate: lastWeek.toISOString().split('T')[0],
-  endDate: today.toISOString().split('T')[0]
+  startDate: defaultDateRange.from,
+  endDate: defaultDateRange.to
 })
 
 const cashUsers = ref<CashUser[]>([])
@@ -1619,12 +1618,9 @@ const resetTxFilters = () => {
   filters.method = ''
   filters.userId = ''
   
-  const today = new Date()
-  const lastWeek = new Date(today)
-  lastWeek.setDate(lastWeek.getDate() - 7)
-  
-  filters.startDate = lastWeek.toISOString().split('T')[0]
-  filters.endDate = today.toISOString().split('T')[0]
+  const range = getDashboardPresetDateRange('7d')
+  filters.startDate = range.from
+  filters.endDate = range.to
 }
 
 const resetSessionFilters = () => {
@@ -1632,12 +1628,9 @@ const resetSessionFilters = () => {
   sessionFilters.status = ''
   sessionFilters.userId = ''
   
-  const today = new Date()
-  const lastWeek = new Date(today)
-  lastWeek.setDate(lastWeek.getDate() - 7)
-  
-  sessionFilters.startDate = lastWeek.toISOString().split('T')[0]
-  sessionFilters.endDate = today.toISOString().split('T')[0]
+  const range = getDashboardPresetDateRange('7d')
+  sessionFilters.startDate = range.from
+  sessionFilters.endDate = range.to
 }
 
 const openSessionOpen = ref(false)

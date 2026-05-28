@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'app_config.dart';
 import 'bootstrap.dart';
 import 'providers/settings_provider.dart';
 import 'router.dart';
@@ -13,10 +14,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await initializeDateFormatting();
-
-  final defaultApiBaseUrl = false
-      ? 'http://localhost:3000/api'
-      : 'https://swekly.com/api';
 
   final bootstrap = await AppStorage.loadBootstrap(
     defaultApiBaseUrl: defaultApiBaseUrl,
@@ -29,7 +26,9 @@ Future<void> main() async {
       fallbackLocale: const Locale('en'),
       useOnlyLangCode: true,
       child: ProviderScope(
-        overrides: [bootstrapProvider.overrideWithValue(bootstrap)],
+        overrides: [
+          bootstrapProvider.overrideWith(() => BootstrapNotifier(bootstrap)),
+        ],
         child: const AdminApp(),
       ),
     ),

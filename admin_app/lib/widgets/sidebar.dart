@@ -7,6 +7,7 @@ import '../providers/auth_provider.dart';
 import '../providers/sidebar_provider.dart';
 import '../providers/store_settings_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/feature_access.dart';
 
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key});
@@ -27,6 +28,12 @@ class Sidebar extends ConsumerWidget {
     return user.role == 'owner' || user.role == 'admin';
   }
 
+  bool _canReadAnySettings(AuthState auth) {
+    return _canRead(auth, 'storeSettings') ||
+        _canRead(auth, 'homepageSettings') ||
+        _isTenantAdmin(auth);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCollapsed = ref.watch(sidebarProvider);
@@ -34,7 +41,9 @@ class Sidebar extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final sidebarBg = isDark ? AppColors.sidebarBg : AppColors.lightSidebarBg;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSidebarBorder;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -158,11 +167,12 @@ class Sidebar extends ConsumerWidget {
                           label: 'admin.nav.customers'.tr(),
                           icon: LucideIcons.users,
                         ),
-                      _NavItem(
-                        route: '/settings',
-                        label: 'admin.nav.settings'.tr(),
-                        icon: LucideIcons.palette,
-                      ),
+                      if (_canReadAnySettings(authState))
+                        _NavItem(
+                          route: '/settings',
+                          label: 'admin.nav.settings'.tr(),
+                          icon: LucideIcons.palette,
+                        ),
                       if (_isTenantAdmin(authState))
                         _NavItem(
                           route: '/users',
@@ -174,12 +184,26 @@ class Sidebar extends ConsumerWidget {
                           route: '/integrations',
                           label: 'admin.nav.integrations'.tr(),
                           icon: LucideIcons.plug,
+                          disabled: FeatureAccess.isLockedForMode(
+                            authState.mode,
+                            OnlineTierFeature.integrations,
+                          ),
+                          disabledReason: FeatureAccess.infoFor(
+                            OnlineTierFeature.integrations,
+                          ).description,
                         ),
                       if (_canRead(authState, 'billing'))
                         _NavItem(
                           route: '/billing',
                           label: 'admin.nav.billing'.tr(),
                           icon: LucideIcons.creditCard,
+                          disabled: FeatureAccess.isLockedForMode(
+                            authState.mode,
+                            OnlineTierFeature.billing,
+                          ),
+                          disabledReason: FeatureAccess.infoFor(
+                            OnlineTierFeature.billing,
+                          ).description,
                         ),
                     ],
                     context: context,
@@ -206,9 +230,15 @@ class Sidebar extends ConsumerWidget {
         : 'Swekly';
     final storeSlug = storeState.settings.slug;
     final initial = storeName.isNotEmpty ? storeName[0].toUpperCase() : 'S';
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSidebarBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return Container(
       height: 52,
@@ -281,8 +311,12 @@ class Sidebar extends ConsumerWidget {
     required bool isDark,
     required BuildContext context,
   }) {
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
-    final labelColor = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSidebarBorder;
+    final labelColor = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return Column(
       crossAxisAlignment: isCollapsed
@@ -308,7 +342,9 @@ class Sidebar extends ConsumerWidget {
             height: 1,
             color: borderColor,
           ),
-        ...items.map((item) => _buildNavItem(context, item, isCollapsed, isDark)),
+        ...items.map(
+          (item) => _buildNavItem(context, item, isCollapsed, isDark),
+        ),
       ],
     );
   }
@@ -327,12 +363,15 @@ class Sidebar extends ConsumerWidget {
     final activeColor = isDark
         ? AppColors.sidebarActiveColor
         : AppColors.lightSidebarActiveColor;
-    final inactiveIconColor =
-        isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final inactiveLabelColor =
-        isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-    final hoverColor =
-        isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
+    final inactiveIconColor = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final inactiveLabelColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final hoverColor = isDark
+        ? AppColors.navHoverBg
+        : AppColors.lightNavHoverBg;
 
     Widget content = Container(
       height: 32,
@@ -346,9 +385,7 @@ class Sidebar extends ConsumerWidget {
                 color: AppColors.brand.withValues(alpha: 0.16),
               ),
             )
-          : BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-            ),
+          : BoxDecoration(borderRadius: BorderRadius.circular(8)),
       child: Row(
         mainAxisAlignment: isCollapsed
             ? MainAxisAlignment.center
@@ -357,27 +394,43 @@ class Sidebar extends ConsumerWidget {
           Icon(
             item.icon,
             size: 15,
-            color: isActive ? activeColor : inactiveIconColor,
+            color: item.disabled
+                ? inactiveIconColor.withValues(alpha: 0.45)
+                : (isActive ? activeColor : inactiveIconColor),
           ),
           if (!isCollapsed) ...[
             const SizedBox(width: 10),
-            Text(
-              item.label,
-              style: TextStyle(
-                color: isActive ? activeColor : inactiveLabelColor,
-                fontSize: 12.5,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+            Expanded(
+              child: Text(
+                item.label,
+                style: TextStyle(
+                  color: item.disabled
+                      ? inactiveLabelColor.withValues(alpha: 0.55)
+                      : (isActive ? activeColor : inactiveLabelColor),
+                  fontSize: 12.5,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                ),
               ),
             ),
+            if (item.disabled)
+              Icon(
+                LucideIcons.lock,
+                size: 12,
+                color: inactiveIconColor.withValues(alpha: 0.5),
+              ),
           ],
         ],
       ),
     );
 
     if (isCollapsed) {
-      final tooltipBg = isDark ? const Color(0xFF1E293B) : const Color(0xFF334155);
+      final tooltipBg = isDark
+          ? const Color(0xFF1E293B)
+          : const Color(0xFF334155);
       content = Tooltip(
-        message: item.label,
+        message: item.disabled && item.disabledReason != null
+            ? '${item.label}\n${item.disabledReason}'
+            : item.label,
         preferBelow: false,
         verticalOffset: 0,
         margin: const EdgeInsets.only(left: 16),
@@ -398,13 +451,15 @@ class Sidebar extends ConsumerWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          if (Scaffold.of(context).hasDrawer &&
-              Scaffold.of(context).isDrawerOpen) {
-            Navigator.of(context).pop();
-          }
-          context.go(item.route);
-        },
+        onTap: item.disabled
+            ? null
+            : () {
+                if (Scaffold.of(context).hasDrawer &&
+                    Scaffold.of(context).isDrawerOpen) {
+                  Navigator.of(context).pop();
+                }
+                context.go(item.route);
+              },
         hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(8),
         child: content,
@@ -424,10 +479,18 @@ class Sidebar extends ConsumerWidget {
     final role = user?.role ?? '—';
     final emailInitial = (user?.email ?? 'A')[0].toUpperCase();
 
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final hoverColor = isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSidebarBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final hoverColor = isDark
+        ? AppColors.navHoverBg
+        : AppColors.lightNavHoverBg;
 
     return Container(
       padding: const EdgeInsets.all(8),
@@ -518,6 +581,14 @@ class _NavItem {
   final String route;
   final String label;
   final IconData icon;
+  final bool disabled;
+  final String? disabledReason;
 
-  _NavItem({required this.route, required this.label, required this.icon});
+  _NavItem({
+    required this.route,
+    required this.label,
+    required this.icon,
+    this.disabled = false,
+    this.disabledReason,
+  });
 }

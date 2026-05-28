@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'models/app_mode.dart';
 import 'providers/auth_provider.dart';
 import 'bootstrap.dart';
+import 'screens/activation_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -18,6 +19,11 @@ import 'screens/category_form_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/settings/printers_settings_page.dart';
 import 'screens/settings/store_settings_page.dart';
+import 'screens/settings/contact_infos_page.dart';
+import 'screens/settings/store_appearance_page.dart';
+import 'screens/settings/homepage_settings_page.dart';
+import 'screens/settings/legal_pages_page.dart';
+import 'screens/settings/domain_settings_page.dart';
 import 'screens/customers_screen.dart';
 import 'screens/customer_detail_screen.dart';
 import 'screens/customer_form_screen.dart';
@@ -37,7 +43,10 @@ import 'screens/delivery_screen.dart';
 import 'screens/billing_screen.dart';
 import 'screens/integrations_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/feature_locked_screen.dart';
+import 'screens/storefront_tools_screen.dart';
 import 'widgets/app_shell.dart';
+import 'utils/feature_access.dart';
 
 // Custom transition that removes the slow overlay effect
 class NoTransitionPage extends CustomTransitionPage<void> {
@@ -73,6 +82,10 @@ String? _pathToResource(String path) {
   if (path.startsWith('/delivery')) return 'delivery';
   if (path.startsWith('/billing')) return 'billing';
   if (path.startsWith('/integrations')) return 'integrations';
+  if (path.startsWith('/settings/homepage')) return 'homepageSettings';
+  if (path.startsWith('/settings/contact')) return 'contactInfos';
+  if (path.startsWith('/storefront')) return 'storeSettings';
+  if (path.startsWith('/settings')) return 'storeSettings';
   return null;
 }
 
@@ -92,32 +105,47 @@ String _firstAllowedPath(List<String> permissions) {
   if (allow('cash')) return '/cash';
   if (allow('billing')) return '/billing';
   if (allow('integrations')) return '/integrations';
+  if (allow('storeSettings')) return '/settings';
+  if (allow('homepageSettings')) return '/settings/homepage';
+  if (allow('contactInfos')) return '/settings/contact';
   return '/orders';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
-  final bootstrap = ref.read(bootstrapProvider);
+  final bootstrap = ref.watch(bootstrapProvider);
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
       final path = state.uri.toString();
       final isLoggedIn = authState.isAuthenticated;
       final mode = authState.mode;
+      final isActivateRoute = path == '/activate';
       final isLoginRoute = path == '/login';
       final isRegisterRoute = path == '/register';
-      final isAuthRoute = isLoginRoute || isRegisterRoute;
+      final isAuthRoute = isLoginRoute || isRegisterRoute || isActivateRoute;
+      final lockedFeature = FeatureAccess.featureForRoute(state.uri.path);
+      final isProvisioned = bootstrap.isProvisioned;
+
+      if (!isProvisioned) {
+        return isActivateRoute ? null : '/activate';
+      }
+
+      if (isActivateRoute) {
+        if (mode == AppMode.offlineOnly || isLoggedIn) return '/';
+        return '/login';
+      }
 
       // Offline-only provisioned: skip login entirely, go straight to app.
       if (mode == AppMode.offlineOnly) {
-        if (isAuthRoute) return '/';
+        if (isLoginRoute || isRegisterRoute) return '/';
+        if (lockedFeature != null) {
+          return '/locked/${lockedFeature.name}';
+        }
         return null;
       }
 
-      // Unprovisioned: no token and no tenantId — need login.
-      final isProvisioned = isLoggedIn || bootstrap.tenantId.isNotEmpty;
-
-      if (!isProvisioned && !isAuthRoute) {
+      if (!isLoggedIn && !isAuthRoute) {
         return '/login';
       }
 
@@ -144,6 +172,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/activate',
+        pageBuilder: (context, state) => NoTransitionPage(
+          key: state.pageKey,
+          child: const ActivationScreen(),
+        ),
+      ),
       GoRoute(
         path: '/login',
         pageBuilder: (context, state) =>
@@ -389,7 +424,63 @@ final routerProvider = Provider<GoRouter>((ref) {
                   child: const StoreSettingsPage(),
                 ),
               ),
+              GoRoute(
+                path: 'contact',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const ContactInfosPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'appearance',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const StoreAppearancePage(),
+                ),
+              ),
+              GoRoute(
+                path: 'homepage',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const HomepageSettingsPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'legal',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const LegalPagesPage(),
+                ),
+              ),
+              GoRoute(
+                path: 'domains',
+                pageBuilder: (context, state) => NoTransitionPage(
+                  key: state.pageKey,
+                  child: const DomainSettingsPage(),
+                ),
+              ),
             ],
+          ),
+          GoRoute(
+            path: '/storefront/preview',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const StorefrontToolsScreen(mode: 'preview'),
+            ),
+          ),
+          GoRoute(
+            path: '/storefront/builder',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const StorefrontToolsScreen(mode: 'builder'),
+            ),
+          ),
+          GoRoute(
+            path: '/storefront/landing-builder',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const StorefrontToolsScreen(mode: 'landing-builder'),
+            ),
           ),
           GoRoute(
             path: '/pos',
@@ -408,6 +499,15 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const BillingScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/locked/:feature',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: FeatureLockedScreen(
+                featureName: state.pathParameters['feature'] ?? '',
+              ),
             ),
           ),
           GoRoute(

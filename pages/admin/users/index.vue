@@ -109,7 +109,17 @@
             <tr v-else-if="filteredUsers.length === 0">
               <td class="px-4 py-6" colspan="7" style="color: var(--text-tertiary)">{{ t('admin.pages.users.empty') }}</td>
             </tr>
-            <tr v-for="u in paginatedUsers" :key="u.id" class="ui-tr">
+            <tr
+              v-for="u in paginatedUsers"
+              :key="u.id"
+              class="ui-tr ui-tr--clickable"
+              role="button"
+              tabindex="0"
+              :aria-label="`${t('admin.common.edit')}: ${u.email}`"
+              @click="openUserRow($event, u)"
+              @keydown.enter="openUserRow($event, u)"
+              @keydown.space="openUserRow($event, u)"
+            >
               <td class="ui-td">
                 <a
                   :href="`mailto:${u.email}`"
@@ -149,7 +159,7 @@
                 <div class="flex items-center justify-end space-x-1">
                   <button
                     type="button"
-                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.common.edit')"
                     @click="openEdit(u)"
                   >
@@ -158,7 +168,7 @@
                   <button
                     v-if="u.isActive"
                     type="button"
-                    class="p-2 rounded-md transition-colors hover:text-amber-400 disabled:opacity-50" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.pages.users.actions.deactivate')"
                     :disabled="cannotDeactivate(u)"
                     @click="deactivate(u)"
@@ -168,7 +178,7 @@
                   <button
                     v-else
                     type="button"
-                    class="p-2 rounded-md transition-colors hover:text-emerald-400" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.pages.users.actions.activate')"
                     @click="setActive(u, true)"
                   >
@@ -267,7 +277,17 @@
             <tr v-else-if="(staffRoles || []).length === 0">
               <td class="px-4 py-6" colspan="3" style="color: var(--text-tertiary)">{{ t('admin.pages.users.roles.empty') }}</td>
             </tr>
-            <tr v-for="r in staffRoles" :key="r.id" class="ui-tr">
+            <tr
+              v-for="r in staffRoles"
+              :key="r.id"
+              class="ui-tr ui-tr--clickable"
+              role="button"
+              tabindex="0"
+              :aria-label="`${t('admin.common.edit')}: ${r.name}`"
+              @click="openRoleRow($event, r)"
+              @keydown.enter="openRoleRow($event, r)"
+              @keydown.space="openRoleRow($event, r)"
+            >
               <td class="ui-td">
                 <div class="font-medium" style="color: var(--text-primary)">{{ r.name }}</div>
               </td>
@@ -305,7 +325,7 @@
                 <div class="flex items-center justify-end space-x-1">
                   <button
                     type="button"
-                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.common.edit')"
                     @click="openEditRole(r)"
                   >
@@ -313,7 +333,7 @@
                   </button>
                   <button
                     type="button"
-                    class="p-2 rounded-md transition-colors hover:text-red-400" style="color: var(--text-muted)"
+                    class="ui-table-action ui-table-action--danger"
                     :title="t('admin.common.delete')"
                     @click="deleteRole(r)"
                   >
@@ -799,6 +819,12 @@ const openEdit = (u: TenantUser) => {
   modalOpen.value = true
 }
 
+function openUserRow(event: Event, user: TenantUser) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  openEdit(user)
+}
+
 const closeModal = () => {
   modalOpen.value = false
   saving.value = false
@@ -1095,6 +1121,12 @@ const openEditRole = (role: StaffRole) => {
     }
   }
   roleModalOpen.value = true
+}
+
+function openRoleRow(event: Event, role: StaffRole) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  openEditRole(role)
 }
 
 const closeRoleModal = () => {

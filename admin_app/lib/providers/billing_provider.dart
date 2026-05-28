@@ -1,29 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/billing_models.dart';
 import '../repositories/billing_repository.dart';
 import '../services/api_service.dart';
 import 'auth_provider.dart';
 
 class BillingState {
-  final Subscription? currentSubscription;
+  final BillingSnapshot? snapshot;
   final List<SubscriptionPlan> availablePlans;
+  final List<BillingPayment> payments;
   final bool isLoading;
+  final String interval;
+  final String? error;
 
-  BillingState({
-    this.currentSubscription,
+  const BillingState({
+    this.snapshot,
     this.availablePlans = const [],
+    this.payments = const [],
     this.isLoading = false,
+    this.interval = 'month',
+    this.error,
   });
 
   BillingState copyWith({
-    Subscription? currentSubscription,
+    BillingSnapshot? snapshot,
     List<SubscriptionPlan>? availablePlans,
+    List<BillingPayment>? payments,
     bool? isLoading,
+    String? interval,
+    String? error,
   }) {
     return BillingState(
-      currentSubscription: currentSubscription ?? this.currentSubscription,
+      snapshot: snapshot ?? this.snapshot,
       availablePlans: availablePlans ?? this.availablePlans,
+      payments: payments ?? this.payments,
       isLoading: isLoading ?? this.isLoading,
+      interval: interval ?? this.interval,
+      error: error,
     );
   }
 }
@@ -35,53 +48,86 @@ class BillingNotifier extends Notifier<BillingState> {
   BillingState build() {
     final api = ref.watch(apiProvider);
     _repo = BillingRepository(api);
-    Future.microtask(() => loadSubscription());
-    return BillingState(
-      availablePlans: [
-        SubscriptionPlan(
-          code: 'basic',
-          name: 'Basic',
-          price: 29.0,
-          features: 'Up to 100 orders/mo',
-        ),
-        SubscriptionPlan(
-          code: 'pro',
-          name: 'Pro',
-          price: 79.0,
-          features: 'Unlimited orders, POS included',
-        ),
-        SubscriptionPlan(
-          code: 'enterprise',
-          name: 'Enterprise',
-          price: 199.0,
-          features: 'Dedicated support, API access',
-        ),
-      ],
-    );
+    Future.microtask(load);
+    return const BillingState();
   }
 
-  Future<void> loadSubscription({bool forceRefresh = false}) async {
-    state = state.copyWith(isLoading: true);
+  Future<void> load() async {
+    state = state.copyWith(isLoading: true, error: null);
     try {
-      final sub = await _repo.getSubscription(forceRefresh: forceRefresh);
-      state = state.copyWith(currentSubscription: sub, isLoading: false);
-      // If a payment/upgrade happened outside the app, refresh tenant flags (e.g. isOffline).
+      final plans = await _repo.listPlans();
+      final snapshot = await _repo.getSnapshot();
+      final payments = await _repo.listPayments();
+      state = state.copyWith(
+        availablePlans: plans,
+        snapshot: snapshot,
+        payments: payments,
+        interval: snapshot.subscription.interval,
+        isLoading: false,
+      );
       ref.read(authProvider.notifier).refreshMe();
     } catch (e) {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
-  Future<void> upgradePlan(String planCode) async {
-    state = state.copyWith(isLoading: true);
-    await Future.delayed(const Duration(seconds: 1));
-    final newSub = Subscription(
-      planCode: planCode,
-      status: 'ACTIVE',
-      nextBillingDate: DateTime.now().add(const Duration(days: 30)),
-    );
-    state = state.copyWith(currentSubscription: newSub, isLoading: false);
-    ref.read(authProvider.notifier).refreshMe();
+  void setInterval(String interval) {
+    state = state.copyWith(interval: interval);
+  }
+
+  Future<void> simulatePayment(String planCode) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final snapshot = await _repo.simulatePayment(
+        planCode: planCode,
+        interval: state.interval,
+      );
+      final payments = await _repo.listPayments();
+      state = state.copyWith(
+        snapshot: snapshot,
+        payments: payments,
+        interval: snapshot.subscription.interval,
+        isLoading: false,
+      );
+      ref.read(authProvider.notifier).refreshMe();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> submitPayment({
+    required String planCode,
+    required String method,
+    String? notes,
+  }) async {
+    SubscriptionPlan? plan;
+    for (final item in state.availablePlans) {
+      if (item.code == planCode) {
+        plan = item;
+        break;
+      }
+    }
+    if (plan == null) {
+      throw Exception('Unknown plan selected');
+    }
+
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _repo.submitPayment(
+        planCode: planCode,
+        interval: state.interval,
+        method: method,
+        amountDzd: state.interval == 'year'
+            ? plan.annualAmountDzd * 12
+            : plan.monthlyAmountDzd,
+        notes: notes,
+      );
+      await load();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
   }
 }
 

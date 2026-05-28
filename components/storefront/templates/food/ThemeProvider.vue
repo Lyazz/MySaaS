@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('food')
 
   const storeStyle = computed(() => {
-    const primaryColor = '#ea580c' // Orange-600 default
+    const primaryColor = brandColor.value.color
   
     // Helper to convert hex to rgb
     const hexToRgb = (hex: string) => {

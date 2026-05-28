@@ -1,3 +1,5 @@
+import 'package:sqflite_sqlcipher/sqflite.dart';
+
 import '../models/store_settings.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
@@ -19,6 +21,7 @@ class StoreSettingsRepository {
       'store_settings',
       where: 'tenantId = ?',
       whereArgs: [_tid],
+      limit: 1,
     );
 
     StoreSettings localSettings = StoreSettings.empty;
@@ -35,13 +38,19 @@ class StoreSettingsRepository {
 
     if (forceRefresh || await _syncService.isOnline) {
       try {
-        final response = await _apiService.client.get('/app/init');
+        final response = await _apiService.client.get('/admin/store-settings');
         final data = response.data;
-        if (data is Map && data.containsKey('settings')) {
-          final remoteSettings = StoreSettings.fromJson(data['settings']);
+        if (data is Map) {
+          final remoteSettings = StoreSettings.fromJson(
+            Map<String, dynamic>.from(data),
+          );
 
           await db.transaction((txn) async {
-            await txn.delete('store_settings', where: 'tenantId = ?', whereArgs: [_tid]);
+            await txn.delete(
+              'store_settings',
+              where: 'tenantId = ?',
+              whereArgs: [_tid],
+            );
             await txn.insert('store_settings', {
               'id': 'singleton_$_tid',
               'tenantId': _tid,
@@ -55,24 +64,34 @@ class StoreSettingsRepository {
           return remoteSettings;
         }
       } catch (_) {
-        // Fail silently on background fetch; local cache remains
+        // Keep the local cache when the remote admin endpoint is unavailable.
       }
     }
+
     return localSettings;
   }
 
   Future<StoreSettings> patchStoreSettings(Map<String, dynamic> patch) async {
-    try {
-      final res = await _apiService.client.patch(
-        '/admin/store-settings',
-        data: patch,
-      );
-      final data = res.data;
-      return StoreSettings.fromJson(
-        data is Map ? Map<String, dynamic>.from(data) : {},
-      );
-    } catch (e) {
-      rethrow;
-    }
+    final res = await _apiService.client.patch(
+      '/admin/store-settings',
+      data: patch,
+    );
+    final data = res.data;
+    final settings = StoreSettings.fromJson(
+      data is Map ? Map<String, dynamic>.from(data) : {},
+    );
+
+    final db = await _dbService.database;
+    await db.insert('store_settings', {
+      'id': 'singleton_$_tid',
+      'tenantId': _tid,
+      'name': settings.name,
+      'slug': settings.slug,
+      'currencyCode': settings.currencyCode,
+      'currencyCountry': settings.currencyCountry,
+      'isCompleted': settings.isCompleted ? 1 : 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+    return settings;
   }
 }

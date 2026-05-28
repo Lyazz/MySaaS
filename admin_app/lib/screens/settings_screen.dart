@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+
+import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/workspace_provider.dart';
-import '../widgets/form/form_input.dart';
-import '../widgets/dialogs/app_dialog.dart';
 import '../theme/app_theme.dart';
+import '../utils/feature_access.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -17,36 +18,80 @@ class SettingsScreen extends ConsumerWidget {
     final settingsState = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
     final workspace = ref.watch(workspaceProvider);
+    final auth = ref.watch(authProvider);
+    final isOfflineTier = auth.mode == AppMode.offlineOnly;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
-    final borderColor = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
-    Widget card(List<Widget> children) => Container(
+    Widget section(String title, List<Widget> children) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title.toUpperCase(),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: textMuted,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
           decoration: BoxDecoration(
             color: surface1,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(color: borderColor),
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
           ),
           child: Column(children: children),
-        );
+        ),
+      ],
+    );
 
-    Widget iconBadge({required IconData icon, required Color bg, required Color fg}) =>
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: fg, size: 20),
-        );
+    Widget tile({
+      required String title,
+      required String subtitle,
+      required IconData icon,
+      String? route,
+      OnlineTierFeature? lockedFeature,
+      bool enabled = true,
+    }) {
+      final locked =
+          lockedFeature != null &&
+          FeatureAccess.isLockedForMode(auth.mode, lockedFeature);
+
+      return ListTile(
+        enabled: enabled && !locked,
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: locked ? textMuted : textPrimary,
+          ),
+        ),
+        subtitle: Text(
+          locked ? '$subtitle\nAvailable on online tiers.' : subtitle,
+          style: TextStyle(color: textMuted, height: 1.35),
+        ),
+        leading: Icon(icon, color: locked ? textMuted : AppColors.brand),
+        trailing: Icon(
+          locked ? LucideIcons.lock : LucideIcons.chevronRight,
+          size: 18,
+          color: textMuted,
+        ),
+        onTap: route == null
+            ? null
+            : () => context.push(
+                locked ? '/locked/${lockedFeature.name}' : route,
+              ),
+      );
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -54,186 +99,179 @@ class SettingsScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'App Settings',
+            'Settings',
             style: TextStyle(
               fontSize: 24,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.5,
+              fontWeight: FontWeight.w700,
               color: textPrimary,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
-            'Manage your application preferences',
+            'Manage local admin preferences, operational settings, and hosted storefront access.',
             style: TextStyle(fontSize: 14, color: textMuted),
           ),
-          const SizedBox(height: 32),
-          _sectionHeader('App Settings', textMuted),
-          const SizedBox(height: 16),
-          card([
+          const SizedBox(height: 24),
+          section('App', [
             SwitchListTile(
-              title: Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text('Enable dark theme for the application', style: TextStyle(color: textMuted)),
-              secondary: iconBadge(
-                icon: LucideIcons.moon,
-                bg: isDark ? const Color(0xFF2D1B52) : const Color(0xFFFAE8FF),
-                fg: isDark ? const Color(0xFFD8B4FE) : Colors.purple,
+              title: Text(
+                'Dark Mode',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
               ),
-              activeThumbColor: AppColors.brandContrast,
-              activeTrackColor: AppColors.brand,
+              subtitle: Text(
+                'Enable the dark admin theme.',
+                style: TextStyle(color: textMuted),
+              ),
               value: settingsState.themeMode == ThemeMode.dark,
               onChanged: (_) => notifier.toggleTheme(),
             ),
-          ]),
-          const SizedBox(height: 32),
-          _sectionHeader('Notifications', textMuted),
-          const SizedBox(height: 16),
-          card([
-            SwitchListTile(
-              title: Text('Push Notifications', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text('Receive alerts for new orders and low stock', style: TextStyle(color: textMuted)),
-              secondary: iconBadge(
-                icon: LucideIcons.bell,
-                bg: isDark ? AppColors.redSurface : const Color(0xFFFEE2E2),
-                fg: isDark ? AppColors.redText : Colors.red,
-              ),
-              activeThumbColor: AppColors.brandContrast,
-              activeTrackColor: AppColors.brand,
-              value: settingsState.notificationsEnabled,
-              onChanged: notifier.toggleNotifications,
-            ),
-          ]),
-          const SizedBox(height: 32),
-          _sectionHeader('General', textMuted),
-          const SizedBox(height: 16),
-          card([
-            ListTile(
-              title: Text('Workspace', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text(workspace.apiBaseUrl, style: TextStyle(color: textMuted)),
-              leading: iconBadge(
-                icon: LucideIcons.link,
-                bg: isDark ? AppColors.blueSurface : const Color(0xFFDBEAFE),
-                fg: isDark ? AppColors.blueText : Colors.blue,
-              ),
-              trailing: Icon(LucideIcons.chevronRight, size: 20, color: textMuted),
-              onTap: () async {
-                final controller = TextEditingController(text: workspace.apiBaseUrl);
-                final ok = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AppDialog(
-                    title: 'Workspace URL',
-                    description: 'Change the API base URL used by this admin app.',
-                    content: FormInput(
-                      label: 'Workspace URL',
-                      controller: controller,
-                      hint: 'https://your-tenant.platform.com',
-                    ),
-                    secondaryLabel: 'Cancel',
-                    onSecondary: () => Navigator.of(ctx).pop(false),
-                    primaryLabel: 'Save',
-                    onPrimary: () => Navigator.of(ctx).pop(true),
-                  ),
-                );
-                if (ok != true) return;
-                try {
-                  await ref.read(workspaceProvider.notifier).setWorkspaceUrl(controller.text);
-                } catch (e) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                }
-              },
-            ),
             Divider(height: 1, color: borderColor),
             ListTile(
-              title: Text('Currency', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text(settingsState.currency, style: TextStyle(color: textMuted)),
-              leading: iconBadge(
-                icon: LucideIcons.dollarSign,
-                bg: isDark ? AppColors.greenSurface : const Color(0xFFDCFCE7),
-                fg: isDark ? AppColors.greenText : Colors.green,
+              title: Text(
+                'Provisioned workspace',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
               ),
-              trailing: Icon(LucideIcons.chevronRight, size: 20, color: textMuted),
-              onTap: () {},
+              subtitle: Text(
+                '${workspace.apiBaseUrl}\nManaged by secure provisioning.',
+                style: TextStyle(color: textMuted, height: 1.35),
+              ),
+              leading: const Icon(
+                LucideIcons.shieldCheck,
+                color: AppColors.brand,
+              ),
             ),
             Divider(height: 1, color: borderColor),
-            ListTile(
-              title: Text('Printers', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text('Manage receipt printers', style: TextStyle(color: textMuted)),
-              leading: iconBadge(
-                icon: LucideIcons.printer,
-                bg: isDark ? AppColors.amberSurface : const Color(0xFFFFEDD5),
-                fg: isDark ? AppColors.amberText : Colors.orange,
-              ),
-              trailing: Icon(LucideIcons.chevronRight, size: 20, color: textMuted),
-              onTap: () => context.go('/settings/printers'),
-            ),
-            Divider(height: 1, color: borderColor),
-            ListTile(
-              title: Text('Store Settings', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text('Name, contact info, functional options', style: TextStyle(color: textMuted)),
-              leading: iconBadge(
-                icon: LucideIcons.store,
-                bg: isDark ? AppColors.greenSurface : const Color(0xFFD1FAE5),
-                fg: isDark ? AppColors.greenText : Colors.green,
-              ),
-              trailing: Icon(LucideIcons.chevronRight, size: 20, color: textMuted),
-              onTap: () => context.push('/settings/store'),
-            ),
-            Divider(height: 1, color: borderColor),
-            ListTile(
-              title: Text('Setup Checklist', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text('Track your store setup progress', style: TextStyle(color: textMuted)),
-              leading: iconBadge(
-                icon: LucideIcons.clipboardCheck,
-                bg: isDark ? AppColors.greenSurface : const Color(0xFFD1FAE5),
-                fg: isDark ? AppColors.greenText : Colors.green,
-              ),
-              trailing: Icon(LucideIcons.chevronRight, size: 20, color: textMuted),
-              onTap: () => context.push('/onboarding'),
-            ),
-            Divider(height: 1, color: borderColor),
-            ListTile(
-              title: Text('Language', style: TextStyle(fontWeight: FontWeight.w500, color: textPrimary)),
-              subtitle: Text('English (US)', style: TextStyle(color: textMuted)),
-              leading: iconBadge(
-                icon: LucideIcons.languages,
-                bg: isDark ? AppColors.blueSurface : const Color(0xFFDBEAFE),
-                fg: isDark ? AppColors.blueText : Colors.blue,
-              ),
-              trailing: Icon(LucideIcons.chevronRight, size: 20, color: textMuted),
-              onTap: () {},
+            tile(
+              title: 'Printers',
+              subtitle: 'Manage receipt and device printing.',
+              icon: LucideIcons.printer,
+              route: '/settings/printers',
             ),
           ]),
-          const SizedBox(height: 32),
-          _sectionHeader('Account', textMuted),
-          const SizedBox(height: 16),
-          card([
-            ListTile(
-              title: const Text('Log Out', style: TextStyle(fontWeight: FontWeight.w500, color: Colors.red)),
-              leading: iconBadge(
-                icon: LucideIcons.logOut,
-                bg: isDark ? AppColors.redSurface : const Color(0xFFFEE2E2),
-                fg: isDark ? AppColors.redText : Colors.red,
-              ),
-              onTap: () {
-                ref.read(authProvider.notifier).logout();
-                context.go('/login');
-              },
+          const SizedBox(height: 24),
+          section('Admin Operations', [
+            tile(
+              title: 'Store Settings',
+              subtitle:
+                  'Order prefixes, checkout rules, and operational defaults.',
+              icon: LucideIcons.store,
+              route: '/settings/store',
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Contact Information',
+              subtitle: 'Manage phone, email, address, and social links.',
+              icon: LucideIcons.contact,
+              route: '/settings/contact',
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Setup Checklist',
+              subtitle: 'Track onboarding progress for this tenant.',
+              icon: LucideIcons.clipboardCheck,
+              route: '/onboarding',
             ),
           ]),
+          const SizedBox(height: 24),
+          section('Hosted Storefront', [
+            tile(
+              title: 'Appearance',
+              subtitle: 'Theme, logo, color, language, and announcement bar.',
+              icon: LucideIcons.palette,
+              route: '/settings/appearance',
+              lockedFeature: OnlineTierFeature.appearance,
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Homepage',
+              subtitle: 'Hero carousel and storefront homepage sections.',
+              icon: LucideIcons.layoutTemplate,
+              route: '/settings/homepage',
+              lockedFeature: OnlineTierFeature.homepage,
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Legal Pages',
+              subtitle: 'Terms, privacy, returns, and public contact pages.',
+              icon: LucideIcons.fileText,
+              route: '/settings/legal',
+              lockedFeature: OnlineTierFeature.legal,
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Custom Domains',
+              subtitle: 'Attach a custom domain to the hosted storefront.',
+              icon: LucideIcons.globe,
+              route: '/settings/domains',
+              lockedFeature: OnlineTierFeature.domains,
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Storefront Preview',
+              subtitle: 'Open the existing hosted storefront preview.',
+              icon: LucideIcons.monitorPlay,
+              route: '/storefront/preview',
+              lockedFeature: OnlineTierFeature.preview,
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Template Builder',
+              subtitle: 'Open the web-based template builder.',
+              icon: LucideIcons.layoutGrid,
+              route: '/storefront/builder',
+              lockedFeature: OnlineTierFeature.builder,
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Landing Page Builder',
+              subtitle: 'Open the web-based marketing landing page builder.',
+              icon: LucideIcons.brush,
+              route: '/storefront/landing-builder',
+              lockedFeature: OnlineTierFeature.landingBuilder,
+            ),
+          ]),
+          const SizedBox(height: 24),
+          section('Cloud', [
+            tile(
+              title: 'Integrations',
+              subtitle: 'Cloud-connected integrations and notifications.',
+              icon: LucideIcons.plug,
+              route: '/integrations',
+              lockedFeature: OnlineTierFeature.integrations,
+            ),
+            Divider(height: 1, color: borderColor),
+            tile(
+              title: 'Billing & Subscription',
+              subtitle: 'Usage, plans, and payment submission.',
+              icon: LucideIcons.creditCard,
+              route: '/billing',
+              lockedFeature: OnlineTierFeature.billing,
+            ),
+          ]),
+          if (isOfflineTier) ...[
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.brand.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.brand.withValues(alpha: 0.14),
+                ),
+              ),
+              child: Text(
+                'This tenant is provisioned for offline-only operation. Hosted storefront and cloud features stay visible here but remain locked until the tenant upgrades to an online tier.',
+                style: TextStyle(color: textPrimary, height: 1.45),
+              ),
+            ),
+          ],
         ],
-      ),
-    );
-  }
-
-  Widget _sectionHeader(String title, Color color) {
-    return Text(
-      title.toUpperCase(),
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: color,
-        letterSpacing: 1,
       ),
     );
   }

@@ -117,18 +117,20 @@
             <div class="color-controls">
               <label class="color-swatch" :style="{ background: form.primaryColor }">
                 <input
-                  v-model="form.primaryColor"
+                  :value="form.primaryColor"
                   type="color"
                   class="color-input"
+                  @input="handlePrimaryColorInput"
                 >
                 <Icon name="lucide:pipette" class="color-swatch-icon" />
               </label>
               <input
-                v-model="form.primaryColor"
+                :value="form.primaryColor"
                 type="text"
                 pattern="^#+([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$"
                 class="field-input color-hex-input"
                 placeholder="#C6F432"
+                @input="handlePrimaryColorInput"
               >
               <div class="color-presets-inline">
                 <button
@@ -139,12 +141,26 @@
                   :class="{ 'is-active': form.primaryColor === color }"
                   :style="{ background: color }"
                   :aria-label="color"
-                  @click="form.primaryColor = color"
+                  @click="setPrimaryColor(color)"
                 >
                   <Icon v-if="form.primaryColor === color" name="lucide:check" class="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
+            <label class="brand-color-toggle">
+              <input
+                v-model="form.useBrandColor"
+                type="checkbox"
+                class="brand-color-toggle-input"
+              >
+              <span class="brand-color-toggle-track">
+                <span class="brand-color-toggle-thumb" />
+              </span>
+              <span class="brand-color-toggle-copy">
+                <span>{{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.overrideLabel') }}</span>
+                <small>{{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.overrideHint') }}</small>
+              </span>
+            </label>
           </div>
         </div>
       </SettingsSection>
@@ -195,7 +211,7 @@
               <Icon name="lucide:check" class="w-3.5 h-3.5" />
             </span>
 
-            <div class="template-card-preview" :style="{ background: tpl.bg, '--accent': tpl.color, '--card-bg': tpl.cardBg, '--border': tpl.border }">
+            <div class="template-card-preview" :style="{ background: tpl.bg, '--accent': templateAccent(tpl), '--card-bg': tpl.cardBg, '--border': tpl.border }">
               <div class="template-card-accent" />
               <div class="template-card-mockup" :style="{ background: tpl.cardBg, borderRadius: tpl.radius, borderColor: tpl.border }">
                 <div class="template-card-mockup-img" :style="{ background: tpl.imgBg }">
@@ -203,10 +219,10 @@
                 </div>
                 <div class="template-card-mockup-body" :style="{ fontFamily: tpl.fontStyle }">
                   <p class="template-card-mockup-name" :style="{ color: tpl.textColor }">{{ tpl.sampleDesc }}</p>
-                  <p class="template-card-mockup-price" :style="{ color: tpl.color }">{{ tpl.samplePrice }}</p>
+                  <p class="template-card-mockup-price" :style="{ color: templateAccent(tpl) }">{{ tpl.samplePrice }}</p>
                   <span
                     class="template-card-mockup-cta"
-                    :style="{ background: tpl.color, color: tpl.btnText, borderRadius: tpl.radius }"
+                    :style="{ background: templateAccent(tpl), color: tpl.btnText, borderRadius: tpl.radius }"
                   >BUY</span>
                 </div>
               </div>
@@ -226,9 +242,9 @@
               </div>
               <p class="template-card-desc">{{ tpl.storeTypes }}</p>
               <div class="template-card-pills">
-                <span class="template-card-pill template-card-pill-color" :style="{ '--c': tpl.color }">
-                  <span class="template-card-pill-dot" :style="{ background: tpl.color }" />
-                  {{ tpl.color.toUpperCase() }}
+                <span class="template-card-pill template-card-pill-color" :style="{ '--c': templateAccent(tpl) }">
+                  <span class="template-card-pill-dot" :style="{ background: templateAccent(tpl) }" />
+                  {{ templateAccent(tpl).toUpperCase() }}
                 </span>
                 <span class="template-card-pill">
                   <Icon name="lucide:type" class="w-3 h-3" />
@@ -289,6 +305,7 @@ import SettingsSection from './settings/SettingsSection.vue'
 import SettingsSaveBar from './settings/SettingsSaveBar.vue'
 import SettingsAnchorTabs from './settings/SettingsAnchorTabs.vue'
 import BrandImageField from './settings/BrandImageField.vue'
+import { normalizeHexColor } from '~/shared/storefront/template-brand'
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
@@ -308,6 +325,7 @@ const form = reactive({
   logoUrl: null as string | null,
   faviconUrl: null as string | null,
   primaryColor: '#C6F432',
+  useBrandColor: false,
   templateKey: 'classic'
 })
 
@@ -409,6 +427,20 @@ function handleSlugInput(e: Event) {
   form.slug = target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
 }
 
+function setPrimaryColor(color: string) {
+  form.primaryColor = color
+  form.useBrandColor = true
+}
+
+function handlePrimaryColorInput(e: Event) {
+  const target = e.target as HTMLInputElement
+  setPrimaryColor(target.value)
+}
+
+function templateAccent(tpl: { color: string }) {
+  return form.useBrandColor ? (normalizeHexColor(form.primaryColor) || tpl.color) : tpl.color
+}
+
 function showMessage(type: 'success' | 'error', text: string) {
   message.type = type
   message.text = text
@@ -441,6 +473,7 @@ function updateForm(data: any) {
   form.logoUrl = data.logoUrl || null
   form.faviconUrl = data.faviconUrl || null
   form.primaryColor = data.primaryColor || '#C6F432'
+  form.useBrandColor = data.useBrandColor === true
   form.templateKey = data.templateKey || 'classic'
   initialFormString.value = JSON.stringify(form)
 }
@@ -471,6 +504,7 @@ async function save() {
         name: form.name,
         slug: form.slug,
         primaryColor: form.primaryColor,
+        useBrandColor: form.useBrandColor,
         templateKey: form.templateKey,
         logoUrl: form.logoUrl,
         faviconUrl: form.faviconUrl
@@ -757,6 +791,72 @@ function reset() {
   font-family: ui-monospace, monospace;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.brand-color-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  cursor: pointer;
+}
+
+.brand-color-toggle-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.brand-color-toggle-track {
+  width: 42px;
+  height: 24px;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  border: 1px solid var(--surface-border);
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.brand-color-toggle-thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--text-muted);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.brand-color-toggle-input:checked + .brand-color-toggle-track {
+  background: rgba(var(--brand-rgb) / 0.18);
+  border-color: rgba(var(--brand-rgb) / 0.38);
+}
+
+.brand-color-toggle-input:checked + .brand-color-toggle-track .brand-color-toggle-thumb {
+  transform: translateX(18px);
+  background: var(--brand);
+}
+
+.brand-color-toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.brand-color-toggle-copy span {
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.brand-color-toggle-copy small {
+  color: var(--text-tertiary);
+  font-size: 11.5px;
+  line-height: 1.45;
 }
 
 .color-presets-inline {

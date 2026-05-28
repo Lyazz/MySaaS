@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../providers/store_settings_provider.dart';
-import '../../widgets/form/form_input.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/buttons/app_button.dart';
+import '../../widgets/form/form_input.dart';
 
 class StoreSettingsPage extends ConsumerStatefulWidget {
   const StoreSettingsPage({super.key});
@@ -13,60 +14,41 @@ class StoreSettingsPage extends ConsumerStatefulWidget {
   ConsumerState<StoreSettingsPage> createState() => _StoreSettingsPageState();
 }
 
-class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  bool _saving = false;
-  bool _loaded = false;
-
-  // General
+class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
   final _nameCtrl = TextEditingController();
   final _slugCtrl = TextEditingController();
-
-  // Contact
-  final _phoneCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
-  final _facebookCtrl = TextEditingController();
-  final _instagramCtrl = TextEditingController();
-  final _tiktokCtrl = TextEditingController();
-
-  // Functional
+  final _currencyCodeCtrl = TextEditingController();
+  final _currencyCountryCtrl = TextEditingController();
+  final _orderIdPrefixCtrl = TextEditingController();
+  final _minimumOrderAmountCtrl = TextEditingController();
+  bool _cartEnabled = true;
+  bool _codEnabled = true;
   bool _hideOptionalAddress = false;
-  bool _enableWishlist = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
+  bool _loaded = false;
+  bool _saving = false;
 
   @override
   void dispose() {
-    _tabController.dispose();
     _nameCtrl.dispose();
     _slugCtrl.dispose();
-    _phoneCtrl.dispose();
-    _emailCtrl.dispose();
-    _addressCtrl.dispose();
-    _facebookCtrl.dispose();
-    _instagramCtrl.dispose();
-    _tiktokCtrl.dispose();
+    _currencyCodeCtrl.dispose();
+    _currencyCountryCtrl.dispose();
+    _orderIdPrefixCtrl.dispose();
+    _minimumOrderAmountCtrl.dispose();
     super.dispose();
   }
 
   void _syncFromState() {
-    final s = ref.read(storeSettingsProvider).settings;
-    _nameCtrl.text = s.name;
-    _slugCtrl.text = s.slug;
-    _phoneCtrl.text = s.phone;
-    _emailCtrl.text = s.email;
-    _addressCtrl.text = s.address;
-    _facebookCtrl.text = s.facebookUrl;
-    _instagramCtrl.text = s.instagramUrl;
-    _tiktokCtrl.text = s.tiktokUrl;
-    _hideOptionalAddress = s.hideOptionalAddress;
-    _enableWishlist = s.enableWishlist;
+    final settings = ref.read(storeSettingsProvider).settings;
+    _nameCtrl.text = settings.name;
+    _slugCtrl.text = settings.slug;
+    _currencyCodeCtrl.text = settings.currencyCode;
+    _currencyCountryCtrl.text = settings.currencyCountry;
+    _orderIdPrefixCtrl.text = settings.orderIdPrefix;
+    _minimumOrderAmountCtrl.text = settings.minimumOrderAmountDzd.toString();
+    _cartEnabled = settings.cartEnabled;
+    _codEnabled = settings.codEnabled;
+    _hideOptionalAddress = settings.hideOptionalAddress;
     _loaded = true;
   }
 
@@ -75,26 +57,24 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage>
     try {
       await ref.read(storeSettingsProvider.notifier).patch({
         'name': _nameCtrl.text.trim(),
-        'phone': _phoneCtrl.text.trim(),
-        'email': _emailCtrl.text.trim(),
-        'address': _addressCtrl.text.trim(),
-        'facebookUrl': _facebookCtrl.text.trim(),
-        'instagramUrl': _instagramCtrl.text.trim(),
-        'tiktokUrl': _tiktokCtrl.text.trim(),
+        'currencyCode': _currencyCodeCtrl.text.trim().toUpperCase(),
+        'currencyCountry': _currencyCountryCtrl.text.trim().toUpperCase(),
+        'orderIdPrefix': _orderIdPrefixCtrl.text.trim().toUpperCase(),
+        'minimumOrderAmountDzd':
+            int.tryParse(_minimumOrderAmountCtrl.text.trim()) ?? 0,
+        'cartEnabled': _cartEnabled,
+        'codEnabled': _codEnabled,
         'hideOptionalAddress': _hideOptionalAddress,
-        'enableWishlist': _enableWishlist,
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Settings saved')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Store settings saved')));
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -102,9 +82,18 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage>
 
   @override
   Widget build(BuildContext context) {
-    final settingsState = ref.watch(storeSettingsProvider);
+    final state = ref.watch(storeSettingsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
-    if (!settingsState.isLoading && !_loaded) {
+    if (!state.isLoading && !_loaded) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(_syncFromState);
       });
@@ -116,99 +105,197 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage>
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: AppButton(
+            child: AppButton.primary(
               label: _saving ? 'Saving...' : 'Save',
               onPressed: _saving ? null : _save,
               icon: LucideIcons.save,
             ),
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'General'),
-            Tab(text: 'Contact'),
-            Tab(text: 'Functional'),
-          ],
-        ),
       ),
-      body: settingsState.isLoading
+      body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildGeneral(),
-                _buildContact(),
-                _buildFunctional(),
-              ],
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionCard(
+                    title: 'Store Identity',
+                    description:
+                        'Operational settings used across orders and admin flows.',
+                    child: Column(
+                      children: [
+                        FormInput(label: 'Store name', controller: _nameCtrl),
+                        const SizedBox(height: 12),
+                        FormInput(
+                          label: 'Store slug',
+                          controller: _slugCtrl,
+                          enabled: false,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: FormInput(
+                                label: 'Currency code',
+                                controller: _currencyCodeCtrl,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FormInput(
+                                label: 'Currency country',
+                                controller: _currencyCountryCtrl,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _SectionCard(
+                    title: 'Checkout Rules',
+                    description:
+                        'Configure default order behavior for local and online admin flows.',
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: FormInput(
+                                label: 'Order ID prefix',
+                                controller: _orderIdPrefixCtrl,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FormInput(
+                                label: 'Minimum order amount (DZD)',
+                                controller: _minimumOrderAmountCtrl,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          title: const Text('Enable cart'),
+                          subtitle: Text(
+                            'Allow storefront visitors to build a cart before checkout.',
+                            style: TextStyle(color: textMuted),
+                          ),
+                          value: _cartEnabled,
+                          onChanged: (value) =>
+                              setState(() => _cartEnabled = value),
+                        ),
+                        SwitchListTile(
+                          title: const Text('Enable cash on delivery'),
+                          subtitle: Text(
+                            'Keep COD ordering active for the storefront.',
+                            style: TextStyle(color: textMuted),
+                          ),
+                          value: _codEnabled,
+                          onChanged: (value) =>
+                              setState(() => _codEnabled = value),
+                        ),
+                        SwitchListTile(
+                          title: const Text('Hide optional address field'),
+                          subtitle: Text(
+                            'Simplify checkout when detailed address is not required.',
+                            style: TextStyle(color: textMuted),
+                          ),
+                          value: _hideOptionalAddress,
+                          onChanged: (value) =>
+                              setState(() => _hideOptionalAddress = value),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(LucideIcons.shieldCheck, size: 18),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Provisioning and workspace binding are managed outside this screen. Workspace URLs are no longer editable from normal app settings.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              height: 1.45,
+                              color: textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }
+}
 
-  Widget _buildGeneral() => SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            FormInput(label: 'Store name', controller: _nameCtrl),
-            const SizedBox(height: 12),
-            FormInput(
-              label: 'Slug',
-              controller: _slugCtrl,
-              enabled: false,
-            ),
-          ],
-        ),
-      );
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final Widget child;
 
-  Widget _buildContact() => SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            FormInput(
-              label: 'Phone',
-              controller: _phoneCtrl,
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 12),
-            FormInput(
-              label: 'Email',
-              controller: _emailCtrl,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 12),
-            FormInput(
-              label: 'Address',
-              controller: _addressCtrl,
-              maxLines: 2,
-            ),
-            const SizedBox(height: 20),
-            FormInput(label: 'Facebook URL', controller: _facebookCtrl),
-            const SizedBox(height: 12),
-            FormInput(label: 'Instagram URL', controller: _instagramCtrl),
-            const SizedBox(height: 12),
-            FormInput(label: 'TikTok URL', controller: _tiktokCtrl),
-          ],
-        ),
-      );
+  const _SectionCard({
+    required this.title,
+    required this.description,
+    required this.child,
+  });
 
-  Widget _buildFunctional() => SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            SwitchListTile(
-              title: const Text('Hide optional address field at checkout'),
-              subtitle: const Text('Simplifies the order form for customers'),
-              value: _hideOptionalAddress,
-              onChanged: (v) => setState(() => _hideOptionalAddress = v),
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
             ),
-            SwitchListTile(
-              title: const Text('Enable wishlist'),
-              subtitle: const Text(
-                  'Allow customers to save products to a wishlist'),
-              value: _enableWishlist,
-              onChanged: (v) => setState(() => _enableWishlist = v),
-            ),
-          ],
-        ),
-      );
+          ),
+          const SizedBox(height: 4),
+          Text(
+            description,
+            style: TextStyle(fontSize: 13, height: 1.45, color: textMuted),
+          ),
+          const SizedBox(height: 18),
+          child,
+        ],
+      ),
+    );
+  }
 }

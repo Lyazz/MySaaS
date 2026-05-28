@@ -1,12 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/app_mode.dart';
 import '../models/bootstrap_config.dart';
 
 class AppStorage {
+  static const _secureStorage = FlutterSecureStorage();
+
   static const _keyApiBaseUrl = 'api_base_url';
   static const _keyAppMode = 'app_mode';
   static const _keyTenantId = 'tenant_id';
@@ -20,25 +23,25 @@ class AppStorage {
   static Future<BootstrapConfig> loadBootstrap({
     required String defaultApiBaseUrl,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
+    final secureValues = await _secureStorage.readAll();
+    final storedBaseUrl = secureValues[_keyApiBaseUrl]?.trim() ?? '';
+    final apiBaseUrl = defaultApiBaseUrl.trim();
+    if (storedBaseUrl != apiBaseUrl) {
+      await _secureStorage.write(key: _keyApiBaseUrl, value: apiBaseUrl);
+    }
 
-    final storedBaseUrl = prefs.getString(_keyApiBaseUrl);
-    final apiBaseUrl =
-        (storedBaseUrl != null && storedBaseUrl.trim().isNotEmpty)
-        ? storedBaseUrl.trim()
-        : defaultApiBaseUrl;
-
-    final modeRaw = prefs.getString(_keyAppMode);
+    final modeRaw = secureValues[_keyAppMode];
     final mode = _modeFromString(modeRaw) ?? AppMode.online;
 
-    final tenantId = prefs.getString(_keyTenantId) ?? '';
-    final workspaceId = prefs.getString(_keyWorkspaceId);
+    final tenantId = secureValues[_keyTenantId] ?? '';
+    final workspaceId = secureValues[_keyWorkspaceId];
 
-    final authToken = prefs.getString(_keyAuthToken);
-    final userJsonRaw = prefs.getString(_keyAuthUserJson);
-    final staffRoleJsonRaw = prefs.getString(_keyAuthStaffRoleJson);
-    final staffPermissions =
-        prefs.getStringList(_keyAuthStaffPermissions) ?? const [];
+    final authToken = secureValues[_keyAuthToken];
+    final userJsonRaw = secureValues[_keyAuthUserJson];
+    final staffRoleJsonRaw = secureValues[_keyAuthStaffRoleJson];
+    final staffPermissions = _tryDecodeStringList(
+      secureValues[_keyAuthStaffPermissions],
+    );
 
     return BootstrapConfig(
       apiBaseUrl: apiBaseUrl,
@@ -55,8 +58,7 @@ class AppStorage {
   }
 
   static Future<void> saveApiBaseUrl(String apiBaseUrl) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyApiBaseUrl, apiBaseUrl.trim());
+    await _secureStorage.write(key: _keyApiBaseUrl, value: apiBaseUrl.trim());
   }
 
   static Future<void> saveProvisioningState({
@@ -64,21 +66,20 @@ class AppStorage {
     required String tenantId,
     String? workspaceId,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyAppMode, mode.name);
-    await prefs.setString(_keyTenantId, tenantId);
+    await _secureStorage.write(key: _keyAppMode, value: mode.name);
+    await _secureStorage.write(key: _keyTenantId, value: tenantId);
     if (workspaceId != null) {
-      await prefs.setString(_keyWorkspaceId, workspaceId);
+      await _secureStorage.write(key: _keyWorkspaceId, value: workspaceId);
     } else {
-      await prefs.remove(_keyWorkspaceId);
+      await _secureStorage.delete(key: _keyWorkspaceId);
     }
   }
 
   static Future<void> clearProvisioningState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyAppMode);
-    await prefs.remove(_keyTenantId);
-    await prefs.remove(_keyWorkspaceId);
+    await _secureStorage.delete(key: _keyAppMode);
+    await _secureStorage.delete(key: _keyTenantId);
+    await _secureStorage.delete(key: _keyWorkspaceId);
+    await _secureStorage.delete(key: _keyApiBaseUrl);
   }
 
   static Future<void> saveAuthSession({
@@ -87,29 +88,38 @@ class AppStorage {
     Map<String, dynamic>? staffRoleJson,
     List<String>? staffPermissions,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyAuthToken, token.trim());
+    await _secureStorage.write(key: _keyAuthToken, value: token.trim());
     if (userJson != null) {
-      await prefs.setString(_keyAuthUserJson, jsonEncode(userJson));
+      await _secureStorage.write(
+        key: _keyAuthUserJson,
+        value: jsonEncode(userJson),
+      );
     } else {
-      await prefs.remove(_keyAuthUserJson);
+      await _secureStorage.delete(key: _keyAuthUserJson);
     }
     if (staffRoleJson != null) {
-      await prefs.setString(_keyAuthStaffRoleJson, jsonEncode(staffRoleJson));
+      await _secureStorage.write(
+        key: _keyAuthStaffRoleJson,
+        value: jsonEncode(staffRoleJson),
+      );
     } else {
-      await prefs.remove(_keyAuthStaffRoleJson);
+      await _secureStorage.delete(key: _keyAuthStaffRoleJson);
     }
     if (staffPermissions != null) {
-      await prefs.setStringList(_keyAuthStaffPermissions, staffPermissions);
+      await _secureStorage.write(
+        key: _keyAuthStaffPermissions,
+        value: jsonEncode(staffPermissions),
+      );
+    } else {
+      await _secureStorage.delete(key: _keyAuthStaffPermissions);
     }
   }
 
   static Future<void> clearAuthSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyAuthToken);
-    await prefs.remove(_keyAuthUserJson);
-    await prefs.remove(_keyAuthStaffRoleJson);
-    await prefs.remove(_keyAuthStaffPermissions);
+    await _secureStorage.delete(key: _keyAuthToken);
+    await _secureStorage.delete(key: _keyAuthUserJson);
+    await _secureStorage.delete(key: _keyAuthStaffRoleJson);
+    await _secureStorage.delete(key: _keyAuthStaffPermissions);
   }
 
   static ThemeMode? parseThemeMode(String? raw) {
@@ -163,5 +173,17 @@ class AppStorage {
       if (decoded is Map<String, dynamic>) return decoded;
     } catch (_) {}
     return null;
+  }
+
+  static List<String> _tryDecodeStringList(String? raw) {
+    final trimmed = raw?.trim() ?? '';
+    if (trimmed.isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is List) {
+        return decoded.map((e) => e.toString()).toList();
+      }
+    } catch (_) {}
+    return const [];
   }
 }

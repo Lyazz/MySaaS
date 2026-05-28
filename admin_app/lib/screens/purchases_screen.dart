@@ -41,7 +41,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
 
   void _setDefaultDateRange() {
     final now = DateTime.now();
-    final start = _startOfDay(now.subtract(const Duration(days: 7)));
+    final start = _startOfDay(now.subtract(const Duration(days: 6)));
     final end = _endOfDay(now);
     _startDate = start;
     _endDate = end;

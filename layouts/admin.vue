@@ -293,6 +293,11 @@ import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import { useOrderUnreadCount } from '~/composables/useOrderUnreadCount'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 import AdminThemeToggle from '~/components/admin/AdminThemeToggle.vue'
+import {
+  adminPathToResource,
+  hasSettingsHubAccess,
+  type AdminRole
+} from '~/shared/admin/settings-navigation'
 
 useHead({
   script: [
@@ -405,7 +410,6 @@ const pageTitle = computed(() => {
   return metaTitle || t('admin.layout.defaultTitle')
 })
 
-type AdminRole = 'owner' | 'admin' | 'staff'
 type NavAccess = 'admin' | 'member'
 type NavItem = { path: string; labelKey: string; icon: string; access?: NavAccess }
 type NavGroup = { titleKey?: string; collapsed: boolean; items: NavItem[] }
@@ -418,37 +422,13 @@ const currentRole = computed<AdminRole>(() => {
 
 const staffPerms = computed<string[]>(() => authStore.staffPermissions || [])
 
-const pathToResource = (path: string): string | null => {
-  if (path === '/admin' || path.startsWith('/admin/dashboard')) return 'dashboard'
-  if (path.startsWith('/admin/products')) return 'products'
-  if (path.startsWith('/admin/inventory')) return 'inventory'
-  if (path.startsWith('/admin/categories')) return 'categories'
-  if (path.startsWith('/admin/suppliers')) return 'suppliers'
-  if (path.startsWith('/admin/purchases')) return 'purchases'
-  if (path.startsWith('/admin/orders')) return 'orders'
-  if (path.startsWith('/admin/sales')) return 'sales'
-  if (path.startsWith('/admin/pos')) return 'pos'
-  if (path.startsWith('/admin/customers')) return 'customers'
-  if (path.startsWith('/admin/delivery')) return 'delivery'
-  if (path.startsWith('/admin/cash')) return 'cash'
-  if (path.startsWith('/admin/billing')) return 'billing'
-  if (path.startsWith('/admin/settings/appearance')) return 'storeSettings'
-  if (path.startsWith('/admin/settings/homepage')) return 'homepageSettings'
-  if (path.startsWith('/admin/settings/contact')) return 'contactInfos'
-  if (path.startsWith('/admin/settings/functional')) return 'storeSettings'
-  if (path.startsWith('/admin/settings/legal')) return 'storeSettings'
-  if (path.startsWith('/admin/settings/domains')) return 'storeSettings'
-  if (path.startsWith('/admin/integrations')) return 'integrations'
-  if (path.startsWith('/admin/meta-pixels')) return 'metaPixels'
-  if (path.startsWith('/admin/users')) return 'users'
-  return null
-}
-
 const hasAccess = (item: NavItem, role: AdminRole): boolean => {
   if (role === 'staff') {
     if (staffPerms.value.length === 0) return item.path.startsWith('/admin/orders')
-    const resource = pathToResource(item.path)
+    if (item.path === '/admin/settings') return hasSettingsHubAccess(role, staffPerms.value)
+    const resource = adminPathToResource(item.path)
     if (!resource) return false
+    if (resource === 'settingsHub') return hasSettingsHubAccess(role, staffPerms.value)
     return staffPerms.value.includes(`${resource}:read`)
   }
   if (item.access === 'member') return true
@@ -460,7 +440,7 @@ const navTourIds: Record<string, string> = {
   '/admin/products': 'sidebar-products',
   '/admin/orders': 'sidebar-orders',
   '/admin/delivery': 'sidebar-delivery',
-  '/admin/settings/appearance': 'sidebar-settings',
+  '/admin/settings': 'sidebar-settings',
 }
 
 const navGroups = ref<NavGroup[]>([
@@ -499,15 +479,7 @@ const navGroups = ref<NavGroup[]>([
     items: [
       { path: '/admin/customers', labelKey: 'admin.nav.customers', icon: 'lucide:users', access: 'admin' },
       { path: '/admin/marketing/landing-page/new', labelKey: 'admin.nav.landingPage', icon: 'lucide:megaphone', access: 'admin' },
-      { path: '/admin/settings/appearance', labelKey: 'admin.nav.appearance', icon: 'lucide:palette', access: 'admin' },
-      { path: '/admin/settings/homepage', labelKey: 'admin.nav.homepage', icon: 'lucide:home', access: 'admin' },
-      { path: '/admin/settings/contact', labelKey: 'admin.nav.contactInfo', icon: 'lucide:phone', access: 'admin' },
-      { path: '/admin/settings/legal', labelKey: 'admin.nav.legalPages', icon: 'lucide:file-text', access: 'admin' },
-      { path: '/admin/settings/functional', labelKey: 'admin.nav.functional', icon: 'lucide:sliders', access: 'admin' },
-      { path: '/admin/settings/domains', labelKey: 'admin.nav.domains', icon: 'lucide:globe-2', access: 'admin' },
-      { path: '/admin/billing', labelKey: 'admin.nav.billing', icon: 'lucide:credit-card', access: 'admin' },
-      { path: '/admin/users', labelKey: 'admin.nav.users', icon: 'lucide:user-cog', access: 'admin' },
-      { path: '/admin/integrations', labelKey: 'admin.nav.integrations', icon: 'lucide:puzzle', access: 'admin' }
+      { path: '/admin/settings', labelKey: 'admin.nav.settingsHub', icon: 'lucide:sliders-horizontal', access: 'admin' }
     ]
   }
 ])

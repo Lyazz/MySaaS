@@ -14,20 +14,13 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2 shrink-0">
-        <div class="flex items-center gap-2 rounded-xl px-3 py-1.5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <label class="text-[11px]" style="color: var(--text-tertiary)">{{ t('admin.pages.dashboard.filters.range') }}</label>
-          <select v-model="selectedRange" class="ui-input h-7 py-0.5 text-[11.5px] min-w-[112px]" data-testid="dashboard-range-select">
-            <option value="7d">{{ t('admin.pages.dashboard.filters.ranges.7d') }}</option>
-            <option value="30d">{{ t('admin.pages.dashboard.filters.ranges.30d') }}</option>
-            <option value="90d">{{ t('admin.pages.dashboard.filters.ranges.90d') }}</option>
-            <option value="custom">{{ t('admin.pages.dashboard.filters.ranges.custom') }}</option>
-          </select>
-
-          <template v-if="selectedRange === 'custom'">
-            <input v-model="customFrom" type="date" class="ui-input h-7 py-0.5 text-[11.5px]" data-testid="dashboard-custom-from">
-            <input v-model="customTo" type="date" class="ui-input h-7 py-0.5 text-[11.5px]" data-testid="dashboard-custom-to">
-          </template>
-        </div>
+        <DateFilter
+          v-model:start-date="customFrom"
+          v-model:end-date="customTo"
+          v-model:range="selectedRange"
+          class="w-full sm:w-auto"
+          testid="dashboard"
+        />
 
         <NuxtLink
           v-if="!storeSettings?.isCompleted"
@@ -278,6 +271,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { buildDashboardRangeQuery, defaultCustomDateRange, type DashboardRange } from '~/composables/admin/dashboardRange'
+import DateFilter from '~/components/ui/DateFilter.vue'
 
 definePageMeta({
   middleware: 'auth',

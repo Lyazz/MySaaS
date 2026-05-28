@@ -51,7 +51,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   void _setDefaultFilters() {
     final today = DateTime.now();
-    final lastWeek = today.subtract(const Duration(days: 7));
+    final lastWeek = today.subtract(const Duration(days: 6));
 
     _searchController.clear();
     _selectedStatus = '';

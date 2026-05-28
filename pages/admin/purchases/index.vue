@@ -161,7 +161,13 @@
             <tr
               v-for="order in paginatedOrders"
               :key="order.id"
-              class="ui-tr"
+              class="ui-tr ui-tr--clickable"
+              role="link"
+              tabindex="0"
+              :aria-label="`${t('admin.pages.purchases.index.table.id')}: #${order.id.slice(0, 8)}`"
+              @click="openPurchaseRow($event, order.id)"
+              @keydown.enter="openPurchaseRow($event, order.id)"
+              @keydown.space="openPurchaseRow($event, order.id)"
             >
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
@@ -302,6 +308,7 @@
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
+import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
 
 definePageMeta({
   middleware: 'auth',
@@ -333,12 +340,9 @@ const selectedSupplier = ref('')
 const selectedUser = ref('')
 const selectedStatus = ref('')
 const selectedPaymentStatus = ref('')
-const today = new Date()
-const lastWeek = new Date(today)
-lastWeek.setDate(lastWeek.getDate() - 7)
-
-const startDate = ref(lastWeek.toISOString().split('T')[0])
-const endDate = ref(today.toISOString().split('T')[0])
+const defaultDateRange = getDashboardPresetDateRange('7d')
+const startDate = ref(defaultDateRange.from)
+const endDate = ref(defaultDateRange.to)
 const currentPage = ref(1)
 const itemsPerPage = 25
 
@@ -397,6 +401,12 @@ const calculateTotal = (order: PurchaseOrder) => {
 }
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString()
+
+function openPurchaseRow(event: Event, purchaseId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/purchases/${purchaseId}`)
+}
 
 const getStatusClass = (status: string) => {
   const base = 'ui-badge '

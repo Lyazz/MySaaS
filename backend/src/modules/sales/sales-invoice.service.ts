@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client'
 import PDFDocument from 'pdfkit'
 import prisma from '../../lib/prisma'
 import { sanitizeInvoiceNumberPrefix } from '../store-settings/store-settings.service'
+import { formatPriceAmount } from '../../../../shared/pricing/money-format'
 
 type InvoiceSourceType = 'SALE' | 'ORDER'
 
@@ -189,8 +190,19 @@ const formatDate = (date: Date) => new Intl.DateTimeFormat('fr-DZ', {
     minute: '2-digit'
 }).format(new Date(date))
 
-const formatMoney = (value: number, currency: string) =>
-    `${Math.round(value).toLocaleString('fr-DZ')} ${currency}`
+const currencyLabel = (currency: string) => {
+    const normalized = String(currency || 'DZD').trim().toUpperCase()
+    return normalized === 'DZD' ? 'DA' : normalized
+}
+
+export const formatInvoiceMoney = (value: unknown, currency: string) => {
+    const amount = formatPriceAmount(value, {
+        locale: 'fr-DZ',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })
+    return amount ? `${amount} ${currencyLabel(currency)}` : `0,00 ${currencyLabel(currency)}`
+}
 
 export async function renderSalesInvoicePdf(model: SalesInvoicePdfModel): Promise<Buffer> {
     const doc = new PDFDocument({ size: 'A4', margin: 42 })
@@ -202,96 +214,199 @@ export async function renderSalesInvoicePdf(model: SalesInvoicePdfModel): Promis
         doc.on('end', () => resolve(Buffer.concat(chunks)))
         doc.on('error', reject)
 
-        if (logo) {
-            try {
-                doc.image(logo, 42, 38, { fit: [82, 44] })
-            } catch {
-                doc.fontSize(18).text(model.tenantName, 42, 42)
-            }
-        } else {
-            doc.fontSize(18).text(model.tenantName, 42, 42)
-        }
-
-        doc.fontSize(22).text('Facture', 360, 42, { align: 'right' })
-        doc.fontSize(10).fillColor('#555')
-        doc.text(`N° ${model.invoiceNumber}`, 360, 72, { align: 'right' })
-        doc.text(`Date: ${formatDate(model.issuedAt)}`, 360, 88, { align: 'right' })
-        doc.fillColor('#000')
-
-        doc.moveDown(3)
-        const topY = Math.max(doc.y, 112)
-        doc.fontSize(11).text(model.tenantName, 42, topY)
-        model.contactLines.forEach((line) => doc.fontSize(9).fillColor('#555').text(line))
-        doc.fillColor('#000')
-
-        doc.fontSize(11).text('Client', 330, topY)
-        doc.fontSize(9).fillColor('#555')
-        doc.text(model.customerName, 330)
-        if (model.customerPhone) doc.text(model.customerPhone, 330)
-        if (model.customerAddress) doc.text(model.customerAddress, 330)
-        doc.fillColor('#000')
-
-        doc.moveDown(2)
-        doc.fontSize(10).fillColor('#555')
-        doc.text(`${model.sourceType === 'ORDER' ? 'Commande' : 'Vente'}: ${model.sourceId}`)
-        doc.text(`Date de vente: ${formatDate(model.sourceDate)}`)
-        doc.fillColor('#000')
-        doc.moveDown(1)
-
-        const tableTop = doc.y + 8
         const left = 42
         const right = doc.page.width - 42
-        const qtyX = 330
-        const unitX = 380
-        const totalX = 475
+        const contentWidth = right - left
+        const ink = '#111827'
+        const muted = '#6B7280'
+        const light = '#F8FAFC'
+        const lineColor = '#E5E7EB'
+        const accent = '#65A30D'
+        const accentDark = '#3F6212'
+        const bottomLimit = doc.page.height - 122
+        let pageNumber = 1
 
-        doc.rect(left, tableTop, right - left, 24).fill('#F3F4F6')
-        doc.fillColor('#111827').fontSize(9).font('Helvetica-Bold')
-        doc.text('Article', left + 8, tableTop + 8, { width: qtyX - left - 16 })
-        doc.text('Qté', qtyX, tableTop + 8, { width: 35, align: 'right' })
-        doc.text('Prix', unitX, tableTop + 8, { width: 70, align: 'right' })
-        doc.text('Total', totalX, tableTop + 8, { width: right - totalX - 8, align: 'right' })
+        const sourceLabel = model.sourceType === 'ORDER' ? 'Commande livrée' : 'Vente POS'
 
-        doc.font('Helvetica').fillColor('#111827')
-        let y = tableTop + 34
-        for (const line of model.lines) {
-            if (y > doc.page.height - 150) {
-                doc.addPage()
-                y = 50
+        const drawFooter = () => {
+            const footerY = doc.page.height - 76
+            doc.moveTo(left, footerY - 14).lineTo(right, footerY - 14).strokeColor(lineColor).stroke()
+            doc.font('Helvetica').fontSize(8).fillColor(muted)
+            const footer = model.footerText || `${model.tenantName} - Facture générée automatiquement`
+            doc.text(footer, left, footerY, { width: contentWidth - 90, ellipsis: true })
+            doc.text(`Page ${pageNumber}`, right - 70, footerY, { width: 70, align: 'right' })
+            doc.fillColor(ink).strokeColor('#000')
+        }
+
+        const drawLogo = (x: number, y: number) => {
+            if (logo) {
+                try {
+                    doc.image(logo, x, y, { fit: [72, 48] })
+                    return
+                } catch {
+                    // Fall through to monogram when a remote/logo buffer is unreadable.
+                }
             }
-            const title = line.variantLabel ? `${line.title} (${line.variantLabel})` : line.title
-            doc.fontSize(9).text(title, left + 8, y, { width: qtyX - left - 16 })
-            doc.text(String(line.quantity), qtyX, y, { width: 35, align: 'right' })
-            doc.text(formatMoney(line.unitPrice, model.currency), unitX, y, { width: 70, align: 'right' })
-            doc.text(formatMoney(line.lineTotal, model.currency), totalX, y, { width: right - totalX - 8, align: 'right' })
-            y += 24
-            doc.moveTo(left, y - 7).lineTo(right, y - 7).strokeColor('#E5E7EB').stroke().strokeColor('#000')
+
+            doc.roundedRect(x, y, 52, 52, 12).fill(accent)
+            doc.font('Helvetica-Bold').fontSize(20).fillColor('#FFFFFF')
+            doc.text(model.tenantName.slice(0, 2).toUpperCase(), x, y + 15, { width: 52, align: 'center' })
+            doc.fillColor(ink)
         }
 
-        y += 10
-        const totalsX = 360
-        doc.fontSize(10)
-        doc.text('Sous-total', totalsX, y, { width: 90 })
-        doc.text(formatMoney(model.subtotal, model.currency), totalX, y, { width: right - totalX - 8, align: 'right' })
+        const drawHeader = (compact = false) => {
+            doc.rect(0, 0, doc.page.width, 12).fill(accent)
+            doc.rect(0, 12, doc.page.width, 2).fill('#DCFCE7')
+            drawLogo(left, compact ? 34 : 38)
+
+            doc.font('Helvetica-Bold').fontSize(compact ? 14 : 18).fillColor(ink)
+            doc.text(model.tenantName, left + 68, compact ? 38 : 42, { width: 230, ellipsis: true })
+            doc.font('Helvetica').fontSize(8.5).fillColor(muted)
+            const contactY = compact ? 58 : 66
+            if (model.contactLines.length > 0) {
+                doc.text(model.contactLines.join('  |  '), left + 68, contactY, { width: 250, ellipsis: true })
+            } else {
+                doc.text('Informations de contact non renseignées', left + 68, contactY, { width: 250 })
+            }
+
+            doc.roundedRect(right - 170, compact ? 32 : 36, 170, compact ? 58 : 72, 10).fill(light)
+            doc.font('Helvetica-Bold').fontSize(compact ? 18 : 24).fillColor(accentDark)
+            doc.text('FACTURE', right - 158, compact ? 42 : 47, { width: 146, align: 'right' })
+            doc.font('Helvetica').fontSize(8.5).fillColor(muted)
+            doc.text(`N° ${model.invoiceNumber}`, right - 158, compact ? 65 : 77, { width: 146, align: 'right' })
+            if (!compact) {
+                doc.text(`Émise le ${formatDate(model.issuedAt)}`, right - 158, 92, { width: 146, align: 'right' })
+            }
+
+            doc.fillColor(ink)
+        }
+
+        const drawCard = (title: string, rows: Array<[string, string | null]>, x: number, y: number, w: number, h: number) => {
+            doc.roundedRect(x, y, w, h, 10).fill(light)
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(accentDark)
+            doc.text(title.toUpperCase(), x + 14, y + 12, { width: w - 28 })
+            let rowY = y + 32
+            for (const [label, value] of rows) {
+                if (!value) continue
+                doc.font('Helvetica').fontSize(8).fillColor(muted)
+                doc.text(label, x + 14, rowY, { width: 72 })
+                doc.font('Helvetica-Bold').fontSize(8.5).fillColor(ink)
+                doc.text(value, x + 88, rowY, { width: w - 102, ellipsis: true })
+                rowY += 15
+            }
+            doc.fillColor(ink)
+        }
+
+        const drawTableHeader = (y: number) => {
+            doc.roundedRect(left, y, contentWidth, 28, 8).fill(accentDark)
+            doc.font('Helvetica-Bold').fontSize(8.5).fillColor('#FFFFFF')
+            doc.text('Article', left + 12, y + 10, { width: 240 })
+            doc.text('Qté', left + 298, y + 10, { width: 36, align: 'right' })
+            doc.text('Prix unitaire', left + 350, y + 10, { width: 82, align: 'right' })
+            doc.text('Montant', left + 442, y + 10, { width: contentWidth - 454, align: 'right' })
+            doc.fillColor(ink)
+        }
+
+        const addContinuationPage = () => {
+            drawFooter()
+            doc.addPage()
+            pageNumber += 1
+            drawHeader(true)
+            const nextY = 118
+            drawTableHeader(nextY)
+            return nextY + 38
+        }
+
+        drawHeader(false)
+
+        const cardsTop = 136
+        drawCard(
+            'Client',
+            [
+                ['Nom', model.customerName],
+                ['Téléphone', model.customerPhone],
+                ['Adresse', model.customerAddress]
+            ],
+            left,
+            cardsTop,
+            246,
+            112
+        )
+        drawCard(
+            'Vente',
+            [
+                ['Type', sourceLabel],
+                ['Référence', model.sourceId],
+                ['Date', formatDate(model.sourceDate)]
+            ],
+            left + 266,
+            cardsTop,
+            contentWidth - 266,
+            112
+        )
+
+        let y = cardsTop + 138
+        doc.font('Helvetica-Bold').fontSize(11).fillColor(ink)
+        doc.text('Articles facturés', left, y)
+        doc.font('Helvetica').fontSize(8.5).fillColor(muted)
+        doc.text(`${model.lines.length} ligne${model.lines.length === 1 ? '' : 's'}`, right - 80, y + 1, { width: 80, align: 'right' })
+        y += 22
+        drawTableHeader(y)
+        y += 38
+
+        for (const line of model.lines) {
+            const title = line.variantLabel ? `${line.title} - ${line.variantLabel}` : line.title
+            const titleHeight = Math.max(14, doc.heightOfString(title, { width: 240 }))
+            const rowHeight = Math.max(34, titleHeight + 18)
+            if (y + rowHeight > bottomLimit) {
+                y = addContinuationPage()
+            }
+
+            doc.roundedRect(left, y - 6, contentWidth, rowHeight, 7).fill('#FFFFFF')
+            doc.moveTo(left, y + rowHeight - 8).lineTo(right, y + rowHeight - 8).strokeColor(lineColor).stroke()
+            doc.font('Helvetica-Bold').fontSize(9).fillColor(ink)
+            doc.text(title, left + 12, y + 5, { width: 240 })
+            doc.font('Helvetica').fontSize(8.5).fillColor(muted)
+            doc.text(String(line.quantity), left + 298, y + 5, { width: 36, align: 'right' })
+            doc.text(formatInvoiceMoney(line.unitPrice, model.currency), left + 350, y + 5, { width: 82, align: 'right' })
+            doc.font('Helvetica-Bold').fontSize(8.5).fillColor(ink)
+            doc.text(formatInvoiceMoney(line.lineTotal, model.currency), left + 442, y + 5, { width: contentWidth - 454, align: 'right' })
+            y += rowHeight
+        }
+
         y += 18
+        const totalsHeight = model.shippingAmount > 0 ? 112 : 92
+        if (y + totalsHeight > bottomLimit) {
+            y = addContinuationPage()
+        }
+
+        const totalsX = right - 220
+        doc.roundedRect(totalsX, y, 220, totalsHeight, 12).fill(light)
+        doc.font('Helvetica').fontSize(9).fillColor(muted)
+        doc.text('Sous-total', totalsX + 16, y + 16, { width: 90 })
+        doc.font('Helvetica-Bold').fillColor(ink)
+        doc.text(formatInvoiceMoney(model.subtotal, model.currency), totalsX + 104, y + 16, { width: 100, align: 'right' })
+
+        let totalLineY = y + 38
         if (model.shippingAmount > 0) {
-            doc.text('Livraison', totalsX, y, { width: 90 })
-            doc.text(formatMoney(model.shippingAmount, model.currency), totalX, y, { width: right - totalX - 8, align: 'right' })
-            y += 18
-        }
-        doc.font('Helvetica-Bold').fontSize(12)
-        doc.text('Total', totalsX, y, { width: 90 })
-        doc.text(formatMoney(model.total, model.currency), totalX, y, { width: right - totalX - 8, align: 'right' })
-        doc.font('Helvetica')
-
-        if (model.footerText) {
-            doc.fontSize(9).fillColor('#555')
-            doc.text(model.footerText, 42, doc.page.height - 86, {
-                width: doc.page.width - 84,
-                align: 'center'
-            })
+            doc.font('Helvetica').fontSize(9).fillColor(muted)
+            doc.text('Livraison', totalsX + 16, totalLineY, { width: 90 })
+            doc.font('Helvetica-Bold').fillColor(ink)
+            doc.text(formatInvoiceMoney(model.shippingAmount, model.currency), totalsX + 104, totalLineY, { width: 100, align: 'right' })
+            totalLineY += 24
         }
 
+        doc.moveTo(totalsX + 16, totalLineY - 8).lineTo(totalsX + 204, totalLineY - 8).strokeColor(lineColor).stroke()
+        doc.font('Helvetica-Bold').fontSize(12).fillColor(accentDark)
+        doc.text('Total à payer', totalsX + 16, totalLineY + 2, { width: 90 })
+        doc.fontSize(13)
+        doc.text(formatInvoiceMoney(model.total, model.currency), totalsX + 104, totalLineY + 2, { width: 100, align: 'right' })
+
+        doc.font('Helvetica').fontSize(8.5).fillColor(muted)
+        doc.text('Merci pour votre confiance.', left, y + 14, { width: 230 })
+        doc.text('Cette facture est générée à partir des données de vente enregistrées dans votre espace administrateur.', left, y + 32, { width: 260 })
+
+        drawFooter()
         doc.end()
     })
 }

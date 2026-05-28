@@ -39,6 +39,7 @@ describe('Store Settings API', () => {
                 name: 'Updated Name',
                 slug: slug,
                 primaryColor: '#4D7C0F',
+                useBrandColor: true,
                 templateKey: 'modern',
                 orderIdPrefix: 'shop1'
             })
@@ -58,6 +59,7 @@ describe('Store Settings API', () => {
         expect(settings?.logoUrl).toBe(logoUrl)
         expect(settings?.faviconUrl).toBe(faviconUrl)
         expect(settings?.orderIdPrefix).toBe('SHOP1')
+        expect(settings?.useBrandColor).toBe(true)
     })
 
     it('updates template key to arena successfully', async () => {

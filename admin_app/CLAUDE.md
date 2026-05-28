@@ -18,6 +18,9 @@ This app is the tenant admin panel of the web app. It is not a separate product.
 
 ## Read Before Coding
 Always read these first:
+- `INSTRUCTIONS.md`
+- `OFFLINE_ONLINE_REQUIREMENTS.md`
+- `FEATURE_TIER_MATRIX.md`
 - `../AGENTS.md`
 - `../CLAUDE.md`
 - `../spec/01-overview.md`

@@ -1,6 +1,6 @@
 import prisma from '../../lib/prisma'
 
-export type AdminDashboardRange = '7d' | '30d' | '90d' | 'custom'
+export type AdminDashboardRange = 'today' | '7d' | '30d' | '90d' | 'custom'
 
 export type AdminDashboardQuery = {
     range: AdminDashboardRange
@@ -108,7 +108,7 @@ export class DashboardService {
             return { range, fromAt, toAt, from: isoDay(fromAt), to: isoDay(toAt), days }
         }
 
-        const days = range === '90d' ? 90 : range === '30d' ? 30 : 7
+        const days = range === 'today' ? 1 : range === '90d' ? 90 : range === '30d' ? 30 : 7
         const toAt = endOfUtcDay(now)
         const fromAt = startOfUtcDay(new Date(toAt.getTime() - (days - 1) * DAY_MS))
         return { range, fromAt, toAt, from: isoDay(fromAt), to: isoDay(toAt), days }

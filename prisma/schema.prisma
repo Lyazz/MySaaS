@@ -292,6 +292,7 @@ model StoreSettings {
   logoUrl      String? // URL of the tenant's store logo
   faviconUrl   String? // URL of the tenant's store favicon
   primaryColor String  @default("#65A30D") // lime-600
+  useBrandColor Boolean @default(false)
   templateKey  String  @default("modern") // e.g. classic | modern
   fontFamily   String  @default("Outfit")
   language     String  @default("fr") // ar | fr | en

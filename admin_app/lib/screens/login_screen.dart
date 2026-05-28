@@ -19,7 +19,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _workspaceController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -30,9 +29,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
 
-    final workspace = ref.read(workspaceProvider);
-    _workspaceController.text = workspace.apiBaseUrl;
-
     assert(() {
       _emailController.text = 'admin@apple.com';
       _passwordController.text = 'password';
@@ -42,7 +38,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
-    _workspaceController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -57,10 +52,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref
-          .read(workspaceProvider.notifier)
-          .setWorkspaceUrl(_workspaceController.text);
-
       await ref
           .read(authProvider.notifier)
           .login(_emailController.text.trim(), _passwordController.text);
@@ -294,6 +285,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _AuthPalette palette, {
     required bool isDesktop,
   }) {
+    final workspace = ref.watch(workspaceProvider);
+
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
@@ -338,6 +331,55 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   textAlign: isDesktop ? TextAlign.left : TextAlign.center,
                 ),
                 const SizedBox(height: 22),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: palette.glassBackground,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: palette.cardBorder),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(LucideIcons.lock, size: 18, color: palette.brand),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Provisioned workspace',
+                              style: GoogleFonts.dmSans(
+                                color: palette.primaryText,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              workspace.apiBaseUrl,
+                              style: GoogleFonts.dmSans(
+                                color: palette.secondaryText,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'This binding is managed by secure provisioning and cannot be changed from the login screen.',
+                              style: GoogleFonts.dmSans(
+                                color: palette.secondaryText,
+                                fontSize: 12,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
                 Row(
                   children: [
                     Expanded(
@@ -385,20 +427,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 18),
-                _buildInput(
-                  palette,
-                  label: 'Workspace URL',
-                  hint: 'http://tenant.localhost:3000/api',
-                  controller: _workspaceController,
-                  keyboardType: TextInputType.url,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your workspace URL';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 14),
                 _buildInput(
                   palette,
                   label: 'Email Address',

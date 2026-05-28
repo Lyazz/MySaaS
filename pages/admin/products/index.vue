@@ -240,7 +240,13 @@
 	            <tr
 	              v-for="product in paginatedProducts"
 	              :key="product.id"
-	              class="ui-tr"
+	              class="ui-tr ui-tr--clickable"
+	              role="link"
+	              tabindex="0"
+	              :aria-label="`${t('admin.pages.products.index.table.product')}: ${product.title}`"
+	              @click="openProductRow($event, product.id)"
+	              @keydown.enter="openProductRow($event, product.id)"
+	              @keydown.space="openProductRow($event, product.id)"
 	            >
 	              <td class="ui-td whitespace-nowrap">
 	                <input
@@ -340,7 +346,7 @@
               </td>
               <td class="ui-td whitespace-nowrap text-center">
                 <Menu as="div" class="relative inline-block text-left text-sm">
-                  <MenuButton class="p-1.5 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)">
+                  <MenuButton class="ui-table-action">
                     <Icon name="lucide:globe" class="w-5 h-5" />
                   </MenuButton>
                   <transition
@@ -413,13 +419,13 @@
                 <div class="flex items-center justify-end space-x-1">
                   <NuxtLink
                     :to="`/admin/products/${product.id}`"
-                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="ui-table-action"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="ui-table-action ui-table-action--danger"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(product)"
                   >
@@ -1044,6 +1050,12 @@ async function fetchCategories() {
 function confirmDelete(product: Product) {
   productToDelete.value = product
   showDeleteModal.value = true
+}
+
+function openProductRow(event: Event, productId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/products/${productId}`)
 }
  
 async function handleDelete() {

@@ -194,7 +194,13 @@
             <tr
               v-for="order in orders"
               :key="order.id"
-              class="ui-tr"
+              class="ui-tr ui-tr--clickable"
+              role="link"
+              tabindex="0"
+              :aria-label="`${t('admin.pages.orders.index.table.orderId')}: ${order.publicId || `#${order.id.substring(0, 8)}`}`"
+              @click="openOrderRow($event, order.id)"
+              @keydown.enter="openOrderRow($event, order.id)"
+              @keydown.space="openOrderRow($event, order.id)"
             >
               <td class="ui-td whitespace-nowrap">
                 <input
@@ -276,14 +282,14 @@
                 <div class="flex items-center justify-end">
                   <NuxtLink
                     :to="`/admin/orders/${order.id}`"
-                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="ui-table-action"
                     :title="t('common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <button
                     v-if="order.status === 'PENDING'"
-                    class="p-2 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="ui-table-action ui-table-action--danger"
                     :title="t('common.delete', 'Delete')"
                     @click="openSingleDelete(order.id)"
                   >
@@ -373,6 +379,7 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
 import AdminOrderExportButton from '~/components/admin/AdminOrderExportButton.vue'
+import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
 
 definePageMeta({
   middleware: 'auth',
@@ -412,12 +419,9 @@ const totalPages = ref(1)
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
 const activeTab = ref('all')
-const today = new Date()
-const lastWeek = new Date(today)
-lastWeek.setDate(lastWeek.getDate() - 7)
-
-const startDate = ref(lastWeek.toISOString().split('T')[0])
-const endDate = ref(today.toISOString().split('T')[0])
+const defaultDateRange = getDashboardPresetDateRange('7d')
+const startDate = ref(defaultDateRange.from)
+const endDate = ref(defaultDateRange.to)
 
 const currentPage = ref(1)
 const itemsPerPage = 25
@@ -514,6 +518,12 @@ function openSingleDelete(id: string) {
   singleDeleteError.value = null
   deleteTargetId.value = id
   singleDeleteOpen.value = true
+}
+
+function openOrderRow(event: Event, orderId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/orders/${orderId}`)
 }
 
 async function confirmSingleDelete() {

@@ -6,7 +6,6 @@ import '../services/api_service.dart';
 import '../services/app_storage.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
-import 'sync_provider.dart';
 
 class User {
   final String id;
@@ -108,7 +107,7 @@ class AuthState {
 class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
-    final bootstrap = ref.read(bootstrapProvider);
+    final bootstrap = ref.watch(bootstrapProvider);
     final apiService = ref.read(apiProvider);
 
     // Initialize mode service from persisted bootstrap — before any network call.
@@ -252,6 +251,7 @@ class AuthNotifier extends Notifier<AuthState> {
     apiService.setToken(token);
     TenantModeService().initialize(mode: mode, tenantId: user.tenantId);
     SyncService().initialize(apiService, mode: mode);
+    final bootstrap = ref.read(bootstrapProvider);
 
     await AppStorage.saveProvisioningState(mode: mode, tenantId: user.tenantId);
     await AppStorage.saveAuthSession(
@@ -260,6 +260,19 @@ class AuthNotifier extends Notifier<AuthState> {
       staffRoleJson: staffRole?.toJson(),
       staffPermissions: staffPermissions,
     );
+    ref
+        .read(bootstrapProvider.notifier)
+        .replace(
+          bootstrap.copyWith(
+            apiBaseUrl: apiService.baseUrl,
+            mode: mode,
+            tenantId: user.tenantId,
+            authToken: token,
+            userJson: user.toJson(),
+            staffRoleJson: staffRole?.toJson(),
+            staffPermissions: staffPermissions,
+          ),
+        );
 
     state = state.copyWith(
       isLoading: false,
@@ -298,6 +311,7 @@ class AuthNotifier extends Notifier<AuthState> {
       final staffPermissions = (staffPermissionsRaw is List)
           ? staffPermissionsRaw.map((e) => e.toString()).toList()
           : <String>[];
+      final bootstrap = ref.read(bootstrapProvider);
 
       TenantModeService().initialize(mode: mode, tenantId: user.tenantId);
       SyncService().initialize(apiService, mode: mode);
@@ -312,6 +326,19 @@ class AuthNotifier extends Notifier<AuthState> {
         staffRoleJson: staffRole?.toJson(),
         staffPermissions: staffPermissions,
       );
+      ref
+          .read(bootstrapProvider.notifier)
+          .replace(
+            bootstrap.copyWith(
+              apiBaseUrl: apiService.baseUrl,
+              mode: mode,
+              tenantId: user.tenantId,
+              authToken: token,
+              userJson: user.toJson(),
+              staffRoleJson: staffRole?.toJson(),
+              staffPermissions: staffPermissions,
+            ),
+          );
 
       state = state.copyWith(
         user: user,
@@ -325,19 +352,26 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
-    final tenantId = TenantModeService().activeTenantId;
+    final bootstrap = ref.read(bootstrapProvider);
     final apiService = ref.read(apiProvider);
     apiService.setToken(null);
-    TenantModeService().initialize(mode: AppMode.online, tenantId: '');
-    SyncService().initialize(apiService, mode: AppMode.online);
-    state = const AuthState();
+    TenantModeService().initialize(
+      mode: bootstrap.mode,
+      tenantId: bootstrap.tenantId,
+    );
+    SyncService().initialize(apiService, mode: bootstrap.mode);
+    ref
+        .read(bootstrapProvider.notifier)
+        .replace(
+          bootstrap.copyWith(
+            clearAuthToken: true,
+            clearUserJson: true,
+            clearStaffRoleJson: true,
+            clearStaffPermissions: true,
+          ),
+        );
+    state = AuthState(mode: bootstrap.mode);
     await AppStorage.clearAuthSession();
-    await AppStorage.clearProvisioningState();
-    // Clear local data for this tenant on explicit logout.
-    if (tenantId.isNotEmpty) {
-      final dbService = ref.read(databaseServiceProvider);
-      await dbService.clearTenantData(tenantId);
-    }
   }
 }
 

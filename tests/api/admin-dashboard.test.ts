@@ -341,6 +341,17 @@ describe('Admin dashboard API', () => {
         expect(res30.body?.revenue?.pos).toBe(80)
         expect(res30.body?.revenue?.total).toBe(330)
 
+        const resToday = await request(app)
+            .get('/api/admin/dashboard')
+            .query({ range: 'today' })
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+
+        expect(resToday.status).toBe(200)
+        expect(resToday.body?.period?.range).toBe('today')
+        expect(resToday.body?.period?.days).toBe(1)
+        expect(resToday.body?.trends?.length).toBe(1)
+
         const res90 = await request(app)
             .get('/api/admin/dashboard')
             .query({ range: '90d' })

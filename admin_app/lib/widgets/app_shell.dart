@@ -40,12 +40,15 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget _buildMobileLayout() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final topbarBg = isDark ? AppColors.contentBg : AppColors.lightTopbarBg;
-    final borderColor =
-        isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
-    final textPrimary =
-        isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary =
-        isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSidebarBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -120,14 +123,18 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget _buildDesktopHeader() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final topbarBg = isDark ? AppColors.contentBg : AppColors.lightTopbarBg;
-    final borderColor =
-        isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
-    final textPrimary =
-        isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary =
-        isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-    final textTertiary =
-        isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSidebarBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
     final hoverBg = isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
 
     final storeState = ref.watch(storeSettingsProvider);
@@ -220,11 +227,14 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   Widget _buildThemeToggle(bool isDark, Color iconColor, Color borderColor) {
     final settings = ref.watch(settingsProvider);
-    final isCurrentlyDark = settings.themeMode == ThemeMode.dark ||
+    final isCurrentlyDark =
+        settings.themeMode == ThemeMode.dark ||
         (settings.themeMode == ThemeMode.system &&
             Theme.of(context).brightness == Brightness.dark);
     final hoverBg = isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
-    final hoverColor = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final hoverColor = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
 
     return _TopbarIconButton(
       icon: isCurrentlyDark ? LucideIcons.sun : LucideIcons.moon,
@@ -239,12 +249,15 @@ class _AppShellState extends ConsumerState<AppShell> {
   void _confirmLogout(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceBg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
-    final borderColor =
-        isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textPrimary =
-        isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary =
-        isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     showDialog(
       context: context,
@@ -304,7 +317,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                     style: TextButton.styleFrom(
                       foregroundColor: textSecondary,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                     ),
                     child: Text(
                       'admin.common.cancel'.tr(),
@@ -322,7 +337,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                       backgroundColor: AppColors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -376,6 +393,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (location == '/pos') return 'admin.nav.pos'.tr();
     if (location == '/delivery') return 'admin.nav.delivery'.tr();
     if (location == '/billing') return 'admin.nav.billing'.tr();
+    if (location == '/integrations') return 'admin.nav.integrations'.tr();
     if (location == '/cash') return 'admin.nav.cash'.tr();
     if (location.startsWith('/cash/')) {
       return 'admin.pages.cash.cashbox.titleFallback'.tr();
@@ -413,6 +431,18 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (location == '/users') return 'admin.nav.users'.tr();
     if (location == '/settings') return 'admin.nav.settings'.tr();
     if (location == '/settings/printers') return 'Printers';
+    if (location == '/settings/store') return 'Store Settings';
+    if (location == '/settings/contact') return 'Contact Information';
+    if (location == '/settings/appearance') return 'Storefront Appearance';
+    if (location == '/settings/homepage') return 'Homepage Settings';
+    if (location == '/settings/legal') return 'Legal Pages';
+    if (location == '/settings/domains') return 'Custom Domains';
+    if (location == '/storefront/preview') return 'Storefront Preview';
+    if (location == '/storefront/builder') return 'Template Builder';
+    if (location == '/storefront/landing-builder') {
+      return 'Landing Page Builder';
+    }
+    if (location.startsWith('/locked/')) return 'Feature Locked';
     return 'admin.nav.dashboard'.tr();
   }
 }
@@ -503,8 +533,7 @@ class _TopbarTextButtonState extends State<_TopbarTextButton> {
         onTap: widget.onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: _hovered ? widget.hoverBg : Colors.transparent,
             borderRadius: BorderRadius.circular(8),

@@ -112,7 +112,13 @@
             <tr
               v-for="sale in sales"
               :key="sale.id"
-              class="ui-tr"
+              class="ui-tr ui-tr--clickable"
+              role="link"
+              tabindex="0"
+              :aria-label="`${t('admin.pages.sales.index.table.saleId')}: #${sale.id.substring(0, 8)}`"
+              @click="openSaleRow($event, sale.id)"
+              @keydown.enter="openSaleRow($event, sale.id)"
+              @keydown.space="openSaleRow($event, sale.id)"
             >
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
@@ -206,7 +212,7 @@
                   </button>
                   <NuxtLink
                     :to="`/admin/sales/${sale.id}`"
-                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
@@ -371,6 +377,7 @@ import { useToast } from '~/composables/useToast'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
+import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
 
 definePageMeta({
   middleware: 'auth',
@@ -415,12 +422,9 @@ const selectedUser = ref('')
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const sortBy = ref('updatedAt')
 const sortOrder = ref<'asc' | 'desc'>('desc')
-const today = new Date()
-const lastWeek = new Date(today)
-lastWeek.setDate(lastWeek.getDate() - 7)
-
-const startDate = ref(lastWeek.toISOString().split('T')[0])
-const endDate = ref(today.toISOString().split('T')[0])
+const defaultDateRange = getDashboardPresetDateRange('7d')
+const startDate = ref(defaultDateRange.from)
+const endDate = ref(defaultDateRange.to)
 const cashboxes = ref<Cashbox[]>([])
 const cashboxesLoaded = ref(false)
 const refundModalOpen = ref(false)
@@ -619,6 +623,12 @@ function formatDate(dateString: string) {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+function openSaleRow(event: Event, saleId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/sales/${saleId}`)
 }
 
 onMounted(() => {

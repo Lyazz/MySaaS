@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('chrono')
 
 const storeStyle = computed(() => {
-  const primaryColor = '#A67C52' // Warm Copper-Bronze
+  const primaryColor = brandColor.value.color
   
   const hexToRgb = (hex: string) => {
     if (!hex || typeof hex !== 'string') return '166 124 82'
