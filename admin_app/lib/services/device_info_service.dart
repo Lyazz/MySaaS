@@ -6,6 +6,26 @@ import 'dart:io';
 class DeviceInfoService {
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
 
+  String getPlatformType() {
+    if (Platform.isMacOS) return 'macos';
+    if (Platform.isWindows) return 'windows';
+    if (Platform.isAndroid) return 'android';
+    if (Platform.isIOS) return 'ios';
+    if (Platform.isLinux) return 'linux';
+    return 'unknown';
+  }
+
+  String getDeviceDisplayName() {
+    return switch (getPlatformType()) {
+      'macos' => 'macOS Admin Device',
+      'windows' => 'Windows Admin Device',
+      'android' => 'Android Admin Device',
+      'ios' => 'iOS Admin Device',
+      'linux' => 'Linux Admin Device',
+      _ => 'Admin Device',
+    };
+  }
+
   /// Gets a stable, unique hardware fingerprint for this device.
   Future<String> getHardwareId() async {
     try {

@@ -705,7 +705,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   border: Border(left: BorderSide(color: palette.inputBorder)),
                 ),
                 child: Text(
-                  '.platform.com',
+                  '.swekly.com',
                   style: GoogleFonts.dmSans(
                     color: palette.secondaryText,
                     fontSize: 12,
@@ -720,7 +720,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
-              '${_slugController.text.trim()}.platform.com',
+              '${_slugController.text.trim()}.swekly.com',
               style: GoogleFonts.dmSans(
                 color: palette.brand,
                 fontSize: 12,

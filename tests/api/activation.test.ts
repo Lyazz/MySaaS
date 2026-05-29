@@ -118,6 +118,7 @@ describe('device activation API', () => {
         licenseKey,
         hardwareId,
         deviceName: 'POS Counter 1',
+        devicePlatform: 'windows',
       });
 
     expect(res.status).toBe(200);
@@ -137,7 +138,8 @@ describe('device activation API', () => {
     const requestCode = Buffer.from(
       JSON.stringify({
         hardwareId,
-        deviceName: 'Offline Counter',
+        deviceName: 'POS Counter 1',
+        devicePlatform: 'windows',
       }),
       'utf-8'
     ).toString('base64');
@@ -194,6 +196,7 @@ describe('device activation API', () => {
     expect(res.body.devices).toHaveLength(1);
     expect(res.body.devices[0]).toMatchObject({
       deviceName: 'POS Counter 1',
+      devicePlatform: 'windows',
       status: 'ACTIVE',
       hardwareId: hardwareId,
       workspaceId: res.body.devices[0].id,

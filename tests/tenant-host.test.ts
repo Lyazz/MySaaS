@@ -10,8 +10,8 @@ describe('tenant host parsing', () => {
     expect(parseHost('apple.localhost:3000')).toEqual({ kind: 'tenant-subdomain', slug: 'apple' })
   })
 
-  it('parses {slug}.platform.com as tenant subdomain', () => {
-    expect(parseHost('tenant-a.platform.com')).toEqual({ kind: 'tenant-subdomain', slug: 'tenant-a' })
+  it('parses {slug}.swekly.com as tenant subdomain', () => {
+    expect(parseHost('tenant-a.swekly.com')).toEqual({ kind: 'tenant-subdomain', slug: 'tenant-a' })
   })
 
   it('supports overriding platform base domain (e.g. swekly.com)', () => {
@@ -33,8 +33,8 @@ describe('tenant host parsing', () => {
     expect(parseHost('192.168.1.5')).toEqual({ kind: 'saas' })
   })
 
-  it('ignores www.platform.com as SaaS host', () => {
-    expect(parseHost('www.platform.com')).toEqual({ kind: 'saas' })
+  it('ignores www.swekly.com as SaaS host', () => {
+    expect(parseHost('www.swekly.com')).toEqual({ kind: 'saas' })
   })
 
   it('handles comma-separated forwarded hosts', () => {

@@ -107,7 +107,7 @@ describe('Maystro Orders Management integration', () => {
         const res = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${token}`)
-            .set('Host', `${tenant.slug}.platform.com`)
+            .set('Host', `${tenant.slug}.swekly.com`)
             .send({
                 provider: 'MAYSTRO',
                 orderId: order.id,
@@ -159,7 +159,7 @@ describe('Maystro Orders Management integration', () => {
         const res = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${token}`)
-            .set('Host', `${tenant.slug}.platform.com`)
+            .set('Host', `${tenant.slug}.swekly.com`)
             .send({
                 provider: 'MAYSTRO',
                 orderId: emptyOrder.id,

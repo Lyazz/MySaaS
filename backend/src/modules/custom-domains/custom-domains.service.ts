@@ -20,7 +20,7 @@ export type TenantDomainDto = {
 }
 
 const platformBaseDomain = (): string =>
-    (process.env.PLATFORM_BASE_DOMAIN || process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN || 'platform.com')
+    (process.env.PLATFORM_BASE_DOMAIN || process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN || 'swekly.com')
         .trim()
         .toLowerCase()
 

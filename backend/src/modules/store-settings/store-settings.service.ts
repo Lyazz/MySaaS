@@ -441,7 +441,7 @@ export class StoreSettingsService {
         apiBasePath?: string
     }): { markdown: string; data: any } {
         const apiBasePath = args.apiBasePath ?? '/api'
-        const tenantHostHint = `${args.tenant.slug}.platform.com (or ${args.tenant.slug}.localhost in dev)`
+        const tenantHostHint = `${args.tenant.slug}.swekly.com (or ${args.tenant.slug}.localhost in dev)`
 
         const data = {
             tenant: args.tenant,

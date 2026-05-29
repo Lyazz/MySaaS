@@ -191,7 +191,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     type UserWithTenant = Prisma.UserGetPayload<{ include: { tenant: true } }>
 
-    const { email, password, hardwareId, deviceName } = req.body
+    const { email, password, hardwareId, deviceName, devicePlatform } = req.body
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
 
     if (!normalizedEmail || typeof password !== 'string' || password.length === 0) {
@@ -285,7 +285,8 @@ router.post('/login', async (req, res) => {
                 const activationResult = await activationService.autoRegisterOrLoginDevice(
                     user.tenantId, 
                     hardwareId, 
-                    deviceName || 'Online POS Device'
+                    deviceName || 'Online POS Device',
+                    devicePlatform
                 )
                 activationToken = activationResult.activationToken
             } catch (err: any) {

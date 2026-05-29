@@ -15,7 +15,24 @@ const maskValue = (value: string, visible = 6) => {
 type OfflineRequestPayload = {
   hardwareId: string;
   deviceName?: string;
+  devicePlatform?: string;
   licenseKey?: string;
+};
+
+const normalizeDevicePlatform = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim().toLowerCase();
+
+  return [
+    'macos',
+    'windows',
+    'android',
+    'ios',
+    'linux',
+    'unknown',
+  ].includes(normalized)
+    ? normalized
+    : null;
 };
 
 export class ActivationService {
@@ -50,6 +67,7 @@ export class ActivationService {
           tenantId: true,
           hardwareId: true,
           deviceName: true,
+          devicePlatform: true,
           status: true,
           lastSyncAt: true,
           createdAt: true,
@@ -108,6 +126,8 @@ export class ActivationService {
           id: device.id,
           workspaceId: device.id,
           deviceName: device.deviceName?.trim() || 'Unnamed Device',
+          devicePlatform:
+            normalizeDevicePlatform(device.devicePlatform) ?? 'unknown',
           status: device.status,
           activatedAt: device.createdAt,
           updatedAt: device.updatedAt,
@@ -147,6 +167,7 @@ export class ActivationService {
         typeof parsed.hardwareId === 'string' ? parsed.hardwareId.trim() : '';
       const deviceName =
         typeof parsed.deviceName === 'string' ? parsed.deviceName.trim() : '';
+      const devicePlatform = normalizeDevicePlatform(parsed.devicePlatform);
       const licenseKey =
         typeof parsed.licenseKey === 'string' ? parsed.licenseKey.trim() : '';
 
@@ -157,6 +178,7 @@ export class ActivationService {
       return {
         hardwareId,
         deviceName: deviceName || undefined,
+        devicePlatform: devicePlatform || undefined,
         licenseKey: licenseKey || undefined,
       };
     }
@@ -169,6 +191,7 @@ export class ActivationService {
 
     return {
       hardwareId: hardwareId.trim(),
+      devicePlatform: undefined,
       licenseKey: licenseKey.trim(),
     };
   }
@@ -205,7 +228,8 @@ export class ActivationService {
     tenantId: string | undefined,
     licenseKey: string,
     hardwareId: string,
-    deviceName?: string
+    deviceName?: string,
+    devicePlatform?: string
   ) {
     return prisma.$transaction(
       async (tx) => {
@@ -255,10 +279,22 @@ export class ActivationService {
               licenseId: license.id,
               hardwareId,
               deviceName: deviceName || 'Unknown Device',
+              devicePlatform: normalizeDevicePlatform(devicePlatform),
             },
           });
         } else if (device.status !== 'ACTIVE') {
           throw new Error('This device has been revoked.');
+        } else if (
+          normalizeDevicePlatform(devicePlatform) &&
+          device.devicePlatform !== normalizeDevicePlatform(devicePlatform)
+        ) {
+          device = await tx.device.update({
+            where: { id: device.id },
+            data: {
+              devicePlatform: normalizeDevicePlatform(devicePlatform),
+              deviceName: deviceName || device.deviceName,
+            },
+          });
         }
 
         const activationToken = signActivationToken({
@@ -286,7 +322,7 @@ export class ActivationService {
    * requestCode is a base64 encoded string.
    * Supported formats:
    * - Legacy: base64(`${licenseKey}:${hardwareId}`)
-   * - Current: base64(JSON.stringify({ hardwareId, deviceName }))
+   * - Current: base64(JSON.stringify({ hardwareId, deviceName, devicePlatform }))
    */
   async offlineActivate(tenantId: string, requestCode: string) {
     try {
@@ -297,7 +333,8 @@ export class ActivationService {
           tenantId,
           payload.licenseKey,
           payload.hardwareId,
-          payload.deviceName || 'Offline Device'
+          payload.deviceName || 'Offline Device',
+          payload.devicePlatform
         );
       }
 
@@ -337,10 +374,23 @@ export class ActivationService {
                 licenseId: license.id,
                 hardwareId: payload.hardwareId,
                 deviceName: payload.deviceName || 'Offline Device',
+                devicePlatform: normalizeDevicePlatform(payload.devicePlatform),
               },
             });
           } else if (device.status !== 'ACTIVE') {
             throw new Error('This device has been revoked.');
+          } else if (
+            normalizeDevicePlatform(payload.devicePlatform) &&
+            device.devicePlatform !==
+              normalizeDevicePlatform(payload.devicePlatform)
+          ) {
+            device = await tx.device.update({
+              where: { id: device.id },
+              data: {
+                devicePlatform: normalizeDevicePlatform(payload.devicePlatform),
+                deviceName: payload.deviceName || device.deviceName,
+              },
+            });
           }
 
           const activationToken = signActivationToken({
@@ -372,7 +422,8 @@ export class ActivationService {
   async autoRegisterOrLoginDevice(
     tenantId: string,
     hardwareId: string,
-    deviceName?: string
+    deviceName?: string,
+    devicePlatform?: string
   ) {
     return prisma.$transaction(
       async (tx) => {
@@ -426,10 +477,22 @@ export class ActivationService {
               licenseId: license.id,
               hardwareId,
               deviceName: deviceName || 'Online POS Device',
+              devicePlatform: normalizeDevicePlatform(devicePlatform),
             },
           });
         } else if (device.status !== 'ACTIVE') {
           throw new Error('This device has been revoked.');
+        } else if (
+          normalizeDevicePlatform(devicePlatform) &&
+          device.devicePlatform !== normalizeDevicePlatform(devicePlatform)
+        ) {
+          device = await tx.device.update({
+            where: { id: device.id },
+            data: {
+              devicePlatform: normalizeDevicePlatform(devicePlatform),
+              deviceName: deviceName || device.deviceName,
+            },
+          });
         }
 
         const activationToken = signActivationToken({

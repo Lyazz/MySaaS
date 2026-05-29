@@ -11,7 +11,7 @@ please adde express as backend framework
 
 2) Tenant resolution:
    - Tenant is resolved from request Host header:
-     - {tenant}.platform.com (subdomain)
+     - {tenant}.swekly.com (subdomain)
      - custom domain (mapped to tenant)
    - Tenant context MUST be attached to request lifecycle.
 

@@ -53,12 +53,15 @@ class ActivationService {
   Future<ActivationResult> activateOnline(String licenseKey) async {
     try {
       final hardwareId = await _deviceInfoService.getHardwareId();
+      final devicePlatform = _deviceInfoService.getPlatformType();
+      final deviceName = _deviceInfoService.getDeviceDisplayName();
       final response = await _apiService.client.post(
         '/activation/online',
         data: {
           'licenseKey': licenseKey.trim(),
           'hardwareId': hardwareId,
-          'deviceName': 'Flutter Device',
+          'deviceName': deviceName,
+          'devicePlatform': devicePlatform,
         },
       );
 
@@ -76,11 +79,13 @@ class ActivationService {
 
   Future<String> generateOfflineRequestCode() async {
     final hardwareId = await _deviceInfoService.getHardwareId();
+    final devicePlatform = _deviceInfoService.getPlatformType();
     return base64Encode(
       utf8.encode(
         jsonEncode({
           'hardwareId': hardwareId,
-          'deviceName': 'Flutter Device',
+          'deviceName': _deviceInfoService.getDeviceDisplayName(),
+          'devicePlatform': devicePlatform,
         }),
       ),
     );

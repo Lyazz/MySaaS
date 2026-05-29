@@ -16,7 +16,7 @@ describe('Maystro pickup point selection', () => {
             }
         })
         tenant = { id: created.id, slug: created.slug }
-        host = `${created.slug}.platform.com`
+        host = `${created.slug}.swekly.com`
 
         await prisma.tenantDeliveryAccount.upsert({
             where: { tenantId_provider: { tenantId: created.id, provider: 'MAYSTRO' } },

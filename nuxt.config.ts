@@ -33,7 +33,7 @@ export default defineNuxtConfig({
       platformBaseDomain:
         process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN ||
         process.env.PLATFORM_BASE_DOMAIN ||
-        'platform.com'
+        'swekly.com'
     }
   },
   modules: [

@@ -10,7 +10,7 @@ describe('Custom domain settings (Tenant Admin)', () => {
   const emailA = `owner-${slugA}@example.com`
   const emailB = `owner-${slugB}@example.com`
   const domain = `www.store-${timestamp}.example.com`
-  const platformBaseDomain = process.env.PLATFORM_BASE_DOMAIN || process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN || 'platform.com'
+  const platformBaseDomain = process.env.PLATFORM_BASE_DOMAIN || process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN || 'swekly.com'
 
   let tokenA = ''
   let tokenB = ''

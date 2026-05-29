@@ -42,7 +42,7 @@ Tenant resolution is based on the HTTP Host header. In a Capacitor “bundled we
 
 Options:
 - **Remote-hosted app (recommended for multi-tenant):** set `CAPACITOR_SERVER_URL` to a tenant domain and rebuild native.
-  - Example: `CAPACITOR_SERVER_URL=https://tenant.platform.com npm run mobile:run:android`
+  - Example: `CAPACITOR_SERVER_URL=https://tenant.swekly.com npm run mobile:run:android`
 - **Bundled assets for a single tenant:** map `CAPACITOR_HOSTNAME` (default `app.local`) as a custom domain for the tenant in your DB.
 
 ## Config knobs

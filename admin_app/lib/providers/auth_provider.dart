@@ -162,11 +162,17 @@ class AuthNotifier extends Notifier<AuthState> {
       final deviceInfo = DeviceInfoService();
 
       String? hardwareId;
+      String? deviceName;
+      String? devicePlatform;
       try {
         hardwareId = await deviceInfo.getHardwareId();
+        deviceName = deviceInfo.getDeviceDisplayName();
+        devicePlatform = deviceInfo.getPlatformType();
       } catch (e) {
         // Fallback or ignore if device info fails (e.g. web unsupported)
         hardwareId = null;
+        deviceName = null;
+        devicePlatform = null;
       }
 
       final response = await apiService.client.post(
@@ -175,6 +181,8 @@ class AuthNotifier extends Notifier<AuthState> {
           'email': email,
           'password': password,
           if (hardwareId != null) 'hardwareId': hardwareId,
+          if (deviceName != null) 'deviceName': deviceName,
+          if (devicePlatform != null) 'devicePlatform': devicePlatform,
         },
       );
 

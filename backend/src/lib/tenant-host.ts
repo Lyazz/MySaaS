@@ -3,7 +3,7 @@ export type ParsedHost =
     | { kind: 'tenant-subdomain'; slug: string }
     | { kind: 'custom-domain'; domain: string }
 
-const DEFAULT_PLATFORM_BASE_DOMAIN = process.env.PLATFORM_BASE_DOMAIN || 'platform.com'
+const DEFAULT_PLATFORM_BASE_DOMAIN = process.env.PLATFORM_BASE_DOMAIN || 'swekly.com'
 
 const normalizeHostHeader = (rawHostHeader: string): string => {
     const first = rawHostHeader.split(',')[0]?.trim() ?? ''

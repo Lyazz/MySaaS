@@ -67,7 +67,7 @@ routes.ts                — Route definitions with middleware
 ### Multi-Tenancy (NON-NEGOTIABLE)
 - Every tenant-owned table has `tenant_id UUID NOT NULL`
 - Every Prisma query must include `where: { tenantId }` — never omit this
-- Tenant resolved from Host header: `{tenant}.platform.com` or custom domain
+- Tenant resolved from Host header: `{tenant}.swekly.com` or custom domain
 - Tenant context attached by middleware — never trust client-sent tenant_id
 
 ### Frontend Structure

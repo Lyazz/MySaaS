@@ -42,7 +42,7 @@ describe('Meta Pixels Admin + Product Assignment', () => {
     })
 
     it('creates pixels and enforces single global per tenant', async () => {
-        const hostA = `${tenantA.slug}.platform.com`
+        const hostA = `${tenantA.slug}.swekly.com`
 
         const p1 = await request(app)
             .post('/api/admin/meta-pixels')
@@ -72,7 +72,7 @@ describe('Meta Pixels Admin + Product Assignment', () => {
     })
 
     it('assigns pixels to a product and exposes pixelIds in public product response', async () => {
-        const hostA = `${tenantA.slug}.platform.com`
+        const hostA = `${tenantA.slug}.swekly.com`
 
         const created = await request(app)
             .post('/api/admin/meta-pixels')
@@ -99,13 +99,13 @@ describe('Meta Pixels Admin + Product Assignment', () => {
         const res = await request(app)
             .get('/api/admin/meta-pixels')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantB.slug}.platform.com`)
+            .set('Host', `${tenantB.slug}.swekly.com`)
         expect(res.status).toBe(403)
 
         const ok = await request(app)
             .get('/api/admin/meta-pixels')
             .set('Authorization', `Bearer ${tokenB}`)
-            .set('Host', `${tenantB.slug}.platform.com`)
+            .set('Host', `${tenantB.slug}.swekly.com`)
         expect(ok.status).toBe(200)
     })
 })

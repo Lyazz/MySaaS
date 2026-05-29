@@ -136,7 +136,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .post('/api/delivery/options')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 provider: 'SELF',
                 destination: { wilayaCode: '16' }
@@ -151,7 +151,7 @@ describe('Delivery API', () => {
     it('rate-shops across offered providers when provider is omitted', async () => {
         const res = await request(app)
             .post('/api/delivery/options')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 destination: { wilayaCode: '16' }
             })
@@ -164,7 +164,7 @@ describe('Delivery API', () => {
     it('supports home/office deliveryMode pricing via serviceLevel', async () => {
         const home = await request(app)
             .post('/api/delivery/options')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 provider: 'SELF',
                 destination: { wilayaCode: '16' },
@@ -176,7 +176,7 @@ describe('Delivery API', () => {
 
         const office = await request(app)
             .post('/api/delivery/options')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 provider: 'SELF',
                 destination: { wilayaCode: '16' },
@@ -209,7 +209,7 @@ describe('Delivery API', () => {
         const first = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send(payload)
 
         expect(first.status).toBe(201)
@@ -218,7 +218,7 @@ describe('Delivery API', () => {
         const second = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send(payload)
 
         expect(second.status).toBe(201)
@@ -250,7 +250,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 provider: 'YALIDINE',
                 orderId: orderA.id,
@@ -312,7 +312,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .patch(`/api/admin/orders/${order.id}`)
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({ status: 'CONFIRMED' })
 
         expect(res.status).toBe(200)
@@ -340,7 +340,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .get(`/api/shipments/${shipmentSelfId}`)
             .set('Authorization', `Bearer ${tokenB}`)
-            .set('Host', `${tenantB.slug}.platform.com`)
+            .set('Host', `${tenantB.slug}.swekly.com`)
 
         expect(res.status).toBe(404)
     })
@@ -349,7 +349,7 @@ describe('Delivery API', () => {
         const confirm = await request(app)
             .patch(`/api/admin/orders/${orderA.id}`)
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({ status: 'CONFIRMED' })
 
         expect(confirm.status).toBe(200)
@@ -358,7 +358,7 @@ describe('Delivery API', () => {
         const ship = await request(app)
             .patch(`/api/admin/orders/${orderA.id}`)
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({ status: 'SHIPPED' })
 
         expect(ship.status).toBe(409)
@@ -369,7 +369,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .post(`/api/self/shipments/${shipmentSelfId}/status`)
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({ status: 'DELIVERED' })
 
         expect(res.status).toBe(200)
@@ -434,7 +434,7 @@ describe('Delivery API', () => {
 
         const res = await request(app)
             .post('/api/webhooks/maystro')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({ payload: double })
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -498,7 +498,7 @@ describe('Delivery API', () => {
 
         const challenge = await request(app)
             .get('/api/webhooks/yalidine?subscribe=1&crc_token=crc-123')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
 
         expect(challenge.status).toBe(200)
         expect(challenge.body).toEqual({ crc_token: 'crc-123' })
@@ -522,7 +522,7 @@ describe('Delivery API', () => {
 
         const invalid = await request(app)
             .post('/api/webhooks/yalidine')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .set('Content-Type', 'application/json')
             .set('X-YALIDINE-SIGNATURE', 'bad-signature')
             .send(rawBody)
@@ -531,7 +531,7 @@ describe('Delivery API', () => {
 
         const first = await request(app)
             .post('/api/webhooks/yalidine')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .set('Content-Type', 'application/json')
             .set('X-YALIDINE-SIGNATURE', signature)
             .send(rawBody)
@@ -541,7 +541,7 @@ describe('Delivery API', () => {
 
         const duplicate = await request(app)
             .post('/api/webhooks/yalidine')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .set('Content-Type', 'application/json')
             .set('X-YALIDINE-SIGNATURE', signature)
             .send(rawBody)
@@ -653,7 +653,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .post('/api/shipments')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 provider: 'MAYSTRO',
                 orderId: mappedOrder.id,
@@ -681,7 +681,7 @@ describe('Delivery API', () => {
         const list = await request(app)
             .get('/api/admin/delivery/providers')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
 
         expect(list.status).toBe(200)
         expect(Array.isArray(list.body)).toBe(true)
@@ -690,7 +690,7 @@ describe('Delivery API', () => {
         const upsert = await request(app)
             .put('/api/admin/delivery/providers/MAYSTRO/account')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 offered: true,
                 isActive: true,
@@ -715,7 +715,7 @@ describe('Delivery API', () => {
         await request(app)
             .put('/api/admin/delivery/providers/MAYSTRO/account')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 offered: true,
                 isActive: true,
@@ -744,7 +744,7 @@ describe('Delivery API', () => {
 
         const res = await request(app)
             .post('/api/delivery/options')
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 provider: 'MAYSTRO',
                 destination: { wilayaCode: '16', communeCode: '575' },
@@ -761,7 +761,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .get('/api/admin/delivery/providers/MAYSTRO/live-rates?deliveryMode=home')
             .set('Authorization', `Bearer ${tokenB}`)
-            .set('Host', `${tenantB.slug}.platform.com`)
+            .set('Host', `${tenantB.slug}.swekly.com`)
 
         expect(res.status).toBe(400)
         expect(res.body.statusMessage).toContain('credentials')
@@ -771,7 +771,7 @@ describe('Delivery API', () => {
         await request(app)
             .put('/api/admin/delivery/providers/MAYSTRO/account')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 offered: true,
                 isActive: true,
@@ -794,7 +794,7 @@ describe('Delivery API', () => {
         const res = await request(app)
             .get('/api/admin/delivery/providers/MAYSTRO/live-rates?deliveryMode=home')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantA.slug}.platform.com`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
 
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body)).toBe(true)

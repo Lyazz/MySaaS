@@ -21,7 +21,7 @@ export class ActivationController {
 
   static async activateOnline(req: Request, res: Response) {
     try {
-      const { licenseKey, hardwareId, deviceName } = req.body;
+      const { licenseKey, hardwareId, deviceName, devicePlatform } = req.body;
 
       if (!licenseKey || !hardwareId) {
         return res
@@ -38,7 +38,8 @@ export class ActivationController {
         tenantId,
         licenseKey,
         hardwareId,
-        deviceName
+        deviceName,
+        devicePlatform
       );
       res.status(200).json(result);
     } catch (error: any) {

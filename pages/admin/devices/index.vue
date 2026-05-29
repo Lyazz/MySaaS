@@ -166,9 +166,20 @@
             <tr v-for="device in devices" :key="device.id" class="ui-tr">
               <td class="ui-td">
                 <div class="space-y-1">
-                  <p class="font-medium" style="color: var(--text-primary)">
-                    {{ device.deviceName }}
-                  </p>
+                  <div class="flex items-center gap-2">
+                    <p class="font-medium" style="color: var(--text-primary)">
+                      {{ device.deviceName }}
+                    </p>
+                    <span
+                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      style="
+                        background: rgba(59, 130, 246, 0.12);
+                        color: rgb(37, 99, 235);
+                      "
+                    >
+                      {{ formatDevicePlatform(device.devicePlatform) }}
+                    </span>
+                  </div>
                   <p class="text-xs" style="color: var(--text-tertiary)">
                     ID {{ shortId(device.id) }}
                   </p>
@@ -452,6 +463,7 @@ type TenantDevice = {
   id: string;
   workspaceId: string;
   deviceName: string;
+  devicePlatform: string;
   status: string;
   activatedAt: string;
   updatedAt: string;
@@ -621,6 +633,23 @@ function resetActivationPanel() {
 
 function shortId(value: string) {
   return value.length > 14 ? `${value.slice(0, 6)}…${value.slice(-6)}` : value;
+}
+
+function formatDevicePlatform(value: string | null | undefined) {
+  switch ((value || '').toLowerCase()) {
+    case 'macos':
+      return 'macOS';
+    case 'windows':
+      return 'Windows';
+    case 'android':
+      return 'Android';
+    case 'ios':
+      return 'iOS';
+    case 'linux':
+      return 'Linux';
+    default:
+      return 'Unknown';
+  }
 }
 
 function formatDate(value: string | null) {
