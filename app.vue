@@ -3,14 +3,44 @@ import { useUiStore } from '~/stores/ui';
 import { resolveFaviconUrl } from '~/utils/branding';
 
 const uiStore = useUiStore();
+const route = useRoute();
 onMounted(() => {
   uiStore.initTheme();
 });
 
-// Global head configuration if needed, but pages will override
+const BRAND_NAME = 'Swekly';
+
+function toReadableLabel(input: string): string {
+  return input
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getFallbackRouteTitle(): string {
+  const matchedPath =
+    route.matched[route.matched.length - 1]?.path || route.path || '/';
+  if (!matchedPath || matchedPath === '/') return 'Home';
+  const segments = matchedPath
+    .split('/')
+    .filter(Boolean)
+    .filter((segment) => !segment.startsWith('[') && !segment.startsWith(':'));
+  if (!segments.length) return 'Home';
+  return toReadableLabel(segments[segments.length - 1] || 'Home');
+}
+
+function formatTitle(titleChunk?: string | null): string {
+  const rawTitle = (titleChunk || '').trim();
+  const normalizedTitle = rawTitle.replace(/\s*[|—-]\s*Swekly\s*$/i, '').trim();
+  const baseTitle = normalizedTitle || getFallbackRouteTitle();
+  return `${baseTitle} | ${BRAND_NAME}`;
+}
+
+// Global page-title format
 useHead({
   titleTemplate: (titleChunk) => {
-    return titleChunk || '';
+    return formatTitle(titleChunk);
   },
 });
 

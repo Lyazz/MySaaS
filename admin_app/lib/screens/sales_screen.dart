@@ -9,6 +9,7 @@ import '../models/sale.dart';
 import '../utils/debouncer.dart';
 import '../utils/tenant_currency.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/date_range_filter_field.dart';
 import '../widgets/form/form_input.dart';
@@ -85,9 +86,16 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
     );
     final salesState = ref.watch(salesProvider);
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -106,17 +114,14 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A), // Slate-900
+                    color: textPrimary,
                     letterSpacing: -0.5,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   'admin.pages.sales.index.subtitle'.tr(),
-                  style: TextStyle(
-                    color: Color(0xFF64748B), // Slate-500
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: textMuted, fontSize: 14),
                 ),
               ],
             ),
@@ -253,10 +258,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             flex: 2,
                             child: Text(
                               '#$shortId',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: Color(0xFF0F172A), // Slate-900
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -273,10 +278,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               sale.customerName.isEmpty
                                   ? '—'
                                   : sale.customerName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 14,
-                                color: Color(0xFF0F172A), // Slate-900
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -288,8 +293,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                   : sale.customerPhone,
                               style: TextStyle(
                                 color: sale.customerPhone.isEmpty
-                                    ? const Color(0xFF94A3B8) // Slate-400
-                                    : const Color(0xFF475569), // Slate-600
+                                    ? textMuted
+                                    : textSecondary,
                               ),
                             ),
                           ),
@@ -297,10 +302,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             flex: 2,
                             child: Text(
                               money.format(sale.totalAmount),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: Color(0xFF0F172A), // Slate-900
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -315,10 +320,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             flex: 2,
                             child: Text(
                               DateFormat.yMMMd().format(sale.updatedAt),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Color(0xFF64748B), // Slate-500
-                              ),
+                              style: TextStyle(fontSize: 13, color: textMuted),
                             ),
                           ),
                           Expanded(
@@ -381,6 +383,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 
   Future<void> _handleRefund(Sale sale) async {
     if (_refundingSaleIds.contains(sale.id)) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
     setState(() => _refundingSaleIds.add(sale.id));
     try {
       final api = ref.read(apiProvider);
@@ -431,10 +435,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                     children: [
                       Text(
                         'Create refund cash outflow and mark this sale as REFUNDED.',
-                        style: TextStyle(
-                          color: const Color(0xFF64748B),
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: textMuted, fontSize: 13),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -588,10 +589,12 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   }
 
   Widget _headerText(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
     return Text(
       text,
-      style: const TextStyle(
-        color: Color(0xFF64748B), // Slate-500
+      style: TextStyle(
+        color: textMuted,
         fontSize: 12,
         fontWeight: FontWeight.w600,
       ),
@@ -603,12 +606,14 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
     return Center(
       child: Padding(
         padding: EdgeInsets.all(48),
         child: Text(
           'admin.pages.sales.index.empty.title'.tr(),
-          style: const TextStyle(color: Color(0xFF64748B)),
+          style: TextStyle(color: textMuted),
         ),
       ),
     );

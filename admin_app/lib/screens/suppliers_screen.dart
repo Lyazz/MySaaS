@@ -50,6 +50,11 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     final suppliersState = ref.watch(suppliersProvider);
     final suppliers = suppliersState.suppliers;
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     final query = _searchController.text.trim().toLowerCase();
     final filteredSuppliers = query.isEmpty
@@ -97,17 +102,14 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF111827), // Gray-900
+                          color: textPrimary,
                           letterSpacing: -0.5,
                         ),
                       ),
                       SizedBox(height: 4),
                       Text(
                         'admin.pages.suppliers.index.subtitle'.tr(),
-                        style: TextStyle(
-                          color: Color(0xFF6B7280),
-                          fontSize: 14,
-                        ), // Gray-500
+                        style: TextStyle(color: textMuted, fontSize: 14),
                       ),
                     ],
                   ),
@@ -171,7 +173,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
             Expanded(
               child: suppliersState.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : _buildSuppliersTable(filteredSuppliers),
+                  : _buildSuppliersTable(filteredSuppliers, isDark: isDark),
             ),
           ],
         ),
@@ -179,7 +181,27 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     );
   }
 
-  Widget _buildSuppliersTable(List<Supplier> suppliers) {
+  Widget _buildSuppliersTable(
+    List<Supplier> suppliers, {
+    required bool isDark,
+  }) {
+    final headerTextColor = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final primaryTextColor = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final secondaryTextColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final mutedTextColor = isDark
+        ? AppColors.textMuted
+        : AppColors.lightTextMuted;
+    final avatarBgColor = isDark
+        ? AppColors.greenSurface
+        : const Color(0xFFECFDF5);
+    final avatarTextColor = isDark ? AppColors.greenText : AppColors.green;
+
     return ResponsivePaginatedTable<Supplier>(
       items: suppliers,
       minWidth: 900,
@@ -192,7 +214,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -204,7 +226,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -216,7 +238,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -228,7 +250,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
               textAlign: TextAlign.end,
@@ -252,7 +274,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFECFDF5), // Emerald-50
+                        color: avatarBgColor,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       alignment: Alignment.center,
@@ -260,18 +282,18 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                         supplier.name.isNotEmpty
                             ? supplier.name[0].toUpperCase()
                             : '?',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF10B981), // Emerald-500
+                          color: avatarTextColor,
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       supplier.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF111827), // Gray-900
+                        color: primaryTextColor,
                         fontSize: 14,
                       ),
                     ),
@@ -288,17 +310,17 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               LucideIcons.mail,
                               size: 12,
-                              color: Color(0xFF9CA3AF),
+                              color: mutedTextColor,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               supplier.email!,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF4B5563), // Gray-600
+                                color: secondaryTextColor,
                               ),
                             ),
                           ],
@@ -307,17 +329,17 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                     if (supplier.phone != null)
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.phone,
                             size: 12,
-                            color: Color(0xFF9CA3AF),
+                            color: mutedTextColor,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             supplier.phone!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
-                              color: Color(0xFF4B5563), // Gray-600
+                              color: secondaryTextColor,
                             ),
                           ),
                         ],
@@ -329,10 +351,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                 flex: 3,
                 child: Text(
                   supplier.address ?? '-',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
-                  ),
+                  style: TextStyle(fontSize: 13, color: mutedTextColor),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

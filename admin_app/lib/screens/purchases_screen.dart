@@ -76,6 +76,11 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     final purchases = purchasesState.purchases;
     final suppliers = suppliersState.suppliers;
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     final query = _searchController.text.trim().toLowerCase();
     final filteredPurchases = purchases.where((purchase) {
@@ -112,7 +117,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -120,17 +125,14 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF111827), // Gray-900
+                            color: textPrimary,
                             letterSpacing: -0.5,
                           ),
                         ),
                         SizedBox(height: 4),
                         Text(
                           'Manage your purchase orders',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6B7280),
-                          ), // Gray-500
+                          style: TextStyle(fontSize: 14, color: textMuted),
                         ),
                       ],
                     ),
@@ -225,7 +227,11 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
               else if (purchasesState.isLoading)
                 const Center(child: CircularProgressIndicator())
               else
-                _buildPurchasesTable(filteredPurchases, isMobile),
+                _buildPurchasesTable(
+                  filteredPurchases,
+                  isMobile,
+                  isDark: isDark,
+                ),
             ],
           ),
         ),
@@ -233,7 +239,19 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     );
   }
 
-  Widget _buildPurchasesTable(List<Purchase> purchases, bool isMobile) {
+  Widget _buildPurchasesTable(
+    List<Purchase> purchases,
+    bool isMobile, {
+    required bool isDark,
+  }) {
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+
     if (purchases.isEmpty) {
       return Center(
         child: Padding(
@@ -253,9 +271,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppColors.textPrimary
-                      : AppColors.lightTextPrimary,
+                  color: textPrimary,
                 ),
               ),
             ],
@@ -267,18 +283,30 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     return ResponsivePaginatedTable<Purchase>(
       items: purchases,
       minWidth: 900,
-      header: const Row(
+      header: Row(
         children: [
-          Expanded(flex: 2, child: Text('ID', style: _headerStyle)),
-          Expanded(flex: 3, child: Text('SUPPLIER', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('STATUS', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('ITEMS', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('DATE', style: _headerStyle)),
+          Expanded(flex: 2, child: Text('ID', style: _headerStyle(textMuted))),
+          Expanded(
+            flex: 3,
+            child: Text('SUPPLIER', style: _headerStyle(textMuted)),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text('STATUS', style: _headerStyle(textMuted)),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text('ITEMS', style: _headerStyle(textMuted)),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text('DATE', style: _headerStyle(textMuted)),
+          ),
           Expanded(
             flex: 1,
             child: Text(
               'ACTION',
-              style: _headerStyle,
+              style: _headerStyle(textMuted),
               textAlign: TextAlign.right,
             ),
           ),
@@ -298,9 +326,9 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   flex: 2,
                   child: Text(
                     '#${purchase.id.length > 8 ? purchase.id.substring(0, 8) : purchase.id}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF111827), // Gray-900
+                      color: textPrimary,
                       fontFamily: 'RobotoMono',
                     ),
                   ),
@@ -309,9 +337,9 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   flex: 3,
                   child: Text(
                     purchase.supplierName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF1F2937),
+                      color: textSecondary,
                     ),
                   ),
                 ),
@@ -326,20 +354,14 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   flex: 2,
                   child: Text(
                     '${purchase.items.length} items',
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: textMuted, fontSize: 13),
                   ),
                 ),
                 Expanded(
                   flex: 2,
                   child: Text(
                     DateFormat('MMM d, yyyy').format(purchase.createdAt),
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: textMuted, fontSize: 13),
                   ),
                 ),
                 Expanded(
@@ -361,10 +383,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     );
   }
 
-  static const _headerStyle = TextStyle(
+  static TextStyle _headerStyle(Color color) => TextStyle(
     fontWeight: FontWeight.w600,
     fontSize: 11,
-    color: Color(0xFF6B7280), // Gray-500
+    color: color,
     letterSpacing: 0.5,
   );
 }

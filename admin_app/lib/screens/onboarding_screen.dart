@@ -78,6 +78,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final done = _items.where((i) => i.done).length;
     final total = _items.length;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+    final progressTrack = isDark ? AppColors.surface3 : AppColors.lightSurface3;
+    final todoIconColor = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Setup Checklist')),
@@ -115,8 +127,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       child: LinearProgressIndicator(
                         value: done / total,
                         minHeight: 8,
-                        backgroundColor: const Color(0xFFE2E8F0),
-                        color: const Color(0xFF10B981),
+                        backgroundColor: progressTrack,
+                        color: AppColors.green,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -126,18 +138,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.surface1
-                            : AppColors.lightSurface1,
+                        color: surface,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: item.done
                               ? (isDark
                                     ? AppColors.greenText.withValues(alpha: 0.4)
-                                    : const Color(0xFF6EE7B7))
-                              : (isDark
-                                    ? AppColors.surfaceBorder
-                                    : const Color(0xFFE2E8F0)),
+                                    : AppColors.green.withValues(alpha: 0.45))
+                              : surfaceBorder,
                         ),
                       ),
                       child: Row(
@@ -146,9 +154,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             item.done
                                 ? LucideIcons.checkCircle
                                 : LucideIcons.circle,
-                            color: item.done
-                                ? const Color(0xFF10B981)
-                                : const Color(0xFFCBD5E1),
+                            color: item.done ? AppColors.green : todoIconColor,
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -159,9 +165,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 decoration: item.done
                                     ? TextDecoration.lineThrough
                                     : null,
-                                color: item.done
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF0F172A),
+                                color: item.done ? textMuted : textPrimary,
                               ),
                             ),
                           ),
