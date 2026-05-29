@@ -1,79 +1,212 @@
-import { PrismaClient } from '@prisma/client'
-import jwt from 'jsonwebtoken'
+import { randomBytes } from 'node:crypto';
 
-const prisma = new PrismaClient()
+import { Prisma, PrismaClient } from '@prisma/client';
 
-// Secure key for signing activation tokens. In production, use env variable!
-const ACTIVATION_SECRET = process.env.ACTIVATION_SECRET || 'fallback_secret_key_change_me'
+import { signActivationToken } from '../../lib/activation-token';
+
+const prisma = new PrismaClient();
+
+const maskValue = (value: string, visible = 6) => {
+  if (!value) return '';
+  if (value.length <= visible * 2) return value;
+  return `${value.slice(0, visible)}…${value.slice(-visible)}`;
+};
 
 export class ActivationService {
+  async listDevices(tenantId: string) {
+    const [tenant, licenses, devices] = await prisma.$transaction([
+      prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { id: true, isOffline: true, isSuspended: true },
+      }),
+      prisma.license.findMany({
+        where: { tenantId },
+        orderBy: [{ createdAt: 'asc' }],
+        select: {
+          id: true,
+          licenseKey: true,
+          maxDevices: true,
+          isActive: true,
+          expiresAt: true,
+          devices: {
+            select: {
+              id: true,
+              status: true,
+            },
+          },
+        },
+      }),
+      prisma.device.findMany({
+        where: { tenantId },
+        orderBy: [{ createdAt: 'desc' }],
+        select: {
+          id: true,
+          tenantId: true,
+          hardwareId: true,
+          deviceName: true,
+          status: true,
+          lastSyncAt: true,
+          createdAt: true,
+          updatedAt: true,
+          license: {
+            select: {
+              id: true,
+              licenseKey: true,
+              maxDevices: true,
+              isActive: true,
+              expiresAt: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+
+    const licenseStats = new Map(
+      licenses.map((license) => [
+        license.id,
+        {
+          activeDeviceCount: license.devices.filter(
+            (d) => d.status === 'ACTIVE'
+          ).length,
+          totalDeviceCount: license.devices.length,
+        },
+      ])
+    );
+
+    const summary = {
+      totalDevices: devices.length,
+      activeDevices: devices.filter((device) => device.status === 'ACTIVE')
+        .length,
+      inactiveDevices: devices.filter((device) => device.status !== 'ACTIVE')
+        .length,
+      licenses: licenses.length,
+      activeLicenses: licenses.filter((license) => license.isActive).length,
+      capacity: licenses.reduce((sum, license) => sum + license.maxDevices, 0),
+      mode: tenant.isOffline ? 'offlineOnly' : 'hybrid',
+      subscriptionTier: tenant.isOffline ? 'offlineOnly' : 'online',
+    };
+
+    return {
+      summary,
+      devices: devices.map((device) => {
+        const stats = licenseStats.get(device.license.id) ?? {
+          activeDeviceCount: 0,
+          totalDeviceCount: 0,
+        };
+
+        return {
+          id: device.id,
+          workspaceId: device.id,
+          deviceName: device.deviceName?.trim() || 'Unnamed Device',
+          status: device.status,
+          activatedAt: device.createdAt,
+          updatedAt: device.updatedAt,
+          lastSyncAt: device.lastSyncAt,
+          hardwareId: device.hardwareId,
+          hardwareIdMasked: maskValue(device.hardwareId),
+          license: {
+            id: device.license.id,
+            key: device.license.licenseKey,
+            keyMasked: maskValue(device.license.licenseKey),
+            isActive: device.license.isActive,
+            maxDevices: device.license.maxDevices,
+            expiresAt: device.license.expiresAt,
+            activeDeviceCount: stats.activeDeviceCount,
+            totalDeviceCount: stats.totalDeviceCount,
+            kind: device.license.licenseKey.startsWith('LIC-ON-')
+              ? 'auto'
+              : 'assigned',
+          },
+        };
+      }),
+    };
+  }
+
   /**
    * Activates a device online, verifying the license and returning a signed JWT.
    */
-  async activateDevice(tenantId: string | undefined, licenseKey: string, hardwareId: string, deviceName?: string) {
-    // 1. Find and validate the license by the unique licenseKey
-    const license = await prisma.license.findUnique({
-      where: {
-        licenseKey,
-      },
-      include: { devices: true },
-    })
+  async activateDevice(
+    tenantId: string | undefined,
+    licenseKey: string,
+    hardwareId: string,
+    deviceName?: string
+  ) {
+    return prisma.$transaction(
+      async (tx) => {
+        const license = await tx.license.findUnique({
+          where: { licenseKey },
+          include: {
+            devices: true,
+            tenant: {
+              select: { id: true, isOffline: true, isSuspended: true },
+            },
+          },
+        });
 
-    if (!license || !license.isActive) {
-      throw new Error('Invalid or inactive License Key')
-    }
+        if (!license || !license.isActive) {
+          throw new Error('Invalid or inactive License Key');
+        }
 
-    // Ensure the tenant matches if the request arrived via a specific tenant subdomain
-    if (tenantId && license.tenantId !== tenantId) {
-      throw new Error('This license does not belong to the current workspace.')
-    }
+        if (tenantId && license.tenantId !== tenantId) {
+          throw new Error(
+            'This license does not belong to the current workspace.'
+          );
+        }
 
-    // We can confidently use the license's true tenant ID moving forward
-    const resolvedTenantId = license.tenantId;
+        if (license.tenant.isSuspended) {
+          throw new Error('Tenant is suspended');
+        }
 
-    if (license.expiresAt && license.expiresAt < new Date()) {
-      throw new Error('License has expired')
-    }
+        if (license.expiresAt && license.expiresAt < new Date()) {
+          throw new Error('License has expired');
+        }
 
-    // 2. Check if this device is already registered
-    let device = license.devices.find((d) => d.hardwareId === hardwareId)
+        let device = license.devices.find((d) => d.hardwareId === hardwareId);
 
-    // 3. If not registered, ensure we haven't exceeded maxDevices
-    if (!device) {
-      const activeDevices = license.devices.filter((d) => d.status === 'ACTIVE').length
-      if (activeDevices >= license.maxDevices) {
-        throw new Error(`Activation limit reached. Maximum ${license.maxDevices} device(s) allowed.`)
-      }
+        if (!device) {
+          const activeDevices = license.devices.filter(
+            (d) => d.status === 'ACTIVE'
+          ).length;
+          if (activeDevices >= license.maxDevices) {
+            throw new Error(
+              `Activation limit reached. Maximum ${license.maxDevices} device(s) allowed.`
+            );
+          }
 
-      // Register new device
-      device = await prisma.device.create({
-        data: {
-          tenantId: resolvedTenantId,
-          licenseId: license.id,
+          device = await tx.device.create({
+            data: {
+              tenantId: license.tenantId,
+              licenseId: license.id,
+              hardwareId,
+              deviceName: deviceName || 'Unknown Device',
+            },
+          });
+        } else if (device.status !== 'ACTIVE') {
+          throw new Error('This device has been revoked.');
+        }
+
+        const activationToken = signActivationToken({
+          tenantId: license.tenantId,
+          workspaceId: device.id,
+          mode: license.tenant.isOffline ? 'offlineOnly' : 'hybrid',
+          subscriptionTier: license.tenant.isOffline ? 'offlineOnly' : 'online',
+          licenseKey,
           hardwareId,
-          deviceName: deviceName || 'Unknown Device',
-        },
-      })
-    } else if (device.status !== 'ACTIVE') {
-      throw new Error('This device has been revoked.')
-    }
+          deviceId: device.id,
+        });
 
-    // 4. Generate signed activation token (JWT)
-    const tokenPayload = {
-      tenantId: resolvedTenantId,
-      licenseKey,
-      hardwareId,
-      deviceId: device.id,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365, // 1 year expiry
-    }
-
-    const activationToken = jwt.sign(tokenPayload, ACTIVATION_SECRET)
-
-    return {
-      message: 'Device activated successfully',
-      device,
-      activationToken,
-    }
+        return {
+          message: 'Device activated successfully',
+          device,
+          activationToken,
+        };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
   }
 
   /**
@@ -82,84 +215,109 @@ export class ActivationService {
    */
   async offlineActivate(tenantId: string, requestCode: string) {
     try {
-      const decoded = Buffer.from(requestCode, 'base64').toString('utf-8')
-      const [licenseKey, hardwareId] = decoded.split(':')
+      const decoded = Buffer.from(requestCode, 'base64').toString('utf-8');
+      const [licenseKey, hardwareId] = decoded.split(':');
 
       if (!licenseKey || !hardwareId) {
-        throw new Error('Invalid Request Code format')
+        throw new Error('Invalid Request Code format');
       }
 
       // We pass the parsed data to the standard activation flow
-      const result = await this.activateDevice(tenantId, licenseKey, hardwareId, 'Offline Device')
-      return result
+      const result = await this.activateDevice(
+        tenantId,
+        licenseKey,
+        hardwareId,
+        'Offline Device'
+      );
+      return result;
     } catch (e: any) {
-      throw new Error(`Offline activation failed: ${e.message}`)
+      throw new Error(`Offline activation failed: ${e.message}`);
     }
   }
   /**
    * Automatically registers or logs in a device for a standard online user during authentication.
    * If the tenant has no devices, it generates a License Key and registers this device.
    */
-  async autoRegisterOrLoginDevice(tenantId: string, hardwareId: string, deviceName?: string) {
-    // 1. Find an active license for this tenant
-    let license = await prisma.license.findFirst({
-      where: { tenantId, isActive: true },
-      include: { devices: true },
-    })
+  async autoRegisterOrLoginDevice(
+    tenantId: string,
+    hardwareId: string,
+    deviceName?: string
+  ) {
+    return prisma.$transaction(
+      async (tx) => {
+        const tenant = await tx.tenant.findUnique({
+          where: { id: tenantId },
+          select: { id: true, isOffline: true, isSuspended: true },
+        });
 
-    // If no license exists (first time online login), create one automatically
-    if (!license) {
-      const crypto = require('crypto')
-      const randomPart = crypto.randomBytes(8).toString('hex').toUpperCase()
-      
-      license = await prisma.license.create({
-        data: {
+        if (!tenant) {
+          throw new Error('Tenant not found');
+        }
+
+        if (tenant.isSuspended) {
+          throw new Error('Tenant is suspended');
+        }
+
+        let license = await tx.license.findFirst({
+          where: { tenantId, isActive: true },
+          include: { devices: true },
+          orderBy: { createdAt: 'asc' },
+        });
+
+        if (!license) {
+          const randomPart = randomBytes(8).toString('hex').toUpperCase();
+
+          license = await tx.license.create({
+            data: {
+              tenantId,
+              licenseKey: `LIC-ON-${randomPart}`,
+              maxDevices: 1,
+            },
+            include: { devices: true },
+          });
+        }
+
+        let device = license.devices.find((d) => d.hardwareId === hardwareId);
+
+        if (!device) {
+          const activeDevices = license.devices.filter(
+            (d) => d.status === 'ACTIVE'
+          ).length;
+          if (activeDevices >= license.maxDevices) {
+            throw new Error(
+              `Device limit reached. You can only have ${license.maxDevices} active device(s).`
+            );
+          }
+
+          device = await tx.device.create({
+            data: {
+              tenantId,
+              licenseId: license.id,
+              hardwareId,
+              deviceName: deviceName || 'Online POS Device',
+            },
+          });
+        } else if (device.status !== 'ACTIVE') {
+          throw new Error('This device has been revoked.');
+        }
+
+        const activationToken = signActivationToken({
           tenantId,
-          licenseKey: `LIC-ON-${randomPart}`,
-          maxDevices: 1,
-        },
-        include: { devices: true },
-      })
-    }
-
-    // 2. Check if this specific device is already registered
-    let device = license.devices.find((d) => d.hardwareId === hardwareId)
-
-    // 3. If not registered, attempt to register it
-    if (!device) {
-      const activeDevices = license.devices.filter((d) => d.status === 'ACTIVE').length
-      if (activeDevices >= license.maxDevices) {
-        throw new Error(`Device limit reached. You can only have ${license.maxDevices} active device(s).`)
-      }
-
-      device = await prisma.device.create({
-        data: {
-          tenantId,
-          licenseId: license.id,
+          workspaceId: device.id,
+          mode: tenant.isOffline ? 'offlineOnly' : 'hybrid',
+          subscriptionTier: tenant.isOffline ? 'offlineOnly' : 'online',
+          licenseKey: license.licenseKey,
           hardwareId,
-          deviceName: deviceName || 'Online POS Device',
-        },
-      })
-    } else if (device.status !== 'ACTIVE') {
-      throw new Error('This device has been revoked.')
-    }
+          deviceId: device.id,
+        });
 
-    // 4. Generate signed activation token (JWT)
-    const tokenPayload = {
-      tenantId,
-      licenseKey: license.licenseKey,
-      hardwareId,
-      deviceId: device.id,
-      tier: 'ONLINE', // We force ONLINE tier for auto-registered devices
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365, // 1 year expiry
-    }
-
-    const activationToken = jwt.sign(tokenPayload, ACTIVATION_SECRET)
-
-    return {
-      message: 'Device auto-registered successfully',
-      device,
-      activationToken,
-    }
+        return {
+          message: 'Device auto-registered successfully',
+          device,
+          activationToken,
+        };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
   }
 }

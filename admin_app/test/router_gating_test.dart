@@ -148,6 +148,37 @@ void main() {
     },
   );
 
+  testWidgets(
+    'offline registration button opens activation for signed-out provisioned tenants',
+    (tester) async {
+      final container = _buildContainer(
+        bootstrap: const BootstrapConfig(
+          apiBaseUrl: 'https://api.example.com',
+          mode: AppMode.hybrid,
+          subscriptionTier: SubscriptionTier.online,
+          tenantId: 'tenant-1',
+        ),
+        authState: const AuthState(
+          mode: AppMode.hybrid,
+          subscriptionTier: SubscriptionTier.online,
+        ),
+      );
+      addTearDown(container.dispose);
+
+      final router = container.read(routerProvider);
+
+      await _pumpRouterApp(tester, container: container, router: router);
+
+      expect(_locationOf(router), '/login');
+      await tester.tap(find.text('Offline Registration'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(_locationOf(router), '/activate');
+      expect(find.text('Activate this device'), findsOneWidget);
+    },
+  );
+
   testWidgets('router restores authenticated sessions to the app shell', (
     tester,
   ) async {

@@ -83,7 +83,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          _buildBackdrop(palette),
+          _AnimatedBlobBackdrop(palette: palette),
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -100,14 +100,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Row(
                         children: [
                           if (isDesktop) ...[
-                            Expanded(child: _buildHeroPanel(palette)),
+                            Expanded(child: _AnimatedEntrance(delay: 0, child: _buildHeroPanel(palette))),
                             const SizedBox(width: 22),
                           ],
                           Expanded(
-                            child: _buildFormPanel(
-                              context,
-                              palette,
-                              isDesktop: isDesktop,
+                            child: _AnimatedEntrance(
+                              delay: isDesktop ? 150 : 0,
+                              child: _buildFormPanel(
+                                context,
+                                palette,
+                                isDesktop: isDesktop,
+                              ),
                             ),
                           ),
                         ],
@@ -120,48 +123,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/activate'),
-        backgroundColor: palette.glassBackground,
-        icon: Icon(LucideIcons.wifiOff, color: palette.primaryText, size: 18),
-        label: Text(
-          'Offline Registration',
-          style: GoogleFonts.dmSans(
-            color: palette.primaryText,
-            fontWeight: FontWeight.w600,
+      floatingActionButton: _HoverScale(
+        child: FloatingActionButton.extended(
+          onPressed: () => context.go('/activate'),
+          backgroundColor: palette.glassBackground,
+          icon: Icon(LucideIcons.wifiOff, color: palette.primaryText, size: 18),
+          label: Text(
+            'Offline Registration',
+            style: GoogleFonts.dmSans(
+              color: palette.primaryText,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildBackdrop(_AuthPalette palette) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        DecoratedBox(decoration: BoxDecoration(gradient: palette.pageGradient)),
-        Positioned(
-          top: -160,
-          left: -80,
-          child: _buildBlob(color: palette.blobPrimary),
-        ),
-        Positioned(
-          bottom: -180,
-          right: -120,
-          child: _buildBlob(color: palette.blobSecondary),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBlob({required Color color}) {
-    return Container(
-      width: 420,
-      height: 420,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 110, sigmaY: 110),
-        child: const SizedBox.expand(),
       ),
     );
   }
@@ -207,78 +181,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: palette.glassBackground,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: palette.cardBorder),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: palette.brand.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(14),
+          _HoverScale(
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: palette.glassBackground,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: palette.cardBorder),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: palette.brand.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      LucideIcons.trendingUp,
+                      color: palette.brand,
+                      size: 22,
+                    ),
                   ),
-                  child: Icon(
-                    LucideIcons.trendingUp,
-                    color: palette.brand,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Revenue Tracking',
-                        style: GoogleFonts.dmSans(
-                          color: palette.primaryText,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Revenue Tracking',
+                          style: GoogleFonts.dmSans(
+                            color: palette.primaryText,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Real-time insights into store performance.',
-                        style: GoogleFonts.dmSans(
-                          color: palette.secondaryText,
-                          fontSize: 13,
+                        const SizedBox(height: 4),
+                        Text(
+                          'Real-time insights into store performance.',
+                          style: GoogleFonts.dmSans(
+                            color: palette.secondaryText,
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Spacer(),
-          Row(
-            children: List.generate(5, (index) {
-              final heights = [26.0, 42.0, 30.0, 52.0, 36.0];
-              return Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: index == 4 ? 0 : 6),
-                  height: heights[index],
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        palette.brand.withValues(alpha: 0.65),
-                        palette.brand.withValues(alpha: 0.15),
                       ],
                     ),
                   ),
-                ),
-              );
-            }),
+                ],
+              ),
+            ),
           ),
+          const Spacer(),
+          _AnimatedChartBars(palette: palette),
           const SizedBox(height: 18),
           Text(
             '© 2026 Swekly Inc.',
@@ -297,10 +252,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _AuthPalette palette, {
     required bool isDesktop,
   }) {
-    final workspace = ref.watch(workspaceProvider);
-
     return Align(
-      alignment: Alignment.topCenter,
+      alignment: Alignment.center,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 540),
         decoration: BoxDecoration(
@@ -333,65 +286,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   textAlign: isDesktop ? TextAlign.left : TextAlign.center,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Access your admin workspace securely.',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 15,
-                    color: palette.secondaryText,
-                  ),
-                  textAlign: isDesktop ? TextAlign.left : TextAlign.center,
-                ),
+
                 const SizedBox(height: 22),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: palette.glassBackground,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: palette.cardBorder),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(LucideIcons.lock, size: 18, color: palette.brand),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Provisioned workspace',
-                              style: GoogleFonts.dmSans(
-                                color: palette.primaryText,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              workspace.apiBaseUrl,
-                              style: GoogleFonts.dmSans(
-                                color: palette.secondaryText,
-                                fontSize: 13,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'This binding is managed by secure provisioning and cannot be changed from the login screen.',
-                              style: GoogleFonts.dmSans(
-                                color: palette.secondaryText,
-                                fontSize: 12,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
+
                 Row(
                   children: [
                     Expanded(
@@ -642,28 +539,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     required IconData icon,
     required String label,
   }) {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: palette.glassBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: palette.cardBorder),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16, color: palette.secondaryText),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.dmSans(
-                color: palette.secondaryText,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+    return _HoverScale(
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: palette.glassBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: palette.cardBorder),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16, color: palette.secondaryText),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.dmSans(
+                  color: palette.secondaryText,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -764,54 +663,56 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     required VoidCallback? onTap,
     IconData? icon,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(13),
-        child: Ink(
-          height: 46,
-          decoration: BoxDecoration(
-            color: onTap == null
-                ? palette.brand.withValues(alpha: 0.55)
-                : palette.brand,
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: palette.brand.withValues(alpha: 0.5)),
-            boxShadow: [
-              BoxShadow(
-                color: palette.brand.withValues(alpha: 0.28),
-                blurRadius: 26,
-                spreadRadius: -8,
-              ),
-            ],
-          ),
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (loading)
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Color(0xFF05070A),
+    return _HoverScale(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(13),
+          child: Ink(
+            height: 46,
+            decoration: BoxDecoration(
+              color: onTap == null
+                  ? palette.brand.withValues(alpha: 0.55)
+                  : palette.brand,
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: palette.brand.withValues(alpha: 0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: palette.brand.withValues(alpha: 0.28),
+                  blurRadius: 26,
+                  spreadRadius: -8,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (loading)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF05070A),
+                      ),
+                    ),
+                  if (loading) const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: GoogleFonts.dmSans(
+                      color: const Color(0xFF05070A),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                     ),
                   ),
-                if (loading) const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: GoogleFonts.dmSans(
-                    color: const Color(0xFF05070A),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-                if (!loading && icon != null) ...[
-                  const SizedBox(width: 8),
-                  Icon(icon, size: 16, color: const Color(0xFF05070A)),
+                  if (!loading && icon != null) ...[
+                    const SizedBox(width: 8),
+                    Icon(icon, size: 16, color: const Color(0xFF05070A)),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -892,6 +793,202 @@ class _AuthPalette {
       inputBackground: const Color(0xFFF3F7FB),
       inputBorder: const Color(0x240F172A),
       brand: const Color(0xFFC6F432),
+    );
+  }
+}
+
+class _AnimatedBlobBackdrop extends StatefulWidget {
+  final _AuthPalette palette;
+  const _AnimatedBlobBackdrop({required this.palette});
+
+  @override
+  State<_AnimatedBlobBackdrop> createState() => _AnimatedBlobBackdropState();
+}
+
+class _AnimatedBlobBackdropState extends State<_AnimatedBlobBackdrop> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 15))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildBlob({required Color color, required double size}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 110, sigmaY: 110),
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DecoratedBox(decoration: BoxDecoration(gradient: widget.palette.pageGradient)),
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final dy = 30 * _controller.value;
+            final dx = 20 * _controller.value;
+            return Positioned(
+              top: -160 + dy,
+              left: -80 + dx,
+              child: _buildBlob(color: widget.palette.blobPrimary, size: 420),
+            );
+          },
+        ),
+        AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final dy = -40 * _controller.value;
+            final dx = -15 * _controller.value;
+            return Positioned(
+              bottom: -180 + dy,
+              right: -120 + dx,
+              child: _buildBlob(color: widget.palette.blobSecondary, size: 420),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _AnimatedEntrance extends StatefulWidget {
+  final Widget child;
+  final int delay;
+  const _AnimatedEntrance({required this.child, this.delay = 0});
+
+  @override
+  State<_AnimatedEntrance> createState() => _AnimatedEntranceState();
+}
+
+class _AnimatedEntranceState extends State<_AnimatedEntrance> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacity;
+  late Animation<Offset> _offset;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _opacity = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _offset = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
+
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: SlideTransition(
+        position: _offset,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _AnimatedChartBars extends StatefulWidget {
+  final _AuthPalette palette;
+  const _AnimatedChartBars({required this.palette});
+
+  @override
+  State<_AnimatedChartBars> createState() => _AnimatedChartBarsState();
+}
+
+class _AnimatedChartBarsState extends State<_AnimatedChartBars> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final baseHeights = [26.0, 42.0, 30.0, 52.0, 36.0];
+    return Row(
+      children: List.generate(5, (index) {
+        return Expanded(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final offset = (index % 2 == 0 ? _controller.value : (1 - _controller.value)) * 8;
+              return Container(
+                margin: EdgeInsets.only(right: index == 4 ? 0 : 6),
+                height: baseHeights[index] + offset,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      widget.palette.brand.withValues(alpha: 0.65),
+                      widget.palette.brand.withValues(alpha: 0.15),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _HoverScale extends StatefulWidget {
+  final Widget child;
+  const _HoverScale({required this.child});
+
+  @override
+  State<_HoverScale> createState() => _HoverScaleState();
+}
+
+class _HoverScaleState extends State<_HoverScale> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedScale(
+        scale: _isHovered ? 1.03 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutQuart,
+        child: widget.child,
+      ),
     );
   }
 }

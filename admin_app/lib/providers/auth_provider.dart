@@ -160,7 +160,7 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final apiService = ref.read(apiProvider);
       final deviceInfo = DeviceInfoService();
-      
+
       String? hardwareId;
       try {
         hardwareId = await deviceInfo.getHardwareId();
@@ -172,7 +172,7 @@ class AuthNotifier extends Notifier<AuthState> {
       final response = await apiService.client.post(
         '/login',
         data: {
-          'email': email, 
+          'email': email,
           'password': password,
           if (hardwareId != null) 'hardwareId': hardwareId,
         },
@@ -298,7 +298,7 @@ class AuthNotifier extends Notifier<AuthState> {
       staffRoleJson: staffRole?.toJson(),
       staffPermissions: staffPermissions,
     );
-    
+
     // Save activation token if it was returned by auto-registration
     if (activationToken != null && activationToken.isNotEmpty) {
       await AppStorage.saveActivationToken(activationToken);
@@ -405,6 +405,13 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (_) {
       // Avoid logout on transient network errors.
     }
+  }
+
+  void applyProvisioning({
+    required AppMode mode,
+    required SubscriptionTier subscriptionTier,
+  }) {
+    state = AuthState(mode: mode, subscriptionTier: subscriptionTier);
   }
 
   Future<void> logout({bool clearProvisioning = false}) async {

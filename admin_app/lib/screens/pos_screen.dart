@@ -1631,24 +1631,27 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: border),
         ),
-        child: FormInput(
-          label: 'Search',
-          showLabel: false,
+        child: TextField(
           controller: _searchController,
-          hint: 'admin.pages.pos.catalog.searchPlaceholder'.tr(),
-          prefixIcon: Icon(LucideIcons.search, color: textMuted, size: 18),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(LucideIcons.x, color: textMuted, size: 18),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {});
-                  },
-                )
-              : null,
-          borderless: true,
-          filled: false,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          textAlignVertical: TextAlignVertical.center,
+          style: TextStyle(fontSize: 14, color: textPrimary),
+          decoration: InputDecoration(
+            hintText: 'admin.pages.pos.catalog.searchPlaceholder'.tr(),
+            hintStyle: TextStyle(color: textMuted, fontSize: 14),
+            prefixIcon: Icon(LucideIcons.search, color: textMuted, size: 18),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: Icon(LucideIcons.x, color: textMuted, size: 18),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {});
+                    },
+                  )
+                : null,
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
           onChanged: (_) => _searchDebouncer.run(() => setState(() {})),
         ),
       );

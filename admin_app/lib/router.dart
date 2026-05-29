@@ -118,7 +118,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      final path = state.uri.toString();
+      final path = state.uri.path;
       final isLoggedIn = authState.isAuthenticated;
       final mode = authState.mode;
       final subscriptionTier = authState.subscriptionTier;
@@ -130,13 +130,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isProvisioned = bootstrap.isProvisioned;
 
       if (!isProvisioned) {
-        if (isLoginRoute || isActivateRoute) return null;
-        return '/login';
+        return isActivateRoute ? null : '/activate';
       }
 
       if (isActivateRoute) {
-        if (mode.skipsAuthentication || isLoggedIn) return '/';
-        return '/login';
+        if (isLoggedIn) return '/';
+        return null;
       }
 
       // Local-only runtime skips auth, but hosted feature locks are tier-driven.

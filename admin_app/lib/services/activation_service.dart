@@ -1,16 +1,28 @@
 import 'dart:convert';
+
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/provisioning_payload.dart';
 import 'api_service.dart';
 import 'device_info_service.dart';
 
-// In a real app, you would securely bundle the public key corresponding to the backend's RSA private key.
-const String _backendPublicKey = '''
+const String _defaultActivationPublicKey = '''
 -----BEGIN PUBLIC KEY-----
-YOUR_PUBLIC_KEY_HERE
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4OW4iDVgRs7zEKyg90Pf
+grga0o2/1nSQ3eA95d57m4gBl/QGVYQtUEJat6VO1ndExXDED90npLbOYkz/GyRU
+q1o03Xcj4B7BfBIbxyxQ+/mFsGTxGSyMWgcxsSyxh9tDEXF9eqzjHKldhjEAZ0fY
+wTo/Cr4xJJOk2eo5m8yvkCqFBeRyTIKGxfTpAIEcaCCHoeQQZy5zXvCumr+cSOVe
+geXV5M7kb9bM92Y/9wV3SNza4CHeEm8JoXOWoyWoUyI2cc1qG5ju/NUBG1+pqSEo
+JwNDCWZCX2eZn/KRF4DeBUrhEkTXTtcbjNMrVXTTF7eM5spvTFbkqtf18QMa7TE6
+ZwIDAQAB
 -----END PUBLIC KEY-----
 ''';
+
+const String _activationPublicKey = String.fromEnvironment(
+  'ACTIVATION_PUBLIC_KEY_PEM',
+  defaultValue: _defaultActivationPublicKey,
+);
 
 final deviceInfoProvider = Provider<DeviceInfoService>((ref) {
   return DeviceInfoService();
@@ -22,81 +34,84 @@ final activationServiceProvider = Provider<ActivationService>((ref) {
   return ActivationService(apiService, deviceInfoService);
 });
 
+class ActivationResult {
+  final String activationToken;
+  final ProvisioningPayload provisioning;
+
+  const ActivationResult({
+    required this.activationToken,
+    required this.provisioning,
+  });
+}
+
 class ActivationService {
   final ApiService _apiService;
   final DeviceInfoService _deviceInfoService;
 
   ActivationService(this._apiService, this._deviceInfoService);
 
-  /// Activates the device online.
-  Future<String> activateOnline(String licenseKey) async {
+  Future<ActivationResult> activateOnline(String licenseKey) async {
     try {
-      final hwid = await _deviceInfoService.getHardwareId();
-
+      final hardwareId = await _deviceInfoService.getHardwareId();
       final response = await _apiService.client.post(
         '/activation/online',
         data: {
-          'licenseKey': licenseKey,
-          'hardwareId': hwid,
+          'licenseKey': licenseKey.trim(),
+          'hardwareId': hardwareId,
           'deviceName': 'Flutter Device',
         },
       );
 
       final data = response.data;
-      if (data['activationToken'] == null) {
+      if (data is! Map || data['activationToken'] == null) {
         throw Exception('No activation token received');
       }
 
-      final token = data['activationToken'] as String;
-      
-      // Optionally verify immediately
-      await verifyToken(token);
-
-      // In a real app, store this token in secure_storage
-      return token;
+      final token = data['activationToken'].toString();
+      return verifyOfflineActivationCode(token);
     } catch (e) {
       throw Exception('Online activation failed: $e');
     }
   }
 
-  /// Generates the Request Code for offline activation
-  Future<String> generateOfflineRequestCode() async {
-    final hwid = await _deviceInfoService.getHardwareId();
-    return base64Encode(utf8.encode(hwid));
+  Future<String> generateOfflineRequestCode(String licenseKey) async {
+    final normalizedKey = licenseKey.trim();
+    if (normalizedKey.isEmpty) {
+      throw Exception('Enter your activation key first.');
+    }
+
+    final hardwareId = await _deviceInfoService.getHardwareId();
+    return base64Encode(utf8.encode('$normalizedKey:$hardwareId'));
   }
 
-  /// Verifies an Activation Token (JWT) locally
-  Future<bool> verifyToken(String token) async {
+  Future<ActivationResult> verifyOfflineActivationCode(String token) async {
     try {
-      // 1. Verify cryptographic signature
-      // In production, uncomment this and use the actual public key
-      // final rs256Key = RSAPublicKey(_backendPublicKey);
-      // final jwt = JWT.verify(token, rs256Key);
-      
-      // For testing, we just decode
-      final jwt = JWT.decode(token);
-      final payload = jwt.payload as Map<String, dynamic>;
+      final publicKey = RSAPublicKey(_activationPublicKey.trim());
+      final jwt = JWT.verify(token.trim(), publicKey);
+      final payload = Map<String, dynamic>.from(jwt.payload as Map);
+      final currentHardwareId = await _deviceInfoService.getHardwareId();
+      final tokenHardwareId = payload['hardwareId']?.toString().trim() ?? '';
 
-      // 2. Verify Hardware ID matches this exact physical device
-      final currentHwid = await _deviceInfoService.getHardwareId();
-      final tokenHwid = payload['hardwareId'] as String?;
-
-      if (currentHwid != tokenHwid) {
-        throw Exception('Hardware fingerprint mismatch. This license is tied to another device.');
+      if (tokenHardwareId.isEmpty || tokenHardwareId != currentHardwareId) {
+        throw Exception(
+          'Hardware fingerprint mismatch. This activation code is tied to another device.',
+        );
       }
 
-      // 3. Verify expiry
-      final exp = payload['exp'];
-      if (exp != null) {
-        final expiryDate = DateTime.fromMillisecondsSinceEpoch(exp * 1000);
-        if (DateTime.now().isAfter(expiryDate)) {
-          throw Exception('Activation token has expired.');
-        }
-      }
+      final provisioning = ProvisioningPayload.fromJson({
+        'apiBaseUrl': _apiService.baseUrl,
+        'tenantId': payload['tenantId'],
+        'workspaceId': payload['workspaceId'],
+        'mode': payload['mode'],
+        'subscriptionTier': payload['subscriptionTier'],
+      });
 
-      return true;
+      return ActivationResult(
+        activationToken: token.trim(),
+        provisioning: provisioning,
+      );
     } catch (e) {
-      throw Exception('Invalid or tampered activation token: $e');
+      throw Exception('Invalid or tampered activation code: $e');
     }
   }
 }

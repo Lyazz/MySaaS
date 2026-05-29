@@ -5,8 +5,10 @@ import 'package:admin_app/models/provisioning_payload.dart';
 import 'package:admin_app/models/subscription_tier.dart';
 import 'package:admin_app/providers/auth_provider.dart';
 import 'package:admin_app/screens/activation_screen.dart';
+import 'package:admin_app/services/activation_service.dart';
 import 'package:admin_app/services/api_service.dart';
 import 'package:admin_app/services/app_storage.dart';
+import 'package:admin_app/services/device_info_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,22 +21,47 @@ String _locationOf(Object routerObject) {
   return router.routeInformationProvider.value.uri.toString();
 }
 
-class _FakeApiService extends ApiService {
-  _FakeApiService({required this.payload, this.error})
-    : super(baseUrl: 'https://swekly.com/api');
+class _FakeActivationService extends ActivationService {
+  _FakeActivationService({
+    required this.result,
+    this.offlineResult,
+    this.offlineRequestCode = 'offline-request-code',
+    this.error,
+  }) : super(
+         ApiService(baseUrl: 'https://swekly.com/api'),
+         DeviceInfoService(),
+       );
 
-  final ProvisioningPayload? payload;
+  final ActivationResult? result;
+  final ActivationResult? offlineResult;
+  final String offlineRequestCode;
   final Exception? error;
 
   @override
-  Future<ProvisioningPayload> activateProvisioningCode(
-    String activationCode,
-  ) async {
+  Future<ActivationResult> activateOnline(String activationCode) async {
     if (error != null) throw error!;
     if (activationCode.trim() != 'trusted-activation-code') {
       throw Exception('Invalid or expired activation code');
     }
-    return payload!;
+    return result!;
+  }
+
+  @override
+  Future<String> generateOfflineRequestCode(String licenseKey) async {
+    if (error != null) throw error!;
+    if (licenseKey.trim() != 'trusted-activation-code') {
+      throw Exception('Enter your activation key first.');
+    }
+    return offlineRequestCode;
+  }
+
+  @override
+  Future<ActivationResult> verifyOfflineActivationCode(String token) async {
+    if (error != null) throw error!;
+    if (token.trim() != 'signed-offline-token') {
+      throw Exception('Invalid or tampered activation code');
+    }
+    return offlineResult ?? result!;
   }
 }
 
@@ -50,7 +77,7 @@ GoRouter _buildTestRouter(
       final bootstrap = container.read(bootstrapProvider);
       final isProvisioned = bootstrap.isProvisioned;
       final isLoggedIn = authState.isAuthenticated;
-      final path = state.uri.toString();
+      final path = state.uri.path;
 
       if (!isProvisioned) {
         return path == '/activate' ? null : '/activate';
@@ -60,6 +87,11 @@ GoRouter _buildTestRouter(
         return authState.mode.skipsAuthentication || isLoggedIn
             ? '/'
             : '/login';
+      }
+
+      if (authState.mode.skipsAuthentication) {
+        if (path == '/login') return '/';
+        return null;
       }
 
       if (!isLoggedIn && path != '/login') {
@@ -101,14 +133,17 @@ void main() {
               BootstrapConfig(apiBaseUrl: 'https://swekly.com/api'),
             ),
           ),
-          apiProvider.overrideWith(
-            (ref) => _FakeApiService(
-              payload: const ProvisioningPayload(
-                apiBaseUrl: 'https://tenant.example.com/api',
-                mode: AppMode.hybrid,
-                subscriptionTier: SubscriptionTier.online,
-                tenantId: 'tenant-42',
-                workspaceId: 'workspace-99',
+          activationServiceProvider.overrideWith(
+            (ref) => _FakeActivationService(
+              result: const ActivationResult(
+                activationToken: 'signed-token-1',
+                provisioning: ProvisioningPayload(
+                  apiBaseUrl: 'https://tenant.example.com/api',
+                  mode: AppMode.hybrid,
+                  subscriptionTier: SubscriptionTier.online,
+                  tenantId: 'tenant-42',
+                  workspaceId: 'workspace-99',
+                ),
               ),
             ),
           ),
@@ -164,6 +199,7 @@ void main() {
       expect(persisted.tenantId, 'tenant-42');
       expect(persisted.workspaceId, 'workspace-99');
       expect(persisted.authToken, isNull);
+      expect(await AppStorage.getActivationToken(), 'signed-token-1');
     },
   );
 
@@ -177,9 +213,9 @@ void main() {
             BootstrapConfig(apiBaseUrl: 'https://swekly.com/api'),
           ),
         ),
-        apiProvider.overrideWith(
-          (ref) => _FakeApiService(
-            payload: null,
+        activationServiceProvider.overrideWith(
+          (ref) => _FakeActivationService(
+            result: null,
             error: Exception('Invalid or expired activation code'),
           ),
         ),
@@ -222,6 +258,94 @@ void main() {
     expect(_locationOf(router), '/activate');
   });
 
+  testWidgets('ActivationScreen provisions offline activation locally', (
+    tester,
+  ) async {
+    await AppStorage.clearAuthSession();
+    await AppStorage.clearProvisioningState();
+
+    final container = ProviderContainer(
+      overrides: [
+        bootstrapProvider.overrideWith(
+          () => BootstrapNotifier(
+            const BootstrapConfig(apiBaseUrl: 'https://swekly.com/api'),
+          ),
+        ),
+        activationServiceProvider.overrideWith(
+          (ref) => _FakeActivationService(
+            result: const ActivationResult(
+              activationToken: 'signed-token-online',
+              provisioning: ProvisioningPayload(
+                apiBaseUrl: 'https://tenant.example.com/api',
+                mode: AppMode.hybrid,
+                subscriptionTier: SubscriptionTier.online,
+                tenantId: 'tenant-online',
+                workspaceId: 'workspace-online',
+              ),
+            ),
+            offlineResult: const ActivationResult(
+              activationToken: 'signed-offline-token',
+              provisioning: ProvisioningPayload(
+                apiBaseUrl: 'https://tenant.example.com/api',
+                mode: AppMode.offlineOnly,
+                subscriptionTier: SubscriptionTier.offlineOnly,
+                tenantId: 'tenant-offline',
+                workspaceId: 'workspace-offline',
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final refresh = ValueNotifier<int>(0);
+    addTearDown(refresh.dispose);
+    final bootstrapSub = container.listen<BootstrapConfig>(
+      bootstrapProvider,
+      (_, __) => refresh.value++,
+    );
+    addTearDown(bootstrapSub.close);
+    final authSub = container.listen<AuthState>(
+      authProvider,
+      (_, __) => refresh.value++,
+    );
+    addTearDown(authSub.close);
+
+    final router = _buildTestRouter(container, refresh);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: buildLocalizedTestApp(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    await tester.enterText(
+      find.byType(TextField).first,
+      'trusted-activation-code',
+    );
+    await tester.tap(find.text('Offline Activation'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('offline-request-code'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).last, 'signed-offline-token');
+    await tester.tap(find.text('Verify'));
+    await tester.pumpAndSettle();
+
+    expect(_locationOf(router), '/');
+
+    final bootstrap = container.read(bootstrapProvider);
+    expect(bootstrap.tenantId, 'tenant-offline');
+    expect(bootstrap.workspaceId, 'workspace-offline');
+    expect(bootstrap.mode, AppMode.offlineOnly);
+    expect(await AppStorage.getActivationToken(), 'signed-offline-token');
+  });
+
   testWidgets('ActivationScreen desktop layout matches golden', (tester) async {
     tester.view.physicalSize = const Size(1440, 1200);
     tester.view.devicePixelRatio = 1;
@@ -234,14 +358,17 @@ void main() {
             const BootstrapConfig(apiBaseUrl: 'https://swekly.com/api'),
           ),
         ),
-        apiProvider.overrideWith(
-          (ref) => _FakeApiService(
-            payload: const ProvisioningPayload(
-              apiBaseUrl: 'https://tenant.example.com/api',
-              mode: AppMode.offlineOnly,
-              subscriptionTier: SubscriptionTier.offlineOnly,
-              tenantId: 'tenant-42',
-              workspaceId: 'workspace-99',
+        activationServiceProvider.overrideWith(
+          (ref) => _FakeActivationService(
+            result: const ActivationResult(
+              activationToken: 'signed-token-2',
+              provisioning: ProvisioningPayload(
+                apiBaseUrl: 'https://tenant.example.com/api',
+                mode: AppMode.offlineOnly,
+                subscriptionTier: SubscriptionTier.offlineOnly,
+                tenantId: 'tenant-42',
+                workspaceId: 'workspace-99',
+              ),
             ),
           ),
         ),

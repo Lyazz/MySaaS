@@ -98,6 +98,7 @@ class AppStorage {
     await _secureStorage.delete(key: _keyTenantId);
     await _secureStorage.delete(key: _keyWorkspaceId);
     await _secureStorage.delete(key: _keyApiBaseUrl);
+    await _secureStorage.delete(key: _keyActivationToken);
   }
 
   static Future<void> saveAuthSession({
