@@ -454,12 +454,7 @@ class SyncService {
       columns: ['nextRetryAt'],
       where:
           'tenantId = ? AND workspaceId = ? AND status = ? AND retryCount < ? AND nextRetryAt IS NOT NULL',
-      whereArgs: [
-        tenantId,
-        workspaceId,
-        SyncStatus.failed.name,
-        _maxRetries,
-      ],
+      whereArgs: [tenantId, workspaceId, SyncStatus.failed.name, _maxRetries],
       orderBy: 'nextRetryAt ASC',
       limit: 1,
     );
@@ -582,7 +577,7 @@ class SyncService {
     final newPayload = Map<String, dynamic>.from(op.payload);
 
     Future<dynamic> process(dynamic value) async {
-      if (value is String && value.startsWith('app_images/')) {
+      if (value is String && ImageStorageManager.isLocalImagePath(value)) {
         try {
           final file = await ImageStorageManager.getLocalImageFile(value);
           if (await file.exists()) {
@@ -1738,7 +1733,12 @@ class SyncService {
         final info = raw.cast<String, dynamic>();
         final id = _string(info['id']);
         if (id.isEmpty) continue;
-        if (await _markConflictIfLocalDirty(txn, 'contact_infos', tenantId, id)) {
+        if (await _markConflictIfLocalDirty(
+          txn,
+          'contact_infos',
+          tenantId,
+          id,
+        )) {
           continue;
         }
         await txn.insert('contact_infos', {
@@ -2181,12 +2181,7 @@ class SyncService {
         columns: ['nextRetryAt'],
         where:
             'tenantId = ? AND workspaceId = ? AND status = ? AND retryCount < ? AND nextRetryAt IS NOT NULL',
-        whereArgs: [
-          tenantId,
-          workspaceId,
-          SyncStatus.failed.name,
-          _maxRetries,
-        ],
+        whereArgs: [tenantId, workspaceId, SyncStatus.failed.name, _maxRetries],
         orderBy: 'nextRetryAt ASC',
         limit: 1,
       );

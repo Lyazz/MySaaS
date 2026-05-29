@@ -1,6 +1,6 @@
 import 'dart:io';
+
 import 'package:path/path.dart' as p;
-import 'package:uuid/uuid.dart';
 
 import '../services/tenant_mode_service.dart';
 import '../services/workspace_file_service.dart';
@@ -22,7 +22,7 @@ class ImageStorageManager {
   static Future<String> saveImageLocally(File file) async {
     final imagesDir = await _getImagesDirectory();
     final extension = p.extension(file.path);
-    final fileName = '\${const Uuid().v4()}\$extension';
+    final fileName = '${DateTime.now().microsecondsSinceEpoch}$extension';
     final savedFile = await file.copy(p.join(imagesDir.path, fileName));
 
     return p.join(
@@ -31,7 +31,7 @@ class ImageStorageManager {
     );
   }
 
-  /// Resolves a relative path (e.g., 'app_images/uuid.jpg') to an absolute File
+  /// Resolves a relative path (e.g., 'images/uuid.jpg') to an absolute File.
   static Future<File> getLocalImageFile(String relativePath) async {
     final trimmed = relativePath.trim();
     if (trimmed.isEmpty) {
@@ -64,5 +64,12 @@ class ImageStorageManager {
   /// Helper to check if a path is an HTTP URL or a local relative path
   static bool isRemoteUrl(String path) {
     return path.startsWith('http://') || path.startsWith('https://');
+  }
+
+  /// Helper to check if a path points to a locally staged workspace image.
+  static bool isLocalImagePath(String path) {
+    final trimmed = path.trim();
+    return trimmed.startsWith('${WorkspaceFileService.imagesDirName}/') ||
+        trimmed.startsWith('${WorkspaceFileService.legacyImagesDirName}/');
   }
 }

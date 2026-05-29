@@ -5,12 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../app_config.dart';
-import '../bootstrap.dart';
-import '../models/app_mode.dart';
-import '../services/api_service.dart';
 import '../services/app_storage.dart';
-import '../services/sync_service.dart';
-import '../services/tenant_mode_service.dart';
+import '../services/activation_service.dart';
 import '../widgets/buttons/app_button.dart';
 
 class ActivationScreen extends ConsumerStatefulWidget {
@@ -34,7 +30,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   Future<void> _activate() async {
     final raw = _payloadController.text.trim();
     if (raw.isEmpty) {
-      setState(() => _error = 'Paste the activation code first.');
+      setState(() => _error = 'Enter your License Key first.');
       return;
     }
 
@@ -44,49 +40,87 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
     });
 
     try {
-      final payload = await ref.read(apiProvider).activateProvisioningCode(raw);
-      final bootstrap = payload.toBootstrapConfig();
-
-      await AppStorage.saveApiBaseUrl(payload.apiBaseUrl);
-      await AppStorage.saveProvisioningState(
-        mode: payload.mode,
-        subscriptionTier: payload.subscriptionTier,
-        tenantId: payload.tenantId,
-        workspaceId: payload.workspaceId,
+      final token = await ref.read(activationServiceProvider).activateOnline(raw);
+      
+      // In a full implementation, we'd fetch tenant config via the token
+      // For now we assume the token is saved and the device unlocks.
+      // await AppStorage.saveAuthSession(...)
+      // We simulate unlocking by storing a dummy token temporarily if we don't have the full payload config:
+      
+      await AppStorage.saveAuthSession(
+        token: token,
+        userJson: {},
+        staffRoleJson: {},
+        staffPermissions: [],
       );
-      if (payload.authToken != null) {
-        await AppStorage.saveAuthSession(
-          token: payload.authToken!,
-          userJson: payload.userJson,
-          staffRoleJson: payload.staffRoleJson,
-          staffPermissions: payload.staffPermissions,
-        );
-      } else {
-        await AppStorage.clearAuthSession();
-      }
 
-      ref.read(bootstrapProvider.notifier).replace(bootstrap);
-      ref.read(apiProvider).setBaseUrl(payload.apiBaseUrl);
-      ref.read(apiProvider).setToken(payload.authToken);
-      TenantModeService().initialize(
-        mode: payload.mode,
-        tenantId: payload.tenantId,
-        workspaceId: payload.workspaceId,
-      );
-      SyncService().initialize(ref.read(apiProvider), mode: payload.mode);
+      // This is a placeholder since we changed the backend activation logic
+      // to return a JWT instead of a provisioning payload.
 
       if (!mounted) return;
-      if (payload.mode.skipsAuthentication || payload.authToken != null) {
-        context.go('/');
-      } else {
-        context.go('/login');
-      }
+      context.go('/login');
     } catch (e) {
       setState(() => _error = e.toString().replaceAll('Exception: ', ''));
     } finally {
       if (mounted) {
         setState(() => _isActivating = false);
       }
+    }
+  }
+
+  Future<void> _showOfflineActivationDialog() async {
+    final raw = _payloadController.text.trim();
+    if (raw.isEmpty) {
+      setState(() => _error = 'Enter your License Key to generate a Request Code.');
+      return;
+    }
+    
+    try {
+      final requestCode = await ref.read(activationServiceProvider).generateOfflineRequestCode(raw);
+      
+      if (!mounted) return;
+      
+      showDialog(
+        context: context,
+        builder: (dialogContext) {
+          final offlineController = TextEditingController();
+          return AlertDialog(
+            title: const Text('Offline Activation'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Go to swekly.com/activate and enter this Request Code:'),
+                const SizedBox(height: 8),
+                SelectableText(requestCode, style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: offlineController,
+                  decoration: const InputDecoration(labelText: 'Paste Activation Code (JWT) here'),
+                )
+              ],
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: () async {
+                   try {
+                     await ref.read(activationServiceProvider).verifyToken(offlineController.text.trim());
+                     if (!dialogContext.mounted) return;
+                     Navigator.pop(dialogContext);
+                     if (!mounted) return;
+                     context.go('/login');
+                   } catch (e) {
+                     // show error
+                   }
+                },
+                child: const Text('Verify'),
+              )
+            ]
+          );
+        }
+      );
+    } catch (e) {
+       setState(() => _error = e.toString().replaceAll('Exception: ', ''));
     }
   }
 
@@ -159,7 +193,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Paste a trusted activation code issued by a tenant admin. The app exchanges it with the platform API and binds this install to exactly one tenant workspace.',
+                          'Enter your License Key to bind this device permanently to your workspace. This ensures secure, single-device operation.',
                           style: GoogleFonts.dmSans(
                             fontSize: 15,
                             height: 1.55,
@@ -224,9 +258,18 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                               child: AppButton.primary(
                                 label: _isActivating
                                     ? 'Activating...'
-                                    : 'Activate Device',
+                                    : 'Activate Online',
                                 onPressed: _isActivating ? null : _activate,
                                 icon: LucideIcons.lock,
+                                fullWidth: true,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: AppButton.secondary(
+                                label: 'Offline Activation',
+                                onPressed: _showOfflineActivationDialog,
+                                icon: LucideIcons.wifiOff,
                                 fullWidth: true,
                               ),
                             ),

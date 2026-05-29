@@ -39,6 +39,7 @@ import loyaltyRouter from './modules/loyalty/routes';
 import googleOAuthRouter from './modules/google-oauth/routes';
 import syncRouter from './modules/sync/routes';
 import provisioningRouter from './modules/provisioning/routes';
+import activationRouter from './modules/activation/routes';
 
 const router = Router();
 
@@ -57,6 +58,7 @@ router.use('/store', publicStoreSettingsRouter);
 router.use('/store', publicHomepageSettingsRouter);
 router.use('/store', publicContactInfosRouter);
 router.use('/pixel', integrationsPublicRouter);
+router.use('/activation', activationRouter);
 
 // Admin Modules
 // Note: These modules have internal RBAC checks, but we could wrap them here too.

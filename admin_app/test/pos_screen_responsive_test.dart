@@ -81,7 +81,12 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  for (final size in const [Size(1440, 900), Size(1024, 760), Size(390, 844)]) {
+  for (final size in const [
+    Size(1440, 900),
+    Size(1024, 760),
+    Size(390, 844),
+    Size(320, 760),
+  ]) {
     testWidgets('POS layout has no overflow at ${size.width}px', (
       WidgetTester tester,
     ) async {

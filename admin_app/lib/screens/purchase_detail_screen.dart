@@ -16,6 +16,7 @@ import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/badges/status_badges.dart';
 import '../theme/app_theme.dart';
+import '../widgets/tenant_image_widget.dart';
 
 class PurchaseDetailScreen extends ConsumerStatefulWidget {
   final String purchaseId;
@@ -1112,10 +1113,15 @@ class _VariantSelectorDialogState
                                   : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: product.mainImageUrl != null
-                                ? Image.network(
-                                    product.mainImageUrl!,
-                                    fit: BoxFit.cover,
+                            child:
+                                product.mainImageUrl != null &&
+                                    product.mainImageUrl!.trim().isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: TenantImageWidget(
+                                      imagePath: product.mainImageUrl!,
+                                      fit: BoxFit.cover,
+                                    ),
                                   )
                                 : const Icon(
                                     LucideIcons.image,

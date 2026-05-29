@@ -1,20 +1,24 @@
+import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/categories_provider.dart';
-import '../services/api_service.dart';
 import '../models/product.dart';
+import '../utils/image_storage_manager.dart';
 import '../theme/app_theme.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/tenant_image_widget.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   final String? categoryId;
+  final ImagePicker? imagePicker;
 
-  const CategoryFormScreen({super.key, this.categoryId});
+  const CategoryFormScreen({super.key, this.categoryId, this.imagePicker});
 
   @override
   ConsumerState<CategoryFormScreen> createState() => _CategoryFormScreenState();
@@ -24,9 +28,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _slugController = TextEditingController();
+  late final ImagePicker _picker;
 
-  String? _imageUrl;
-  File? _imageFile;
+  String? _imagePath;
+  final Set<String> _sessionLocalImages = <String>{};
   bool _isLoading = false;
   bool _autoGenerateSlug = true;
   Category? _existingCategory;
@@ -34,6 +39,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   @override
   void initState() {
     super.initState();
+    _picker = widget.imagePicker ?? ImagePicker();
     if (widget.categoryId != null) {
       _loadCategory();
     }
@@ -43,9 +49,20 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   @override
   void dispose() {
     _titleController.removeListener(_onTitleChanged);
+    unawaited(_cleanupDiscardedImages());
     _titleController.dispose();
     _slugController.dispose();
     super.dispose();
+  }
+
+  Future<void> _cleanupDiscardedImages() async {
+    final discarded = _sessionLocalImages.toList(growable: false);
+    _sessionLocalImages.clear();
+    for (final path in discarded) {
+      try {
+        await ImageStorageManager.deleteLocalImage(path);
+      } catch (_) {}
+    }
   }
 
   void _onTitleChanged() {
@@ -76,7 +93,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
 
       _titleController.text = _existingCategory!.title;
       _slugController.text = _existingCategory!.slug;
-      _imageUrl = _existingCategory!.imageUrl;
+      _imagePath = _existingCategory!.imageUrl;
       _autoGenerateSlug = false;
     } catch (e) {
       if (mounted) {
@@ -94,12 +111,21 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
+      final currentPath = _imagePath;
+      final nextPath = await ImageStorageManager.saveImageLocally(
+        File(pickedFile.path),
+      );
+
+      if (currentPath != null && _sessionLocalImages.remove(currentPath)) {
+        await ImageStorageManager.deleteLocalImage(currentPath);
+      }
+
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _imagePath = nextPath;
+        _sessionLocalImages.add(nextPath);
       });
     }
   }
@@ -110,25 +136,13 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
     setState(() => _isLoading = true);
 
     try {
-      String? uploadedImageUrl = _imageUrl;
-
-      // Upload image if a new one was selected
-      if (_imageFile != null) {
-        final api = ref.read(apiProvider);
-        uploadedImageUrl = await api.uploadImage(_imageFile!.path);
-
-        if (uploadedImageUrl == null) {
-          throw Exception('Failed to upload image');
-        }
-      }
-
       final success = widget.categoryId == null
           ? await ref
                 .read(categoriesProvider.notifier)
                 .createCategory(
                   title: _titleController.text.trim(),
                   slug: _slugController.text.trim(),
-                  imageUrl: uploadedImageUrl,
+                  imageUrl: _imagePath,
                 )
           : await ref
                 .read(categoriesProvider.notifier)
@@ -136,11 +150,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                   id: widget.categoryId!,
                   title: _titleController.text.trim(),
                   slug: _slugController.text.trim(),
-                  imageUrl: uploadedImageUrl,
+                  imageUrl: _imagePath,
                 );
 
       if (mounted) {
         if (success) {
+          _sessionLocalImages.clear();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -322,7 +337,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
   }
 
   Widget _buildImagePicker() {
-    final hasImage = _imageFile != null || _imageUrl != null;
+    final hasImage = _imagePath != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,22 +357,16 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                         ? AppColors.surfaceBorder
                         : AppColors.lightSurfaceBorder,
                   ),
-                  image: _imageFile != null
-                      ? DecorationImage(
-                          image: FileImage(_imageFile!),
-                          fit: BoxFit.cover,
-                        )
-                      : (_imageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(
-                                  ref
-                                      .read(apiProvider)
-                                      .resolvePublicUrl(_imageUrl!),
-                                ),
-                                fit: BoxFit.cover,
-                              )
-                            : null),
                 ),
+                child: _imagePath == null
+                    ? null
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: TenantImageWidget(
+                          imagePath: _imagePath!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
               );
             },
           ),
@@ -378,10 +387,14 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                 icon: LucideIcons.trash2,
                 size: AppButtonSize.sm,
                 onPressed: () {
+                  final imagePath = _imagePath;
                   setState(() {
-                    _imageFile = null;
-                    _imageUrl = null;
+                    _imagePath = null;
                   });
+                  if (imagePath != null &&
+                      _sessionLocalImages.remove(imagePath)) {
+                    unawaited(ImageStorageManager.deleteLocalImage(imagePath));
+                  }
                 },
               ),
             ],

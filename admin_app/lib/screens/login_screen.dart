@@ -30,7 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.initState();
 
     assert(() {
-      _emailController.text = 'admin@apple.com';
+      _emailController.text = 'admin@test.com';
       _passwordController.text = 'password';
       return true;
     }());

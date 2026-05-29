@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -19,9 +21,11 @@ import '../services/workspace_cache_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/barcode_scanner.dart';
 import '../utils/debouncer.dart';
+import '../utils/image_storage_manager.dart';
 import '../utils/pos_payment.dart';
 import '../utils/tenant_currency.dart';
 import '../widgets/numpad_widget.dart';
+import '../widgets/offline_image_widget.dart';
 import '../widgets/smart_cash_suggestions.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/dialogs/app_dialog.dart';
@@ -40,6 +44,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   static const double _cartDrawerBreakpoint = 1180;
   static const double _wideBreakpoint = 1440;
   static const double _desktopCategoryWidth = 124;
+  static const double _mobileCatalogHorizontalPadding = 12;
+  static const double _catalogGridSpacing = 14;
   static const double _productCardImageAspectRatio = 3 / 2;
 
   final TextEditingController _searchController = TextEditingController();
@@ -585,7 +591,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final cached = _resolvedImageUrlCache[value];
     if (cached != null) return cached;
 
-    final resolved = ref.read(apiProvider).resolvePublicUrl(value);
+    final resolved = ImageStorageManager.isLocalImagePath(value)
+        ? value
+        : ref.read(apiProvider).resolvePublicUrl(value);
     _resolvedImageUrlCache[value] = resolved;
     return resolved;
   }
@@ -1323,6 +1331,61 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     return preferred.clamp(2, 8);
   }
 
+  double _productGridChildAspectRatio(
+    double viewportWidth, {
+    required int crossAxisCount,
+    required double horizontalPadding,
+  }) {
+    final usableWidth = math.max(
+      0.0,
+      viewportWidth -
+          (horizontalPadding * 2) -
+          (_catalogGridSpacing * (crossAxisCount - 1)),
+    );
+    final tileWidth = usableWidth / crossAxisCount;
+
+    // The image takes tileWidth / 1.5 height (aspect ratio 3/2).
+    // The content below image needs roughly 85 pixels for title, price and padding.
+    final estimatedHeight = (tileWidth / 1.5) + 85;
+    return tileWidth / estimatedHeight;
+  }
+
+  String _stockStatusLabel(Product product) {
+    if (product.stock <= 0) return 'Out of stock';
+    if (product.stock <= product.lowStockThreshold) return 'Low stock';
+    return 'In stock';
+  }
+
+  Widget _buildProductMetaChip({
+    required String label,
+    required Color backgroundColor,
+    required Color borderColor,
+    required Color textColor,
+  }) {
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 8,
+        vertical: 5,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: borderColor),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+          height: 1.1,
+        ),
+      ),
+    );
+  }
+
   List<Product> _sortedProducts(PosState posState) {
     if (identical(_cachedSourceProducts, posState.products) &&
         _cachedSortType == posState.sortType &&
@@ -1562,10 +1625,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     Widget searchField() {
       return Container(
-        height: 52,
+        height: 44,
         decoration: BoxDecoration(
           color: surface2,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: border),
         ),
         child: FormInput(
@@ -1585,7 +1648,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               : null,
           borderless: true,
           filled: false,
-          contentPadding: const EdgeInsets.symmetric(vertical: 13),
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
           onChanged: (_) => _searchDebouncer.run(() => setState(() {})),
         ),
       );
@@ -1776,9 +1839,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 )
               : Row(
                   children: [
-                    Expanded(child: searchField()),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 260),
+                      child: searchField(),
+                    ),
                     const SizedBox(width: 12),
-                    Flexible(
+                    Expanded(
                       child: Align(
                         alignment: AlignmentDirectional.centerEnd,
                         child: actionStrip(actions),
@@ -2048,6 +2114,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           builder: (context, constraints) {
             return _buildProductSkeletonGrid(
               isMobile: isMobile,
+              viewportWidth: constraints.maxWidth,
               crossAxisCount: _adaptiveGridColumns(
                 constraints.maxWidth,
                 isMobile: isMobile,
@@ -2075,7 +2142,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           isMobile: isMobile,
           preferred: posState.crossAxisCount,
         );
-        final horizontalPadding = isMobile ? 12.0 : 0.0;
+        final horizontalPadding = isMobile
+            ? _mobileCatalogHorizontalPadding
+            : 0.0;
         final bottomPadding = posState.cart.isNotEmpty && hasFloatingCart
             ? 112.0
             : 0.0;
@@ -2102,9 +2171,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: constraints.maxWidth < 420 ? 0.64 : 0.70,
-            crossAxisSpacing: 14,
-            mainAxisSpacing: 14,
+            childAspectRatio: _productGridChildAspectRatio(
+              constraints.maxWidth,
+              crossAxisCount: crossAxisCount,
+              horizontalPadding: horizontalPadding,
+            ),
+            crossAxisSpacing: _catalogGridSpacing,
+            mainAxisSpacing: _catalogGridSpacing,
           ),
           itemCount: filteredProducts.length,
           itemBuilder: (context, index) =>
@@ -2340,14 +2413,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         return GridView.builder(
           padding: EdgeInsetsDirectional.only(
             bottom: isMobile ? 110 : 0,
-            start: isMobile ? 12 : 0,
-            end: isMobile ? 12 : 0,
+            start: isMobile ? _mobileCatalogHorizontalPadding : 0,
+            end: isMobile ? _mobileCatalogHorizontalPadding : 0,
           ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             childAspectRatio: constraints.maxWidth < 420 ? 0.78 : 0.86,
-            crossAxisSpacing: 14,
-            mainAxisSpacing: 14,
+            crossAxisSpacing: _catalogGridSpacing,
+            mainAxisSpacing: _catalogGridSpacing,
           ),
           itemCount: posState.categories.length,
           itemBuilder: (context, index) =>
@@ -2579,7 +2652,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final imageUrl = _resolveImageUrl(product.mainImageUrl);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
-    final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
     final border = isDark
         ? AppColors.surfaceBorder
         : AppColors.lightSurfaceBorder;
@@ -2589,13 +2661,34 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final textMuted = isDark
         ? AppColors.textMuted
         : AppColors.lightTextTertiary;
+    final settings = ref.watch(storeSettingsProvider).settings;
     final outOfStock = product.stock <= 0;
-    final lowStock = product.stock > 0 && product.stock <= 5;
+    final lowStock =
+        product.stock > 0 && product.stock <= product.lowStockThreshold;
+    final categoryLabel = product.category?.title.trim();
+    final stockStatusLabel = _stockStatusLabel(product);
+    final priceLabel = tenantCurrencyFormatter(settings).format(product.price);
+    final stockChipBackground = outOfStock
+        ? AppColors.red.withValues(alpha: isDark ? 0.16 : 0.10)
+        : lowStock
+        ? AppColors.amber.withValues(alpha: isDark ? 0.18 : 0.12)
+        : (isDark ? AppColors.surface2 : AppColors.lightSurface2);
+    final stockChipBorder = outOfStock
+        ? AppColors.red.withValues(alpha: isDark ? 0.45 : 0.24)
+        : lowStock
+        ? AppColors.amber.withValues(alpha: isDark ? 0.45 : 0.28)
+        : border;
+    final stockChipText = outOfStock
+        ? (isDark ? AppColors.redText : AppColors.red)
+        : lowStock
+        ? (isDark ? AppColors.amberText : const Color(0xFF92400E))
+        : textMuted;
 
     return _HoverableProductCard(
       onTap: () => _handleProductTap(product),
       onLongPress: () => _handleProductLongPress(product),
       child: Container(
+        key: ValueKey('pos-product-card-${product.id}'),
         decoration: BoxDecoration(
           color: surface,
           borderRadius: BorderRadius.circular(16),
@@ -2680,99 +2773,44 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               ),
             ),
             Expanded(
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      12,
-                      10,
-                      12,
-                      12,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(12, 10, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        height: 1.25,
+                        color: textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13.5,
-                            height: 1.25,
+                    const Spacer(),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(top: 8),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          priceLabel,
+                          key: ValueKey('pos-product-price-${product.id}'),
+                          style: GoogleFonts.jetBrainsMono(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            height: 1,
                             color: textPrimary,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          product.slug,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: textMuted,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const Spacer(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                tenantCurrencyFormatter(
-                                  ref.watch(storeSettingsProvider).settings,
-                                ).format(product.price),
-                                style: GoogleFonts.jetBrainsMono(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 15,
-                                  color: textPrimary,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: outOfStock ? surface2 : AppColors.brand,
-                                borderRadius: BorderRadius.circular(10),
-                                border: outOfStock
-                                    ? Border.all(color: border)
-                                    : null,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.brand.withValues(
-                                      alpha: outOfStock
-                                          ? 0
-                                          : (isDark ? 0.18 : 0.30),
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                LucideIcons.plus,
-                                size: 17,
-                                color: outOfStock
-                                    ? textMuted
-                                    : AppColors.brandContrast,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -4058,19 +4096,25 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
   Widget _buildProductSkeletonGrid({
     bool isMobile = false,
+    required double viewportWidth,
     required int crossAxisCount,
   }) {
+    final horizontalPadding = isMobile ? _mobileCatalogHorizontalPadding : 0.0;
     return GridView.builder(
       padding: EdgeInsets.only(
         bottom: isMobile ? 100 : 0,
-        left: isMobile ? 16 : 0,
-        right: isMobile ? 16 : 0,
+        left: horizontalPadding,
+        right: horizontalPadding,
       ),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        childAspectRatio: _productGridChildAspectRatio(
+          viewportWidth,
+          crossAxisCount: crossAxisCount,
+          horizontalPadding: horizontalPadding,
+        ),
+        crossAxisSpacing: _catalogGridSpacing,
+        mainAxisSpacing: _catalogGridSpacing,
       ),
       itemCount: 12, // Show 12 skeleton items
       itemBuilder: (context, index) => const ProductCardSkeleton(),
@@ -4138,6 +4182,19 @@ class _PosSafeNetworkImageState extends State<_PosSafeNetworkImage> {
 
     if (url == null) {
       return fallback;
+    }
+
+    if (ImageStorageManager.isLocalImagePath(url)) {
+      return RepaintBoundary(
+        child: OfflineImageWidget(
+          imagePath: url,
+          width: widget.width,
+          height: widget.height,
+          fit: widget.fit,
+          placeholder: fallback,
+          errorWidget: fallback,
+        ),
+      );
     }
 
     return RepaintBoundary(

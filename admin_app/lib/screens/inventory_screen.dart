@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../services/api_service.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
 import '../theme/app_theme.dart';
@@ -9,6 +8,7 @@ import '../widgets/responsive_paginated_table.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../utils/debouncer.dart';
 import '../widgets/form/form_input.dart';
+import '../widgets/tenant_image_widget.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -126,10 +126,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       rowBuilder: (context, product, index) {
         // Low-stock threshold (basic): < 10
         final isLowStock = product.stock < 10;
-        final rawImageUrl = product.mainImageUrl;
-        final imageUrl = rawImageUrl == null
-            ? null
-            : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
+        final imagePath = product.mainImageUrl?.trim();
 
         return Padding(
           padding: EdgeInsets.symmetric(
@@ -150,14 +147,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           context,
                         ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(6),
-                        image: imageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(imageUrl),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
                       ),
-                      child: imageUrl == null
+                      child: imagePath == null || imagePath.isEmpty
                           ? Icon(
                               LucideIcons.image,
                               size: 20,
@@ -165,7 +156,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 context,
                               ).colorScheme.onSurface.withValues(alpha: 0.3),
                             )
-                          : null,
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: TenantImageWidget(imagePath: imagePath),
+                            ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

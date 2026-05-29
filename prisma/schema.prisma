@@ -60,6 +60,8 @@ model Tenant {
   maystroProductMaps   MaystroProductMapping[]
   maystroOrderMaps     MaystroOrderMapping[]
   maystroInventoryLogs MaystroInventoryEvent[]
+  licenses             License[]
+  devices              Device[]
 }
 
 model Cashbox {
@@ -289,13 +291,13 @@ model StoreSettings {
   defaultCashboxId String?
   defaultCashbox   Cashbox? @relation("StoreSettingsDefaultCashbox", fields: [tenantId, defaultCashboxId], references: [tenantId, id], onDelete: SetNull)
 
-  logoUrl      String? // URL of the tenant's store logo
-  faviconUrl   String? // URL of the tenant's store favicon
-  primaryColor String  @default("#65A30D") // lime-600
+  logoUrl       String? // URL of the tenant's store logo
+  faviconUrl    String? // URL of the tenant's store favicon
+  primaryColor  String  @default("#65A30D") // lime-600
   useBrandColor Boolean @default(false)
-  templateKey  String  @default("modern") // e.g. classic | modern
-  fontFamily   String  @default("Outfit")
-  language     String  @default("fr") // ar | fr | en
+  templateKey   String  @default("modern") // e.g. classic | modern
+  fontFamily    String  @default("Outfit")
+  language      String  @default("fr") // ar | fr | en
 
   announcementText      String?
   announcementScrolling Boolean @default(false)
@@ -308,29 +310,29 @@ model StoreSettings {
   // Tenant-scoped via StoreSettings. Treated as an opaque JSON blob but validated at the API layer.
   homeConfig Json?
 
-  cartEnabled     Boolean @default(true)
-  codEnabled      Boolean @default(true)
-  orderIdPrefix   String  @default("ORDR")
-  minimumOrderAmountDzd Int @default(1000)
+  cartEnabled           Boolean @default(true)
+  codEnabled            Boolean @default(true)
+  orderIdPrefix         String  @default("ORDR")
+  minimumOrderAmountDzd Int     @default(1000)
   hideOptionalAddress   Boolean @default(true)
-  currencyCode    String  @default("DZD") // ISO currency code
-  currencyCountry String  @default("DZ") // ISO country for flag/locale
+  currencyCode          String  @default("DZD") // ISO currency code
+  currencyCountry       String  @default("DZ") // ISO country for flag/locale
 
   isCompleted              Boolean  @default(false)
   checklistDismissed       Boolean  @default(false)
   allowedDeliveryProviders String[] @default(["SELF"])
   storePickupEnabled       Boolean  @default(false)
 
-  loyaltyEnabled                Boolean @default(false)
-  loyaltyMinRedeemPoints        Int     @default(0)
-  loyaltyRedeemRateDzdPerPoint  Decimal @default(1)
-  loyaltyBasePoints             Decimal @default(0)
-  loyaltyMarginFactor           Decimal @default(0)
-  loyaltyPublicFormulaMode      String  @default("SUMMARY")
-  salesInvoiceEnabled           Boolean @default(false)
-  invoiceNumberPrefix           String  @default("INV")
-  invoiceFooterText             String?
-  invoiceShowLogo               Boolean @default(true)
+  loyaltyEnabled               Boolean @default(false)
+  loyaltyMinRedeemPoints       Int     @default(0)
+  loyaltyRedeemRateDzdPerPoint Decimal @default(1)
+  loyaltyBasePoints            Decimal @default(0)
+  loyaltyMarginFactor          Decimal @default(0)
+  loyaltyPublicFormulaMode     String  @default("SUMMARY")
+  salesInvoiceEnabled          Boolean @default(false)
+  invoiceNumberPrefix          String  @default("INV")
+  invoiceFooterText            String?
+  invoiceShowLogo              Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -358,32 +360,32 @@ model TenantContactInfo {
 }
 
 model User {
-  id           String           @id @default(uuid())
-  email        String
-  passwordHash String?
-  role         String           @default("staff") // owner, admin, staff
-  isSuperAdmin Boolean          @default(false)
-  isActive     Boolean          @default(true)
+  id                 String           @id @default(uuid())
+  email              String
+  passwordHash       String?
+  role               String           @default("staff") // owner, admin, staff
+  isSuperAdmin       Boolean          @default(false)
+  isActive           Boolean          @default(true)
   tokenInvalidBefore DateTime?
-  tenantId     String
-  tenant       Tenant           @relation(fields: [tenantId], references: [id])
-  cashboxId    String?
-  cashbox      Cashbox?         @relation("UserCashbox", fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: SetNull)
-  staffRoleId  String?
-  staffRole    TenantStaffRole? @relation("StaffRoleUsers", fields: [tenantId, staffRoleId], references: [tenantId, id], onDelete: Restrict)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  tenantId           String
+  tenant             Tenant           @relation(fields: [tenantId], references: [id])
+  cashboxId          String?
+  cashbox            Cashbox?         @relation("UserCashbox", fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: SetNull)
+  staffRoleId        String?
+  staffRole          TenantStaffRole? @relation("StaffRoleUsers", fields: [tenantId, staffRoleId], references: [tenantId, id], onDelete: Restrict)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   inventoryMovements      InventoryMovement[]
-  purchaseOrdersCreated   PurchaseOrder[]     @relation("PurchaseOrderCreatedBy")
-  salesCreated            Sale[]              @relation("SaleCreatedBy")
-  salesInvoicesCreated    SalesInvoice[]      @relation("SalesInvoiceCreatedBy")
+  purchaseOrdersCreated   PurchaseOrder[]        @relation("PurchaseOrderCreatedBy")
+  salesCreated            Sale[]                 @relation("SaleCreatedBy")
+  salesInvoicesCreated    SalesInvoice[]         @relation("SalesInvoiceCreatedBy")
   customerPointsCreated   CustomerPointsLedger[]
-  customerPaymentsCreated CustomerPayment[]   @relation("CustomerPaymentCreatedBy")
-  supplierPaymentsCreated SupplierPayment[]   @relation("SupplierPaymentCreatedBy")
-  cashSessionsOpened      CashSession[]       @relation("CashSessionOpenedBy")
-  cashSessionsClosed      CashSession[]       @relation("CashSessionClosedBy")
-  cashTransactionsCreated CashTransaction[]   @relation("CashTransactionCreatedBy")
+  customerPaymentsCreated CustomerPayment[]      @relation("CustomerPaymentCreatedBy")
+  supplierPaymentsCreated SupplierPayment[]      @relation("SupplierPaymentCreatedBy")
+  cashSessionsOpened      CashSession[]          @relation("CashSessionOpenedBy")
+  cashSessionsClosed      CashSession[]          @relation("CashSessionClosedBy")
+  cashTransactionsCreated CashTransaction[]      @relation("CashTransactionCreatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
@@ -478,16 +480,16 @@ model Product {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
 
-  categoryId String?
-  category   Category? @relation(fields: [tenantId, categoryId], references: [tenantId, id])
+  categoryId    String?
+  category      Category?         @relation(fields: [tenantId, categoryId], references: [tenantId, id])
   categoryLinks ProductCategory[]
 
   options     ProductOption[]
   variants    ProductVariant[]
   bundleDeals ProductBundleDeal[]
 
-  orderItems OrderItem[]
-  saleItems  SaleItem[]
+  orderItems      OrderItem[]
+  saleItems       SaleItem[]
   maystroMappings MaystroProductMapping[]
 
   createdAt DateTime @default(now())
@@ -652,18 +654,18 @@ model ProductVariant {
   productId String
   product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
 
-  sku            String   @db.VarChar(32)
-  skuLocked      Boolean  @default(false)
-  barcode        String?  @db.VarChar(32)
-  price          Decimal  @default(0)
+  sku                String    @db.VarChar(32)
+  skuLocked          Boolean   @default(false)
+  barcode            String?   @db.VarChar(32)
+  price              Decimal   @default(0)
   promotionalPrice   Decimal?
   isPromotionActive  Boolean   @default(false)
   promotionStartDate DateTime?
   promotionEndDate   DateTime?
   showCountdown      Boolean   @default(false)
-  compareAtPrice Decimal?
-  cost           Decimal  @default(0) // prix d'achat (latest unit cost)
-  isActive       Boolean  @default(true)
+  compareAtPrice     Decimal?
+  cost               Decimal   @default(0) // prix d'achat (latest unit cost)
+  isActive           Boolean   @default(true)
 
   // Inventory
   trackInventory Boolean @default(true)
@@ -767,11 +769,11 @@ model Sale {
   orderId String?
   order   Order?  @relation("SaleOrder", fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
 
-  totalAmount Float
-  status      String @default("COMPLETED") // COMPLETED | REFUNDED (future)
-  earnedPointsTotal   Int   @default(0)
-  redeemedPointsTotal Int   @default(0)
-  redeemedAmount      Float @default(0)
+  totalAmount         Float
+  status              String @default("COMPLETED") // COMPLETED | REFUNDED (future)
+  earnedPointsTotal   Int    @default(0)
+  redeemedPointsTotal Int    @default(0)
+  redeemedAmount      Float  @default(0)
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
@@ -781,7 +783,7 @@ model Sale {
   customerAddress String?
 
   clientRequestId String?
-  notes String?
+  notes           String?
 
   createdByUserId String?
   createdBy       User?   @relation("SaleCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
@@ -789,7 +791,7 @@ model Sale {
   items            SaleItem[]
   pointsLedger     CustomerPointsLedger[]
   movements        InventoryMovement[]
-  cashTransactions CashTransaction[]   @relation("CashTxSale")
+  cashTransactions CashTransaction[]      @relation("CashTxSale")
   customerPayments CustomerPayment[]
 
   createdAt DateTime @default(now())
@@ -933,16 +935,16 @@ model PurchaseOrderItem {
 }
 
 model Order {
-  id          String @id @default(uuid())
-  publicId    String?
-  tenantId    String
-  tenant      Tenant @relation(fields: [tenantId], references: [id])
-  status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
-  totalAmount Float
+  id                      String  @id @default(uuid())
+  publicId                String?
+  tenantId                String
+  tenant                  Tenant  @relation(fields: [tenantId], references: [id])
+  status                  String  @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  totalAmount             Float
   totalWithShippingAmount Float?
-  earnedPointsTotal   Int   @default(0)
-  redeemedPointsTotal Int   @default(0)
-  redeemedAmount      Float @default(0)
+  earnedPointsTotal       Int     @default(0)
+  redeemedPointsTotal     Int     @default(0)
+  redeemedAmount          Float   @default(0)
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
@@ -952,7 +954,7 @@ model Order {
   customerAddress String?
   customerIp      String?
 
-  callStatus    String  @default("not_called")
+  callStatus    String    @default("not_called")
   internalNotes String?
   readAt        DateTime?
 
@@ -975,8 +977,8 @@ model Order {
   shipments          Shipment[]
   maystroMappings    MaystroOrderMapping[]
   inventoryMovements InventoryMovement[]
-  cashTransactions   CashTransaction[]   @relation("CashTxOrder")
-  sale               Sale?               @relation("SaleOrder")
+  cashTransactions   CashTransaction[]      @relation("CashTxOrder")
+  sale               Sale?                  @relation("SaleOrder")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -993,13 +995,13 @@ model Customer {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  name           String
-  phone          String
+  name            String
+  phone           String
   phoneNormalized String
-  phoneRaw       String?
-  email          String?
-  address        String?
-  openingBalance Decimal @default(0)
+  phoneRaw        String?
+  email           String?
+  address         String?
+  openingBalance  Decimal @default(0)
 
   // For future customer-auth/customer-space. Not used in MVP flows yet.
   passwordHash String?
@@ -1008,7 +1010,7 @@ model Customer {
   sales            Sale[]
   pointsLedger     CustomerPointsLedger[]
   payments         CustomerPayment[]
-  cashTransactions CashTransaction[] @relation("CashTxCustomer")
+  cashTransactions CashTransaction[]      @relation("CashTxCustomer")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1049,8 +1051,8 @@ model CustomerPointsLedger {
   customerId String
   customer   Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Cascade)
 
-  direction CustomerPointsDirection
-  status    CustomerPointsStatus
+  direction  CustomerPointsDirection
+  status     CustomerPointsStatus
   sourceType CustomerPointsSourceType
   sourceId   String
 
@@ -1063,7 +1065,7 @@ model CustomerPointsLedger {
   order   Order?  @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: SetNull)
 
   formulaSnapshot Json?
-  expiresAt DateTime?
+  expiresAt       DateTime?
 
   createdByUserId String?
   createdBy       User?   @relation(fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: SetNull)
@@ -1170,11 +1172,11 @@ enum MaystroSyncStatus {
 }
 
 model MaystroProductMapping {
-  id             String           @id @default(uuid())
+  id             String  @id @default(uuid())
   tenantId       String
-  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant         Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   localProductId String
-  product        Product          @relation(fields: [tenantId, localProductId], references: [tenantId, id], onDelete: Cascade)
+  product        Product @relation(fields: [tenantId, localProductId], references: [tenantId, id], onDelete: Cascade)
 
   maystroProductId String
   maystroUuid      String?
@@ -1192,17 +1194,17 @@ model MaystroProductMapping {
 }
 
 model MaystroOrderMapping {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id           String @id @default(uuid())
+  tenantId     String
+  tenant       Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   localOrderId String
-  order       Order    @relation(fields: [tenantId, localOrderId], references: [tenantId, id], onDelete: Cascade)
+  order        Order  @relation(fields: [tenantId, localOrderId], references: [tenantId, id], onDelete: Cascade)
 
-  externalId    String
+  externalId     String
   maystroOrderId String?
-  tracking      String?
-  deliveryPrice Decimal?
-  success       Boolean  @default(false)
+  tracking       String?
+  deliveryPrice  Decimal?
+  success        Boolean  @default(false)
 
   lastSyncedAt DateTime?
   lastError    String?
@@ -1216,9 +1218,9 @@ model MaystroOrderMapping {
 }
 
 model MaystroInventoryEvent {
-  id        String @id @default(uuid())
-  tenantId  String
-  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   maystroProductId String?
   direction        String?
@@ -1344,5 +1346,44 @@ model GoogleOAuthToken {
   updatedAt    DateTime  @updatedAt
 
   @@unique([tenantId, userId])
+  @@index([tenantId])
+}
+
+model License {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  licenseKey String    @unique
+  maxDevices Int       @default(1)
+  isActive   Boolean   @default(true)
+  expiresAt  DateTime?
+
+  devices Device[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Device {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  licenseId String
+  license   License @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  hardwareId String
+  deviceName String?
+  status     String  @default("ACTIVE")
+
+  lastSyncAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([licenseId, hardwareId])
   @@index([tenantId])
 }

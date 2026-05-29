@@ -72,7 +72,7 @@ class _ShimmerSkeletonState extends State<ShimmerSkeleton>
 }
 
 class ProductCardSkeleton extends StatelessWidget {
-  static const double _imageAspectRatio = 4 / 3;
+  static const double _imageAspectRatio = 3 / 2;
 
   const ProductCardSkeleton({super.key});
 
@@ -112,18 +112,19 @@ class ProductCardSkeleton extends StatelessWidget {
                     borderRadius: 4,
                   ),
                   const SizedBox(height: 8),
-                  const ShimmerSkeleton(width: 70, height: 12, borderRadius: 4),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  const Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
                     children: [
-                      const ShimmerSkeleton(
-                        width: 80,
-                        height: 20,
-                        borderRadius: 4,
-                      ),
-                      ShimmerSkeleton(width: 40, height: 40, borderRadius: 20),
+                      ShimmerSkeleton(width: 72, height: 22, borderRadius: 999),
+                      ShimmerSkeleton(width: 92, height: 22, borderRadius: 999),
                     ],
+                  ),
+                  const Spacer(),
+                  const ShimmerSkeleton(
+                    width: double.infinity,
+                    height: 22,
+                    borderRadius: 4,
                   ),
                 ],
               ),

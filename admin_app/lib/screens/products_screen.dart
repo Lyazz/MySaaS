@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../services/api_service.dart';
 import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
@@ -19,6 +18,7 @@ import '../widgets/form/form_select.dart';
 import '../widgets/badges/ui_badge.dart';
 import '../theme/app_theme.dart';
 import '../providers/store_settings_provider.dart';
+import '../widgets/tenant_image_widget.dart';
 
 // Filter Notifiers
 class CategoryFilterNotifier extends Notifier<String> {
@@ -996,10 +996,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final money = tenantCurrencyFormatter(
       ref.watch(storeSettingsProvider).settings,
     );
-    final rawImageUrl = product.mainImageUrl;
-    final imageUrl = rawImageUrl == null
-        ? null
-        : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
+    final imagePath = product.mainImageUrl?.trim();
     final isSelected = _selectedProductIds.contains(product.id);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -1041,20 +1038,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           : const Color(0xFFE5E7EB),
                       width: 1,
                     ),
-                    image: imageUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
                   ),
-                  child: imageUrl == null
+                  child: imagePath == null || imagePath.isEmpty
                       ? const Icon(
                           LucideIcons.image,
                           color: Color(0xFF94A3B8),
                           size: 20,
                         )
-                      : null,
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: TenantImageWidget(imagePath: imagePath),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../services/api_service.dart';
 import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/categories_provider.dart';
@@ -15,6 +14,7 @@ import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/tenant_image_widget.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({super.key});
@@ -296,10 +296,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         },
       ),
       rowBuilder: (context, category, index) {
-        final rawImageUrl = category.imageUrl;
-        final imageUrl = rawImageUrl == null
-            ? null
-            : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
+        final imagePath = category.imageUrl?.trim();
 
         return Padding(
           padding: EdgeInsets.symmetric(
@@ -324,14 +321,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         border: Border.all(
                           color: Theme.of(context).colorScheme.outline,
                         ),
-                        image: imageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(imageUrl),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
                       ),
-                      child: imageUrl == null
+                      child: imagePath == null || imagePath.isEmpty
                           ? Icon(
                               LucideIcons.image,
                               color: Theme.of(
@@ -339,7 +330,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                               ).colorScheme.onSurface.withValues(alpha: 0.3),
                               size: 20,
                             )
-                          : null,
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: TenantImageWidget(imagePath: imagePath),
+                            ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -591,7 +585,7 @@ class _TableIconButtonState extends State<_TableIconButton> {
       onExit: (_) => setState(() => _isHovered = false),
       child: IconButton(
         icon: Icon(widget.icon, size: 14),
-        color: _isHovered ? widget.color.withOpacity(0.8) : widget.color,
+        color: _isHovered ? widget.color.withValues(alpha: 0.8) : widget.color,
         onPressed: widget.onPressed,
         padding: const EdgeInsets.all(4),
         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),

@@ -1,10 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../services/api_service.dart';
 import '../providers/products_provider.dart';
+import '../utils/image_storage_manager.dart';
 import '../widgets/rich_text_editor.dart';
 import '../widgets/product_options_list.dart';
 import 'variant_edit_screen.dart';
@@ -13,11 +16,13 @@ import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
 import '../theme/app_theme.dart';
+import '../widgets/tenant_image_widget.dart';
 
 class ProductFormScreen extends ConsumerStatefulWidget {
   final String? productId;
+  final ImagePicker? imagePicker;
 
-  const ProductFormScreen({super.key, this.productId});
+  const ProductFormScreen({super.key, this.productId, this.imagePicker});
 
   @override
   ConsumerState<ProductFormScreen> createState() => _ProductFormScreenState();
@@ -44,8 +49,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
   // Image Management
   final List<String> _images = [];
+  final Set<String> _sessionLocalImages = <String>{};
   bool _isUploading = false;
-  final ImagePicker _picker = ImagePicker();
+  late final ImagePicker _picker;
 
   Future<void> _pickImage() async {
     try {
@@ -54,16 +60,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
       setState(() => _isUploading = true);
 
-      // Upload
-      final url = await ref.read(apiProvider).uploadImage(image.path);
-
-      if (url != null) {
-        setState(() {
-          _images.add(url);
-        });
-      } else {
-        setState(() => _error = 'Failed to upload image');
-      }
+      final localPath = await ImageStorageManager.saveImageLocally(
+        File(image.path),
+      );
+      setState(() {
+        _images.add(localPath);
+        _sessionLocalImages.add(localPath);
+      });
     } catch (e) {
       setState(() => _error = 'Error picking image: $e');
     } finally {
@@ -71,15 +74,31 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     }
   }
 
-  void _removeImage(int index) {
+  Future<void> _removeImage(int index) async {
+    final removedPath = _images[index];
     setState(() {
       _images.removeAt(index);
     });
+
+    if (_sessionLocalImages.remove(removedPath)) {
+      await ImageStorageManager.deleteLocalImage(removedPath);
+    }
+  }
+
+  Future<void> _cleanupDiscardedImages() async {
+    final discarded = _sessionLocalImages.toList(growable: false);
+    _sessionLocalImages.clear();
+    for (final path in discarded) {
+      try {
+        await ImageStorageManager.deleteLocalImage(path);
+      } catch (_) {}
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    _picker = widget.imagePicker ?? ImagePicker();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
@@ -132,6 +151,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
   @override
   void dispose() {
+    unawaited(_cleanupDiscardedImages());
     _titleController.dispose();
     _slugController.dispose();
     _miniDescriptionController.dispose();
@@ -174,6 +194,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         await ref.read(productsProvider.notifier).createProduct(data);
       }
 
+      _sessionLocalImages.clear();
       if (mounted) context.pop();
     } catch (e) {
       setState(() => _error = e.toString());
@@ -669,10 +690,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                                         0xFFE2E8F0,
                                                       ),
                                                     ),
-                                                    image: DecorationImage(
-                                                      image: NetworkImage(
-                                                        imageUrl,
-                                                      ),
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                    child: TenantImageWidget(
+                                                      imagePath: imageUrl,
                                                       fit: BoxFit.cover,
                                                     ),
                                                   ),

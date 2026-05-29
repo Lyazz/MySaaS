@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../bootstrap.dart';
 import '../models/provisioning_payload.dart';
+import '../utils/image_storage_manager.dart';
 import 'tenant_mode_service.dart';
 
 final apiProvider = Provider<ApiService>((ref) {
@@ -81,6 +82,7 @@ class ApiService {
   String resolvePublicUrl(String url) {
     final trimmed = url.trim();
     if (trimmed.isEmpty) return trimmed;
+    if (ImageStorageManager.isLocalImagePath(trimmed)) return trimmed;
 
     final lower = trimmed.toLowerCase();
     if (lower.startsWith('http://') || lower.startsWith('https://')) {
@@ -135,7 +137,7 @@ class ApiService {
     }
 
     return ProvisioningPayload.fromJson(
-      Map<String, dynamic>.from(provisioning as Map),
+      Map<String, dynamic>.from(provisioning),
     );
   }
 
@@ -145,7 +147,11 @@ class ApiService {
         'file': await MultipartFile.fromFile(filePath),
       });
 
-      final response = await _dio.post('/upload', data: formData);
+      final response = await _dio.post(
+        '/upload',
+        data: formData,
+        options: Options(contentType: 'multipart/form-data'),
+      );
       return response.data['url'];
     } catch (e) {
       return null;
