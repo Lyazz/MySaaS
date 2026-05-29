@@ -47,11 +47,8 @@ class _FakeActivationService extends ActivationService {
   }
 
   @override
-  Future<String> generateOfflineRequestCode(String licenseKey) async {
+  Future<String> generateOfflineRequestCode() async {
     if (error != null) throw error!;
-    if (licenseKey.trim() != 'trusted-activation-code') {
-      throw Exception('Enter your activation key first.');
-    }
     return offlineRequestCode;
   }
 

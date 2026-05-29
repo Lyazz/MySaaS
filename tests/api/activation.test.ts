@@ -133,9 +133,12 @@ describe('device activation API', () => {
     expect(decoded.licenseKey).toBe(licenseKey);
   });
 
-  it('generates an offline activation token for owner/admin users on the SaaS host', async () => {
+  it('generates an offline activation token for owner/admin users from the new device request payload', async () => {
     const requestCode = Buffer.from(
-      `${licenseKey}:${hardwareId}`,
+      JSON.stringify({
+        hardwareId,
+        deviceName: 'Offline Counter',
+      }),
       'utf-8'
     ).toString('base64');
 
@@ -152,6 +155,22 @@ describe('device activation API', () => {
     expect(decoded.tenantId).toBe(tenantId);
     expect(decoded.hardwareId).toBe(hardwareId);
     expect(decoded.licenseKey).toBe(licenseKey);
+  });
+
+  it('keeps supporting the legacy offline request-code format', async () => {
+    const requestCode = Buffer.from(
+      `${licenseKey}:${hardwareId}`,
+      'utf-8'
+    ).toString('base64');
+
+    const res = await request(app)
+      .post('/api/activation/offline')
+      .set('X-Forwarded-Host', host)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ requestCode });
+
+    expect(res.status).toBe(200);
+    expect(typeof res.body.activationToken).toBe('string');
   });
 
   it('lists only tenant-owned devices with license summary data', async () => {

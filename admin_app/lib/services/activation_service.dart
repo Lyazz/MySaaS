@@ -74,14 +74,16 @@ class ActivationService {
     }
   }
 
-  Future<String> generateOfflineRequestCode(String licenseKey) async {
-    final normalizedKey = licenseKey.trim();
-    if (normalizedKey.isEmpty) {
-      throw Exception('Enter your activation key first.');
-    }
-
+  Future<String> generateOfflineRequestCode() async {
     final hardwareId = await _deviceInfoService.getHardwareId();
-    return base64Encode(utf8.encode('$normalizedKey:$hardwareId'));
+    return base64Encode(
+      utf8.encode(
+        jsonEncode({
+          'hardwareId': hardwareId,
+          'deviceName': 'Flutter Device',
+        }),
+      ),
+    );
   }
 
   Future<ActivationResult> verifyOfflineActivationCode(String token) async {

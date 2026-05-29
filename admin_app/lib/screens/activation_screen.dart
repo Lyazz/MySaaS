@@ -102,10 +102,9 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
 
   Future<void> _showOfflineActivationDialog() async {
     try {
-      final activationKey = _payloadController.text.trim();
       final requestCode = await ref
           .read(activationServiceProvider)
-          .generateOfflineRequestCode(activationKey);
+          .generateOfflineRequestCode();
 
       if (!mounted) return;
 
@@ -119,7 +118,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  'Use the activation key from the main form to generate this Request Code. In the tenant admin panel, open Devices > Offline Activation and paste it there.',
+                  'Generate this Request Code on the device, then in the tenant admin panel open Devices > Offline Activation and paste it there to receive a signed activation code.',
                 ),
                 const SizedBox(height: 8),
                 SelectableText(
@@ -238,7 +237,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Enter the tenant-issued activation key to bind this device permanently to one workspace. Online activation redeems it with the server; offline activation turns it into a request code for the admin panel.',
+                          'Enter the tenant-issued activation key for online activation. For offline activation, generate a request code here and complete the signing step from the tenant admin panel.',
                           style: GoogleFonts.dmSans(
                             fontSize: 15,
                             height: 1.55,
@@ -288,7 +287,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                           ),
                           decoration: InputDecoration(
                             labelText: 'Activation key',
-                            hintText: 'Paste the tenant-issued activation key',
+                            hintText: 'Paste the tenant-issued key for online activation',
                             errorText: _error,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),

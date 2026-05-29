@@ -12,6 +12,12 @@ const maskValue = (value: string, visible = 6) => {
   return `${value.slice(0, visible)}…${value.slice(-visible)}`;
 };
 
+type OfflineRequestPayload = {
+  hardwareId: string;
+  deviceName?: string;
+  licenseKey?: string;
+};
+
 export class ActivationService {
   async listDevices(tenantId: string) {
     const [tenant, licenses, devices] = await prisma.$transaction([
@@ -117,13 +123,79 @@ export class ActivationService {
             expiresAt: device.license.expiresAt,
             activeDeviceCount: stats.activeDeviceCount,
             totalDeviceCount: stats.totalDeviceCount,
-            kind: device.license.licenseKey.startsWith('LIC-ON-')
+            kind:
+              device.license.licenseKey.startsWith('LIC-ON-') ||
+              device.license.licenseKey.startsWith('LIC-AUTO-')
               ? 'auto'
               : 'assigned',
           },
         };
       }),
     };
+  }
+
+  private decodeOfflineRequestCode(requestCode: string): OfflineRequestPayload {
+    const decoded = Buffer.from(requestCode, 'base64').toString('utf-8').trim();
+
+    if (!decoded) {
+      throw new Error('Invalid Request Code format');
+    }
+
+    if (decoded.startsWith('{')) {
+      const parsed = JSON.parse(decoded) as Record<string, unknown>;
+      const hardwareId =
+        typeof parsed.hardwareId === 'string' ? parsed.hardwareId.trim() : '';
+      const deviceName =
+        typeof parsed.deviceName === 'string' ? parsed.deviceName.trim() : '';
+      const licenseKey =
+        typeof parsed.licenseKey === 'string' ? parsed.licenseKey.trim() : '';
+
+      if (!hardwareId) {
+        throw new Error('Invalid Request Code format');
+      }
+
+      return {
+        hardwareId,
+        deviceName: deviceName || undefined,
+        licenseKey: licenseKey || undefined,
+      };
+    }
+
+    const [licenseKey, hardwareId] = decoded.split(':');
+
+    if (!licenseKey || !hardwareId) {
+      throw new Error('Invalid Request Code format');
+    }
+
+    return {
+      hardwareId: hardwareId.trim(),
+      licenseKey: licenseKey.trim(),
+    };
+  }
+
+  private async ensureTenantLicense(
+    tx: Prisma.TransactionClient,
+    tenantId: string
+  ) {
+    let license = await tx.license.findFirst({
+      where: { tenantId, isActive: true },
+      include: { devices: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (license) {
+      return license;
+    }
+
+    const randomPart = randomBytes(8).toString('hex').toUpperCase();
+    return tx.license.create({
+      data: {
+        tenantId,
+        licenseKey: `LIC-AUTO-${randomPart}`,
+        maxDevices: 1,
+      },
+      include: { devices: true },
+    });
   }
 
   /**
@@ -211,25 +283,84 @@ export class ActivationService {
 
   /**
    * Processes an offline activation request
-   * requestCode is a base64 encoded string: base64(`${licenseKey}:${hardwareId}`)
+   * requestCode is a base64 encoded string.
+   * Supported formats:
+   * - Legacy: base64(`${licenseKey}:${hardwareId}`)
+   * - Current: base64(JSON.stringify({ hardwareId, deviceName }))
    */
   async offlineActivate(tenantId: string, requestCode: string) {
     try {
-      const decoded = Buffer.from(requestCode, 'base64').toString('utf-8');
-      const [licenseKey, hardwareId] = decoded.split(':');
+      const payload = this.decodeOfflineRequestCode(requestCode);
 
-      if (!licenseKey || !hardwareId) {
-        throw new Error('Invalid Request Code format');
+      if (payload.licenseKey) {
+        return this.activateDevice(
+          tenantId,
+          payload.licenseKey,
+          payload.hardwareId,
+          payload.deviceName || 'Offline Device'
+        );
       }
 
-      // We pass the parsed data to the standard activation flow
-      const result = await this.activateDevice(
-        tenantId,
-        licenseKey,
-        hardwareId,
-        'Offline Device'
+      return prisma.$transaction(
+        async (tx) => {
+          const tenant = await tx.tenant.findUnique({
+            where: { id: tenantId },
+            select: { id: true, isOffline: true, isSuspended: true },
+          });
+
+          if (!tenant) {
+            throw new Error('Tenant not found');
+          }
+
+          if (tenant.isSuspended) {
+            throw new Error('Tenant is suspended');
+          }
+
+          const license = await this.ensureTenantLicense(tx, tenantId);
+          let device = license.devices.find(
+            (entry) => entry.hardwareId === payload.hardwareId
+          );
+
+          if (!device) {
+            const activeDevices = license.devices.filter(
+              (entry) => entry.status === 'ACTIVE'
+            ).length;
+            if (activeDevices >= license.maxDevices) {
+              throw new Error(
+                `Activation limit reached. Maximum ${license.maxDevices} device(s) allowed.`
+              );
+            }
+
+            device = await tx.device.create({
+              data: {
+                tenantId,
+                licenseId: license.id,
+                hardwareId: payload.hardwareId,
+                deviceName: payload.deviceName || 'Offline Device',
+              },
+            });
+          } else if (device.status !== 'ACTIVE') {
+            throw new Error('This device has been revoked.');
+          }
+
+          const activationToken = signActivationToken({
+            tenantId,
+            workspaceId: device.id,
+            mode: tenant.isOffline ? 'offlineOnly' : 'hybrid',
+            subscriptionTier: tenant.isOffline ? 'offlineOnly' : 'online',
+            licenseKey: license.licenseKey,
+            hardwareId: payload.hardwareId,
+            deviceId: device.id,
+          });
+
+          return {
+            message: 'Device activated successfully',
+            device,
+            activationToken,
+          };
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
       );
-      return result;
     } catch (e: any) {
       throw new Error(`Offline activation failed: ${e.message}`);
     }
