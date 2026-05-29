@@ -120,6 +120,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/activate'),
+        backgroundColor: palette.glassBackground,
+        icon: Icon(LucideIcons.wifiOff, color: palette.primaryText, size: 18),
+        label: Text(
+          'Offline Registration',
+          style: GoogleFonts.dmSans(
+            color: palette.primaryText,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 

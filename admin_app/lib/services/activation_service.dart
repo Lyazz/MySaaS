@@ -60,10 +60,9 @@ class ActivationService {
   }
 
   /// Generates the Request Code for offline activation
-  Future<String> generateOfflineRequestCode(String licenseKey) async {
+  Future<String> generateOfflineRequestCode() async {
     final hwid = await _deviceInfoService.getHardwareId();
-    final payload = '$licenseKey:$hwid';
-    return base64Encode(utf8.encode(payload));
+    return base64Encode(utf8.encode(hwid));
   }
 
   /// Verifies an Activation Token (JWT) locally

@@ -7,6 +7,8 @@ import '../theme/app_theme.dart';
 import '../widgets/admin_stat_card.dart';
 import '../widgets/buttons/app_button.dart';
 import '../providers/admin_dashboard_provider.dart';
+import '../providers/auth_provider.dart';
+import '../models/app_mode.dart';
 import '../providers/store_settings_provider.dart';
 import '../widgets/badges/status_badges.dart';
 
@@ -686,11 +688,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildQuickLinksCard(BuildContext context) {
+    final authState = ref.read(authProvider);
+    final isOffline = authState.mode == AppMode.offlineOnly;
+
     final links = [
       (label: 'Add product', icon: LucideIcons.plus, to: '/products/create'),
       (label: 'Manage products', icon: LucideIcons.package, to: '/products'),
       (label: 'Categories', icon: LucideIcons.tags, to: '/categories'),
       (label: 'Settings', icon: LucideIcons.settings, to: '/settings'),
+      if (isOffline)
+        (label: 'Upgrade to Online', icon: LucideIcons.cloudLightning, to: '/upgrade'),
     ];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;

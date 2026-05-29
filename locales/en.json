@@ -2086,6 +2086,7 @@
       "orders": "Orders",
       "salesItem": "Sales",
       "pos": "POS",
+      "devices": "Devices",
       "customers": "Customers",
       "deliveryItem": "Delivery",
       "billing": "Billing",

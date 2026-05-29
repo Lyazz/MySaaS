@@ -478,6 +478,7 @@ const navGroups = ref<NavGroup[]>([
     collapsed: false,
     items: [
       { path: '/admin/customers', labelKey: 'admin.nav.customers', icon: 'lucide:users', access: 'admin' },
+      { path: '/admin/devices', labelKey: 'admin.nav.devices', icon: 'lucide:smartphone', access: 'admin' },
       { path: '/admin/marketing/landing-page/new', labelKey: 'admin.nav.landingPage', icon: 'lucide:megaphone', access: 'admin' },
       { path: '/admin/settings', labelKey: 'admin.nav.settingsHub', icon: 'lucide:sliders-horizontal', access: 'admin' }
     ]

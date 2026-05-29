@@ -7,5 +7,6 @@ const controller = new SyncController()
 
 router.use(requireTenantMember)
 router.get('/pull', controller.pull.bind(controller))
+router.post('/upgrade', controller.upgrade.bind(controller))
 
 export default router

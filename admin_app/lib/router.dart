@@ -8,6 +8,7 @@ import 'screens/activation_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
+import 'screens/upgrade_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'screens/orders_screen.dart';
@@ -129,7 +130,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isProvisioned = bootstrap.isProvisioned;
 
       if (!isProvisioned) {
-        return isActivateRoute ? null : '/activate';
+        if (isLoginRoute || isActivateRoute) return null;
+        return '/login';
       }
 
       if (isActivateRoute) {
@@ -190,6 +192,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/register',
         pageBuilder: (context, state) =>
             NoTransitionPage(key: state.pageKey, child: const RegisterScreen()),
+      ),
+      GoRoute(
+        path: '/upgrade',
+        pageBuilder: (context, state) =>
+            NoTransitionPage(key: state.pageKey, child: const UpgradeScreen()),
       ),
       ShellRoute(
         builder: (context, state, child) {

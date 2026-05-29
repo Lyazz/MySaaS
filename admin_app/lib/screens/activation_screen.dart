@@ -69,14 +69,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   }
 
   Future<void> _showOfflineActivationDialog() async {
-    final raw = _payloadController.text.trim();
-    if (raw.isEmpty) {
-      setState(() => _error = 'Enter your License Key to generate a Request Code.');
-      return;
-    }
-    
     try {
-      final requestCode = await ref.read(activationServiceProvider).generateOfflineRequestCode(raw);
+      final requestCode = await ref.read(activationServiceProvider).generateOfflineRequestCode();
       
       if (!mounted) return;
       
@@ -89,7 +83,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Go to swekly.com/activate and enter this Request Code:'),
+                const Text('Log in to your Tenant Admin Panel, go to Devices > Offline Activation, and enter this Request Code:'),
                 const SizedBox(height: 8),
                 SelectableText(requestCode, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),

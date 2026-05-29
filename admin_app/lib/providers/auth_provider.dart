@@ -7,6 +7,7 @@ import '../models/bootstrap_config.dart';
 import '../models/subscription_tier.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
+import '../services/device_info_service.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
 import '../services/workspace_data_cleaner.dart';
@@ -158,9 +159,23 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final apiService = ref.read(apiProvider);
+      final deviceInfo = DeviceInfoService();
+      
+      String? hardwareId;
+      try {
+        hardwareId = await deviceInfo.getHardwareId();
+      } catch (e) {
+        // Fallback or ignore if device info fails (e.g. web unsupported)
+        hardwareId = null;
+      }
+
       final response = await apiService.client.post(
         '/login',
-        data: {'email': email, 'password': password},
+        data: {
+          'email': email, 
+          'password': password,
+          if (hardwareId != null) 'hardwareId': hardwareId,
+        },
       );
 
       await _applyAuthResponse(
@@ -227,6 +242,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
     final apiService = ref.read(apiProvider);
     final token = payload['token'].toString();
+    final activationToken = payload['activationToken']?.toString();
     final rawUser = (payload['user'] as Map?)?.cast<String, dynamic>();
     final user = User.fromJson(rawUser ?? {'id': '', 'email': fallbackEmail});
 
@@ -282,6 +298,11 @@ class AuthNotifier extends Notifier<AuthState> {
       staffRoleJson: staffRole?.toJson(),
       staffPermissions: staffPermissions,
     );
+    
+    // Save activation token if it was returned by auto-registration
+    if (activationToken != null && activationToken.isNotEmpty) {
+      await AppStorage.saveActivationToken(activationToken);
+    }
     ref
         .read(bootstrapProvider.notifier)
         .replace(

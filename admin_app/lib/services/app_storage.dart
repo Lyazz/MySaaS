@@ -133,11 +133,25 @@ class AppStorage {
     }
   }
 
+  static const _keyActivationToken = 'activation_token';
+
   static Future<void> clearAuthSession() async {
     await _secureStorage.delete(key: _keyAuthToken);
     await _secureStorage.delete(key: _keyAuthUserJson);
     await _secureStorage.delete(key: _keyAuthStaffRoleJson);
     await _secureStorage.delete(key: _keyAuthStaffPermissions);
+  }
+
+  static Future<void> saveActivationToken(String token) async {
+    await _secureStorage.write(key: _keyActivationToken, value: token.trim());
+  }
+
+  static Future<String?> getActivationToken() async {
+    return await _secureStorage.read(key: _keyActivationToken);
+  }
+
+  static Future<void> clearActivationToken() async {
+    await _secureStorage.delete(key: _keyActivationToken);
   }
 
   static ThemeMode? parseThemeMode(String? raw) {

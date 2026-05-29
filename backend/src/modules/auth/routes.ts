@@ -5,8 +5,10 @@ import bcrypt from 'bcryptjs'
 import { signAccessToken } from '../../lib/jwt'
 import { seedStaffRolePresets } from '../staff-roles/presets'
 import { PhoneNormalizationService } from '../loyalty/phone-normalization.service'
+import { ActivationService } from '../activation/activation.service'
 
 const router = Router()
+const activationService = new ActivationService()
 const MIN_PASSWORD_LENGTH = 8
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const DUMMY_PASSWORD_HASH = '$2b$10$X9pL7vT6A2mQjO5k9sXXuuBkEFGhqUJSTjhRLuVVU3hV3MGWST5Oi'
@@ -189,7 +191,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     type UserWithTenant = Prisma.UserGetPayload<{ include: { tenant: true } }>
 
-    const { email, password } = req.body
+    const { email, password, hardwareId, deviceName } = req.body
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
 
     if (!normalizedEmail || typeof password !== 'string' || password.length === 0) {
@@ -276,9 +278,27 @@ router.post('/login', async (req, res) => {
             }
         }
 
+        // Handle auto-activation for POS devices logging in online
+        let activationToken: string | undefined = undefined
+        if (hardwareId && user.tenantId) {
+            try {
+                const activationResult = await activationService.autoRegisterOrLoginDevice(
+                    user.tenantId, 
+                    hardwareId, 
+                    deviceName || 'Online POS Device'
+                )
+                activationToken = activationResult.activationToken
+            } catch (err: any) {
+                console.error('Auto-activation during login failed:', err.message)
+                // We choose to still let them login, but the app won't get the activationToken,
+                // so the app's activation guard will block them or ask them to resolve the device limit.
+            }
+        }
+
         res.json({
             success: true,
             token,
+            activationToken,
             user: { ...userInfo, tenant: responseTenant ? { ...responseTenant, isOffline } : null },
             tenant: responseTenant ? { ...responseTenant, isOffline } : null,
             staffRole,
