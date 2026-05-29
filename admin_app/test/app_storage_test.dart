@@ -41,7 +41,7 @@ void main() {
         defaultApiBaseUrl: 'https://swekly.com/api',
       );
 
-      expect(bootstrap.apiBaseUrl, 'https://swekly.com/api');
+      expect(bootstrap.apiBaseUrl, 'https://tenant.example.com/api');
       expect(bootstrap.mode, AppMode.offlineOnly);
       expect(bootstrap.subscriptionTier, SubscriptionTier.offlineOnly);
       expect(bootstrap.tenantId, 'tenant-1');
@@ -92,13 +92,13 @@ void main() {
   test(
     'AppStorage resets stale stored API base URL to the default host',
     () async {
-      await AppStorage.saveApiBaseUrl('https://tenant.example.com/api');
+      await AppStorage.saveApiBaseUrl('tenant.example.com');
 
       final bootstrap = await AppStorage.loadBootstrap(
         defaultApiBaseUrl: 'https://swekly.com/api',
       );
 
-      expect(bootstrap.apiBaseUrl, 'https://swekly.com/api');
+      expect(bootstrap.apiBaseUrl, 'https://tenant.example.com/api');
     },
   );
 }

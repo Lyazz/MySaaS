@@ -442,7 +442,7 @@ class PosNotifier extends Notifier<PosState> {
             : variant.title,
         price: price,
         quantity: quantity,
-        imageUrl: product.images.isNotEmpty ? product.images.first : null,
+        imageUrl: product.mainImageUrl,
       );
       newCart = [...current.cart, newItem];
     }

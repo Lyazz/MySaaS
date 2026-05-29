@@ -1,3 +1,5 @@
+import 'package:admin_app/bootstrap.dart';
+import 'package:admin_app/models/bootstrap_config.dart';
 import 'package:admin_app/providers/settings_provider.dart';
 import 'package:admin_app/screens/login_screen.dart';
 import 'package:admin_app/screens/register_screen.dart';
@@ -94,5 +96,43 @@ void main() {
 
     expect(find.text('Phone number verified.'), findsOneWidget);
     expect(find.text('Create account'), findsOneWidget);
+  });
+
+  testWidgets('login screen dark desktop layout matches golden', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1440, 1100));
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    final container = ProviderContainer(
+      overrides: [
+        bootstrapProvider.overrideWith(
+          () => BootstrapNotifier(
+            const BootstrapConfig(
+              apiBaseUrl: 'https://tenant.example.com/api',
+              tenantId: 'tenant-1',
+              workspaceId: 'workspace-1',
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(settingsProvider.notifier).setThemeMode(ThemeMode.dark);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const _AuthTestApp(child: LoginScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(LoginScreen),
+      matchesGoldenFile('goldens/login_screen_dark.png'),
+    );
   });
 }

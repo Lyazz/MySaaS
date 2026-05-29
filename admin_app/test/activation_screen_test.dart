@@ -104,7 +104,7 @@ void main() {
           apiProvider.overrideWith(
             (ref) => _FakeApiService(
               payload: const ProvisioningPayload(
-                apiBaseUrl: 'https://swekly.com/api',
+                apiBaseUrl: 'https://tenant.example.com/api',
                 mode: AppMode.hybrid,
                 subscriptionTier: SubscriptionTier.online,
                 tenantId: 'tenant-42',
@@ -150,7 +150,7 @@ void main() {
       expect(_locationOf(router), '/login');
 
       final bootstrap = container.read(bootstrapProvider);
-      expect(bootstrap.apiBaseUrl, 'https://swekly.com/api');
+      expect(bootstrap.apiBaseUrl, 'https://tenant.example.com/api');
       expect(bootstrap.tenantId, 'tenant-42');
       expect(bootstrap.workspaceId, 'workspace-99');
       expect(bootstrap.authToken, isNull);
@@ -159,7 +159,7 @@ void main() {
       final persisted = await AppStorage.loadBootstrap(
         defaultApiBaseUrl: 'https://swekly.com/api',
       );
-      expect(persisted.apiBaseUrl, 'https://swekly.com/api');
+      expect(persisted.apiBaseUrl, 'https://tenant.example.com/api');
       expect(persisted.subscriptionTier, SubscriptionTier.online);
       expect(persisted.tenantId, 'tenant-42');
       expect(persisted.workspaceId, 'workspace-99');
@@ -220,5 +220,46 @@ void main() {
 
     expect(find.text('Invalid or expired activation code'), findsOneWidget);
     expect(_locationOf(router), '/activate');
+  });
+
+  testWidgets('ActivationScreen desktop layout matches golden', (tester) async {
+    tester.view.physicalSize = const Size(1440, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final container = ProviderContainer(
+      overrides: [
+        bootstrapProvider.overrideWith(
+          () => BootstrapNotifier(
+            const BootstrapConfig(apiBaseUrl: 'https://swekly.com/api'),
+          ),
+        ),
+        apiProvider.overrideWith(
+          (ref) => _FakeApiService(
+            payload: const ProvisioningPayload(
+              apiBaseUrl: 'https://tenant.example.com/api',
+              mode: AppMode.offlineOnly,
+              subscriptionTier: SubscriptionTier.offlineOnly,
+              tenantId: 'tenant-42',
+              workspaceId: 'workspace-99',
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: buildLocalizedTestApp(home: const ActivationScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(ActivationScreen),
+      matchesGoldenFile('goldens/activation_screen_desktop.png'),
+    );
   });
 }

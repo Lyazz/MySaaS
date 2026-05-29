@@ -40,6 +40,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   static const double _cartDrawerBreakpoint = 1180;
   static const double _wideBreakpoint = 1440;
   static const double _desktopCategoryWidth = 124;
+  static const double _productCardImageAspectRatio = 3 / 2;
 
   final TextEditingController _searchController = TextEditingController();
   final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
@@ -2101,7 +2102,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: constraints.maxWidth < 420 ? 0.70 : 0.76,
+            childAspectRatio: constraints.maxWidth < 420 ? 0.64 : 0.70,
             crossAxisSpacing: 14,
             mainAxisSpacing: 14,
           ),
@@ -2603,154 +2604,173 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              flex: 6,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadiusDirectional.vertical(
-                      top: Radius.circular(15),
-                    ),
-                    child: _PosSafeNetworkImage(
+            ClipRRect(
+              borderRadius: const BorderRadiusDirectional.vertical(
+                top: Radius.circular(15),
+              ),
+              child: AspectRatio(
+                aspectRatio: _productCardImageAspectRatio,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _PosSafeNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
                       cacheWidth: 512,
                       cacheHeight: 512,
                       fallback: _buildImageFallback(),
                     ),
-                  ),
-                  if (outOfStock || lowStock)
+                    if (outOfStock || lowStock)
+                      PositionedDirectional(
+                        top: 8,
+                        end: 8,
+                        child: Container(
+                          padding: const EdgeInsetsDirectional.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: outOfStock
+                                ? AppColors.red.withValues(alpha: 0.92)
+                                : AppColors.amber.withValues(alpha: 0.92),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            outOfStock ? 'OUT' : 'LOW',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              letterSpacing: 0.6,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
                     PositionedDirectional(
-                      top: 8,
-                      end: 8,
+                      start: 8,
+                      bottom: 8,
                       child: Container(
                         padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: 8,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: outOfStock
-                              ? AppColors.red.withValues(alpha: 0.92)
-                              : AppColors.amber.withValues(alpha: 0.92),
-                          borderRadius: BorderRadius.circular(6),
+                          color: Colors.black.withValues(alpha: 0.46),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.14),
+                          ),
                         ),
                         child: Text(
-                          outOfStock ? 'OUT' : 'LOW',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            letterSpacing: 0.6,
-                            fontWeight: FontWeight.w800,
+                          outOfStock
+                              ? 'Out'
+                              : '${product.stock} ${product.stock == 1 ? 'unit' : 'units'}',
+                          style: TextStyle(
+                            color: outOfStock
+                                ? AppColors.redText
+                                : Colors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ),
-                  PositionedDirectional(
-                    start: 8,
-                    bottom: 8,
-                    child: Container(
-                      padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.46),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.14),
-                        ),
-                      ),
-                      child: Text(
-                        outOfStock
-                            ? 'Out'
-                            : '${product.stock} ${product.stock == 1 ? 'unit' : 'units'}',
-                        style: TextStyle(
-                          color: outOfStock ? AppColors.redText : Colors.white,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(12, 10, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Expanded(
+              child: Stack(
                 children: [
-                  Text(
-                    product.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13.5,
-                      height: 1.25,
-                      color: textPrimary,
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      12,
+                      10,
+                      12,
+                      12,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    product.slug,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: textMuted,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          tenantCurrencyFormatter(
-                            ref.watch(storeSettingsProvider).settings,
-                          ).format(product.price),
-                          style: GoogleFonts.jetBrainsMono(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13.5,
+                            height: 1.25,
                             color: textPrimary,
-                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product.slug,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: textMuted,
+                            fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: outOfStock ? surface2 : AppColors.brand,
-                          borderRadius: BorderRadius.circular(10),
-                          border: outOfStock ? Border.all(color: border) : null,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.brand.withValues(
-                                alpha: outOfStock ? 0 : (isDark ? 0.18 : 0.30),
+                        const Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                tenantCurrencyFormatter(
+                                  ref.watch(storeSettingsProvider).settings,
+                                ).format(product.price),
+                                style: GoogleFonts.jetBrainsMono(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
+                                  color: textPrimary,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: outOfStock ? surface2 : AppColors.brand,
+                                borderRadius: BorderRadius.circular(10),
+                                border: outOfStock
+                                    ? Border.all(color: border)
+                                    : null,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.brand.withValues(
+                                      alpha: outOfStock
+                                          ? 0
+                                          : (isDark ? 0.18 : 0.30),
+                                    ),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              alignment: Alignment.center,
+                              child: Icon(
+                                LucideIcons.plus,
+                                size: 17,
+                                color: outOfStock
+                                    ? textMuted
+                                    : AppColors.brandContrast,
+                              ),
                             ),
                           ],
                         ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          LucideIcons.plus,
-                          size: 17,
-                          color: outOfStock
-                              ? textMuted
-                              : AppColors.brandContrast,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -4059,8 +4079,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 }
 
 class _PosSafeNetworkImage extends StatefulWidget {
-  static final Set<String> _failedUrls = <String>{};
-
   final String? imageUrl;
   final double? width;
   final double? height;
@@ -4109,12 +4127,6 @@ class _PosSafeNetworkImageState extends State<_PosSafeNetworkImage> {
     }
   }
 
-  void _rememberFailure(String url) {
-    if (_PosSafeNetworkImage._failedUrls.add(url) && mounted) {
-      setState(() {});
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final url = _normalizedUrl;
@@ -4124,7 +4136,7 @@ class _PosSafeNetworkImageState extends State<_PosSafeNetworkImage> {
       child: widget.fallback,
     );
 
-    if (url == null || _PosSafeNetworkImage._failedUrls.contains(url)) {
+    if (url == null) {
       return fallback;
     }
 
@@ -4146,12 +4158,7 @@ class _PosSafeNetworkImageState extends State<_PosSafeNetworkImage> {
         fadeOutDuration: Duration.zero,
         useOldImageOnUrlChange: true,
         placeholder: (context, _) => fallback,
-        errorWidget: (context, failedUrl, error) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _rememberFailure(failedUrl);
-          });
-          return fallback;
-        },
+        errorWidget: (context, failedUrl, error) => fallback,
       ),
     );
   }

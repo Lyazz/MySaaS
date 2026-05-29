@@ -2,18 +2,26 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:admin_app/bootstrap.dart';
 import 'package:admin_app/models/app_mode.dart';
+import 'package:admin_app/models/bootstrap_config.dart';
 import 'package:admin_app/models/purchase.dart';
+import 'package:admin_app/models/subscription_tier.dart';
+import 'package:admin_app/providers/auth_provider.dart';
 import 'package:admin_app/repositories/contact_infos_repository.dart';
 import 'package:admin_app/repositories/product_repository.dart';
 import 'package:admin_app/repositories/purchase_repository.dart';
 import 'package:admin_app/services/api_service.dart';
+import 'package:admin_app/services/app_storage.dart';
 import 'package:admin_app/services/database_service.dart';
 import 'package:admin_app/services/sync_service.dart';
 import 'package:admin_app/services/tenant_mode_service.dart';
 import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
@@ -28,6 +36,7 @@ void main() {
   final products = <String, Map<String, dynamic>>{};
   final purchases = <String, Map<String, dynamic>>{};
   final contactInfos = <String, Map<String, dynamic>>{};
+  final contactPatchConflictIds = <String>{};
   String? lastPurchaseAddItemPath;
   var purchaseCounter = 0;
 
@@ -47,9 +56,9 @@ void main() {
     final body = request.method == 'GET'
         ? const <String, dynamic>{}
         : ((jsonDecode(await utf8.decoder.bind(request).join()) as Object?)
-                  as Map?)
-              ?.cast<String, dynamic>() ??
-            const <String, dynamic>{};
+                      as Map?)
+                  ?.cast<String, dynamic>() ??
+              const <String, dynamic>{};
 
     if (path == '/api/admin/products' && request.method == 'POST') {
       final product = <String, dynamic>{
@@ -94,6 +103,10 @@ void main() {
     if (path.startsWith('/api/admin/contact-infos/') &&
         request.method == 'PATCH') {
       final id = path.split('/').last;
+      if (contactPatchConflictIds.remove(id)) {
+        await writeJson(request, 409, {'error': 'Conflict'});
+        return;
+      }
       final current = contactInfos[id] ?? {'id': id};
       final next = <String, dynamic>{...current, ...body};
       contactInfos[id] = next;
@@ -161,41 +174,46 @@ void main() {
       return;
     }
 
-    await writeJson(request, 404, {'error': 'Unhandled ${request.method} $path'});
+    await writeJson(request, 404, {
+      'error': 'Unhandled ${request.method} $path',
+    });
   }
 
   setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
     sqfliteFfiInit();
     final factory = databaseFactoryFfi;
     tempDir = await Directory.systemTemp.createTemp('admin-app-sync-test');
     DatabaseService.databasesPathProvider = () async => tempDir.path;
     originalDatabaseOpener = DatabaseService.databaseOpener;
-    DatabaseService.databaseOpener = (
-      String path, {
-      int? version,
-      OnDatabaseConfigureFn? onConfigure,
-      OnDatabaseCreateFn? onCreate,
-      OnDatabaseVersionChangeFn? onUpgrade,
-      OnDatabaseVersionChangeFn? onDowngrade,
-      OnDatabaseOpenFn? onOpen,
-      String? password,
-      bool readOnly = false,
-      bool singleInstance = true,
-    }) {
-      return factory.openDatabase(
-        path,
-        options: OpenDatabaseOptions(
-          version: version,
-          onConfigure: onConfigure,
-          onCreate: onCreate,
-          onUpgrade: onUpgrade,
-          onDowngrade: onDowngrade,
-          onOpen: onOpen,
-          readOnly: readOnly,
-          singleInstance: singleInstance,
-        ),
-      );
-    };
+    DatabaseService.databaseOpener =
+        (
+          String path, {
+          int? version,
+          OnDatabaseConfigureFn? onConfigure,
+          OnDatabaseCreateFn? onCreate,
+          OnDatabaseVersionChangeFn? onUpgrade,
+          OnDatabaseVersionChangeFn? onDowngrade,
+          OnDatabaseOpenFn? onOpen,
+          String? password,
+          bool readOnly = false,
+          bool singleInstance = true,
+        }) {
+          return factory.openDatabase(
+            path,
+            options: OpenDatabaseOptions(
+              version: version,
+              onConfigure: onConfigure,
+              onCreate: onCreate,
+              onUpgrade: onUpgrade,
+              onDowngrade: onDowngrade,
+              onOpen: onOpen,
+              readOnly: readOnly,
+              singleInstance: singleInstance,
+            ),
+          );
+        };
     connectivity = _FakeConnectivityPlatform();
     ConnectivityPlatform.instance = connectivity;
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
@@ -209,10 +227,13 @@ void main() {
     products.clear();
     purchases.clear();
     contactInfos.clear();
+    contactPatchConflictIds.clear();
     lastPurchaseAddItemPath = null;
     purchaseCounter = 0;
     connectivity.setResults(const [ConnectivityResult.none]);
     SyncService().reset();
+    await AppStorage.clearAuthSession();
+    await AppStorage.clearProvisioningState();
     final tenantId = 'tenant-${DateTime.now().microsecondsSinceEpoch}';
     TenantModeService().initialize(
       mode: AppMode.hybrid,
@@ -259,6 +280,28 @@ void main() {
     fail('Timed out waiting for sync queue to drain');
   }
 
+  Future<void> waitForCondition(
+    Future<bool> Function() condition, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      if (await condition()) return;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
+    fail('Timed out waiting for condition');
+  }
+
+  Future<int> tenantRowCount(String table, {required String tenantId}) async {
+    final db = await DatabaseService().database;
+    return Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM $table WHERE tenantId = ?', [
+            tenantId,
+          ]),
+        ) ??
+        0;
+  }
+
   testWidgets('offline CRUD persists product changes into the durable queue', (
     tester,
   ) async {
@@ -281,42 +324,47 @@ void main() {
 
     expect(await queueCount(), 3);
     final db = await DatabaseService().database;
-    final rows = await db.query('products', where: 'id = ?', whereArgs: [product.id]);
-    expect(rows, isEmpty);
-  });
-
-  testWidgets('hybrid sync flushes pending product creates after connectivity returns', (
-    tester,
-  ) async {
-    await configureWorkspace(
-      tenantId: 'tenant-hybrid-sync',
-      connectivityResults: const [ConnectivityResult.none],
-    );
-    final repo = ProductRepository(api);
-
-    final product = await repo.createProduct({
-      'id': 'product-sync-1',
-      'title': 'Hybrid product',
-      'slug': 'hybrid-product',
-      'price': 1800,
-      'stock': 8,
-      'isActive': true,
-      'images': const [],
-    });
-
-    connectivity.setResults(const [ConnectivityResult.wifi]);
-    await waitForQueueToDrain();
-
-    expect(products[product.id]?['title'], 'Hybrid product');
-    final db = await DatabaseService().database;
     final rows = await db.query(
       'products',
-      columns: ['syncStatus'],
       where: 'id = ?',
       whereArgs: [product.id],
     );
-    expect(rows.single['syncStatus'], SyncStatus.synced.name);
+    expect(rows, isEmpty);
   });
+
+  testWidgets(
+    'hybrid sync flushes pending product creates after connectivity returns',
+    (tester) async {
+      await configureWorkspace(
+        tenantId: 'tenant-hybrid-sync',
+        connectivityResults: const [ConnectivityResult.none],
+      );
+      final repo = ProductRepository(api);
+
+      final product = await repo.createProduct({
+        'id': 'product-sync-1',
+        'title': 'Hybrid product',
+        'slug': 'hybrid-product',
+        'price': 1800,
+        'stock': 8,
+        'isActive': true,
+        'images': const [],
+      });
+
+      connectivity.setResults(const [ConnectivityResult.wifi]);
+      await waitForQueueToDrain();
+
+      expect(products[product.id]?['title'], 'Hybrid product');
+      final db = await DatabaseService().database;
+      final rows = await db.query(
+        'products',
+        columns: ['syncStatus'],
+        where: 'id = ?',
+        whereArgs: [product.id],
+      );
+      expect(rows.single['syncStatus'], SyncStatus.synced.name);
+    },
+  );
 
   testWidgets('restart resumes pending sync queue safely', (tester) async {
     await configureWorkspace(
@@ -344,33 +392,37 @@ void main() {
     expect(products.containsKey('restart-product'), isTrue);
   });
 
-  testWidgets('queued purchase follow-up operations resolve aliased remote IDs', (
-    tester,
-  ) async {
-    await configureWorkspace(
-      tenantId: 'tenant-purchase-alias',
-      connectivityResults: const [ConnectivityResult.none],
-    );
-    final repo = PurchaseRepository(api);
+  testWidgets(
+    'queued purchase follow-up operations resolve aliased remote IDs',
+    (tester) async {
+      await configureWorkspace(
+        tenantId: 'tenant-purchase-alias',
+        connectivityResults: const [ConnectivityResult.none],
+      );
+      final repo = PurchaseRepository(api);
 
-    final purchase = await repo.createDraftPurchase('supplier-1', 'Supplier');
-    await repo.addPurchaseItem(
-      purchase.id,
-      PurchaseItem(
-        id: 'item-1',
-        productId: 'variant-1',
-        productName: 'Variant 1',
-        quantityOrdered: 3,
-        quantityReceived: 0,
-        unitCost: 250,
-      ),
-    );
+      final purchase = await repo.createDraftPurchase('supplier-1', 'Supplier');
+      await repo.addPurchaseItem(
+        purchase.id,
+        PurchaseItem(
+          id: 'item-1',
+          productId: 'variant-1',
+          productName: 'Variant 1',
+          quantityOrdered: 3,
+          quantityReceived: 0,
+          unitCost: 250,
+        ),
+      );
 
-    connectivity.setResults(const [ConnectivityResult.wifi]);
-    await waitForQueueToDrain();
+      connectivity.setResults(const [ConnectivityResult.wifi]);
+      await waitForQueueToDrain();
 
-    expect(lastPurchaseAddItemPath, '/api/admin/purchases/remote-purchase-1/items');
-  });
+      expect(
+        lastPurchaseAddItemPath,
+        '/api/admin/purchases/remote-purchase-1/items',
+      );
+    },
+  );
 
   testWidgets('conflict preflight marks local contact info as conflicted', (
     tester,
@@ -406,7 +458,8 @@ void main() {
     final deadline = DateTime.now().add(const Duration(seconds: 5));
     while (DateTime.now().isBefore(deadline)) {
       final queue = await db.query('sync_queue', columns: ['status'], limit: 1);
-      if (queue.isNotEmpty && queue.single['status'] == SyncStatus.conflicted.name) {
+      if (queue.isNotEmpty &&
+          queue.single['status'] == SyncStatus.conflicted.name) {
         break;
       }
       await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -422,6 +475,327 @@ void main() {
     expect(queue.single['status'], SyncStatus.conflicted.name);
     expect(local.single['syncStatus'], SyncStatus.conflicted.name);
   });
+
+  testWidgets('matching contact base fingerprint syncs successfully', (
+    tester,
+  ) async {
+    await configureWorkspace(
+      tenantId: 'tenant-contact-sync',
+      connectivityResults: const [ConnectivityResult.none],
+    );
+    final db = await DatabaseService().database;
+    await db.insert('contact_infos', {
+      'id': 'contact-sync-1',
+      'tenantId': 'tenant-contact-sync',
+      'kind': 'phone',
+      'label': 'Store',
+      'value': '+2135550000',
+      'position': 0,
+      'isActive': 1,
+      'syncStatus': SyncStatus.synced.name,
+    });
+    contactInfos['contact-sync-1'] = {
+      'id': 'contact-sync-1',
+      'kind': 'phone',
+      'label': 'Store',
+      'value': '+2135550000',
+      'position': 0,
+      'isActive': true,
+    };
+
+    final repo = ContactInfosRepository(api);
+    await repo.update('contact-sync-1', {'value': '+2135551111'});
+
+    connectivity.setResults(const [ConnectivityResult.wifi]);
+    await waitForQueueToDrain();
+
+    final queue = await db.query('sync_queue');
+    final local = await db.query(
+      'contact_infos',
+      columns: ['value', 'syncStatus'],
+      where: 'id = ?',
+      whereArgs: const ['contact-sync-1'],
+    );
+    expect(queue, isEmpty);
+    expect(contactInfos['contact-sync-1']?['value'], '+2135551111');
+    expect(local.single['value'], '+2135551111');
+    expect(local.single['syncStatus'], SyncStatus.synced.name);
+  });
+
+  testWidgets('remote patch conflict marks local contact info as conflicted', (
+    tester,
+  ) async {
+    await configureWorkspace(
+      tenantId: 'tenant-contact-409',
+      connectivityResults: const [ConnectivityResult.none],
+    );
+    final db = await DatabaseService().database;
+    await db.insert('contact_infos', {
+      'id': 'contact-409',
+      'tenantId': 'tenant-contact-409',
+      'kind': 'phone',
+      'label': 'Store',
+      'value': '+2135550000',
+      'position': 0,
+      'isActive': 1,
+      'syncStatus': SyncStatus.synced.name,
+    });
+    contactInfos['contact-409'] = {
+      'id': 'contact-409',
+      'kind': 'phone',
+      'label': 'Store',
+      'value': '+2135550000',
+      'position': 0,
+      'isActive': true,
+    };
+    contactPatchConflictIds.add('contact-409');
+
+    final repo = ContactInfosRepository(api);
+    await repo.update('contact-409', {'value': '+2135551111'});
+
+    connectivity.setResults(const [ConnectivityResult.wifi]);
+    await waitForCondition(() async {
+      final queue = await db.query('sync_queue', columns: ['status'], limit: 1);
+      return queue.isNotEmpty &&
+          queue.single['status'] == SyncStatus.conflicted.name;
+    });
+
+    final queue = await db.query('sync_queue', columns: ['status'], limit: 1);
+    final local = await db.query(
+      'contact_infos',
+      columns: ['syncStatus'],
+      where: 'id = ?',
+      whereArgs: const ['contact-409'],
+    );
+    expect(queue.single['status'], SyncStatus.conflicted.name);
+    expect(local.single['syncStatus'], SyncStatus.conflicted.name);
+  });
+
+  testWidgets('logout clears only the active workspace namespace', (
+    tester,
+  ) async {
+    const tenantA = 'tenant-logout-a';
+    const tenantB = 'tenant-logout-b';
+    const workspaceId = 'workspace';
+
+    await configureWorkspace(
+      tenantId: tenantA,
+      connectivityResults: const [ConnectivityResult.none],
+    );
+    await ProductRepository(api).createProduct({
+      'id': 'logout-product-a',
+      'title': 'Tenant A product',
+      'slug': 'tenant-a-product',
+      'price': 1500,
+      'stock': 4,
+      'isActive': true,
+      'images': const [],
+    });
+
+    await configureWorkspace(
+      tenantId: tenantB,
+      connectivityResults: const [ConnectivityResult.none],
+    );
+    await ProductRepository(api).createProduct({
+      'id': 'logout-product-b',
+      'title': 'Tenant B product',
+      'slug': 'tenant-b-product',
+      'price': 1600,
+      'stock': 5,
+      'isActive': true,
+      'images': const [],
+    });
+
+    await AppStorage.saveApiBaseUrl(api.baseUrl);
+    await AppStorage.saveProvisioningState(
+      mode: AppMode.offlineOnly,
+      subscriptionTier: SubscriptionTier.offlineOnly,
+      tenantId: tenantA,
+      workspaceId: workspaceId,
+    );
+    await AppStorage.saveAuthSession(
+      token: 'token-a',
+      userJson: const {
+        'id': 'user-a',
+        'email': 'owner-a@example.com',
+        'role': 'owner',
+        'isSuperAdmin': false,
+        'tenantId': tenantA,
+      },
+    );
+
+    final container = ProviderContainer(
+      overrides: [
+        bootstrapProvider.overrideWith(
+          () => BootstrapNotifier(
+            const BootstrapConfig(
+              apiBaseUrl: 'https://unused.example/api',
+              mode: AppMode.offlineOnly,
+              subscriptionTier: SubscriptionTier.offlineOnly,
+              tenantId: tenantA,
+              workspaceId: workspaceId,
+              authToken: 'token-a',
+              userJson: {
+                'id': 'user-a',
+                'email': 'owner-a@example.com',
+                'role': 'owner',
+                'isSuperAdmin': false,
+                'tenantId': tenantA,
+              },
+            ),
+          ),
+        ),
+        apiProvider.overrideWith((ref) => api),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    container.read(authProvider);
+    await container.read(authProvider.notifier).logout();
+
+    final persisted = await AppStorage.loadBootstrap(
+      defaultApiBaseUrl: api.baseUrl,
+    );
+    expect(persisted.tenantId, tenantA);
+    expect(persisted.workspaceId, workspaceId);
+    expect(persisted.authToken, isNull);
+    expect(persisted.userJson, isNull);
+
+    TenantModeService().initialize(
+      mode: AppMode.offlineOnly,
+      tenantId: tenantA,
+      workspaceId: workspaceId,
+    );
+    expect(await tenantRowCount('products', tenantId: tenantA), 0);
+    expect(await tenantRowCount('sync_queue', tenantId: tenantA), 0);
+
+    TenantModeService().initialize(
+      mode: AppMode.hybrid,
+      tenantId: tenantB,
+      workspaceId: workspaceId,
+    );
+    expect(await tenantRowCount('products', tenantId: tenantB), greaterThan(0));
+    expect(
+      await tenantRowCount('sync_queue', tenantId: tenantB),
+      greaterThan(0),
+    );
+  });
+
+  testWidgets(
+    'reprovision clears active workspace and persisted binding only',
+    (tester) async {
+      const tenantA = 'tenant-reprovision-a';
+      const tenantB = 'tenant-reprovision-b';
+      const workspaceId = 'workspace';
+
+      await configureWorkspace(
+        tenantId: tenantA,
+        connectivityResults: const [ConnectivityResult.none],
+      );
+      await ProductRepository(api).createProduct({
+        'id': 'reprovision-product-a',
+        'title': 'Tenant A product',
+        'slug': 'tenant-a-reprovision',
+        'price': 1900,
+        'stock': 6,
+        'isActive': true,
+        'images': const [],
+      });
+
+      await configureWorkspace(
+        tenantId: tenantB,
+        connectivityResults: const [ConnectivityResult.none],
+      );
+      await ProductRepository(api).createProduct({
+        'id': 'reprovision-product-b',
+        'title': 'Tenant B product',
+        'slug': 'tenant-b-reprovision',
+        'price': 2100,
+        'stock': 7,
+        'isActive': true,
+        'images': const [],
+      });
+
+      await AppStorage.saveApiBaseUrl(api.baseUrl);
+      await AppStorage.saveProvisioningState(
+        mode: AppMode.offlineOnly,
+        subscriptionTier: SubscriptionTier.offlineOnly,
+        tenantId: tenantA,
+        workspaceId: workspaceId,
+      );
+      await AppStorage.saveAuthSession(
+        token: 'token-a',
+        userJson: const {
+          'id': 'user-a',
+          'email': 'owner-a@example.com',
+          'role': 'owner',
+          'isSuperAdmin': false,
+          'tenantId': tenantA,
+        },
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          bootstrapProvider.overrideWith(
+            () => BootstrapNotifier(
+              const BootstrapConfig(
+                apiBaseUrl: 'https://unused.example/api',
+                mode: AppMode.offlineOnly,
+                subscriptionTier: SubscriptionTier.offlineOnly,
+                tenantId: tenantA,
+                workspaceId: workspaceId,
+                authToken: 'token-a',
+                userJson: {
+                  'id': 'user-a',
+                  'email': 'owner-a@example.com',
+                  'role': 'owner',
+                  'isSuperAdmin': false,
+                  'tenantId': tenantA,
+                },
+              ),
+            ),
+          ),
+          apiProvider.overrideWith((ref) => api),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(authProvider);
+      await container
+          .read(authProvider.notifier)
+          .logout(clearProvisioning: true);
+
+      final persisted = await AppStorage.loadBootstrap(
+        defaultApiBaseUrl: api.baseUrl,
+      );
+      expect(persisted.isProvisioned, isFalse);
+      expect(persisted.tenantId, isEmpty);
+      expect(persisted.workspaceId, isNull);
+      expect(TenantModeService().activeTenantId, isEmpty);
+
+      TenantModeService().initialize(
+        mode: AppMode.offlineOnly,
+        tenantId: tenantA,
+        workspaceId: workspaceId,
+      );
+      expect(await tenantRowCount('products', tenantId: tenantA), 0);
+      expect(await tenantRowCount('sync_queue', tenantId: tenantA), 0);
+
+      TenantModeService().initialize(
+        mode: AppMode.hybrid,
+        tenantId: tenantB,
+        workspaceId: workspaceId,
+      );
+      expect(
+        await tenantRowCount('products', tenantId: tenantB),
+        greaterThan(0),
+      );
+      expect(
+        await tenantRowCount('sync_queue', tenantId: tenantB),
+        greaterThan(0),
+      );
+    },
+  );
 }
 
 class _FakeConnectivityPlatform extends ConnectivityPlatform {
@@ -439,5 +813,6 @@ class _FakeConnectivityPlatform extends ConnectivityPlatform {
   Future<List<ConnectivityResult>> checkConnectivity() async => _results;
 
   @override
-  Stream<List<ConnectivityResult>> get onConnectivityChanged => _controller.stream;
+  Stream<List<ConnectivityResult>> get onConnectivityChanged =>
+      _controller.stream;
 }

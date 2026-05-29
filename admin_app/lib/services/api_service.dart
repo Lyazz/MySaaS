@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,6 +64,16 @@ class ApiService {
     _dio.options.baseUrl = baseUrl.trim();
   }
 
+  bool _isLoopbackHost(String host) {
+    final normalized = host.trim().toLowerCase();
+    return normalized == 'localhost' ||
+        normalized.endsWith('.localhost') ||
+        normalized == '127.0.0.1' ||
+        normalized == '0.0.0.0' ||
+        normalized == '::1' ||
+        normalized == '[::1]';
+  }
+
   /// Resolves relative URLs like `/uploads/...` against the API host
   /// (e.g. `http://localhost:3000/api` -> `http://localhost:3000/uploads/...`).
   ///
@@ -76,6 +84,19 @@ class ApiService {
 
     final lower = trimmed.toLowerCase();
     if (lower.startsWith('http://') || lower.startsWith('https://')) {
+      try {
+        final absolute = Uri.parse(trimmed);
+        final base = Uri.parse(_dio.options.baseUrl);
+        final shouldRewriteLoopbackHost =
+            _isLoopbackHost(absolute.host) &&
+            base.host.trim().isNotEmpty &&
+            absolute.host.trim().toLowerCase() !=
+                base.host.trim().toLowerCase();
+
+        if (shouldRewriteLoopbackHost) {
+          return absolute.replace(host: base.host).toString();
+        }
+      } catch (_) {}
       return trimmed;
     }
 

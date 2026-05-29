@@ -1,6 +1,8 @@
 # admin_app
 
-A new Flutter project.
+Flutter admin workspace for the multi-tenant SaaS platform. The app is
+provisioned per tenant workspace and supports online, offline-only, and hybrid
+sync operation modes.
 
 ## API base URL (Android + iOS)
 
@@ -8,6 +10,27 @@ A new Flutter project.
 
 - Mobile (Android/iOS): `http://192.168.1.4:3000/api`
 - Desktop (macOS/Windows/Linux): `http://localhost:3000/api`
+
+## Test Matrix
+
+Run the main Flutter coverage locally from `admin_app/`:
+
+- `flutter test`
+- `flutter test integration_test/sync_integration_test.dart`
+
+Golden baselines live under `test/goldens/`. Refresh them intentionally with:
+
+- `flutter test --update-goldens`
+
+## Windows Smoke
+
+The Windows desktop target is checked into `windows/` and has a lightweight
+smoke test in `test/windows_target_smoke_test.dart`.
+
+On a Windows host, validate the target end to end with:
+
+- `flutter test test/windows_target_smoke_test.dart`
+- `flutter build windows --debug`
 
 ## Getting Started
 

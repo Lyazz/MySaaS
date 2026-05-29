@@ -7,6 +7,7 @@ void main() {
   test('ProvisioningPayload parses trusted bootstrap JSON', () {
     final payload = ProvisioningPayload.fromEncoded('''
       {
+        "apiBaseUrl": "https://tenant.example.com/api",
         "tenantId": "tenant-1",
         "workspaceId": "workspace-7",
         "mode": "offlineOnly",
@@ -25,7 +26,7 @@ void main() {
       }
     ''');
 
-    expect(payload.apiBaseUrl, 'https://swekly.com/api');
+    expect(payload.apiBaseUrl, 'https://tenant.example.com/api');
     expect(payload.mode, AppMode.offlineOnly);
     expect(payload.subscriptionTier, SubscriptionTier.offlineOnly);
     expect(payload.tenantId, 'tenant-1');
@@ -49,11 +50,13 @@ void main() {
 
   test('ProvisioningPayload supports hybrid runtime with online tier', () {
     final payload = ProvisioningPayload.fromJson({
+      'apiBaseUrl': 'tenant.example.com',
       'tenantId': 'tenant-1',
       'mode': 'hybrid',
       'subscriptionTier': 'online',
     });
 
+    expect(payload.apiBaseUrl, 'https://tenant.example.com/api');
     expect(payload.mode, AppMode.hybrid);
     expect(payload.subscriptionTier, SubscriptionTier.online);
   });

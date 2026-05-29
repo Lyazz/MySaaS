@@ -72,6 +72,8 @@ class _ShimmerSkeletonState extends State<ShimmerSkeleton>
 }
 
 class ProductCardSkeleton extends StatelessWidget {
+  static const double _imageAspectRatio = 4 / 3;
+
   const ProductCardSkeleton({super.key});
 
   @override
@@ -91,37 +93,40 @@ class ProductCardSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              child: const ShimmerSkeleton(borderRadius: 0),
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: const AspectRatio(
+              aspectRatio: _imageAspectRatio,
+              child: ShimmerSkeleton(borderRadius: 0),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const ShimmerSkeleton(
-                  width: double.infinity,
-                  height: 16,
-                  borderRadius: 4,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const ShimmerSkeleton(
-                      width: 80,
-                      height: 20,
-                      borderRadius: 4,
-                    ),
-                    ShimmerSkeleton(width: 40, height: 40, borderRadius: 20),
-                  ],
-                ),
-              ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ShimmerSkeleton(
+                    width: double.infinity,
+                    height: 16,
+                    borderRadius: 4,
+                  ),
+                  const SizedBox(height: 8),
+                  const ShimmerSkeleton(width: 70, height: 12, borderRadius: 4),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const ShimmerSkeleton(
+                        width: 80,
+                        height: 20,
+                        borderRadius: 4,
+                      ),
+                      ShimmerSkeleton(width: 40, height: 40, borderRadius: 20),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

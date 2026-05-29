@@ -4,6 +4,7 @@ import '../app_config.dart';
 import 'app_mode.dart';
 import 'bootstrap_config.dart';
 import 'subscription_tier.dart';
+import '../utils/api_base_url.dart';
 
 class ProvisioningPayload {
   final String apiBaseUrl;
@@ -43,6 +44,12 @@ class ProvisioningPayload {
     final tenantId = (json['tenantId'] ?? '').toString().trim();
     final workspaceId = (json['workspaceId'] ?? '').toString().trim();
     final authToken = (json['authToken'] ?? '').toString().trim();
+    final rawApiBaseUrl = (json['apiBaseUrl'] ?? '').toString().trim();
+    final apiBaseUrl = rawApiBaseUrl.isEmpty
+        ? defaultApiBaseUrl
+        : (normalizeApiBaseUrl(rawApiBaseUrl).isNotEmpty
+              ? normalizeApiBaseUrl(rawApiBaseUrl)
+              : defaultApiBaseUrl);
     final mode = _parseMode(json);
     final subscriptionTier = _parseSubscriptionTier(json, mode);
 
@@ -55,7 +62,7 @@ class ProvisioningPayload {
     final permissionsRaw = json['staffPermissions'];
 
     return ProvisioningPayload(
-      apiBaseUrl: defaultApiBaseUrl,
+      apiBaseUrl: apiBaseUrl,
       mode: mode,
       subscriptionTier: subscriptionTier,
       tenantId: tenantId,

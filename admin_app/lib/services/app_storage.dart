@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_mode.dart';
 import '../models/bootstrap_config.dart';
 import '../models/subscription_tier.dart';
+import '../utils/api_base_url.dart';
 
 class AppStorage {
   static const _secureStorage = FlutterSecureStorage();
@@ -27,7 +28,10 @@ class AppStorage {
   }) async {
     final secureValues = await _secureStorage.readAll();
     final storedBaseUrl = secureValues[_keyApiBaseUrl]?.trim() ?? '';
-    final apiBaseUrl = defaultApiBaseUrl.trim();
+    final normalizedStoredBaseUrl = normalizeApiBaseUrl(storedBaseUrl);
+    final apiBaseUrl = normalizedStoredBaseUrl.isNotEmpty
+        ? normalizedStoredBaseUrl
+        : defaultApiBaseUrl.trim();
     if (storedBaseUrl != apiBaseUrl) {
       await _secureStorage.write(key: _keyApiBaseUrl, value: apiBaseUrl);
     }

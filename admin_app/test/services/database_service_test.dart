@@ -115,6 +115,236 @@ void main() {
   );
 
   test(
+    'copies legacy root database into the active workspace namespace',
+    () async {
+      sqfliteFfiInit();
+      final factory = databaseFactoryFfi;
+      final tempDir = await Directory.systemTemp.createTemp(
+        'database-service-legacy-root-copy',
+      );
+      addTearDown(() => tempDir.delete(recursive: true));
+
+      final legacyPath = p.join(tempDir.path, 'mysaas_offline_encryptedd.db');
+      final legacyDb = await factory.openDatabase(
+        legacyPath,
+        options: OpenDatabaseOptions(
+          version: 8,
+          onCreate: (db, version) async {
+            await db.execute('''
+            CREATE TABLE sync_queue(
+              id TEXT PRIMARY KEY,
+              tenantId TEXT NOT NULL DEFAULT '',
+              workspaceId TEXT NOT NULL DEFAULT '',
+              entityType TEXT NOT NULL,
+              action TEXT NOT NULL,
+              payload TEXT NOT NULL,
+              status TEXT NOT NULL,
+              retryCount INTEGER NOT NULL DEFAULT 0,
+              idempotencyKey TEXT,
+              lastError TEXT,
+              lastAttemptAt TEXT,
+              nextRetryAt TEXT,
+              createdAt TEXT NOT NULL
+            )
+          ''');
+            await db.execute('''
+            CREATE TABLE products(
+              id TEXT PRIMARY KEY,
+              tenantId TEXT NOT NULL DEFAULT '',
+              title TEXT NOT NULL,
+              slug TEXT NOT NULL,
+              miniDescription TEXT,
+              description TEXT,
+              price REAL NOT NULL,
+              stock INTEGER NOT NULL,
+              lowStockThreshold INTEGER DEFAULT 5,
+              isActive INTEGER NOT NULL,
+              categoryId TEXT,
+              mainImageUrl TEXT,
+              syncStatus TEXT DEFAULT 'synced',
+              optionsJson TEXT,
+              variantsJson TEXT
+            )
+          ''');
+          },
+        ),
+      );
+      await legacyDb.insert('products', {
+        'id': 'legacy-product',
+        'tenantId': 'tenant-legacy',
+        'title': 'Legacy product',
+        'slug': 'legacy-product',
+        'price': 1200,
+        'stock': 3,
+        'isActive': 1,
+        'syncStatus': 'synced',
+      });
+      await legacyDb.close();
+      await secureStorage.write(
+        key: 'db_encryption_key',
+        value: 'legacy-secret',
+      );
+
+      DatabaseService.databasesPathProvider = () async => tempDir.path;
+      DatabaseService.databaseOpener =
+          (
+            String path, {
+            int? version,
+            OnDatabaseConfigureFn? onConfigure,
+            OnDatabaseCreateFn? onCreate,
+            OnDatabaseVersionChangeFn? onUpgrade,
+            OnDatabaseVersionChangeFn? onDowngrade,
+            OnDatabaseOpenFn? onOpen,
+            String? password,
+            bool readOnly = false,
+            bool singleInstance = true,
+          }) {
+            return factory.openDatabase(
+              path,
+              options: OpenDatabaseOptions(
+                version: version,
+                onConfigure: onConfigure,
+                onCreate: onCreate,
+                onUpgrade: onUpgrade,
+                onDowngrade: onDowngrade,
+                onOpen: onOpen,
+                readOnly: readOnly,
+                singleInstance: singleInstance,
+              ),
+            );
+          };
+
+      TenantModeService().initialize(
+        mode: AppMode.hybrid,
+        tenantId: 'tenant-legacy',
+        workspaceId: 'workspace-legacy',
+      );
+
+      final db = await DatabaseService().database;
+      final rows = await db.query(
+        'products',
+        where: 'tenantId = ?',
+        whereArgs: const ['tenant-legacy'],
+      );
+      final namespacedPath = p.join(
+        tempDir.path,
+        'tenant_workspace_dbs',
+        TenantModeService().activeNamespaceKey,
+        'mysaas_offline_encryptedd.db',
+      );
+
+      expect(File(namespacedPath).existsSync(), isTrue);
+      expect(rows, hasLength(1));
+      expect(rows.single['id'], 'legacy-product');
+      expect(
+        await secureStorage.read(
+          key: 'db_encryption_key::${TenantModeService().activeNamespaceKey}',
+        ),
+        'legacy-secret',
+      );
+    },
+  );
+
+  test(
+    'backfills legacy sync queue rows with the active workspace id',
+    () async {
+      sqfliteFfiInit();
+      final factory = databaseFactoryFfi;
+      final tempDir = await Directory.systemTemp.createTemp(
+        'database-service-workspace-backfill',
+      );
+      addTearDown(() => tempDir.delete(recursive: true));
+
+      DatabaseService.databasesPathProvider = () async => tempDir.path;
+      DatabaseService.databaseOpener =
+          (
+            String path, {
+            int? version,
+            OnDatabaseConfigureFn? onConfigure,
+            OnDatabaseCreateFn? onCreate,
+            OnDatabaseVersionChangeFn? onUpgrade,
+            OnDatabaseVersionChangeFn? onDowngrade,
+            OnDatabaseOpenFn? onOpen,
+            String? password,
+            bool readOnly = false,
+            bool singleInstance = true,
+          }) async {
+            final file = File(path);
+            if (!file.existsSync()) {
+              Directory(p.dirname(path)).createSync(recursive: true);
+              final legacy = await factory.openDatabase(
+                path,
+                options: OpenDatabaseOptions(
+                  version: 7,
+                  onCreate: (db, version) async {
+                    await db.execute('''
+                    CREATE TABLE sync_queue(
+                      id TEXT PRIMARY KEY,
+                      tenantId TEXT NOT NULL DEFAULT '',
+                      workspaceId TEXT NOT NULL DEFAULT '',
+                      entityType TEXT NOT NULL,
+                      action TEXT NOT NULL,
+                      payload TEXT NOT NULL,
+                      status TEXT NOT NULL,
+                      retryCount INTEGER NOT NULL DEFAULT 0,
+                      idempotencyKey TEXT,
+                      lastError TEXT,
+                      lastAttemptAt TEXT,
+                      nextRetryAt TEXT,
+                      createdAt TEXT NOT NULL
+                    )
+                  ''');
+                  },
+                ),
+              );
+              await legacy.insert('sync_queue', {
+                'id': 'op-1',
+                'tenantId': 'tenant-backfill',
+                'workspaceId': '',
+                'entityType': 'product',
+                'action': 'create',
+                'payload': '{}',
+                'status': 'pending',
+                'retryCount': 0,
+                'createdAt': DateTime.utc(2026, 1, 1).toIso8601String(),
+              });
+              await legacy.close();
+            }
+
+            return factory.openDatabase(
+              path,
+              options: OpenDatabaseOptions(
+                version: version,
+                onConfigure: onConfigure,
+                onCreate: onCreate,
+                onUpgrade: onUpgrade,
+                onDowngrade: onDowngrade,
+                onOpen: onOpen,
+                readOnly: readOnly,
+                singleInstance: singleInstance,
+              ),
+            );
+          };
+
+      TenantModeService().initialize(
+        mode: AppMode.hybrid,
+        tenantId: 'tenant-backfill',
+        workspaceId: 'workspace-backfill',
+      );
+
+      final db = await DatabaseService().database;
+      final rows = await db.query(
+        'sync_queue',
+        columns: ['workspaceId'],
+        where: 'tenantId = ?',
+        whereArgs: const ['tenant-backfill'],
+      );
+
+      expect(rows.single['workspaceId'], 'workspace-backfill');
+    },
+  );
+
+  test(
     'deduplicates concurrent opens and disables plugin single-instance reuse',
     () async {
       final tempDir = await Directory.systemTemp.createTemp(
