@@ -77,7 +77,8 @@ GoRouter _buildTestRouter(
       final path = state.uri.path;
 
       if (!isProvisioned) {
-        return path == '/activate' ? null : '/activate';
+        if (path == '/activate' || path == '/login') return null;
+        return '/login';
       }
 
       if (path == '/activate') {
@@ -100,7 +101,9 @@ GoRouter _buildTestRouter(
     routes: [
       GoRoute(
         path: '/activate',
-        builder: (context, state) => const ActivationScreen(),
+        builder: (context, state) => ActivationScreen(
+          offlineOnly: state.uri.queryParameters['mode'] == 'offline',
+        ),
       ),
       GoRoute(
         path: '/login',

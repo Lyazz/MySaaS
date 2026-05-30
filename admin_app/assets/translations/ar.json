@@ -2077,6 +2077,11 @@
             "variants": "الأنواع / المخزون",
             "bundles": "الباقات"
           },
+          "generalTab": {
+            "imagesTitle": "صور المنتج",
+            "imagesHint": "ارفع صور المنتج وأدرها.",
+            "addImage": "إضافة صورة"
+          },
           "links": {
             "label": "الروابط",
             "product": "المنتج",
@@ -2092,7 +2097,11 @@
           "variantsTab": {
             "title": "الخيارات / الأنواع / المخزون",
             "showArchived": "إظهار الأنواع المؤرشفة",
-            "archivedCount": "المؤرشفة: {count}"
+            "archivedCount": "المؤرشفة: {count}",
+            "empty": "لا توجد أنواع مُولدة بعد. أضف خيارات لتوليد الأنواع.",
+            "saveFirst": "يرجى حفظ المنتج أولاً لإضافة الأنواع.",
+            "noSku": "لا يوجد SKU",
+            "inStock": "{count} في المخزون"
           },
           "bundlesTab": {
             "title": "عروض الباقات",
@@ -2117,7 +2126,8 @@
             "updateFailed": "تعذر تحديث المنتج. حاول مرة أخرى.",
             "bundlesLoadFailed": "تعذر تحميل عروض الباقات",
             "bundlesSaveFailed": "تعذر حفظ عرض الباقة",
-            "bundlesDeleteFailed": "تعذر حذف عرض الباقة"
+            "bundlesDeleteFailed": "تعذر حذف عرض الباقة",
+            "imagePickFailed": "تعذر اختيار الصورة. حاول مرة أخرى."
           }
         }
       },
@@ -2828,6 +2838,7 @@
       }
     },
     "validation": {
+      "required": "مطلوب",
       "invalidNumber": "أدخل رقمًا صالحًا"
     }
   }

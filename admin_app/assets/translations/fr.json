@@ -2078,6 +2078,11 @@
             "variants": "Variants / Stock",
             "bundles": "Bundles"
           },
+          "generalTab": {
+            "imagesTitle": "Images du produit",
+            "imagesHint": "Téléversez et gérez les visuels du produit.",
+            "addImage": "Ajouter une image"
+          },
           "links": {
             "label": "Liens",
             "product": "Produit",
@@ -2093,7 +2098,11 @@
           "variantsTab": {
             "title": "Options / Variants / Stock",
             "showArchived": "Afficher les variants archivées",
-            "archivedCount": "Archivées : {count}"
+            "archivedCount": "Archivées : {count}",
+            "empty": "Aucun variant généré. Ajoutez des options pour générer des variants.",
+            "saveFirst": "Veuillez d’abord enregistrer le produit pour ajouter des variants.",
+            "noSku": "Aucun SKU",
+            "inStock": "{count} en stock"
           },
           "bundlesTab": {
             "title": "Offres en bundle",
@@ -2118,7 +2127,8 @@
             "updateFailed": "Impossible de mettre à jour le produit. Veuillez réessayer.",
             "bundlesLoadFailed": "Impossible de charger les offres bundle",
             "bundlesSaveFailed": "Impossible d’enregistrer l’offre bundle",
-            "bundlesDeleteFailed": "Impossible de supprimer l’offre bundle"
+            "bundlesDeleteFailed": "Impossible de supprimer l’offre bundle",
+            "imagePickFailed": "Échec de la sélection de l’image. Veuillez réessayer."
           }
         }
       },
@@ -2829,6 +2839,7 @@
       }
     },
     "validation": {
+      "required": "Obligatoire",
       "invalidNumber": "Entrez un nombre valide"
     }
   },

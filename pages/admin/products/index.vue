@@ -756,6 +756,7 @@ import BaseToggle from '~/components/ui/BaseToggle.vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useToast } from '~/composables/useToast'
 import { buildProductPricing } from '~/shared/pricing/product-pricing'
+import { extractApiErrorMessage } from '~/shared/http/error-message'
  
 definePageMeta({
   middleware: 'auth',
@@ -1001,8 +1002,15 @@ async function fetchProducts() {
       }
     })
     products.value = data
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to fetch products:', error)
+    showToast(
+      extractApiErrorMessage(
+        error,
+        t('admin.pages.products.index.loadingError', 'Failed to load products')
+      ),
+      'error'
+    )
   } finally {
     loading.value = false
   }
@@ -1042,8 +1050,15 @@ async function fetchCategories() {
       }
     })
     categories.value = data
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to fetch categories:', error)
+    showToast(
+      extractApiErrorMessage(
+        error,
+        t('admin.pages.products.index.categoriesLoadError', 'Failed to load categories')
+      ),
+      'error'
+    )
   }
 }
  

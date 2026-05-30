@@ -16,7 +16,9 @@ import '../services/tenant_mode_service.dart';
 import '../widgets/buttons/app_button.dart';
 
 class ActivationScreen extends ConsumerStatefulWidget {
-  const ActivationScreen({super.key});
+  const ActivationScreen({super.key, this.offlineOnly = false});
+
+  final bool offlineOnly;
 
   @override
   ConsumerState<ActivationScreen> createState() => _ActivationScreenState();
@@ -227,7 +229,9 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                         ),
                         const SizedBox(height: 18),
                         Text(
-                          'Activate this device',
+                          widget.offlineOnly
+                              ? 'Offline activation'
+                              : 'Activate this device',
                           style: GoogleFonts.dmSans(
                             fontSize: 34,
                             fontWeight: FontWeight.w700,
@@ -237,7 +241,9 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Enter the tenant-issued activation key for online activation. For offline activation, generate a request code here and complete the signing step from the tenant admin panel.',
+                          widget.offlineOnly
+                              ? 'Generate a request code on this device, then sign it from the tenant admin panel and paste the signed code to finish offline activation.'
+                              : 'Enter the tenant-issued activation key for online activation. For offline activation, generate a request code here and complete the signing step from the tenant admin panel.',
                           style: GoogleFonts.dmSans(
                             fontSize: 15,
                             height: 1.55,
@@ -245,80 +251,100 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: palette.glassBackground,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: palette.cardBorder),
+                        if (!widget.offlineOnly) ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: palette.glassBackground,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: palette.cardBorder),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Trusted activation',
+                                  style: GoogleFonts.dmSans(
+                                    color: palette.primaryText,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Activation uses `$defaultApiBaseUrl` and stores tenant/workspace binding from a server-signed activation token. No tenant IDs are entered manually on the device.',
+                                  style: GoogleFonts.dmSans(
+                                    color: palette.secondaryText,
+                                    fontSize: 13,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: 18),
+                          TextField(
+                            controller: _payloadController,
+                            minLines: 1,
+                            maxLines: 1,
+                            style: GoogleFonts.dmSans(
+                              color: palette.primaryText,
+                              fontSize: 13,
+                              height: 1.45,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: 'Activation key',
+                              hintText:
+                                  'Paste the tenant-issued key for online activation',
+                              errorText: _error,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              alignLabelWithHint: true,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
                             children: [
-                              Text(
-                                'Trusted activation',
-                                style: GoogleFonts.dmSans(
-                                  color: palette.primaryText,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                              Expanded(
+                                child: AppButton.primary(
+                                  label: _isActivating
+                                      ? 'Activating...'
+                                      : 'Activate Device',
+                                  onPressed: _isActivating ? null : _activate,
+                                  icon: LucideIcons.lock,
+                                  fullWidth: true,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Activation uses `$defaultApiBaseUrl` and stores tenant/workspace binding from a server-signed activation token. No tenant IDs are entered manually on the device.',
-                                style: GoogleFonts.dmSans(
-                                  color: palette.secondaryText,
-                                  fontSize: 13,
-                                  height: 1.5,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: AppButton.secondary(
+                                  label: 'Offline Activation',
+                                  onPressed: _showOfflineActivationDialog,
+                                  icon: LucideIcons.wifiOff,
+                                  fullWidth: true,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 18),
-                        TextField(
-                          controller: _payloadController,
-                          minLines: 1,
-                          maxLines: 1,
-                          style: GoogleFonts.dmSans(
-                            color: palette.primaryText,
-                            fontSize: 13,
-                            height: 1.45,
+                        ] else ...[
+                          AppButton.primary(
+                            label: 'Start Offline Activation',
+                            onPressed: _showOfflineActivationDialog,
+                            icon: LucideIcons.wifiOff,
+                            fullWidth: true,
                           ),
-                          decoration: InputDecoration(
-                            labelText: 'Activation key',
-                            hintText: 'Paste the tenant-issued key for online activation',
-                            errorText: _error,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            alignLabelWithHint: true,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppButton.primary(
-                                label: _isActivating
-                                    ? 'Activating...'
-                                    : 'Activate Device',
-                                onPressed: _isActivating ? null : _activate,
-                                icon: LucideIcons.lock,
-                                fullWidth: true,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: AppButton.secondary(
-                                label: 'Offline Activation',
-                                onPressed: _showOfflineActivationDialog,
-                                icon: LucideIcons.wifiOff,
-                                fullWidth: true,
+                          if (_error != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _error!,
+                              style: GoogleFonts.dmSans(
+                                color: const Color(0xFFDC2626),
+                                fontSize: 13,
                               ),
                             ),
                           ],
-                        ),
+                        ],
                       ],
                     ),
                   ),

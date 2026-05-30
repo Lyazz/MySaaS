@@ -105,9 +105,7 @@ Future<void> _pumpRouterApp(
 }
 
 void main() {
-  testWidgets('router sends unprovisioned startup to activation', (
-    tester,
-  ) async {
+  testWidgets('router sends unprovisioned startup to login', (tester) async {
     final container = _buildContainer(
       bootstrap: const BootstrapConfig(apiBaseUrl: 'https://api.example.com'),
       authState: const AuthState(mode: AppMode.online),
@@ -118,8 +116,8 @@ void main() {
 
     await _pumpRouterApp(tester, container: container, router: router);
 
-    expect(_locationOf(router), '/activate');
-    expect(find.text('Activate this device'), findsOneWidget);
+    expect(_locationOf(router), '/login');
+    expect(find.text('Log in to your account'), findsOneWidget);
   });
 
   testWidgets(
@@ -149,7 +147,7 @@ void main() {
   );
 
   testWidgets(
-    'offline registration button opens activation for signed-out provisioned tenants',
+    'offline activation button opens offline activation mode for signed-out provisioned tenants',
     (tester) async {
       final container = _buildContainer(
         bootstrap: const BootstrapConfig(
@@ -170,12 +168,12 @@ void main() {
       await _pumpRouterApp(tester, container: container, router: router);
 
       expect(_locationOf(router), '/login');
-      await tester.tap(find.text('Offline Registration'));
+      await tester.tap(find.text('Offline Activation'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      expect(_locationOf(router), '/activate');
-      expect(find.text('Activate this device'), findsOneWidget);
+      expect(_locationOf(router), '/activate?mode=offline');
+      expect(find.text('Offline activation'), findsOneWidget);
     },
   );
 

@@ -2090,6 +2090,11 @@
             "variants": "Variants / Stock",
             "bundles": "Bundles"
           },
+          "generalTab": {
+            "imagesTitle": "Product images",
+            "imagesHint": "Upload and manage your product visuals.",
+            "addImage": "Add image"
+          },
           "links": {
             "label": "Links",
             "product": "Product",
@@ -2105,7 +2110,11 @@
           "variantsTab": {
             "title": "Options / Variants / Stock",
             "showArchived": "Show archived variants",
-            "archivedCount": "Archived: {count}"
+            "archivedCount": "Archived: {count}",
+            "empty": "No variants generated yet. Add options to generate variants.",
+            "saveFirst": "Please save the product first to add variants.",
+            "noSku": "No SKU",
+            "inStock": "{count} in stock"
           },
           "bundlesTab": {
             "title": "Bundle deals",
@@ -2130,7 +2139,8 @@
             "updateFailed": "Failed to update product. Please try again.",
             "bundlesLoadFailed": "Failed to load bundle deals",
             "bundlesSaveFailed": "Failed to save bundle deal",
-            "bundlesDeleteFailed": "Failed to delete bundle deal"
+            "bundlesDeleteFailed": "Failed to delete bundle deal",
+            "imagePickFailed": "Failed to pick image. Please try again."
           }
         }
       },
@@ -2841,6 +2851,7 @@
       }
     },
     "validation": {
+      "required": "Required",
       "invalidNumber": "Enter a valid number"
     }
   },

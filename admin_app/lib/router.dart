@@ -130,7 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isProvisioned = bootstrap.isProvisioned;
 
       if (!isProvisioned) {
-        return isActivateRoute ? null : '/activate';
+        if (isActivateRoute || isLoginRoute || isRegisterRoute) {
+          return null;
+        }
+        return '/login';
       }
 
       if (isActivateRoute) {
@@ -179,7 +182,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/activate',
         pageBuilder: (context, state) => NoTransitionPage(
           key: state.pageKey,
-          child: const ActivationScreen(),
+          child: ActivationScreen(
+            offlineOnly: state.uri.queryParameters['mode'] == 'offline',
+          ),
         ),
       ),
       GoRoute(

@@ -100,7 +100,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Row(
                         children: [
                           if (isDesktop) ...[
-                            Expanded(child: _AnimatedEntrance(delay: 0, child: _buildHeroPanel(palette))),
+                            Expanded(
+                              child: _AnimatedEntrance(
+                                delay: 0,
+                                child: _buildHeroPanel(palette),
+                              ),
+                            ),
                             const SizedBox(width: 22),
                           ],
                           Expanded(
@@ -125,11 +130,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       floatingActionButton: _HoverScale(
         child: FloatingActionButton.extended(
-          onPressed: () => context.go('/activate'),
+          onPressed: () => context.go('/activate?mode=offline'),
           backgroundColor: palette.glassBackground,
           icon: Icon(LucideIcons.wifiOff, color: palette.primaryText, size: 18),
           label: Text(
-            'Offline Registration',
+            'Offline Activation',
             style: GoogleFonts.dmSans(
               color: palette.primaryText,
               fontWeight: FontWeight.w600,
@@ -805,13 +810,17 @@ class _AnimatedBlobBackdrop extends StatefulWidget {
   State<_AnimatedBlobBackdrop> createState() => _AnimatedBlobBackdropState();
 }
 
-class _AnimatedBlobBackdropState extends State<_AnimatedBlobBackdrop> with SingleTickerProviderStateMixin {
+class _AnimatedBlobBackdropState extends State<_AnimatedBlobBackdrop>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 15))..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 15),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -837,7 +846,9 @@ class _AnimatedBlobBackdropState extends State<_AnimatedBlobBackdrop> with Singl
     return Stack(
       fit: StackFit.expand,
       children: [
-        DecoratedBox(decoration: BoxDecoration(gradient: widget.palette.pageGradient)),
+        DecoratedBox(
+          decoration: BoxDecoration(gradient: widget.palette.pageGradient),
+        ),
         AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
@@ -876,7 +887,8 @@ class _AnimatedEntrance extends StatefulWidget {
   State<_AnimatedEntrance> createState() => _AnimatedEntranceState();
 }
 
-class _AnimatedEntranceState extends State<_AnimatedEntrance> with SingleTickerProviderStateMixin {
+class _AnimatedEntranceState extends State<_AnimatedEntrance>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacity;
   late Animation<Offset> _offset;
@@ -884,9 +896,18 @@ class _AnimatedEntranceState extends State<_AnimatedEntrance> with SingleTickerP
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _opacity = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _offset = Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _opacity = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _offset = Tween<Offset>(
+      begin: const Offset(0, 0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
 
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.forward();
@@ -903,10 +924,7 @@ class _AnimatedEntranceState extends State<_AnimatedEntrance> with SingleTickerP
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacity,
-      child: SlideTransition(
-        position: _offset,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _offset, child: widget.child),
     );
   }
 }
@@ -919,13 +937,17 @@ class _AnimatedChartBars extends StatefulWidget {
   State<_AnimatedChartBars> createState() => _AnimatedChartBarsState();
 }
 
-class _AnimatedChartBarsState extends State<_AnimatedChartBars> with SingleTickerProviderStateMixin {
+class _AnimatedChartBarsState extends State<_AnimatedChartBars>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
   }
 
   @override
@@ -943,7 +965,11 @@ class _AnimatedChartBarsState extends State<_AnimatedChartBars> with SingleTicke
           child: AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
-              final offset = (index % 2 == 0 ? _controller.value : (1 - _controller.value)) * 8;
+              final offset =
+                  (index % 2 == 0
+                      ? _controller.value
+                      : (1 - _controller.value)) *
+                  8;
               return Container(
                 margin: EdgeInsets.only(right: index == 4 ? 0 : 6),
                 height: baseHeights[index] + offset,

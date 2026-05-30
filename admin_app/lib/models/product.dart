@@ -124,9 +124,15 @@ class ProductImage {
   });
 
   factory ProductImage.fromJson(Map<String, dynamic> json) {
+    final resolvedUrl =
+        json['url']?.toString() ??
+        json['imageUrl']?.toString() ??
+        json['src']?.toString() ??
+        '';
+
     return ProductImage(
       id: json['id'],
-      url: json['url'] ?? '',
+      url: resolvedUrl,
       isMain: json['isMain'] ?? false,
       position: json['position'] ?? 0,
     );
@@ -278,7 +284,7 @@ class ProductVariant {
           (json['images'] as List?)?.map((e) {
             if (e is String) return e;
             if (e is Map) {
-              return e['url'] as String; // Handle nested image object if any
+              return (e['url'] ?? e['imageUrl'] ?? '').toString();
             }
             return '';
           }).toList() ??

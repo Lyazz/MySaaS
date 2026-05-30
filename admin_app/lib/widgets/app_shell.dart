@@ -30,6 +30,32 @@ class AppShell extends ConsumerStatefulWidget {
 class _AppShellState extends ConsumerState<AppShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  String _buildStorefrontUrl({
+    required String apiBaseUrl,
+    required String storeSlug,
+  }) {
+    final uri = Uri.tryParse(apiBaseUrl);
+    if (uri == null) return apiBaseUrl;
+
+    final baseUri = uri.replace(path: '', query: null, fragment: null);
+    final normalizedSlug = storeSlug.trim();
+    if (normalizedSlug.isEmpty || baseUri.host.isEmpty) {
+      return baseUri.toString().replaceAll(RegExp(r'/$'), '');
+    }
+
+    final hostParts = baseUri.host.split('.');
+    final alreadyPrefixed =
+        hostParts.isNotEmpty && hostParts.first == normalizedSlug;
+    final tenantHost = alreadyPrefixed
+        ? baseUri.host
+        : '$normalizedSlug.${baseUri.host}';
+
+    return baseUri
+        .replace(host: tenantHost)
+        .toString()
+        .replaceAll(RegExp(r'/$'), '');
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.watch(syncServiceProvider);
@@ -143,13 +169,10 @@ class _AppShellState extends ConsumerState<AppShell> {
     final storeSlug = storeState.settings.slug;
     final workspaceState = ref.watch(workspaceProvider);
 
-    String storefrontUrl = workspaceState.apiBaseUrl.replaceFirst(
-      RegExp(r'/api$'),
-      '',
+    final storefrontUrl = _buildStorefrontUrl(
+      apiBaseUrl: workspaceState.apiBaseUrl,
+      storeSlug: storeSlug,
     );
-    if (storeSlug.isNotEmpty) {
-      storefrontUrl = '$storefrontUrl/shop/$storeSlug';
-    }
 
     return Container(
       height: 52,

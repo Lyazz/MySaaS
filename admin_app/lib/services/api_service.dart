@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../bootstrap.dart';
 import '../models/provisioning_payload.dart';
@@ -154,6 +157,41 @@ class ApiService {
       );
       return response.data['url'];
     } catch (e) {
+      return null;
+    }
+  }
+
+  Future<String?> uploadPickedFile(XFile file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final filename = file.name.trim().isNotEmpty
+          ? file.name.trim()
+          : 'upload-${DateTime.now().microsecondsSinceEpoch}.jpg';
+      return uploadImageBytes(bytes, filename: filename);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> uploadImageBytes(
+    Uint8List bytes, {
+    required String filename,
+  }) async {
+    try {
+      final safeFilename = filename.trim().isNotEmpty
+          ? filename.trim()
+          : 'upload-${DateTime.now().microsecondsSinceEpoch}.jpg';
+      final formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(bytes, filename: safeFilename),
+      });
+
+      final response = await _dio.post(
+        '/upload',
+        data: formData,
+        options: Options(contentType: 'multipart/form-data'),
+      );
+      return response.data['url']?.toString();
+    } catch (_) {
       return null;
     }
   }
