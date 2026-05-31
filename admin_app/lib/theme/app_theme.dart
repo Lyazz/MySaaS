@@ -8,15 +8,15 @@ abstract final class AppColors {
   static const brandContrast = Color(0xFF05070A); // --brand-contrast
 
   // Layout
-  static const contentBg = Color(0xFF0C0E12); // --admin-content-bg
-  static const sidebarBg = Color(0xFF0F1117); // --admin-sidebar-bg
+  static const contentBg = Color(0xFF020617); // slate-950
+  static const sidebarBg = Color(0xFF0F172A); // slate-900
 
   // Surfaces
-  static const surface1 = Color(0xFF0F1117); // --surface-1
-  static const surface2 = Color(0xFF13161E); // --surface-2
-  static const surface3 = Color(0xFF181C26); // --surface-3
-  static const surfaceBorder = Color(0x12FFFFFF); // rgba(255,255,255,0.07)
-  static const surfaceBorderHover = Color(0x21FFFFFF); // rgba(255,255,255,0.13)
+  static const surface1 = Color(0xFF0F172A); // slate-900
+  static const surface2 = Color(0xFF151E2E); // slate-850
+  static const surface3 = Color(0xFF1E293B); // slate-800
+  static const surfaceBorder = Color(0x1AFFFFFF); // rgba(255,255,255,0.1)
+  static const surfaceBorderHover = Color(0x26FFFFFF); // rgba(255,255,255,0.15)
 
   // Text
   static const textPrimary = Color(0xFFF4F4F5); // --text-primary
@@ -77,7 +77,17 @@ abstract final class AppTheme {
         error: AppColors.red,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
+        displayLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
+        displayMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
+        displaySmall: GoogleFonts.outfit(color: AppColors.textPrimary),
+        headlineLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
+        headlineMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
+        headlineSmall: GoogleFonts.outfit(color: AppColors.textPrimary),
+        titleLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
+        titleMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
+        titleSmall: GoogleFonts.outfit(color: AppColors.textPrimary),
+      ).apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
       ),
@@ -210,7 +220,17 @@ abstract final class AppTheme {
         error: AppColors.red,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
+        displayLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        displayMedium: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        displaySmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        headlineLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        headlineMedium: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        headlineSmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        titleLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        titleMedium: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+        titleSmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+      ).apply(
         bodyColor: AppColors.lightTextPrimary,
         displayColor: AppColors.lightTextPrimary,
       ),

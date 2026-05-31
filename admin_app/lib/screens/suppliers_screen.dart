@@ -12,6 +12,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../theme/app_theme.dart';
 
 class SuppliersScreen extends ConsumerStatefulWidget {
@@ -366,17 +367,16 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                     alignment: WrapAlignment.end,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      AppButton.secondary(
-                        label: 'admin.common.edit'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.edit'.tr(),
                         icon: LucideIcons.pencil,
-                        size: AppButtonSize.sm,
                         onPressed: () =>
                             context.go('/suppliers/${supplier.id}'),
                       ),
-                      AppButton.danger(
-                        label: 'admin.common.delete'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.delete'.tr(),
                         icon: LucideIcons.trash2,
-                        size: AppButtonSize.sm,
+                        isDanger: true,
                         onPressed: () => _confirmDelete(supplier),
                       ),
                     ],

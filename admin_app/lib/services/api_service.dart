@@ -173,7 +173,37 @@ class ApiService {
     }
   }
 
+  String _extractUploadErrorMessage(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map) {
+        final message = data['error'] ?? data['message'];
+        if (message is String && message.trim().isNotEmpty) {
+          return message.trim();
+        }
+      }
+      final message = error.message?.trim();
+      if (message != null && message.isNotEmpty) {
+        return message;
+      }
+    }
+    final text = error.toString().trim();
+    if (text.isNotEmpty) return text;
+    return 'Upload failed';
+  }
+
   Future<String?> uploadImageBytes(
+    Uint8List bytes, {
+    required String filename,
+  }) async {
+    try {
+      return await uploadImageBytesOrThrow(bytes, filename: filename);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String> uploadImageBytesOrThrow(
     Uint8List bytes, {
     required String filename,
   }) async {
@@ -190,9 +220,13 @@ class ApiService {
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
-      return response.data['url']?.toString();
-    } catch (_) {
-      return null;
+      final url = response.data['url']?.toString().trim() ?? '';
+      if (url.isEmpty) {
+        throw Exception('Upload completed but no image URL was returned.');
+      }
+      return url;
+    } catch (error) {
+      throw Exception(_extractUploadErrorMessage(error));
     }
   }
 }

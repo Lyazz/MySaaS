@@ -15,6 +15,7 @@ import '../utils/tenant_currency.dart';
 import '../widgets/badges/status_badges.dart';
 import '../widgets/badges/ui_badge.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/responsive_server_paginated_table.dart';
 import '../widgets/stat_card.dart';
 
@@ -423,10 +424,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 flex: 2,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: AppButton.secondary(
-                    label: 'admin.common.view'.tr(),
+                  child: TableActionButton(
+                    tooltip: 'admin.common.view'.tr(),
                     icon: LucideIcons.eye,
-                    size: AppButtonSize.sm,
                     onPressed: () => context.push('/sales/${s.id}'),
                   ),
                 ),
@@ -557,10 +557,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                             ).colorScheme.onSurface.withValues(alpha: 0.3),
                           ),
                         )
-                      : AppButton.secondary(
-                          label: 'admin.common.view'.tr(),
+                      : TableActionButton(
+                          tooltip: 'admin.common.view'.tr(),
                           icon: LucideIcons.eye,
-                          size: AppButtonSize.sm,
                           onPressed: () =>
                               context.push('/sales/${p.saleId!.trim()}'),
                         ),

@@ -194,7 +194,7 @@ class DatabaseService {
     return databaseOpener(
       path,
       password: encryptionKey,
-      version: 8,
+      version: 9,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
       onOpen: (db) => _backfillWorkspaceScope(db),
@@ -465,6 +465,15 @@ class DatabaseService {
         tenantId TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL,
         showLogo INTEGER DEFAULT 1,
+        cachedLogoUrl TEXT,
+        showStoreName INTEGER DEFAULT 1,
+        storeNameOverride TEXT,
+        showStoreAddress INTEGER DEFAULT 0,
+        storeAddressOverride TEXT,
+        showStorePhone INTEGER DEFAULT 0,
+        storePhoneOverride TEXT,
+        showStoreEmail INTEGER DEFAULT 0,
+        storeEmailOverride TEXT,
         showHeader INTEGER DEFAULT 1,
         headerText TEXT,
         showDate INTEGER DEFAULT 1,
@@ -878,6 +887,17 @@ class DatabaseService {
       await _safeAddColumn(db, 'sync_queue', 'lastError TEXT');
       await _safeAddColumn(db, 'sync_queue', 'lastAttemptAt TEXT');
       await _safeAddColumn(db, 'sync_queue', 'nextRetryAt TEXT');
+    }
+    if (oldVersion < 9) {
+      await _safeAddColumn(db, 'receipt_layouts', 'cachedLogoUrl TEXT');
+      await _safeAddColumn(db, 'receipt_layouts', 'showStoreName INTEGER DEFAULT 1');
+      await _safeAddColumn(db, 'receipt_layouts', 'storeNameOverride TEXT');
+      await _safeAddColumn(db, 'receipt_layouts', 'showStoreAddress INTEGER DEFAULT 0');
+      await _safeAddColumn(db, 'receipt_layouts', 'storeAddressOverride TEXT');
+      await _safeAddColumn(db, 'receipt_layouts', 'showStorePhone INTEGER DEFAULT 0');
+      await _safeAddColumn(db, 'receipt_layouts', 'storePhoneOverride TEXT');
+      await _safeAddColumn(db, 'receipt_layouts', 'showStoreEmail INTEGER DEFAULT 0');
+      await _safeAddColumn(db, 'receipt_layouts', 'storeEmailOverride TEXT');
     }
   }
 

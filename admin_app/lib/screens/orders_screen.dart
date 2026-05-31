@@ -15,6 +15,7 @@ import '../widgets/form/date_range_filter_field.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/badges/status_badges.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
@@ -450,10 +451,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 flex: 2,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: AppButton.secondary(
-                    label: 'View',
+                  child: TableActionButton(
+                    tooltip: 'View',
                     icon: LucideIcons.eye,
-                    size: AppButtonSize.sm,
                     onPressed: () => context.push('/orders/${order.id}'),
                   ),
                 ),

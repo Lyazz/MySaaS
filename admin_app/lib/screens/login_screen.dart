@@ -160,7 +160,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           const SizedBox(height: 22),
           Text.rich(
             TextSpan(
-              style: GoogleFonts.dmSans(
+              style: GoogleFonts.outfit(
                 fontSize: 44,
                 fontWeight: FontWeight.w700,
                 height: 1.08,
@@ -283,7 +283,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 22),
                 Text(
                   'Log in to your account',
-                  style: GoogleFonts.dmSans(
+                  style: GoogleFonts.outfit(
                     fontSize: 34,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.8,

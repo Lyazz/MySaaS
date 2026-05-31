@@ -232,7 +232,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                           widget.offlineOnly
                               ? 'Offline activation'
                               : 'Activate this device',
-                          style: GoogleFonts.dmSans(
+                          style: GoogleFonts.outfit(
                             fontSize: 34,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.9,

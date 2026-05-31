@@ -668,7 +668,9 @@
       "toggleSidebar": "إظهار/إخفاء القائمة",
       "closeSidebar": "إغلاق القائمة",
       "viewStore": "عرض المتجر",
-      "logout": "تسجيل الخروج"
+      "logout": "تسجيل الخروج",
+      "logoutConfirmTitle": "تسجيل الخروج؟",
+      "logoutConfirmMessage": "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى لوحة الإدارة."
     },
     "common": {
       "name": "الاسم",
@@ -1048,6 +1050,7 @@
         "variant": "النسخة",
         "price": "السعر",
         "cost": "التكلفة",
+        "promotion": "الترويج",
         "track": "تتبع",
         "onHand": "المتوفر",
         "reserved": "محجوز",
@@ -1066,6 +1069,7 @@
         "movements": "الحركات"
       },
       "defaultVariant": "افتراضي",
+      "promotionSimpleProduct": "استخدم تبويب ترويج المنتج للنسخة الافتراضية في المنتج البسيط.",
       "movements": {
         "title": "حركات المخزون",
         "subtitle": "آخر 50 حركة لهذه النسخة.",
@@ -1269,6 +1273,8 @@
       "contactInfo": "معلومات الاتصال",
       "functional": "إعدادات التشغيل",
       "users": "المستخدمون",
+      "apps": "التطبيقات",
+      "integrations": "الربط والتطبيقات",
       "storeParameters": "إعدادات المتجر"
     },
     "roles": {
@@ -1325,6 +1331,15 @@
         },
         "isActive": {
           "label": "المنتج نشط ومرئي للعملاء"
+        },
+        "isPromotionActive": {
+          "label": "ترويج نشط"
+        },
+        "promotionalPrice": {
+          "label": "السعر الترويجي"
+        },
+        "showCountdown": {
+          "label": "إظهار مؤقت التنازلي"
         }
       },
       "category": {
@@ -1386,6 +1401,10 @@
         "address": {
           "label": "العنوان",
           "placeholder": "عنوان المورّد"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Additional notes…"
         }
       }
     },
@@ -1463,6 +1482,13 @@
           "actions": {
             "confirmPayment": "تأكيد الدفع"
           }
+        },
+        "alerts": {
+          "saleCreated": "تم إنشاء البيع بنجاح",
+          "saleFailed": "فشل البيع: {message}",
+          "unknownError": "حدث خطأ غير معروف",
+          "featureComingSoon": "الميزة {feature} ستتوفر قريباً",
+          "reprintNotImplemented": "إعادة طباعة آخر بيع غير متاحة حالياً"
         }
       },
       "cash": {
@@ -2096,8 +2122,21 @@
           },
           "variantsTab": {
             "title": "الخيارات / الأنواع / المخزون",
+            "pricingHint": "أدر أسعار البيع والتكلفة والمخزون والترويجات لكل نسخة من هنا.",
             "showArchived": "إظهار الأنواع المؤرشفة",
             "archivedCount": "المؤرشفة: {count}",
+            "allocationTitle": "وزّع المخزون قبل استخدام هذه الأنواع",
+            "allocationMessage": "لا يزال المخزون الحالي موجودًا في النوع المصدر المخفي. وزّع إجمالي المخزون والمخزون المحجوز ومخزون الأمان على الأنواع النشطة ليصبح المخزون قابلاً للبيع.",
+            "onHandShort": "متوفر",
+            "reservedShort": "محجوز",
+            "safetyShort": "أمان",
+            "totalOnHand": "المتوفر الموزع",
+            "totalReserved": "المحجوز الموزع",
+            "totalSafety": "الأمان الموزع",
+            "allocationBalanced": "التوزيع متوازن",
+            "allocationUnbalanced": "يجب أن يطابق التوزيع أرصدة النوع المصدر المخفي تمامًا",
+            "allocateAction": "توزيع المخزون",
+            "allocationSaved": "تم حفظ توزيع مخزون الأنواع",
             "empty": "لا توجد أنواع مُولدة بعد. أضف خيارات لتوليد الأنواع.",
             "saveFirst": "يرجى حفظ المنتج أولاً لإضافة الأنواع.",
             "noSku": "لا يوجد SKU",
@@ -2835,11 +2874,202 @@
             "updateFailed": "تعذر تحديث المورّد. حاول مرة أخرى."
           }
         }
+      },
+      "sale": {
+        "detail": {
+          "metaTitle": "تفاصيل البيع"
+        }
       }
     },
     "validation": {
       "required": "مطلوب",
       "invalidNumber": "أدخل رقمًا صالحًا"
+    },
+    "receipt": {
+      "editor": {
+        "title": "تعديل تخطيط الإيصال",
+        "tabEditor": "المحرر",
+        "tabPreview": "معاينة",
+        "saveLayout": "حفظ التخطيط",
+        "storeInformation": "معلومات المتجر",
+        "showLogo": "عرض الشعار",
+        "showStoreName": "عرض اسم المتجر",
+        "storeNameOverride": "تجاوز اسم المتجر (اختياري)",
+        "showStoreAddress": "عرض العنوان",
+        "storeAddressOverride": "تجاوز العنوان (اختياري)",
+        "showStorePhone": "عرض الهاتف",
+        "storePhoneOverride": "تجاوز الهاتف (اختياري)",
+        "showStoreEmail": "عرض البريد الإلكتروني",
+        "storeEmailOverride": "تجاوز البريد الإلكتروني (اختياري)",
+        "headerLegacy": "الترويسة (قديم)",
+        "showCustomHeader": "عرض نص ترويسة مخصص",
+        "headerText": "نص الترويسة",
+        "content": "المحتوى",
+        "showOrderNumber": "عرض رقم الطلب",
+        "showDate": "عرض التاريخ والوقت",
+        "showCustomerInfo": "عرض معلومات العميل",
+        "showTaxBreakdown": "عرض تفاصيل الضرائب",
+        "footer": "التذييل",
+        "showFooterMessage": "عرض رسالة التذييل",
+        "footerText": "نص التذييل",
+        "printAsImage": "طباعة كصورة (دعم اللغة العربية)"
+      },
+      "print": {
+        "item": "العنصر",
+        "qty": "الكمية",
+        "price": "السعر",
+        "total": "المجموع",
+        "discount": "الخصم",
+        "grandTotal": "المجموع الكلي",
+        "orderNum": "طلب #{id}",
+        "customer": "العميل: {name}",
+        "phone": "الهاتف: {phone}",
+        "tel": "هاتف: {phone}",
+        "email": "البريد الإلكتروني: {email}"
+      }
+    }
+  },
+  "superAdmin": {
+    "layout": {
+      "brand": "المشرف العام",
+      "role": "المشرف العام",
+      "closeSidebar": "إغلاق الشريط الجانبي",
+      "toggleSidebar": "إظهار/إخفاء الشريط الجانبي",
+      "defaultTitle": "لوحة تحكم المشرف العام"
+    },
+    "actions": {
+      "logout": "تسجيل الخروج"
+    },
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "tenants": "المستأجرون",
+      "analytics": "التحليلات",
+      "auditLogs": "سجل التدقيق"
+    },
+    "login": {
+      "title": "Super Admin",
+      "subtitle": "Sign in to access the platform dashboard",
+      "backToSite": "Back to main site",
+      "form": {
+        "email": {
+          "label": "Email Address",
+          "placeholder": "superadmin{'@'}example.com"
+        },
+        "password": {
+          "label": "Password"
+        },
+        "submit": {
+          "signingIn": "Signing in...",
+          "signIn": "Sign In"
+        }
+      },
+      "errors": {
+        "superAdminRequired": "Access denied: Super admin privileges required",
+        "loginFailed": "Login failed"
+      }
+    },
+    "dashboard": {
+      "overview": {
+        "title": "Platform overview",
+        "subtitle": "Manage your multi-tenant SaaS platform"
+      },
+      "stats": {
+        "tenants": "Total tenants",
+        "users": "Total users",
+        "products": "Total products",
+        "revenue": "Total revenue"
+      },
+      "recentActivity": {
+        "title": "Recent activity",
+        "viewAll": "View all",
+        "empty": "No recent activity"
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "createTenant": {
+          "title": "Create tenant",
+          "subtitle": "Add a new store"
+        },
+        "manageTenants": {
+          "title": "Manage tenants",
+          "subtitle": "View all stores"
+        },
+        "viewAnalytics": {
+          "title": "View analytics",
+          "subtitle": "Platform insights"
+        }
+      }
+    },
+    "audit": {
+      "actions": {
+        "createTenant": "Create tenant",
+        "updateTenant": "Update tenant",
+        "deleteTenant": "Delete tenant",
+        "suspendTenant": "Suspend tenant",
+        "unsuspendTenant": "Activate tenant",
+        "impersonateUser": "Impersonate user"
+      }
+    },
+    "tenants": {
+      "title": "إدارة المستأجرين",
+      "actions": {
+        "createTenant": "إنشاء مستأجر",
+        "payments": "المدفوعات",
+        "suspend": "تعليق",
+        "activate": "تفعيل"
+      },
+      "search": {
+        "placeholder": "ابحث عن مستأجر..."
+      },
+      "loading": "جارٍ تحميل المستأجرين...",
+      "empty": "لا توجد نتائج",
+      "table": {
+        "name": "الاسم",
+        "slug": "المعرّف",
+        "status": "الحالة",
+        "users": "المستخدمون",
+        "products": "المنتجات",
+        "orders": "الطلبات",
+        "created": "تاريخ الإنشاء",
+        "actions": "إجراءات"
+      },
+      "status": {
+        "active": "نشط",
+        "suspended": "معلّق"
+      },
+      "modal": {
+        "createTitle": "إنشاء مستأجر جديد",
+        "editTitle": "تعديل المستأجر",
+        "fields": {
+          "name": {
+            "label": "اسم المستأجر",
+            "placeholder": "متجرك"
+          },
+          "slug": {
+            "label": "المعرّف (النطاق الفرعي)",
+            "placeholder": "your-store",
+            "slugFallback": "slug",
+            "hint": "سيكون متاحًا على {slug}.localhost:3000"
+          },
+          "ownerEmail": {
+            "label": "بريد المالك",
+            "placeholder": "admin{'@'}yourstore.com"
+          },
+          "ownerPassword": {
+            "label": "كلمة مرور المالك"
+          }
+        }
+      },
+      "errors": {
+        "generic": "حدث خطأ",
+        "suspendFailed": "تعذر تعليق المستأجر",
+        "activateFailed": "تعذر تفعيل المستأجر",
+        "deleteFailed": "تعذر حذف المستأجر"
+      },
+      "confirm": {
+        "suspend": "هل أنت متأكد من تعليق {name}؟",
+        "delete": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء!"
+      }
     }
   }
 }

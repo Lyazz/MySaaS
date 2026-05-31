@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:crop_your_image/crop_your_image.dart' as desktop_crop;
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +28,6 @@ import '../widgets/form/form_select.dart';
 import '../widgets/product_options_list.dart';
 import '../widgets/rich_text_editor.dart';
 import '../widgets/tenant_image_widget.dart';
-import 'variant_edit_screen.dart';
 
 class ProductFormScreen extends ConsumerStatefulWidget {
   final String? productId;
@@ -214,23 +216,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       if (!mounted) return;
 
       setState(() => _isUploading = true);
-      final cropped = await _cropImage(selected);
-      if (cropped == null) return;
-
       final apiService = ref.read(apiProvider);
-      String? uploadedUrl;
-      try {
-        final croppedBytes = await cropped.readAsBytes();
-        uploadedUrl = await apiService.uploadImageBytes(
-          croppedBytes,
-          filename: _buildCroppedFilename(selected.name),
-        );
-      } catch (_) {
-        // Web can fail to re-open bytes from the cropped path in some browsers.
-        // Fall back to uploading the originally picked file so add-image never dead-ends.
-        uploadedUrl = await apiService.uploadPickedFile(selected);
-      }
-      final resolvedUploadedUrl = uploadedUrl?.trim() ?? '';
+
+      final prepared = await _prepareImageUploadPayload(selected);
+      final uploadedUrl = await apiService.uploadImageBytesOrThrow(
+        prepared.bytes,
+        filename: prepared.filename,
+      );
+      final resolvedUploadedUrl = uploadedUrl.trim();
       if (resolvedUploadedUrl.isNotEmpty) {
         setState(() {
           _images.add(resolvedUploadedUrl);
@@ -239,9 +232,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         if (kIsWeb) {
           throw Exception('web_upload_failed');
         }
-        final localSourcePath = cropped.path.trim().isNotEmpty
-            ? cropped.path
-            : selected.path;
+        final localSourcePath = selected.path;
         final localPath = await ImageStorageManager.saveImageLocally(
           File(localSourcePath),
         );
@@ -251,14 +242,197 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         });
       }
     } catch (e) {
+      if (e is _ImageCropCancelled) {
+        return;
+      }
       setState(() {
-        _error = 'admin.pages.products.edit.errors.imagePickFailed'.tr();
+        _error = _buildImageUploadErrorMessage(e);
       });
     } finally {
       if (mounted) {
         setState(() => _isUploading = false);
       }
     }
+  }
+
+  bool get _supportsCropper {
+    if (kIsWeb) return true;
+    return defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
+  }
+
+  bool get _isDesktopPlatform {
+    if (kIsWeb) return false;
+    return defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux;
+  }
+
+  String _buildImageUploadErrorMessage(Object error) {
+    final raw = error.toString();
+    final lower = raw.toLowerCase();
+
+    if (lower.contains('only png, jpeg, and webp uploads are allowed') ||
+        lower.contains('only png, jpeg, and webp')) {
+      return 'Only PNG, JPG, or WebP images are supported. Please choose one of these formats.';
+    }
+
+    if (lower.contains('heic') || lower.contains('heif')) {
+      return 'HEIC/HEIF images are not supported yet. Please convert to PNG, JPG, or WebP and try again.';
+    }
+
+    return 'admin.pages.products.edit.errors.imagePickFailed'.tr();
+  }
+
+  Future<_PreparedImageUpload> _prepareImageUploadPayload(XFile selected) async {
+    if (_isDesktopPlatform) {
+      final croppedBytes = await _cropImageDesktop(selected);
+      if (croppedBytes == null) {
+        throw _ImageCropCancelled();
+      }
+      return _PreparedImageUpload(
+        bytes: croppedBytes,
+        filename: _buildCroppedFilename(selected.name),
+      );
+    }
+
+    if (!_supportsCropper) {
+      final originalBytes = await selected.readAsBytes();
+      return _PreparedImageUpload(
+        bytes: originalBytes,
+        filename: _buildUploadFilename(selected.name),
+      );
+    }
+
+    try {
+      final cropped = await _cropImage(selected);
+      if (cropped == null) {
+        throw _ImageCropCancelled();
+      }
+
+      final croppedBytes = await cropped.readAsBytes();
+      return _PreparedImageUpload(
+        bytes: croppedBytes,
+        filename: _buildCroppedFilename(selected.name),
+      );
+    } on _ImageCropCancelled {
+      rethrow;
+    } catch (_) {
+      // If cropper fails at runtime on a given device/browser,
+      // continue with original file so the picker flow still works.
+      final originalBytes = await selected.readAsBytes();
+      return _PreparedImageUpload(
+        bytes: originalBytes,
+        filename: _buildUploadFilename(selected.name),
+      );
+    }
+  }
+
+  Future<Uint8List?> _cropImageDesktop(XFile source) async {
+    final originalBytes = await source.readAsBytes();
+    if (!mounted) return null;
+
+    final cropController = desktop_crop.CropController();
+    Uint8List? croppedBytes;
+    Object? cropFailure;
+    bool isCropping = false;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 900,
+                  maxHeight: 700,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Crop image',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            color: Colors.black12,
+                            child: desktop_crop.Crop(
+                              controller: cropController,
+                              image: originalBytes,
+                              interactive: true,
+                              initialRectBuilder:
+                                  desktop_crop.InitialRectBuilder
+                                      .withSizeAndRatio(
+                                    size: 0.9,
+                                  ),
+                              onCropped: (result) {
+                                if (result is desktop_crop.CropSuccess) {
+                                  croppedBytes = result.croppedImage;
+                                } else if (result is desktop_crop.CropFailure) {
+                                  cropFailure = result.cause;
+                                }
+                                if (Navigator.of(dialogContext).canPop()) {
+                                  Navigator.of(dialogContext).pop();
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          AppButton.secondary(
+                            label: 'admin.common.cancel'.tr(),
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                          ),
+                          const SizedBox(width: 10),
+                          AppButton.primary(
+                            label: isCropping
+                                ? 'admin.common.uploading'.tr()
+                                : 'Apply crop',
+                            onPressed: isCropping
+                                ? null
+                                : () {
+                                    setDialogState(() => isCropping = true);
+                                    cropController.crop();
+                                  },
+                            loading: isCropping,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (cropFailure != null) {
+      throw Exception('Failed to crop image.');
+    }
+
+    return croppedBytes;
+  }
+
+  String _buildUploadFilename(String originalName) {
+    final trimmed = originalName.trim();
+    if (trimmed.isEmpty) {
+      return 'upload-${DateTime.now().microsecondsSinceEpoch}.jpg';
+    }
+    return trimmed;
   }
 
   String _buildCroppedFilename(String originalName) {
@@ -494,6 +668,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     );
   }
 }
+
+class _PreparedImageUpload {
+  final Uint8List bytes;
+  final String filename;
+
+  const _PreparedImageUpload({required this.bytes, required this.filename});
+}
+
+class _ImageCropCancelled implements Exception {}
 
 class _ProductBreadcrumb extends StatelessWidget {
   final bool isEditing;
@@ -1446,7 +1629,7 @@ class _DescriptionTabSection extends StatelessWidget {
   }
 }
 
-class _VariantsTabSection extends StatelessWidget {
+class _VariantsTabSection extends ConsumerStatefulWidget {
   final bool isEditing;
   final Product? product;
   final String? productId;
@@ -1460,8 +1643,792 @@ class _VariantsTabSection extends StatelessWidget {
   });
 
   @override
+  ConsumerState<_VariantsTabSection> createState() => _VariantsTabSectionState();
+}
+
+class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
+  final List<_VariantEditorRow> _rows = <_VariantEditorRow>[];
+  final List<_StockAllocationRow> _stockAllocationRows = <_StockAllocationRow>[];
+  bool _showArchivedVariants = false;
+  bool _allocatingStock = false;
+
+  final Set<String> _savingInfoIds = <String>{};
+  final Set<String> _savingInventoryIds = <String>{};
+  final Set<String> _savingStockIds = <String>{};
+  final Set<String> _lockingSkuIds = <String>{};
+  final Set<String> _suggestingSkuIds = <String>{};
+  final Set<String> _savingImagesIds = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _syncRowsFromProduct();
+  }
+
+  @override
+  void didUpdateWidget(covariant _VariantsTabSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product != widget.product) {
+      _syncRowsFromProduct();
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final row in _rows) {
+      row.dispose();
+    }
+    for (final row in _stockAllocationRows) {
+      row.dispose();
+    }
+    super.dispose();
+  }
+
+  void _syncRowsFromProduct() {
+    for (final row in _rows) {
+      row.dispose();
+    }
+    _rows
+      ..clear()
+      ..addAll(
+        (widget.product?.variants ?? const <ProductVariant>[])
+            .map(_VariantEditorRow.fromVariant),
+      );
+    _syncStockAllocationRows();
+    if (mounted) setState(() {});
+  }
+
+  void _syncStockAllocationRows() {
+    for (final row in _stockAllocationRows) {
+      row.dispose();
+    }
+    _stockAllocationRows.clear();
+
+    final product = widget.product;
+    if (product == null ||
+        !product.stockAllocationRequired ||
+        product.stockAllocationSourceBalance == null) {
+      return;
+    }
+
+    final eligible = product.variants
+        .where((variant) => variant.optionValues.isNotEmpty && variant.isActive)
+        .toList(growable: false);
+
+    _stockAllocationRows.addAll(
+      eligible.map(
+        (variant) => _StockAllocationRow(
+          variantId: variant.id,
+          title: variant.title,
+          stockController: TextEditingController(text: '0'),
+          reservedController: TextEditingController(text: '0'),
+          safetyController: TextEditingController(text: '0'),
+        ),
+      ),
+    );
+  }
+
+  List<_VariantEditorRow> get _visibleRows {
+    if (_showArchivedVariants) return _rows;
+    return _rows.where((row) => row.isActive).toList(growable: false);
+  }
+
+  int get _archivedCount => _rows.where((row) => !row.isActive).length;
+
+  int get _allocationStockTotal {
+    return _stockAllocationRows.fold(
+      0,
+      (sum, row) => sum + _parseInt(row.stockController.text),
+    );
+  }
+
+  int get _allocationReservedTotal {
+    return _stockAllocationRows.fold(
+      0,
+      (sum, row) => sum + _parseInt(row.reservedController.text),
+    );
+  }
+
+  int get _allocationSafetyTotal {
+    return _stockAllocationRows.fold(
+      0,
+      (sum, row) => sum + _parseInt(row.safetyController.text),
+    );
+  }
+
+  bool get _allocationBalanced {
+    final source = widget.product?.stockAllocationSourceBalance;
+    if (source == null) return false;
+    return _allocationStockTotal == source.stock &&
+        _allocationReservedTotal == source.reserved &&
+        _allocationSafetyTotal == source.safetyStock;
+  }
+
+  bool _supportsVariantPromotion(_VariantEditorRow row) {
+    return row.optionValues.isNotEmpty;
+  }
+
+  String _extractErrorMessage(
+    Object error, {
+    required String fallbackKey,
+  }) {
+    final fallback = fallbackKey.tr();
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map) {
+        final message = data['statusMessage'] ?? data['error'] ?? data['message'];
+        if (message is String && message.trim().isNotEmpty) {
+          return message.trim();
+        }
+      }
+      final text = error.message?.trim();
+      if (text != null && text.isNotEmpty) return text;
+    }
+    final raw = error.toString().trim();
+    if (raw.isNotEmpty) return raw;
+    return fallback;
+  }
+
+  double _parseDouble(String value, {double fallback = 0}) {
+    return double.tryParse(value.trim()) ?? fallback;
+  }
+
+  int _parseInt(String value, {int fallback = 0}) {
+    return int.tryParse(value.trim()) ?? fallback;
+  }
+
+  double? _parseNullableDouble(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    return double.tryParse(trimmed);
+  }
+
+  String? _toIsoOrNull(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    final dt = DateTime.tryParse(trimmed);
+    if (dt == null) return null;
+    return dt.toIso8601String();
+  }
+
+  int _availableOf(_VariantEditorRow row) {
+    if (row.availableStock != null) {
+      return row.availableStock!;
+    }
+    return (row.stock - row.reserved - row.safetyStock).clamp(0, 1 << 30);
+  }
+
+  Future<void> _updateVariantInfo(_VariantEditorRow row) async {
+    final previous = row.snapshot();
+    _savingInfoIds.add(row.id);
+    setState(() {});
+    try {
+      final payload = <String, dynamic>{
+        'price': _parseDouble(row.priceController.text),
+        'cost': _parseDouble(row.costController.text),
+        'sku': row.skuController.text.trim(),
+        'barcode': row.barcodeController.text.trim(),
+        'isActive': row.isActive,
+        'promotionalPrice': _supportsVariantPromotion(row)
+            ? _parseNullableDouble(row.promotionalPriceController.text)
+            : null,
+        'isPromotionActive': _supportsVariantPromotion(row)
+            ? row.isPromotionActive
+            : false,
+        'promotionStartDate': _supportsVariantPromotion(row)
+            ? _toIsoOrNull(row.promotionStartController.text)
+            : null,
+        'promotionEndDate': _supportsVariantPromotion(row)
+            ? _toIsoOrNull(row.promotionEndController.text)
+            : null,
+        'showCountdown': _supportsVariantPromotion(row) ? row.showCountdown : false,
+      };
+      await ref.read(productsProvider.notifier).updateVariant(row.id, payload);
+      widget.onVariantUpdated();
+    } catch (error) {
+      row.restore(previous);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _extractErrorMessage(
+                error,
+                fallbackKey: 'admin.variantsTable.errors.updateVariantFailed',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      _savingInfoIds.remove(row.id);
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> _updateVariantInventory(
+    _VariantEditorRow row,
+    Map<String, dynamic> patch,
+  ) async {
+    final previous = row.snapshot();
+    _savingInventoryIds.add(row.id);
+    setState(() {});
+    try {
+      await ref.read(productsProvider.notifier).updateVariantInventory(
+            row.id,
+            patch,
+          );
+      widget.onVariantUpdated();
+    } catch (error) {
+      row.restore(previous);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _extractErrorMessage(
+                error,
+                fallbackKey: 'admin.variantsTable.errors.updateInventoryFailed',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      _savingInventoryIds.remove(row.id);
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> _setVariantStock(_VariantEditorRow row) async {
+    final previous = row.snapshot();
+    final nextStock = _parseInt(row.stockController.text, fallback: row.stock);
+    if (nextStock < 0) {
+      row.restore(previous);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'admin.variantsTable.errors.updateStockFailed'.tr(),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    _savingStockIds.add(row.id);
+    setState(() {});
+    try {
+      await ref.read(apiProvider).client.post(
+            '/admin/inventory/variants/${row.id}/stock/set',
+            data: {
+              'stock': nextStock,
+              'reason': 'admin_product_variants_flutter',
+            },
+          );
+      widget.onVariantUpdated();
+    } catch (error) {
+      row.restore(previous);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _extractErrorMessage(
+                error,
+                fallbackKey: 'admin.variantsTable.errors.updateStockFailed',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      _savingStockIds.remove(row.id);
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> _lockSku(_VariantEditorRow row) async {
+    _lockingSkuIds.add(row.id);
+    setState(() {});
+    try {
+      await ref.read(productsProvider.notifier).lockVariantSku(row.id);
+      widget.onVariantUpdated();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _extractErrorMessage(
+                error,
+                fallbackKey: 'admin.variantsTable.errors.lockSkuFailed',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      _lockingSkuIds.remove(row.id);
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> _suggestSku(_VariantEditorRow row) async {
+    _suggestingSkuIds.add(row.id);
+    setState(() {});
+    try {
+      final sku = await ref.read(productsProvider.notifier).suggestVariantSku(
+            row.id,
+          );
+      if (sku.trim().isEmpty) {
+        throw Exception(
+          'admin.variantsTable.errors.suggestSkuUnavailable'.tr(),
+        );
+      }
+      row.skuController.text = sku.trim();
+      await _updateVariantInfo(row);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _extractErrorMessage(
+                error,
+                fallbackKey: 'admin.variantsTable.errors.suggestSkuFailed',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      _suggestingSkuIds.remove(row.id);
+      if (mounted) setState(() {});
+    }
+  }
+
+  List<String> _availableVariantImages() {
+    final product = widget.product;
+    if (product == null) return const <String>[];
+    final fromProductImages = product.productImages
+        .map((img) => img.url.trim())
+        .where((url) => url.isNotEmpty);
+    final fromLegacy = product.images.map((url) => url.trim()).where((url) => url.isNotEmpty);
+
+    final seen = <String>{};
+    final merged = <String>[];
+    for (final url in [...fromProductImages, ...fromLegacy]) {
+      if (seen.add(url)) merged.add(url);
+    }
+    return merged;
+  }
+
+  Future<void> _openImageEditor(_VariantEditorRow row) async {
+    final availableImages = _availableVariantImages();
+    final selected = row.images.toSet();
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogBodyContext, setDialogState) {
+            final saving = _savingImagesIds.contains(row.id);
+            return Dialog(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 820, maxHeight: 640),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'admin.variantsTable.imagePicker.title'.tr(),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'admin.variantsTable.imagePicker.subtitle'.tr(),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(dialogBodyContext).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Expanded(
+                        child: availableImages.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'admin.variantsTable.imagePicker.empty'.tr(),
+                                  style: const TextStyle(color: Color(0xFF64748B)),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : GridView.builder(
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                  childAspectRatio: 0.9,
+                                ),
+                                itemCount: availableImages.length,
+                                itemBuilder: (gridContext, index) {
+                                  final url = availableImages[index];
+                                  final checked = selected.contains(url);
+                                  return InkWell(
+                                    onTap: () {
+                                      setDialogState(() {
+                                        if (checked) {
+                                          selected.remove(url);
+                                        } else {
+                                          selected.add(url);
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: checked
+                                              ? const Color(0xFF65A30D)
+                                              : Theme.of(gridContext)
+                                                    .colorScheme
+                                                    .outline
+                                                    .withValues(alpha: 0.4),
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.all(8),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: TenantImageWidget(
+                                                imagePath: url,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  'admin.variantsTable.imagePicker.imageWithIndex'
+                                                      .tr(namedArgs: {'index': (index + 1).toString()}),
+                                                  style: const TextStyle(fontSize: 11),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              Checkbox(
+                                                value: checked,
+                                                onChanged: (_) {
+                                                  setDialogState(() {
+                                                    if (checked) {
+                                                      selected.remove(url);
+                                                    } else {
+                                                      selected.add(url);
+                                                    }
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          AppButton.secondary(
+                            label: 'admin.common.cancel'.tr(),
+                            onPressed: saving
+                                ? null
+                                : () => Navigator.of(dialogContext).pop(),
+                          ),
+                          const SizedBox(width: 10),
+                          AppButton.primary(
+                            label: saving
+                                ? 'admin.common.saving'.tr()
+                                : 'admin.variantsTable.imagePicker.save'.tr(),
+                            onPressed: saving
+                                ? null
+                                : () async {
+                                    _savingImagesIds.add(row.id);
+                                    setDialogState(() {});
+                                    try {
+                                      await ref
+                                          .read(productsProvider.notifier)
+                                          .updateVariantImages(
+                                            row.id,
+                                            selected.toList(growable: false),
+                                          );
+                                      if (dialogContext.mounted) {
+                                        Navigator.of(dialogContext).pop();
+                                      }
+                                      widget.onVariantUpdated();
+                                    } catch (error) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              _extractErrorMessage(
+                                                error,
+                                                fallbackKey:
+                                                    'admin.variantsTable.errors.saveImagesFailed',
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    } finally {
+                                      _savingImagesIds.remove(row.id);
+                                      if (mounted) setState(() {});
+                                    }
+                                  },
+                            loading: saving,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _openMovements(_VariantEditorRow row) async {
+    final List<_VariantMovementRecord> movements = <_VariantMovementRecord>[];
+    var loadError = '';
+    try {
+      final response = await ref
+          .read(apiProvider)
+          .client
+          .get('/admin/inventory/variants/${row.id}/movements');
+      final data = response.data;
+      if (data is List) {
+        for (final item in data) {
+          if (item is Map) {
+            movements.add(
+              _VariantMovementRecord.fromJson(Map<String, dynamic>.from(item)),
+            );
+          }
+        }
+      }
+    } catch (error) {
+      loadError = _extractErrorMessage(
+        error,
+        fallbackKey: 'admin.variantsTable.movements.loading',
+      );
+    }
+
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 980, maxHeight: 680),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${'admin.variantsTable.movements.title'.tr()} - ${row.title}',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'admin.variantsTable.movements.subtitle'.tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: loadError.isNotEmpty
+                        ? Center(child: Text(loadError))
+                        : movements.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'admin.variantsTable.movements.empty'.tr(),
+                                  style: const TextStyle(color: Color(0xFF64748B)),
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(minWidth: 900),
+                                  child: Column(
+                                    children: [
+                                      _movementHeaderRow(context),
+                                      const Divider(height: 1),
+                                      Expanded(
+                                        child: ListView.separated(
+                                          itemCount: movements.length,
+                                          separatorBuilder: (_, _) =>
+                                              const Divider(height: 1),
+                                          itemBuilder: (context, index) =>
+                                              _movementDataRow(
+                                            context,
+                                            movements[index],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: AppButton.secondary(
+                      label: 'admin.common.close'.tr(),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _allocateStock() async {
+    if (!_allocationBalanced || widget.productId == null) return;
+    _allocatingStock = true;
+    setState(() {});
+    try {
+      await ref.read(apiProvider).client.post(
+            '/admin/products/${widget.productId}/variants/allocate-stock',
+            data: {
+              'sourceVariantId': widget.product?.stockAllocationSourceVariantId,
+              'allocations': _stockAllocationRows
+                  .map(
+                    (row) => {
+                      'variantId': row.variantId,
+                      'stock': _parseInt(row.stockController.text),
+                      'reserved': _parseInt(row.reservedController.text),
+                      'safetyStock': _parseInt(row.safetyController.text),
+                    },
+                  )
+                  .toList(growable: false),
+            },
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'admin.pages.products.edit.variantsTab.allocationSaved'.tr(),
+            ),
+          ),
+        );
+      }
+      widget.onVariantUpdated();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _extractErrorMessage(
+                error,
+                fallbackKey:
+                    'admin.pages.products.edit.variantsTab.allocationUnbalanced',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      _allocatingStock = false;
+      if (mounted) setState(() {});
+    }
+  }
+
+  Widget _movementHeaderRow(BuildContext context) {
+    TextStyle style = const TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+    return Row(
+      children: [
+        _headerCell('admin.variantsTable.movements.columns.date'.tr(), 170, style),
+        _headerCell('admin.variantsTable.movements.columns.type'.tr(), 160, style),
+        _headerCell('admin.variantsTable.movements.columns.deltaStock'.tr(), 100, style),
+        _headerCell('admin.variantsTable.movements.columns.deltaReserved'.tr(), 110, style),
+        _headerCell('admin.variantsTable.movements.columns.deltaSafety'.tr(), 100, style),
+        _headerCell('admin.variantsTable.movements.columns.after'.tr(), 220, style),
+        _headerCell('admin.variantsTable.movements.columns.by'.tr(), 180, style),
+      ],
+    );
+  }
+
+  Widget _movementDataRow(BuildContext context, _VariantMovementRecord row) {
+    final textStyle = const TextStyle(fontSize: 12);
+    String afterText() {
+      final s = row.stockAfter?.toString() ?? '—';
+      final r = row.reservedAfter?.toString() ?? '—';
+      final ss = row.safetyStockAfter?.toString() ?? '—';
+      return 'S=$s · R=$r · SS=$ss';
+    }
+
+    return Row(
+      children: [
+        _dataCell(row.createdAt ?? '', 170, textStyle),
+        _dataCell(row.type, 160, textStyle),
+        _dataCell('${row.delta}', 100, textStyle),
+        _dataCell('${row.reservedDelta}', 110, textStyle),
+        _dataCell('${row.safetyStockDelta}', 100, textStyle),
+        _dataCell(afterText(), 220, textStyle),
+        _dataCell(
+          row.createdByEmail ??
+              'admin.variantsTable.movements.system'.tr(),
+          180,
+          textStyle,
+        ),
+      ],
+    );
+  }
+
+  Widget _headerCell(String text, double width, TextStyle style) {
+    return SizedBox(
+      width: width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: Text(text, style: style),
+      ),
+    );
+  }
+
+  Widget _dataCell(String text, double width, TextStyle style) {
+    return SizedBox(
+      width: width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        child: Text(text, style: style, overflow: TextOverflow.ellipsis),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return const InputDecoration(
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      border: OutlineInputBorder(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!isEditing) {
+    if (!widget.isEditing) {
       return Center(
         child: Text(
           'admin.pages.products.edit.variantsTab.saveFirst'.tr(),
@@ -1470,142 +2437,818 @@ class _VariantsTabSection extends StatelessWidget {
       );
     }
 
-    if (product == null || productId == null) {
+    if (widget.product == null || widget.productId == null) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    final visibleRows = _visibleRows;
+    final sourceBalance = widget.product!.stockAllocationSourceBalance;
+    final showAllocationBanner = widget.product!.stockAllocationRequired &&
+        sourceBalance != null &&
+        _stockAllocationRows.isNotEmpty;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ProductOptionsList(productId: productId!, options: product!.options),
-          const SizedBox(height: 20),
+          ProductOptionsList(
+            productId: widget.productId!,
+            options: widget.product!.options,
+          ),
+          const SizedBox(height: 16),
           Text(
             'admin.pages.products.edit.variantsTab.title'.tr(),
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 10),
-          if (product!.variants.isEmpty)
+          const SizedBox(height: 6),
+          Text(
+            'admin.pages.products.edit.variantsTab.pricingHint'.tr(),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+              fontSize: 12,
+            ),
+          ),
+          if (showAllocationBanner) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFFACC15).withValues(alpha: 0.55)),
+                color: const Color(0xFFFEFCE8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2),
+                        child: Icon(LucideIcons.alertTriangle, size: 16, color: Color(0xFFCA8A04)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'admin.pages.products.edit.variantsTab.allocationTitle'.tr(),
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'admin.pages.products.edit.variantsTab.allocationMessage'.tr(),
+                              style: const TextStyle(fontSize: 12, color: Color(0xFF854D0E)),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${widget.product!.stockAllocationSourceVariantTitle ?? 'admin.variantsTable.defaultVariant'.tr()}: '
+                              '${sourceBalance.stock} ${'admin.pages.products.edit.variantsTab.onHandShort'.tr()}, '
+                              '${sourceBalance.reserved} ${'admin.pages.products.edit.variantsTab.reservedShort'.tr()}, '
+                              '${sourceBalance.safetyStock} ${'admin.pages.products.edit.variantsTab.safetyShort'.tr()}',
+                              style: const TextStyle(fontSize: 12, color: Color(0xFF854D0E)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      AppButton.primary(
+                        label: _allocatingStock
+                            ? 'admin.common.saving'.tr()
+                            : 'admin.pages.products.edit.variantsTab.allocateAction'.tr(),
+                        onPressed:
+                            _allocatingStock || !_allocationBalanced ? null : _allocateStock,
+                        loading: _allocatingStock,
+                        size: AppButtonSize.sm,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 620),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              _headerCell(
+                                'admin.variantsTable.columns.variant'.tr(),
+                                230,
+                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                              ),
+                              _headerCell(
+                                'admin.variantsTable.columns.onHand'.tr(),
+                                110,
+                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                              ),
+                              _headerCell(
+                                'admin.variantsTable.columns.reserved'.tr(),
+                                110,
+                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                              ),
+                              _headerCell(
+                                'admin.variantsTable.columns.safety'.tr(),
+                                110,
+                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          ..._stockAllocationRows.map(
+                            (row) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                children: [
+                                  _dataCell(row.title, 230, const TextStyle(fontSize: 12)),
+                                  SizedBox(
+                                    width: 110,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      child: TextField(
+                                        controller: row.stockController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: _inputDecoration(),
+                                        onChanged: (_) => setState(() {}),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 110,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      child: TextField(
+                                        controller: row.reservedController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: _inputDecoration(),
+                                        onChanged: (_) => setState(() {}),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 110,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      child: TextField(
+                                        controller: row.safetyController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: _inputDecoration(),
+                                        onChanged: (_) => setState(() {}),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              _dataCell(
+                                '${'admin.pages.products.edit.variantsTab.totalOnHand'.tr()}: '
+                                '$_allocationStockTotal/${sourceBalance.stock}',
+                                230,
+                                const TextStyle(fontSize: 11),
+                              ),
+                              _dataCell(
+                                '${'admin.pages.products.edit.variantsTab.totalReserved'.tr()}: '
+                                '$_allocationReservedTotal/${sourceBalance.reserved}',
+                                220,
+                                const TextStyle(fontSize: 11),
+                              ),
+                              _dataCell(
+                                '${'admin.pages.products.edit.variantsTab.totalSafety'.tr()}: '
+                                '$_allocationSafetyTotal/${sourceBalance.safetyStock}',
+                                220,
+                                const TextStyle(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _allocationBalanced
+                                  ? 'admin.pages.products.edit.variantsTab.allocationBalanced'.tr()
+                                  : 'admin.pages.products.edit.variantsTab.allocationUnbalanced'
+                                      .tr(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: _allocationBalanced
+                                    ? const Color(0xFF059669)
+                                    : const Color(0xFFDC2626),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Checkbox(
+                value: _showArchivedVariants,
+                onChanged: (value) {
+                  setState(() => _showArchivedVariants = value == true);
+                },
+              ),
+              Text('admin.pages.products.edit.variantsTab.showArchived'.tr()),
+              const SizedBox(width: 12),
+              Text(
+                'admin.pages.products.edit.variantsTab.archivedCount'.tr(
+                  namedArgs: {'count': _archivedCount.toString()},
+                ),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (visibleRows.isEmpty)
             Text(
               'admin.pages.products.edit.variantsTab.empty'.tr(),
               style: const TextStyle(color: Color(0xFF64748B)),
             )
           else
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
+            Container(
+              decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
+                ),
               ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: product!.variants.map((variant) {
-                  return InkWell(
-                    onTap: () {
-                      Navigator.of(context)
-                          .push(
-                            MaterialPageRoute(
-                              builder: (_) => VariantEditScreen(
-                                variant: variant,
-                                product: product!,
-                              ),
-                            ),
-                          )
-                          .then((_) => onVariantUpdated());
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: Color(0xFFE2E8F0)),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 1880),
+                  child: Column(
+                    children: [
+                      Container(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        child: Row(
+                          children: [
+                            _headerCell('admin.variantsTable.columns.variant'.tr(), 180, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.price'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.cost'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.promotion'.tr(), 280, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.track'.tr(), 70, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.onHand'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.reserved'.tr(), 88, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.safety'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.available'.tr(), 90, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.sku'.tr(), 240, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.barcode'.tr(), 150, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.active'.tr(), 70, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.variantsTable.columns.images'.tr(), 120, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell('admin.common.actions'.tr(), 110, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              color: const Color(0xFFF1F5F9),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: variant.images.isNotEmpty
-                                ? TenantImageWidget(
-                                    imagePath: variant.images.first,
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  variant.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  variant.sku.isEmpty
-                                      ? 'admin.pages.products.edit.variantsTab.noSku'
-                                            .tr()
-                                      : variant.sku,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ),
-                              ],
+                      ...visibleRows.map((row) {
+                        final savingInfo = _savingInfoIds.contains(row.id);
+                        final savingInventory = _savingInventoryIds.contains(row.id);
+                        final savingStock = _savingStockIds.contains(row.id);
+                        final lockingSku = _lockingSkuIds.contains(row.id);
+                        final suggestingSku = _suggestingSkuIds.contains(row.id);
+                        final supportPromo = _supportsVariantPromotion(row);
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                variant.price.toStringAsFixed(2),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
+                              SizedBox(
+                                width: 180,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Text(
+                                    row.title,
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                  ),
                                 ),
                               ),
-                              Text(
-                                'admin.pages.products.edit.variantsTab.inStock'
-                                    .tr(
-                                      namedArgs: {
-                                        'count': variant.stock.toString(),
-                                      },
-                                    ),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: variant.stock > 0
-                                      ? const Color(0xFF65A30D)
-                                      : const Color(0xFFEF4444),
+                              SizedBox(
+                                width: 92,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: TextField(
+                                    controller: row.priceController,
+                                    enabled: !savingInfo,
+                                    decoration: _inputDecoration(),
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    onSubmitted: (_) => _updateVariantInfo(row),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 92,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: TextField(
+                                    controller: row.costController,
+                                    enabled: !savingInfo,
+                                    decoration: _inputDecoration(),
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    onSubmitted: (_) => _updateVariantInfo(row),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 280,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: supportPromo
+                                      ? Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Checkbox(
+                                                  value: row.isPromotionActive,
+                                                  onChanged: savingInfo
+                                                      ? null
+                                                      : (value) {
+                                                          setState(() {
+                                                            row.isPromotionActive = value == true;
+                                                          });
+                                                          _updateVariantInfo(row);
+                                                        },
+                                                ),
+                                                Expanded(
+                                                  child: Text(
+                                                    'admin.forms.product.isPromotionActive.label'.tr(),
+                                                    style: const TextStyle(fontSize: 11),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            if (row.isPromotionActive) ...[
+                                              TextField(
+                                                controller: row.promotionalPriceController,
+                                                enabled: !savingInfo,
+                                                decoration: _inputDecoration().copyWith(
+                                                  hintText: 'admin.forms.product.promotionalPrice.label'.tr(),
+                                                ),
+                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                onSubmitted: (_) => _updateVariantInfo(row),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              TextField(
+                                                controller: row.promotionStartController,
+                                                enabled: !savingInfo,
+                                                decoration: _inputDecoration().copyWith(hintText: 'YYYY-MM-DDTHH:mm'),
+                                                onSubmitted: (_) => _updateVariantInfo(row),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              TextField(
+                                                controller: row.promotionEndController,
+                                                enabled: !savingInfo,
+                                                decoration: _inputDecoration().copyWith(hintText: 'YYYY-MM-DDTHH:mm'),
+                                                onSubmitted: (_) => _updateVariantInfo(row),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Checkbox(
+                                                    value: row.showCountdown,
+                                                    onChanged: savingInfo
+                                                        ? null
+                                                        : (value) {
+                                                            setState(() {
+                                                              row.showCountdown = value == true;
+                                                            });
+                                                            _updateVariantInfo(row);
+                                                          },
+                                                  ),
+                                                  Expanded(
+                                                    child: Text(
+                                                      'admin.forms.product.showCountdown.label'.tr(),
+                                                      style: const TextStyle(fontSize: 11),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ],
+                                        )
+                                      : Text(
+                                          'admin.variantsTable.promotionSimpleProduct'.tr(),
+                                          style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                        ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 70,
+                                child: Center(
+                                  child: Checkbox(
+                                    value: row.trackInventory,
+                                    onChanged: savingInventory
+                                        ? null
+                                        : (value) {
+                                            setState(() {
+                                              row.trackInventory = value == true;
+                                            });
+                                            _updateVariantInventory(
+                                              row,
+                                              {
+                                                'trackInventory': row.trackInventory,
+                                              },
+                                            );
+                                          },
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 92,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: TextField(
+                                    controller: row.stockController,
+                                    enabled: !savingStock && row.trackInventory,
+                                    decoration: _inputDecoration(),
+                                    keyboardType: TextInputType.number,
+                                    onSubmitted: (_) => _setVariantStock(row),
+                                  ),
+                                ),
+                              ),
+                              _dataCell('${row.reserved}', 88, const TextStyle(fontSize: 12)),
+                              SizedBox(
+                                width: 92,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: TextField(
+                                    controller: row.safetyStockController,
+                                    enabled: !savingInventory,
+                                    decoration: _inputDecoration(),
+                                    keyboardType: TextInputType.number,
+                                    onSubmitted: (_) {
+                                      _updateVariantInventory(
+                                        row,
+                                        {
+                                          'safetyStock': _parseInt(
+                                            row.safetyStockController.text,
+                                            fallback: row.safetyStock,
+                                          ),
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              _dataCell(
+                                row.trackInventory ? '${_availableOf(row)}' : '∞',
+                                90,
+                                const TextStyle(fontSize: 12),
+                              ),
+                              SizedBox(
+                                width: 240,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: row.skuController,
+                                          enabled: !row.skuLocked && !savingInfo,
+                                          decoration: _inputDecoration(),
+                                          onSubmitted: (_) => _updateVariantInfo(row),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      if (!row.skuLocked)
+                                        IconButton(
+                                          tooltip:
+                                              'admin.variantsTable.actions.suggestSku'.tr(),
+                                          icon: suggestingSku
+                                              ? const SizedBox(
+                                                  width: 12,
+                                                  height: 12,
+                                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                                )
+                                              : const Icon(LucideIcons.wand2, size: 16),
+                                          onPressed: suggestingSku ? null : () => _suggestSku(row),
+                                        ),
+                                      if (!row.skuLocked)
+                                        IconButton(
+                                          tooltip:
+                                              'admin.variantsTable.actions.lockSku'.tr(),
+                                          icon: lockingSku
+                                              ? const SizedBox(
+                                                  width: 12,
+                                                  height: 12,
+                                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                                )
+                                              : const Icon(LucideIcons.lock, size: 16),
+                                          onPressed: lockingSku ? null : () => _lockSku(row),
+                                        )
+                                      else
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 6),
+                                          child: Text(
+                                            'admin.variantsTable.actions.skuLocked'.tr(),
+                                            style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 150,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: TextField(
+                                    controller: row.barcodeController,
+                                    enabled: !savingInfo,
+                                    decoration: _inputDecoration(),
+                                    onSubmitted: (_) => _updateVariantInfo(row),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 70,
+                                child: Center(
+                                  child: Checkbox(
+                                    value: row.isActive,
+                                    onChanged: savingInfo
+                                        ? null
+                                        : (value) {
+                                            setState(() {
+                                              row.isActive = value == true;
+                                            });
+                                            _updateVariantInfo(row);
+                                          },
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 120,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: AppButton.secondary(
+                                    label:
+                                        'admin.variantsTable.actions.manageImages'
+                                            .tr(namedArgs: {
+                                      'count': row.images.length.toString(),
+                                    }),
+                                    onPressed: () => _openImageEditor(row),
+                                    size: AppButtonSize.sm,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 110,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: AppButton.ghost(
+                                    label:
+                                        'admin.variantsTable.actions.movements'.tr(),
+                                    onPressed: () => _openMovements(row),
+                                    size: AppButtonSize.sm,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            LucideIcons.chevronRight,
-                            size: 16,
-                            color: Color(0xFF94A3B8),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
               ),
             ),
         ],
       ),
     );
+  }
+}
+
+class _VariantEditorRow {
+  final String id;
+  final String title;
+  final List<String> images;
+  final List<ProductVariantOptionValue> optionValues;
+
+  bool skuLocked;
+  bool trackInventory;
+  bool isActive;
+  bool isPromotionActive;
+  bool showCountdown;
+  int stock;
+  int reserved;
+  int safetyStock;
+  int? availableStock;
+
+  final TextEditingController priceController;
+  final TextEditingController costController;
+  final TextEditingController promotionalPriceController;
+  final TextEditingController promotionStartController;
+  final TextEditingController promotionEndController;
+  final TextEditingController stockController;
+  final TextEditingController safetyStockController;
+  final TextEditingController skuController;
+  final TextEditingController barcodeController;
+
+  _VariantEditorRow({
+    required this.id,
+    required this.title,
+    required this.images,
+    required this.optionValues,
+    required this.skuLocked,
+    required this.trackInventory,
+    required this.isActive,
+    required this.isPromotionActive,
+    required this.showCountdown,
+    required this.stock,
+    required this.reserved,
+    required this.safetyStock,
+    required this.availableStock,
+    required this.priceController,
+    required this.costController,
+    required this.promotionalPriceController,
+    required this.promotionStartController,
+    required this.promotionEndController,
+    required this.stockController,
+    required this.safetyStockController,
+    required this.skuController,
+    required this.barcodeController,
+  });
+
+  factory _VariantEditorRow.fromVariant(ProductVariant variant) {
+    return _VariantEditorRow(
+      id: variant.id,
+      title: variant.title,
+      images: List<String>.from(variant.images),
+      optionValues: List<ProductVariantOptionValue>.from(variant.optionValues),
+      skuLocked: variant.skuLocked,
+      trackInventory: variant.trackInventory,
+      isActive: variant.isActive,
+      isPromotionActive: variant.isPromotionActive,
+      showCountdown: variant.showCountdown,
+      stock: variant.stock,
+      reserved: variant.reserved,
+      safetyStock: variant.safetyStock,
+      availableStock: variant.availableStock,
+      priceController: TextEditingController(text: variant.price.toString()),
+      costController: TextEditingController(text: variant.cost.toString()),
+      promotionalPriceController: TextEditingController(
+        text: variant.promotionalPrice?.toString() ?? '',
+      ),
+      promotionStartController: TextEditingController(
+        text: variant.promotionStartDate?.toIso8601String().substring(0, 16) ?? '',
+      ),
+      promotionEndController: TextEditingController(
+        text: variant.promotionEndDate?.toIso8601String().substring(0, 16) ?? '',
+      ),
+      stockController: TextEditingController(text: variant.stock.toString()),
+      safetyStockController: TextEditingController(
+        text: variant.safetyStock.toString(),
+      ),
+      skuController: TextEditingController(text: variant.sku),
+      barcodeController: TextEditingController(text: variant.barcode ?? ''),
+    );
+  }
+
+  Map<String, dynamic> snapshot() {
+    return {
+      'price': priceController.text,
+      'cost': costController.text,
+      'promo': promotionalPriceController.text,
+      'promoStart': promotionStartController.text,
+      'promoEnd': promotionEndController.text,
+      'stockText': stockController.text,
+      'safetyText': safetyStockController.text,
+      'sku': skuController.text,
+      'barcode': barcodeController.text,
+      'skuLocked': skuLocked,
+      'trackInventory': trackInventory,
+      'isActive': isActive,
+      'isPromotionActive': isPromotionActive,
+      'showCountdown': showCountdown,
+      'stock': stock,
+      'reserved': reserved,
+      'safetyStock': safetyStock,
+      'availableStock': availableStock,
+    };
+  }
+
+  void restore(Map<String, dynamic> snapshot) {
+    priceController.text = snapshot['price']?.toString() ?? priceController.text;
+    costController.text = snapshot['cost']?.toString() ?? costController.text;
+    promotionalPriceController.text =
+        snapshot['promo']?.toString() ?? promotionalPriceController.text;
+    promotionStartController.text =
+        snapshot['promoStart']?.toString() ?? promotionStartController.text;
+    promotionEndController.text =
+        snapshot['promoEnd']?.toString() ?? promotionEndController.text;
+    stockController.text = snapshot['stockText']?.toString() ?? stockController.text;
+    safetyStockController.text =
+        snapshot['safetyText']?.toString() ?? safetyStockController.text;
+    skuController.text = snapshot['sku']?.toString() ?? skuController.text;
+    barcodeController.text = snapshot['barcode']?.toString() ?? barcodeController.text;
+    skuLocked = snapshot['skuLocked'] == true;
+    trackInventory = snapshot['trackInventory'] == true;
+    isActive = snapshot['isActive'] == true;
+    isPromotionActive = snapshot['isPromotionActive'] == true;
+    showCountdown = snapshot['showCountdown'] == true;
+    stock = (snapshot['stock'] as num?)?.toInt() ?? stock;
+    reserved = (snapshot['reserved'] as num?)?.toInt() ?? reserved;
+    safetyStock = (snapshot['safetyStock'] as num?)?.toInt() ?? safetyStock;
+    availableStock = (snapshot['availableStock'] as num?)?.toInt();
+  }
+
+  void dispose() {
+    priceController.dispose();
+    costController.dispose();
+    promotionalPriceController.dispose();
+    promotionStartController.dispose();
+    promotionEndController.dispose();
+    stockController.dispose();
+    safetyStockController.dispose();
+    skuController.dispose();
+    barcodeController.dispose();
+  }
+}
+
+class _VariantMovementRecord {
+  final String id;
+  final String type;
+  final int delta;
+  final int reservedDelta;
+  final int safetyStockDelta;
+  final int? stockAfter;
+  final int? reservedAfter;
+  final int? safetyStockAfter;
+  final String? createdAt;
+  final String? createdByEmail;
+
+  _VariantMovementRecord({
+    required this.id,
+    required this.type,
+    required this.delta,
+    required this.reservedDelta,
+    required this.safetyStockDelta,
+    required this.stockAfter,
+    required this.reservedAfter,
+    required this.safetyStockAfter,
+    required this.createdAt,
+    required this.createdByEmail,
+  });
+
+  factory _VariantMovementRecord.fromJson(Map<String, dynamic> json) {
+    int? parseNullableInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      return int.tryParse(value.toString());
+    }
+
+    return _VariantMovementRecord(
+      id: json['id']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      delta: parseNullableInt(json['delta']) ?? 0,
+      reservedDelta: parseNullableInt(json['reservedDelta']) ?? 0,
+      safetyStockDelta: parseNullableInt(json['safetyStockDelta']) ?? 0,
+      stockAfter: parseNullableInt(json['stockAfter']),
+      reservedAfter: parseNullableInt(json['reservedAfter']),
+      safetyStockAfter: parseNullableInt(json['safetyStockAfter']),
+      createdAt: json['createdAt']?.toString(),
+      createdByEmail: json['createdBy'] is Map
+          ? (json['createdBy']['email']?.toString())
+          : null,
+    );
+  }
+}
+
+class _StockAllocationRow {
+  final String variantId;
+  final String title;
+  final TextEditingController stockController;
+  final TextEditingController reservedController;
+  final TextEditingController safetyController;
+
+  _StockAllocationRow({
+    required this.variantId,
+    required this.title,
+    required this.stockController,
+    required this.reservedController,
+    required this.safetyController,
+  });
+
+  void dispose() {
+    stockController.dispose();
+    reservedController.dispose();
+    safetyController.dispose();
   }
 }

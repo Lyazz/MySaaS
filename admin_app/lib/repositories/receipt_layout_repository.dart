@@ -24,12 +24,21 @@ class ReceiptLayoutRepository {
       whereArgs: [_tid],
     );
 
-    final localLayouts = localData
+        final localLayouts = localData
         .map(
           (e) => ReceiptLayout.fromMap({
             'id': e['id'],
             'name': e['name'],
             'showLogo': e['showLogo'] == 1,
+            'cachedLogoUrl': e['cachedLogoUrl'],
+            'showStoreName': e['showStoreName'] == 1,
+            'storeNameOverride': e['storeNameOverride'],
+            'showStoreAddress': e['showStoreAddress'] == 1,
+            'storeAddressOverride': e['storeAddressOverride'],
+            'showStorePhone': e['showStorePhone'] == 1,
+            'storePhoneOverride': e['storePhoneOverride'],
+            'showStoreEmail': e['showStoreEmail'] == 1,
+            'storeEmailOverride': e['storeEmailOverride'],
             'showHeader': e['showHeader'] == 1,
             'headerText': e['headerText'],
             'showDate': e['showDate'] == 1,
@@ -64,6 +73,15 @@ class ReceiptLayoutRepository {
               'tenantId': _tid,
               'name': r.name,
               'showLogo': r.showLogo ? 1 : 0,
+              'cachedLogoUrl': r.cachedLogoUrl,
+              'showStoreName': r.showStoreName ? 1 : 0,
+              'storeNameOverride': r.storeNameOverride,
+              'showStoreAddress': r.showStoreAddress ? 1 : 0,
+              'storeAddressOverride': r.storeAddressOverride,
+              'showStorePhone': r.showStorePhone ? 1 : 0,
+              'storePhoneOverride': r.storePhoneOverride,
+              'showStoreEmail': r.showStoreEmail ? 1 : 0,
+              'storeEmailOverride': r.storeEmailOverride,
               'showHeader': r.showHeader ? 1 : 0,
               'headerText': r.headerText,
               'showDate': r.showDate ? 1 : 0,
@@ -87,25 +105,22 @@ class ReceiptLayoutRepository {
     final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
-    final newLayout = ReceiptLayout(
-      id: id,
-      name: layout.name,
-      showLogo: layout.showLogo,
-      showHeader: layout.showHeader,
-      headerText: layout.headerText,
-      showDate: layout.showDate,
-      showOrderNumber: layout.showOrderNumber,
-      showCustomerInfo: layout.showCustomerInfo,
-      showFooter: layout.showFooter,
-      footerText: layout.footerText,
-      showTaxBreakdown: layout.showTaxBreakdown,
-    );
+    final newLayout = layout.copyWith(id: id);
 
     await db.insert('receipt_layouts', {
       'id': newLayout.id,
       'tenantId': _tid,
       'name': newLayout.name,
       'showLogo': newLayout.showLogo ? 1 : 0,
+      'cachedLogoUrl': newLayout.cachedLogoUrl,
+      'showStoreName': newLayout.showStoreName ? 1 : 0,
+      'storeNameOverride': newLayout.storeNameOverride,
+      'showStoreAddress': newLayout.showStoreAddress ? 1 : 0,
+      'storeAddressOverride': newLayout.storeAddressOverride,
+      'showStorePhone': newLayout.showStorePhone ? 1 : 0,
+      'storePhoneOverride': newLayout.storePhoneOverride,
+      'showStoreEmail': newLayout.showStoreEmail ? 1 : 0,
+      'storeEmailOverride': newLayout.storeEmailOverride,
       'showHeader': newLayout.showHeader ? 1 : 0,
       'headerText': newLayout.headerText,
       'showDate': newLayout.showDate ? 1 : 0,
@@ -135,6 +150,15 @@ class ReceiptLayoutRepository {
       {
         'name': layout.name,
         'showLogo': layout.showLogo ? 1 : 0,
+        'cachedLogoUrl': layout.cachedLogoUrl,
+        'showStoreName': layout.showStoreName ? 1 : 0,
+        'storeNameOverride': layout.storeNameOverride,
+        'showStoreAddress': layout.showStoreAddress ? 1 : 0,
+        'storeAddressOverride': layout.storeAddressOverride,
+        'showStorePhone': layout.showStorePhone ? 1 : 0,
+        'storePhoneOverride': layout.storePhoneOverride,
+        'showStoreEmail': layout.showStoreEmail ? 1 : 0,
+        'storeEmailOverride': layout.storeEmailOverride,
         'showHeader': layout.showHeader ? 1 : 0,
         'headerText': layout.headerText,
         'showDate': layout.showDate ? 1 : 0,

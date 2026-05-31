@@ -296,7 +296,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           const SizedBox(height: 22),
           Text.rich(
             TextSpan(
-              style: GoogleFonts.dmSans(
+              style: GoogleFonts.outfit(
                 fontSize: 44,
                 fontWeight: FontWeight.w700,
                 height: 1.08,
@@ -385,7 +385,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               const SizedBox(height: 22),
               Text(
                 'Create your account',
-                style: GoogleFonts.dmSans(
+                style: GoogleFonts.outfit(
                   fontSize: 34,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.8,

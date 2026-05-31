@@ -41,6 +41,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
   int _paperWidth = 80;
   bool _cut = true;
   bool _drawer = false;
+  bool _forceImagePrint = false;
 
   @override
   void initState() {
@@ -81,6 +82,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         _paperWidth = profile.paperWidth;
         _cut = profile.cut;
         _drawer = profile.drawer;
+        _forceImagePrint = profile.forceImagePrint;
 
         _ipController.text = profile.ip ?? '';
         _portController.text = profile.port?.toString() ?? '9100';
@@ -95,6 +97,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         _paperWidth = 80;
         _cut = true;
         _drawer = false;
+        _forceImagePrint = false;
         _ipController.clear();
         _portController.text = '9100';
         _macController.clear();
@@ -142,6 +145,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
       'paperWidth': _paperWidth,
       'cut': _cut,
       'drawer': _drawer,
+      'forceImagePrint': _forceImagePrint,
     };
 
     final newProfile = PrinterProfile(
@@ -726,6 +730,15 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 8),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Print as Image (Arabic Support)'),
+                          subtitle: const Text('Rasterize PDF to image for perfect Arabic rendering (slower)'),
+                          value: _forceImagePrint,
+                          onChanged: (v) => setState(() => _forceImagePrint = v!),
+                          activeColor: accentColor,
                         ),
                       ],
                     ],

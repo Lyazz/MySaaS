@@ -12,6 +12,7 @@ import '../utils/tenant_currency.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/responsive_server_paginated_table.dart';
 
 class CustomersScreen extends ConsumerStatefulWidget {
@@ -391,10 +392,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   flex: 2,
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: AppButton.secondary(
-                      label: 'admin.common.view'.tr(),
+                    child: TableActionButton(
+                      tooltip: 'admin.common.view'.tr(),
                       icon: LucideIcons.eye,
-                      size: AppButtonSize.sm,
                       onPressed: () => context.go('/customers/${customer.id}'),
                     ),
                   ),

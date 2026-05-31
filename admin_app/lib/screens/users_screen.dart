@@ -10,6 +10,7 @@ import '../providers/staff_roles_provider.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/responsive_paginated_table.dart';
@@ -570,17 +571,17 @@ class _UsersTable extends StatelessWidget {
                   child: Wrap(
                     spacing: 8,
                     children: [
-                      AppButton.secondary(
-                        label: 'admin.common.edit'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.edit'.tr(),
                         icon: LucideIcons.pencil,
-                        size: AppButtonSize.sm,
                         onPressed: () => onEdit(u),
                       ),
                       if (u.isActive && u.role != 'owner')
-                        IconButton(
+                        TableActionButton(
                           tooltip: 'admin.pages.users.actions.deactivate'.tr(),
                           onPressed: () => onDeactivate(u),
-                          icon: const Icon(LucideIcons.userX, size: 18),
+                          icon: LucideIcons.userX,
+                          isDanger: true,
                         ),
                     ],
                   ),
@@ -685,16 +686,15 @@ class _RolesTable extends StatelessWidget {
                   child: Wrap(
                     spacing: 8,
                     children: [
-                      AppButton.secondary(
-                        label: 'admin.common.edit'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.edit'.tr(),
                         icon: LucideIcons.pencil,
-                        size: AppButtonSize.sm,
                         onPressed: () => onEdit(r),
                       ),
-                      AppButton.danger(
-                        label: 'admin.common.delete'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.delete'.tr(),
                         icon: LucideIcons.trash2,
-                        size: AppButtonSize.sm,
+                        isDanger: true,
                         onPressed: () => onDelete(r),
                       ),
                     ],

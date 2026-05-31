@@ -14,6 +14,7 @@ import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/tenant_image_widget.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
@@ -427,18 +428,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    AppButton.secondary(
-                      label: 'Edit',
+                    TableActionButton(
+                      tooltip: 'Edit',
                       icon: LucideIcons.pencil,
-                      size: AppButtonSize.sm,
                       onPressed: () =>
                           context.push('/categories/${category.id}'),
                     ),
                     const SizedBox(width: 8),
-                    AppButton.danger(
-                      label: 'Delete',
+                    TableActionButton(
+                      tooltip: 'Delete',
                       icon: LucideIcons.trash2,
-                      size: AppButtonSize.sm,
+                      isDanger: true,
                       onPressed: () => _confirmDelete(category),
                     ),
                   ],

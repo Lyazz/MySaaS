@@ -40,6 +40,7 @@ class PrinterProfile {
   int get profileId =>
       capabilityParams['profileId'] ??
       0; // standard, default, etc. (CapabilityProfile value)
+  bool get forceImagePrint => capabilityParams['forceImagePrint'] ?? false;
 
   Map<String, dynamic> toMap() {
     return {

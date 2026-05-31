@@ -13,6 +13,7 @@ import '../utils/tenant_currency.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/badges/ui_badge.dart';
@@ -843,7 +844,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         Expanded(
           flex: 4,
           child: Text(
-            'admin.pages.products.index.table.product'.tr(),
+            'admin.pages.products.index.table.product'.tr().toUpperCase(),
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -853,9 +854,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           ),
         ),
         Expanded(
-          flex: 2,
+          flex: 3,
           child: Text(
-            'admin.pages.products.index.table.category'.tr(),
+            'admin.pages.products.index.table.category'.tr().toUpperCase(),
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -865,34 +866,47 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           ),
         ),
         Expanded(
-          flex: 1,
+          flex: 3,
           child: Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: Text(
-              'admin.pages.products.index.table.price'.tr(),
+              'admin.pages.products.index.table.price'.tr().toUpperCase(),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF6B7280),
                 letterSpacing: 0.5,
               ),
-              textAlign: TextAlign.right,
             ),
           ),
         ),
         Expanded(
-          flex: 1,
+          flex: 2,
           child: Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: Text(
-              'admin.pages.products.index.table.stock'.tr(),
+              'admin.pages.products.index.table.stock'.tr().toUpperCase(),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF6B7280),
                 letterSpacing: 0.5,
               ),
-              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'admin.pages.products.index.table.status'.tr().toUpperCase(),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF6B7280),
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),
@@ -901,7 +915,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           child: Align(
             alignment: Alignment.center,
             child: Text(
-              'admin.pages.products.index.table.status'.tr(),
+              'admin.pages.products.index.table.links'.tr().toUpperCase(),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -913,23 +927,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           ),
         ),
         Expanded(
-          flex: 3,
-          child: Text(
-            'admin.pages.products.index.table.links'.tr(),
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF6B7280),
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 3,
+          flex: 2,
           child: Align(
             alignment: Alignment.centerRight,
             child: Text(
-              'admin.pages.products.index.table.actions'.tr(),
+              'admin.pages.products.index.table.actions'.tr().toUpperCase(),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -950,7 +952,6 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       return UiBadge(
         label: 'admin.pages.products.index.table.outOfStock'.tr(),
         tone: UiBadgeTone.red,
-        textAlign: TextAlign.center,
       );
     }
     if (product.stock <= product.lowStockThreshold) {
@@ -988,7 +989,6 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         color: Color(0xFF374151),
         fontWeight: FontWeight.w500,
       ),
-      textAlign: TextAlign.right,
     );
   }
 
@@ -1084,7 +1084,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Align(
               alignment: Alignment.centerLeft,
               child: product.category != null
@@ -1103,162 +1103,175 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ),
           ),
           Expanded(
-            flex: 1,
+            flex: 3,
             child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                money.format(product.price),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF111827),
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.2,
-                ),
-                textAlign: TextAlign.right,
-              ),
+              alignment: Alignment.centerLeft,
+              child: _buildPriceCell(product, money, isDark),
             ),
           ),
           Expanded(
-            flex: 1,
+            flex: 2,
             child: Align(
-              alignment: Alignment.centerRight,
+              alignment: Alignment.centerLeft,
               child: _buildStockCell(product),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Transform.scale(
+                    scale: 0.75,
+                    child: Switch(
+                      value: product.isActive,
+                      activeColor: Colors.white,
+                      activeTrackColor: const Color(0xFF84CC16), // Lime-500
+                      onChanged: (val) {
+                        // Assuming you have a method to toggle status in the provider
+                        // ref.read(productsProvider.notifier).toggleStatus(product.id, val);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    product.isActive
+                        ? 'admin.common.active'.tr()
+                        : 'admin.common.inactive'.tr(),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: product.isActive
+                          ? const Color(0xFF15803D)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
             flex: 1,
             child: Align(
               alignment: Alignment.center,
-              child: UiBadge(
-                label: product.isActive
-                    ? 'admin.common.active'.tr()
-                    : 'admin.common.inactive'.tr(),
-                tone: product.isActive
-                    ? UiBadgeTone.emerald
-                    : UiBadgeTone.slate,
-                maxWidth: 110,
-                textAlign: TextAlign.center,
+              child: PopupMenuButton<String>(
+                icon: const Icon(
+                  LucideIcons.globe,
+                  color: Color(0xFF64748B),
+                  size: 18,
+                ),
+                position: PopupMenuPosition.under,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'open_product',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.externalLink,
+                          size: 16,
+                          color: Color(0xFF64748B),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'admin.pages.products.index.links.openProduct'.tr(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'copy_product',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.copy,
+                          size: 16,
+                          color: Color(0xFF64748B),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'admin.pages.products.index.links.copyProduct'.tr(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    value: 'open_landing',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.externalLink,
+                          size: 16,
+                          color: Color(0xFF64748B),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'admin.pages.products.index.links.openLanding'.tr(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'copy_landing',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.copy,
+                          size: 16,
+                          color: Color(0xFF64748B),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'admin.pages.products.index.links.copyLanding'.tr(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                onSelected: (value) async {
+                  if (value == 'copy_product') {
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text: 'https://example.com/product/${product.slug}',
+                      ),
+                    );
+                    if (context.mounted)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('admin.common.copied'.tr())),
+                      );
+                  } else if (value == 'copy_landing') {
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text:
+                            'https://example.com/product/${product.slug}?mode=landing',
+                      ),
+                    );
+                    if (context.mounted)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('admin.common.copied'.tr())),
+                      );
+                  } else {
+                    if (context.mounted)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'admin.common.featureComingSoon'.tr(
+                              namedArgs: {'feature': value},
+                            ),
+                          ),
+                        ),
+                      );
+                  }
+                },
               ),
             ),
           ),
           Expanded(
-            flex: 3,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        '${'admin.pages.products.index.links.product'.tr()}:',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF9CA3AF), // Gray-400
-                        ),
-                      ),
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.externalLink,
-                      color: const Color(0xFF65A30D), // Lime-600
-                      tooltip: 'admin.pages.products.index.links.openProduct'
-                          .tr(),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'admin.common.featureComingSoon'.tr(
-                                namedArgs: {
-                                  'feature':
-                                      'admin.pages.products.index.links.openProduct'
-                                          .tr(),
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.copy,
-                      color: const Color(0xFF9CA3AF), // Gray-400
-                      tooltip: 'admin.pages.products.index.links.copyProduct'
-                          .tr(),
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(
-                            text: 'https://example.com/product/${product.slug}',
-                          ),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('admin.common.copied'.tr())),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        '${'admin.pages.products.index.links.landing'.tr()}:',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF9CA3AF), // Gray-400
-                        ),
-                      ),
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.externalLink,
-                      color: const Color(0xFF65A30D), // Lime-600
-                      tooltip: 'admin.pages.products.index.links.openLanding'
-                          .tr(),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'admin.common.featureComingSoon'.tr(
-                                namedArgs: {
-                                  'feature':
-                                      'admin.pages.products.index.links.openLanding'
-                                          .tr(),
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.copy,
-                      color: const Color(0xFF9CA3AF), // Gray-400
-                      tooltip: 'admin.pages.products.index.links.copyLanding'
-                          .tr(),
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(
-                            text:
-                                'https://example.com/product/${product.slug}?mode=landing',
-                          ),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('admin.common.copied'.tr())),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 3,
+            flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
               child: Wrap(
@@ -1267,16 +1280,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  AppButton.secondary(
-                    label: 'admin.common.edit'.tr(),
+                  TableActionButton(
+                    tooltip: 'admin.common.edit'.tr(),
                     icon: LucideIcons.pencil,
-                    size: AppButtonSize.sm,
                     onPressed: () => context.push('/products/${product.id}'),
                   ),
-                  AppButton.danger(
-                    label: 'admin.common.delete'.tr(),
+                  TableActionButton(
+                    tooltip: 'admin.common.delete'.tr(),
                     icon: LucideIcons.trash2,
-                    size: AppButtonSize.sm,
+                    isDanger: true,
                     onPressed: () => ref
                         .read(productsProvider.notifier)
                         .deleteProduct(product.id),
@@ -1286,6 +1298,60 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPriceCell(Product product, NumberFormat money, bool isDark) {
+    final bool hasPromotion =
+        product.promotionalPrice != null && product.promotionalPrice! > 0;
+
+    if (hasPromotion) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Text(
+                money.format(product.promotionalPrice!),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF84CC16), // Lime-500
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                money.format(product.price),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF9CA3AF), // Gray-400
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+            ],
+          ),
+          if (product.promotionEndDate != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Text(
+                'exp. ${DateFormat('dd/MM/yyyy').format(product.promotionEndDate!)}',
+                style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
+              ),
+            ),
+        ],
+      );
+    }
+
+    return Text(
+      money.format(product.price),
+      style: const TextStyle(
+        fontSize: 14,
+        color: Color(0xFF111827),
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.2,
       ),
     );
   }

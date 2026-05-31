@@ -1,9 +1,12 @@
+import 'dart:typed_data';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:intl/intl.dart';
 import '../models/printer_profile.dart';
 import '../models/pos_models.dart';
 import '../models/customer.dart';
 import '../models/receipt_layout.dart';
+import 'package:image/image.dart' as img;
+import 'logo_cache_service.dart';
 
 class ReceiptBuilder {
   Future<List<int>> buildReceipt({
@@ -15,6 +18,8 @@ class ReceiptBuilder {
     String? orderId,
     DateTime? date,
     ReceiptLayout? layout,
+    dynamic storeSettings,
+    Map<String, String>? contactInfos,
     String currencyCode = 'DZD',
   }) async {
     final money = NumberFormat.simpleCurrency(name: currencyCode);
@@ -29,15 +34,62 @@ class ReceiptBuilder {
     );
 
     List<int> bytes = [];
+    final safeContactInfos = contactInfos ?? {};
+    
+    final storeName = effectiveLayout.storeNameOverride ?? storeSettings?.name ?? 'MySaaS Store';
+    final storeAddress = effectiveLayout.storeAddressOverride ?? safeContactInfos['address'];
+    final storePhone = effectiveLayout.storePhoneOverride ?? safeContactInfos['phone'];
+    final storeEmail = effectiveLayout.storeEmailOverride ?? safeContactInfos['email'];
+    final logoUrl = storeSettings?.logoUrl;
 
     // 1. Header
-    if (effectiveLayout.showHeader) {
+    
+    if (effectiveLayout.showLogo && logoUrl != null && logoUrl.isNotEmpty) {
+      final cachedLogo = await logoCacheService.getCachedLogo(logoUrl);
+      if (cachedLogo != null && await cachedLogo.exists()) {
+        try {
+          final bytesData = await cachedLogo.readAsBytes();
+          final image = img.decodeImage(bytesData);
+          if (image != null) {
+            bytes += generator.image(image);
+            bytes += generator.feed(1);
+          }
+        } catch (_) {}
+      }
+    }
+    
+    if (effectiveLayout.showStoreName) {
       bytes += generator.text(
-        effectiveLayout.headerText,
+        storeName,
         styles: const PosStyles(
           align: PosAlign.center,
           height: PosTextSize.size2,
           width: PosTextSize.size2,
+          bold: true,
+        ),
+      );
+      bytes += generator.feed(1);
+    }
+    
+    if (effectiveLayout.showStoreAddress && storeAddress != null && storeAddress.isNotEmpty) {
+      bytes += generator.text(storeAddress, styles: const PosStyles(align: PosAlign.center));
+    }
+    if (effectiveLayout.showStorePhone && storePhone != null && storePhone.isNotEmpty) {
+      bytes += generator.text('Tel: $storePhone', styles: const PosStyles(align: PosAlign.center));
+    }
+    if (effectiveLayout.showStoreEmail && storeEmail != null && storeEmail.isNotEmpty) {
+      bytes += generator.text('Email: $storeEmail', styles: const PosStyles(align: PosAlign.center));
+    }
+    
+    if (effectiveLayout.showStoreAddress || effectiveLayout.showStorePhone || effectiveLayout.showStoreEmail) {
+      bytes += generator.feed(1);
+    }
+
+    if (effectiveLayout.showHeader && effectiveLayout.headerText.isNotEmpty) {
+      bytes += generator.text(
+        effectiveLayout.headerText,
+        styles: const PosStyles(
+          align: PosAlign.center,
           bold: true,
         ),
       );
@@ -125,12 +177,12 @@ class ReceiptBuilder {
             styles: const PosStyles(align: PosAlign.center),
           ),
           PosColumn(
-            text: item.price.toStringAsFixed(2),
+            text: money.format(item.price),
             width: 2,
             styles: const PosStyles(align: PosAlign.right),
           ),
           PosColumn(
-            text: (item.price * item.quantity).toStringAsFixed(2),
+            text: money.format(item.price * item.quantity),
             width: 2,
             styles: const PosStyles(align: PosAlign.right),
           ),
@@ -185,9 +237,53 @@ class ReceiptBuilder {
         styles: const PosStyles(align: PosAlign.center, bold: true),
       );
     }
+    
+    if (effectiveLayout.showOrderNumber && orderId != null) {
+      bytes += generator.feed(1);
+      try {
+        final List<int> barcodeData = orderId.codeUnits;
+        bytes += generator.barcode(Barcode.code128(barcodeData));
+        bytes += generator.text(orderId, styles: const PosStyles(align: PosAlign.center));
+      } catch (e) {
+        // Fallback if barcode fails
+        bytes += generator.text(orderId, styles: const PosStyles(align: PosAlign.center));
+      }
+    }
+    
     bytes += generator.feed(3);
 
     // 4. Cut & Drawer
+    if (profile.cut) {
+      bytes += generator.cut();
+    }
+    if (profile.drawer) {
+      bytes += generator.drawer();
+    }
+
+    return bytes;
+  }
+
+  Future<List<int>> buildImageReceipt({
+    required PrinterProfile profile,
+    required List<List<int>> images,
+  }) async {
+    final CapabilityProfile capabilityProfile = await CapabilityProfile.load(
+      name: _getProfileName(profile.profileId),
+    );
+    final generator = Generator(
+      profile.paperWidth == 58 ? PaperSize.mm58 : PaperSize.mm80,
+      capabilityProfile,
+    );
+
+    List<int> bytes = [];
+
+    for (final imageBytes in images) {
+      final image = img.decodeImage(Uint8List.fromList(imageBytes));
+      if (image != null) {
+        bytes += generator.image(image);
+      }
+    }
+
     if (profile.cut) {
       bytes += generator.cut();
     }

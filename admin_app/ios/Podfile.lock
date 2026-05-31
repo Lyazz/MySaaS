@@ -42,6 +42,9 @@ PODS:
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - GTMSessionFetcher/Core (3.5.0)
+  - image_cropper (0.0.5):
+    - Flutter
+    - TOCropViewController (~> 3.1.2)
   - image_picker_ios (0.0.1):
     - Flutter
   - integration_test (0.0.1):
@@ -100,6 +103,7 @@ PODS:
     - SQLCipher/common
   - super_native_extensions (0.0.1):
     - Flutter
+  - TOCropViewController (3.1.2)
   - url_launcher_ios (0.0.1):
     - Flutter
   - video_player_avfoundation (0.0.1):
@@ -114,6 +118,7 @@ DEPENDENCIES:
   - flutter_keyboard_visibility_temp_fork (from `.symlinks/plugins/flutter_keyboard_visibility_temp_fork/ios`)
   - flutter_secure_storage_darwin (from `.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
   - gal (from `.symlinks/plugins/gal/darwin`)
+  - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - irondash_engine_context (from `.symlinks/plugins/irondash_engine_context/ios`)
@@ -144,6 +149,7 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - SQLCipher
+    - TOCropViewController
 
 EXTERNAL SOURCES:
   connectivity_plus:
@@ -160,6 +166,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage_darwin/darwin"
   gal:
     :path: ".symlinks/plugins/gal/darwin"
+  image_cropper:
+    :path: ".symlinks/plugins/image_cropper/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   integration_test:
@@ -203,6 +211,7 @@ SPEC CHECKSUMS:
   GoogleToolboxForMac: d1a2cbf009c453f4d6ded37c105e2f67a32206d8
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
+  image_cropper: d3ba338ce166ebe54a4e1de742829354b521d473
   image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   irondash_engine_context: 3458bf979b90d616ffb8ae03a150bafe2e860cc9
@@ -222,6 +231,7 @@ SPEC CHECKSUMS:
   sqflite_sqlcipher: 1c9c7ceb30cb65dab28712cb2110fdf39b37311c
   SQLCipher: eb79c64049cb002b4e9fcb30edb7979bf4706dfc
   super_native_extensions: 4916b3c627a9c7fffdc48a23a9eca0b1ac228fa7
+  TOCropViewController: a916930c465b5d9445a74d95e0c0da931771b4df
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
   video_player_avfoundation: 7993f492ae0bd77edaea24d9dc051d8bb2cd7c86
 

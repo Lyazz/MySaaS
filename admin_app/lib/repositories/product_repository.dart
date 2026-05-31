@@ -69,6 +69,11 @@ class ProductRepository {
             'id': v.id,
             'price': v.price,
             'compareAtPrice': v.compareAtPrice,
+            'promotionalPrice': v.promotionalPrice,
+            'isPromotionActive': v.isPromotionActive,
+            'promotionStartDate': v.promotionStartDate?.toIso8601String(),
+            'promotionEndDate': v.promotionEndDate?.toIso8601String(),
+            'showCountdown': v.showCountdown,
             'cost': v.cost,
             'stock': v.stock,
             'sku': v.sku,
@@ -78,6 +83,7 @@ class ProductRepository {
             'trackInventory': v.trackInventory,
             'safetyStock': v.safetyStock,
             'reserved': v.reserved,
+            'availableStock': v.availableStock,
             'images': v.images,
             'optionValues': v.optionValues
                 .map(
@@ -201,6 +207,7 @@ class ProductRepository {
       try {
         final response = await _apiService.client.get(
           '/admin/products/$trimmed',
+          queryParameters: {'includeInactiveVariants': '1'},
         );
         final remote = Product.fromJson(response.data);
         await db.insert(

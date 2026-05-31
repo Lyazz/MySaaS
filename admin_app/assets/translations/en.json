@@ -668,7 +668,9 @@
       "toggleSidebar": "Toggle sidebar",
       "closeSidebar": "Close sidebar",
       "viewStore": "View Store",
-      "logout": "Logout"
+      "logout": "Logout",
+      "logoutConfirmTitle": "Log out?",
+      "logoutConfirmMessage": "You will need to sign in again to access the admin panel."
     },
     "common": {
       "name": "Name",
@@ -1048,6 +1050,7 @@
         "variant": "Variant",
         "price": "Price",
         "cost": "Cost",
+        "promotion": "Promotion",
         "track": "Track",
         "onHand": "On-hand",
         "reserved": "Reserved",
@@ -1066,6 +1069,7 @@
         "movements": "Movements"
       },
       "defaultVariant": "Default",
+      "promotionSimpleProduct": "Use the product promotion tab for the default variant of a simple product.",
       "movements": {
         "title": "Inventory movements",
         "subtitle": "Latest 50 movements for this variant.",
@@ -1327,6 +1331,15 @@
         },
         "isActive": {
           "label": "Product is active and visible to customers"
+        },
+        "isPromotionActive": {
+          "label": "Active Promotion"
+        },
+        "promotionalPrice": {
+          "label": "Promotional Price"
+        },
+        "showCountdown": {
+          "label": "Show Countdown Timer"
         }
       },
       "category": {
@@ -2109,8 +2122,21 @@
           },
           "variantsTab": {
             "title": "Options / Variants / Stock",
+            "pricingHint": "Manage selling prices, costs, inventory, and per-variant promotions here.",
             "showArchived": "Show archived variants",
             "archivedCount": "Archived: {count}",
+            "allocationTitle": "Allocate stock before using these variants",
+            "allocationMessage": "Existing stock is still parked on the hidden source variant. Split the full stock, reserved stock, and safety stock across active variants to make inventory sellable again.",
+            "onHandShort": "on hand",
+            "reservedShort": "reserved",
+            "safetyShort": "safety",
+            "totalOnHand": "Allocated on hand",
+            "totalReserved": "Allocated reserved",
+            "totalSafety": "Allocated safety",
+            "allocationBalanced": "Allocation is balanced",
+            "allocationUnbalanced": "Allocation must match the hidden source balances exactly",
+            "allocateAction": "Allocate stock",
+            "allocationSaved": "Variant stock allocation saved",
             "empty": "No variants generated yet. Add options to generate variants.",
             "saveFirst": "Please save the product first to add variants.",
             "noSku": "No SKU",
@@ -2848,11 +2874,59 @@
             "updateFailed": "Failed to update supplier. Please try again."
           }
         }
+      },
+      "sale": {
+        "detail": {
+          "metaTitle": "Sale Details"
+        }
       }
     },
     "validation": {
       "required": "Required",
       "invalidNumber": "Enter a valid number"
+    },
+    "receipt": {
+      "editor": {
+        "title": "Edit Receipt Layout",
+        "tabEditor": "Editor",
+        "tabPreview": "Preview",
+        "saveLayout": "Save Layout",
+        "storeInformation": "Store Information",
+        "showLogo": "Show Logo",
+        "showStoreName": "Show Store Name",
+        "storeNameOverride": "Store Name Override (Optional)",
+        "showStoreAddress": "Show Store Address",
+        "storeAddressOverride": "Store Address Override (Optional)",
+        "showStorePhone": "Show Store Phone",
+        "storePhoneOverride": "Store Phone Override (Optional)",
+        "showStoreEmail": "Show Store Email",
+        "storeEmailOverride": "Store Email Override (Optional)",
+        "headerLegacy": "Header (Legacy)",
+        "showCustomHeader": "Show Custom Header Text",
+        "headerText": "Header Text",
+        "content": "Content",
+        "showOrderNumber": "Show Order Number",
+        "showDate": "Show Date & Time",
+        "showCustomerInfo": "Show Customer Info",
+        "showTaxBreakdown": "Show Tax Breakdown",
+        "footer": "Footer",
+        "showFooterMessage": "Show Footer Message",
+        "footerText": "Footer Text",
+        "printAsImage": "Print as Image (Arabic Support)"
+      },
+      "print": {
+        "item": "Item",
+        "qty": "Qty",
+        "price": "Price",
+        "total": "Total",
+        "discount": "Discount",
+        "grandTotal": "TOTAL",
+        "orderNum": "Order #{id}",
+        "customer": "Customer: {name}",
+        "phone": "Phone: {phone}",
+        "tel": "Tel: {phone}",
+        "email": "Email: {email}"
+      }
     }
   },
   "superAdmin": {

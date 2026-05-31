@@ -16,6 +16,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/responsive_server_paginated_table.dart';
 import '../widgets/badges/status_badges.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 
 class SalesScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -330,11 +331,11 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  AppButton.danger(
-                                    label: 'Refund',
+                                  TableActionButton(
+                                    tooltip: 'Refund',
                                     icon: LucideIcons.rotateCcw,
-                                    size: AppButtonSize.sm,
-                                    loading: refundBusy,
+                                    isDanger: true,
+                                    isLoading: refundBusy,
                                     onPressed: refundBusy
                                         ? null
                                         : () {
@@ -353,10 +354,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                           },
                                   ),
                                   const SizedBox(width: 8),
-                                  AppButton.secondary(
-                                    label: isOrder ? 'View order' : 'View',
+                                  TableActionButton(
+                                    tooltip: isOrder ? 'View order' : 'View',
                                     icon: LucideIcons.eye,
-                                    size: AppButtonSize.sm,
                                     onPressed: isOrder
                                         ? () =>
                                               context.push('/orders/${sale.id}')

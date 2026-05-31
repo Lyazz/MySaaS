@@ -221,10 +221,16 @@ class _ResponsivePaginatedTableState<T>
                     horizontal: 20,
                     vertical: 12,
                   ),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF8FAFC), // Slate-50
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.surface2
+                        : AppColors.lightSurface2,
                     border: Border(
-                      bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                      bottom: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.surfaceBorder
+                            : AppColors.lightSurfaceBorder,
+                      ),
                     ),
                   ),
                   child: widget.header,

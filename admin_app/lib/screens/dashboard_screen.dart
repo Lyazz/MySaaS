@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../widgets/admin_stat_card.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../providers/admin_dashboard_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/app_mode.dart';
@@ -96,11 +97,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           children: [
             Text(
               'Welcome back, $storeName',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
                 letterSpacing: -0.5,
-                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -168,11 +167,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Could not load dashboard data',
-                  style: TextStyle(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF991B1B),
+                    color: const Color(0xFF991B1B),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -338,10 +337,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   children: [
                     Text(
                       'Recent orders',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -413,7 +410,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
 
     if (recent.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(28),
         child: Column(
           children: [
@@ -421,7 +418,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             SizedBox(height: 12),
             Text(
               'No recent orders',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 4),
             Text(
@@ -538,10 +537,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     width: 90,
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: AppButton.secondary(
-                        label: 'View',
+                      child: TableActionButton(
+                        tooltip: 'View',
                         icon: LucideIcons.eye,
-                        size: AppButtonSize.sm,
                         onPressed: () => context.go('/orders/${order.id}'),
                       ),
                     ),
@@ -611,11 +609,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         children: [
           Text(
             'Order status',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: textPrimary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
@@ -697,7 +693,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       (label: 'Categories', icon: LucideIcons.tags, to: '/categories'),
       (label: 'Settings', icon: LucideIcons.settings, to: '/settings'),
       if (isOffline)
-        (label: 'Upgrade to Online', icon: LucideIcons.cloudLightning, to: '/upgrade'),
+        (
+          label: 'Upgrade to Online',
+          icon: LucideIcons.cloudLightning,
+          to: '/upgrade',
+        ),
     ];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -730,11 +730,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         children: [
           Text(
             'Quick links',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: textPrimary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
@@ -793,8 +791,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget _tableHeader(String label, {double? width, bool alignRight = false}) {
     final child = Text(
       label.toUpperCase(),
-      style: const TextStyle(
-        fontSize: 11,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: 0.6,
       ),

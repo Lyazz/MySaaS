@@ -668,7 +668,9 @@
       "toggleSidebar": "Afficher/masquer le menu",
       "closeSidebar": "Fermer le menu",
       "viewStore": "Voir la boutique",
-      "logout": "Se déconnecter"
+      "logout": "Se déconnecter",
+      "logoutConfirmTitle": "Se déconnecter ?",
+      "logoutConfirmMessage": "Vous devrez vous reconnecter pour accéder au panneau d’administration."
     },
     "common": {
       "name": "Nom",
@@ -1048,6 +1050,7 @@
         "variant": "Variante",
         "price": "Prix",
         "cost": "Coût",
+        "promotion": "Promotion",
         "track": "Suivi",
         "onHand": "En stock",
         "reserved": "Réservé",
@@ -1066,6 +1069,7 @@
         "movements": "Mouvements"
       },
       "defaultVariant": "Par défaut",
+      "promotionSimpleProduct": "Utilisez l’onglet promotions du produit pour la variante par défaut d’un produit simple.",
       "movements": {
         "title": "Mouvements de stock",
         "subtitle": "50 derniers mouvements pour cette variante.",
@@ -1268,6 +1272,8 @@
       "homepage": "Page d’accueil",
       "contactInfo": "Infos de contact",
       "functional": "Fonctionnel",
+      "apps": "Applications",
+      "integrations": "Intégrations",
       "users": "Utilisateurs",
       "storeParameters": "Paramètres de la boutique"
     },
@@ -1325,6 +1331,15 @@
         },
         "isActive": {
           "label": "Le produit est actif et visible pour les clients"
+        },
+        "isPromotionActive": {
+          "label": "Promotion Active"
+        },
+        "promotionalPrice": {
+          "label": "Prix Promotionnel"
+        },
+        "showCountdown": {
+          "label": "Afficher le compte à rebours"
         }
       },
       "category": {
@@ -1386,6 +1401,10 @@
         "address": {
           "label": "Adresse",
           "placeholder": "Adresse du fournisseur"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Additional notes…"
         }
       }
     },
@@ -1464,6 +1483,13 @@
           "actions": {
             "confirmPayment": "Confirmer le paiement"
           }
+        },
+        "alerts": {
+          "saleCreated": "Vente créée avec succès",
+          "saleFailed": "Échec de la vente : {message}",
+          "unknownError": "Une erreur inconnue est survenue",
+          "featureComingSoon": "La fonction {feature} arrive bientôt",
+          "reprintNotImplemented": "La réimpression de la dernière vente n'est pas encore disponible"
         }
       },
       "cash": {
@@ -2097,8 +2123,21 @@
           },
           "variantsTab": {
             "title": "Options / Variants / Stock",
+            "pricingHint": "Gérez ici les prix de vente, les coûts, le stock et les promotions par variante.",
             "showArchived": "Afficher les variants archivées",
             "archivedCount": "Archivées : {count}",
+            "allocationTitle": "Allouez le stock avant d’utiliser ces variantes",
+            "allocationMessage": "Le stock existant est encore conservé sur la variante source masquée. Répartissez le stock total, le stock réservé et le stock de sécurité entre les variantes actives pour rendre l’inventaire vendable.",
+            "onHandShort": "en stock",
+            "reservedShort": "réservé",
+            "safetyShort": "sécurité",
+            "totalOnHand": "En stock alloué",
+            "totalReserved": "Réservé alloué",
+            "totalSafety": "Sécurité allouée",
+            "allocationBalanced": "La répartition est équilibrée",
+            "allocationUnbalanced": "La répartition doit correspondre exactement aux soldes cachés de la variante source",
+            "allocateAction": "Allouer le stock",
+            "allocationSaved": "Répartition du stock des variantes enregistrée",
             "empty": "Aucun variant généré. Ajoutez des options pour générer des variants.",
             "saveFirst": "Veuillez d’abord enregistrer le produit pour ajouter des variants.",
             "noSku": "Aucun SKU",
@@ -2836,11 +2875,59 @@
             "updateFailed": "Impossible de mettre à jour le fournisseur. Veuillez réessayer."
           }
         }
+      },
+      "sale": {
+        "detail": {
+          "metaTitle": "Détails de la vente"
+        }
       }
     },
     "validation": {
       "required": "Obligatoire",
       "invalidNumber": "Entrez un nombre valide"
+    },
+    "receipt": {
+      "editor": {
+        "title": "Modifier la mise en page du reçu",
+        "tabEditor": "Éditeur",
+        "tabPreview": "Aperçu",
+        "saveLayout": "Enregistrer",
+        "storeInformation": "Informations de la boutique",
+        "showLogo": "Afficher le logo",
+        "showStoreName": "Afficher le nom de la boutique",
+        "storeNameOverride": "Remplacer le nom de la boutique (Optionnel)",
+        "showStoreAddress": "Afficher l'adresse",
+        "storeAddressOverride": "Remplacer l'adresse (Optionnel)",
+        "showStorePhone": "Afficher le téléphone",
+        "storePhoneOverride": "Remplacer le téléphone (Optionnel)",
+        "showStoreEmail": "Afficher l'email",
+        "storeEmailOverride": "Remplacer l'email (Optionnel)",
+        "headerLegacy": "En-tête (Ancien)",
+        "showCustomHeader": "Afficher un texte d'en-tête personnalisé",
+        "headerText": "Texte d'en-tête",
+        "content": "Contenu",
+        "showOrderNumber": "Afficher le numéro de commande",
+        "showDate": "Afficher la date et l'heure",
+        "showCustomerInfo": "Afficher les informations du client",
+        "showTaxBreakdown": "Afficher les taxes",
+        "footer": "Pied de page",
+        "showFooterMessage": "Afficher le message de pied de page",
+        "footerText": "Texte de pied de page",
+        "printAsImage": "Imprimer comme image (Support Arabe)"
+      },
+      "print": {
+        "item": "Article",
+        "qty": "Qté",
+        "price": "Prix",
+        "total": "Total",
+        "discount": "Remise",
+        "grandTotal": "TOTAL",
+        "orderNum": "Commande n°{id}",
+        "customer": "Client : {name}",
+        "phone": "Téléphone : {phone}",
+        "tel": "Tél : {phone}",
+        "email": "Email : {email}"
+      }
     }
   },
   "superAdmin": {
