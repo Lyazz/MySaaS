@@ -202,7 +202,7 @@ onUnmounted(() => {
         :related-products="relatedProducts"
     />
     <!-- Themed product tags / search keywords -->
-    <ProductKeywordTags
+    <StorefrontSharedProductKeywordTags
       v-if="normalizedProduct?.searchKeywords"
       :keywords="normalizedProduct.searchKeywords"
       :template-key="templateKey"
