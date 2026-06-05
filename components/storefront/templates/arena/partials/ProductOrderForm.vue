@@ -539,26 +539,7 @@ const scrollToForm = () => {
             </div>
         </div>
 
-        <!-- Testimonial / Social Proof -->
-        <div class="mb-6 bg-brand-500/10/50 rounded-2xl p-4 border border-brand-100 flex items-center gap-4 shadow-sm relative overflow-hidden">
-            <!-- Subtle background shine -->
-            <div class="absolute top-0 right-0 -m-4 w-24 h-24 bg-brand-200/30 rounded-full blur-2xl"></div>
-            
-            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 relative z-10">
-                <img src="https://i.pravatar.cc/100?img=5" alt="Customer" class="w-full h-full object-cover">
-            </div>
-            <div class="relative z-10">
-                <p class="text-sm font-bold text-slate-200 leading-tight">"Loved it, will buy again!"</p>
-                <div class="flex text-amber-400 my-0.5 drop-shadow-sm">
-                    <Icon name="lucide:star" class="w-3 h-3 fill-current" />
-                    <Icon name="lucide:star" class="w-3 h-3 fill-current" />
-                    <Icon name="lucide:star" class="w-3 h-3 fill-current" />
-                    <Icon name="lucide:star" class="w-3 h-3 fill-current" />
-                    <Icon name="lucide:star" class="w-3 h-3 fill-current" />
-                </div>
-                <p class="text-xs text-slate-500 font-medium">Susanae from NY city just bought one!</p>
-            </div>
-        </div>
+
 
         <BundleDealsPicker
             :bundle-deals="product?.bundleDeals || []"

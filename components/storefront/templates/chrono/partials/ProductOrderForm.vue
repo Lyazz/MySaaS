@@ -344,19 +344,7 @@ const scrollToForm = () => {
             </div>
         </div>
 
-        <!-- Testimonial / Social Proof -->
-        <div class="mb-6 p-4 border flex items-center gap-4 relative overflow-hidden" style="background-color:#1A1F2E; border-color:rgba(166,124,82,0.15); border-radius:2px;">
-            <div class="w-11 h-11 rounded-full overflow-hidden border flex-shrink-0" style="border-color:rgba(166,124,82,0.3);">
-                <img src="https://i.pravatar.cc/100?img=5" alt="Customer" class="w-full h-full object-cover">
-            </div>
-            <div>
-                <p class="text-sm font-medium leading-tight mb-1" style="color:#D4C5A9;">"Loved it, will buy again!"</p>
-                <div class="flex mb-0.5" style="color:#A67C52;">
-                    <Icon v-for="i in 5" :key="i" name="lucide:star" class="w-3 h-3 fill-current" />
-                </div>
-                <p class="text-xs" style="color:#5A5450;">Susanae from NY just bought one!</p>
-            </div>
-        </div>
+
 
         <BundleDealsPicker
             :bundle-deals="product?.bundleDeals || []"
