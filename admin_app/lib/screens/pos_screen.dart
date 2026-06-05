@@ -695,15 +695,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     );
   }
 
-  Future<void> _showPaymentSheet(PosState posState) async {
-    if (posState.cart.isEmpty) return;
+  Future<bool> _showPaymentSheet(PosState posState) async {
+    if (posState.cart.isEmpty) return false;
 
     final total = posState.total;
     final currency = tenantCurrencyFormatter(
       ref.read(storeSettingsProvider).settings,
     );
 
-    await showDialog<void>(
+    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) {
@@ -818,7 +818,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
                   if (ok) {
                     if (dialogContext.mounted) {
-                      Navigator.pop(dialogContext);
+                      Navigator.pop(dialogContext, true);
                     }
                     if (mounted) {
                       _showCheckoutSuccessAnimation();
@@ -1381,6 +1381,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         );
       },
     );
+    return result ?? false;
   }
 
   void _showShortcutsDialog() {
@@ -3970,7 +3971,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     icon: LucideIcons.creditCard,
                     onPressed: posState.cart.isEmpty
                         ? null
-                        : () => _showPaymentSheet(posState),
+                        : () async {
+                            final success = await _showPaymentSheet(posState);
+                            if (success == true && mounted) {
+                              final route = ModalRoute.of(context);
+                              if (route is PopupRoute) {
+                                Navigator.pop(context);
+                              }
+                            }
+                          },
                     fullWidth: true,
                   ),
                 ),
