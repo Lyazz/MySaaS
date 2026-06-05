@@ -127,9 +127,10 @@ const themeMap: Record<TemplateKey, TagTheme> = {
   },
 
   // ── Chrono (dark luxury watch aesthetic)
+  // wrapper = full-width dark container (bg applied via wrapperInlineStyle)
   chrono: {
-    wrapper: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 mt-0',
-    inner: 'border-t pt-8',
+    wrapper: 'w-full',
+    inner: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t',
     label: 'text-[10px] font-medium uppercase tracking-[0.25em] mb-5',
     tag: 'inline-flex items-center px-4 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] border transition-all duration-200',
     icon: 'lucide:hash',
@@ -147,9 +148,10 @@ const themeMap: Record<TemplateKey, TagTheme> = {
   },
 
   // ── Arena (esports HUD, dark + brand neon)
+  // wrapper includes the dark bg so tags are visible outside the template component
   arena: {
-    wrapper: 'max-w-[1400px] mx-auto px-5 lg:px-10 py-8 mt-0',
-    inner: 'border-t border-white/[0.06] pt-8',
+    wrapper: 'bg-[#06080c] w-full',
+    inner: 'max-w-[1400px] mx-auto px-5 lg:px-10 py-8 border-t border-white/[0.06]',
     label: 'text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-5',
     tag: 'inline-flex items-center px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] border border-white/[0.06] bg-[#0b0f14] text-slate-300 hover:border-brand-500/50 hover:text-brand-400 transition-colors',
     icon: 'lucide:zap',
@@ -157,14 +159,15 @@ const themeMap: Record<TemplateKey, TagTheme> = {
   },
 }
 
-// Special inline-style overrides for dark-mode templates (Chrono, Maison)
+// Resolved theme for current template
 const theme = computed<TagTheme>(() => themeMap[props.templateKey] ?? themeMap.modern)
 const isChronoTheme = computed(() => props.templateKey === 'chrono')
 const isMaisonTheme = computed(() => props.templateKey === 'maison')
 
 // Inline styles for dark templates that use CSS vars / non-Tailwind colors
+// Chrono needs a dark bg since it renders outside the template's own dark wrapper
 const wrapperInlineStyle = computed(() => {
-  if (isChronoTheme.value) return 'background-color:#0E1117; font-family:\'Cormorant Garamond\',serif;'
+  if (isChronoTheme.value) return 'background-color:#0E1117; font-family:\'Cormorant Garamond\',serif; width:100%;'
   if (isMaisonTheme.value) return ''
   return ''
 })
