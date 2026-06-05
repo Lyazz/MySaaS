@@ -26,8 +26,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
   String _sortBy = 'createdAt';
   String _sortOrder = 'desc';
-  Category? _categoryToDelete;
-  bool _showDeleteModal = false;
 
   @override
   void initState() {
@@ -50,7 +48,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     setState(() {
       _sortBy = field;
     });
-    // We do local sorting in CategoryWorkspace so we don't necessarily need to refetch if not server paginated
   }
 
   void _toggleSortOrder() {
@@ -59,11 +56,41 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     });
   }
 
+  Future<void> _confirmDelete(Category category) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (context) => _DeleteDialog(category: category),
+    );
+
+    if (confirmed == true && mounted) {
+      final success = await ref
+          .read(categoriesProvider.notifier)
+          .deleteCategory(category.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'admin.pages.categories.index.deleteModal.success'.tr()
+                  : 'admin.pages.categories.index.deleteModal.error'.tr(),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoriesState = ref.watch(categoriesProvider);
     final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
 
     return Scaffold(
       floatingActionButton: (isMobile && !isOfflineTenant)
@@ -76,111 +103,142 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               ),
             )
           : null,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(isMobile ? 16 : 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!isMobile) ...[
-                    _buildHeader(),
-                    const SizedBox(height: 24),
-                  ],
-                  _buildToolbar(),
-                  const SizedBox(height: 24),
-                  if (categoriesState.isLoading)
-                    const Center(
-                        child: Padding(
-                      padding: EdgeInsets.all(48.0),
-                      child: CircularProgressIndicator(),
-                    ))
-                  else if (categoriesState.error != null)
-                    Center(child: Text('Error: ${categoriesState.error}'))
-                  else
-                    CategoryWorkspace(
-                      categories: categoriesState.categories,
-                      searchQuery: _searchController.text,
-                      sortBy: _sortBy,
-                      sortOrder: _sortOrder,
-                      onDeleteCategory: (category) {
-                        setState(() {
-                          _categoryToDelete = category;
-                          _showDeleteModal = true;
-                        });
-                      },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Header (desktop only) ──────────────────────────────────
+              if (!isMobile) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'admin.pages.categories.index.title'.tr(),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: textPrimary,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'admin.pages.categories.index.subtitle'.tr(),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
-                ],
-              ),
-            ),
+                    if (!isOfflineTenant)
+                      AppButton.primary(
+                        label: 'admin.pages.categories.index.addCategory'.tr(),
+                        icon: LucideIcons.plus,
+                        onPressed: () => context.go('/categories/create'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+              ],
+
+              // ── Filter toolbar ─────────────────────────────────────────
+              _buildToolbar(isDark),
+              const SizedBox(height: 24),
+
+              // ── Content area ───────────────────────────────────────────
+              if (categoriesState.isLoading)
+                _buildLoadingState(isDark)
+              else if (categoriesState.error != null)
+                _buildErrorState(categoriesState.error!, isDark)
+              else
+                CategoryWorkspace(
+                  categories: categoriesState.categories,
+                  searchQuery: _searchController.text,
+                  sortBy: _sortBy,
+                  sortOrder: _sortOrder,
+                  onDeleteCategory: _confirmDelete,
+                ),
+            ],
           ),
-          if (_showDeleteModal) _buildDeleteModal(),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader() {
-    final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildLoadingState(bool isDark) {
+    final brand = Theme.of(context).colorScheme.primary;
+    return _UiCard(
+      isDark: isDark,
+      padding: const EdgeInsets.all(48),
+      child: Center(
+        child: Column(
           children: [
-            Text(
-              'admin.pages.categories.index.title'.tr(),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: -0.5,
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(brand),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             Text(
-              'admin.pages.categories.index.subtitle'.tr(),
+              'admin.pages.categories.index.loading'.tr(),
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
               ),
             ),
           ],
         ),
-        if (!isOfflineTenant)
-          AppButton.primary(
-            label: 'admin.pages.categories.index.addCategory'.tr(),
-            icon: LucideIcons.plus,
-            onPressed: () => context.go('/categories/create'),
-          ),
-      ],
+      ),
     );
   }
 
-  Widget _buildToolbar() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
+  Widget _buildErrorState(String error, bool isDark) {
+    return _UiCard(
+      isDark: isDark,
+      padding: const EdgeInsets.all(48),
+      child: Center(
+        child: Text(
+          'Error: $error',
+          style: TextStyle(
+            color: AppColors.red,
+            fontSize: 14,
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildToolbar(bool isDark) {
+    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+
+    return _UiCard(
+      isDark: isDark,
+      padding: const EdgeInsets.all(16),
       child: LayoutBuilder(builder: (context, constraints) {
-        final isMobile = constraints.maxWidth < 600;
+        final isMobileLayout = constraints.maxWidth < 600;
+
         final searchWidget = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'admin.pages.categories.index.filters.searchLabel'.tr(),
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: textPrimary,
+              ),
             ),
             const SizedBox(height: 4),
             FormInput(
@@ -197,7 +255,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           children: [
             Text(
               'admin.pages.categories.index.sort.sortBy'.tr(),
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: textPrimary,
+              ),
             ),
             const SizedBox(height: 4),
             Row(
@@ -226,32 +288,38 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                InkWell(
-                  onTap: _toggleSortOrder,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).colorScheme.outlineVariant),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    ),
-                    child: Icon(
-                      _sortOrder == 'asc'
-                          ? LucideIcons.arrowUp
-                          : LucideIcons.arrowDown,
-                      size: 20,
+                // Sort order toggle
+                Tooltip(
+                  message: _sortOrder == 'asc'
+                      ? 'admin.common.next'.tr()
+                      : 'admin.common.previous'.tr(),
+                  child: InkWell(
+                    onTap: _toggleSortOrder,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: surfaceBorder),
+                        borderRadius: BorderRadius.circular(8),
+                        color: surface2,
+                      ),
+                      child: Icon(
+                        _sortOrder == 'asc'
+                            ? LucideIcons.arrowUp
+                            : LucideIcons.arrowDown,
+                        size: 16,
+                        color: textSecondary,
+                      ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ],
         );
 
-        if (isMobile) {
+        if (isMobileLayout) {
           return Column(
             children: [
               searchWidget,
@@ -272,63 +340,62 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       }),
     );
   }
+}
 
-  Future<void> _handleDelete() async {
-    if (_categoryToDelete == null) return;
+// ── Delete confirmation dialog ─────────────────────────────────────────────
+class _DeleteDialog extends StatelessWidget {
+  final Category category;
 
-    final success = await ref
-        .read(categoriesProvider.notifier)
-        .deleteCategory(_categoryToDelete!.id);
+  const _DeleteDialog({required this.category});
 
-    setState(() {
-      _showDeleteModal = false;
-      _categoryToDelete = null;
-    });
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? 'Category deleted successfully'
-                : 'Failed to delete category',
-          ),
-          backgroundColor: success ? Colors.green : Colors.red,
-        ),
-      );
-    }
-  }
-
-  Widget _buildDeleteModal() {
-    return Container(
-      color: Colors.black54,
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(24),
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
           padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'admin.pages.categories.index.deleteModal.title'.tr(),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              // Icon + title row
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(LucideIcons.alertTriangle, size: 20, color: AppColors.red),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'admin.pages.categories.index.deleteModal.title'.tr(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               Text(
                 'admin.pages.categories.index.deleteModal.messageWithTitle'.tr(
-                    namedArgs: {'title': _categoryToDelete?.title ?? ''}),
+                    namedArgs: {'title': category.title}),
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 14,
+                  color: textSecondary,
+                  height: 1.5,
                 ),
               ),
               const SizedBox(height: 24),
@@ -337,23 +404,54 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 children: [
                   AppButton.secondary(
                     label: 'admin.common.cancel'.tr(),
-                    onPressed: () {
-                      setState(() {
-                        _showDeleteModal = false;
-                        _categoryToDelete = null;
-                      });
-                    },
+                    onPressed: () => Navigator.of(context).pop(false),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   AppButton.danger(
-                      label: 'admin.common.delete'.tr(),
-                      onPressed: _handleDelete),
+                    label: 'admin.common.delete'.tr(),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
                 ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+// ── Shared ui-card surface ─────────────────────────────────────────────────
+class _UiCard extends StatelessWidget {
+  final bool isDark;
+  final Widget child;
+  final EdgeInsets padding;
+
+  const _UiCard({
+    required this.isDark,
+    required this.child,
+    this.padding = EdgeInsets.zero,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

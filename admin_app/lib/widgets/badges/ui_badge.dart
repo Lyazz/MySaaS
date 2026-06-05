@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
-enum UiBadgeTone { slate, emerald, indigo, lime, amber, red }
+enum UiBadgeTone {
+  slate,
+  slateDark, // dark-mode slate variant
+  emerald,
+  indigo,
+  lime,
+  amber,
+  red,
+}
 
 class UiBadge extends StatelessWidget {
   final String label;
@@ -33,6 +41,7 @@ class UiBadge extends StatelessWidget {
 
   static Color backgroundColor(UiBadgeTone tone) => switch (tone) {
     UiBadgeTone.slate => const Color(0xFFF1F5F9), // slate-100
+    UiBadgeTone.slateDark => const Color(0xFF1E293B), // slate-800 (dark mode)
     UiBadgeTone.emerald => const Color(0xFFECFDF5), // emerald-50
     UiBadgeTone.indigo => const Color(0xFFEEF2FF), // indigo-50
     UiBadgeTone.lime => const Color(0xFFF7FEE7), // lime-50
@@ -42,6 +51,7 @@ class UiBadge extends StatelessWidget {
 
   static Color foregroundColor(UiBadgeTone tone) => switch (tone) {
     UiBadgeTone.slate => const Color(0xFF334155), // slate-700
+    UiBadgeTone.slateDark => const Color(0xFF94A3B8), // slate-400 (dark mode)
     UiBadgeTone.emerald => const Color(0xFF047857), // emerald-700
     UiBadgeTone.indigo => const Color(0xFF4338CA), // indigo-700
     UiBadgeTone.lime => const Color(0xFF4D7C0F), // lime-700
