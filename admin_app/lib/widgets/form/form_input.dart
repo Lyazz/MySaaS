@@ -100,7 +100,7 @@ class FormInput extends StatelessWidget {
     );
     final focusedBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
+      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
     );
     final errorBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
@@ -119,10 +119,14 @@ class FormInput extends StatelessWidget {
         ? InputBorder.none
         : focusedErrorBorder;
 
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    final effectiveShowLabel = showLabel && !isMobile;
+    final inlineLabel = (showLabel && isMobile) ? label : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showLabel) ...[
+        if (effectiveShowLabel) ...[
           Text(label, style: labelStyle ?? defaultLabelStyle),
           const SizedBox(height: 4),
         ],
@@ -146,6 +150,7 @@ class FormInput extends StatelessWidget {
           textAlignVertical: TextAlignVertical.center,
           style: textStyle ?? TextStyle(fontSize: 14, color: textPrimary),
           decoration: InputDecoration(
+            labelText: inlineLabel,
             hintText: hint,
             hintStyle:
                 hintStyle ?? TextStyle(color: textTertiary, fontSize: 14),

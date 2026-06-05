@@ -111,10 +111,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/pos'),
-              backgroundColor: AppColors.brand,
-              child: const Icon(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
                 LucideIcons.plus,
-                color: AppColors.brandContrast,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : null,
@@ -476,7 +476,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText( 'superAdmin.tenants.table.actions'.tr()),
+              child: _headerText('admin.pages.orders.index.table.actions'.tr()),
             ),
           ),
         ],

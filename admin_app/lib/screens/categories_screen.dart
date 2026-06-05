@@ -69,10 +69,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       floatingActionButton: (isMobile && !isOfflineTenant)
           ? FloatingActionButton(
               onPressed: () => context.go('/categories/create'),
-              backgroundColor: AppColors.brand,
-              child: const Icon(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
                 LucideIcons.plus,
-                color: AppColors.brandContrast,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : null,

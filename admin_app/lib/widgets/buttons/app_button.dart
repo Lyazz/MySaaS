@@ -146,8 +146,8 @@ class AppButton extends StatelessWidget {
         onPressed: resolvedOnPressed,
         child: child,
         iconSize: iconSize,
-        backgroundColor: AppColors.brand,
-        foregroundColor: AppColors.brandContrast,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       AppButtonVariant.neutral => _buildFilled(
         context,

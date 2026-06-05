@@ -72,10 +72,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/customers/create'),
-              backgroundColor: AppColors.brand,
-              child: const Icon(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
                 LucideIcons.plus,
-                color: AppColors.brandContrast,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : null,
@@ -212,19 +212,16 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         children: [
           _buildHeaderCell(
             'admin.pages.customers.index.table.customer'.tr(),
-            flex: 4,
+            flex: 3,
           ),
-          _buildHeaderCell('admin.forms.customer.phone.label'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.customers.index.table.info'.tr(), flex: 3),
+          _buildHeaderCell('admin.pages.customers.index.table.address'.tr(), flex: 3),
           _buildHeaderCell(
             'admin.pages.customers.index.table.orders'.tr(),
             flex: 1,
           ),
           _buildHeaderCell(
             'admin.pages.customers.index.table.totalSpent'.tr(),
-            flex: 2,
-          ),
-          _buildHeaderCell(
-            'admin.pages.customers.detail.stats.currentBalance'.tr(),
             flex: 2,
           ),
           _buildHeaderCell(
@@ -254,7 +251,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             child: Row(
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 3,
                   child: Row(
                     children: [
                       Container(
@@ -277,56 +274,100 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              customer.name,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontSize: 14,
-                              ),
-                            ),
-                            if ((customer.email ?? '').trim().isNotEmpty)
-                              Text(
-                                customer.email!,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.5),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            else if ((customer.address ?? '').trim().isNotEmpty)
-                              Text(
-                                customer.address!,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.5),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          ],
+                        child: Text(
+                          customer.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if ((customer.email ?? '').trim().isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              LucideIcons.mail,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                customer.email!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      if ((customer.phone).trim().isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              LucideIcons.phone,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                customer.phone,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      if ((customer.email ?? '').trim().isEmpty && customer.phone.trim().isEmpty)
+                        Text(
+                          '—',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
                   child: Text(
-                    customer.phone.isEmpty ? '—' : customer.phone,
+                    (customer.address ?? '').trim().isEmpty ? '—' : customer.address!,
                     style: TextStyle(
                       fontSize: 13,
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Expanded(
@@ -360,17 +401,6 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    money.format(customer.currentBalance),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: balanceColor,
                     ),
                   ),
                 ),

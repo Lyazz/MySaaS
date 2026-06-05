@@ -115,10 +115,10 @@ class _CashScreenState extends ConsumerState<CashScreen> {
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => _openMobileActions(context),
-              backgroundColor: AppColors.brand,
-              child: const Icon(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
                 LucideIcons.plus,
-                color: AppColors.brandContrast,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : null,
@@ -171,7 +171,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              Text( 'app.cashboxes_transactions_and_ses'.tr(),
+              Text( 'admin.pages.cash.subtitle'.tr(),
                 style: TextStyle(
                   color: Theme.of(
                     context,
@@ -196,7 +196,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.user, size: 18),
-            title: Text( 'app.new_customer_payment'.tr()),
+            title: Text( 'admin.pages.cash.actions.newCustomerPayment'.tr()),
           ),
         ),
         PopupMenuItem(
@@ -204,7 +204,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.truck, size: 18),
-            title: Text( 'app.new_supplier_payment'.tr()),
+            title: Text( 'admin.pages.cash.actions.newSupplierPayment'.tr()),
           ),
         ),
         PopupMenuDivider(),
@@ -243,7 +243,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
         // PopupMenuButton from opening. IgnorePointer lets PopupMenuButton
         // handle taps while keeping the same visual styling.
         child: AppButton.primary(
-          label: 'app.new_action'.tr(),
+          label: 'admin.pages.cash.actions.newAction'.tr(),
           icon: LucideIcons.plus,
           trailing: const Icon(LucideIcons.chevronDown, size: 18),
           onPressed: null,
@@ -265,7 +265,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           children: [
             ListTile(
               leading: const Icon(LucideIcons.user),
-              title: Text( 'app.new_customer_payment'.tr()),
+              title: Text( 'admin.pages.cash.actions.newCustomerPayment'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.customerPayment);
@@ -273,7 +273,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.truck),
-              title: Text( 'app.new_supplier_payment'.tr()),
+              title: Text( 'admin.pages.cash.actions.newSupplierPayment'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.supplierPayment);
@@ -340,7 +340,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               icon: LucideIcons.arrowDownLeft,
               iconBg: const Color(0xFFD1FAE5), // emerald-100
               iconColor: const Color(0xFF059669), // emerald-600
-              label: 'app.total_in_today'.tr(),
+              label: 'admin.pages.cash.stats.totalIn'.tr(),
               value: money.format(totalIn),
               valueColor: const Color(0xFF059669),
             ),
@@ -348,7 +348,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               icon: LucideIcons.arrowUpRight,
               iconBg: const Color(0xFFFFE4E6), // rose-100
               iconColor: const Color(0xFFE11D48), // rose-600
-              label: 'app.total_out_today'.tr(),
+              label: 'admin.pages.cash.stats.totalOut'.tr(),
               value: money.format(totalOut),
               valueColor: const Color(0xFFE11D48),
             ),
@@ -363,7 +363,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               icon: LucideIcons.trendingUp,
               iconBg: const Color(0xFFFEF3C7), // amber-100
               iconColor: const Color(0xFFD97706), // amber-600
-              label: 'app.net_today'.tr(),
+              label: 'admin.pages.cash.stats.netBalance'.tr(),
               value: money.format(net),
               valueColor: net >= 0
                   ? const Color(0xFF059669)
@@ -457,14 +457,14 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                         ).colorScheme.onSurface.withValues(alpha: 0.3),
                       ),
                       const SizedBox(height: 8),
-                      Text( 'app.no_cashboxes_yet'.tr(),
+                      Text( 'admin.pages.cash.cashboxes.empty'.tr(),
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text( 'app.create_one_to_start_tracking_c'.tr(),
+                      Text( 'admin.pages.cash.cashboxes.emptyHint'.tr(),
                         style: TextStyle(
                           color: Theme.of(
                             context,
@@ -783,7 +783,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocalState) => AppDialog(
-          title: 'app.create_cashbox'.tr(),
+          title: 'admin.pages.cash.cashboxes.create'.tr(),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1585,11 +1585,11 @@ class _TransactionsPanel extends StatelessWidget {
           ),
         ),
         if (cash.isLoadingTransactions)
-          _LoadingState(label: 'app.loading_transactions'.tr())
+          _LoadingState(label: 'admin.pages.cash.transactions.loading'.tr())
         else if (cash.transactions.isEmpty)
           _EmptyState(
-            title: 'app.no_transactions_found'.tr(),
-            subtitle: 'app.try_expanding_the_date_range_o'.tr(),
+            title: 'admin.pages.cash.transactions.empty'.tr(),
+            subtitle: 'admin.pages.cash.transactions.emptyHint'.tr(),
           )
         else if (isCompact)
           ListView.separated(
@@ -1685,11 +1685,11 @@ class _SessionsPanel extends StatelessWidget {
           ),
         ),
         if (cash.isLoadingSessions)
-          _LoadingState(label: 'app.loading_sessions'.tr())
+          _LoadingState(label: 'admin.pages.cash.sessions.loading'.tr())
         else if (cash.sessions.isEmpty)
           _EmptyState(
-            title: 'app.no_sessions_found'.tr(),
-            subtitle: 'app.try_expanding_the_date_range_o'.tr(),
+            title: 'admin.pages.cash.sessions.empty'.tr(),
+            subtitle: 'admin.pages.cash.transactions.emptyHint'.tr(),
           )
         else if (isCompact)
           ListView.separated(
@@ -2708,13 +2708,13 @@ class _SessionsTable extends StatelessWidget {
           ),
           Expanded(
             flex: 2,
-            child: Text( 'app.admin_pages_cash_sessions_tabl'.tr().tr().toUpperCase(),
+            child: Text( 'admin.pages.cash.sessions.table.openedAt'.tr().toUpperCase(),
               style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'app.admin_pages_cash_sessions_tabl2'.tr().tr().toUpperCase(),
+            child: Text( 'admin.pages.cash.sessions.table.closedAt'.tr().toUpperCase(),
               style: headerStyle,
             ),
           ),
@@ -2722,9 +2722,7 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text( 'app.admin_pages_cash_sessions_tabl3'.tr()
-                    .tr()
-                    .toUpperCase(),
+              child: Text( 'admin.pages.cash.sessions.table.openingFloat'.tr().toUpperCase(),
                 style: headerStyle,
               ),
             ),
@@ -2733,9 +2731,7 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text( 'app.admin_pages_cash_sessions_tabl4'.tr()
-                    .tr()
-                    .toUpperCase(),
+              child: Text( 'admin.pages.cash.sessions.table.expectedClosing'.tr().toUpperCase(),
                 style: headerStyle,
               ),
             ),
@@ -2744,9 +2740,7 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text( 'app.admin_pages_cash_sessions_tabl5'.tr()
-                    .tr()
-                    .toUpperCase(),
+              child: Text( 'admin.pages.cash.sessions.table.closingCount'.tr().toUpperCase(),
                 style: headerStyle,
               ),
             ),

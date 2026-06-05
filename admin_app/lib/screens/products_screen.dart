@@ -100,10 +100,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       floatingActionButton: (isMobile && !isOfflineTenant)
           ? FloatingActionButton(
               onPressed: () => context.go('/products/create'),
-              backgroundColor: AppColors.brand,
-              child: const Icon(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
                 LucideIcons.plus,
-                color: AppColors.brandContrast,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : null,
@@ -990,7 +990,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      color: isSelected ? AppColors.brand.withValues(alpha: 0.06) : null,
+      color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06) : null,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [

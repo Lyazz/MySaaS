@@ -58,14 +58,14 @@ class DeliveryScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: provider.isEnabled
-                              ? AppColors.brand.withValues(alpha: 0.4)
+                              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)
                               : borderColor,
                           width: 2,
                         ),
                         boxShadow: [
                           if (provider.isEnabled)
                             BoxShadow(
-                              color: AppColors.brand.withValues(alpha: 0.08),
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -125,15 +125,15 @@ class DeliveryScreen extends ConsumerWidget {
                                 provider.isEnabled ? 'Active' : 'Inactive',
                                 style: TextStyle(
                                   color: provider.isEnabled
-                                      ? AppColors.brand
+                                      ? Theme.of(context).colorScheme.primary
                                       : textMuted,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Switch(
                                 value: provider.isEnabled,
-                                activeTrackColor: AppColors.brand,
-                                activeThumbColor: AppColors.brandContrast,
+                                activeTrackColor: Theme.of(context).colorScheme.primary,
+                                activeThumbColor: Theme.of(context).colorScheme.onPrimary,
                                 onChanged: (_) => ref
                                     .read(deliveryProviderProvider.notifier)
                                     .toggleProvider(provider.id),

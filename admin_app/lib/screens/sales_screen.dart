@@ -14,7 +14,7 @@ import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/date_range_filter_field.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/responsive_server_paginated_table.dart';
-import '../widgets/badges/status_badges.dart';
+
 import '../widgets/buttons/app_button.dart';
 import '../widgets/buttons/table_action_button.dart';
 
@@ -203,10 +203,6 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       flex: 2,
                     ),
                     _buildHeaderCell(
-                      'admin.pages.cash.transactions.table.type'.tr(),
-                      flex: 2,
-                    ),
-                    _buildHeaderCell(
                       'admin.pages.sales.index.table.customer'.tr(),
                       flex: 3,
                     ),
@@ -219,11 +215,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       flex: 2,
                     ),
                     _buildHeaderCell(
-                      'admin.pages.orders.index.table.status'.tr(),
-                      flex: 2,
-                    ),
-                    _buildHeaderCell(
-                      'admin.pages.orders.index.table.date'.tr(),
+                      'admin.pages.sales.index.table.completed'.tr(),
                       flex: 2,
                     ),
                     Expanded(
@@ -267,13 +259,6 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             ),
                           ),
                           Expanded(
-                            flex: 2,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: SaleTypeBadge(type: sale.type),
-                            ),
-                          ),
-                          Expanded(
                             flex: 3,
                             child: Text(
                               sale.customerName.isEmpty
@@ -308,13 +293,6 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                 fontSize: 14,
                                 color: textPrimary,
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: SaleStatusBadge(status: sale.status),
                             ),
                           ),
                           Expanded(

@@ -67,6 +67,6 @@ void main() {
     expect(state.customers.first.name, 'Ada Lovelace');
 
     expect(find.text('Ada Lovelace'), findsOneWidget);
-    expect(find.widgetWithText(AppButton, 'View'), findsOneWidget);
+    expect(find.byTooltip('View'), findsOneWidget);
   });
 }

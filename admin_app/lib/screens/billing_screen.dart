@@ -118,7 +118,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
                       color: isSelected
-                          ? AppColors.brand
+                          ? Theme.of(context).colorScheme.primary
                           : (isCurrent ? AppColors.green : borderColor),
                     ),
                   ),

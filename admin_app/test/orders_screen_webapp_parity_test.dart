@@ -107,14 +107,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Checkbox), findsWidgets);
-      expect(find.text('Order ID'.toUpperCase()), findsWidgets);
-      expect(find.text('Customer'.toUpperCase()), findsWidgets);
-      expect(find.text('Phone'.toUpperCase()), findsWidgets);
-      expect(find.text('admin.pages.orders.index.table.delivery'.toUpperCase()), findsWidgets);
-      expect(find.text('Total'.toUpperCase()), findsWidgets);
-      expect(find.text('Status'.toUpperCase()), findsWidgets);
-      expect(find.text('Date'.toUpperCase()), findsWidgets);
-      expect(find.text('superAdmin.tenants.table.actions'.toUpperCase()), findsWidgets);
+      expect(find.text('Order ID'), findsWidgets);
+      expect(find.text('Customer'), findsWidgets);
+      expect(find.text('Phone'), findsWidgets);
+      expect(find.text('admin.pages.orders.index.table.delivery'), findsWidgets);
+      expect(find.text('Total'), findsWidgets);
+      expect(find.text('Status'), findsWidgets);
+      expect(find.text('Date'), findsWidgets);
+      expect(find.text('Actions'), findsWidgets);
     });
   });
 }

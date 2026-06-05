@@ -56,6 +56,6 @@ void main() {
     );
     expect(find.text('Sale ID'), findsOneWidget);
     expect(find.text('Page 1 of 2'), findsOneWidget);
-    expect(find.widgetWithText(AppButton, 'View order'), findsOneWidget);
+    expect(find.byTooltip('View order'), findsOneWidget);
   });
 }

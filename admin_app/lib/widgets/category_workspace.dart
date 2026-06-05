@@ -281,7 +281,7 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   color: isActive
-                      ? AppColors.brand.withValues(alpha: 0.08)
+                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
                       : Colors.transparent,
                   child: Row(
                     children: [

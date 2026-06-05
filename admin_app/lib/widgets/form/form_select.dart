@@ -79,7 +79,7 @@ class FormSelect<T> extends StatelessWidget {
     );
     final focusedOutlineBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: BorderSide(color: AppColors.brand, width: 1.5),
+      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
     );
     final errorOutlineBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
@@ -101,10 +101,14 @@ class FormSelect<T> extends StatelessWidget {
     final safeInitialValue =
         (value != null && items.any((it) => it.value == value)) ? value : null;
 
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    final effectiveShowLabel = showLabel && !isMobile;
+    final inlineLabel = (showLabel && isMobile) ? label : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showLabel) ...[
+        if (effectiveShowLabel) ...[
           Text(label, style: labelStyle ?? defaultLabelStyle),
           const SizedBox(height: 4),
         ],
@@ -132,6 +136,7 @@ class FormSelect<T> extends StatelessWidget {
           isDense: isDense,
           dropdownColor: resolvedDropdownColor,
           decoration: InputDecoration(
+            labelText: inlineLabel,
             prefixIcon: prefixIcon,
             contentPadding: contentPadding,
             border: border,

@@ -60,6 +60,8 @@ abstract final class AppColors {
   static const blue = Color(0xFF3B82F6);
   static const blueSurface = Color(0xFF0F1D2D);
   static const blueText = Color(0xFF93C5FD);
+  static const lightBrand = Color(0xFF4F7A0A);
+  static const lightBrandContrast = Color(0xFFFFFFFF);
 }
 
 abstract final class AppTheme {
@@ -203,6 +205,19 @@ abstract final class AppTheme {
         radius: const Radius.circular(99),
         thickness: WidgetStateProperty.all(4),
       ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(AppColors.surface2),
+          surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: AppColors.surfaceBorder),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -211,8 +226,8 @@ abstract final class AppTheme {
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.lightContentBg,
       colorScheme: const ColorScheme.light(
-        primary: AppColors.brand,
-        onPrimary: AppColors.brandContrast,
+        primary: AppColors.lightBrand,
+        onPrimary: AppColors.lightBrandContrast,
         surface: AppColors.lightSurface1,
         onSurface: AppColors.lightTextPrimary,
         surfaceContainerHighest: AppColors.lightSurface2,
@@ -279,7 +294,7 @@ abstract final class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.brand, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.lightBrand, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -296,8 +311,8 @@ abstract final class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.brand,
-          foregroundColor: AppColors.brandContrast,
+          backgroundColor: AppColors.lightBrand,
+          foregroundColor: AppColors.lightBrandContrast,
           textStyle: const TextStyle(fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
@@ -351,6 +366,22 @@ abstract final class AppTheme {
         thumbColor: WidgetStateProperty.all(AppColors.lightSurfaceBorderHover),
         radius: const Radius.circular(99),
         thickness: WidgetStateProperty.all(4),
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: const TextStyle(
+          color: AppColors.lightTextPrimary,
+          fontSize: 14,
+        ),
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(AppColors.lightSurface2),
+          surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: AppColors.lightSurfaceBorder),
+            ),
+          ),
+        ),
       ),
     );
   }

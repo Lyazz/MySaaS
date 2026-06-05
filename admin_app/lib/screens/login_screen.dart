@@ -337,7 +337,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 18),
                 _buildInput(
                   palette,
-                  label: 'superAdmin.login.form.email.label'.tr(),
+                  label: 'auth.login.form.email.label'.tr(),
                   hint: 'name@company.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -351,7 +351,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 14),
                 _buildInput(
                   palette,
-                  label: 'superAdmin.login.form.password.label'.tr(),
+                  label: 'auth.login.form.password.label'.tr(),
                   hint: '••••••••',
                   controller: _passwordController,
                   obscureText: true,

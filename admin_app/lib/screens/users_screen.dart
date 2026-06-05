@@ -7,6 +7,7 @@ import '../models/admin_user.dart';
 import '../models/staff_role.dart';
 import '../providers/admin_users_provider.dart';
 import '../providers/staff_roles_provider.dart';
+import '../providers/cash_provider.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
@@ -35,6 +36,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     super.initState();
     if (widget.autoFetch) {
       Future.microtask(() async {
+        await ref.read(cashProvider.notifier).fetchCashboxes();
         await ref.read(staffRolesProvider.notifier).fetchRoles();
         await ref.read(adminUsersProvider.notifier).fetchUsers();
       });
@@ -51,6 +53,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
   Widget build(BuildContext context) {
     final usersState = ref.watch(adminUsersProvider);
     final rolesState = ref.watch(staffRolesProvider);
+    final cashState = ref.watch(cashProvider);
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     final query = _searchController.text.trim().toLowerCase();
@@ -110,6 +113,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                         ? null
                         : () async {
                             if (_activeTab == 'users') {
+                              await ref.read(cashProvider.notifier).fetchCashboxes();
                               await ref
                                   .read(adminUsersProvider.notifier)
                                   .fetchUsers();
@@ -148,6 +152,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                           ? null
                           : () async {
                               if (_activeTab == 'users') {
+                                await ref.read(cashProvider.notifier).fetchCashboxes();
                                 await ref
                                     .read(adminUsersProvider.notifier)
                                     .fetchUsers();
@@ -248,6 +253,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                       loading: usersState.isLoading,
                       users: filteredUsers,
                       staffRoles: rolesState.roles,
+                      cashboxes: cashState.cashboxes,
                       onEdit: (u) => _openEditUser(context, u),
                       onDeactivate: (u) => _confirmDeactivate(context, u),
                     )
@@ -453,6 +459,7 @@ class _UsersTable extends StatelessWidget {
   final bool loading;
   final List<AdminUser> users;
   final List<StaffRole> staffRoles;
+  final List<dynamic> cashboxes;
   final ValueChanged<AdminUser> onEdit;
   final ValueChanged<AdminUser> onDeactivate;
 
@@ -460,6 +467,7 @@ class _UsersTable extends StatelessWidget {
     required this.loading,
     required this.users,
     required this.staffRoles,
+    required this.cashboxes,
     required this.onEdit,
     required this.onDeactivate,
   });
@@ -472,19 +480,29 @@ class _UsersTable extends StatelessWidget {
     return '—';
   }
 
+  String _cashboxName(String? cashboxId) {
+    if (cashboxId == null || cashboxId.isEmpty) return '—';
+    for (final cashbox in cashboxes) {
+      if (cashbox.id == cashboxId) return cashbox.name;
+    }
+    return '—';
+  }
+
   @override
   Widget build(BuildContext context) {
     return ResponsivePaginatedTable<AdminUser>(
       items: users,
       isLoading: loading,
       emptyState: Center(child: Text('admin.pages.users.empty'.tr())),
-      minWidth: 980,
+      minWidth: 1200,
       header: Row(
         children: [
           _buildHeaderCell('admin.pages.users.columns.email'.tr(), flex: 4),
           _buildHeaderCell('admin.pages.users.columns.role'.tr(), flex: 2),
           _buildHeaderCell('admin.pages.users.columns.staffRole'.tr(), flex: 3),
+          _buildHeaderCell('admin.pages.users.columns.cashbox'.tr(), flex: 2),
           _buildHeaderCell('admin.pages.users.columns.status'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.users.columns.createdAt'.tr(), flex: 2),
           Expanded(
             flex: 2,
             child: Align(
@@ -559,9 +577,34 @@ class _UsersTable extends StatelessWidget {
               ),
               Expanded(
                 flex: 2,
+                child: Text(
+                  _cashboxName(u.cashboxId),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: u.cashboxId == null
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF475569),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: ActiveBadge(isActive: u.isActive),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  u.createdAt != null
+                      ? DateFormat.yMMMd().format(u.createdAt!)
+                      : '—',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
               ),
               Expanded(

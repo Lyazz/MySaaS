@@ -110,12 +110,12 @@ class SmartCashSuggestions extends StatelessWidget {
             style: TextStyle(
               fontWeight: isExact ? FontWeight.bold : FontWeight.w600,
               color: isExact
-                  ? AppColors.brandContrast
+                  ? Theme.of(context).colorScheme.onPrimary
                   : (isDark ? AppColors.textPrimary : const Color(0xFF0F172A)),
             ),
           ),
           backgroundColor: isExact
-              ? AppColors.brand
+              ? Theme.of(context).colorScheme.primary
               : (isDark ? AppColors.surface2 : Colors.white),
           side: isExact
               ? BorderSide.none

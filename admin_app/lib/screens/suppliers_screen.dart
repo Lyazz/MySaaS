@@ -78,10 +78,10 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/suppliers/create'),
-              backgroundColor: AppColors.brand,
-              child: const Icon(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
                 LucideIcons.plus,
-                color: AppColors.brandContrast,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : null,
@@ -290,12 +290,16 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      supplier.name,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: primaryTextColor,
-                        fontSize: 14,
+                    Expanded(
+                      child: Text(
+                        supplier.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: primaryTextColor,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -317,11 +321,15 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                               color: mutedTextColor,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              supplier.email!,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: secondaryTextColor,
+                            Expanded(
+                              child: Text(
+                                supplier.email!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: secondaryTextColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -336,11 +344,15 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                             color: mutedTextColor,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            supplier.phone!,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: secondaryTextColor,
+                          Expanded(
+                            child: Text(
+                              supplier.phone!,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: secondaryTextColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

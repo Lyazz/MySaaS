@@ -102,10 +102,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/purchases/create'),
-              backgroundColor: AppColors.brand,
-              child: const Icon(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
                 LucideIcons.plus,
-                color: AppColors.brandContrast,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             )
           : null,

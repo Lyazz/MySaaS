@@ -69,8 +69,8 @@ class NumpadWidget extends StatelessWidget {
         context,
         'Enter',
         isDark: isDark,
-        color: AppColors.brand,
-        textColor: AppColors.brandContrast,
+        color: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
         onTap: onEnter,
       ),
     ];

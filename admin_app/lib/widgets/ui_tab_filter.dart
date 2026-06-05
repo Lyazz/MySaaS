@@ -42,12 +42,12 @@ class UiTabFilter extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? AppColors.brand.withValues(alpha: 0.1)
+                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isActive
-                        ? AppColors.brand.withValues(alpha: 0.2)
+                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
                         : Theme.of(context).colorScheme.outlineVariant,
                   ),
                 ),
@@ -60,7 +60,7 @@ class UiTabFilter extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                         color: isActive
-                            ? AppColors.brand
+                            ? Theme.of(context).colorScheme.primary
                             : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
@@ -70,7 +70,7 @@ class UiTabFilter extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: isActive
-                              ? AppColors.brand.withValues(alpha: 0.2)
+                              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
                               : Theme.of(context).colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(9999),
                         ),
@@ -80,7 +80,7 @@ class UiTabFilter extends StatelessWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: isActive
-                                ? AppColors.brand
+                                ? Theme.of(context).colorScheme.primary
                                 : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                         ),

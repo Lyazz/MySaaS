@@ -6,12 +6,27 @@ import 'package:image_picker/image_picker.dart';
 
 import '../bootstrap.dart';
 import '../models/provisioning_payload.dart';
+import '../providers/auth_provider.dart';
 import '../utils/image_storage_manager.dart';
 import 'tenant_mode_service.dart';
 
 final apiProvider = Provider<ApiService>((ref) {
   final bootstrap = ref.watch(bootstrapProvider);
-  return ApiService(baseUrl: bootstrap.apiBaseUrl);
+  final api = ApiService(baseUrl: bootstrap.apiBaseUrl);
+
+  api.client.interceptors.add(
+    InterceptorsWrapper(
+      onError: (DioException error, ErrorInterceptorHandler handler) {
+        if (error.response?.statusCode == 401) {
+          // Token expired or invalid, force logout
+          ref.read(authProvider.notifier).logout();
+        }
+        handler.next(error);
+      },
+    ),
+  );
+
+  return api;
 });
 
 class ApiService {

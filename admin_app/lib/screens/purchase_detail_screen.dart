@@ -856,7 +856,7 @@ class _TableRowState extends State<_TableRow> {
                     backgroundColor: isDark
                         ? AppColors.surface3
                         : const Color(0xFFE2E8F0),
-                    color: AppColors.brand,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(2),
                     minHeight: 4,
                   ),

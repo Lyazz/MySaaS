@@ -281,11 +281,11 @@ class Sidebar extends ConsumerWidget {
               child: CachedNetworkImage(
                 imageUrl: resolvedLogoUrl,
                 fit: BoxFit.contain,
-                errorWidget: (context, url, error) => _buildInitialsLogo(initial),
+                errorWidget: (context, url, error) => _buildInitialsLogo(context, initial),
               ),
             )
           else
-            _buildInitialsLogo(initial),
+            _buildInitialsLogo(context, initial),
           if (!isCollapsed) ...[
             const SizedBox(width: 10),
             Flexible(
@@ -322,19 +322,19 @@ class Sidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildInitialsLogo(String initial) {
+  Widget _buildInitialsLogo(BuildContext context, String initial) {
     return Container(
       width: 28,
       height: 28,
       decoration: BoxDecoration(
-        color: AppColors.brand,
+        color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(7),
       ),
       alignment: Alignment.center,
       child: Text(
         initial,
-        style: const TextStyle(
-          color: AppColors.brandContrast,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimary,
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
@@ -417,10 +417,10 @@ class Sidebar extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 1),
       decoration: isActive
           ? BoxDecoration(
-              color: AppColors.brand.withValues(alpha: 0.10),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppColors.brand.withValues(alpha: 0.16),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.16),
               ),
             )
           : BoxDecoration(borderRadius: BorderRadius.circular(8)),
@@ -566,17 +566,17 @@ class Sidebar extends ConsumerWidget {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withValues(alpha: 0.15),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(99),
                     border: Border.all(
-                      color: AppColors.brand.withValues(alpha: 0.30),
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.30),
                     ),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     emailInitial,
-                    style: const TextStyle(
-                      color: AppColors.brand,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),

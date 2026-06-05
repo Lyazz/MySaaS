@@ -174,12 +174,12 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             decoration: BoxDecoration(
               color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.brand.withValues(alpha: 0.3)),
+              border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
               boxShadow: isDark
                   ? null
                   : [
                       BoxShadow(
-                        color: AppColors.brand.withValues(alpha: 0.05),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
