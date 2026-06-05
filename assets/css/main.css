@@ -74,6 +74,11 @@
   }
 
   [data-theme="light"] {
+    /* Brand — darkened for light-mode readability (same hue, ~60% lower luminance) */
+    --brand: #4f7a0a;
+    --brand-rgb: 79 122 10;
+    --brand-contrast: #ffffff;
+
     /* Admin shell — light chrome */
     --admin-sidebar-bg: #f4f7fb;
     --admin-sidebar-surface: #edf2f7;
