@@ -1,5 +1,6 @@
 {
   "common": {
+    "delete": "Delete",
     "view": "View",
     "details": "Details",
     "errorPage": {
@@ -2122,7 +2123,8 @@
       "users": "Users",
       "storefront": "Storefront",
       "account": "Account",
-      "connections": "Connections"
+      "connections": "Connections",
+      "export": "Export"
     },
     "settingsHub": {
       "empty": {
@@ -3328,10 +3330,22 @@
           "subtitle": "Manage customer orders",
           "addBtn": "New order",
           "filters": {
+            "rangeLabel": "Date range",
             "searchLabel": "Search",
             "searchPlaceholder": "Search by customer name or phone…",
             "statusLabel": "Status filter",
             "allOrders": "All orders"
+          },
+          "stats": {
+            "total": "Total",
+            "pending": "Pending",
+            "delivered": "Delivered",
+            "cancelled": "Cancelled"
+          },
+          "deliveryModes": {
+            "home": "Home delivery",
+            "store": "Store pickup",
+            "pickup": "Pickup point"
           },
           "loading": "Loading orders…",
           "empty": {
@@ -3346,6 +3360,7 @@
             "total": "Total",
             "status": "Status",
             "date": "Date",
+            "delivery": "Delivery",
             "actions": "Actions"
           }
         },

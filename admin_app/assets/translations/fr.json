@@ -1,5 +1,6 @@
 {
   "common": {
+    "delete": "Supprimer",
     "view": "Voir",
     "details": "Détails",
     "errorPage": {
@@ -2100,7 +2101,8 @@
       "account": "Compte",
       "connections": "Connexions",
       "apps": "Applications",
-      "integrations": "Intégrations"
+      "integrations": "Intégrations",
+      "export": "Exporter"
     },
     "settingsHub": {
       "empty": {
@@ -3307,10 +3309,22 @@
           "subtitle": "Gérez les commandes clients",
           "addBtn": "Nouvelle commande",
           "filters": {
+            "rangeLabel": "Période",
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher par nom ou téléphone…",
             "statusLabel": "Filtre de statut",
             "allOrders": "Toutes les commandes"
+          },
+          "stats": {
+            "total": "Total",
+            "pending": "En attente",
+            "delivered": "Livré",
+            "cancelled": "Annulé"
+          },
+          "deliveryModes": {
+            "home": "Livraison à domicile",
+            "store": "Retrait en magasin",
+            "pickup": "Point de retrait"
           },
           "loading": "Chargement des commandes…",
           "empty": {
@@ -3325,6 +3339,7 @@
             "total": "Total",
             "status": "Statut",
             "date": "Date",
+            "delivery": "Livraison",
             "actions": "Actions"
           }
         },

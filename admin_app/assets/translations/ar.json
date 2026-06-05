@@ -1,5 +1,6 @@
 {
   "common": {
+    "delete": "حذف",
     "view": "عرض",
     "details": "تفاصيل",
     "errorPage": {
@@ -2126,7 +2127,8 @@
       "account": "الحساب",
       "connections": "التكاملات",
       "apps": "التطبيقات",
-      "integrations": "الربط والتطبيقات"
+      "integrations": "الربط والتطبيقات",
+      "export": "تصدير"
     },
     "settingsHub": {
       "empty": {
@@ -3332,10 +3334,22 @@
           "subtitle": "إدارة طلبات العملاء",
           "addBtn": "طلب جديد",
           "filters": {
+            "rangeLabel": "الفترة",
             "searchLabel": "بحث",
             "searchPlaceholder": "ابحث بالاسم أو الهاتف…",
             "statusLabel": "تصفية الحالة",
             "allOrders": "كل الطلبات"
+          },
+          "stats": {
+            "total": "الإجمالي",
+            "pending": "قيد الانتظار",
+            "delivered": "مُسلم",
+            "cancelled": "ملغى"
+          },
+          "deliveryModes": {
+            "home": "توصيل للمنزل",
+            "store": "استلام من المتجر",
+            "pickup": "نقطة استلام"
           },
           "loading": "جارٍ تحميل الطلبات…",
           "empty": {
@@ -3350,6 +3364,7 @@
             "total": "الإجمالي",
             "status": "الحالة",
             "date": "التاريخ",
+            "delivery": "التوصيل",
             "actions": "الإجراءات"
           }
         },
