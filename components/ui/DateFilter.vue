@@ -1,17 +1,17 @@
 <template>
-  <div class="w-full min-w-0">
+  <div class="w-auto max-w-full min-w-0">
     <label class="ui-label block mb-1">
       {{ label || t('admin.pages.dashboard.filters.range', 'Range') }}
     </label>
     <div
-      class="flex w-full min-w-0 flex-col gap-2 rounded-xl px-3 py-2 sm:flex-row sm:items-center"
+      class="flex min-w-0 max-w-full flex-col gap-2 rounded-xl px-3 py-2 sm:flex-row sm:items-center"
       style="background: var(--surface-1); border: 1px solid var(--surface-border)"
     >
-      <div class="flex min-w-0 flex-1 items-center gap-2">
+      <div class="flex min-w-0 items-center gap-2">
         <Icon name="lucide:calendar" class="h-4 w-4 shrink-0" style="color: var(--text-muted)" />
         <select
           v-model="selectedRange"
-          class="ui-input h-9 min-w-0 flex-1 py-1 text-[12px] sm:h-7 sm:min-w-[128px] sm:flex-none sm:text-[11.5px]"
+          class="ui-input h-9 min-w-0 py-1 text-[12px] sm:h-7 sm:text-[11.5px]"
           :data-testid="testid ? `${testid}-range-select` : undefined"
           @change="handleRangeChange"
         >
@@ -25,7 +25,7 @@
 
       <div
         v-if="selectedRange === 'custom'"
-        class="grid w-full min-w-0 grid-cols-1 gap-2 sm:w-auto sm:min-w-[260px] sm:grid-cols-2"
+        class="grid min-w-0 grid-cols-1 gap-2 sm:min-w-[260px] sm:grid-cols-2"
       >
         <input
           type="date"
