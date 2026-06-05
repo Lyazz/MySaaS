@@ -3,6 +3,7 @@ import { coalesceProductImageUrls } from '../../lib/product-images'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '../../../../shared/inventory/variant-availability'
 import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
+import { normalizeSearchText } from '../../../../shared/text/normalize-search'
 
 const extractMetaPixelIds = (metaPixels: any[]): string[] => {
     return (metaPixels || [])
@@ -69,13 +70,9 @@ export class PublicProductsService {
         })
 
         const where: any = { tenantId, isActive: true }
-        if (search) {
-            where.OR = [
-                { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { searchKeywords: { contains: search, mode: 'insensitive' } }
-            ]
-        }
+        // Note: search filtering is done in-memory (below) using normalizeSearchText
+        // so that Arabic Alef variants and Latin diacritics are handled correctly.
+        // Prisma's `contains: mode: insensitive` cannot normalize Arabic characters.
 
         const products = await prisma.product.findMany({
             where,
@@ -122,7 +119,18 @@ export class PublicProductsService {
             orderBy: { createdAt: 'desc' }
         })
 
-        return products.map(({ metaPixels, productImages, images, variants, _count, ...rest }: any) => {
+        const normalizedSearch = search ? normalizeSearchText(search) : null
+
+        const matchesSearch = (product: any): boolean => {
+            if (!normalizedSearch) return true
+            return (
+                normalizeSearchText(product.title ?? '').includes(normalizedSearch) ||
+                normalizeSearchText(product.description ?? '').includes(normalizedSearch) ||
+                normalizeSearchText(product.searchKeywords ?? '').includes(normalizedSearch)
+            )
+        }
+
+        return products.filter(matchesSearch).map(({ metaPixels, productImages, images, variants, _count, ...rest }: any) => {
             const withCategories = mapProductCategories(rest)
             const hasVariants = Number(_count?.options || 0) > 0
             const mappedVariants = Array.isArray(variants)

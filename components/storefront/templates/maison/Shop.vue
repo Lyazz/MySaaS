@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ProductCard from './ProductCard.vue'
+import { normalizeSearchText } from '~/shared/text/normalize-search'
 
 const props = defineProps<{
   products: any[]
@@ -54,8 +55,8 @@ const filteredProducts = computed(() => {
     result = result.filter(p => selectedCategories.value.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
   }
   if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase()
-    result = result.filter(p => p.title.toLowerCase().includes(q) || (p.searchKeywords && p.searchKeywords.toLowerCase().includes(q)))
+    const q = normalizeSearchText(searchQuery.value)
+    result = result.filter(p => normalizeSearchText(p.title).includes(q) || (p.searchKeywords && normalizeSearchText(p.searchKeywords).includes(q)))
   }
   result = result.filter(p => {
     const price = Number(p.price)

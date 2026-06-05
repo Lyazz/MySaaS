@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProductCard from '~/components/storefront/templates/modern/ProductCard.vue'
-
+import { normalizeSearchText } from '~/shared/text/normalize-search'
 const props = defineProps<{
     products: any[]
 }>()
@@ -73,7 +73,7 @@ const filteredProducts = computed(() => {
 
     // Filter by Search
     if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase()
+        const q = normalizeSearchText(searchQuery.value)
         result = result.filter(p => 
             p.title.toLowerCase().includes(q) || 
             (p.searchKeywords && p.searchKeywords.toLowerCase().includes(q))
