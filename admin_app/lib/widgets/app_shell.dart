@@ -214,7 +214,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               // View store
               _TopbarTextButton(
                 icon: LucideIcons.externalLink,
-                label: 'admin.actions.viewStore'.tr(),
+                label: 'app.admin_actions_viewstore'.tr().tr(),
                 color: textSecondary,
                 hoverBg: hoverBg,
                 hoverColor: textPrimary,
@@ -314,8 +314,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'admin.actions.logoutConfirmTitle'.tr(),
+                  Text( 'app.admin_actions_logoutconfirmtit'.tr().tr(),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -325,8 +324,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 ],
               ),
               const SizedBox(height: 12),
-              Text(
-                'admin.actions.logoutConfirmMessage'.tr(),
+              Text( 'app.admin_actions_logoutconfirmmes'.tr().tr(),
                 style: TextStyle(
                   fontSize: 13,
                   color: textSecondary,

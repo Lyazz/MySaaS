@@ -923,6 +923,7 @@
       "selectPlaceholder": "Sélectionner…",
       "storeFallback": "Boutique"
     },
+
     "actions": {
       "addToCart": "Ajouter au panier",
       "adding": "Ajout…",
@@ -1235,7 +1236,8 @@
       "emptyHint": "Essayez une autre catégorie ou parcourez tous les produits."
     },
     "search": {
-      "placeholder": "Rechercher des produits..."
+      "placeholder": "Rechercher des produits...",
+      "keywords": "Mots-clés associés"
     },
     "header": {
       "wishlistTitle": "Favoris",
@@ -1965,6 +1967,7 @@
       "templates": {
         "title": "Modèle de boutique",
         "subtitle": "Choisissez la mise en page qui correspond le mieux à votre marque.",
+        "quickView": "Aperçu rapide",
         "options": {
           "classic": {
             "label": "Classique",
@@ -2173,6 +2176,11 @@
           "label": "Mini description",
           "hint": "Courte description pour l’en-tête de la landing page (optionnel)",
           "placeholder": "Saisir un bref résumé…"
+        },
+        "searchKeywords": {
+          "label": "Mots-clés de recherche",
+          "hint": "Mots-clés pour aider les clients à trouver ce produit dans la recherche de la boutique.",
+          "placeholder": "Tapez et appuyez sur Entrée..."
         },
         "description": {
           "label": "Description",

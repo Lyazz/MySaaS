@@ -9,6 +9,7 @@ import '../widgets/responsive_filter_bar.dart';
 import '../utils/debouncer.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/tenant_image_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -68,7 +69,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget _buildHeader() {
     return ResponsiveFilterBar(
       searchField: FormInput(
-        label: 'Search',
+        label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
         controller: _searchController,
         hint: 'Search products by name or SKU...',
         contentPadding: const EdgeInsets.symmetric(
@@ -90,33 +91,29 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     return ResponsivePaginatedTable<Product>(
       items: products,
       minWidth: 900,
-      header: const Row(
+      header: Row(
         children: [
           Expanded(
             flex: 3,
-            child: Text(
-              'Product',
+            child: Text( 'admin.pages.sales.detail.itemsTable.product'.tr(),
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              'SKU',
+            child: Text( 'admin.pages.purchases.detail.items.sku'.tr(),
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
           Expanded(
             flex: 1,
-            child: Text(
-              'Stock',
+            child: Text( 'admin.pages.products.index.table.stock'.tr(),
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
           Expanded(
             flex: 1,
-            child: Text(
-              'Status',
+            child: Text( 'superAdmin.paymentsPage.history.table.status'.tr(),
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),

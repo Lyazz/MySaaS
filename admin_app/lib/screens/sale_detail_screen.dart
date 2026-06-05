@@ -18,6 +18,7 @@ import '../widgets/badges/status_badges.dart';
 import '../widgets/badges/ui_badge.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/responsive_server_paginated_table.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SaleDetailScreen extends ConsumerStatefulWidget {
   final String saleId;
@@ -270,8 +271,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         _totalCard(money.format(sale.totalAmount)),
                       ],
                       const SizedBox(height: 20),
-                      Text(
-                        'Items',
+                      Text( 'admin.pages.sales.detail.sections.items'.tr(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -323,8 +323,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  'Sales',
+                Text( 'admin.pages.sales.index.title'.tr(),
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -340,7 +339,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
         const Spacer(),
         if (sale != null) ...[
           AppButton.danger(
-            label: 'Refund',
+            label: 'admin.pages.sales.actions.refund'.tr(),
             icon: LucideIcons.rotateCcw,
             size: AppButtonSize.sm,
             loading: _isRefunding,
@@ -362,7 +361,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           const SizedBox(width: 8),
         ],
         AppButton.secondary(
-          label: 'Retry',
+          label: 'app.retry'.tr(),
           icon: LucideIcons.refreshCw,
           size: AppButtonSize.sm,
           onPressed: _retry,
@@ -388,9 +387,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'No open cashbox available. Open a cash session first.',
+          SnackBar(
+            content: Text( 'admin.pages.sales.messages.noOpenCashbox'.tr(),
             ),
           ),
         );
@@ -413,15 +411,14 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
-                title: const Text('Refund Sale'),
+                title: Text( 'admin.pages.sales.refundModal.title'.tr()),
                 content: SizedBox(
                   width: 420,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Create refund cash outflow and mark this sale as REFUNDED.',
+                      Text( 'app.create_refund_cash_outflow_and'.tr(),
                         style: TextStyle(fontSize: 13),
                       ),
                       const SizedBox(height: 12),
@@ -441,24 +438,24 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                 () =>
                                     selectedCashboxId = v ?? selectedCashboxId,
                               ),
-                        decoration: const InputDecoration(
-                          labelText: 'Cashbox',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.cashboxLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         initialValue: selectedMethod,
-                        items: const [
-                          DropdownMenuItem(value: 'CASH', child: Text('Cash')),
-                          DropdownMenuItem(value: 'CARD', child: Text('Card')),
+                        items: [
+                          DropdownMenuItem(value: 'CASH', child: Text( 'admin.pages.cash.methods.CASH'.tr())),
+                          DropdownMenuItem(value: 'CARD', child: Text( 'admin.pages.cash.methods.CARD'.tr())),
                           DropdownMenuItem(
                             value: 'TRANSFER',
-                            child: Text('Transfer'),
+                            child: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr()),
                           ),
                           DropdownMenuItem(
                             value: 'OTHER',
-                            child: Text('Other'),
+                            child: Text( 'admin.pages.cash.methods.OTHER'.tr()),
                           ),
                         ],
                         onChanged: submitting
@@ -467,8 +464,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                 () => selectedMethod = (v ?? 'CASH')
                                     .toUpperCase(),
                               ),
-                        decoration: const InputDecoration(
-                          labelText: 'Method',
+                        decoration: InputDecoration(
+                          labelText: 'superAdmin.paymentsPage.history.table.method'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -476,8 +473,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                       TextField(
                         controller: referenceCtrl,
                         enabled: !submitting,
-                        decoration: const InputDecoration(
-                          labelText: 'Reference (optional)',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.referenceLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -486,8 +483,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         controller: noteCtrl,
                         enabled: !submitting,
                         maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Note (optional)',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.noteLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -509,10 +506,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     onPressed: submitting
                         ? null
                         : () => Navigator.of(dialogContext).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text( 'admin.common.cancel'.tr()),
                   ),
                   AppButton.danger(
-                    label: 'Refund',
+                    label: 'admin.pages.sales.actions.refund'.tr(),
                     icon: LucideIcons.rotateCcw,
                     loading: submitting,
                     onPressed: submitting
@@ -561,7 +558,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
         _retry();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sale refunded successfully')),
+          SnackBar(content: Text( 'app.sale_refunded_successfully'.tr())),
         );
       }
     } catch (e) {
@@ -599,8 +596,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Total',
+          Text( 'admin.pages.sales.detail.itemsTable.total'.tr(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -632,10 +628,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       totalItems: items.length,
       itemsPerPage: items.isEmpty ? 1 : items.length,
       onPageChanged: (_) {},
-      emptyState: const Center(
+      emptyState: Center(
         child: Padding(
           padding: EdgeInsets.all(48),
-          child: Text('No items found'),
+          child: Text( 'app.no_items_found'.tr()),
         ),
       ),
       header: Row(
@@ -729,8 +725,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               child: CircularProgressIndicator(strokeWidth: 3),
             ),
             const SizedBox(height: 12),
-            Text(
-              'Loading sale...',
+            Text( 'app.loading_sale'.tr(),
               style: TextStyle(
                 color: Theme.of(
                   context,
@@ -754,7 +749,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             AppButton.secondary(
-              label: 'Retry',
+              label: 'app.retry'.tr(),
               icon: LucideIcons.refreshCw,
               onPressed: _retry,
             ),
@@ -778,8 +773,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
-            Text(
-              'Sale not found',
+            Text( 'admin.pages.sales.detail.notFound.title'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -787,8 +781,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'This sale may have been deleted.',
+            Text( 'admin.pages.sales.detail.notFound.hint'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

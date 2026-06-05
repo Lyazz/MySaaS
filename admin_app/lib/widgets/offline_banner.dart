@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../providers/network_status_provider.dart';
 import '../providers/sync_provider.dart';
 import '../services/sync_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class OfflineBanner extends ConsumerWidget {
   const OfflineBanner({super.key});
@@ -76,8 +77,7 @@ class OfflineBanner extends ConsumerWidget {
             ],
             if (canOpenRecovery) ...[
               const SizedBox(width: 8),
-              Text(
-                'Manage',
+              Text( 'admin.pages.purchases.index.table.manage'.tr(),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.9),
                   fontSize: 9,
@@ -111,8 +111,7 @@ class OfflineBanner extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Sync recovery',
+                Text( 'app.sync_recovery'.tr(),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -126,7 +125,7 @@ class OfflineBanner extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 if (issues.isEmpty)
-                  const Text('No queued failures.')
+                  Text( 'app.no_queued_failures'.tr())
                 else
                   ...issues.take(6).map(
                     (issue) => ListTile(
@@ -156,7 +155,7 @@ class OfflineBanner extends ConsumerWidget {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close'),
+                      child: Text( 'admin.pages.cash.modals.closeSession.confirm'.tr()),
                     ),
                     const SizedBox(width: 8),
                     FilledButton(
@@ -168,7 +167,7 @@ class OfflineBanner extends ConsumerWidget {
                                 Navigator.of(context).pop();
                               }
                             },
-                      child: const Text('Retry failed'),
+                      child: Text( 'app.retry_failed'.tr()),
                     ),
                   ],
                 ),
@@ -215,7 +214,7 @@ class _BannerPresentation {
       SyncStage.conflicted => _BannerPresentation(
         backgroundColor: Colors.red.shade700,
         icon: LucideIcons.alertTriangle,
-        label: 'Sync conflicted',
+        label: 'app.sync_conflicted'.tr(),
         detail: '${syncState.conflicted} need review',
       ),
       SyncStage.syncing => _BannerPresentation(
@@ -227,7 +226,7 @@ class _BannerPresentation {
       SyncStage.failed => _BannerPresentation(
         backgroundColor: Colors.red.shade600,
         icon: LucideIcons.alertCircle,
-        label: 'Sync failed',
+        label: 'app.sync_failed'.tr(),
         detail: syncState.recoveryRequired > 0
             ? '${syncState.recoveryRequired} action needed'
             : syncState.nextRetryAt != null

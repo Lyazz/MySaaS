@@ -12,6 +12,7 @@ import '../utils/tenant_currency.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CashboxDetailScreen extends ConsumerStatefulWidget {
   final String cashboxId;
@@ -71,7 +72,7 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
             Row(
               children: [
                 AppButton.ghost(
-                  label: 'Cash',
+                  label: 'admin.pages.cash.methods.CASH'.tr(),
                   size: AppButtonSize.sm,
                   onPressed: () => context.go('/cash'),
                 ),
@@ -127,7 +128,7 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                 ),
                 if (cashbox != null && cashbox.openSession == null)
                   AppButton.primary(
-                    label: 'Open session',
+                    label: 'admin.pages.cash.openSession'.tr(),
                     icon: LucideIcons.play,
                     onPressed: cashbox.isActive
                         ? () => _openSession(context, cashbox)
@@ -135,7 +136,7 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                   ),
                 if (cashbox?.openSession != null) ...[
                   AppButton.secondary(
-                    label: 'Close session',
+                    label: 'admin.pages.cash.closeSession'.tr(),
                     icon: LucideIcons.lock,
                     onPressed: () => _closeSession(context, cashbox!),
                   ),
@@ -154,16 +155,14 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Transactions',
+                            Text( 'admin.pages.cash.transactions.title'.tr(),
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'Transactions for this cashbox (last 7 days).',
+                            Text( 'app.transactions_for_this_cashbox'.tr(),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Theme.of(
@@ -175,7 +174,7 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                         ),
                       ),
                       AppButton.secondary(
-                        label: 'Refresh',
+                        label: 'superAdmin.paymentsPage.actions.refresh'.tr(),
                         icon: LucideIcons.refreshCw,
                         size: AppButtonSize.sm,
                         onPressed: () => ref
@@ -188,26 +187,26 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   if (cash.isLoadingTransactions)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(32),
                       child: Center(child: CircularProgressIndicator()),
                     )
                   else if (cash.transactions.isEmpty)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(32),
-                      child: Center(child: Text('No transactions found')),
+                      child: Center(child: Text( 'app.no_transactions_found'.tr())),
                     )
                   else
                     Column(
                       children: [
                         _TableHeader(
-                          columns: const [
-                            _Col(label: 'DATE', flex: 2),
-                            _Col(label: 'TYPE', flex: 3),
-                            _Col(label: 'METHOD', flex: 2),
-                            _Col(label: 'AMOUNT', flex: 2, alignRight: true),
+                          columns: [
+                            _Col(label: 'superAdmin.paymentsPage.history.table.date'.tr(), flex: 2),
+                            _Col(label: 'admin.pages.inventory.movements.table.type'.tr(), flex: 3),
+                            _Col(label: 'superAdmin.paymentsPage.history.table.method'.tr(), flex: 2),
+                            _Col(label: 'superAdmin.paymentsPage.history.table.amount'.tr(), flex: 2, alignRight: true),
                           ],
                         ),
                         ...cash.transactions.map(
@@ -274,22 +273,22 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
     BuildContext context,
     CashboxSummary cashbox,
   ) async {
-    final openingController = TextEditingController(text: '0');
+    final openingController = TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr());
     final noteController = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AppDialog(
-        title: 'Open session',
+        title: 'admin.pages.cash.openSession'.tr(),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             FormInput(
-              label: 'Opening float',
+              label: 'admin.pages.cash.sessions.table.openingFloat'.tr(),
               controller: openingController,
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'Note (optional)', controller: noteController),
+            FormInput(label: 'admin.pages.sales.refundModal.noteLabel'.tr(), controller: noteController),
           ],
         ),
         secondaryLabel: 'Cancel',
@@ -334,7 +333,7 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AppDialog(
-        title: 'Close session',
+        title: 'admin.pages.cash.closeSession'.tr(),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -364,12 +363,12 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
               ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'Closing count',
+              label: 'admin.pages.cash.closingCount'.tr(),
               controller: closingController,
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'Note (optional)', controller: noteController),
+            FormInput(label: 'admin.pages.sales.refundModal.noteLabel'.tr(), controller: noteController),
           ],
         ),
         secondaryLabel: 'Cancel',

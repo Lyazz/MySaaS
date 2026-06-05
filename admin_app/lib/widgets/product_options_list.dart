@@ -9,6 +9,7 @@ import 'buttons/app_button.dart';
 import 'dialogs/app_dialog.dart';
 import 'option_metadata_dialog.dart';
 import '../theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ProductOptionsList extends ConsumerStatefulWidget {
   final String productId;
@@ -78,10 +79,9 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AppDialog(
-        title: 'Delete Option',
-        description:
-            'This will delete all variants associated with this option.',
-        content: const Text('Are you sure you want to delete this option?'),
+        title: 'admin.productOptionsEditor.deleteModal.title'.tr(),
+        description: 'app.this_will_delete_all_variants'.tr(),
+        content: Text( 'app.are_you_sure_you_want_to_delet4'.tr()),
         secondaryLabel: 'Cancel',
         onSecondary: () => Navigator.pop(context, false),
         primaryLabel: 'Delete',
@@ -146,8 +146,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Options',
+            Text( 'admin.productOptionsEditor.title'.tr(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
@@ -156,7 +155,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             ),
             if (widget.options.length < 3 && !_isCreatingOption)
               AppButton.secondary(
-                label: 'Add Option',
+                label: 'app.add_option'.tr(),
                 icon: LucideIcons.plus,
                 size: AppButtonSize.sm,
                 onPressed: () => setState(() => _isCreatingOption = true),
@@ -189,13 +188,12 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'New Option',
+                Text( 'app.new_option'.tr(),
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Option Name',
+                  label: 'admin.productOptionsEditor.fields.optionName'.tr(),
                   controller: _newOptionNameController,
                   hint: 'e.g. Size, Color',
                   contentPadding: const EdgeInsets.symmetric(
@@ -203,30 +201,30 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                     vertical: 10,
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 FormSelect<String>(
-                  label: 'Display Type',
+                  label: 'admin.productOptionsEditor.fields.displayType'.tr(),
                   value: _newOptionType,
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: 'dropdown',
-                      child: Text('Dropdown'),
+                      child: Text( 'admin.productOptionsEditor.displayTypes.dropdown'.tr()),
                     ),
                     DropdownMenuItem(
                       value: 'button',
-                      child: Text('Buttons / Tags'),
+                      child: Text( 'admin.productOptionsEditor.displayTypes.button'.tr()),
                     ),
                     DropdownMenuItem(
                       value: 'radio',
-                      child: Text('Radio Buttons'),
+                      child: Text( 'admin.productOptionsEditor.displayTypes.radio'.tr()),
                     ),
                     DropdownMenuItem(
                       value: 'color',
-                      child: Text('Color Swatch'),
+                      child: Text( 'admin.productOptionsEditor.displayTypes.color'.tr()),
                     ),
                     DropdownMenuItem(
                       value: 'image',
-                      child: Text('Image with Text'),
+                      child: Text( 'admin.productOptionsEditor.displayTypes.image'.tr()),
                     ),
                   ],
                   onChanged: (v) =>
@@ -234,7 +232,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Values',
+                  label: 'app.values'.tr(),
                   controller: _newOptionValuesController,
                   hint: 'Separate with comma (e.g. S, M, L)',
                   contentPadding: const EdgeInsets.symmetric(
@@ -247,14 +245,14 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     AppButton.secondary(
-                      label: 'Cancel',
+                      label: 'admin.common.cancel'.tr(),
                       size: AppButtonSize.sm,
                       onPressed: () =>
                           setState(() => _isCreatingOption = false),
                     ),
                     const SizedBox(width: 8),
                     AppButton.primary(
-                      label: 'Add',
+                      label: 'app.add'.tr(),
                       size: AppButtonSize.sm,
                       onPressed: _createOption,
                     ),
@@ -318,7 +316,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
               SizedBox(
                 width: 120,
                 child: FormInput(
-                  label: 'Add value',
+                  label: 'app.add_value'.tr(),
                   showLabel: false,
                   controller: valueController,
                   hint: 'Add value',

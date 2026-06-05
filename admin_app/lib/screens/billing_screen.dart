@@ -8,6 +8,7 @@ import '../providers/billing_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/form/form_input.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class BillingScreen extends ConsumerStatefulWidget {
   const BillingScreen({super.key});
@@ -56,8 +57,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Billing & Subscription',
+          Text( 'app.billing_subscription'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -65,8 +65,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Usage, plans, and payment submission backed by the live billing endpoints.',
+          Text( 'app.usage_plans_and_payment_submis'.tr(),
             style: TextStyle(color: textMuted),
           ),
           const SizedBox(height: 24),
@@ -89,14 +88,14 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
           Row(
             children: [
               ChoiceChip(
-                label: const Text('Monthly'),
+                label: Text( 'superAdmin.paymentsPage.interval.monthly'.tr()),
                 selected: billingState.interval == 'month',
                 onSelected: (_) =>
                     ref.read(billingProvider.notifier).setInterval('month'),
               ),
               const SizedBox(width: 8),
               ChoiceChip(
-                label: const Text('Yearly'),
+                label: Text( 'superAdmin.paymentsPage.interval.yearly'.tr()),
                 selected: billingState.interval == 'year',
                 onSelected: (_) =>
                     ref.read(billingProvider.notifier).setInterval('year'),
@@ -190,8 +189,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Submit or Simulate Payment',
+                  Text( 'app.submit_or_simulate_payment'.tr(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -214,7 +212,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                   ),
                   const SizedBox(height: 12),
                   FormInput(
-                    label: 'Notes',
+                    label: 'superAdmin.paymentsPage.import.fields.notes'.tr(),
                     controller: _notesCtrl,
                     maxLines: 3,
                   ),
@@ -223,7 +221,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                     children: [
                       Expanded(
                         child: AppButton.secondary(
-                          label: 'Simulate Payment',
+                          label: 'app.simulate_payment'.tr(),
                           onPressed: billingState.isLoading
                               ? null
                               : () => ref
@@ -236,7 +234,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: AppButton.primary(
-                          label: 'Submit Payment',
+                          label: 'app.submit_payment'.tr(),
                           onPressed: billingState.isLoading
                               ? null
                               : () => ref
@@ -256,8 +254,7 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
               ),
             ),
           const SizedBox(height: 24),
-          Text(
-            'Recent Payments',
+          Text( 'app.recent_payments'.tr(),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,

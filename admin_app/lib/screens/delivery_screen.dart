@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/delivery_provider.dart';
 import '../theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class DeliveryScreen extends ConsumerWidget {
   const DeliveryScreen({super.key});
@@ -26,8 +27,7 @@ class DeliveryScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Delivery Settings',
+          Text( 'app.delivery_settings'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -35,8 +35,7 @@ class DeliveryScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Manage delivery providers and rates',
+          Text( 'app.manage_delivery_providers_and'.tr(),
             style: TextStyle(color: textMuted),
           ),
           const SizedBox(height: 32),

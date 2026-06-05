@@ -234,7 +234,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         ),
         if (!isOfflineTenant)
           AppButton.primary(
-            label: 'admin.pages.products.index.addProduct'.tr(),
+            label: 'app.admin_pages_products_index_add'.tr().tr(),
             icon: LucideIcons.plus,
             onPressed: () => context.go('/products/create'),
           ),
@@ -270,8 +270,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    'admin.common.featureComingSoon'.tr(
+                  content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
                       namedArgs: {
                         'feature': 'admin.pages.products.index.bulk.export'
                             .tr(),
@@ -289,8 +288,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    'admin.common.featureComingSoon'.tr(
+                  content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
                       namedArgs: {
                         'feature': 'admin.pages.products.index.bulk.import'
                             .tr(),
@@ -317,8 +315,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           // Sort Dropdown
           Row(
             children: [
-              Text(
-                'admin.pages.products.index.sort.sortBy'.tr(),
+              Text( 'app.admin_pages_products_index_sor'.tr().tr(),
                 style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
               ),
               const SizedBox(width: 8),
@@ -328,7 +325,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   builder: (context, ref, _) {
                     final sortBy = ref.watch(productSortProvider);
                     return FormSelect<String>(
-                      label: 'admin.pages.products.index.sort.sortBy'.tr(),
+                      label: 'app.admin_pages_products_index_sor'.tr().tr(),
                       showLabel: false,
                       value: sortBy,
                       borderless: true,
@@ -386,7 +383,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   Widget _buildFilters(List<Category> categories, {bool isMobile = false}) {
     return ResponsiveFilterBar(
       searchField: FormInput(
-        label: 'admin.pages.products.index.filters.searchLabel'.tr(),
+        label: 'app.admin_pages_products_index_fil4'.tr().tr(),
         controller: _searchController,
         hint: 'admin.pages.products.index.filters.searchPlaceholder'.tr(),
         contentPadding: const EdgeInsets.symmetric(
@@ -412,8 +409,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text(
-                      'admin.pages.products.index.filters.allCategories'.tr(),
+                    child: Text( 'app.admin_pages_products_index_fil'.tr().tr(),
                     ),
                   ),
                   ...categories.map(
@@ -443,8 +439,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text(
-                      'admin.pages.products.index.filters.allStatus'.tr(),
+                    child: Text( 'app.admin_pages_products_index_fil2'.tr().tr(),
                     ),
                   ),
                   DropdownMenuItem(
@@ -457,8 +452,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   ),
                   DropdownMenuItem(
                     value: 'lowStock',
-                    child: Text(
-                      'admin.pages.products.index.filters.lowStock'.tr(),
+                    child: Text( 'app.admin_pages_products_index_fil3'.tr().tr(),
                     ),
                   ),
                 ],
@@ -572,8 +566,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             LucideIcons.plus,
                             color: Color(0xFF0F172A),
                           ),
-                          title: Text(
-                            'admin.pages.products.index.addProduct'.tr(),
+                          title: Text( 'app.admin_pages_products_index_add'.tr().tr(),
                           ),
                           onTap: () {
                             context.pop();
@@ -585,8 +578,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           LucideIcons.arrowUpDown,
                           color: Color(0xFF64748B),
                         ),
-                        title: Text(
-                          'admin.pages.products.index.sort.sortBy'.tr(),
+                        title: Text( 'app.admin_pages_products_index_sor'.tr().tr(),
                         ),
                         trailing: SizedBox(
                           width: 160,
@@ -594,7 +586,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             builder: (context, ref, _) {
                               final sortBy = ref.watch(productSortProvider);
                               return FormSelect<String>(
-                                label: 'admin.pages.products.index.sort.sortBy'
+                                label: 'app.admin_pages_products_index_sor'.tr()
                                     .tr(),
                                 showLabel: false,
                                 value: sortBy,
@@ -667,8 +659,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           context.pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                'admin.common.featureComingSoon'.tr(
+                              content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
                                   namedArgs: {
                                     'feature':
                                         'admin.pages.products.index.bulk.export'
@@ -692,8 +683,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           context.pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                'admin.common.featureComingSoon'.tr(
+                              content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
                                   namedArgs: {
                                     'feature':
                                         'admin.pages.products.index.bulk.import'
@@ -719,8 +709,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             context.pop();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  'admin.common.featureComingSoon'.tr(
+                                content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
                                     namedArgs: {
                                       'feature':
                                           'admin.pages.products.index.bulk.update'
@@ -794,7 +783,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             const SizedBox(height: 24),
             if (!(ref.watch(authProvider).mode == AppMode.offlineOnly))
               AppButton.primary(
-                label: 'admin.pages.products.index.empty.newProduct'.tr(),
+                label: 'app.admin_pages_products_index_emp'.tr().tr(),
                 icon: LucideIcons.plus,
                 onPressed: () => context.push('/products/create'),
               ),
@@ -950,7 +939,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     if (product.stock == 0) {
       // Out of stock — red badge
       return UiBadge(
-        label: 'admin.pages.products.index.table.outOfStock'.tr(),
+        label: 'app.admin_pages_products_index_tab'.tr().tr(),
         tone: UiBadgeTone.red,
       );
     }
@@ -1176,8 +1165,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'admin.pages.products.index.links.openProduct'.tr(),
+                        Text( 'app.admin_pages_products_index_lin'.tr().tr(),
                         ),
                       ],
                     ),
@@ -1192,8 +1180,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'admin.pages.products.index.links.copyProduct'.tr(),
+                        Text( 'app.admin_pages_products_index_lin2'.tr().tr(),
                         ),
                       ],
                     ),
@@ -1209,8 +1196,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'admin.pages.products.index.links.openLanding'.tr(),
+                        Text( 'app.admin_pages_products_index_lin3'.tr().tr(),
                         ),
                       ],
                     ),
@@ -1225,8 +1211,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'admin.pages.products.index.links.copyLanding'.tr(),
+                        Text( 'app.admin_pages_products_index_lin4'.tr().tr(),
                         ),
                       ],
                     ),
@@ -1258,8 +1243,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     if (context.mounted)
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(
-                            'admin.common.featureComingSoon'.tr(
+                          content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
                               namedArgs: {'feature': value},
                             ),
                           ),

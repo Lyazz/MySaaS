@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../theme/app_theme.dart';
 import '../utils/feature_access.dart';
 import '../widgets/buttons/app_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FeatureLockedScreen extends ConsumerWidget {
   final String featureName;
@@ -17,11 +18,10 @@ class FeatureLockedScreen extends ConsumerWidget {
     final feature = FeatureAccess.fromName(featureName);
     final info = feature != null
         ? FeatureAccess.infoFor(feature)
-        : const FeatureAccessInfo(
+        : FeatureAccessInfo(
             feature: OnlineTierFeature.preview,
-            title: 'Feature Locked',
-            description:
-                'This feature is not available for the current subscription.',
+            title: 'app.feature_locked'.tr(),
+            description: 'app.this_feature_is_not_available'.tr(),
           );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
@@ -85,8 +85,7 @@ class FeatureLockedScreen extends ConsumerWidget {
                       color: AppColors.brand.withValues(alpha: 0.14),
                     ),
                   ),
-                  child: Text(
-                    'Upgrade to an online tier to unlock hosted storefront capabilities from this app.',
+                  child: Text( 'app.upgrade_to_an_online_tier_to_u'.tr(),
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.45,
@@ -99,7 +98,7 @@ class FeatureLockedScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: AppButton.secondary(
-                        label: 'Back to Settings',
+                        label: 'app.back_to_settings'.tr(),
                         onPressed: () => context.go('/settings'),
                         icon: LucideIcons.arrowLeft,
                         fullWidth: true,

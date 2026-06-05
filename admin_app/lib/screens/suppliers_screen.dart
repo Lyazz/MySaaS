@@ -115,7 +115,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                     ],
                   ),
                   AppButton.primary(
-                    label: 'admin.pages.suppliers.index.addSupplier'.tr(),
+                    label: 'app.admin_pages_suppliers_index_ad'.tr().tr(),
                     icon: LucideIcons.plus,
                     onPressed: () => context.go('/suppliers/create'),
                   ),
@@ -126,7 +126,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
 
             ResponsiveFilterBar(
               searchField: FormInput(
-                label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
+                label: 'app.admin_pages_suppliers_index_fi'.tr().tr(),
                 controller: _searchController,
                 hint: 'admin.pages.suppliers.index.filters.searchPlaceholder'
                     .tr(),
@@ -141,20 +141,20 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                 SizedBox(
                   width: 200,
                   child: FormSelect<String>(
-                    label: 'Sort',
+                    label: 'admin.pages.pos.catalog.actions.sort'.tr(),
                     value: _sortBy,
-                    contentPadding: const EdgeInsets.symmetric(
+                    contentPadding: EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 14,
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'name_asc',
-                        child: Text('Name A-Z'),
+                        child: Text( 'app.name_a_z'.tr()),
                       ),
                       DropdownMenuItem(
                         value: 'name_desc',
-                        child: Text('Name Z-A'),
+                        child: Text( 'app.name_z_a'.tr()),
                       ),
                     ],
                     onChanged: (value) {
@@ -394,8 +394,8 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AppDialog(
-        title: 'admin.pages.suppliers.index.deleteModal.title'.tr(),
-        description: 'admin.pages.suppliers.index.deleteModal.messageWithName'
+        title: 'app.admin_pages_suppliers_index_de'.tr().tr(),
+        description: 'app.admin_pages_suppliers_index_de2'.tr()
             .tr(namedArgs: {'name': supplier.name}),
         content: Text(supplier.name),
         secondaryLabel: 'admin.common.cancel'.tr(),

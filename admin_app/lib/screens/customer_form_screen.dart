@@ -40,7 +40,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
     _phone = TextEditingController();
     _email = TextEditingController();
     _address = TextEditingController();
-    _openingBalance = TextEditingController(text: '0');
+    _openingBalance = TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr());
 
     if (widget.customerId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadCustomer());
@@ -214,7 +214,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
 
                     final openingBalanceField = FormInput(
                       controller: _openingBalance,
-                      label: 'admin.forms.customer.openingBalance.label'.tr(),
+                      label: 'app.admin_forms_customer_openingba'.tr().tr(),
                       hint: isEditing
                           ? 'admin.forms.customer.openingBalance.hint'.tr()
                           : 'admin.forms.customer.openingBalance.placeholder'

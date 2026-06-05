@@ -16,6 +16,7 @@ import '../widgets/buttons/app_button.dart';
 import '../widgets/buttons/table_action_button.dart';
 import '../theme/app_theme.dart';
 import '../widgets/badges/status_badges.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PurchasesScreen extends ConsumerStatefulWidget {
   const PurchasesScreen({super.key});
@@ -121,8 +122,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Purchases',
+                        Text( 'admin.pages.purchases.index.title'.tr(),
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -131,14 +131,13 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                           ),
                         ),
                         SizedBox(height: 4),
-                        Text(
-                          'Manage your purchase orders',
+                        Text( 'app.manage_your_purchase_orders'.tr(),
                           style: TextStyle(fontSize: 14, color: textMuted),
                         ),
                       ],
                     ),
                     AppButton.primary(
-                      label: 'New Purchase',
+                      label: 'admin.pages.purchases.create.breadcrumb'.tr(),
                       icon: LucideIcons.plus,
                       onPressed: () => context.go('/purchases/create'),
                     ),
@@ -149,7 +148,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
 
               ResponsiveFilterBar(
                 searchField: FormInput(
-                  label: 'Search',
+                  label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
                   controller: _searchController,
                   hint: 'Search purchases...',
                   contentPadding: const EdgeInsets.symmetric(
@@ -180,16 +179,16 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   SizedBox(
                     width: 240,
                     child: FormSelect<String?>(
-                      label: 'Supplier',
+                      label: 'admin.pages.purchases.detail.cards.supplier'.tr(),
                       value: _selectedSupplierId,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
                       ),
                       items: [
-                        const DropdownMenuItem<String?>(
+                        DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('All Suppliers'),
+                          child: Text( 'admin.pages.purchases.index.filters.allSuppliers'.tr()),
                         ),
                         ...suppliers.map(
                           (s) => DropdownMenuItem<String?>(
@@ -267,8 +266,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                     : AppColors.lightTextTertiary,
               ),
               const SizedBox(height: 16),
-              Text(
-                'No purchases found',
+              Text( 'admin.pages.purchases.index.empty.title'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -286,27 +284,26 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
       minWidth: 900,
       header: Row(
         children: [
-          Expanded(flex: 2, child: Text('ID', style: _headerStyle(textMuted))),
+          Expanded(flex: 2, child: Text( 'admin.pages.purchases.index.table.id'.tr(), style: _headerStyle(textMuted))),
           Expanded(
             flex: 3,
-            child: Text('SUPPLIER', style: _headerStyle(textMuted)),
+            child: Text( 'admin.pages.purchases.detail.cards.supplier'.tr(), style: _headerStyle(textMuted)),
           ),
           Expanded(
             flex: 2,
-            child: Text('STATUS', style: _headerStyle(textMuted)),
+            child: Text( 'superAdmin.paymentsPage.history.table.status'.tr(), style: _headerStyle(textMuted)),
           ),
           Expanded(
             flex: 2,
-            child: Text('ITEMS', style: _headerStyle(textMuted)),
+            child: Text( 'admin.pages.sales.detail.sections.items'.tr(), style: _headerStyle(textMuted)),
           ),
           Expanded(
             flex: 2,
-            child: Text('DATE', style: _headerStyle(textMuted)),
+            child: Text( 'superAdmin.paymentsPage.history.table.date'.tr(), style: _headerStyle(textMuted)),
           ),
           Expanded(
             flex: 1,
-            child: Text(
-              'ACTION',
+            child: Text( 'admin.pages.purchases.index.table.action'.tr(),
               style: _headerStyle(textMuted),
               textAlign: TextAlign.right,
             ),
@@ -370,7 +367,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: TableActionButton(
-                      tooltip: 'Manage',
+                      tooltip: 'admin.pages.purchases.index.table.manage'.tr(),
                       icon: LucideIcons.eye,
                       onPressed: () => context.go('/purchases/${purchase.id}'),
                     ),

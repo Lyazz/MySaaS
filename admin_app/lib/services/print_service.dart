@@ -13,6 +13,7 @@ import 'receipt_builder.dart';
 import '../../providers/store_settings_provider.dart';
 import 'api_service.dart';
 import '../repositories/contact_infos_repository.dart';
+import '../../providers/workspace_provider.dart';
 
 import 'senders/printer_sender.dart';
 import 'senders/network_sender.dart';
@@ -21,7 +22,8 @@ import 'senders/bluetooth_sender.dart';
 import 'senders/windows_spooler_sender.dart';
 import 'senders/serial_sender.dart';
 // import 'senders/pdf_sender.dart'; // Handled inline or separate
-
+import '../../models/store_settings.dart';
+import '../../utils/tenant_currency.dart';
 class SenderFactory {
   static PrinterSender getSender(PrinterTransport transport) {
     switch (transport) {
@@ -46,6 +48,17 @@ class PrintService {
   final ReceiptBuilder _receiptBuilder = ReceiptBuilder();
 
   PrintService(this.ref);
+
+  String? _resolveLogoUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    final uri = Uri.tryParse(ref.read(workspaceProvider).apiBaseUrl);
+    if (uri != null) {
+      final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
+      return url.startsWith('/') ? '$base$url' : '$base/$url';
+    }
+    return url;
+  }
 
   Future<void> printReceipt({
     required PrinterProfile profile,
@@ -102,6 +115,7 @@ class PrintService {
       storeSettings: storeSettings,
       contactInfos: contactInfos,
       currencyCode: actualCurrencyCode,
+      resolvedLogoUrl: _resolveLogoUrl(storeSettings.logoUrl),
     );
 
     // 2. Get Sender
@@ -123,7 +137,9 @@ class PrintService {
     String? currencyCode,
   ) async {
     final actualCurrencyCode = currencyCode ?? storeSettings?.currencyCode ?? 'DZD';
-    final money = NumberFormat.simpleCurrency(name: actualCurrencyCode);
+    final money = (storeSettings != null && storeSettings is StoreSettings)
+        ? tenantCurrencyFormatter(storeSettings)
+        : NumberFormat.simpleCurrency(name: actualCurrencyCode);
     final effectiveLayout = layout ?? ReceiptLayout.standard();
     final doc = pw.Document();
     
@@ -132,6 +148,17 @@ class PrintService {
     final storePhone = effectiveLayout.storePhoneOverride ?? contactInfos['phone'];
     final storeEmail = effectiveLayout.storeEmailOverride ?? contactInfos['email'];
 
+    pw.ImageProvider? logoImage;
+    final resolvedLogoUrl = _resolveLogoUrl(storeSettings?.logoUrl);
+    
+    if (effectiveLayout.showLogo && resolvedLogoUrl?.isNotEmpty == true) {
+      try {
+        logoImage = await networkImage(resolvedLogoUrl!);
+      } catch (e) {
+        // Ignore logo loading error
+      }
+    }
+
     doc.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.roll80,
@@ -139,6 +166,10 @@ class PrintService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
+              if (logoImage != null) ...[
+                pw.Image(logoImage, width: 80, height: 80, fit: pw.BoxFit.contain),
+                pw.SizedBox(height: 12),
+              ],
               if (effectiveLayout.showStoreName) ...[
                 pw.Text(
                   storeName,
@@ -153,9 +184,9 @@ class PrintService {
               if (effectiveLayout.showStoreAddress && storeAddress != null && storeAddress.isNotEmpty)
                 pw.Text(storeAddress, style: const pw.TextStyle(fontSize: 12)),
               if (effectiveLayout.showStorePhone && storePhone != null && storePhone.isNotEmpty)
-                pw.Text("admin.receipt.print.tel".tr(namedArgs: {'phone': storePhone}), style: const pw.TextStyle(fontSize: 12)),
+                pw.Text( "app.admin_receipt_print_tel".tr().tr(namedArgs: {'phone': storePhone}), style: const pw.TextStyle(fontSize: 12)),
               if (storeEmail != null && storeEmail.isNotEmpty && effectiveLayout.showStoreEmail)
-                pw.Text("admin.receipt.print.email".tr(namedArgs: {'email': storeEmail}), style: const pw.TextStyle(fontSize: 12)),
+                pw.Text( "app.admin_receipt_print_email".tr().tr(namedArgs: {'email': storeEmail}), style: const pw.TextStyle(fontSize: 12)),
 
               if (effectiveLayout.showStoreAddress || effectiveLayout.showStorePhone || effectiveLayout.showStoreEmail)
                 pw.SizedBox(height: 12),
@@ -172,15 +203,15 @@ class PrintService {
               ],
 
               if (effectiveLayout.showOrderNumber && orderId != null) 
-                pw.Text("admin.receipt.print.orderNum".tr(namedArgs: {'id': orderId})),
+                pw.Text( "app.admin_receipt_print_ordernum".tr().tr(namedArgs: {'id': orderId})),
                 
               if (effectiveLayout.showDate)
                 pw.Text(DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())),
                 
               if (effectiveLayout.showCustomerInfo && customer != null) ...[
                 pw.SizedBox(height: 12),
-                pw.Text("admin.receipt.print.customer".tr(namedArgs: {'name': customer.name})),
-                if (customer.phone.isNotEmpty) pw.Text("admin.receipt.print.phone".tr(namedArgs: {'phone': customer.phone})),
+                pw.Text( "app.admin_receipt_print_customer".tr().tr(namedArgs: {'name': customer.name})),
+                if (customer.phone.isNotEmpty) pw.Text( "app.admin_receipt_print_phone".tr().tr(namedArgs: {'phone': customer.phone})),
               ],
                 
               pw.SizedBox(height: 12),
@@ -190,16 +221,16 @@ class PrintService {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Expanded(child: pw.Text('Item', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
+                  pw.Expanded(child: pw.Text( 'app.item'.tr(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11))),
                   pw.Container(
                     width: 30,
                     alignment: pw.Alignment.center,
-                    child: pw.Text('Qty', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+                    child: pw.Text( 'admin.pages.sales.detail.itemsTable.qty'.tr(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
                   ),
                   pw.Container(
                     width: 60,
                     alignment: pw.Alignment.centerRight,
-                    child: pw.Text('Total', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+                    child: pw.Text( 'admin.pages.sales.detail.itemsTable.total'.tr(), style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
                   ),
                 ],
               ),
@@ -238,7 +269,7 @@ class PrintService {
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text("admin.receipt.print.discount".tr()),
+                    pw.Text( "app.admin_receipt_print_discount".tr().tr()),
                     pw.Text('-${money.format(discountAmount)}'),
                   ],
                 ),
@@ -253,8 +284,7 @@ class PrintService {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(
-                      "admin.receipt.print.grandTotal".tr(),
+                    pw.Text( "app.admin_receipt_print_grandtotal".tr().tr(),
                       style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16),
                     ),
                     pw.Text(

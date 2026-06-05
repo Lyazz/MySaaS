@@ -17,6 +17,7 @@ import '../widgets/buttons/app_button.dart';
 import '../widgets/badges/status_badges.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tenant_image_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PurchaseDetailScreen extends ConsumerStatefulWidget {
   final String purchaseId;
@@ -80,10 +81,9 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AppDialog(
-        title: 'Delete Purchase Order',
-        description: 'This action cannot be undone.',
-        content: const Text(
-          'Are you sure you want to delete this purchase order?',
+        title: 'admin.pages.purchases.detail.deleteModal.title'.tr(),
+        description: 'admin.confirmModal.defaults.message'.tr(),
+        content: Text( 'app.are_you_sure_you_want_to_delet2'.tr(),
         ),
         secondaryLabel: 'Cancel',
         onSecondary: () => Navigator.pop(context, false),
@@ -125,8 +125,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
 
     if (purchaseAsync.status == 'NOT_FOUND') {
       return Scaffold(
-        appBar: AppBar(title: const Text('Not Found')),
-        body: const Center(child: Text('Purchase order not found')),
+        appBar: AppBar(title: Text( 'app.not_found'.tr())),
+        body: Center(child: Text( 'app.purchase_order_not_found'.tr())),
       );
     }
 
@@ -156,8 +156,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                       children: [
                         InkWell(
                           onTap: () => context.go('/purchases'),
-                          child: Text(
-                            'Purchases',
+                          child: Text( 'admin.pages.purchases.index.title'.tr(),
                             style: TextStyle(
                               color: Colors.grey[500],
                               fontWeight: FontWeight.w500,
@@ -192,7 +191,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                 Row(
                   children: [
                     AppButton.secondary(
-                      label: 'Refresh',
+                      label: 'superAdmin.paymentsPage.actions.refresh'.tr(),
                       icon: LucideIcons.refreshCw,
                       onPressed: () => ref
                           .read(purchasesProvider.notifier)
@@ -200,7 +199,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                     ),
                     const SizedBox(width: 12),
                     AppButton.primary(
-                      label: 'Add Products',
+                      label: 'admin.pages.purchases.detail.addProducts'.tr(),
                       icon: LucideIcons.plus,
                       onPressed: _showAddProductModal,
                     ),
@@ -268,8 +267,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Order items',
+                        Text( 'admin.pages.purchases.detail.items.title'.tr(),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -369,7 +367,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: AppButton.danger(
-                label: 'Delete Order',
+                label: 'admin.pages.purchases.detail.deleteModal.confirm'.tr(),
                 icon: LucideIcons.trash2,
                 onPressed: _deletePurchase,
               ),
@@ -382,7 +380,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
 
   Widget _buildSupplierCard(Purchase purchase) {
     return _InfoCard(
-      title: 'SUPPLIER',
+      title: 'admin.pages.purchases.detail.cards.supplier'.tr(),
       icon: LucideIcons.truck,
       children: [
         Text(
@@ -408,12 +406,12 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
     );
 
     return _InfoCard(
-      title: 'SUMMARY',
+      title: 'admin.pages.purchases.detail.cards.summary'.tr(),
       icon: LucideIcons.fileText,
       children: [
-        _SummaryRow(label: 'Items Ordered', value: ordered.toInt().toString()),
+        _SummaryRow(label: 'admin.pages.purchases.detail.cards.itemsOrdered'.tr(), value: ordered.toInt().toString()),
         _SummaryRow(
-          label: 'Items Received',
+          label: 'admin.pages.purchases.detail.cards.itemsReceived'.tr(),
           value: received.toInt().toString(),
           valueColor: received == ordered
               ? Colors.green[700]
@@ -424,7 +422,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
           child: Divider(),
         ),
         _SummaryRow(
-          label: 'Estimated Total',
+          label: 'app.estimated_total'.tr(),
           value: _money.format(purchase.totalAmount),
           isBold: true,
         ),
@@ -434,7 +432,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
 
   Widget _buildActionsCard() {
     return _InfoCard(
-      title: 'NOTES',
+      title: 'superAdmin.paymentsPage.import.fields.notes'.tr(),
       icon: LucideIcons.fileText,
       children: [
         Center(
@@ -442,8 +440,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             children: [
               Icon(LucideIcons.fileText, size: 32, color: Colors.grey[300]),
               const SizedBox(height: 8),
-              Text(
-                'No notes added',
+              Text( 'app.no_notes_added'.tr(),
                 style: TextStyle(color: Colors.grey[500], fontSize: 13),
               ),
             ],
@@ -460,8 +457,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
         children: [
           Icon(LucideIcons.shoppingCart, size: 48, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          Text(
-            'No items added yet',
+          Text( 'app.no_items_added_yet'.tr(),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -469,13 +465,12 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Add products to this purchase order',
+          Text( 'app.add_products_to_this_purchase'.tr(),
             style: TextStyle(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
           AppButton.primary(
-            label: 'Add Products',
+            label: 'admin.pages.purchases.detail.addProducts'.tr(),
             icon: LucideIcons.plus,
             onPressed: _showAddProductModal,
           ),
@@ -501,8 +496,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          const Text(
-            'TOTAL ORDER VALUE',
+          Text( 'admin.pages.purchases.detail.items.table.totalOrderValue'.tr(),
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(width: 24),
@@ -652,15 +646,14 @@ class _TableHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text('PRODUCT', style: headerStyle)),
-          Expanded(flex: 2, child: Text('ORDERED', style: headerStyle)),
-          Expanded(flex: 2, child: Text('UNIT COST', style: headerStyle)),
-          Expanded(flex: 2, child: Text('RECEIVED', style: headerStyle)),
-          Expanded(flex: 3, child: Text('RECEIVE NOW', style: headerStyle)),
+          Expanded(flex: 3, child: Text( 'admin.pages.sales.detail.itemsTable.product'.tr(), style: headerStyle)),
+          Expanded(flex: 2, child: Text( 'admin.pages.purchases.detail.items.table.ordered'.tr(), style: headerStyle)),
+          Expanded(flex: 2, child: Text( 'admin.pages.purchases.detail.items.table.unitCost'.tr(), style: headerStyle)),
+          Expanded(flex: 2, child: Text( 'admin.pages.purchases.detail.items.table.received'.tr(), style: headerStyle)),
+          Expanded(flex: 3, child: Text( 'admin.pages.purchases.detail.items.table.receiveNow'.tr(), style: headerStyle)),
           Expanded(
             flex: 2,
-            child: Text(
-              'TOTAL',
+            child: Text( 'admin.pages.sales.detail.itemsTable.total'.tr(),
               style: headerStyle,
               textAlign: TextAlign.right,
             ),
@@ -793,7 +786,7 @@ class _TableRowState extends State<_TableRow> {
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     )
                   : FormInput(
-                      label: 'Qty ordered',
+                      label: 'app.qty_ordered'.tr(),
                       showLabel: false,
                       controller: _qtyController,
                       keyboardType: TextInputType.number,
@@ -818,7 +811,7 @@ class _TableRowState extends State<_TableRow> {
               child: widget.item.quantityReceived > 0
                   ? Text(widget.money.format(widget.item.unitCost))
                   : FormInput(
-                      label: 'Unit cost',
+                      label: 'admin.pages.purchases.detail.items.table.unitCost'.tr(),
                       showLabel: false,
                       controller: _costController,
                       keyboardType: TextInputType.number,
@@ -882,7 +875,7 @@ class _TableRowState extends State<_TableRow> {
                   SizedBox(
                     width: 70,
                     child: FormInput(
-                      label: 'Receive',
+                      label: 'app.receive'.tr(),
                       showLabel: false,
                       controller: _receiveController,
                       enabled: !isFullyReceived,
@@ -949,25 +942,25 @@ class _TableRowState extends State<_TableRow> {
                   // Simple Dropdown for mode (Replace/Weighted)
                   Expanded(
                     child: FormSelect<String>(
-                      label: 'Mode',
+                      label: 'app.mode'.tr(),
                       showLabel: false,
                       value: widget.salePriceMode,
                       borderless: true,
                       filled: false,
                       isDense: true,
-                      textStyle: const TextStyle(
+                      textStyle: TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
                       ),
                       contentPadding: EdgeInsets.zero,
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: 'replace',
-                          child: Text('Replace Price'),
+                          child: Text( 'app.replace_price'.tr()),
                         ),
                         DropdownMenuItem(
                           value: 'weighted',
-                          child: Text('Weighted Avg'),
+                          child: Text( 'admin.pages.purchases.detail.items.table.salePriceMode.weighted'.tr()),
                         ),
                       ],
                       onChanged: (val) {
@@ -1054,8 +1047,7 @@ class _VariantSelectorDialogState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Add Products',
+                Text( 'admin.pages.purchases.detail.addProducts'.tr(),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
@@ -1066,7 +1058,7 @@ class _VariantSelectorDialogState
             ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'Search',
+              label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
               showLabel: false,
               controller: _searchController,
               hint: 'Search products...',
@@ -1149,7 +1141,7 @@ class _VariantSelectorDialogState
                                 'SKU: ${variant.sku.isNotEmpty ? variant.sku : "-"}  |  Stock: ${variant.stock}',
                               ),
                               trailing: AppButton.secondary(
-                                label: 'Add',
+                                label: 'app.add'.tr(),
                                 size: AppButtonSize.sm,
                                 onPressed: () =>
                                     widget.onSelect(product, variant),

@@ -9,6 +9,7 @@ import '../providers/settings_provider.dart';
 import '../providers/workspace_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/feature_access.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -98,8 +99,7 @@ class SettingsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Settings',
+          Text( 'admin.tours.sidebar.steps.settings.title'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -107,22 +107,19 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            'Manage local admin preferences, operational settings, and hosted storefront access.',
+          Text( 'app.manage_local_admin_preferences'.tr(),
             style: TextStyle(fontSize: 14, color: textMuted),
           ),
           const SizedBox(height: 24),
           section('App', [
             SwitchListTile(
-              title: Text(
-                'Dark Mode',
+              title: Text( 'app.dark_mode'.tr(),
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: textPrimary,
                 ),
               ),
-              subtitle: Text(
-                'Enable the dark admin theme.',
+              subtitle: Text( 'app.enable_the_dark_admin_theme'.tr(),
                 style: TextStyle(color: textMuted),
               ),
               value: settingsState.themeMode == ThemeMode.dark,
@@ -130,8 +127,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             Divider(height: 1, color: borderColor),
             ListTile(
-              title: Text(
-                'Provisioned workspace',
+              title: Text( 'app.provisioned_workspace'.tr(),
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: textPrimary,
@@ -148,15 +144,13 @@ class SettingsScreen extends ConsumerWidget {
             ),
             Divider(height: 1, color: borderColor),
             ListTile(
-              title: Text(
-                'Reprovision workspace',
+              title: Text( 'app.reprovision_workspace'.tr(),
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: textPrimary,
                 ),
               ),
-              subtitle: Text(
-                'Clear local tenant data on this install and return to secure activation.',
+              subtitle: Text( 'app.clear_local_tenant_data_on_thi'.tr(),
                 style: TextStyle(color: textMuted, height: 1.35),
               ),
               leading: const Icon(LucideIcons.rotateCcw, color: AppColors.red),
@@ -169,18 +163,17 @@ class SettingsScreen extends ConsumerWidget {
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (dialogContext) => AlertDialog(
-                    title: const Text('Reprovision workspace'),
-                    content: const Text(
-                      'This clears the local workspace database, sync queue, files, and image cache for this tenant binding on this device.',
+                    title: Text( 'app.reprovision_workspace'.tr()),
+                    content: Text( 'app.this_clears_the_local_workspac'.tr(),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(false),
-                        child: const Text('Cancel'),
+                        child: Text( 'admin.common.cancel'.tr()),
                       ),
                       FilledButton(
                         onPressed: () => Navigator.of(dialogContext).pop(true),
-                        child: const Text('Clear and reprovision'),
+                        child: Text( 'app.clear_and_reprovision'.tr()),
                       ),
                     ],
                   ),
@@ -196,8 +189,8 @@ class SettingsScreen extends ConsumerWidget {
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Printers',
-              subtitle: 'Manage receipt and device printing.',
+              title: 'app.printers'.tr(),
+              subtitle: 'app.manage_receipt_and_device_prin'.tr(),
               icon: LucideIcons.printer,
               route: '/settings/printers',
             ),
@@ -205,23 +198,22 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           section('Admin Operations', [
             tile(
-              title: 'Store Settings',
-              subtitle:
-                  'Order prefixes, checkout rules, and operational defaults.',
+              title: 'app.store_settings'.tr(),
+              subtitle: 'app.order_prefixes_checkout_rules'.tr(),
               icon: LucideIcons.store,
               route: '/settings/store',
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Contact Information',
-              subtitle: 'Manage phone, email, address, and social links.',
+              title: 'app.contact_information'.tr(),
+              subtitle: 'app.manage_phone_email_address_and'.tr(),
               icon: LucideIcons.contact,
               route: '/settings/contact',
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Setup Checklist',
-              subtitle: 'Track onboarding progress for this tenant.',
+              title: 'app.setup_checklist'.tr(),
+              subtitle: 'app.track_onboarding_progress_for'.tr(),
               icon: LucideIcons.clipboardCheck,
               route: '/onboarding',
             ),
@@ -229,56 +221,56 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           section('Hosted Storefront', [
             tile(
-              title: 'Appearance',
-              subtitle: 'Theme, logo, color, language, and announcement bar.',
+              title: 'admin.tours.settings.steps.appearance.title'.tr(),
+              subtitle: 'app.theme_logo_color_language_and'.tr(),
               icon: LucideIcons.palette,
               route: '/settings/appearance',
               lockedFeature: OnlineTierFeature.appearance,
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Homepage',
-              subtitle: 'Hero carousel and storefront homepage sections.',
+              title: 'admin.pages.settings.homepage.metaTitle'.tr(),
+              subtitle: 'app.hero_carousel_and_storefront_h'.tr(),
               icon: LucideIcons.layoutTemplate,
               route: '/settings/homepage',
               lockedFeature: OnlineTierFeature.homepage,
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Legal Pages',
-              subtitle: 'Terms, privacy, returns, and public contact pages.',
+              title: 'admin.settingsHub.links.legal'.tr(),
+              subtitle: 'app.terms_privacy_returns_and_publ'.tr(),
               icon: LucideIcons.fileText,
               route: '/settings/legal',
               lockedFeature: OnlineTierFeature.legal,
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Custom Domains',
-              subtitle: 'Attach a custom domain to the hosted storefront.',
+              title: 'app.custom_domains'.tr(),
+              subtitle: 'app.attach_a_custom_domain_to_the'.tr(),
               icon: LucideIcons.globe,
               route: '/settings/domains',
               lockedFeature: OnlineTierFeature.domains,
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Storefront Preview',
-              subtitle: 'Open the existing hosted storefront preview.',
+              title: 'app.storefront_preview'.tr(),
+              subtitle: 'app.open_the_existing_hosted_store'.tr(),
               icon: LucideIcons.monitorPlay,
               route: '/storefront/preview',
               lockedFeature: OnlineTierFeature.preview,
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Template Builder',
-              subtitle: 'Open the web-based template builder.',
+              title: 'app.template_builder'.tr(),
+              subtitle: 'app.open_the_web_based_template_bu'.tr(),
               icon: LucideIcons.layoutGrid,
               route: '/storefront/builder',
               lockedFeature: OnlineTierFeature.builder,
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Landing Page Builder',
-              subtitle: 'Open the web-based marketing landing page builder.',
+              title: 'app.landing_page_builder'.tr(),
+              subtitle: 'app.open_the_web_based_marketing_l'.tr(),
               icon: LucideIcons.brush,
               route: '/storefront/landing-builder',
               lockedFeature: OnlineTierFeature.landingBuilder,
@@ -287,16 +279,16 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           section('Cloud', [
             tile(
-              title: 'Integrations',
-              subtitle: 'Cloud-connected integrations and notifications.',
+              title: 'admin.settingsHub.links.integrations'.tr(),
+              subtitle: 'app.cloud_connected_integrations_a'.tr(),
               icon: LucideIcons.plug,
               route: '/integrations',
               lockedFeature: OnlineTierFeature.integrations,
             ),
             Divider(height: 1, color: borderColor),
             tile(
-              title: 'Billing & Subscription',
-              subtitle: 'Usage, plans, and payment submission.',
+              title: 'app.billing_subscription'.tr(),
+              subtitle: 'app.usage_plans_and_payment_submis2'.tr(),
               icon: LucideIcons.creditCard,
               route: '/billing',
               lockedFeature: OnlineTierFeature.billing,
@@ -313,8 +305,7 @@ class SettingsScreen extends ConsumerWidget {
                   color: AppColors.brand.withValues(alpha: 0.14),
                 ),
               ),
-              child: Text(
-                'This tenant is on an offline-only subscription tier. Hosted storefront and cloud features stay visible here but remain locked until the tenant upgrades to an online tier.',
+              child: Text( 'app.this_tenant_is_on_an_offline_o'.tr(),
                 style: TextStyle(color: textPrimary, height: 1.45),
               ),
             ),

@@ -271,7 +271,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             showIcon: false,
           ),
           StatCard(
-            label: 'admin.pages.customers.detail.stats.totalSpent'.tr(),
+            label: 'app.admin_pages_customers_detail_s'.tr().tr(),
             value: totalSpent,
             icon: LucideIcons.dollarSign,
             moodColor: const Color(0xFF4D7C0F), // Lime-700
@@ -279,7 +279,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             showIcon: false,
           ),
           StatCard(
-            label: 'admin.pages.customers.detail.stats.totalPaid'.tr(),
+            label: 'app.admin_pages_customers_detail_s2'.tr().tr(),
             value: totalPaid,
             icon: LucideIcons.wallet,
             moodColor: const Color(0xFF047857), // Emerald-700
@@ -287,7 +287,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             showIcon: false,
           ),
           StatCard(
-            label: 'admin.pages.customers.detail.stats.currentBalance'.tr(),
+            label: 'app.admin_pages_customers_detail_s3'.tr().tr(),
             value: currentBalance,
             icon: LucideIcons.scale,
             moodColor: balanceColor,
@@ -549,8 +549,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: p.saleId == null || p.saleId!.trim().isEmpty
-                      ? Text(
-                          '—',
+                      ? Text( 'app.str_204'.tr(),
                           style: TextStyle(
                             color: Theme.of(
                               context,
@@ -621,8 +620,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
           children: [
             const Icon(LucideIcons.alertCircle, size: 28),
             const SizedBox(height: 12),
-            Text(
-              'admin.pages.customers.detail.errors.loadFailed'.tr(),
+            Text( 'app.admin_pages_customers_detail_e'.tr().tr(),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -651,8 +649,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
               ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
-            Text(
-              'admin.pages.customers.detail.notFound.title'.tr(),
+            Text( 'app.admin_pages_customers_detail_n'.tr().tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -660,8 +657,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'admin.pages.customers.detail.notFound.hint'.tr(),
+            Text( 'app.admin_pages_customers_detail_n2'.tr().tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

@@ -129,9 +129,9 @@ void main() {
     expect(find.widgetWithText(Tab, 'Variants / Stock'), findsOneWidget);
 
     expect(find.widgetWithText(Tab, 'Images'), findsNothing);
-    expect(find.widgetWithText(Tab, 'Bundles'), findsNothing);
-    expect(find.widgetWithText(Tab, 'Promotions'), findsNothing);
-    expect(find.widgetWithText(Tab, 'Tracking'), findsNothing);
+    expect(find.widgetWithText(Tab, 'Promotions'), findsOneWidget);
+    expect(find.widgetWithText(Tab, 'Bundles'), findsOneWidget);
+    expect(find.widgetWithText(Tab, 'Tracking'), findsOneWidget);
 
     expect(find.text('Low stock alert threshold'), findsOneWidget);
     expect(find.text('Product images'), findsOneWidget);

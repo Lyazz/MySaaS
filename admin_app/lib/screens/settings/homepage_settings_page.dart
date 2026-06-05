@@ -7,6 +7,7 @@ import '../../repositories/homepage_settings_repository.dart';
 import '../../services/api_service.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class HomepageSettingsPage extends ConsumerStatefulWidget {
   const HomepageSettingsPage({super.key});
@@ -145,7 +146,7 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Homepage settings saved')));
+      ).showSnackBar(SnackBar(content: Text( 'app.homepage_settings_saved'.tr())));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -164,7 +165,7 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Homepage Settings'),
+        title: Text( 'admin.pages.settings.homepage.title'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -181,12 +182,12 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
         child: Column(
           children: [
             if (_error != null) ...[Text(_error!), const SizedBox(height: 12)],
-            FormInput(label: 'Hero image URL', controller: _slideImageCtrl),
+            FormInput(label: 'app.hero_image_url'.tr(), controller: _slideImageCtrl),
             const SizedBox(height: 12),
-            FormInput(label: 'Hero title', controller: _slideTitleCtrl),
+            FormInput(label: 'app.hero_title'.tr(), controller: _slideTitleCtrl),
             const SizedBox(height: 12),
             FormInput(
-              label: 'Hero subtitle',
+              label: 'app.hero_subtitle'.tr(),
               controller: _slideSubtitleCtrl,
               maxLines: 2,
             ),
@@ -195,14 +196,14 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
               children: [
                 Expanded(
                   child: FormInput(
-                    label: 'Hero button text',
+                    label: 'app.hero_button_text'.tr(),
                     controller: _slideButtonTextCtrl,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: FormInput(
-                    label: 'Hero button link',
+                    label: 'app.hero_button_link'.tr(),
                     controller: _slideButtonHrefCtrl,
                   ),
                 ),
@@ -210,7 +211,7 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
             ),
             const SizedBox(height: 20),
             _HomepageSectionCard(
-              title: 'Browse by Category',
+              title: 'admin.homepageSettingsForm.sections.browseByCategory.title'.tr(),
               enabled: _browseEnabled,
               onChanged: (value) => setState(() => _browseEnabled = value),
               eyebrowController: _browseEyebrowCtrl,
@@ -218,7 +219,7 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
             ),
             const SizedBox(height: 16),
             _HomepageSectionCard(
-              title: 'New Arrivals',
+              title: 'admin.homepageSettingsForm.sections.newArrivals.title'.tr(),
               enabled: _arrivalsEnabled,
               onChanged: (value) => setState(() => _arrivalsEnabled = value),
               eyebrowController: _arrivalsEyebrowCtrl,
@@ -227,7 +228,7 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
             ),
             const SizedBox(height: 16),
             _HomepageSectionCard(
-              title: 'Best Sellers',
+              title: 'admin.homepageSettingsForm.sections.bestSellers.title'.tr(),
               enabled: _bestEnabled,
               onChanged: (value) => setState(() => _bestEnabled = value),
               eyebrowController: _bestEyebrowCtrl,
@@ -273,13 +274,13 @@ class _HomepageSectionCard extends StatelessWidget {
             value: enabled,
             onChanged: onChanged,
           ),
-          FormInput(label: 'Eyebrow', controller: eyebrowController),
+          FormInput(label: 'app.eyebrow'.tr(), controller: eyebrowController),
           const SizedBox(height: 12),
-          FormInput(label: 'Title', controller: titleController),
+          FormInput(label: 'admin.pages.categories.index.sort.title'.tr(), controller: titleController),
           if (limitController != null) ...[
             const SizedBox(height: 12),
             FormInput(
-              label: 'Limit',
+              label: 'admin.homepageSettingsForm.fields.limit'.tr(),
               controller: limitController!,
               keyboardType: TextInputType.number,
             ),

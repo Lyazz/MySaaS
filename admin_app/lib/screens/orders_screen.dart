@@ -17,6 +17,9 @@ import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/buttons/table_action_button.dart';
 import '../widgets/badges/status_badges.dart';
+import '../widgets/admin_stat_card.dart';
+import '../widgets/ui_tab_filter.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class OrdersScreen extends ConsumerStatefulWidget {
   final String? initialStatus;
@@ -36,6 +39,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   int _page = 1;
+  String _activeTab = 'all';
 
   @override
   void initState() {
@@ -62,7 +66,19 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   }
 
   void _resetFilters() {
-    setState(_setDefaultFilters);
+    setState(() {
+      _activeTab = 'all';
+      _setDefaultFilters();
+    });
+    _fetchOrders();
+  }
+
+  void _onTabChanged(String tab) {
+    setState(() {
+      _activeTab = tab;
+      _selectedStatus = tab == 'all' ? '' : tab;
+      _page = 1;
+    });
     _fetchOrders();
   }
 
@@ -112,9 +128,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!isMobile) ...[
-                    _buildHeader(),
+                    _buildHeader(ordersState),
                     const SizedBox(height: 24),
                   ],
+                  _buildTabs(ordersState),
+                  const SizedBox(height: 24),
                   _buildFiltersCard(),
                   const SizedBox(height: 24),
                   if (ordersState.isLoading)
@@ -134,40 +152,134 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildHeader(OrdersState state) {
+    final pendingCount = state.orders.where((o) => o.status == 'PENDING').length;
+    final deliveredCount = state.orders.where((o) => o.status == 'DELIVERED').length;
+    final cancelledCount = state.orders.where((o) => o.status == 'CANCELLED').length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Orders',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: -0.5,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text( 'superAdmin.tenants.table.orders'.tr(),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text( 'admin.pages.orders.index.subtitle'.tr(),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                AppButton.secondary(
+                  label: 'admin.nav.export'.tr(),
+                  icon: LucideIcons.download,
+                  onPressed: () {}, // Dummy for parity
+                ),
+                const SizedBox(width: 12),
+                AppButton.primary(
+                  label: 'admin.pages.orders.index.addBtn'.tr(),
+                  icon: LucideIcons.plus,
+                  onPressed: () => context.push('/orders/create'),
+                ),
+              ],
+            )
+          ],
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: AdminStatCard(
+                label: 'admin.dashboard.stats.total'.tr(),
+                value: state.total.toString(),
+                icon: LucideIcons.shoppingBag,
+                tone: 'blue',
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Manage customer orders',
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.5),
+            const SizedBox(width: 16),
+            Expanded(
+              child: AdminStatCard(
+                label: 'admin.dashboard.stats.pending'.tr(),
+                value: pendingCount.toString(),
+                icon: LucideIcons.clock,
+                tone: 'orange',
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: AdminStatCard(
+                label: 'admin.dashboard.stats.delivered'.tr(),
+                value: deliveredCount.toString(),
+                icon: LucideIcons.checkCircle,
+                tone: 'lime',
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: AdminStatCard(
+                label: 'admin.dashboard.stats.cancelled'.tr(),
+                value: cancelledCount.toString(),
+                icon: LucideIcons.xCircle,
+                tone: 'red',
               ),
             ),
           ],
-        ),
-        AppButton.primary(
-          label: 'New Order',
-          icon: LucideIcons.plus,
-          onPressed: () => context.push('/orders/create'),
-        ),
+        )
       ],
+    );
+  }
+
+  Widget _buildTabs(OrdersState state) {
+    final tabs = [
+      UiTabItem(key: 'all', label: 'admin.pages.orders.index.filters.allOrders'.tr()),
+      UiTabItem(
+        key: 'PENDING',
+        label: 'admin.pages.billing.status.pending.badge'.tr(),
+        count: state.orders.where((o) => o.status == 'PENDING').length,
+      ),
+      UiTabItem(
+        key: 'CONFIRMED',
+        label: 'admin.orderStatus.confirmed'.tr(),
+        count: state.orders.where((o) => o.status == 'CONFIRMED').length,
+      ),
+      UiTabItem(
+        key: 'SHIPPED',
+        label: 'admin.orderStatus.shipped'.tr(),
+        count: state.orders.where((o) => o.status == 'SHIPPED').length,
+      ),
+      UiTabItem(
+        key: 'DELIVERED',
+        label: 'admin.orderStatus.delivered'.tr(),
+        count: state.orders.where((o) => o.status == 'DELIVERED').length,
+      ),
+      UiTabItem(
+        key: 'CANCELLED',
+        label: 'admin.pages.purchases.index.filters.statusValues.CANCELLED'.tr(),
+        count: state.orders.where((o) => o.status == 'CANCELLED').length,
+      ),
+    ];
+
+    return UiTabFilter(
+      activeTab: _activeTab,
+      tabs: tabs,
+      onTabChanged: _onTabChanged,
     );
   }
 
@@ -177,7 +289,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   Widget _buildFiltersCard() {
     return ResponsiveFilterBar(
       searchField: FormInput(
-        label: 'Search',
+        label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
         controller: _searchController,
         hint: 'Search orders...',
         contentPadding: const EdgeInsets.symmetric(
@@ -211,24 +323,25 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         SizedBox(
           width: 220,
           child: FormSelect<String>(
-            label: 'Status',
+            label: 'superAdmin.paymentsPage.history.table.status'.tr(),
             value: _selectedStatus,
-            contentPadding: const EdgeInsets.symmetric(
+            contentPadding: EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
-            items: const [
-              DropdownMenuItem(value: '', child: Text('All Orders')),
-              DropdownMenuItem(value: 'PENDING', child: Text('Pending')),
-              DropdownMenuItem(value: 'CONFIRMED', child: Text('Confirmed')),
-              DropdownMenuItem(value: 'SHIPPED', child: Text('Shipped')),
-              DropdownMenuItem(value: 'DELIVERED', child: Text('Delivered')),
-              DropdownMenuItem(value: 'CANCELLED', child: Text('Cancelled')),
-              DropdownMenuItem(value: 'RETURNED', child: Text('Returned')),
+            items: [
+              DropdownMenuItem(value: '', child: Text( 'admin.pages.orders.index.filters.allOrders'.tr())),
+              DropdownMenuItem(value: 'PENDING', child: Text( 'admin.pages.billing.status.pending.badge'.tr())),
+              DropdownMenuItem(value: 'CONFIRMED', child: Text( 'admin.orderStatus.confirmed'.tr())),
+              DropdownMenuItem(value: 'SHIPPED', child: Text( 'admin.orderStatus.shipped'.tr())),
+              DropdownMenuItem(value: 'DELIVERED', child: Text( 'admin.orderStatus.delivered'.tr())),
+              DropdownMenuItem(value: 'CANCELLED', child: Text( 'admin.pages.purchases.index.filters.statusValues.CANCELLED'.tr())),
+              DropdownMenuItem(value: 'RETURNED', child: Text( 'admin.orderStatus.returned'.tr())),
             ],
             onChanged: (value) {
               setState(() {
                 _selectedStatus = value ?? '';
+                _activeTab = value == '' ? 'all' : value!;
                 _page = 1;
               });
               _fetchOrders();
@@ -242,7 +355,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   Widget _buildLoadingCard() {
     return _card(
-      child: const Padding(
+      child: Padding(
         padding: EdgeInsets.all(48),
         child: Column(
           children: [
@@ -252,8 +365,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               child: CircularProgressIndicator(strokeWidth: 3),
             ),
             SizedBox(height: 12),
-            Text(
-              'Loading orders...',
+            Text( 'app.loading_orders'.tr(),
               style: TextStyle(color: Color(0xFF64748B)), // Slate-500
             ),
           ],
@@ -273,7 +385,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             AppButton.secondary(
-              label: 'Retry',
+              label: 'app.retry'.tr(),
               icon: LucideIcons.refreshCw,
               onPressed: _fetchOrders,
             ),
@@ -301,8 +413,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
-            Text(
-              'No orders found',
+            Text( 'admin.pages.orders.index.empty.title'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -344,17 +455,28 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       },
       header: Row(
         children: [
-          _buildHeaderCell('Order ID', flex: 2),
-          _buildHeaderCell('Customer', flex: 3),
-          _buildHeaderCell('Phone', flex: 2),
-          _buildHeaderCell('Total', flex: 2),
-          _buildHeaderCell('Status', flex: 2),
-          _buildHeaderCell('Date', flex: 2),
+          Expanded(
+            flex: 1,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Checkbox(
+                value: false, // dummy for UI parity
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+          _buildHeaderCell('admin.pages.orders.index.table.orderId'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.orders.index.table.customer'.tr(), flex: 3),
+          _buildHeaderCell('admin.pages.orders.index.table.phone'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.orders.index.table.delivery'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.orders.index.table.total'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.orders.index.table.status'.tr(), flex: 2),
+          _buildHeaderCell('admin.pages.orders.index.table.date'.tr(), flex: 2),
           Expanded(
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText('Actions'),
+              child: _headerText( 'superAdmin.tenants.table.actions'.tr()),
             ),
           ),
         ],
@@ -363,10 +485,28 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         final shortId = order.id.length > 8
             ? order.id.substring(0, 8)
             : order.id;
+        
+        String deliveryModeLabel = order.deliveryMode.trim().toLowerCase();
+        if (deliveryModeLabel == 'store') deliveryModeLabel = 'admin.pages.orders.index.deliveryModes.store'.tr();
+        else if (deliveryModeLabel == 'pickup' || deliveryModeLabel == 'desk' || deliveryModeLabel == 'office') deliveryModeLabel = 'admin.pages.orders.index.deliveryModes.pickup'.tr();
+        else deliveryModeLabel = 'admin.pages.orders.index.deliveryModes.home'.tr();
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
             children: [
+              Expanded(
+                flex: 1,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: order.status == 'PENDING'
+                      ? Checkbox(
+                          value: false, // dummy
+                          onChanged: (_) {},
+                        )
+                      : const SizedBox(width: 24, height: 24),
+                ),
+              ),
               Expanded(
                 flex: 2,
                 child: InkWell(
@@ -419,13 +559,51 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               ),
               Expanded(
                 flex: 2,
-                child: Text(
-                  money.format(order.totalAmount),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      order.shippingProvider?.isNotEmpty == true ? order.shippingProvider! : '—',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      deliveryModeLabel,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      money.format(order.totalWithShippingAmount ?? order.totalAmount),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    if (order.shippingAmount != null && order.shippingAmount! > 0)
+                      Text(
+                        '+${money.format(order.shippingAmount!)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               Expanded(
@@ -451,10 +629,23 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 flex: 2,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: TableActionButton(
-                    tooltip: 'View',
-                    icon: LucideIcons.eye,
-                    onPressed: () => context.push('/orders/${order.id}'),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TableActionButton(
+                        tooltip: 'admin.pages.billing.history.viewProof'.tr(),
+                        icon: LucideIcons.eye,
+                        onPressed: () => context.push('/orders/${order.id}'),
+                      ),
+                      if (order.status == 'PENDING') ...[
+                        const SizedBox(width: 8),
+                        TableActionButton(
+                          tooltip: 'common.delete'.tr(),
+                          icon: LucideIcons.trash2,
+                          onPressed: () {}, // Dummy
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),

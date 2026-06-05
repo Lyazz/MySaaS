@@ -10,6 +10,8 @@ import '../providers/sidebar_provider.dart';
 import '../providers/store_settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/feature_access.dart';
+import '../providers/workspace_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Sidebar extends ConsumerWidget {
   const Sidebar({super.key});
@@ -40,12 +42,26 @@ class Sidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isCollapsed = ref.watch(sidebarProvider);
     final authState = ref.watch(authProvider);
+    final workspaceState = ref.watch(workspaceProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final sidebarBg = isDark ? AppColors.sidebarBg : AppColors.lightSidebarBg;
     final borderColor = isDark
         ? AppColors.surfaceBorder
         : AppColors.lightSidebarBorder;
+
+    String? resolveLogoUrl(String? url) {
+      if (url == null || url.isEmpty) return null;
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+      final uri = Uri.tryParse(workspaceState.apiBaseUrl);
+      if (uri != null) {
+        final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
+        return url.startsWith('/') ? '$base$url' : '$base/$url';
+      }
+      return url;
+    }
+
+    final String? resolvedLogoUrl = resolveLogoUrl(ref.watch(storeSettingsProvider).settings.logoUrl);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -56,7 +72,7 @@ class Sidebar extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          _buildHeader(context, isCollapsed, ref, isDark),
+          _buildHeader(context, isCollapsed, ref, isDark, resolvedLogoUrl),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(
@@ -100,13 +116,13 @@ class Sidebar extends ConsumerWidget {
                       if (_canRead(authState, 'delivery'))
                         _NavItem(
                           route: '/delivery',
-                          label: 'admin.nav.deliveryItem'.tr(),
+                          label: 'app.admin_nav_deliveryitem'.tr().tr(),
                           icon: LucideIcons.truck,
                         ),
                       if (_canRead(authState, 'sales'))
                         _NavItem(
                           route: '/sales',
-                          label: 'admin.nav.salesItem'.tr(),
+                          label: 'app.admin_nav_salesitem'.tr().tr(),
                           icon: LucideIcons.barChart,
                         ),
                       if (_canRead(authState, 'cash'))
@@ -159,7 +175,7 @@ class Sidebar extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   _buildNavGroup(
-                    title: 'admin.nav.storeParameters'.tr(),
+                    title: 'app.admin_nav_storeparameters'.tr().tr(),
                     isCollapsed: isCollapsed,
                     isDark: isDark,
                     items: [
@@ -225,6 +241,7 @@ class Sidebar extends ConsumerWidget {
     bool isCollapsed,
     WidgetRef ref,
     bool isDark,
+    String? resolvedLogoUrl,
   ) {
     final storeState = ref.watch(storeSettingsProvider);
     final storeName = storeState.settings.name.isNotEmpty
@@ -253,23 +270,22 @@ class Sidebar extends ConsumerWidget {
             ? MainAxisAlignment.center
             : MainAxisAlignment.start,
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: AppColors.brand,
-              borderRadius: BorderRadius.circular(7),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initial,
-              style: const TextStyle(
-                color: AppColors.brandContrast,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+          if (resolvedLogoUrl != null && resolvedLogoUrl.isNotEmpty)
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(7),
               ),
-            ),
-          ),
+              clipBehavior: Clip.antiAlias,
+              child: CachedNetworkImage(
+                imageUrl: resolvedLogoUrl,
+                fit: BoxFit.contain,
+                errorWidget: (context, url, error) => _buildInitialsLogo(initial),
+              ),
+            )
+          else
+            _buildInitialsLogo(initial),
           if (!isCollapsed) ...[
             const SizedBox(width: 10),
             Flexible(
@@ -302,6 +318,26 @@ class Sidebar extends ConsumerWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildInitialsLogo(String initial) {
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: AppColors.brand,
+        borderRadius: BorderRadius.circular(7),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: const TextStyle(
+          color: AppColors.brandContrast,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
       ),
     );
   }

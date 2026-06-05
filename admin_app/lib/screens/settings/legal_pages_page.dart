@@ -6,6 +6,7 @@ import '../../providers/store_settings_provider.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
 import '../../widgets/form/form_select.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LegalPagesPage extends ConsumerStatefulWidget {
   const LegalPagesPage({super.key});
@@ -90,7 +91,7 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Legal pages saved')));
+      ).showSnackBar(SnackBar(content: Text( 'app.legal_pages_saved'.tr())));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -112,7 +113,7 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Legal Pages'),
+        title: Text( 'admin.settingsHub.links.legal'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -131,7 +132,7 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
               child: Column(
                 children: [
                   FormSelect<String>(
-                    label: 'Page',
+                    label: 'app.page'.tr(),
                     value: _pageKey,
                     items: _pages
                         .map(
@@ -149,13 +150,13 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
-                    title: const Text('Publish this legal page'),
+                    title: Text( 'app.publish_this_legal_page'.tr()),
                     value: _enabled,
                     onChanged: (value) => setState(() => _enabled = value),
                   ),
                   const SizedBox(height: 12),
                   _LocalizedBlock(
-                    title: 'Titles',
+                    title: 'app.titles'.tr(),
                     frController: _titleFrCtrl,
                     enController: _titleEnCtrl,
                     arController: _titleArCtrl,
@@ -163,7 +164,7 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
                   ),
                   const SizedBox(height: 16),
                   _LocalizedBlock(
-                    title: 'Content',
+                    title: 'app.content'.tr(),
                     frController: _contentFrCtrl,
                     enController: _contentEnCtrl,
                     arController: _contentArCtrl,
@@ -208,19 +209,19 @@ class _LocalizedBlock extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           FormInput(
-            label: 'French',
+            label: 'i18n.locales.fr'.tr(),
             controller: frController,
             maxLines: multiline ? 5 : 1,
           ),
           const SizedBox(height: 12),
           FormInput(
-            label: 'English',
+            label: 'i18n.locales.en'.tr(),
             controller: enController,
             maxLines: multiline ? 5 : 1,
           ),
           const SizedBox(height: 12),
           FormInput(
-            label: 'Arabic',
+            label: 'i18n.locales.ar'.tr(),
             controller: arController,
             maxLines: multiline ? 5 : 1,
           ),

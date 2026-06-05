@@ -45,10 +45,17 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _titleController = TextEditingController();
   final _slugController = TextEditingController();
   final _miniDescriptionController = TextEditingController();
+  final _searchKeywordsController = TextEditingController();
   final _landingDescriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
-  final _lowStockThresholdController = TextEditingController(text: '5');
+  final _lowStockThresholdController = TextEditingController(text: 'admin.forms.product.lowStockThreshold.placeholder'.tr());
+  final _promotionalPriceController = TextEditingController();
+
+  DateTime? _promotionStartDate;
+  DateTime? _promotionEndDate;
+  bool _showCountdown = false;
+  bool _isPromotionActive = false;
 
   bool _isBootstrapping = true;
   bool _isSubmitting = false;
@@ -100,10 +107,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     _titleController.dispose();
     _slugController.dispose();
     _miniDescriptionController.dispose();
+    _searchKeywordsController.dispose();
     _landingDescriptionController.dispose();
     _priceController.dispose();
     _stockController.dispose();
     _lowStockThresholdController.dispose();
+    _promotionalPriceController.dispose();
     super.dispose();
   }
 
@@ -124,6 +133,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           _titleController.text = product.title;
           _slugController.text = product.slug;
           _miniDescriptionController.text = product.miniDescription ?? '';
+          _searchKeywordsController.text = product.searchKeywords ?? '';
           _landingDescriptionController.text = product.description ?? '';
           _priceController.text = product.price.toString();
           _stockController.text = product.stock.toString();
@@ -131,6 +141,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               .toString();
           _selectedCategoryId = product.categoryId ?? product.category?.id;
           _isActive = product.isActive;
+          _isPromotionActive = product.isPromotionActive;
+          _promotionalPriceController.text = product.promotionalPrice?.toString() ?? '';
+          _promotionStartDate = product.promotionStartDate;
+          _promotionEndDate = product.promotionEndDate;
+          _showCountdown = product.showCountdown;
 
           final productImageUrls = product.productImages
               .map((item) => item.url.trim())
@@ -173,6 +188,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'title': _titleController.text.trim(),
         'slug': _slugController.text.trim(),
         'miniDescription': _miniDescriptionController.text.trim(),
+        'searchKeywords': _searchKeywordsController.text.trim(),
         'description': _landingDescriptionController.text,
         'price': double.tryParse(_priceController.text.trim()) ?? 0,
         'isActive': _isActive,
@@ -180,6 +196,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'lowStockThreshold':
             int.tryParse(_lowStockThresholdController.text.trim()) ?? 5,
         'images': _images,
+        'isPromotionActive': _isPromotionActive,
+        'promotionalPrice': _promotionalPriceController.text.trim().isNotEmpty
+            ? double.tryParse(_promotionalPriceController.text.trim())
+            : null,
+        'promotionStartDate': _promotionStartDate?.toIso8601String(),
+        'promotionEndDate': _promotionEndDate?.toIso8601String(),
+        'showCountdown': _showCountdown,
       };
 
       if (!_isEditing) {
@@ -354,8 +377,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Crop image',
+                      Text( 'admin.components.imageCropper.title'.tr(),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 12),
@@ -464,7 +486,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           ],
         ),
         IOSUiSettings(
-          title: 'Crop image',
+          title: 'admin.components.imageCropper.title'.tr(),
           aspectRatioLockEnabled: false,
           resetAspectRatioEnabled: true,
           aspectRatioPresets: const [
@@ -630,6 +652,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             slugController: _slugController,
                             miniDescriptionController:
                                 _miniDescriptionController,
+                            searchKeywordsController: _searchKeywordsController,
                             landingDescriptionController:
                                 _landingDescriptionController,
                             priceController: _priceController,
@@ -650,6 +673,23 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             },
                             images: _images,
                             isUploading: _isUploading,
+                            isPromotionActive: _isPromotionActive,
+                            onPromotionActiveChanged: (val) {
+                              setState(() => _isPromotionActive = val);
+                            },
+                            promotionalPriceController: _promotionalPriceController,
+                            promotionStartDate: _promotionStartDate,
+                            onPromotionStartDateChanged: (val) {
+                              setState(() => _promotionStartDate = val);
+                            },
+                            promotionEndDate: _promotionEndDate,
+                            onPromotionEndDateChanged: (val) {
+                              setState(() => _promotionEndDate = val);
+                            },
+                            showCountdown: _showCountdown,
+                            onShowCountdownChanged: (val) {
+                              setState(() => _showCountdown = val);
+                            },
                             onAddImage: _pickImage,
                             onRemoveImage: _removeImage,
                             product: _product,
@@ -1002,6 +1042,87 @@ class _LoadingCard extends StatelessWidget {
   }
 }
 
+class _SearchKeywordsInput extends StatefulWidget {
+  final TextEditingController controller;
+
+  const _SearchKeywordsInput({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  State<_SearchKeywordsInput> createState() => _SearchKeywordsInputState();
+}
+
+class _SearchKeywordsInputState extends State<_SearchKeywordsInput> {
+  final TextEditingController _inputController = TextEditingController();
+
+  List<String> get _keywords {
+    if (widget.controller.text.trim().isEmpty) return [];
+    return widget.controller.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+
+  void _addKeyword(String value) {
+    final val = value.trim();
+    if (val.isNotEmpty) {
+      final current = _keywords;
+      if (!current.contains(val)) {
+        current.add(val);
+        widget.controller.text = current.join(',');
+        setState(() {});
+      }
+      _inputController.clear();
+    }
+  }
+
+  void _removeKeyword(String value) {
+    final current = _keywords;
+    current.remove(value);
+    widget.controller.text = current.join(',');
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final keywords = _keywords;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (keywords.isNotEmpty) ...[
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: keywords.map((k) {
+              return InputChip(
+                label: Text(k, style: const TextStyle(fontSize: 12)),
+                onDeleted: () => _removeKeyword(k),
+                deleteIcon: const Icon(Icons.close, size: 14),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 8),
+        ],
+        FormInput(
+          controller: _inputController,
+          label: 'admin.forms.product.searchKeywords.label'.tr(),
+          hint: 'admin.forms.product.searchKeywords.placeholder'.tr(),
+          onSubmitted: _addKeyword,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'admin.forms.product.searchKeywords.hint'.tr(),
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProductTabsCard extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final List<Category> categories;
@@ -1010,6 +1131,7 @@ class _ProductTabsCard extends StatelessWidget {
   final TextEditingController titleController;
   final TextEditingController slugController;
   final TextEditingController miniDescriptionController;
+  final TextEditingController searchKeywordsController;
   final TextEditingController landingDescriptionController;
   final TextEditingController priceController;
   final TextEditingController stockController;
@@ -1018,6 +1140,15 @@ class _ProductTabsCard extends StatelessWidget {
   final ValueChanged<String?> onCategoryChanged;
   final bool isActive;
   final ValueChanged<bool> onActiveChanged;
+  final bool isPromotionActive;
+  final ValueChanged<bool> onPromotionActiveChanged;
+  final TextEditingController promotionalPriceController;
+  final DateTime? promotionStartDate;
+  final ValueChanged<DateTime?> onPromotionStartDateChanged;
+  final DateTime? promotionEndDate;
+  final ValueChanged<DateTime?> onPromotionEndDateChanged;
+  final bool showCountdown;
+  final ValueChanged<bool> onShowCountdownChanged;
   final List<String> images;
   final bool isUploading;
   final VoidCallback onAddImage;
@@ -1036,6 +1167,7 @@ class _ProductTabsCard extends StatelessWidget {
     required this.titleController,
     required this.slugController,
     required this.miniDescriptionController,
+    required this.searchKeywordsController,
     required this.landingDescriptionController,
     required this.priceController,
     required this.stockController,
@@ -1044,6 +1176,15 @@ class _ProductTabsCard extends StatelessWidget {
     required this.onCategoryChanged,
     required this.isActive,
     required this.onActiveChanged,
+    required this.isPromotionActive,
+    required this.onPromotionActiveChanged,
+    required this.promotionalPriceController,
+    required this.promotionStartDate,
+    required this.onPromotionStartDateChanged,
+    required this.promotionEndDate,
+    required this.onPromotionEndDateChanged,
+    required this.showCountdown,
+    required this.onShowCountdownChanged,
     required this.images,
     required this.isUploading,
     required this.onAddImage,
@@ -1060,7 +1201,7 @@ class _ProductTabsCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return DefaultTabController(
-      length: 3,
+      length: 6,
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
@@ -1084,6 +1225,9 @@ class _ProductTabsCard extends StatelessWidget {
                 Tab(text: 'admin.pages.products.edit.tabs.general'.tr()),
                 Tab(text: 'admin.pages.products.edit.tabs.description'.tr()),
                 Tab(text: 'admin.pages.products.edit.tabs.variants'.tr()),
+                Tab(text: 'admin.pages.products.edit.tabs.promotions'.tr()),
+                Tab(text: 'admin.pages.products.edit.tabs.bundles'.tr()),
+                Tab(text: 'admin.pages.products.edit.tabs.tracking'.tr()),
               ],
             ),
             const Divider(height: 1, color: Color(0xFFE2E8F0)),
@@ -1097,6 +1241,7 @@ class _ProductTabsCard extends StatelessWidget {
                       titleController: titleController,
                       slugController: slugController,
                       miniDescriptionController: miniDescriptionController,
+                      searchKeywordsController: searchKeywordsController,
                       priceController: priceController,
                       stockController: stockController,
                       lowStockThresholdController: lowStockThresholdController,
@@ -1119,6 +1264,20 @@ class _ProductTabsCard extends StatelessWidget {
                       productId: productId,
                       onVariantUpdated: onVariantUpdated,
                     ),
+                    _PromotionsTabSection(
+                      isPromotionActive: isPromotionActive,
+                      onPromotionActiveChanged: onPromotionActiveChanged,
+                      promotionalPriceController: promotionalPriceController,
+                      promotionStartDate: promotionStartDate,
+                      onPromotionStartDateChanged: onPromotionStartDateChanged,
+                      promotionEndDate: promotionEndDate,
+                      onPromotionEndDateChanged: onPromotionEndDateChanged,
+                      showCountdown: showCountdown,
+                      onShowCountdownChanged: onShowCountdownChanged,
+                      hasVariantOptions: (product?.options.isNotEmpty ?? false),
+                    ),
+                    const _PlaceholderTabSection(title: 'Bundles'),
+                    const _PlaceholderTabSection(title: 'Tracking'),
                   ],
                 ),
               ),
@@ -1158,6 +1317,7 @@ class _GeneralTabSection extends StatelessWidget {
   final TextEditingController titleController;
   final TextEditingController slugController;
   final TextEditingController miniDescriptionController;
+  final TextEditingController searchKeywordsController;
   final TextEditingController priceController;
   final TextEditingController stockController;
   final TextEditingController lowStockThresholdController;
@@ -1176,6 +1336,7 @@ class _GeneralTabSection extends StatelessWidget {
     required this.titleController,
     required this.slugController,
     required this.miniDescriptionController,
+    required this.searchKeywordsController,
     required this.priceController,
     required this.stockController,
     required this.lowStockThresholdController,
@@ -1216,8 +1377,7 @@ class _GeneralTabSection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'admin.forms.product.isActive.label'.tr(),
+                      Text( 'app.admin_forms_product_isactive_l'.tr().tr(),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -1288,20 +1448,24 @@ class _GeneralTabSection extends StatelessWidget {
           const SizedBox(height: 16),
           FormInput(
             key: const Key('product-form-mini-description'),
-            label: 'admin.forms.product.miniDescription.label'.tr(),
+            label: 'app.admin_forms_product_minidescri2'.tr().tr(),
             controller: miniDescriptionController,
             hint: 'admin.forms.product.miniDescription.placeholder'.tr(),
             maxLines: 3,
           ),
           const SizedBox(height: 4),
-          Text(
-            'admin.forms.product.miniDescription.hint'.tr(),
+          Text( 'app.admin_forms_product_minidescri'.tr().tr(),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(
                 context,
               ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
+          ),
+          const SizedBox(height: 16),
+          _SearchKeywordsInput(
+            key: const Key('product-form-search-keywords'),
+            controller: searchKeywordsController,
           ),
           const SizedBox(height: 16),
           LayoutBuilder(
@@ -1398,8 +1562,7 @@ class _GeneralTabSection extends StatelessWidget {
           ),
           if (isEditing) ...[
             const SizedBox(height: 4),
-            Text(
-              'admin.forms.product.stock.hintSystemManaged'.tr(),
+            Text( 'app.admin_forms_product_stock_hint'.tr().tr(),
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(
@@ -1412,7 +1575,7 @@ class _GeneralTabSection extends StatelessWidget {
           const SizedBox(height: 16),
           FormInput(
             key: const Key('product-form-low-stock-threshold'),
-            label: 'admin.forms.product.lowStockThreshold.label'.tr(),
+            label: 'app.admin_forms_product_lowstockth2'.tr().tr(),
             controller: lowStockThresholdController,
             hint: 'admin.forms.product.lowStockThreshold.placeholder'.tr(),
             keyboardType: TextInputType.number,
@@ -1427,8 +1590,7 @@ class _GeneralTabSection extends StatelessWidget {
             },
           ),
           const SizedBox(height: 4),
-          Text(
-            'admin.forms.product.lowStockThreshold.hint'.tr(),
+          Text( 'app.admin_forms_product_lowstockth'.tr().tr(),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(
@@ -1445,7 +1607,7 @@ class _GeneralTabSection extends StatelessWidget {
             items: [
               DropdownMenuItem<String?>(
                 value: null,
-                child: Text('admin.common.noneSelected'.tr()),
+                child: Text( 'app.admin_common_noneselected'.tr().tr()),
               ),
               ...categories.map(
                 (cat) => DropdownMenuItem<String?>(
@@ -1487,13 +1649,11 @@ class _ImagesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'admin.pages.products.edit.generalTab.imagesTitle'.tr(),
+        Text( 'app.admin_pages_products_edit_gene'.tr().tr(),
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 4),
-        Text(
-          'admin.pages.products.edit.generalTab.imagesHint'.tr(),
+        Text( 'app.admin_pages_products_edit_gene2'.tr().tr(),
           style: TextStyle(
             color: Theme.of(
               context,
@@ -1505,7 +1665,7 @@ class _ImagesSection extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: AppButton.secondary(
-            label: 'admin.pages.products.edit.generalTab.addImage'.tr(),
+            label: 'app.admin_pages_products_edit_gene3'.tr().tr(),
             icon: LucideIcons.plus,
             onPressed: isUploading ? null : onAddImage,
           ),
@@ -1548,8 +1708,7 @@ class _ImagesSection extends StatelessWidget {
                         color: Color(0xFF94A3B8),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        'admin.pages.products.edit.generalTab.addImage'.tr(),
+                      Text( 'app.admin_pages_products_edit_gene3'.tr().tr(),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
@@ -1613,8 +1772,7 @@ class _DescriptionTabSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'admin.pages.products.edit.descriptionTab.title'.tr(),
+          Text( 'app.admin_pages_products_edit_desc'.tr().tr(),
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
@@ -1720,9 +1878,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
         (variant) => _StockAllocationRow(
           variantId: variant.id,
           title: variant.title,
-          stockController: TextEditingController(text: '0'),
-          reservedController: TextEditingController(text: '0'),
-          safetyController: TextEditingController(text: '0'),
+          stockController: TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr()),
+          reservedController: TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr()),
+          safetyController: TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr()),
         ),
       ),
     );
@@ -1906,8 +2064,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'admin.variantsTable.errors.updateStockFailed'.tr(),
+            content: Text( 'app.admin_variantstable_errors_upd'.tr().tr(),
             ),
           ),
         );
@@ -2038,13 +2195,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'admin.variantsTable.imagePicker.title'.tr(),
+                      Text( 'app.admin_variantstable_imagepicke'.tr().tr(),
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'admin.variantsTable.imagePicker.subtitle'.tr(),
+                      Text( 'app.admin_variantstable_imagepicke2'.tr().tr(),
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(dialogBodyContext).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -2054,8 +2209,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                       Expanded(
                         child: availableImages.isEmpty
                             ? Center(
-                                child: Text(
-                                  'admin.variantsTable.imagePicker.empty'.tr(),
+                                child: Text( 'app.admin_variantstable_imagepicke3'.tr().tr(),
                                   style: const TextStyle(color: Color(0xFF64748B)),
                                   textAlign: TextAlign.center,
                                 ),
@@ -2110,8 +2264,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                           Row(
                                             children: [
                                               Expanded(
-                                                child: Text(
-                                                  'admin.variantsTable.imagePicker.imageWithIndex'
+                                                child: Text( 'app.admin_variantstable_imagepicke4'.tr()
                                                       .tr(namedArgs: {'index': (index + 1).toString()}),
                                                   style: const TextStyle(fontSize: 11),
                                                   overflow: TextOverflow.ellipsis,
@@ -2245,8 +2398,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'admin.variantsTable.movements.subtitle'.tr(),
+                  Text( 'app.admin_variantstable_movements'.tr().tr(),
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -2258,8 +2410,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                         ? Center(child: Text(loadError))
                         : movements.isEmpty
                             ? Center(
-                                child: Text(
-                                  'admin.variantsTable.movements.empty'.tr(),
+                                child: Text( 'app.admin_variantstable_movements2'.tr().tr(),
                                   style: const TextStyle(color: Color(0xFF64748B)),
                                 ),
                               )
@@ -2329,8 +2480,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'admin.pages.products.edit.variantsTab.allocationSaved'.tr(),
+            content: Text( 'app.admin_pages_products_edit_vari'.tr().tr(),
             ),
           ),
         );
@@ -2430,8 +2580,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
   Widget build(BuildContext context) {
     if (!widget.isEditing) {
       return Center(
-        child: Text(
-          'admin.pages.products.edit.variantsTab.saveFirst'.tr(),
+        child: Text( 'app.admin_pages_products_edit_vari2'.tr().tr(),
           style: const TextStyle(color: Color(0xFF64748B)),
         ),
       );
@@ -2457,13 +2606,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
             options: widget.product!.options,
           ),
           const SizedBox(height: 16),
-          Text(
-            'admin.pages.products.edit.variantsTab.title'.tr(),
+          Text( 'app.admin_pages_products_edit_vari3'.tr().tr(),
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
-          Text(
-            'admin.pages.products.edit.variantsTab.pricingHint'.tr(),
+          Text( 'app.admin_pages_products_edit_vari4'.tr().tr(),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
               fontSize: 12,
@@ -2493,13 +2640,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'admin.pages.products.edit.variantsTab.allocationTitle'.tr(),
+                            Text( 'app.admin_pages_products_edit_vari5'.tr().tr(),
                               style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(height: 2),
-                            Text(
-                              'admin.pages.products.edit.variantsTab.allocationMessage'.tr(),
+                            Text( 'app.admin_pages_products_edit_vari6'.tr().tr(),
                               style: const TextStyle(fontSize: 12, color: Color(0xFF854D0E)),
                             ),
                             const SizedBox(height: 6),
@@ -2656,10 +2801,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                   setState(() => _showArchivedVariants = value == true);
                 },
               ),
-              Text('admin.pages.products.edit.variantsTab.showArchived'.tr()),
+              Text( 'app.admin_pages_products_edit_vari7'.tr().tr()),
               const SizedBox(width: 12),
-              Text(
-                'admin.pages.products.edit.variantsTab.archivedCount'.tr(
+              Text( 'app.admin_pages_products_edit_vari8'.tr().tr(
                   namedArgs: {'count': _archivedCount.toString()},
                 ),
                 style: TextStyle(
@@ -2671,8 +2815,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
           ),
           const SizedBox(height: 8),
           if (visibleRows.isEmpty)
-            Text(
-              'admin.pages.products.edit.variantsTab.empty'.tr(),
+            Text( 'app.admin_pages_products_edit_vari9'.tr().tr(),
               style: const TextStyle(color: Color(0xFF64748B)),
             )
           else
@@ -2787,8 +2930,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                                         },
                                                 ),
                                                 Expanded(
-                                                  child: Text(
-                                                    'admin.forms.product.isPromotionActive.label'.tr(),
+                                                  child: Text( 'app.admin_forms_product_ispromotio'.tr().tr(),
                                                     style: const TextStyle(fontSize: 11),
                                                   ),
                                                 ),
@@ -2799,7 +2941,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                                 controller: row.promotionalPriceController,
                                                 enabled: !savingInfo,
                                                 decoration: _inputDecoration().copyWith(
-                                                  hintText: 'admin.forms.product.promotionalPrice.label'.tr(),
+                                                  hintText: 'app.admin_forms_product_promotiona'.tr().tr(),
                                                 ),
                                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                                 onSubmitted: (_) => _updateVariantInfo(row),
@@ -2808,14 +2950,14 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                               TextField(
                                                 controller: row.promotionStartController,
                                                 enabled: !savingInfo,
-                                                decoration: _inputDecoration().copyWith(hintText: 'YYYY-MM-DDTHH:mm'),
+                                                decoration: _inputDecoration().copyWith(hintText: 'app.yyyy_mm_ddthh_mm'.tr()),
                                                 onSubmitted: (_) => _updateVariantInfo(row),
                                               ),
                                               const SizedBox(height: 6),
                                               TextField(
                                                 controller: row.promotionEndController,
                                                 enabled: !savingInfo,
-                                                decoration: _inputDecoration().copyWith(hintText: 'YYYY-MM-DDTHH:mm'),
+                                                decoration: _inputDecoration().copyWith(hintText: 'app.yyyy_mm_ddthh_mm'.tr()),
                                                 onSubmitted: (_) => _updateVariantInfo(row),
                                               ),
                                               Row(
@@ -2832,8 +2974,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                                           },
                                                   ),
                                                   Expanded(
-                                                    child: Text(
-                                                      'admin.forms.product.showCountdown.label'.tr(),
+                                                    child: Text( 'app.admin_forms_product_showcountd'.tr().tr(),
                                                       style: const TextStyle(fontSize: 11),
                                                     ),
                                                   ),
@@ -2842,8 +2983,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                             ],
                                           ],
                                         )
-                                      : Text(
-                                          'admin.variantsTable.promotionSimpleProduct'.tr(),
+                                      : Text( 'app.admin_variantstable_promotions'.tr().tr(),
                                           style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                                         ),
                                 ),
@@ -2928,8 +3068,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                       const SizedBox(width: 4),
                                       if (!row.skuLocked)
                                         IconButton(
-                                          tooltip:
-                                              'admin.variantsTable.actions.suggestSku'.tr(),
+                                          tooltip: 'app.admin_variantstable_actions_su'.tr().tr(),
                                           icon: suggestingSku
                                               ? const SizedBox(
                                                   width: 12,
@@ -2941,8 +3080,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                         ),
                                       if (!row.skuLocked)
                                         IconButton(
-                                          tooltip:
-                                              'admin.variantsTable.actions.lockSku'.tr(),
+                                          tooltip: 'app.admin_variantstable_actions_lo'.tr().tr(),
                                           icon: lockingSku
                                               ? const SizedBox(
                                                   width: 12,
@@ -2955,8 +3093,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                       else
                                         Padding(
                                           padding: const EdgeInsets.only(left: 6),
-                                          child: Text(
-                                            'admin.variantsTable.actions.skuLocked'.tr(),
+                                          child: Text( 'app.admin_variantstable_actions_sk'.tr().tr(),
                                             style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                                           ),
                                         ),
@@ -2997,8 +3134,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(6),
                                   child: AppButton.secondary(
-                                    label:
-                                        'admin.variantsTable.actions.manageImages'
+                                    label: 'app.admin_variantstable_actions_ma'.tr()
                                             .tr(namedArgs: {
                                       'count': row.images.length.toString(),
                                     }),
@@ -3012,8 +3148,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(6),
                                   child: AppButton.ghost(
-                                    label:
-                                        'admin.variantsTable.actions.movements'.tr(),
+                                    label: 'app.admin_variantstable_actions_mo'.tr().tr(),
                                     onPressed: () => _openMovements(row),
                                     size: AppButtonSize.sm,
                                   ),
@@ -3250,5 +3385,185 @@ class _StockAllocationRow {
     stockController.dispose();
     reservedController.dispose();
     safetyController.dispose();
+  }
+}
+
+class _PlaceholderTabSection extends StatelessWidget {
+  final String title;
+
+  const _PlaceholderTabSection({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(LucideIcons.construction, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              '$title Tab',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'This section is not implemented in the Flutter Admin app yet.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PromotionsTabSection extends StatelessWidget {
+  final bool isPromotionActive;
+  final ValueChanged<bool> onPromotionActiveChanged;
+  final TextEditingController promotionalPriceController;
+  final DateTime? promotionStartDate;
+  final ValueChanged<DateTime?> onPromotionStartDateChanged;
+  final DateTime? promotionEndDate;
+  final ValueChanged<DateTime?> onPromotionEndDateChanged;
+  final bool showCountdown;
+  final ValueChanged<bool> onShowCountdownChanged;
+  final bool hasVariantOptions;
+
+  const _PromotionsTabSection({
+    required this.isPromotionActive,
+    required this.onPromotionActiveChanged,
+    required this.promotionalPriceController,
+    required this.promotionStartDate,
+    required this.onPromotionStartDateChanged,
+    required this.promotionEndDate,
+    required this.onPromotionEndDateChanged,
+    required this.showCountdown,
+    required this.onShowCountdownChanged,
+    required this.hasVariantOptions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (hasVariantOptions) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(LucideIcons.info, size: 48, color: Colors.blue),
+              const SizedBox(height: 16),
+              const Text(
+                'Use variant promotions for this product',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'This product has selectable variants. You can configure promotions individually for each variant in the Variants tab.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SwitchListTile(
+            title: Text('admin.pages.products.edit.promotions.active'.tr()),
+            subtitle: Text('admin.pages.products.edit.promotions.activeHint'.tr()),
+            value: isPromotionActive,
+            onChanged: onPromotionActiveChanged,
+            contentPadding: EdgeInsets.zero,
+            activeColor: const Color(0xFF65A30D),
+          ),
+          if (isPromotionActive) ...[
+            const SizedBox(height: 24),
+            FormInput(
+              label: 'admin.pages.products.edit.promotions.price'.tr(),
+              controller: promotionalPriceController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              prefixIcon: const Icon(LucideIcons.tags),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: promotionStartDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (date != null) {
+                        onPromotionStartDateChanged(date);
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'admin.pages.products.edit.promotions.startDate'.tr(),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(LucideIcons.calendar),
+                      ),
+                      child: Text(
+                        promotionStartDate != null
+                            ? DateFormat.yMd().format(promotionStartDate!)
+                            : 'Select Date',
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: promotionEndDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (date != null) {
+                        onPromotionEndDateChanged(date);
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'admin.pages.products.edit.promotions.endDate'.tr(),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(LucideIcons.calendar),
+                      ),
+                      child: Text(
+                        promotionEndDate != null
+                            ? DateFormat.yMd().format(promotionEndDate!)
+                            : 'Select Date',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            CheckboxListTile(
+              title: Text('admin.pages.products.edit.promotions.showCountdown'.tr()),
+              value: showCountdown,
+              onChanged: (val) => onShowCountdownChanged(val ?? false),
+              contentPadding: EdgeInsets.zero,
+              activeColor: const Color(0xFF65A30D),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

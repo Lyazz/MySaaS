@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -16,8 +14,6 @@ import '../providers/pos_provider.dart';
 import '../providers/customers_provider.dart';
 import '../providers/store_settings_provider.dart';
 import '../services/api_service.dart';
-import '../services/tenant_mode_service.dart';
-import '../services/workspace_cache_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/barcode_scanner.dart';
 import '../utils/debouncer.dart';
@@ -49,6 +45,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   static const double _productCardImageAspectRatio = 3 / 2;
 
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   final Debouncer _searchDebouncer = Debouncer(milliseconds: 300);
   late final BarcodeScannerBuffer _barcodeBuffer;
   bool _barcodeHandlerAttached = false;
@@ -89,6 +86,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     }
     _searchDebouncer.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -96,15 +94,81 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (!mounted) return false;
     if (event is! KeyDownEvent) return false;
 
-    if (HardwareKeyboard.instance.isAltPressed ||
-        HardwareKeyboard.instance.isControlPressed ||
-        HardwareKeyboard.instance.isMetaPressed) {
+    final primaryFocus = FocusManager.instance.primaryFocus;
+    final isTextFieldFocused = primaryFocus != null && primaryFocus.context?.widget is EditableText;
+
+    final isControlOrCmd = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+    final logicalKey = event.logicalKey;
+
+    if (!isTextFieldFocused) {
+      if (logicalKey == LogicalKeyboardKey.arrowUp) {
+        ref.read(posProvider.notifier).incrementLastInteractedItemQuantity();
+        return true;
+      }
+      if (logicalKey == LogicalKeyboardKey.arrowDown) {
+        ref.read(posProvider.notifier).decrementLastInteractedItemQuantity();
+        return true;
+      }
+      if (logicalKey == LogicalKeyboardKey.f12) {
+        _showPaymentSheet(ref.read(posProvider));
+        return true;
+      }
+      if (logicalKey == LogicalKeyboardKey.escape) {
+        ref.read(posProvider.notifier).clearCart();
+        return true;
+      }
+      if (logicalKey == LogicalKeyboardKey.slash) {
+        _searchFocusNode.requestFocus();
+        return true;
+      }
+      if (logicalKey == LogicalKeyboardKey.tab) {
+         final state = ref.read(posProvider);
+         final nextIndex = (state.currentSessionIndex + 1) % state.sessions.length;
+         ref.read(posProvider.notifier).switchSession(nextIndex);
+         return true; 
+      }
+      if (isControlOrCmd) {
+        if (logicalKey == LogicalKeyboardKey.keyD) {
+          _showDiscountDialog();
+          return true;
+        }
+        if (logicalKey == LogicalKeyboardKey.keyN) {
+          _showNumpadDialog();
+          return true;
+        }
+        if (logicalKey == LogicalKeyboardKey.keyU) {
+          _showCreateCustomerDialog();
+          return true;
+        }
+        if (logicalKey == LogicalKeyboardKey.keyF) {
+          _searchFocusNode.requestFocus();
+          return true;
+        }
+        if (logicalKey == LogicalKeyboardKey.keyV) {
+          ref.read(posProvider.notifier).toggleProductView();
+          return true;
+        }
+      }
+    }
+
+    if (HardwareKeyboard.instance.isAltPressed || isControlOrCmd) {
       return false;
     }
 
     final now = DateTime.now();
 
     if (isEnterKeyEvent(event)) {
+      if (!_barcodeBuffer.hasPending) {
+        if (!isTextFieldFocused) {
+          final posState = ref.read(posProvider);
+          if (posState.currentSession.cart.isNotEmpty) {
+             ref.read(posProvider.notifier).checkoutFast();
+             return true;
+          }
+        }
+        return false;
+      }
+
       final code = _barcodeBuffer.submit(now);
       if (code == null) return false;
 
@@ -144,6 +208,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             duration: const Duration(seconds: 2),
           ),
         );
+        return;
+      }
+
+      if (item.needsVariantSelection) {
+        final product = ref.read(posProvider).products.firstWhere(
+          (p) => p.id == item.productId,
+        );
+        _showVariantSelectorSheet(product);
         return;
       }
 
@@ -217,29 +289,28 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               }
 
               return AppDialog(
-                title: 'Create customer',
-                description:
-                    'Add a customer and attach this sale to their account.',
+                title: 'admin.pages.customers.create.submit'.tr(),
+                description: 'app.add_a_customer_and_attach_this'.tr(),
                 maxWidth: 460,
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FormInput(
-                      label: 'Name',
+                      label: 'superAdmin.tenants.table.name'.tr(),
                       controller: nameController,
                       autofocus: true,
                       onChanged: (_) => setDialogState(() {}),
                     ),
                     const SizedBox(height: 14),
                     FormInput(
-                      label: 'Phone',
+                      label: 'admin.pages.sales.detail.fields.customerPhone'.tr(),
                       controller: phoneController,
                       keyboardType: TextInputType.phone,
                       onChanged: (_) => setDialogState(() {}),
                     ),
                     const SizedBox(height: 14),
                     FormInput(
-                      label: 'Email',
+                      label: 'admin.pages.users.fields.email'.tr(),
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
                     ),
@@ -259,11 +330,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 ),
                 actions: [
                   AppButton.secondary(
-                    label: 'Cancel',
+                    label: 'admin.common.cancel'.tr(),
                     onPressed: () => Navigator.pop(context),
                   ),
                   AppButton.primary(
-                    label: 'Create',
+                    label: 'admin.pages.users.roles.actions.create'.tr(),
                     icon: LucideIcons.plus,
                     onPressed: canSubmit ? submit : null,
                     loading: customersState.isLoading,
@@ -428,7 +499,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: const Text('Scan Barcode'),
+            title: Text( 'app.scan_barcode'.tr()),
             backgroundColor: const Color(0xFF65A30D),
             foregroundColor: Colors.white,
           ),
@@ -456,8 +527,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     );
     if (posState.cart.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Add products before applying a discount'),
+        SnackBar(
+          content: Text( 'app.add_products_before_applying_a'.tr()),
           backgroundColor: Colors.grey,
         ),
       );
@@ -503,7 +574,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         'Discount (${posState.discount!.value.toStringAsFixed(0)}%)',
     };
 
-    final mono = GoogleFonts.jetBrainsMono(
+    final mono = TextStyle(
       fontSize: 13,
       fontWeight: FontWeight.w600,
       fontFeatures: const [FontFeature.tabularFigures()],
@@ -514,8 +585,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Subtotal',
+            Text( 'admin.pages.orders.detail.itemsTable.subtotal'.tr(),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -588,8 +658,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   String? _resolveImageUrl(String? rawUrl) {
     final value = rawUrl?.trim();
     if (value == null || value.isEmpty) return null;
-    final cached = _resolvedImageUrlCache[value];
-    if (cached != null) return cached;
+    // Use containsKey so a cached null entry is respected and not re-evaluated
+    // every build frame (null means the URL resolved to nothing valid).
+    if (_resolvedImageUrlCache.containsKey(value)) {
+      return _resolvedImageUrlCache[value];
+    }
 
     final resolved = ImageStorageManager.isLocalImagePath(value)
         ? value
@@ -706,8 +779,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
                   if (!breakdown.isValid) {
                     ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      const SnackBar(
-                        content: Text('Invalid payment amounts'),
+                      SnackBar(
+                        content: Text( 'app.invalid_payment_amounts'.tr()),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -844,8 +917,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                               padding: const EdgeInsets.all(20),
                               child: Row(
                                 children: [
-                                  const Text(
-                                    'Checkout',
+                                  Text( 'admin.pages.billing.payment.emptyTitle'.tr(),
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -900,8 +972,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                           Center(
                                             child: Column(
                                               children: [
-                                                Text(
-                                                  'Total to Pay',
+                                                Text( 'admin.pages.billing.payment.totalLabel'.tr(),
                                                   style: TextStyle(
                                                     color: isDark
                                                         ? AppColors.textMuted
@@ -936,7 +1007,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                               children: [
                                                 Expanded(
                                                   child: _PaymentMethodButton(
-                                                    title: 'Cash',
+                                                    title: 'admin.pages.cash.methods.CASH'.tr(),
                                                     icon: LucideIcons.banknote,
                                                     isSelected:
                                                         method ==
@@ -950,7 +1021,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                 const SizedBox(width: 16),
                                                 Expanded(
                                                   child: _PaymentMethodButton(
-                                                    title: 'Card',
+                                                    title: 'admin.pages.cash.methods.CARD'.tr(),
                                                     icon:
                                                         LucideIcons.creditCard,
                                                     isSelected:
@@ -970,8 +1041,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                           if (method ==
                                               PosPaymentMethod.cash) ...[
                                             // Received Amount Input
-                                            Text(
-                                              'Cash Received',
+                                            Text( 'admin.pages.pos.paymentModal.cashReceived'.tr(),
                                               style: TextStyle(
                                                 color: isDark
                                                     ? AppColors.textMuted
@@ -1144,8 +1214,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                 900) ...[
                                               const SizedBox(height: 20),
                                               ExpansionTile(
-                                                title: const Text(
-                                                  'Show Numpad',
+                                                title: Text( 'app.show_numpad'.tr(),
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                   ),
@@ -1192,8 +1261,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                     ),
                                                   ),
                                                   const SizedBox(height: 8),
-                                                  const Text(
-                                                    'Waiting for terminal...',
+                                                  Text( 'app.waiting_for_terminal'.tr(),
                                                     style: TextStyle(
                                                       color: Colors.grey,
                                                     ),
@@ -1226,8 +1294,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                         child: Column(
                                           children: [
                                             const SizedBox(height: 24),
-                                            const Text(
-                                              'Keypad',
+                                            Text( 'admin.pages.pos.paymentModal.keypad'.tr(),
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.grey,
@@ -1271,7 +1338,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 width: double.infinity,
                                 height: 56,
                                 child: AppButton.neutral(
-                                  label: 'Confirm Payment (Enter)',
+                                  label: 'app.confirm_payment_enter'.tr(),
                                   onPressed: breakdown.isSettled
                                       ? confirm
                                       : null,
@@ -1289,6 +1356,71 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               },
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showShortcutsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final textPrimary = isDark ? Colors.white : Colors.black87;
+        final textMuted = isDark ? Colors.white54 : Colors.black54;
+
+        Widget buildShortcutRow(String keyStr, String desc) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: isDark ? Colors.white24 : Colors.black12),
+                  ),
+                  child: Text(
+                    keyStr,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      color: textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    desc,
+                    style: TextStyle(color: textMuted, fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return AppDialog(
+          title: 'Keyboard Shortcuts',
+          description: 'Speed up your checkout with these shortcuts.',
+          maxWidth: 450,
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              buildShortcutRow('Enter', 'Fast Checkout'),
+              buildShortcutRow('F12', 'Open Payment Sheet'),
+              buildShortcutRow('↑ / ↓', 'Adjust quantity of last item'),
+              buildShortcutRow('Ctrl + F', 'Focus Search Bar'),
+              buildShortcutRow('Ctrl + D', 'Apply Discount'),
+              buildShortcutRow('Ctrl + N', 'Add Custom Amount'),
+              buildShortcutRow('Ctrl + U', 'Select Customer'),
+              buildShortcutRow('Ctrl + V', 'Toggle Product View'),
+              buildShortcutRow('Tab', 'Cycle Open Sessions'),
+              buildShortcutRow('Esc', 'Clear Cart'),
+            ],
+          ),
         );
       },
     );
@@ -1603,7 +1735,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Reprinting last order…'),
+          content: Text( 'app.reprinting_last_order'.tr()),
           backgroundColor: isDark
               ? AppColors.surface3
               : AppColors.lightSurface3,
@@ -1615,8 +1747,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     void showReturnRefundComingSoon() {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Return / Refund — coming soon'),
+        SnackBar(
+          content: Text( 'app.return_refund_coming_soon'.tr()),
           behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 2),
         ),
@@ -1633,10 +1765,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         ),
         child: TextField(
           controller: _searchController,
+          focusNode: _searchFocusNode,
           textAlignVertical: TextAlignVertical.center,
           style: TextStyle(fontSize: 14, color: textPrimary),
           decoration: InputDecoration(
-            hintText: 'admin.pages.pos.catalog.searchPlaceholder'.tr(),
+            hintText: 'app.admin_pages_pos_catalog_search'.tr().tr(),
             hintStyle: TextStyle(color: textMuted, fontSize: 14),
             prefixIcon: Icon(LucideIcons.search, color: textMuted, size: 18),
             suffixIcon: _searchController.text.isNotEmpty
@@ -1666,22 +1799,22 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         popup: PopupMenuButton<ProductSortType>(
           tooltip: 'admin.pages.pos.catalog.actions.sort'.tr(),
           onSelected: notifier.setSortType,
-          itemBuilder: (context) => const [
+          itemBuilder: (context) => [
             PopupMenuItem(
               value: ProductSortType.name,
-              child: Text('Name (A to Z)'),
+              child: Text( 'app.name_a_to_z'.tr()),
             ),
             PopupMenuItem(
               value: ProductSortType.priceAsc,
-              child: Text('Price (low to high)'),
+              child: Text( 'app.price_low_to_high'.tr()),
             ),
             PopupMenuItem(
               value: ProductSortType.priceDesc,
-              child: Text('Price (high to low)'),
+              child: Text( 'app.price_high_to_low'.tr()),
             ),
             PopupMenuItem(
               value: ProductSortType.recent,
-              child: Text('Recently added'),
+              child: Text( 'app.recently_added'.tr()),
             ),
           ],
           shape: RoundedRectangleBorder(
@@ -1706,11 +1839,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         child: PopupMenuButton<int>(
           tooltip: 'admin.pages.pos.catalog.actions.columns'.tr(),
           onSelected: notifier.setCrossAxisCount,
-          itemBuilder: (context) => const [
-            PopupMenuItem(value: 3, child: Text('3 columns')),
-            PopupMenuItem(value: 4, child: Text('4 columns')),
-            PopupMenuItem(value: 5, child: Text('5 columns')),
-            PopupMenuItem(value: 6, child: Text('6 columns')),
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 3, child: Text( 'app.3_columns'.tr())),
+            PopupMenuItem(value: 4, child: Text( 'app.4_columns'.tr())),
+            PopupMenuItem(value: 5, child: Text( 'app.5_columns'.tr())),
+            PopupMenuItem(value: 6, child: Text( 'app.6_columns'.tr())),
           ],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -1724,7 +1857,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 const SizedBox(width: 6),
                 Text(
                   '${posState.crossAxisCount}',
-                  style: GoogleFonts.jetBrainsMono(
+                  style: TextStyle(
                     color: textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -1742,7 +1875,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         if (isMobile)
           _buildIconChip(
             icon: LucideIcons.scan,
-            tooltip: 'Scan barcode',
+            tooltip: 'app.scan_barcode'.tr(),
             onTap: _showBarcodeScanner,
           )
         else ...[
@@ -1758,7 +1891,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ),
           _buildLabeledActionButton(
             icon: LucideIcons.undo2,
-            label: 'Return / Refund',
+            label: 'app.return_refund2'.tr(),
             onTap: showReturnRefundComingSoon,
           ),
         ],
@@ -1918,7 +2051,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         border: Border.all(color: border),
       ),
       child: PopupMenuButton<String>(
-        tooltip: 'More actions',
+        tooltip: 'app.more_actions'.tr(),
         icon: Icon(LucideIcons.moreVertical, color: textMuted, size: 18),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onSelected: (value) {
@@ -1938,19 +2071,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           _menuItem(
             value: 'discount',
             icon: LucideIcons.percent,
-            label: 'Apply discount',
+            label: 'app.apply_discount'.tr(),
             color: textPrimary,
           ),
           _menuItem(
             value: 'reprint',
             icon: LucideIcons.printer,
-            label: 'Reprint last order',
+            label: 'admin.pages.pos.catalog.actions.reprintLastOrder'.tr(),
             color: textPrimary,
           ),
           _menuItem(
             value: 'return',
             icon: LucideIcons.undo2,
-            label: 'Return / refund',
+            label: 'app.return_refund2'.tr(),
             color: textPrimary,
           ),
         ],
@@ -2077,8 +2210,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             children: [
               Icon(LucideIcons.alertCircle, size: 44, color: AppColors.red),
               const SizedBox(height: 16),
-              Text(
-                'Error loading products',
+              Text( 'app.error_loading_products'.tr(),
                 style: TextStyle(
                   color: AppColors.red,
                   fontSize: 15,
@@ -2129,7 +2261,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       }
       return _buildCatalogEmptyState(
         icon: LucideIcons.packageOpen,
-        title: 'admin.pages.pos.catalog.noProducts'.tr(),
+        title: 'app.admin_pages_pos_catalog_noprod'.tr().tr(),
         subtitle: searchQuery.isEmpty
             ? 'Try another category or add products from catalog management.'
             : 'No product, SKU, or barcode matched "$searchQuery".',
@@ -2265,8 +2397,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(14, 18, 14, 8),
-            child: Text(
-              'CATEGORIES',
+            child: Text( 'admin.pages.categories.index.title'.tr(),
               style: TextStyle(
                 fontSize: 10,
                 letterSpacing: 1.4,
@@ -2280,7 +2411,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               padding: const EdgeInsets.symmetric(vertical: 4),
               children: [
                 _buildDesktopCategoryItem(
-                  title: 'All',
+                  title: 'admin.pages.delivery.pricing.filters.all'.tr(),
                   icon: LucideIcons.layoutGrid,
                   isSelected: selectedCategoryId == null,
                   onTap: () => notifier.selectCategory(null),
@@ -2333,8 +2464,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       child: InkWell(
         onTap: onTap,
         hoverColor: hoverBg,
-        child: Container(
-          padding: const EdgeInsetsDirectional.fromSTEB(8, 10, 8, 10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          padding: const EdgeInsetsDirectional.fromSTEB(8, 12, 8, 12),
           decoration: BoxDecoration(
             color: isSelected
                 ? AppColors.brand.withValues(alpha: isDark ? 0.08 : 0.10)
@@ -2349,17 +2482,28 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           child: Column(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: iconBg,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isSelected
-                        ? activeAccent.withValues(alpha: 0.4)
+                        ? activeAccent.withValues(alpha: isDark ? 0.5 : 0.4)
                         : Colors.transparent,
-                    width: 1.5,
+                    width: 2,
                   ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.brand.withValues(
+                              alpha: isDark ? 0.30 : 0.15,
+                            ),
+                            blurRadius: 14,
+                            spreadRadius: 1,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: imageUrl != null && imageUrl.isNotEmpty
                     ? ClipOval(
@@ -2440,12 +2584,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final border = isDark
         ? AppColors.surfaceBorder
         : AppColors.lightSurfaceBorder;
-    final textPrimary = isDark
-        ? AppColors.textPrimary
-        : AppColors.lightTextPrimary;
-    final textMuted = isDark
-        ? AppColors.textMuted
-        : AppColors.lightTextTertiary;
     final placeholderBg = isDark
         ? AppColors.surface3
         : AppColors.brand.withValues(alpha: 0.18);
@@ -2454,47 +2592,35 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => ref.read(posProvider.notifier).selectCategory(category.id),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
           decoration: BoxDecoration(
             color: surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(color: border),
             boxShadow: isDark
                 ? null
                 : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadiusDirectional.vertical(
-                    top: Radius.circular(15),
-                  ),
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Container(
-                          color: placeholderBg,
-                          child: _PosSafeNetworkImage(
-                            imageUrl: imageUrl,
-                            fit: BoxFit.cover,
-                            cacheWidth: 480,
-                            cacheHeight: 480,
-                            fallback: _buildImageFallback(
-                              icon: LucideIcons.layoutGrid,
-                              iconSize: 44,
-                              backgroundColor: placeholderBg,
-                              iconColor: AppColors.brand,
-                            ),
-                          ),
-                        )
-                      : Container(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(17),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Background image / placeholder
+                imageUrl != null && imageUrl.isNotEmpty
+                    ? _PosSafeNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        cacheWidth: 480,
+                        cacheHeight: 480,
+                        fallback: Container(
                           color: placeholderBg,
                           alignment: Alignment.center,
                           child: Icon(
@@ -2502,39 +2628,68 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                             color: isDark
                                 ? AppColors.brand.withValues(alpha: 0.7)
                                 : AppColors.lightSidebarActiveColor,
-                            size: 40,
+                            size: 44,
                           ),
                         ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(12, 10, 12, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      category.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: textPrimary,
+                      )
+                    : Container(
+                        color: placeholderBg,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          LucideIcons.layoutGrid,
+                          color: isDark
+                              ? AppColors.brand.withValues(alpha: 0.7)
+                              : AppColors.lightSidebarActiveColor,
+                          size: 44,
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Browse →',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: textMuted,
-                        fontWeight: FontWeight.w500,
+                // Gradient overlay at bottom for title legibility
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.65),
+                        ],
+                        stops: const [0.45, 1.0],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                // Title overlay
+                PositionedDirectional(
+                  start: 10,
+                  end: 10,
+                  bottom: 10,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        category.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: Colors.white,
+                          height: 1.2,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black54,
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -2637,7 +2792,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 tenantCurrencyFormatter(
                   ref.watch(storeSettingsProvider).settings,
                 ).format(product.price),
-                style: GoogleFonts.jetBrainsMono(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: textPrimary,
@@ -2668,33 +2823,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final outOfStock = product.stock <= 0;
     final lowStock =
         product.stock > 0 && product.stock <= product.lowStockThreshold;
-    final categoryLabel = product.category?.title.trim();
-    final stockStatusLabel = _stockStatusLabel(product);
-    final priceLabel = tenantCurrencyFormatter(settings).format(product.price);
-    final stockChipBackground = outOfStock
-        ? AppColors.red.withValues(alpha: isDark ? 0.16 : 0.10)
-        : lowStock
-        ? AppColors.amber.withValues(alpha: isDark ? 0.18 : 0.12)
-        : (isDark ? AppColors.surface2 : AppColors.lightSurface2);
-    final stockChipBorder = outOfStock
-        ? AppColors.red.withValues(alpha: isDark ? 0.45 : 0.24)
-        : lowStock
-        ? AppColors.amber.withValues(alpha: isDark ? 0.45 : 0.28)
-        : border;
-    final stockChipText = outOfStock
-        ? (isDark ? AppColors.redText : AppColors.red)
-        : lowStock
-        ? (isDark ? AppColors.amberText : const Color(0xFF92400E))
-        : textMuted;
 
     return _HoverableProductCard(
       onTap: () => _handleProductTap(product),
       onLongPress: () => _handleProductLongPress(product),
-      child: Container(
+      cardBuilder: (isHovered) => Container(
         key: ValueKey('pos-product-card-${product.id}'),
         decoration: BoxDecoration(
           color: surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(color: border),
         ),
         child: Column(
@@ -2702,7 +2839,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           children: [
             ClipRRect(
               borderRadius: const BorderRadiusDirectional.vertical(
-                top: Radius.circular(15),
+                top: Radius.circular(17),
               ),
               child: AspectRatio(
                 aspectRatio: _productCardImageAspectRatio,
@@ -2715,6 +2852,51 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       cacheWidth: 512,
                       cacheHeight: 512,
                       fallback: _buildImageFallback(),
+                    ),
+                    // Gradient overlay for depth
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.30),
+                            ],
+                            stops: const [0.5, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Hover overlay — desktop add-to-cart affordance
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 180),
+                      opacity: isHovered ? 1.0 : 0.0,
+                      child: Container(
+                        color: AppColors.brand.withValues(alpha: 0.12),
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.brand,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.brand.withValues(alpha: 0.5),
+                                blurRadius: 16,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            LucideIcons.plus,
+                            color: AppColors.brandContrast,
+                            size: 22,
+                          ),
+                        ),
+                      ),
                     ),
                     if (outOfStock || lowStock)
                       PositionedDirectional(
@@ -2730,6 +2912,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 ? AppColors.red.withValues(alpha: 0.92)
                                 : AppColors.amber.withValues(alpha: 0.92),
                             borderRadius: BorderRadius.circular(6),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (outOfStock ? AppColors.red : AppColors.amber)
+                                    .withValues(alpha: 0.45),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Text(
                             outOfStock ? 'OUT' : 'LOW',
@@ -2742,6 +2932,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           ),
                         ),
                       ),
+                    // Glass-morphism stock count chip
                     PositionedDirectional(
                       start: 8,
                       bottom: 8,
@@ -2751,10 +2942,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.46),
+                          color: Colors.black.withValues(alpha: 0.52),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.14),
+                            color: Colors.white.withValues(alpha: 0.18),
                           ),
                         ),
                         child: Text(
@@ -2787,29 +2978,21 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         fontWeight: FontWeight.w700,
                         fontSize: 13.5,
                         height: 1.25,
-                        color: textPrimary,
+                        color: outOfStock ? textMuted : textPrimary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const Spacer(),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(top: 8),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          priceLabel,
-                          key: ValueKey('pos-product-price-${product.id}'),
-                          style: GoogleFonts.jetBrainsMono(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                            height: 1,
-                            color: textPrimary,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
-                        ),
+                    Text(
+                      tenantCurrencyFormatter(settings).format(product.price),
+                      key: ValueKey('pos-product-price-${product.id}'),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        height: 1,
+                        color: outOfStock ? textMuted : textPrimary,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
@@ -2857,8 +3040,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'admin.pages.pos.cart.actions.viewCart'.tr(),
+                        Text( 'app.admin_pages_pos_cart_actions_v'.tr().tr(),
                           style: TextStyle(
                             color: textPrimary,
                             fontSize: 16,
@@ -2866,8 +3048,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          'admin.pages.pos.cart.itemsCount'.tr(
+                        Text( 'app.admin_pages_pos_cart_itemscoun'.tr().tr(
                             namedArgs: {'count': itemCount.toString()},
                           ),
                           style: TextStyle(
@@ -2880,6 +3061,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     ),
                   ),
                   _buildCartIconButton(
+                    icon: LucideIcons.keyboard,
+                    tooltip: 'Keyboard Shortcuts',
+                    onTap: _showShortcutsDialog,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildCartIconButton(
                     icon: posState.isCartSimpleView
                         ? LucideIcons.image
                         : LucideIcons.alignJustify,
@@ -2891,7 +3078,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   const SizedBox(width: 8),
                   _buildCartIconButton(
                     icon: LucideIcons.trash2,
-                    tooltip: 'admin.pages.pos.cart.actions.clearCart'.tr(),
+                    tooltip: 'app.admin_pages_pos_cart_actions_c'.tr().tr(),
                     onTap: posState.cart.isEmpty ? null : notifier.clearCart,
                     isDestructive: true,
                   ),
@@ -3005,7 +3192,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         ),
                       ),
                     );
-                  }),
+                  }).expand((Widget w) => [w, const SizedBox(width: 8)]).toList()..removeLast(),
                 ),
               ),
               const SizedBox(height: 12),
@@ -3144,7 +3331,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   child: Text(
                     '${item.quantity}',
                     key: ValueKey<int>(item.quantity),
-                    style: GoogleFonts.jetBrainsMono(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: compact ? 13 : 15,
                       color: textPrimary,
@@ -3305,7 +3492,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         children: [
                           Text(
                             currency.format(item.price * item.quantity),
-                            style: GoogleFonts.jetBrainsMono(
+                            style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
                               color: textPrimary,
@@ -3449,8 +3636,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                         CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        'No customer found',
+                                      Text( 'app.no_customer_found'.tr(),
                                         style: TextStyle(
                                           color: textPrimary,
                                           fontSize: 12.5,
@@ -3458,8 +3644,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 2),
-                                      Text(
-                                        'Create one and assign this sale',
+                                      Text( 'app.create_one_and_assign_this_sal'.tr(),
                                         style: TextStyle(
                                           color: textMuted,
                                           fontSize: 11.5,
@@ -3547,7 +3732,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               controller.text = posState.selectedCustomer!.name;
             }
             return FormInput(
-              label: 'Customer',
+              label: 'admin.pages.sales.index.table.customer'.tr(),
               showLabel: false,
               controller: controller,
               focusNode: focusNode,
@@ -3571,7 +3756,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       },
                     ),
                   IconButton(
-                    tooltip: 'Create customer',
+                    tooltip: 'admin.pages.customers.create.submit'.tr(),
                     icon: Icon(
                       LucideIcons.userPlus,
                       size: 16,
@@ -3629,9 +3814,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           Container(
             padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
             decoration: BoxDecoration(
-              color: surface2,
+              color: posState.cart.isNotEmpty
+                  ? AppColors.brand.withValues(alpha: isDark ? 0.10 : 0.08)
+                  : surface2,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: border),
+              border: Border.all(
+                color: posState.cart.isNotEmpty
+                    ? AppColors.brand.withValues(alpha: isDark ? 0.28 : 0.22)
+                    : border,
+              ),
             ),
             child: Row(
               children: [
@@ -3641,26 +3832,44 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: textMuted,
+                      color: posState.cart.isNotEmpty
+                          ? (isDark ? AppColors.brand : AppColors.lightSidebarActiveColor)
+                          : textMuted,
                     ),
                   ),
                 ),
                 Flexible(
-                  child: Text(
-                    tenantCurrencyFormatter(
-                      ref.watch(storeSettingsProvider).settings,
-                    ).format(posState.total),
-                    textAlign: TextAlign.end,
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w900,
-                      color: posState.cart.isEmpty
-                          ? textPrimary
-                          : AppColors.brand,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (child, animation) => SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, -0.4),
+                          end: Offset.zero,
+                        ).animate(CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        )),
+                        child: FadeTransition(opacity: animation, child: child),
+                      ),
+                      child: Text(
+                        tenantCurrencyFormatter(
+                          ref.watch(storeSettingsProvider).settings,
+                        ).format(posState.total),
+                        key: ValueKey(posState.total),
+                        textAlign: TextAlign.end,
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: posState.cart.isEmpty
+                              ? textPrimary
+                              : AppColors.brand,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -3743,19 +3952,57 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 78,
-              height: 78,
-              decoration: BoxDecoration(
-                color: surface,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: border),
-              ),
-              child: Icon(
-                LucideIcons.shoppingCart,
-                size: 34,
-                color: AppColors.brand.withValues(alpha: isDark ? 0.92 : 1),
-              ),
+            // Pulsing glow animation around cart icon
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.85, end: 1.1),
+              duration: const Duration(milliseconds: 1600),
+              curve: Curves.easeInOut,
+              builder: (context, scale, child) {
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer glow ring
+                    Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.brand.withValues(
+                            alpha: isDark ? 0.08 : 0.06,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Icon container
+                    Container(
+                      width: 78,
+                      height: 78,
+                      decoration: BoxDecoration(
+                        color: surface,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: border),
+                        boxShadow: isDark
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.brand.withValues(alpha: 0.12),
+                                  blurRadius: 20,
+                                  spreadRadius: 2,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Icon(
+                        LucideIcons.shoppingCart,
+                        size: 34,
+                        color: AppColors.brand.withValues(alpha: isDark ? 0.92 : 1),
+                      ),
+                    ),
+                  ],
+                );
+              },
+              onEnd: () => setState(() {}), // Trigger reverse
             ),
             const SizedBox(height: 22),
             Text(
@@ -3768,8 +4015,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Tap a product card or use quick charge.',
+            Text( 'app.tap_a_product_card_or_use_quic'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(color: textMuted, fontSize: 13, height: 1.35),
             ),
@@ -3784,9 +4030,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface = isDark ? AppColors.surface2 : AppColors.lightSurface1;
-    final border = isDark
-        ? AppColors.surfaceBorderHover
-        : AppColors.lightSurfaceBorder;
     final textPrimary = isDark
         ? AppColors.textPrimary
         : AppColors.lightTextPrimary;
@@ -3798,16 +4041,27 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       (sum, item) => sum + item.quantity,
     );
 
+    final firstItemName = posState.cart.isNotEmpty ? posState.cart.first.name : '';
+
     return Container(
       decoration: BoxDecoration(
         color: surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark
+              ? AppColors.brand.withValues(alpha: 0.22)
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.26 : 0.10),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            color: AppColors.brand.withValues(alpha: isDark ? 0.22 : 0.10),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -3815,57 +4069,97 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showMobileCartSheet(context, posState),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 14),
+            padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 14, 12),
             child: Row(
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.brand,
-                    borderRadius: BorderRadius.circular(12),
+                // Animated item count badge
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  transitionBuilder: (child, animation) => ScaleTransition(
+                    scale: animation,
+                    child: child,
                   ),
-                  child: Text(
-                    '$itemCount',
-                    style: GoogleFonts.jetBrainsMono(
-                      color: AppColors.brandContrast,
-                      fontWeight: FontWeight.w900,
+                  child: Container(
+                    key: ValueKey(itemCount),
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.brand,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.brand.withValues(alpha: 0.45),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      '$itemCount',
+                      style: const TextStyle(
+                        color: AppColors.brandContrast,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    'admin.pages.pos.actions.viewCart'.tr(),
-                    style: TextStyle(
-                      color: textPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'app.admin_pages_pos_actions_viewca'.tr(),
+                        style: TextStyle(
+                          color: textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (firstItemName.isNotEmpty)
+                        Text(
+                          firstItemName,
+                          style: TextStyle(
+                            color: textMuted,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            height: 1.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Icon(LucideIcons.chevronUp, size: 18, color: textMuted),
-                const SizedBox(width: 8),
-                Flexible(
+                const SizedBox(width: 10),
+                Icon(LucideIcons.chevronUp, size: 16, color: textMuted),
+                const SizedBox(width: 6),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
                   child: Text(
                     tenantCurrencyFormatter(
                       ref.watch(storeSettingsProvider).settings,
                     ).format(posState.total),
+                    key: ValueKey(posState.total),
                     textAlign: TextAlign.end,
-                    style: GoogleFonts.jetBrainsMono(
+                    style: const TextStyle(
                       color: AppColors.brand,
-                      fontSize: 16,
+                      fontSize: 17,
                       fontWeight: FontWeight.w900,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontFeatures: [FontFeature.tabularFigures()],
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -3944,7 +4238,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     if (detailed == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load product variants')),
+        SnackBar(content: Text( 'app.failed_to_load_product_variant'.tr())),
       );
       return;
     }
@@ -4035,8 +4329,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     child: variants.isEmpty
                         ? Padding(
                             padding: const EdgeInsets.symmetric(vertical: 28),
-                            child: Text(
-                              'No active variants for this product.',
+                            child: Text( 'app.no_active_variants_for_this_pr'.tr(),
                               style: TextStyle(color: textMuted),
                             ),
                           )
@@ -4149,76 +4442,27 @@ class _PosSafeNetworkImage extends StatefulWidget {
 }
 
 class _PosSafeNetworkImageState extends State<_PosSafeNetworkImage> {
-  static final WorkspaceCacheService _imageCacheService =
-      WorkspaceCacheService();
-
-  String? get _normalizedUrl {
-    final value = widget.imageUrl?.trim();
-    if (value == null || value.isEmpty) return null;
-    return value;
-  }
-
-  String? get _cacheKey {
-    final url = _normalizedUrl;
-    if (url == null) return null;
-
-    try {
-      final uri = Uri.parse(url);
-      if (!uri.hasQuery && !uri.hasFragment) return url;
-
-      // Product object URLs sometimes gain volatile query params. Cache by
-      // object path so a token refresh does not redownload the same thumbnail.
-      return uri.replace(query: null, fragment: null).toString();
-    } catch (_) {
-      return url;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final url = _normalizedUrl;
+    final url = widget.imageUrl?.trim();
     final fallback = SizedBox(
       width: widget.width,
       height: widget.height,
       child: widget.fallback,
     );
 
-    if (url == null) {
-      return fallback;
-    }
+    if (url == null || url.isEmpty) return fallback;
 
-    if (ImageStorageManager.isLocalImagePath(url)) {
-      return RepaintBoundary(
-        child: OfflineImageWidget(
-          imagePath: url,
-          width: widget.width,
-          height: widget.height,
-          fit: widget.fit,
-          placeholder: fallback,
-          errorWidget: fallback,
-        ),
-      );
-    }
-
+    // Use OfflineImageWidget – the same path used by TenantImageWidget and
+    // the products screen – so the POS benefits from the same working cache.
     return RepaintBoundary(
-      child: CachedNetworkImage(
-        imageUrl: url,
-        cacheKey: _cacheKey,
-        cacheManager: _imageCacheService.imageCacheManager(
-          TenantModeService().activeNamespaceKey,
-        ),
+      child: OfflineImageWidget(
+        imagePath: url,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
-        memCacheWidth: widget.cacheWidth,
-        memCacheHeight: widget.cacheHeight,
-        maxWidthDiskCache: widget.cacheWidth,
-        maxHeightDiskCache: widget.cacheHeight,
-        fadeInDuration: Duration.zero,
-        fadeOutDuration: Duration.zero,
-        useOldImageOnUrlChange: true,
-        placeholder: (context, _) => fallback,
-        errorWidget: (context, failedUrl, error) => fallback,
+        placeholder: fallback,
+        errorWidget: fallback,
       ),
     );
   }
@@ -4298,8 +4542,8 @@ class _DiscountDialogState extends State<_DiscountDialog> {
     final isValid = value > 0 && discountAmount > 0;
 
     return AppDialog(
-      title: 'Apply Discount',
-      description: 'Apply a cart-wide fixed amount or percentage discount.',
+      title: 'app.apply_discount'.tr(),
+      description: 'app.apply_a_cart_wide_fixed_amount'.tr(),
       maxWidth: 520,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -4314,7 +4558,7 @@ class _DiscountDialogState extends State<_DiscountDialog> {
               children: [
                 Expanded(
                   child: _DiscountTypeButton(
-                    label: 'Amount',
+                    label: 'superAdmin.paymentsPage.history.table.amount'.tr(),
                     icon: LucideIcons.badgeDollarSign,
                     isSelected: _type == PosDiscountType.fixed,
                     onTap: () => setState(() => _type = PosDiscountType.fixed),
@@ -4322,7 +4566,7 @@ class _DiscountDialogState extends State<_DiscountDialog> {
                 ),
                 Expanded(
                   child: _DiscountTypeButton(
-                    label: 'Percent',
+                    label: 'app.percent'.tr(),
                     icon: LucideIcons.percent,
                     isSelected: _type == PosDiscountType.percent,
                     onTap: () =>
@@ -4355,7 +4599,7 @@ class _DiscountDialogState extends State<_DiscountDialog> {
           ),
           const SizedBox(height: 16),
           FormInput(
-            label: 'Reason',
+            label: 'app.reason'.tr(),
             controller: _reasonController,
             hint: 'Promotion, damaged package, customer gesture...',
             maxLines: 2,
@@ -4376,18 +4620,18 @@ class _DiscountDialogState extends State<_DiscountDialog> {
             child: Column(
               children: [
                 _DiscountSummaryRow(
-                  label: 'Subtotal',
+                  label: 'admin.pages.orders.detail.itemsTable.subtotal'.tr(),
                   value: currency.format(widget.subtotal),
                 ),
                 const SizedBox(height: 8),
                 _DiscountSummaryRow(
-                  label: 'Discount',
+                  label: 'admin.pages.pos.catalog.actions.discount'.tr(),
                   value: '-${currency.format(discountAmount)}',
                   valueColor: AppColors.brand,
                 ),
                 const Divider(height: 24),
                 _DiscountSummaryRow(
-                  label: 'New total',
+                  label: 'app.new_total'.tr(),
                   value: currency.format(total),
                   isStrong: true,
                 ),
@@ -4399,16 +4643,16 @@ class _DiscountDialogState extends State<_DiscountDialog> {
       actions: [
         if (widget.onClear != null)
           AppButton.danger(
-            label: 'Remove',
+            label: 'storefront.cart.item.remove'.tr(),
             icon: LucideIcons.trash2,
             onPressed: widget.onClear,
           ),
         AppButton.secondary(
-          label: 'Cancel',
+          label: 'admin.common.cancel'.tr(),
           onPressed: () => Navigator.pop(context),
         ),
         AppButton.primary(
-          label: 'Apply',
+          label: 'storefront.actions.apply'.tr(),
           icon: LucideIcons.check,
           onPressed: isValid
               ? () {
@@ -4643,12 +4887,12 @@ class _CheckoutSuccessAnimationState extends State<_CheckoutSuccessAnimation>
 
 // Hover wrapper widget for desktop interactions
 class _HoverableProductCard extends StatefulWidget {
-  final Widget child;
+  final Widget Function(bool isHovered) cardBuilder;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
   const _HoverableProductCard({
-    required this.child,
+    required this.cardBuilder,
     required this.onTap,
     this.onLongPress,
   });
@@ -4671,27 +4915,35 @@ class _HoverableProductCardState extends State<_HoverableProductCard> {
         onTap: widget.onTap,
         onLongPress: widget.onLongPress,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
           transform: _isHovered
-              ? (Matrix4.identity()..setTranslationRaw(0, -4, 0))
+              ? (Matrix4.identity()..setTranslationRaw(0, -6, 0))
               : Matrix4.identity(),
           decoration: BoxDecoration(
             color: _isDark ? AppColors.surface1 : AppColors.lightSurface1,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             boxShadow: _isDark
-                ? null
+                ? (_isHovered
+                    ? [
+                        BoxShadow(
+                          color: AppColors.brand.withValues(alpha: 0.18),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ]
+                    : null)
                 : [
                     BoxShadow(
                       color: Colors.black.withValues(
-                        alpha: _isHovered ? 0.1 : 0.05,
+                        alpha: _isHovered ? 0.12 : 0.05,
                       ),
-                      blurRadius: _isHovered ? 16 : 8,
-                      offset: Offset(0, _isHovered ? 8 : 4),
+                      blurRadius: _isHovered ? 20 : 8,
+                      offset: Offset(0, _isHovered ? 10 : 4),
                     ),
                   ],
           ),
-          child: widget.child,
+          child: widget.cardBuilder(_isHovered),
         ),
       ),
     );
@@ -4714,35 +4966,37 @@ class _PaymentMethodButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark
-        ? AppColors.textPrimary
-        : AppColors.lightTextPrimary;
     final textMuted = isDark
         ? AppColors.textMuted
         : AppColors.lightTextTertiary;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
+      borderRadius: BorderRadius.circular(14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         height: 64,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? AppColors.surface2 : Colors.white)
+              ? (isDark
+                  ? AppColors.brand.withValues(alpha: 0.12)
+                  : AppColors.brand.withValues(alpha: 0.08))
               : (isDark ? AppColors.surface3 : const Color(0xFFF1F5F9)),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
                 ? (isDark ? AppColors.brand : AppColors.lightSidebarActiveColor)
                 : Colors.transparent,
             width: 2,
           ),
-          boxShadow: isSelected && !isDark
+          boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    color: AppColors.brand.withValues(
+                      alpha: isDark ? 0.25 : 0.15,
+                    ),
+                    blurRadius: isDark ? 16 : 8,
+                    offset: const Offset(0, 4),
                   ),
                 ]
               : null,
@@ -4750,14 +5004,18 @@ class _PaymentMethodButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: isSelected ? textPrimary : textMuted, size: 20),
+            Icon(
+              icon,
+              color: isSelected ? AppColors.brand : textMuted,
+              size: 22,
+            ),
             const SizedBox(width: 12),
             Text(
               title,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: isSelected ? textPrimary : textMuted,
+                color: isSelected ? AppColors.brand : textMuted,
               ),
             ),
           ],

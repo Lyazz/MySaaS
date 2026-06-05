@@ -131,7 +131,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 24),
             child: ResponsiveFilterBar(
               searchField: FormInput(
-                label: 'admin.pages.sales.index.filters.searchLabel'.tr(),
+                label: 'app.admin_pages_sales_index_filter'.tr().tr(),
                 controller: _searchController,
                 hint: 'admin.pages.sales.index.filters.searchPlaceholder'.tr(),
                 contentPadding: const EdgeInsets.symmetric(
@@ -332,7 +332,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   TableActionButton(
-                                    tooltip: 'Refund',
+                                    tooltip: 'admin.pages.sales.actions.refund'.tr(),
                                     icon: LucideIcons.rotateCcw,
                                     isDanger: true,
                                     isLoading: refundBusy,
@@ -400,9 +400,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'No open cashbox available. Open a cash session first.',
+          SnackBar(
+            content: Text( 'admin.pages.sales.messages.noOpenCashbox'.tr(),
             ),
           ),
         );
@@ -426,15 +425,14 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
           return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
-                title: const Text('Refund Sale'),
+                title: Text( 'admin.pages.sales.refundModal.title'.tr()),
                 content: SizedBox(
                   width: 420,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Create refund cash outflow and mark this sale as REFUNDED.',
+                      Text( 'app.create_refund_cash_outflow_and'.tr(),
                         style: TextStyle(color: textMuted, fontSize: 13),
                       ),
                       const SizedBox(height: 12),
@@ -454,24 +452,24 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                 () =>
                                     selectedCashboxId = v ?? selectedCashboxId,
                               ),
-                        decoration: const InputDecoration(
-                          labelText: 'Cashbox',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.cashboxLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         initialValue: selectedMethod,
-                        items: const [
-                          DropdownMenuItem(value: 'CASH', child: Text('Cash')),
-                          DropdownMenuItem(value: 'CARD', child: Text('Card')),
+                        items: [
+                          DropdownMenuItem(value: 'CASH', child: Text( 'admin.pages.cash.methods.CASH'.tr())),
+                          DropdownMenuItem(value: 'CARD', child: Text( 'admin.pages.cash.methods.CARD'.tr())),
                           DropdownMenuItem(
                             value: 'TRANSFER',
-                            child: Text('Transfer'),
+                            child: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr()),
                           ),
                           DropdownMenuItem(
                             value: 'OTHER',
-                            child: Text('Other'),
+                            child: Text( 'admin.pages.cash.methods.OTHER'.tr()),
                           ),
                         ],
                         onChanged: submitting
@@ -480,8 +478,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                 () => selectedMethod = (v ?? 'CASH')
                                     .toUpperCase(),
                               ),
-                        decoration: const InputDecoration(
-                          labelText: 'Method',
+                        decoration: InputDecoration(
+                          labelText: 'superAdmin.paymentsPage.history.table.method'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -489,8 +487,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       TextField(
                         controller: referenceCtrl,
                         enabled: !submitting,
-                        decoration: const InputDecoration(
-                          labelText: 'Reference (optional)',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.referenceLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -499,8 +497,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                         controller: noteCtrl,
                         enabled: !submitting,
                         maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Note (optional)',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.noteLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -522,10 +520,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                     onPressed: submitting
                         ? null
                         : () => Navigator.of(dialogContext).pop(false),
-                    child: const Text('Cancel'),
+                    child: Text( 'admin.common.cancel'.tr()),
                   ),
                   AppButton.danger(
-                    label: 'Refund',
+                    label: 'admin.pages.sales.actions.refund'.tr(),
                     icon: LucideIcons.rotateCcw,
                     loading: submitting,
                     onPressed: submitting
@@ -573,7 +571,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
         _fetchSales();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sale refunded successfully')),
+          SnackBar(content: Text( 'app.sale_refunded_successfully'.tr())),
         );
       }
     } catch (e) {

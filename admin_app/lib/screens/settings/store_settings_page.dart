@@ -6,6 +6,7 @@ import '../../providers/store_settings_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class StoreSettingsPage extends ConsumerStatefulWidget {
   const StoreSettingsPage({super.key});
@@ -69,7 +70,7 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Store settings saved')));
+      ).showSnackBar(SnackBar(content: Text( 'app.store_settings_saved'.tr())));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -101,7 +102,7 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Store Settings'),
+        title: Text( 'app.store_settings'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -121,15 +122,14 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _SectionCard(
-                    title: 'Store Identity',
-                    description:
-                        'Operational settings used across orders and admin flows.',
+                    title: 'admin.appearanceSettingsForm.identity.title'.tr(),
+                    description: 'app.operational_settings_used_acro'.tr(),
                     child: Column(
                       children: [
-                        FormInput(label: 'Store name', controller: _nameCtrl),
+                        FormInput(label: 'admin.pages.onboarding.storeInfo.nameLabel'.tr(), controller: _nameCtrl),
                         const SizedBox(height: 12),
                         FormInput(
-                          label: 'Store slug',
+                          label: 'app.store_slug'.tr(),
                           controller: _slugCtrl,
                           enabled: false,
                         ),
@@ -138,14 +138,14 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                           children: [
                             Expanded(
                               child: FormInput(
-                                label: 'Currency code',
+                                label: 'app.currency_code'.tr(),
                                 controller: _currencyCodeCtrl,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: FormInput(
-                                label: 'Currency country',
+                                label: 'app.currency_country'.tr(),
                                 controller: _currencyCountryCtrl,
                               ),
                             ),
@@ -156,23 +156,22 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                   ),
                   const SizedBox(height: 16),
                   _SectionCard(
-                    title: 'Checkout Rules',
-                    description:
-                        'Configure default order behavior for local and online admin flows.',
+                    title: 'admin.settingsHub.links.checkoutRules'.tr(),
+                    description: 'app.configure_default_order_behavi'.tr(),
                     child: Column(
                       children: [
                         Row(
                           children: [
                             Expanded(
                               child: FormInput(
-                                label: 'Order ID prefix',
+                                label: 'app.order_id_prefix'.tr(),
                                 controller: _orderIdPrefixCtrl,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: FormInput(
-                                label: 'Minimum order amount (DZD)',
+                                label: 'app.minimum_order_amount_dzd'.tr(),
                                 controller: _minimumOrderAmountCtrl,
                                 keyboardType: TextInputType.number,
                               ),
@@ -181,9 +180,8 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                         ),
                         const SizedBox(height: 16),
                         SwitchListTile(
-                          title: const Text('Enable cart'),
-                          subtitle: Text(
-                            'Allow storefront visitors to build a cart before checkout.',
+                          title: Text( 'app.enable_cart'.tr()),
+                          subtitle: Text( 'app.allow_storefront_visitors_to_b'.tr(),
                             style: TextStyle(color: textMuted),
                           ),
                           value: _cartEnabled,
@@ -191,9 +189,8 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                               setState(() => _cartEnabled = value),
                         ),
                         SwitchListTile(
-                          title: const Text('Enable cash on delivery'),
-                          subtitle: Text(
-                            'Keep COD ordering active for the storefront.',
+                          title: Text( 'app.enable_cash_on_delivery'.tr()),
+                          subtitle: Text( 'app.keep_cod_ordering_active_for_t'.tr(),
                             style: TextStyle(color: textMuted),
                           ),
                           value: _codEnabled,
@@ -201,9 +198,8 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                               setState(() => _codEnabled = value),
                         ),
                         SwitchListTile(
-                          title: const Text('Hide optional address field'),
-                          subtitle: Text(
-                            'Simplify checkout when detailed address is not required.',
+                          title: Text( 'admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.title'.tr()),
+                          subtitle: Text( 'app.simplify_checkout_when_detaile'.tr(),
                             style: TextStyle(color: textMuted),
                           ),
                           value: _hideOptionalAddress,
@@ -227,8 +223,7 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                         const Icon(LucideIcons.shieldCheck, size: 18),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            'Provisioning and workspace binding are managed outside this screen. Workspace URLs are no longer editable from normal app settings.',
+                          child: Text( 'app.provisioning_and_workspace_bin'.tr(),
                             style: TextStyle(
                               fontSize: 13,
                               height: 1.45,

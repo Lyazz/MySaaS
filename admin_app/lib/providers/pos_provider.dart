@@ -26,6 +26,7 @@ class PosLookupItem {
   final String? sku;
   final double price;
   final String? imageUrl;
+  final bool needsVariantSelection;
 
   const PosLookupItem({
     required this.productId,
@@ -35,6 +36,7 @@ class PosLookupItem {
     required this.sku,
     required this.price,
     required this.imageUrl,
+    this.needsVariantSelection = false,
   });
 
   factory PosLookupItem.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,7 @@ class PosLookupItem {
       variantLabel: json['variantLabel']?.toString(),
       price: (json['price'] is num) ? (json['price'] as num).toDouble() : 0.0,
       imageUrl: json['imageUrl']?.toString(),
+      needsVariantSelection: json['needsVariantSelection'] == true,
     );
   }
 }
@@ -55,12 +58,14 @@ class PosSession {
   final String? selectedCustomerId;
   final Customer? selectedCustomer;
   final PosDiscount? discount;
+  final int? lastInteractedItemIndex;
 
   const PosSession({
     this.cart = const [],
     this.selectedCustomerId,
     this.selectedCustomer,
     this.discount,
+    this.lastInteractedItemIndex,
   });
 
   double get subtotal =>
@@ -80,6 +85,8 @@ class PosSession {
     PosDiscount? discount,
     bool clearCustomer = false,
     bool clearDiscount = false,
+    bool clearLastInteracted = false,
+    int? lastInteractedItemIndex,
   }) {
     return PosSession(
       cart: cart ?? this.cart,
@@ -90,6 +97,7 @@ class PosSession {
           ? null
           : (selectedCustomer ?? this.selectedCustomer),
       discount: clearDiscount ? null : (discount ?? this.discount),
+      lastInteractedItemIndex: clearLastInteracted ? null : (lastInteractedItemIndex ?? this.lastInteractedItemIndex),
     );
   }
 }
@@ -299,6 +307,8 @@ class PosNotifier extends Notifier<PosState> {
           final matchesBarcode =
               (v.barcode != null && v.barcode!.trim() == normalized);
           if (matchesSku || matchesBarcode) {
+            final bool isMainProductVariant = v.optionValues.isEmpty;
+            final bool needsVariantSelection = isMainProductVariant && p.options.isNotEmpty;
             return PosLookupItem(
               productId: p.id,
               variantId: v.id,
@@ -307,6 +317,7 @@ class PosNotifier extends Notifier<PosState> {
               sku: v.sku,
               price: v.price,
               imageUrl: p.mainImageUrl,
+              needsVariantSelection: needsVariantSelection,
             );
           }
         }
@@ -324,6 +335,27 @@ class PosNotifier extends Notifier<PosState> {
   Future<PosLookupItem?> addByCode(String code, {int quantity = 1}) async {
     final item = await lookupByCode(code);
     if (item == null) return null;
+
+    bool needsSelection = item.needsVariantSelection;
+    if (!needsSelection) {
+      final product = state.products.where((p) => p.id == item.productId).firstOrNull;
+      if (product != null && product.options.isNotEmpty && (item.variantLabel == null || item.variantLabel == 'Default' || item.variantLabel!.isEmpty)) {
+        needsSelection = true;
+      }
+    }
+
+    if (needsSelection) {
+      return PosLookupItem(
+        productId: item.productId,
+        variantId: item.variantId,
+        title: item.title,
+        variantLabel: item.variantLabel,
+        sku: item.sku,
+        price: item.price,
+        imageUrl: item.imageUrl,
+        needsVariantSelection: true,
+      );
+    }
 
     final current = state.currentSession;
     final existingIndex = current.cart.indexWhere(
@@ -355,7 +387,10 @@ class PosNotifier extends Notifier<PosState> {
       ];
     }
 
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    _updateCurrentSession(current.copyWith(
+      cart: newCart,
+      lastInteractedItemIndex: existingIndex >= 0 ? existingIndex : newCart.length - 1,
+    ));
     return item;
   }
 
@@ -446,7 +481,10 @@ class PosNotifier extends Notifier<PosState> {
       );
       newCart = [...current.cart, newItem];
     }
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    _updateCurrentSession(current.copyWith(
+      cart: newCart,
+      lastInteractedItemIndex: existingIndex >= 0 ? existingIndex : newCart.length - 1,
+    ));
   }
 
   void addCustomItem({
@@ -493,7 +531,12 @@ class PosNotifier extends Notifier<PosState> {
       }
       return item;
     }).toList();
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    
+    final interactedIndex = newCart.indexWhere((item) => item.productId == productId && item.variantId == variantId);
+    _updateCurrentSession(current.copyWith(
+      cart: newCart,
+      lastInteractedItemIndex: interactedIndex >= 0 ? interactedIndex : null,
+    ));
   }
 
   void updateQuantityAtIndex(int index, int quantity) {
@@ -512,7 +555,24 @@ class PosNotifier extends Notifier<PosState> {
     final item = current.cart[index];
     final newCart = [...current.cart];
     newCart[index] = item.copyWith(quantity: quantity);
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    _updateCurrentSession(current.copyWith(
+      cart: newCart,
+      lastInteractedItemIndex: index,
+    ));
+  }
+
+  void incrementLastInteractedItemQuantity() {
+    final current = state.currentSession;
+    final index = current.lastInteractedItemIndex;
+    if (index == null || index < 0 || index >= current.cart.length) return;
+    updateQuantityAtIndex(index, current.cart[index].quantity + 1);
+  }
+
+  void decrementLastInteractedItemQuantity() {
+    final current = state.currentSession;
+    final index = current.lastInteractedItemIndex;
+    if (index == null || index < 0 || index >= current.cart.length) return;
+    updateQuantityAtIndex(index, current.cart[index].quantity - 1);
   }
 
   void removeFromCart(String productId, String? variantId) {

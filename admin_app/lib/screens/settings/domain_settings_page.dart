@@ -7,6 +7,7 @@ import '../../repositories/custom_domains_repository.dart';
 import '../../services/api_service.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class DomainSettingsPage extends ConsumerStatefulWidget {
   const DomainSettingsPage({super.key});
@@ -90,15 +91,14 @@ class _DomainSettingsPageState extends ConsumerState<DomainSettingsPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Custom Domains')),
+      appBar: AppBar(title: Text( 'app.custom_domains'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (_error != null) ...[Text(_error!), const SizedBox(height: 12)],
-            Text(
-              'Point your CNAME record to:',
+            Text( 'app.point_your_cname_record_to'.tr(),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 6),
@@ -110,7 +110,7 @@ class _DomainSettingsPageState extends ConsumerState<DomainSettingsPage> {
               children: [
                 Expanded(
                   child: FormInput(
-                    label: 'New domain',
+                    label: 'app.new_domain'.tr(),
                     controller: _domainCtrl,
                     hint: 'www.example.com',
                   ),

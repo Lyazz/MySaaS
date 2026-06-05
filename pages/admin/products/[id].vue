@@ -205,6 +205,35 @@
               </template>
             </AdminFormField>
 
+            <!-- Search Keywords -->
+            <div class="space-y-1">
+              <label class="block text-sm font-medium" style="color: var(--text-primary)">
+                {{ t('admin.forms.product.searchKeywords.label', 'Mots-clés de recherche') }}
+              </label>
+              <div class="flex flex-wrap items-center gap-2 p-2 rounded-md focus-within:ring-2 focus-within:[--tw-ring-color:var(--brand)]" style="border: 1px solid var(--surface-border); background: var(--surface-1);">
+                <span
+                  v-for="(keyword, index) in keywordList"
+                  :key="index"
+                  class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary);"
+                >
+                  {{ keyword }}
+                  <button type="button" class="hover:text-red-500 transition-colors" @click="removeKeyword(index)">
+                    <Icon name="lucide:x" class="w-3 h-3" />
+                  </button>
+                </span>
+                <input
+                  v-model="newKeyword"
+                  type="text"
+                  :placeholder="t('admin.forms.product.searchKeywords.placeholder', 'Tapez et appuyez sur Entrée...')"
+                  class="flex-1 min-w-[120px] bg-transparent outline-none text-sm" style="color: var(--text-primary)"
+                  @keydown.enter.prevent="addKeyword"
+                >
+              </div>
+              <p class="text-xs mt-1" style="color: var(--text-tertiary)">
+                {{ t('admin.forms.product.searchKeywords.hint', 'Mots-clés pour aider les clients à trouver ce produit dans la recherche de la boutique.') }}
+              </p>
+            </div>
+
             <div
               class="rounded-2xl border p-4 space-y-2"
               style="border-color: var(--surface-border); background: var(--surface-2)"
@@ -817,6 +846,7 @@ const form = ref({
   title: '',
   slug: '',
   miniDescription: '',
+  searchKeywords: '',
   description: '',
   price: 0,
   stock: 0,
@@ -860,6 +890,27 @@ const lastAutoSlug = ref('')
 const slugPattern = CONTENT_SLUG_PATTERN
 const slugSuggestionSeq = ref(0)
 const { showToast } = useToast()
+
+const newKeyword = ref('')
+const keywordList = computed(() => {
+  if (!form.value.searchKeywords) return []
+  return form.value.searchKeywords.split(',').map(k => k.trim()).filter(k => k)
+})
+
+function addKeyword() {
+  const kw = newKeyword.value.trim()
+  if (kw && !keywordList.value.includes(kw)) {
+    const newList = [...keywordList.value, kw]
+    form.value.searchKeywords = newList.join(',')
+  }
+  newKeyword.value = ''
+}
+
+function removeKeyword(index: number) {
+  const newList = [...keywordList.value]
+  newList.splice(index, 1)
+  form.value.searchKeywords = newList.join(',')
+}
 
 const categoryDisplayTitle = (category: CategoryOption) => {
   return `${'-> '.repeat(category.depth)}${category.title}`
@@ -1006,9 +1057,10 @@ async function fetchProduct() {
     }
 
     form.value = {
-      title: data.title,
-      slug: data.slug,
+      title: data.title || '',
+      slug: data.slug || '',
       miniDescription: data.miniDescription || '',
+      searchKeywords: data.searchKeywords || '',
       description: data.description || '',
       price: Number(data.price),
       stock: data.stock,
@@ -1333,6 +1385,7 @@ async function handleSubmit() {
       title: form.value.title,
       slug: form.value.slug,
       miniDescription: form.value.miniDescription || null,
+      searchKeywords: form.value.searchKeywords || null,
       description: form.value.description || null,
       isActive: form.value.isActive,
       lowStockThreshold: Number(form.value.lowStockThreshold),

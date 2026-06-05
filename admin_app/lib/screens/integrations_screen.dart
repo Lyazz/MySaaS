@@ -7,6 +7,7 @@ import '../providers/integrations_provider.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
 import '../theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class IntegrationsScreen extends ConsumerWidget {
   const IntegrationsScreen({super.key});
@@ -20,8 +21,7 @@ class IntegrationsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Integrations',
+          Text( 'admin.settingsHub.links.integrations'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
@@ -29,8 +29,7 @@ class IntegrationsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Connect third-party services to your store',
+          Text( 'app.connect_third_party_services_t'.tr(),
             style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 24),
@@ -44,20 +43,19 @@ class IntegrationsScreen extends ConsumerWidget {
                 _IntegrationCard(
                   integration: state.facebook,
                   name: 'Facebook Pixel',
-                  description:
-                      'Track conversions and retarget customers via Facebook Ads.',
+                  description: 'app.track_conversions_and_retarget'.tr(),
                   icon: LucideIcons.facebook,
                   iconColor: const Color(0xFF3B82F6),
-                  iconBg: const Color(0xFFEFF6FF),
-                  configFields: const [
+                  iconBg: Color(0xFFEFF6FF),
+                  configFields: [
                     _FieldDef(
                       key: 'pixelId',
-                      label: 'Pixel ID',
+                      label: 'admin.pages.integrations.metaPixels.table.pixelId'.tr(),
                       hint: '1234567890',
                     ),
                     _FieldDef(
                       key: 'accessToken',
-                      label: 'Conversion API Token',
+                      label: 'app.conversion_api_token'.tr(),
                       hint: 'EAA...',
                     ),
                   ],
@@ -65,20 +63,19 @@ class IntegrationsScreen extends ConsumerWidget {
                 _IntegrationCard(
                   integration: state.telegram,
                   name: 'Telegram Notifications',
-                  description:
-                      'Receive new order alerts directly in a Telegram chat.',
+                  description: 'app.receive_new_order_alerts_direc'.tr(),
                   icon: LucideIcons.send,
                   iconColor: const Color(0xFF0EA5E9),
-                  iconBg: const Color(0xFFE0F2FE),
-                  configFields: const [
+                  iconBg: Color(0xFFE0F2FE),
+                  configFields: [
                     _FieldDef(
                       key: 'botToken',
-                      label: 'Bot Token',
+                      label: 'admin.pages.integrations.telegram.modal.fields.botToken.label'.tr(),
                       hint: '110201543:AAHd...',
                     ),
                     _FieldDef(
                       key: 'chatId',
-                      label: 'Chat ID',
+                      label: 'admin.pages.integrations.telegram.modal.fields.chatId.label'.tr(),
                       hint: '-100123456',
                     ),
                   ],

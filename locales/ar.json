@@ -941,6 +941,7 @@
       "selectPlaceholder": "اختر…",
       "storeFallback": "المتجر"
     },
+
     "actions": {
       "addToCart": "أضف إلى السلة",
       "adding": "جارٍ الإضافة…",
@@ -1253,7 +1254,8 @@
       "emptyHint": "جرّب فئة أخرى أو تصفّح كل المنتجات."
     },
     "search": {
-      "placeholder": "ابحث عن منتجات..."
+      "placeholder": "ابحث عن منتجات...",
+      "keywords": "كلمات ذات صلة"
     },
     "header": {
       "wishlistTitle": "المفضلة",
@@ -1983,6 +1985,7 @@
       "templates": {
         "title": "قالب المتجر",
         "subtitle": "اختر التخطيط الأنسب لعلامتك.",
+        "quickView": "عرض سريع",
         "options": {
           "classic": {
             "label": "كلاسيكي",
@@ -2191,6 +2194,11 @@
           "label": "وصف مختصر",
           "hint": "وصف قصير لعنوان صفحة الهبوط (اختياري)",
           "placeholder": "اكتب ملخصاً قصيراً…"
+        },
+        "searchKeywords": {
+          "label": "كلمات البحث",
+          "hint": "الكلمات الرئيسية لمساعدة العملاء في العثور على هذا المنتج في بحث المتجر.",
+          "placeholder": "اكتب واضغط Enter..."
         },
         "description": {
           "label": "الوصف",

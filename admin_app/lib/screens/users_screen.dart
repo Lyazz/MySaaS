@@ -129,7 +129,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                     )
                   else
                     AppButton.primary(
-                      label: 'admin.pages.users.roles.actions.addRole'.tr(),
+                      label: 'app.admin_pages_users_roles_action'.tr().tr(),
                       icon: LucideIcons.plus,
                       onPressed: () => _openCreateRole(context),
                     ),
@@ -170,7 +170,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                             fullWidth: true,
                           )
                         : AppButton.primary(
-                            label: 'admin.pages.users.roles.actions.addRole'
+                            label: 'app.admin_pages_users_roles_action'.tr()
                                 .tr(),
                             icon: LucideIcons.plus,
                             onPressed: () => _openCreateRole(context),
@@ -214,7 +214,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                                 .fetchUsers(includeInactive: v == true);
                           },
                   ),
-                  Text('admin.pages.users.includeInactive'.tr()),
+                  Text( 'app.admin_pages_users_includeinact'.tr().tr()),
                 ],
               ),
             const SizedBox(height: 12),
@@ -318,7 +318,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
       context: context,
       builder: (ctx) => AppDialog(
         title: 'admin.pages.users.actions.deactivate'.tr(),
-        description: 'admin.pages.users.hints.deactivateHint'.tr(),
+        description: 'app.admin_pages_users_hints_deacti'.tr().tr(),
         content: Text(user.email),
         secondaryLabel: 'admin.common.cancel'.tr(),
         onSecondary: () => Navigator.of(ctx).pop(false),
@@ -335,7 +335,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     final result = await showDialog<_RoleFormResult>(
       context: context,
       builder: (ctx) =>
-          _RoleDialog(title: 'admin.pages.users.roles.createTitle'.tr()),
+          _RoleDialog(title: 'app.admin_pages_users_roles_create'.tr().tr()),
     );
     if (result == null) return;
     await ref
@@ -347,7 +347,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     final result = await showDialog<_RoleFormResult>(
       context: context,
       builder: (ctx) => _RoleDialog(
-        title: 'admin.pages.users.roles.editTitle'.tr(),
+        title: 'app.admin_pages_users_roles_editti'.tr().tr(),
         initialName: role.name,
         initialPermissions: role.permissions,
       ),
@@ -366,8 +366,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AppDialog(
-        title: 'admin.confirmModal.defaults.title'.tr(),
-        description: 'admin.confirmModal.defaults.message'.tr(),
+        title: 'app.admin_confirmmodal_defaults_ti'.tr().tr(),
+        description: 'app.admin_confirmmodal_defaults_me'.tr().tr(),
         content: Text(role.name),
         secondaryLabel: 'admin.common.cancel'.tr(),
         onSecondary: () => Navigator.of(ctx).pop(false),
@@ -794,7 +794,7 @@ class _UserDialogState extends State<_UserDialog> {
   Widget build(BuildContext context) {
     return AppDialog(
       title: widget.title,
-      description: 'Create or update an admin/staff user for this tenant.',
+      description: 'app.create_or_update_an_admin_staf'.tr(),
       maxWidth: 720,
       content: Form(
         key: _formKey,
@@ -802,7 +802,7 @@ class _UserDialogState extends State<_UserDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             FormInput(
-              label: 'Email',
+              label: 'admin.pages.users.fields.email'.tr(),
               controller: _email,
               keyboardType: TextInputType.emailAddress,
               validator: (v) =>
@@ -810,7 +810,7 @@ class _UserDialogState extends State<_UserDialog> {
             ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'Password',
+              label: 'superAdmin.login.form.password.label'.tr(),
               controller: _password,
               obscureText: true,
               validator: (v) {
@@ -820,13 +820,13 @@ class _UserDialogState extends State<_UserDialog> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             FormSelect<String>(
-              label: 'Role',
+              label: 'admin.pages.users.fields.role'.tr(),
               value: _role,
-              items: const [
-                DropdownMenuItem(value: 'staff', child: Text('Staff')),
-                DropdownMenuItem(value: 'admin', child: Text('Admin')),
+              items: [
+                DropdownMenuItem(value: 'staff', child: Text( 'admin.roles.staff'.tr())),
+                DropdownMenuItem(value: 'admin', child: Text( 'admin.roles.admin'.tr())),
               ],
               onChanged: (v) {
                 if (v == null) return;
@@ -839,12 +839,12 @@ class _UserDialogState extends State<_UserDialog> {
             if (_role == 'staff') ...[
               const SizedBox(height: 16),
               FormSelect<String?>(
-                label: 'Staff Role',
+                label: 'admin.pages.users.fields.staffRole'.tr(),
                 value: _staffRoleId,
                 items: [
-                  const DropdownMenuItem<String?>(
+                  DropdownMenuItem<String?>(
                     value: null,
-                    child: Text('No staff role'),
+                    child: Text( 'app.no_staff_role'.tr()),
                   ),
                   ...widget.roles.map(
                     (r) => DropdownMenuItem<String?>(
@@ -859,7 +859,7 @@ class _UserDialogState extends State<_UserDialog> {
             if (widget.showActiveToggle) ...[
               const SizedBox(height: 8),
               SwitchListTile(
-                title: const Text('Active'),
+                title: Text( 'superAdmin.tenants.status.active'.tr()),
                 value: _isActive,
                 onChanged: (v) => setState(() => _isActive = v),
                 contentPadding: EdgeInsets.zero,
@@ -937,24 +937,23 @@ class _RoleDialogState extends State<_RoleDialog> {
   Widget build(BuildContext context) {
     return AppDialog(
       title: widget.title,
-      description: 'Define a role and its permissions.',
+      description: 'app.define_a_role_and_its_permissi'.tr(),
       maxWidth: 840,
       content: Form(
         key: _formKey,
         child: Column(
           children: [
             FormInput(
-              label: 'Role name',
+              label: 'app.role_name'.tr(),
               controller: _name,
               validator: (v) => (v == null || v.trim().length < 2)
                   ? 'Name is too short'
                   : null,
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Permissions',
+              child: Text( 'admin.pages.users.roles.fields.permissions'.tr(),
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               ),
             ),
@@ -994,7 +993,7 @@ class _RoleDialogState extends State<_RoleDialog> {
         }
         if (perms.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Select at least one permission')),
+            SnackBar(content: Text( 'app.select_at_least_one_permission'.tr())),
           );
           return;
         }

@@ -7,6 +7,9 @@ import '../models/customer.dart';
 import '../models/receipt_layout.dart';
 import 'package:image/image.dart' as img;
 import 'logo_cache_service.dart';
+import '../models/store_settings.dart';
+import '../utils/tenant_currency.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ReceiptBuilder {
   Future<List<int>> buildReceipt({
@@ -21,8 +24,11 @@ class ReceiptBuilder {
     dynamic storeSettings,
     Map<String, String>? contactInfos,
     String currencyCode = 'DZD',
+    String? resolvedLogoUrl,
   }) async {
-    final money = NumberFormat.simpleCurrency(name: currencyCode);
+    final money = (storeSettings != null && storeSettings is StoreSettings)
+        ? tenantCurrencyFormatter(storeSettings)
+        : NumberFormat.simpleCurrency(name: currencyCode);
     final effectiveLayout = layout ?? ReceiptLayout.standard();
 
     final CapabilityProfile capabilityProfile = await CapabilityProfile.load(
@@ -40,12 +46,12 @@ class ReceiptBuilder {
     final storeAddress = effectiveLayout.storeAddressOverride ?? safeContactInfos['address'];
     final storePhone = effectiveLayout.storePhoneOverride ?? safeContactInfos['phone'];
     final storeEmail = effectiveLayout.storeEmailOverride ?? safeContactInfos['email'];
-    final logoUrl = storeSettings?.logoUrl;
+    final logoUrl = resolvedLogoUrl ?? storeSettings?.logoUrl;
 
     // 1. Header
     
     if (effectiveLayout.showLogo && logoUrl != null && logoUrl.isNotEmpty) {
-      final cachedLogo = await logoCacheService.getCachedLogo(logoUrl);
+      final cachedLogo = await logoCacheService.cacheLogo(logoUrl);
       if (cachedLogo != null && await cachedLogo.exists()) {
         try {
           final bytesData = await cachedLogo.readAsBytes();
@@ -146,19 +152,19 @@ class ReceiptBuilder {
     } else {
       // 80mm Layout
       bytes += generator.row([
-        PosColumn(text: 'Item', width: 6, styles: const PosStyles(bold: true)),
+        PosColumn(text: 'app.item'.tr(), width: 6, styles: const PosStyles(bold: true)),
         PosColumn(
-          text: 'Qty',
+          text: 'admin.pages.sales.detail.itemsTable.qty'.tr(),
           width: 2,
           styles: const PosStyles(bold: true, align: PosAlign.center),
         ),
         PosColumn(
-          text: 'Price',
+          text: 'admin.pages.sales.detail.itemsTable.price'.tr(),
           width: 2,
           styles: const PosStyles(bold: true, align: PosAlign.right),
         ),
         PosColumn(
-          text: 'Total',
+          text: 'admin.pages.sales.detail.itemsTable.total'.tr(),
           width: 2,
           styles: const PosStyles(bold: true, align: PosAlign.right),
         ),
@@ -196,7 +202,7 @@ class ReceiptBuilder {
     if (discountAmount > 0) {
       bytes += generator.row([
         PosColumn(
-          text: 'Discount',
+          text: 'admin.pages.pos.catalog.actions.discount'.tr(),
           width: 6,
           styles: const PosStyles(bold: true),
         ),
@@ -210,7 +216,7 @@ class ReceiptBuilder {
 
     bytes += generator.row([
       PosColumn(
-        text: 'TOTAL',
+        text: 'admin.pages.sales.detail.itemsTable.total'.tr(),
         width: 6,
         styles: const PosStyles(
           height: PosTextSize.size2,

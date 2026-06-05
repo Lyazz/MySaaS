@@ -101,8 +101,7 @@ class _ResponsiveServerPaginatedTableState<T>
           Center(
             child: Padding(
               padding: EdgeInsets.all(48),
-              child: Text(
-                'admin.common.noDataAvailable'.tr(),
+              child: Text( 'app.admin_common_nodataavailable'.tr().tr(),
                 style: const TextStyle(color: Colors.grey),
               ),
             ),

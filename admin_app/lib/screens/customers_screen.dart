@@ -94,7 +94,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   ],
                   ResponsiveFilterBar(
                     searchField: FormInput(
-                      label: 'admin.pages.customers.index.filters.searchLabel'
+                      label: 'app.admin_pages_customers_index_fi'.tr()
                           .tr(),
                       controller: _searchController,
                       hint:
@@ -180,7 +180,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   onPressed: loading ? null : _fetchCustomers,
                 ),
                 AppButton.primary(
-                  label: 'admin.pages.customers.index.addCustomer'.tr(),
+                  label: 'app.admin_pages_customers_index_ad'.tr().tr(),
                   icon: LucideIcons.plus,
                   onPressed: () => context.go('/customers/create'),
                 ),
@@ -489,7 +489,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             ),
             const SizedBox(height: 16),
             AppButton.primary(
-              label: 'admin.pages.customers.index.addCustomer'.tr(),
+              label: 'app.admin_pages_customers_index_ad'.tr().tr(),
               icon: LucideIcons.plus,
               onPressed: () => context.go('/customers/create'),
             ),

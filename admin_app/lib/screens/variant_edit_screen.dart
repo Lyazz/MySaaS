@@ -6,6 +6,7 @@ import '../providers/products_provider.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
 import '../theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class VariantEditScreen extends ConsumerStatefulWidget {
   final ProductVariant variant;
@@ -125,10 +126,10 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
               // Basic Info Card
               _buildCard(
                 context,
-                title: 'General Information',
+                title: 'app.general_information'.tr(),
                 children: [
                   FormInput(
-                    label: 'Price',
+                    label: 'admin.pages.sales.detail.itemsTable.price'.tr(),
                     controller: _priceController,
                     prefixText: '\$ ',
                     keyboardType: const TextInputType.numberWithOptions(
@@ -137,7 +138,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   FormInput(
-                    label: 'Cost (Purchase price)',
+                    label: 'app.cost_purchase_price'.tr(),
                     controller: _costController,
                     prefixText: '\$ ',
                     keyboardType: const TextInputType.numberWithOptions(
@@ -146,13 +147,13 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   FormInput(
-                    label: 'SKU',
+                    label: 'admin.pages.purchases.detail.items.sku'.tr(),
                     controller: _skuController,
                     enabled: widget.variant.skuLocked != true,
                     suffixIcon: widget.variant.skuLocked == true
                         ? null
                         : IconButton(
-                            tooltip: 'Suggest SKU',
+                            tooltip: 'app.suggest_sku'.tr(),
                             onPressed: _isLoading
                                 ? null
                                 : () async {
@@ -166,8 +167,8 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                                       if (!mounted) return;
                                       if (suggested.trim().isEmpty) {
                                         messenger.showSnackBar(
-                                          const SnackBar(
-                                            content: Text('No SKU suggestion'),
+                                          SnackBar(
+                                            content: Text( 'app.no_sku_suggestion'.tr()),
                                           ),
                                         );
                                         return;
@@ -190,13 +191,13 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                           ),
                   ),
                   const SizedBox(height: 16),
-                  FormInput(label: 'Barcode', controller: _barcodeController),
+                  FormInput(label: 'admin.variantsTable.columns.barcode'.tr(), controller: _barcodeController),
                   const SizedBox(height: 16),
                   if (widget.variant.skuLocked != true)
                     Align(
                       alignment: Alignment.centerLeft,
                       child: AppButton.secondary(
-                        label: 'Lock SKU',
+                        label: 'app.lock_sku'.tr(),
                         icon: LucideIcons.lock,
                         size: AppButtonSize.sm,
                         onPressed: _isLoading
@@ -209,7 +210,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                                       .lockVariantSku(widget.variant.id);
                                   if (!mounted) return;
                                   messenger.showSnackBar(
-                                    const SnackBar(content: Text('SKU locked')),
+                                    SnackBar(content: Text( 'app.sku_locked'.tr())),
                                   );
                                 } catch (e) {
                                   if (!mounted) return;
@@ -223,14 +224,13 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                       ),
                     )
                   else
-                    const Text(
-                      'SKU is locked',
+                    Text( 'app.sku_is_locked'.tr(),
                       style: TextStyle(color: Color(0xFF64748B)),
                     ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: const Text('Active'),
-                    subtitle: const Text('Visible to customers'),
+                    title: Text( 'superAdmin.tenants.status.active'.tr()),
+                    subtitle: Text( 'app.visible_to_customers'.tr()),
                     value: _isActive,
                     activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _isActive = v),
@@ -243,10 +243,10 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
               // Inventory Card
               _buildCard(
                 context,
-                title: 'Inventory',
+                title: 'admin.pages.inventory.title'.tr(),
                 children: [
                   SwitchListTile(
-                    title: const Text('Track Inventory'),
+                    title: Text( 'app.track_inventory'.tr()),
                     value: _trackInventory,
                     activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _trackInventory = v),
@@ -258,7 +258,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                       children: [
                         Expanded(
                           child: FormInput(
-                            label: 'Stock',
+                            label: 'admin.pages.products.index.table.stock'.tr(),
                             controller: _stockController,
                             keyboardType: TextInputType.number,
                             readOnly: true,
@@ -268,7 +268,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: FormInput(
-                            label: 'Safety Stock',
+                            label: 'app.safety_stock'.tr(),
                             controller: _safetyStockController,
                             keyboardType: TextInputType.number,
                           ),
@@ -277,7 +277,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                     ),
                     const SizedBox(height: 16),
                     FormInput(
-                      label: 'Reserved',
+                      label: 'admin.pages.inventory.table.reserved'.tr(),
                       controller: _reservedController,
                       readOnly: true,
                       keyboardType: TextInputType.number,
@@ -288,7 +288,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
 
               const SizedBox(height: 32),
               AppButton.primary(
-                label: 'Save Changes',
+                label: 'admin.common.saveChanges'.tr(),
                 onPressed: _save,
                 fullWidth: true,
                 loading: _isLoading,

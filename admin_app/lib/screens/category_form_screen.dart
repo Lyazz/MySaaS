@@ -13,6 +13,7 @@ import '../theme/app_theme.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/tenant_image_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   final String? categoryId;
@@ -212,11 +213,11 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildCard(
-                            title: 'Basic Information',
+                            title: 'app.basic_information'.tr(),
                             children: [
                               _buildTextField(
                                 controller: _titleController,
-                                label: 'Category Title',
+                                label: 'admin.forms.category.title.label'.tr(),
                                 hint: 'e.g., Electronics',
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
@@ -228,7 +229,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                               const SizedBox(height: 20),
                               _buildTextField(
                                 controller: _slugController,
-                                label: 'Slug',
+                                label: 'superAdmin.tenants.modal.fields.slug.slugFallback'.tr(),
                                 hint: 'e.g., electronics',
                                 onChanged: (_) {
                                   setState(() => _autoGenerateSlug = false);
@@ -249,7 +250,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                           ),
                           const SizedBox(height: 24),
                           _buildCard(
-                            title: 'Category Image',
+                            title: 'app.category_image'.tr(),
                             children: [_buildImagePicker()],
                           ),
                           const SizedBox(height: 32),
@@ -257,7 +258,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               AppButton.secondary(
-                                label: 'Cancel',
+                                label: 'admin.common.cancel'.tr(),
                                 onPressed: () => context.pop(),
                               ),
                               const SizedBox(width: 12),
@@ -383,7 +384,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
             if (hasImage) ...[
               const SizedBox(width: 12),
               AppButton.danger(
-                label: 'Remove',
+                label: 'storefront.cart.item.remove'.tr(),
                 icon: LucideIcons.trash2,
                 size: AppButtonSize.sm,
                 onPressed: () {

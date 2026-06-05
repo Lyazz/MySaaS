@@ -12,6 +12,8 @@ import '../providers/auth_provider.dart';
 import '../models/app_mode.dart';
 import '../providers/store_settings_provider.dart';
 import '../widgets/badges/status_badges.dart';
+import '../utils/tenant_currency.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -103,8 +105,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              'A quick snapshot of your store.',
+            Text( 'admin.pages.dashboard.snapshot'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 color: Theme.of(
@@ -117,7 +118,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         Row(
           children: [
             AppButton.secondary(
-              label: 'Refresh',
+              label: 'superAdmin.paymentsPage.actions.refresh'.tr(),
               icon: LucideIcons.refreshCw,
               onPressed: dashboardState.isLoading
                   ? null
@@ -135,7 +136,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             if (showFinishSetup) ...[
               const SizedBox(width: 12),
               AppButton.primary(
-                label: 'Finish setup',
+                label: 'admin.pages.onboarding.saveFinish'.tr(),
                 icon: LucideIcons.sparkles,
                 onPressed: () => context.go('/settings'),
               ),
@@ -167,8 +168,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Could not load dashboard data',
+                Text( 'app.could_not_load_dashboard_data'.tr(),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF991B1B),
@@ -202,13 +202,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final double itemWidth =
         (width - (crossAxisCount - 1) * spacing) / crossAxisCount;
 
-    final money = NumberFormat.simpleCurrency(
-      name: storeSettingsState.settings.currencyCode,
+    final money = tenantCurrencyFormatter(
+      storeSettingsState.settings,
     );
     final data = dashboardState.data;
-    final lowStockHint = data.inventory.outOfStockProducts > 0
-        ? '${data.inventory.outOfStockProducts} out of stock'
-        : null;
+
+    int trendOrdersCount = 0;
+    for (final point in data.trends) {
+      trendOrdersCount += point.ordersCount;
+    }
 
     return Wrap(
       spacing: spacing,
@@ -217,9 +219,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         SizedBox(
           width: itemWidth,
           child: AdminStatCard(
-            label: 'Orders (7 days)',
-            value: data.last7d.orders.toString(),
-            icon: LucideIcons.clipboardList,
+            label: 'admin.pages.dashboard.stats.totalRevenue'.tr(),
+            value: money.format(data.revenue.total),
+            icon: LucideIcons.wallet,
+            tone: 'brand',
+            isLoading: dashboardState.isLoading,
+            onTap: () => context.go('/sales'),
+          ),
+        ),
+        SizedBox(
+          width: itemWidth,
+          child: AdminStatCard(
+            label: 'admin.pages.dashboard.stats.ordersRevenue'.tr(),
+            value: money.format(data.revenue.orders),
+            icon: LucideIcons.shoppingBag,
             tone: 'blue',
             isLoading: dashboardState.isLoading,
             onTap: () => context.go('/orders'),
@@ -228,35 +241,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         SizedBox(
           width: itemWidth,
           child: AdminStatCard(
-            label: 'Revenue (7 days)',
-            value: money.format(data.last7d.revenue),
-            icon: LucideIcons.banknote,
-            tone: 'lime',
+            label: 'admin.pages.dashboard.stats.posRevenue'.tr(),
+            value: money.format(data.revenue.pos),
+            icon: LucideIcons.monitorSmartphone,
+            tone: 'indigo',
+            isLoading: dashboardState.isLoading,
+            onTap: () => context.go('/pos'),
+          ),
+        ),
+        SizedBox(
+          width: itemWidth,
+          child: AdminStatCard(
+            label: 'admin.pages.dashboard.stats.ordersCount'.tr(),
+            value: trendOrdersCount.toString(),
+            icon: LucideIcons.clipboardList,
+            tone: 'amber',
             isLoading: dashboardState.isLoading,
             onTap: () => context.go('/orders'),
-          ),
-        ),
-        SizedBox(
-          width: itemWidth,
-          child: AdminStatCard(
-            label: 'Products',
-            value: data.counts.products.toString(),
-            icon: LucideIcons.package,
-            tone: 'lime',
-            isLoading: dashboardState.isLoading,
-            onTap: () => context.go('/products'),
-          ),
-        ),
-        SizedBox(
-          width: itemWidth,
-          child: AdminStatCard(
-            label: 'Low stock',
-            value: data.inventory.lowStockProducts.toString(),
-            hint: lowStockHint,
-            icon: LucideIcons.alertCircle,
-            tone: 'orange',
-            isLoading: dashboardState.isLoading,
-            onTap: () => context.go('/products'),
           ),
         ),
       ],
@@ -335,15 +336,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Recent orders',
+                    Text( 'admin.pages.dashboard.recentOrders.title'.tr(),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      'Latest orders for this tenant.',
+                    Text( 'app.latest_orders_for_this_tenant'.tr(),
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(
@@ -354,7 +353,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ],
                 ),
                 AppButton.secondary(
-                  label: 'View all',
+                  label: 'superAdmin.dashboard.recentActivity.viewAll'.tr(),
                   icon: LucideIcons.arrowRight,
                   onPressed: () => context.go('/orders'),
                 ),
@@ -374,8 +373,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     StoreSettingsState storeSettingsState,
   ) {
     final recent = dashboardState.data.recentOrders;
-    final money = NumberFormat.simpleCurrency(
-      name: storeSettingsState.settings.currencyCode,
+    final money = tenantCurrencyFormatter(
+      storeSettingsState.settings,
     );
     final showStatus = MediaQuery.of(context).size.width > 700;
     final showDate = MediaQuery.of(context).size.width > 900;
@@ -416,15 +415,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           children: [
             Icon(LucideIcons.inbox, size: 40, color: Color(0xFFCBD5E1)),
             SizedBox(height: 12),
-            Text(
-              'No recent orders',
+            Text( 'app.no_recent_orders'.tr(),
               style: Theme.of(
                 context,
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 4),
-            Text(
-              'New orders will appear here.',
+            Text( 'app.new_orders_will_appear_here'.tr(),
               style: TextStyle(color: Color(0xFF64748B)),
             ),
           ],
@@ -538,7 +535,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: TableActionButton(
-                        tooltip: 'View',
+                        tooltip: 'admin.pages.billing.history.viewProof'.tr(),
                         icon: LucideIcons.eye,
                         onPressed: () => context.go('/orders/${order.id}'),
                       ),
@@ -582,12 +579,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     final rows = [
-      (status: 'PENDING', label: 'Pending', dot: const Color(0xFFF59E0B)),
-      (status: 'CONFIRMED', label: 'Confirmed', dot: const Color(0xFF3B82F6)),
-      (status: 'SHIPPED', label: 'Shipped', dot: const Color(0xFF06B6D4)),
-      (status: 'DELIVERED', label: 'Delivered', dot: const Color(0xFF22C55E)),
-      (status: 'CANCELLED', label: 'Cancelled', dot: const Color(0xFFEF4444)),
-      (status: 'RETURNED', label: 'Returned', dot: const Color(0xFFA855F7)),
+      (status: 'PENDING', label: 'admin.pages.billing.status.pending.badge'.tr(), dot: const Color(0xFFF59E0B)),
+      (status: 'CONFIRMED', label: 'admin.orderStatus.confirmed'.tr(), dot: const Color(0xFF3B82F6)),
+      (status: 'SHIPPED', label: 'admin.orderStatus.shipped'.tr(), dot: const Color(0xFF06B6D4)),
+      (status: 'DELIVERED', label: 'admin.orderStatus.delivered'.tr(), dot: const Color(0xFF22C55E)),
+      (status: 'CANCELLED', label: 'admin.pages.purchases.index.filters.statusValues.CANCELLED'.tr(), dot: const Color(0xFFEF4444)),
+      (status: 'RETURNED', label: 'admin.orderStatus.returned'.tr(), dot: const Color(0xFFA855F7)),
     ];
 
     return Container(
@@ -607,15 +604,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Order status',
+          Text( 'admin.pages.dashboard.orderStatus.title'.tr(),
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
-          Text(
-            'Quick overview by status.',
+          Text( 'app.quick_overview_by_status'.tr(),
             style: TextStyle(fontSize: 14, color: textMuted),
           ),
           const SizedBox(height: 16),
@@ -688,13 +683,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final isOffline = authState.mode == AppMode.offlineOnly;
 
     final links = [
-      (label: 'Add product', icon: LucideIcons.plus, to: '/products/create'),
-      (label: 'Manage products', icon: LucideIcons.package, to: '/products'),
-      (label: 'Categories', icon: LucideIcons.tags, to: '/categories'),
-      (label: 'Settings', icon: LucideIcons.settings, to: '/settings'),
+      (label: 'admin.pages.products.index.addProduct'.tr(), icon: LucideIcons.plus, to: '/products/create'),
+      (label: 'admin.pages.dashboard.quickLinks.manageProducts'.tr(), icon: LucideIcons.package, to: '/products'),
+      (label: 'admin.pages.categories.index.title'.tr(), icon: LucideIcons.tags, to: '/categories'),
+      (label: 'admin.tours.sidebar.steps.settings.title'.tr(), icon: LucideIcons.settings, to: '/settings'),
       if (isOffline)
         (
-          label: 'Upgrade to Online',
+          label: 'app.upgrade_to_online'.tr(),
           icon: LucideIcons.cloudLightning,
           to: '/upgrade',
         ),
@@ -728,15 +723,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Quick links',
+          Text( 'app.quick_links'.tr(),
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
-          Text(
-            'Common actions to get things done.',
+          Text( 'app.common_actions_to_get_things_d'.tr(),
             style: TextStyle(fontSize: 14, color: textMuted),
           ),
           const SizedBox(height: 16),

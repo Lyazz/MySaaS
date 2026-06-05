@@ -937,6 +937,7 @@
       "selectPlaceholder": "Select…",
       "storeFallback": "Store"
     },
+
     "actions": {
       "addToCart": "Add to cart",
       "adding": "Adding…",
@@ -1249,7 +1250,8 @@
       "emptyHint": "Try checking other categories or browse all products."
     },
     "search": {
-      "placeholder": "Search products..."
+      "placeholder": "Search products...",
+      "keywords": "Related Keywords"
     },
     "header": {
       "wishlistTitle": "Wishlist",
@@ -1979,6 +1981,7 @@
       "templates": {
         "title": "Store template",
         "subtitle": "Choose the layout that best fits your brand.",
+        "quickView": "Quick view",
         "options": {
           "classic": {
             "label": "Classic Shop",
@@ -2189,6 +2192,11 @@
           "label": "Mini description",
           "hint": "Short description for landing page header (optional)",
           "placeholder": "Enter a short summary…"
+        },
+        "searchKeywords": {
+          "label": "Search Keywords",
+          "hint": "Keywords to help customers find this product in storefront search.",
+          "placeholder": "Type and press Enter..."
         },
         "description": {
           "label": "Description",

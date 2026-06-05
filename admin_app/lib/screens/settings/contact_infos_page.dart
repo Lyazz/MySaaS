@@ -8,6 +8,7 @@ import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ContactInfosPage extends ConsumerStatefulWidget {
   const ContactInfosPage({super.key});
@@ -106,7 +107,7 @@ class _ContactInfosPageState extends ConsumerState<ContactInfosPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Contact info saved')));
+      ).showSnackBar(SnackBar(content: Text( 'app.contact_info_saved'.tr())));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -125,7 +126,7 @@ class _ContactInfosPageState extends ConsumerState<ContactInfosPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Information'),
+        title: Text( 'app.contact_information'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -147,22 +148,22 @@ class _ContactInfosPageState extends ConsumerState<ContactInfosPage> {
               const SizedBox(height: 12),
             ],
             _FieldBlock(
-              title: 'Primary Channels',
+              title: 'app.primary_channels'.tr(),
               children: [
                 FormInput(
-                  label: 'Phone',
+                  label: 'admin.pages.sales.detail.fields.customerPhone'.tr(),
                   controller: _controllers['phone']!,
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Email',
+                  label: 'admin.pages.users.fields.email'.tr(),
                   controller: _controllers['email']!,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Address',
+                  label: 'admin.pages.suppliers.index.table.address'.tr(),
                   controller: _controllers['address']!,
                   maxLines: 2,
                 ),
@@ -170,24 +171,24 @@ class _ContactInfosPageState extends ConsumerState<ContactInfosPage> {
             ),
             const SizedBox(height: 16),
             _FieldBlock(
-              title: 'Social & Messaging',
+              title: 'app.social_messaging'.tr(),
               children: [
                 FormInput(
-                  label: 'WhatsApp',
+                  label: 'admin.contactInfosForm.kinds.whatsapp.label'.tr(),
                   controller: _controllers['whatsapp']!,
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Facebook',
+                  label: 'admin.contactInfosForm.kinds.facebook.label'.tr(),
                   controller: _controllers['facebook']!,
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Instagram',
+                  label: 'admin.contactInfosForm.kinds.instagram.label'.tr(),
                   controller: _controllers['instagram']!,
                 ),
                 const SizedBox(height: 12),
-                FormInput(label: 'TikTok', controller: _controllers['tiktok']!),
+                FormInput(label: 'admin.contactInfosForm.kinds.tiktok.label'.tr(), controller: _controllers['tiktok']!),
               ],
             ),
           ],

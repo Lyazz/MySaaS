@@ -308,6 +308,44 @@ class OrderRepository {
     return null;
   }
 
+  Future<void> updateCallStatus(String id, String status) async {
+    final resolvedId = await _resolveOrderId(id);
+
+    if (await _syncService.isOnline) {
+      try {
+        await _apiService.client.patch(
+          '/admin/orders/$resolvedId',
+          data: {'callStatus': status},
+        );
+      } catch (_) {}
+    }
+
+    await _syncService.enqueueOperation(
+      entityType: 'order',
+      action: 'updateCallStatus',
+      payload: {'id': resolvedId, 'callStatus': status},
+    );
+  }
+
+  Future<void> updateInternalNotes(String id, String notes) async {
+    final resolvedId = await _resolveOrderId(id);
+
+    if (await _syncService.isOnline) {
+      try {
+        await _apiService.client.patch(
+          '/admin/orders/$resolvedId',
+          data: {'internalNotes': notes},
+        );
+      } catch (_) {}
+    }
+
+    await _syncService.enqueueOperation(
+      entityType: 'order',
+      action: 'updateInternalNotes',
+      payload: {'id': resolvedId, 'internalNotes': notes},
+    );
+  }
+
   Future<void> updateStatus(String id, String status) async {
     final db = await _dbService.database;
     final resolvedId = await _resolveOrderId(id);

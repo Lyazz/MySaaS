@@ -9,6 +9,7 @@ import '../services/database_service.dart';
 import '../services/tenant_mode_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/buttons/app_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class UpgradeScreen extends ConsumerStatefulWidget {
   const UpgradeScreen({super.key});
@@ -146,7 +147,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         : AppColors.lightTextSecondary;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Upgrade to Online Tier'), elevation: 0),
+      appBar: AppBar(title: Text( 'app.upgrade_to_online_tier'.tr()), elevation: 0),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -163,8 +164,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                     color: AppColors.blue,
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    'Create your Online Account',
+                  Text( 'app.create_your_online_account'.tr(),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -173,8 +173,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Your offline data will automatically be synced to the cloud.',
+                  Text( 'app.your_offline_data_will_automat'.tr(),
                     style: TextStyle(color: textSecondary),
                     textAlign: TextAlign.center,
                   ),
@@ -198,8 +197,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                   ],
                   TextFormField(
                     controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Store Name',
+                    decoration: InputDecoration(
+                      labelText: 'admin.pages.onboarding.storeInfo.nameLabel'.tr(),
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
@@ -207,18 +206,18 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _slugController,
-                    decoration: const InputDecoration(
-                      labelText: 'Store URL (Slug)',
+                    decoration: InputDecoration(
+                      labelText: 'app.store_url_slug'.tr(),
                       border: OutlineInputBorder(),
-                      prefixText: 'swekly.com/',
+                      prefixText: 'app.swekly_com2'.tr(),
                     ),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Admin Email',
+                    decoration: InputDecoration(
+                      labelText: 'app.admin_email'.tr(),
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.emailAddress,
@@ -227,8 +226,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _phoneController,
-                    decoration: const InputDecoration(
-                      labelText: 'Admin Phone',
+                    decoration: InputDecoration(
+                      labelText: 'app.admin_phone'.tr(),
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.phone,
@@ -237,8 +236,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
+                    decoration: InputDecoration(
+                      labelText: 'superAdmin.login.form.password.label'.tr(),
                       border: OutlineInputBorder(),
                     ),
                     obscureText: true,

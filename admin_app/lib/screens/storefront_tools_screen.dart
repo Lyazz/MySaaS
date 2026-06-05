@@ -7,6 +7,7 @@ import '../providers/store_settings_provider.dart';
 import '../providers/workspace_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/buttons/app_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class StorefrontToolsScreen extends ConsumerWidget {
   final String mode;
@@ -108,14 +109,14 @@ class StorefrontToolsScreen extends ConsumerWidget {
                   SelectableText(storefrontUrl),
                   const SizedBox(height: 20),
                   AppButton.primary(
-                    label: 'Open Web Admin Tool',
+                    label: 'app.open_web_admin_tool'.tr(),
                     onPressed: () => openUrl(adminToolUrl),
                     icon: LucideIcons.externalLink,
                     fullWidth: true,
                   ),
                   const SizedBox(height: 12),
                   AppButton.secondary(
-                    label: 'Open Storefront',
+                    label: 'app.open_storefront'.tr(),
                     onPressed: () => openUrl(storefrontUrl),
                     icon: LucideIcons.store,
                     fullWidth: true,

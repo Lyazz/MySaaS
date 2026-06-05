@@ -14,6 +14,7 @@ import '../utils/tenant_currency.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 const _wilayas = [
   ('01', 'Adrar'),
@@ -245,7 +246,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
           icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => context.pop(),
         ),
-        title: const Text('New Order'),
+        title: Text( 'admin.pages.orders.index.addBtn'.tr()),
       ),
       body: Form(
         key: _formKey,
@@ -285,16 +286,16 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
         children: [
           _buildCard(
             icon: LucideIcons.user,
-            title: 'Customer',
+            title: 'admin.pages.sales.index.table.customer'.tr(),
             child: Column(
               children: [
                 FormSelect<String>(
-                  label: 'Select existing customer (optional)',
+                  label: 'app.select_existing_customer_optio'.tr(),
                   value: _selectedCustomerId ?? '',
                   items: [
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: '',
-                      child: Text('-- New customer --'),
+                      child: Text( 'app.new_customer'.tr()),
                     ),
                     ...customers.map(
                       (c) => DropdownMenuItem(
@@ -309,7 +310,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Customer Name *',
+                  label: 'app.customer_name'.tr(),
                   controller: _customerNameCtrl,
                   enabled: _selectedCustomerId == null,
                   validator: (v) =>
@@ -318,7 +319,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Phone',
+                  label: 'admin.pages.sales.detail.fields.customerPhone'.tr(),
                   controller: _customerPhoneCtrl,
                   enabled: _selectedCustomerId == null,
                   keyboardType: TextInputType.phone,
@@ -326,47 +327,47 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildCard(
             icon: LucideIcons.truck,
-            title: 'Shipping',
+            title: 'storefront.cart.summary.shipping'.tr(),
             child: Column(
               children: [
                 FormSelect<String>(
-                  label: 'Provider',
+                  label: 'app.provider'.tr(),
                   value: _shippingProvider,
-                  items: const [
-                    DropdownMenuItem(value: '', child: Text('None')),
+                  items: [
+                    DropdownMenuItem(value: '', child: Text( 'admin.pages.products.edit.bundlesTab.tags.none'.tr())),
                     DropdownMenuItem(
                       value: 'YALIDINE',
-                      child: Text('Yalidine'),
+                      child: Text( 'app.yalidine'.tr()),
                     ),
-                    DropdownMenuItem(value: 'MAYSTRO', child: Text('Maystro')),
+                    DropdownMenuItem(value: 'MAYSTRO', child: Text( 'app.maystro'.tr())),
                     DropdownMenuItem(
                       value: 'SELF',
-                      child: Text('Self delivery'),
+                      child: Text( 'storefront.checkout.delivery.provider.self'.tr()),
                     ),
                   ],
                   onChanged: (v) => setState(() => _shippingProvider = v ?? ''),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 FormSelect<String>(
-                  label: 'Delivery mode',
+                  label: 'admin.pages.orders.create.deliveryMode'.tr(),
                   value: _deliveryMode,
-                  items: const [
-                    DropdownMenuItem(value: 'home', child: Text('Home')),
-                    DropdownMenuItem(value: 'pickup', child: Text('Stop desk')),
+                  items: [
+                    DropdownMenuItem(value: 'home', child: Text( 'admin.pages.delivery.pricing.modes.home'.tr())),
+                    DropdownMenuItem(value: 'pickup', child: Text( 'app.stop_desk'.tr())),
                   ],
                   onChanged: (v) => setState(() => _deliveryMode = v ?? 'home'),
                 ),
                 const SizedBox(height: 12),
                 FormSelect<String>(
-                  label: 'Wilaya',
+                  label: 'admin.pages.orders.create.wilaya'.tr(),
                   value: _selectedWilaya,
                   items: [
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: '',
-                      child: Text('-- Select --'),
+                      child: Text( 'app.select'.tr()),
                     ),
                     ..._wilayas.map(
                       (w) => DropdownMenuItem(
@@ -378,9 +379,9 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   onChanged: (v) => setState(() => _selectedWilaya = v ?? ''),
                 ),
                 const SizedBox(height: 12),
-                FormInput(label: 'Address', controller: _addressCtrl),
+                FormInput(label: 'admin.pages.suppliers.index.table.address'.tr(), controller: _addressCtrl),
                 const SizedBox(height: 12),
-                FormInput(label: 'Notes', controller: _notesCtrl, maxLines: 2),
+                FormInput(label: 'superAdmin.paymentsPage.import.fields.notes'.tr(), controller: _notesCtrl, maxLines: 2),
               ],
             ),
           ),
@@ -399,8 +400,8 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
         children: [
           TextField(
             controller: _productSearchCtrl,
-            decoration: const InputDecoration(
-              hintText: 'Search products...',
+            decoration: InputDecoration(
+              hintText: 'admin.pages.pos.catalog.searchPlaceholder'.tr(),
               prefixIcon: Icon(LucideIcons.search, size: 18),
               border: OutlineInputBorder(),
               isDense: true,
@@ -447,7 +448,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
     );
 
     final cartList = _cart.isEmpty
-        ? const Padding(
+        ? Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Center(
               child: Column(
@@ -459,8 +460,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                     color: Color(0xFF94A3B8),
                   ),
                   SizedBox(height: 8),
-                  Text(
-                    'Cart is empty',
+                  Text( 'admin.pages.orders.create.emptyCart'.tr(),
                     style: TextStyle(color: Color(0xFF94A3B8)),
                   ),
                 ],
@@ -558,8 +558,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Total',
+              Text( 'admin.pages.sales.detail.itemsTable.total'.tr(),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(

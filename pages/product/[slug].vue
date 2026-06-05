@@ -16,6 +16,7 @@ type Product = {
   slug: string
   description?: string | null
   miniDescription?: string | null
+  searchKeywords?: string | null
   price: string | number
   stock: number
   isActive: boolean
@@ -59,7 +60,8 @@ const normalizedProduct = computed<Product | null>(() => {
       normalizeMiniDescription(rawMiniDescription) ??
       (typeof rawMiniDescription === 'string' && rawMiniDescription.trim().length > 0
         ? rawMiniDescription.trim()
-        : null)
+        : null),
+    searchKeywords: (product.value as any).searchKeywords
   }
 })
 
@@ -199,5 +201,18 @@ onUnmounted(() => {
         :product="normalizedProduct"
         :related-products="relatedProducts"
     />
+    <div v-if="normalizedProduct?.searchKeywords" class="mx-auto max-w-6xl px-4 py-8 border-t border-gray-200 mt-8">
+      <h3 class="text-sm font-semibold text-gray-900 mb-4">{{ $t('storefront.search.keywords') || 'Related Keywords' }}</h3>
+      <div class="flex flex-wrap gap-2">
+        <NuxtLink
+          v-for="keyword in normalizedProduct.searchKeywords.split(',').map(k => k.trim()).filter(k => k)"
+          :key="keyword"
+          :to="`/products?q=${encodeURIComponent(keyword)}`"
+          class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 hover:bg-gray-200"
+        >
+          {{ keyword }}
+        </NuxtLink>
+      </div>
+    </div>
   </NuxtLayout>
 </template>

@@ -21,7 +21,14 @@ const categoryDisplayTitle = (category: any): string => {
 const filters = computed(() => ({ categories: categoryData.value || [] }))
 
 const selectedCategories = ref<string[]>([])
-const searchQuery = ref('')
+const route = useRoute()
+const searchQuery = ref((route.query.q as string) || '')
+
+watch(() => route.query.q, (newQ) => {
+    if (newQ !== undefined) {
+        searchQuery.value = newQ as string
+    }
+})
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const minPriceInput = ref<number | null>(null)
 const maxPriceInput = ref<number | null>(null)
@@ -48,7 +55,7 @@ const filteredProducts = computed(() => {
   }
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
-    result = result.filter(p => p.title.toLowerCase().includes(q))
+    result = result.filter(p => p.title.toLowerCase().includes(q) || (p.searchKeywords && p.searchKeywords.toLowerCase().includes(q)))
   }
   result = result.filter(p => {
     const price = Number(p.price)

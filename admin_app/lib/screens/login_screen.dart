@@ -9,6 +9,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/workspace_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -133,8 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           onPressed: () => context.go('/activate?mode=offline'),
           backgroundColor: palette.glassBackground,
           icon: Icon(LucideIcons.wifiOff, color: palette.primaryText, size: 18),
-          label: Text(
-            'Offline Activation',
+          label: Text( 'app.offline_activation'.tr(),
             style: GoogleFonts.dmSans(
               color: palette.primaryText,
               fontWeight: FontWeight.w600,
@@ -170,15 +170,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 const TextSpan(text: 'Welcome back,\n'),
                 TextSpan(
-                  text: 'Builder.',
+                  text: 'app.builder'.tr(),
                   style: TextStyle(color: palette.brand),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Your dashboard is ready. Continue managing orders, products, delivery, and analytics from one place.',
+          Text( 'app.your_dashboard_is_ready_contin'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 16,
               color: palette.secondaryText,
@@ -214,8 +213,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Revenue Tracking',
+                        Text( 'auth.login.hero.carousel.revenue.title'.tr(),
                           style: GoogleFonts.dmSans(
                             color: palette.primaryText,
                             fontWeight: FontWeight.w600,
@@ -223,8 +221,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          'Real-time insights into store performance.',
+                        Text( 'app.real_time_insights_into_store'.tr(),
                           style: GoogleFonts.dmSans(
                             color: palette.secondaryText,
                             fontSize: 13,
@@ -240,8 +237,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           const Spacer(),
           _AnimatedChartBars(palette: palette),
           const SizedBox(height: 18),
-          Text(
-            '© 2026 Swekly Inc.',
+          Text( 'app.2026_swekly_inc'.tr(),
             style: GoogleFonts.dmSans(
               color: palette.secondaryText,
               fontSize: 12,
@@ -281,8 +277,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 22),
-                Text(
-                  'Log in to your account',
+                Text( 'auth.login.form.title'.tr(),
                   style: GoogleFonts.outfit(
                     fontSize: 34,
                     fontWeight: FontWeight.w700,
@@ -300,7 +295,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: _buildSocialButton(
                         palette,
                         icon: LucideIcons.chrome,
-                        label: 'Google',
+                        label: 'app.google'.tr(),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -308,7 +303,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: _buildSocialButton(
                         palette,
                         icon: LucideIcons.facebook,
-                        label: 'Facebook',
+                        label: 'admin.contactInfosForm.kinds.facebook.label'.tr(),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -316,7 +311,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: _buildSocialButton(
                         palette,
                         icon: LucideIcons.apple,
-                        label: 'Apple',
+                        label: 'app.apple'.tr(),
                       ),
                     ),
                   ],
@@ -327,8 +322,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Expanded(child: Divider(color: palette.cardBorder)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        'OR CONTINUE WITH',
+                      child: Text( 'auth.register.social.divider'.tr(),
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -343,7 +337,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 18),
                 _buildInput(
                   palette,
-                  label: 'Email Address',
+                  label: 'superAdmin.login.form.email.label'.tr(),
                   hint: 'name@company.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -357,7 +351,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 14),
                 _buildInput(
                   palette,
-                  label: 'Password',
+                  label: 'superAdmin.login.form.password.label'.tr(),
                   hint: '••••••••',
                   controller: _passwordController,
                   obscureText: true,
@@ -425,8 +419,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     InkWell(
                       onTap: () => context.go('/register'),
-                      child: Text(
-                        'Start for free',
+                      child: Text( 'auth.login.form.startFree'.tr(),
                         style: GoogleFonts.dmSans(
                           color: palette.brand,
                           fontSize: 14,
@@ -492,8 +485,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
         const SizedBox(width: 10),
-        Text(
-          'Swekly',
+        Text( 'app.swekly'.tr(),
           style: GoogleFonts.dmSans(
             color: palette.primaryText,
             fontSize: 18,

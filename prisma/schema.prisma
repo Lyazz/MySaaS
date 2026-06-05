@@ -462,6 +462,7 @@ model Product {
   slug              String
   description       String?
   miniDescription   String?
+  searchKeywords    String?
   price             Decimal @default(0)
   stock             Int     @default(0)
   lowStockThreshold Int     @default(5)

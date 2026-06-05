@@ -101,6 +101,124 @@ class AdminDashboardInventory {
   );
 }
 
+class AdminDashboardRevenue {
+  final double total;
+  final double orders;
+  final double pos;
+
+  const AdminDashboardRevenue({
+    required this.total,
+    required this.orders,
+    required this.pos,
+  });
+
+  factory AdminDashboardRevenue.fromJson(Map<String, dynamic> json) {
+    double asDouble(dynamic value) => double.tryParse(value?.toString() ?? '') ?? 0.0;
+    return AdminDashboardRevenue(
+      total: asDouble(json['total']),
+      orders: asDouble(json['orders']),
+      pos: asDouble(json['pos']),
+    );
+  }
+
+  static const empty = AdminDashboardRevenue(total: 0, orders: 0, pos: 0);
+}
+
+class AdminDashboardTrend {
+  final String date;
+  final int ordersCount;
+  final double ordersRevenue;
+  final double posRevenue;
+  final double totalRevenue;
+
+  const AdminDashboardTrend({
+    required this.date,
+    required this.ordersCount,
+    required this.ordersRevenue,
+    required this.posRevenue,
+    required this.totalRevenue,
+  });
+
+  factory AdminDashboardTrend.fromJson(Map<String, dynamic> json) {
+    return AdminDashboardTrend(
+      date: json['date']?.toString() ?? '',
+      ordersCount: int.tryParse(json['ordersCount']?.toString() ?? '') ?? 0,
+      ordersRevenue: double.tryParse(json['ordersRevenue']?.toString() ?? '') ?? 0.0,
+      posRevenue: double.tryParse(json['posRevenue']?.toString() ?? '') ?? 0.0,
+      totalRevenue: double.tryParse(json['totalRevenue']?.toString() ?? '') ?? 0.0,
+    );
+  }
+}
+
+class AdminDashboardTopProduct {
+  final String productId;
+  final String title;
+  final int quantity;
+  final double revenue;
+
+  const AdminDashboardTopProduct({
+    required this.productId,
+    required this.title,
+    required this.quantity,
+    required this.revenue,
+  });
+
+  factory AdminDashboardTopProduct.fromJson(Map<String, dynamic> json) {
+    return AdminDashboardTopProduct(
+      productId: json['productId']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      quantity: int.tryParse(json['quantity']?.toString() ?? '') ?? 0,
+      revenue: double.tryParse(json['revenue']?.toString() ?? '') ?? 0.0,
+    );
+  }
+}
+
+class AdminDashboardTopCategory {
+  final String categoryId;
+  final String title;
+  final int quantity;
+  final double revenue;
+
+  const AdminDashboardTopCategory({
+    required this.categoryId,
+    required this.title,
+    required this.quantity,
+    required this.revenue,
+  });
+
+  factory AdminDashboardTopCategory.fromJson(Map<String, dynamic> json) {
+    return AdminDashboardTopCategory(
+      categoryId: json['categoryId']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      quantity: int.tryParse(json['quantity']?.toString() ?? '') ?? 0,
+      revenue: double.tryParse(json['revenue']?.toString() ?? '') ?? 0.0,
+    );
+  }
+}
+
+class AdminDashboardCriticalStock {
+  final String productId;
+  final String title;
+  final int stock;
+  final int lowStockThreshold;
+
+  const AdminDashboardCriticalStock({
+    required this.productId,
+    required this.title,
+    required this.stock,
+    required this.lowStockThreshold,
+  });
+
+  factory AdminDashboardCriticalStock.fromJson(Map<String, dynamic> json) {
+    return AdminDashboardCriticalStock(
+      productId: json['productId']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      stock: int.tryParse(json['stock']?.toString() ?? '') ?? 0,
+      lowStockThreshold: int.tryParse(json['lowStockThreshold']?.toString() ?? '') ?? 0,
+    );
+  }
+}
+
 class AdminDashboardRecentOrder {
   final String id;
   final String status;
@@ -141,21 +259,32 @@ class AdminDashboardData {
   final AdminDashboardCounts counts;
   final AdminDashboardLast7d last7d;
   final AdminDashboardInventory inventory;
+  final AdminDashboardRevenue revenue;
   final Map<String, int> ordersByStatus;
   final List<AdminDashboardRecentOrder> recentOrders;
+  final List<AdminDashboardTrend> trends;
+  final List<AdminDashboardTopProduct> topProducts;
+  final List<AdminDashboardTopCategory> topCategories;
+  final List<AdminDashboardCriticalStock> criticalStock;
 
   const AdminDashboardData({
     required this.counts,
     required this.last7d,
     required this.inventory,
+    required this.revenue,
     required this.ordersByStatus,
     required this.recentOrders,
+    required this.trends,
+    required this.topProducts,
+    required this.topCategories,
+    required this.criticalStock,
   });
 
   factory AdminDashboardData.fromJson(Map<String, dynamic> json) {
     final countsRaw = _asStringMap(json['counts']);
     final last7dRaw = _asStringMap(json['last7d']);
     final inventoryRaw = _asStringMap(json['inventory']);
+    final revenueRaw = _asStringMap(json['revenue']);
 
     final ordersByStatusRaw = _asStringMap(json['ordersByStatus']);
     final ordersByStatus = <String, int>{};
@@ -170,12 +299,37 @@ class AdminDashboardData {
         .map((e) => AdminDashboardRecentOrder.fromJson(_asStringMap(e)))
         .toList();
 
+    final trends = _asList(json['trends'])
+        .whereType<Map>()
+        .map((e) => AdminDashboardTrend.fromJson(_asStringMap(e)))
+        .toList();
+
+    final topProducts = _asList(json['topProducts'])
+        .whereType<Map>()
+        .map((e) => AdminDashboardTopProduct.fromJson(_asStringMap(e)))
+        .toList();
+
+    final topCategories = _asList(json['topCategories'])
+        .whereType<Map>()
+        .map((e) => AdminDashboardTopCategory.fromJson(_asStringMap(e)))
+        .toList();
+
+    final criticalStock = _asList(json['criticalStock'])
+        .whereType<Map>()
+        .map((e) => AdminDashboardCriticalStock.fromJson(_asStringMap(e)))
+        .toList();
+
     return AdminDashboardData(
       counts: AdminDashboardCounts.fromJson(countsRaw),
       last7d: AdminDashboardLast7d.fromJson(last7dRaw),
       inventory: AdminDashboardInventory.fromJson(inventoryRaw),
+      revenue: AdminDashboardRevenue.fromJson(revenueRaw),
       ordersByStatus: ordersByStatus,
       recentOrders: recentOrders,
+      trends: trends,
+      topProducts: topProducts,
+      topCategories: topCategories,
+      criticalStock: criticalStock,
     );
   }
 
@@ -183,7 +337,12 @@ class AdminDashboardData {
     counts: AdminDashboardCounts.empty,
     last7d: AdminDashboardLast7d.empty,
     inventory: AdminDashboardInventory.empty,
+    revenue: AdminDashboardRevenue.empty,
     ordersByStatus: {},
     recentOrders: [],
+    trends: [],
+    topProducts: [],
+    topCategories: [],
+    criticalStock: [],
   );
 }

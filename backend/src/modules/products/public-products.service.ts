@@ -72,7 +72,8 @@ export class PublicProductsService {
         if (search) {
             where.OR = [
                 { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } }
+                { description: { contains: search, mode: 'insensitive' } },
+                { searchKeywords: { contains: search, mode: 'insensitive' } }
             ]
         }
 

@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class _ChecklistItem {
   final String id;
@@ -92,7 +93,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         : AppColors.lightTextTertiary;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup Checklist')),
+      appBar: AppBar(title: Text( 'app.setup_checklist'.tr())),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -102,7 +103,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   Text('Failed to load: $_error'),
                   const SizedBox(height: 12),
-                  ElevatedButton(onPressed: _load, child: const Text('Retry')),
+                  ElevatedButton(onPressed: _load, child: Text( 'app.retry'.tr())),
                 ],
               ),
             )
@@ -114,8 +115,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   if (total > 0) ...[
                     Row(
                       children: [
-                        const Text(
-                          'Progress: ',
+                        Text( 'app.progress'.tr(),
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                         Text('$done / $total steps completed'),

@@ -85,8 +85,7 @@ class _ResponsivePaginatedTableState<T>
           Center(
             child: Padding(
               padding: EdgeInsets.all(48.0),
-              child: Text(
-                'admin.common.noDataAvailable'.tr(),
+              child: Text( 'app.admin_common_nodataavailable'.tr().tr(),
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -304,7 +303,7 @@ class _ResponsivePaginatedTableState<T>
               SizedBox(
                 width: 96,
                 child: FormSelect<int>(
-                  label: 'admin.common.rowsPerPage'.tr(),
+                  label: 'app.admin_common_rowsperpage'.tr().tr(),
                   showLabel: false,
                   value: _rowsPerPage,
                   icon: const Icon(LucideIcons.chevronDown, size: 14),

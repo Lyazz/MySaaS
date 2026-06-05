@@ -8,6 +8,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -306,16 +307,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 const TextSpan(text: 'Start your\n'),
                 TextSpan(
-                  text: 'e-commerce empire',
+                  text: 'app.e_commerce_empire'.tr(),
                   style: TextStyle(color: palette.brand),
                 ),
-                const TextSpan(text: ' today.'),
+                TextSpan(text: 'auth.register.hero.today'.tr()),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Create your tenant, configure your operations, and go live with COD-ready workflows built for Algeria.',
+          Text( 'app.create_your_tenant_configure_y'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 16,
               color: palette.secondaryText,
@@ -343,8 +343,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ],
           ),
           const Spacer(),
-          Text(
-            'Everything you need for product catalog, orders, shipping, and team access in one platform.',
+          Text( 'app.everything_you_need_for_produc'.tr(),
             style: GoogleFonts.dmSans(
               color: palette.secondaryText,
               fontSize: 13,
@@ -383,8 +382,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ],
               ),
               const SizedBox(height: 22),
-              Text(
-                'Create your account',
+              Text( 'auth.register.form.title'.tr(),
                 style: GoogleFonts.outfit(
                   fontSize: 34,
                   fontWeight: FontWeight.w700,
@@ -394,8 +392,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 textAlign: isDesktop ? TextAlign.left : TextAlign.center,
               ),
               const SizedBox(height: 8),
-              Text(
-                'Set up your tenant and start selling today.',
+              Text( 'app.set_up_your_tenant_and_start_s'.tr(),
                 style: GoogleFonts.dmSans(
                   fontSize: 15,
                   color: palette.secondaryText,
@@ -413,7 +410,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     children: [
                       _buildInput(
                         palette,
-                        label: 'Company Name',
+                        label: 'auth.register.form.companyName.label'.tr(),
                         hint: 'Your company name',
                         controller: _nameController,
                         validator: (value) {
@@ -428,7 +425,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 14),
                       _buildInput(
                         palette,
-                        label: 'Email Address',
+                        label: 'superAdmin.login.form.email.label'.tr(),
                         hint: 'name@company.com',
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -444,7 +441,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 14),
                       _buildInput(
                         palette,
-                        label: 'Phone Number',
+                        label: 'admin.forms.supplier.phone.placeholder'.tr(),
                         hint: '05XXXXXXXX',
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
@@ -462,7 +459,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 14),
                       _buildInput(
                         palette,
-                        label: 'Password',
+                        label: 'superAdmin.login.form.password.label'.tr(),
                         hint: '••••••••',
                         controller: _passwordController,
                         obscureText: true,
@@ -478,7 +475,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 14),
                       _buildInput(
                         palette,
-                        label: 'Confirm Password',
+                        label: 'admin.pages.users.fields.confirmPassword'.tr(),
                         hint: '••••••••',
                         controller: _confirmPasswordController,
                         obscureText: true,
@@ -548,8 +545,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         alignment: WrapAlignment.center,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Text(
-                            'Already have an account? ',
+                          Text( 'auth.register.form.haveAccount'.tr(),
                             style: GoogleFonts.dmSans(
                               color: palette.secondaryText,
                               fontSize: 14,
@@ -557,8 +553,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                           InkWell(
                             onTap: () => context.go('/login'),
-                            child: Text(
-                              'Log in',
+                            child: Text( 'auth.register.form.logIn'.tr(),
                               style: GoogleFonts.dmSans(
                                 color: palette.brand,
                                 fontSize: 14,
@@ -608,8 +603,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  'Account created successfully',
+                child: Text( 'app.account_created_successfully'.tr(),
                   style: GoogleFonts.dmSans(
                     color: palette.primaryText,
                     fontSize: 20,
@@ -631,7 +625,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           const SizedBox(height: 14),
           _buildSubmitButton(
             palette,
-            label: 'Go to dashboard',
+            label: 'admin.pages.onboarding.done.ctaDashboard'.tr(),
             icon: LucideIcons.arrowRight,
             loading: false,
             enabled: true,
@@ -646,8 +640,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Store URL',
+        Text( 'auth.register.form.slug.label'.tr(),
           style: GoogleFonts.dmSans(
             color: palette.secondaryText,
             fontSize: 12,
@@ -678,7 +671,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'my-store',
+                    hintText: 'admin.appearanceSettingsForm.identity.slug.placeholder'.tr(),
                     hintStyle: GoogleFonts.dmSans(
                       color: palette.mutedText,
                       fontSize: 14,
@@ -704,8 +697,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 decoration: BoxDecoration(
                   border: Border(left: BorderSide(color: palette.inputBorder)),
                 ),
-                child: Text(
-                  '.swekly.com',
+                child: Text( 'app.swekly_com'.tr(),
                   style: GoogleFonts.dmSans(
                     color: palette.secondaryText,
                     fontSize: 12,
@@ -736,8 +728,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'OTP Verification',
+        Text( 'app.otp_verification'.tr(),
           style: GoogleFonts.dmSans(
             color: palette.secondaryText,
             fontSize: 12,
@@ -758,7 +749,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   fontWeight: FontWeight.w500,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Enter OTP code',
+                  hintText: 'auth.register.form.otp.placeholder'.tr(),
                   hintStyle: GoogleFonts.dmSans(
                     color: palette.mutedText,
                     fontSize: 14,
@@ -788,14 +779,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             _buildSmallActionButton(
               palette,
               key: const Key('register-send-otp'),
-              label: 'Send',
+              label: 'app.send'.tr(),
               onTap: _sendOtpPlaceholder,
             ),
             const SizedBox(width: 6),
             _buildSmallActionButton(
               palette,
               key: const Key('register-verify-otp'),
-              label: 'Verify',
+              label: 'app.verify'.tr(),
               onTap: _otpSent ? _verifyOtpPlaceholder : null,
             ),
           ],
@@ -909,8 +900,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
         const SizedBox(width: 10),
-        Text(
-          'Swekly',
+        Text( 'app.swekly'.tr(),
           style: GoogleFonts.dmSans(
             color: palette.primaryText,
             fontSize: 18,

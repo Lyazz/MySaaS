@@ -14,6 +14,7 @@ import '../services/activation_service.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
 import '../widgets/buttons/app_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ActivationScreen extends ConsumerStatefulWidget {
   const ActivationScreen({super.key, this.offlineOnly = false});
@@ -115,12 +116,11 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
         builder: (dialogContext) {
           final offlineController = TextEditingController();
           return AlertDialog(
-            title: const Text('Offline Activation'),
+            title: Text( 'app.offline_activation'.tr()),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Generate this Request Code on the device, then in the tenant admin panel open Devices > Offline Activation and paste it there to receive a signed activation code.',
+                Text( 'app.generate_this_request_code_on'.tr(),
                 ),
                 const SizedBox(height: 8),
                 SelectableText(
@@ -130,8 +130,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: offlineController,
-                  decoration: const InputDecoration(
-                    labelText: 'Paste signed activation code here',
+                  decoration: InputDecoration(
+                    labelText: 'app.paste_signed_activation_code_h'.tr(),
                   ),
                 ),
               ],
@@ -139,7 +139,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
+                child: Text( 'admin.common.cancel'.tr()),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -159,7 +159,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                     ).showSnackBar(SnackBar(content: Text(e.toString())));
                   }
                 },
-                child: const Text('Verify'),
+                child: Text( 'app.verify'.tr()),
               ),
             ],
           );
@@ -262,8 +262,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Trusted activation',
+                                Text( 'app.trusted_activation'.tr(),
                                   style: GoogleFonts.dmSans(
                                     color: palette.primaryText,
                                     fontWeight: FontWeight.w600,
@@ -293,9 +292,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                               height: 1.45,
                             ),
                             decoration: InputDecoration(
-                              labelText: 'Activation key',
-                              hintText:
-                                  'Paste the tenant-issued key for online activation',
+                              labelText: 'app.activation_key'.tr(),
+                              hintText: 'app.paste_the_tenant_issued_key_fo'.tr(),
                               errorText: _error,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(18),
@@ -319,7 +317,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: AppButton.secondary(
-                                  label: 'Offline Activation',
+                                  label: 'app.offline_activation'.tr(),
                                   onPressed: _showOfflineActivationDialog,
                                   icon: LucideIcons.wifiOff,
                                   fullWidth: true,
@@ -329,7 +327,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                           ),
                         ] else ...[
                           AppButton.primary(
-                            label: 'Start Offline Activation',
+                            label: 'app.start_offline_activation'.tr(),
                             onPressed: _showOfflineActivationDialog,
                             icon: LucideIcons.wifiOff,
                             fullWidth: true,

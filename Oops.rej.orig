@@ -1,0 +1,48 @@
+@@ -15,6 +17,47 @@
+ import '../widgets/form/form_select.dart';
+ import '../widgets/buttons/app_button.dart';
+ import 'package:easy_localization/easy_localization.dart';
+ 
++class DashedDivider extends StatelessWidget {
++  final Color color;
++  const DashedDivider({super.key, required this.color});
++
++  @override
++  Widget build(BuildContext context) {
++    return SizedBox(
++      height: 1,
++      width: double.infinity,
++      child: CustomPaint(painter: _DashedLinePainter(color: color)),
++    );
++  }
++}
++
++class _DashedLinePainter extends CustomPainter {
++  final Color color;
++
++  _DashedLinePainter({required this.color});
++
++  @override
++  void paint(Canvas canvas, Size size) {
++    var paint = Paint()
++      ..color = color
++      ..strokeWidth = 1
++      ..style = PaintingStyle.stroke;
++
++    var max = size.width;
++    var dashWidth = 4.0;
++    var dashSpace = 4.0;
++    double startY = 0;
++
++    while (startY < max) {
++      canvas.drawLine(Offset(startY, 0), Offset(startY + dashWidth, 0), paint);
++      startY += dashWidth + dashSpace;
++    }
++  }
++
++  @override
++  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
++}
++
+ class OrderDetailScreen extends ConsumerStatefulWidget {
+   final String orderId;

@@ -4,13 +4,14 @@ import '../models/cash.dart';
 import '../models/contact_info.dart';
 import '../models/delivery_provider.dart';
 import '../models/store_settings.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SyncConflictPolicy {
   final String entityType;
   final String action;
   final String description;
 
-  const SyncConflictPolicy({
+  SyncConflictPolicy({
     required this.entityType,
     required this.action,
     required this.description,
@@ -18,42 +19,36 @@ class SyncConflictPolicy {
 }
 
 class SyncConflictPolicies {
-  static const definitions = <SyncConflictPolicy>[
+  static final definitions = <SyncConflictPolicy>[
     SyncConflictPolicy(
       entityType: 'order',
       action: 'updateStatus',
-      description:
-          'Block sync if the remote order status changed since the local edit.',
+      description: 'app.block_sync_if_the_remote_order'.tr(),
     ),
     SyncConflictPolicy(
       entityType: 'storeSettings',
       action: 'patch',
-      description:
-          'Block sync if remote store settings diverged from the local baseline snapshot.',
+      description: 'app.block_sync_if_remote_store_set'.tr(),
     ),
     SyncConflictPolicy(
       entityType: 'contactInfo',
       action: 'update',
-      description:
-          'Block sync if the remote contact info changed or was deleted since the local edit.',
+      description: 'app.block_sync_if_the_remote_conta'.tr(),
     ),
     SyncConflictPolicy(
       entityType: 'contactInfo',
       action: 'delete',
-      description:
-          'Block sync if the remote contact info changed before the local delete is replayed.',
+      description: 'app.block_sync_if_the_remote_conta2'.tr(),
     ),
     SyncConflictPolicy(
       entityType: 'cashbox',
       action: 'update',
-      description:
-          'Block sync if remote cashbox metadata diverged from the local baseline snapshot.',
+      description: 'app.block_sync_if_remote_cashbox_m'.tr(),
     ),
     SyncConflictPolicy(
       entityType: 'deliveryProvider',
       action: 'update',
-      description:
-          'Block sync if remote delivery provider activation changed since the local edit.',
+      description: 'app.block_sync_if_remote_delivery'.tr(),
     ),
   ];
 

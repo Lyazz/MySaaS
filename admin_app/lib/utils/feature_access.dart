@@ -1,4 +1,5 @@
 import '../models/subscription_tier.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 enum OnlineTierFeature {
   billing,
@@ -17,7 +18,7 @@ class FeatureAccessInfo {
   final String title;
   final String description;
 
-  const FeatureAccessInfo({
+  FeatureAccessInfo({
     required this.feature,
     required this.title,
     required this.description,
@@ -25,60 +26,51 @@ class FeatureAccessInfo {
 }
 
 class FeatureAccess {
-  static const _featureInfo = <OnlineTierFeature, FeatureAccessInfo>{
+  static final _featureInfo = <OnlineTierFeature, FeatureAccessInfo>{
     OnlineTierFeature.billing: FeatureAccessInfo(
       feature: OnlineTierFeature.billing,
-      title: 'Billing & Subscription',
-      description:
-          'Billing and subscription management are available on online tiers only.',
+      title: 'app.billing_subscription'.tr(),
+      description: 'app.billing_and_subscription_manag'.tr(),
     ),
     OnlineTierFeature.integrations: FeatureAccessInfo(
       feature: OnlineTierFeature.integrations,
-      title: 'Cloud Integrations',
-      description:
-          'Cloud integrations require an online tier with remote services enabled.',
+      title: 'app.cloud_integrations'.tr(),
+      description: 'app.cloud_integrations_require_an'.tr(),
     ),
     OnlineTierFeature.domains: FeatureAccessInfo(
       feature: OnlineTierFeature.domains,
-      title: 'Custom Domains',
-      description:
-          'Custom domains depend on the hosted storefront and require an online tier.',
+      title: 'app.custom_domains'.tr(),
+      description: 'app.custom_domains_depend_on_the_h'.tr(),
     ),
     OnlineTierFeature.appearance: FeatureAccessInfo(
       feature: OnlineTierFeature.appearance,
-      title: 'Storefront Appearance',
-      description:
-          'Storefront appearance controls apply to the hosted storefront and require an online tier.',
+      title: 'app.storefront_appearance'.tr(),
+      description: 'app.storefront_appearance_controls'.tr(),
     ),
     OnlineTierFeature.homepage: FeatureAccessInfo(
       feature: OnlineTierFeature.homepage,
-      title: 'Homepage Settings',
-      description:
-          'Homepage sections and carousel settings are storefront-managed and require an online tier.',
+      title: 'admin.pages.settings.homepage.title'.tr(),
+      description: 'app.homepage_sections_and_carousel'.tr(),
     ),
     OnlineTierFeature.legal: FeatureAccessInfo(
       feature: OnlineTierFeature.legal,
-      title: 'Legal Pages',
-      description:
-          'Public legal pages belong to the hosted storefront and require an online tier.',
+      title: 'admin.settingsHub.links.legal'.tr(),
+      description: 'app.public_legal_pages_belong_to_t'.tr(),
     ),
     OnlineTierFeature.preview: FeatureAccessInfo(
       feature: OnlineTierFeature.preview,
-      title: 'Storefront Preview',
-      description:
-          'Previewing the hosted storefront requires an online tier storefront.',
+      title: 'app.storefront_preview'.tr(),
+      description: 'app.previewing_the_hosted_storefro'.tr(),
     ),
     OnlineTierFeature.builder: FeatureAccessInfo(
       feature: OnlineTierFeature.builder,
-      title: 'Template Builder',
-      description:
-          'The template builder is part of hosted storefront management and requires an online tier.',
+      title: 'app.template_builder'.tr(),
+      description: 'app.the_template_builder_is_part_o'.tr(),
     ),
     OnlineTierFeature.landingBuilder: FeatureAccessInfo(
       feature: OnlineTierFeature.landingBuilder,
-      title: 'Landing Page Builder',
-      description:
-          'The landing page builder is available on online tiers only.',
+      title: 'app.landing_page_builder'.tr(),
+      description: 'app.the_landing_page_builder_is_av'.tr(),
     ),
   };
 

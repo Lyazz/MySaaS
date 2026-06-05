@@ -25,7 +25,14 @@ const filters = computed(() => ({
 }))
 
 const selectedCategories = ref<string[]>([])
-const searchQuery = ref('')
+const route = useRoute()
+const searchQuery = ref((route.query.q as string) || '')
+
+watch(() => route.query.q, (newQ) => {
+    if (newQ !== undefined) {
+        searchQuery.value = newQ as string
+    }
+})
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
@@ -58,7 +65,7 @@ const filteredProducts = computed(() => {
     }
     if (searchQuery.value) {
         const q = searchQuery.value.toLowerCase()
-        result = result.filter(p => p.title.toLowerCase().includes(q))
+        result = result.filter(p => p.title.toLowerCase().includes(q) || (p.searchKeywords && p.searchKeywords.toLowerCase().includes(q)))
     }
     result = result.filter(p => {
         const price = Number(p.price)
