@@ -178,7 +178,7 @@ async function handleAddToCart() {
         {{ product.description || storefrontContent.product.descriptionFallback }}
       </p>
 
-      <div class="mt-3 flex items-end justify-between gap-3 pt-3 border-t border-white/[0.06]">
+      <div class="mt-3 flex flex-wrap items-end justify-between gap-3 pt-3 border-t border-white/[0.06]">
         <div>
           <div class="flex items-baseline gap-2">
             <span class="text-xl font-black text-white tracking-[-0.02em]">{{ formatAmount(displayPrice) }}</span>
@@ -190,7 +190,7 @@ async function handleAddToCart() {
         <button
           v-if="storeSettings?.cartEnabled !== false"
           :disabled="isOutOfStock || !product.isActive"
-          class="inline-flex h-9 items-center gap-1.5 bg-brand-500 text-[#02060a] px-3 text-[10px] font-black uppercase tracking-[0.18em] hover:bg-white transition-colors disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed [clip-path:polygon(10%_0,100%_0,90%_100%,0_100%)]"
+          class="inline-flex h-9 flex-shrink-0 whitespace-nowrap items-center gap-1.5 bg-brand-500 text-[#02060a] px-3 text-[10px] font-black uppercase tracking-[0.18em] hover:bg-white transition-colors disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed [clip-path:polygon(10%_0,100%_0,90%_100%,0_100%)]"
           @click.prevent="handleAddToCart"
         >
           <Icon name="lucide:plus" class="w-3.5 h-3.5" />
