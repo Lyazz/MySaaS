@@ -9,6 +9,7 @@ import 'package:admin_app/screens/products_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import 'helpers/pump_localized_app.dart';
 
@@ -112,8 +113,10 @@ void main() {
       find.text('Very long product title that should ellipsize nicely'),
       findsOneWidget,
     );
-    expect(find.text('Edit'), findsNWidgets(products.length));
-    expect(find.text('Delete'), findsNWidgets(products.length));
+    expect(find.byIcon(LucideIcons.listFilter), findsOneWidget);
+    expect(find.text('CSV'), findsOneWidget);
+    expect(find.byIcon(LucideIcons.pencil), findsNWidgets(products.length));
+    expect(find.byIcon(LucideIcons.trash2), findsNWidgets(products.length));
     expect(tester.takeException(), isNull);
   });
 

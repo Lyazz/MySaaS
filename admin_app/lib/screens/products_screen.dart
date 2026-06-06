@@ -112,14 +112,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         children: [
           if (!isMobile) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
               child: _buildHeader(),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _buildActionsRow(),
-            ),
-            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: _buildFilters(categories, isMobile: isMobile),
@@ -242,160 +237,33 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
-  Widget _buildActionsRow() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark
-              ? AppColors.surfaceBorder
-              : AppColors.lightSurfaceBorder,
-        ),
-      ),
-      child: Row(
-        children: [
-          // Action Buttons in Toolbar? Maybe keep them separately or integrate?
-          // The design shows Search + Sort + View Toggle usually.
-          // Products screen has bulk actions. Let's keep them but style better if needed.
-          // Actually, let's keep the user's bulk actions but in a nice row.
-          // The previous "Actions Row" was a mix. Let's use the new Toolbar style for Search/Sort/Filter and keep Actions separate or above?
-          // The products screen has a LOT of filters.
-          // Let's stick to the previous layout but update the style of the "Actions Row" to be cleaner.
-          _ActionToolbarButton(
-            icon: LucideIcons.upload,
-            label: 'admin.pages.products.index.bulk.export'.tr(),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
-                      namedArgs: {
-                        'feature': 'admin.pages.products.index.bulk.export'
-                            .tr(),
-                      },
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-          _ActionToolbarButton(
-            icon: LucideIcons.download,
-            label: 'admin.pages.products.index.bulk.import'.tr(),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
-                      namedArgs: {
-                        'feature': 'admin.pages.products.index.bulk.import'
-                            .tr(),
-                      },
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          if (_selectedProductIds.isNotEmpty) ...[
-            const SizedBox(width: 8),
-            _ActionToolbarButton(
-              icon: LucideIcons.edit,
-              label: 'admin.pages.products.index.bulk.update'.tr(),
-              onPressed: () {
-                // ...
-              },
-              color: const Color(0xFF0F172A),
-              textColor: Colors.white,
-            ),
-          ],
-          const Spacer(),
-          // Sort Dropdown
-          Row(
-            children: [
-              Text( 'app.admin_pages_products_index_sor'.tr().tr(),
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 150,
-                child: Consumer(
-                  builder: (context, ref, _) {
-                    final sortBy = ref.watch(productSortProvider);
-                    return FormSelect<String>(
-                      label: 'app.admin_pages_products_index_sor'.tr().tr(),
-                      showLabel: false,
-                      value: sortBy,
-                      borderless: true,
-                      borderRadius: 6,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                          value: 'recent',
-                          child: Text(
-                            'admin.pages.products.index.sort.newest'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'title',
-                          child: Text(
-                            'admin.pages.products.index.sort.title'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'price',
-                          child: Text(
-                            'admin.pages.products.index.sort.price'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'stock',
-                          child: Text(
-                            'admin.pages.products.index.sort.stock'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'status',
-                          child: Text(
-                            'admin.pages.products.index.sort.status'.tr(),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) => ref
-                          .read(productSortProvider.notifier)
-                          .set(value ?? 'recent'),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildFilters(List<Category> categories, {bool isMobile = false}) {
+    final selectedCategoryId = ref.watch(productCategoryFilterProvider);
+    final selectedStatus = ref.watch(productStatusFilterProvider);
+    final activeFilterChips = isMobile
+        ? const <Widget>[]
+        : _buildActiveFilterChips(
+            categories,
+            selectedCategoryId: selectedCategoryId,
+            selectedStatus: selectedStatus,
+          );
+
     return ResponsiveFilterBar(
       searchField: FormInput(
         label: 'app.admin_pages_products_index_fil4'.tr().tr(),
         controller: _searchController,
         hint: 'admin.pages.products.index.filters.searchPlaceholder'.tr(),
+        showLabel: isMobile,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
+          horizontal: 14,
+          vertical: 12,
         ),
         onChanged: (value) => _searchDebouncer.run(() => setState(() {})),
       ),
       filters: [
         // Category
         SizedBox(
-          width: 180,
+          width: isMobile ? double.infinity : 220,
           child: Consumer(
             builder: (context, ref, _) {
               final selectedCategory = ref.watch(productCategoryFilterProvider);
@@ -403,14 +271,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 label: 'admin.pages.products.index.filters.category'.tr(),
                 value: selectedCategory,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+                  horizontal: 14,
+                  vertical: 12,
                 ),
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text( 'app.admin_pages_products_index_fil'.tr().tr(),
-                    ),
+                    child: Text('app.admin_pages_products_index_fil'.tr().tr()),
                   ),
                   ...categories.map(
                     (c) => DropdownMenuItem(value: c.id, child: Text(c.title)),
@@ -425,7 +292,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         ),
         // Status
         SizedBox(
-          width: 140,
+          width: isMobile ? double.infinity : 180,
           child: Consumer(
             builder: (context, ref, _) {
               final selectedStatus = ref.watch(productStatusFilterProvider);
@@ -433,13 +300,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 label: 'admin.pages.products.index.filters.status'.tr(),
                 value: selectedStatus,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+                  horizontal: 14,
+                  vertical: 12,
                 ),
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text( 'app.admin_pages_products_index_fil2'.tr().tr(),
+                    child: Text(
+                      'app.admin_pages_products_index_fil2'.tr().tr(),
                     ),
                   ),
                   DropdownMenuItem(
@@ -452,7 +320,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   ),
                   DropdownMenuItem(
                     value: 'lowStock',
-                    child: Text( 'app.admin_pages_products_index_fil3'.tr().tr(),
+                    child: Text(
+                      'app.admin_pages_products_index_fil3'.tr().tr(),
                     ),
                   ),
                 ],
@@ -488,7 +357,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 ),
               ),
             ]
-          : null,
+          : _buildDesktopToolbarActions(),
+      collapseDesktopFilters: true,
+      activeFilterCount:
+          (selectedCategoryId.isNotEmpty ? 1 : 0) +
+          (selectedStatus.isNotEmpty ? 1 : 0),
+      activeFilterChips: activeFilterChips,
       onClearFilters: () {
         setState(() {
           _searchController.clear();
@@ -497,6 +371,186 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         ref.read(productStatusFilterProvider.notifier).set('');
         ref.read(productSortProvider.notifier).set('recent');
       },
+    );
+  }
+
+  List<Widget> _buildDesktopToolbarActions() {
+    return [
+      if (_selectedProductIds.isNotEmpty) ...[
+        AppButton.neutral(
+          label: 'admin.pages.products.index.bulk.update'.tr(),
+          icon: LucideIcons.edit,
+          onPressed: () =>
+              _showComingSoon('admin.pages.products.index.bulk.update'.tr()),
+        ),
+        const SizedBox(width: 8),
+      ],
+      _buildImportExportMenu(),
+      const SizedBox(width: 12),
+      _buildSortSelect(),
+    ];
+  }
+
+  Widget _buildImportExportMenu() {
+    return PopupMenuButton<String>(
+      tooltip: 'admin.common.actions'.tr(),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onSelected: (value) {
+        if (value == 'export') {
+          _showComingSoon('admin.pages.products.index.bulk.export'.tr());
+        } else if (value == 'import') {
+          _showComingSoon('admin.pages.products.index.bulk.import'.tr());
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'export',
+          child: Row(
+            children: [
+              const Icon(
+                LucideIcons.upload,
+                size: 16,
+                color: Color(0xFF64748B),
+              ),
+              const SizedBox(width: 8),
+              Text('admin.pages.products.index.bulk.export'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'import',
+          child: Row(
+            children: [
+              const Icon(
+                LucideIcons.download,
+                size: 16,
+                color: Color(0xFF64748B),
+              ),
+              const SizedBox(width: 8),
+              Text('admin.pages.products.index.bulk.import'.tr()),
+            ],
+          ),
+        ),
+      ],
+      child: IgnorePointer(
+        child: AppButton.secondary(
+          label: 'CSV',
+          icon: LucideIcons.arrowDownUp,
+          trailing: const Icon(LucideIcons.chevronDown, size: 14),
+          onPressed: () {},
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortSelect() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'app.admin_pages_products_index_sor'.tr().tr(),
+          style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 150,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final sortBy = ref.watch(productSortProvider);
+              return FormSelect<String>(
+                label: 'app.admin_pages_products_index_sor'.tr().tr(),
+                showLabel: false,
+                value: sortBy,
+                borderRadius: 6,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'recent',
+                    child: Text('admin.pages.products.index.sort.newest'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'title',
+                    child: Text('admin.pages.products.index.sort.title'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'price',
+                    child: Text('admin.pages.products.index.sort.price'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'stock',
+                    child: Text('admin.pages.products.index.sort.stock'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'status',
+                    child: Text('admin.pages.products.index.sort.status'.tr()),
+                  ),
+                ],
+                onChanged: (value) => ref
+                    .read(productSortProvider.notifier)
+                    .set(value ?? 'recent'),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildActiveFilterChips(
+    List<Category> categories, {
+    required String selectedCategoryId,
+    required String selectedStatus,
+  }) {
+    final chips = <Widget>[];
+    final selectedCategory = categories
+        .where((category) => category.id == selectedCategoryId)
+        .firstOrNull;
+
+    if (selectedCategory != null) {
+      chips.add(
+        _ActiveFilterChip(
+          label: selectedCategory.title,
+          onDeleted: () =>
+              ref.read(productCategoryFilterProvider.notifier).set(''),
+        ),
+      );
+    }
+
+    if (selectedStatus.isNotEmpty) {
+      chips.add(
+        _ActiveFilterChip(
+          label: _statusFilterLabel(selectedStatus),
+          onDeleted: () =>
+              ref.read(productStatusFilterProvider.notifier).set(''),
+        ),
+      );
+    }
+
+    return chips;
+  }
+
+  String _statusFilterLabel(String status) {
+    return switch (status) {
+      'active' => 'admin.common.active'.tr(),
+      'inactive' => 'admin.common.inactive'.tr(),
+      'lowStock' => 'app.admin_pages_products_index_fil3'.tr().tr(),
+      _ => status,
+    };
+  }
+
+  void _showComingSoon(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'app.admin_common_featurecomingsoon'.tr().tr(
+            namedArgs: {'feature': feature},
+          ),
+        ),
+      ),
     );
   }
 
@@ -566,7 +620,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             LucideIcons.plus,
                             color: Color(0xFF0F172A),
                           ),
-                          title: Text( 'app.admin_pages_products_index_add'.tr().tr(),
+                          title: Text(
+                            'app.admin_pages_products_index_add'.tr().tr(),
                           ),
                           onTap: () {
                             context.pop();
@@ -578,7 +633,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           LucideIcons.arrowUpDown,
                           color: Color(0xFF64748B),
                         ),
-                        title: Text( 'app.admin_pages_products_index_sor'.tr().tr(),
+                        title: Text(
+                          'app.admin_pages_products_index_sor'.tr().tr(),
                         ),
                         trailing: SizedBox(
                           width: 160,
@@ -586,7 +642,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             builder: (context, ref, _) {
                               final sortBy = ref.watch(productSortProvider);
                               return FormSelect<String>(
-                                label: 'app.admin_pages_products_index_sor'.tr()
+                                label: 'app.admin_pages_products_index_sor'
+                                    .tr()
                                     .tr(),
                                 showLabel: false,
                                 value: sortBy,
@@ -659,7 +716,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           context.pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
+                              content: Text(
+                                'app.admin_common_featurecomingsoon'.tr().tr(
                                   namedArgs: {
                                     'feature':
                                         'admin.pages.products.index.bulk.export'
@@ -683,7 +741,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           context.pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
+                              content: Text(
+                                'app.admin_common_featurecomingsoon'.tr().tr(
                                   namedArgs: {
                                     'feature':
                                         'admin.pages.products.index.bulk.import'
@@ -709,7 +768,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             context.pop();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
+                                content: Text(
+                                  'app.admin_common_featurecomingsoon'.tr().tr(
                                     namedArgs: {
                                       'feature':
                                           'admin.pages.products.index.bulk.update'
@@ -990,7 +1050,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06) : null,
+      color: isSelected
+          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)
+          : null,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
@@ -1110,13 +1172,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   Transform.scale(
                     scale: 0.75,
                     child: Switch(
                       value: product.isActive,
-                      activeColor: Colors.white,
+                      activeThumbColor: Colors.white,
                       activeTrackColor: const Color(0xFF84CC16), // Lime-500
                       onChanged: (val) {
                         // Assuming you have a method to toggle status in the provider
@@ -1124,16 +1186,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    product.isActive
-                        ? 'admin.common.active'.tr()
-                        : 'admin.common.inactive'.tr(),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: product.isActive
-                          ? const Color(0xFF15803D)
-                          : const Color(0xFF64748B),
+                  const SizedBox(width: 2),
+                  Flexible(
+                    child: Text(
+                      product.isActive
+                          ? 'admin.common.active'.tr()
+                          : 'admin.common.inactive'.tr(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: product.isActive
+                            ? const Color(0xFF15803D)
+                            : const Color(0xFF64748B),
+                      ),
                     ),
                   ),
                 ],
@@ -1165,8 +1231,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text( 'app.admin_pages_products_index_lin'.tr().tr(),
-                        ),
+                        Text('app.admin_pages_products_index_lin'.tr().tr()),
                       ],
                     ),
                   ),
@@ -1180,8 +1245,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text( 'app.admin_pages_products_index_lin2'.tr().tr(),
-                        ),
+                        Text('app.admin_pages_products_index_lin2'.tr().tr()),
                       ],
                     ),
                   ),
@@ -1196,8 +1260,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text( 'app.admin_pages_products_index_lin3'.tr().tr(),
-                        ),
+                        Text('app.admin_pages_products_index_lin3'.tr().tr()),
                       ],
                     ),
                   ),
@@ -1211,8 +1274,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           color: Color(0xFF64748B),
                         ),
                         const SizedBox(width: 8),
-                        Text( 'app.admin_pages_products_index_lin4'.tr().tr(),
-                        ),
+                        Text('app.admin_pages_products_index_lin4'.tr().tr()),
                       ],
                     ),
                   ),
@@ -1224,10 +1286,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         text: 'https://example.com/product/${product.slug}',
                       ),
                     );
-                    if (context.mounted)
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('admin.common.copied'.tr())),
                       );
+                    }
                   } else if (value == 'copy_landing') {
                     await Clipboard.setData(
                       ClipboardData(
@@ -1235,20 +1298,23 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             'https://example.com/product/${product.slug}?mode=landing',
                       ),
                     );
-                    if (context.mounted)
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('admin.common.copied'.tr())),
                       );
+                    }
                   } else {
-                    if (context.mounted)
+                    if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text( 'app.admin_common_featurecomingsoon'.tr().tr(
+                          content: Text(
+                            'app.admin_common_featurecomingsoon'.tr().tr(
                               namedArgs: {'feature': value},
                             ),
                           ),
                         ),
                       );
+                    }
                   }
                 },
               ),
@@ -1378,23 +1444,53 @@ class _LinkButtonState extends State<_LinkButton> {
   }
 }
 
-class _ActionToolbarButton extends StatelessWidget {
-  final IconData icon;
+class _ActiveFilterChip extends StatelessWidget {
   final String label;
-  final VoidCallback? onPressed;
-  final Color? color;
-  final Color? textColor;
+  final VoidCallback onDeleted;
 
-  const _ActionToolbarButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-    this.color,
-    this.textColor,
-  });
+  const _ActiveFilterChip({required this.label, required this.onDeleted});
 
   @override
   Widget build(BuildContext context) {
-    return AppButton.secondary(label: label, icon: icon, onPressed: onPressed);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 180),
+      padding: const EdgeInsets.only(left: 10, right: 4, top: 6, bottom: 6),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surface2 : AppColors.lightSurface2,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: onDeleted,
+            borderRadius: BorderRadius.circular(999),
+            child: const Padding(
+              padding: EdgeInsets.all(2),
+              child: Icon(LucideIcons.x, size: 12, color: Color(0xFF64748B)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
