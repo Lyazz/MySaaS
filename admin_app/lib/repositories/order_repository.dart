@@ -249,38 +249,39 @@ class OrderRepository {
 
   Future<Order?> getOrder(String id) async {
     final resolvedId = await _resolveOrderId(id);
-    if (await _syncService.isOnline) {
-      try {
-        final res = await _apiService.client.get('/admin/orders/$resolvedId');
-        final o = Order.fromJson(res.data);
+    try {
+      final res = await _apiService.client.get('/admin/orders/$resolvedId');
+      final o = Order.fromJson(res.data);
 
-        final db = await _dbService.database;
-        final itemsJsonList = o.items
-            .map(
-              (i) => {
-                'id': i.id,
-                'productId': i.productId,
-                'quantity': i.quantity,
-                'price': i.price,
-              },
-            )
-            .toList();
-        await db.insert('orders', {
-          'id': o.id,
-          'tenantId': _tid,
-          'status': o.status,
-          'total': o.totalAmount,
-          'createdAt': o.createdAt.toIso8601String(),
-          'customerName': o.customerName,
-          'customerPhone': o.customerPhone,
-          'shippingAddress': o.customerAddress,
-          'itemsJson': jsonEncode(itemsJsonList),
-          'syncStatus': 'synced',
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      final db = await _dbService.database;
+      final itemsJsonList = o.items
+          .map(
+            (i) => {
+              'id': i.id,
+              'productId': i.productId,
+              'quantity': i.quantity,
+              'price': i.price,
+              if (i.lineTotal != null) 'lineTotal': i.lineTotal,
+              if (i.productTitle != null) 'productTitle': i.productTitle,
+              if (i.variantLabel != null) 'variantLabel': i.variantLabel,
+            },
+          )
+          .toList();
+      await db.insert('orders', {
+        'id': o.id,
+        'tenantId': _tid,
+        'status': o.status,
+        'total': o.totalAmount,
+        'createdAt': o.createdAt.toIso8601String(),
+        'customerName': o.customerName,
+        'customerPhone': o.customerPhone,
+        'shippingAddress': o.customerAddress,
+        'itemsJson': jsonEncode(itemsJsonList),
+        'syncStatus': 'synced',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-        return o;
-      } catch (_) {}
-    }
+      return o;
+    } catch (_) {}
 
     final db = await _dbService.database;
     final localData = await db.query(
@@ -293,7 +294,7 @@ class OrderRepository {
       final itemsJson = e['itemsJson'] != null
           ? jsonDecode(e['itemsJson'].toString())
           : [];
-      return Order.fromJson({
+      final localOrder = Order.fromJson({
         'id': e['id'],
         'status': e['status'],
         'totalAmount': e['total'],
@@ -303,8 +304,75 @@ class OrderRepository {
         'customerAddress': e['shippingAddress'],
         'items': itemsJson,
       });
+      return _withLocalPreviousOrders(db, localOrder);
     }
 
+    return null;
+  }
+
+  Future<Order> _withLocalPreviousOrders(Database db, Order order) async {
+    final normalizedPhone = _normalizeAlgerianPhone(
+      order.customerPhoneNormalized ?? order.customerPhone,
+    );
+    if (normalizedPhone == null) {
+      return order.copyWith(
+        previousOrders: const [],
+        previousOrdersMatch: const PreviousOrdersMatch(type: 'none'),
+      );
+    }
+
+    final rows = await db.query(
+      'orders',
+      where: 'tenantId = ? AND id != ?',
+      whereArgs: [_tid, order.id],
+      orderBy: 'createdAt DESC',
+    );
+
+    final previousOrders = <Order>[];
+    for (final row in rows) {
+      final phone = row['customerPhone']?.toString() ?? '';
+      if (_normalizeAlgerianPhone(phone) != normalizedPhone) continue;
+      final itemsJson = row['itemsJson'] != null
+          ? jsonDecode(row['itemsJson'].toString())
+          : [];
+      previousOrders.add(
+        Order.fromJson({
+          'id': row['id'],
+          'status': row['status'],
+          'totalAmount': row['total'],
+          'createdAt': row['createdAt'],
+          'customerName': row['customerName'],
+          'customerPhone': row['customerPhone'],
+          'customerPhoneNormalized': normalizedPhone,
+          'customerAddress': row['shippingAddress'],
+          'items': itemsJson,
+        }),
+      );
+    }
+
+    return order.copyWith(
+      previousOrders: previousOrders,
+      previousOrdersMatch: PreviousOrdersMatch(
+        type: 'phone',
+        phoneNormalized: normalizedPhone,
+      ),
+    );
+  }
+
+  String? _normalizeAlgerianPhone(String? value) {
+    final digits = (value ?? '').replaceAll(RegExp(r'\D'), '');
+    if (RegExp(r'^0[567]\d{8}$').hasMatch(digits)) {
+      return '213${digits.substring(1)}';
+    }
+    if (RegExp(r'^[567]\d{8}$').hasMatch(digits)) {
+      return '213$digits';
+    }
+    if (RegExp(r'^213[567]\d{8}$').hasMatch(digits)) {
+      return digits;
+    }
+    if (RegExp(r'^00213[567]\d{8}$').hasMatch(digits)) {
+      return digits.substring(2);
+    }
     return null;
   }
 

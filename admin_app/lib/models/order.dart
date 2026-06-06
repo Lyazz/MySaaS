@@ -95,6 +95,36 @@ class Order {
           : null,
     );
   }
+
+  Order copyWith({
+    List<Order>? previousOrders,
+    PreviousOrdersMatch? previousOrdersMatch,
+  }) {
+    return Order(
+      id: id,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      customerPhoneNormalized: customerPhoneNormalized,
+      customerAddress: customerAddress,
+      customerId: customerId,
+      totalAmount: totalAmount,
+      status: status,
+      createdAt: createdAt,
+      items: items,
+      publicId: publicId,
+      internalNotes: internalNotes,
+      callStatus: callStatus,
+      shippingAmount: shippingAmount,
+      totalWithShippingAmount: totalWithShippingAmount,
+      shippingProvider: shippingProvider,
+      deliveryMode: deliveryMode,
+      shippingPickupPoint: shippingPickupPoint,
+      shippingWilayaCode: shippingWilayaCode,
+      shippingCommuneCode: shippingCommuneCode,
+      previousOrders: previousOrders ?? this.previousOrders,
+      previousOrdersMatch: previousOrdersMatch ?? this.previousOrdersMatch,
+    );
+  }
 }
 
 class PreviousOrdersMatch {
@@ -165,7 +195,9 @@ class OrderItem {
       productTitle:
           json['productTitle']?.toString() ??
           (product is Map ? product['title']?.toString() : null),
-      variantLabel: labels.isEmpty ? null : labels.join(' / '),
+      variantLabel:
+          json['variantLabel']?.toString() ??
+          (labels.isEmpty ? null : labels.join(' / ')),
     );
   }
 }
