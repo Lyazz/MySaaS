@@ -77,6 +77,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     final textSecondary = isDark
         ? AppColors.textSecondary
         : AppColors.lightTextSecondary;
+    final backPath = _backFallbackPath(context);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -96,6 +97,16 @@ class _AppShellState extends ConsumerState<AppShell> {
                 icon: Icon(LucideIcons.menu, size: 18, color: textSecondary),
                 onPressed: () => _scaffoldKey.currentState?.openDrawer(),
               ),
+              if (backPath != null) ...[
+                IconButton(
+                  icon: Icon(
+                    LucideIcons.arrowLeft,
+                    size: 18,
+                    color: textSecondary,
+                  ),
+                  onPressed: () => _navigateBack(context, backPath),
+                ),
+              ],
               const SizedBox(width: 4),
               Container(width: 1, height: 16, color: borderColor),
               const SizedBox(width: 12),
@@ -164,6 +175,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         ? AppColors.textTertiary
         : AppColors.lightTextTertiary;
     final hoverBg = isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
+    final backPath = _backFallbackPath(context);
 
     final storeState = ref.watch(storeSettingsProvider);
     final storeSlug = storeState.settings.slug;
@@ -192,6 +204,17 @@ class _AppShellState extends ConsumerState<AppShell> {
             borderColor: borderColor,
             onPressed: () => ref.read(sidebarProvider.notifier).toggle(),
           ),
+          if (backPath != null) ...[
+            const SizedBox(width: 8),
+            _TopbarIconButton(
+              icon: LucideIcons.arrowLeft,
+              color: textTertiary,
+              hoverBg: hoverBg,
+              hoverColor: textPrimary,
+              borderColor: borderColor,
+              onPressed: () => _navigateBack(context, backPath),
+            ),
+          ],
           const SizedBox(width: 10),
           Container(width: 1, height: 16, color: borderColor),
           const SizedBox(width: 12),
@@ -248,6 +271,46 @@ class _AppShellState extends ConsumerState<AppShell> {
         ],
       ),
     );
+  }
+
+  void _navigateBack(BuildContext context, String fallbackPath) {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+
+    context.go(fallbackPath);
+  }
+
+  String? _backFallbackPath(BuildContext context) {
+    final location = GoRouterState.of(context).uri.path;
+    if (location == '/products/create' || location.startsWith('/products/')) {
+      return '/products';
+    }
+    if (location == '/orders/create' || location.startsWith('/orders/')) {
+      return '/orders';
+    }
+    if (location.startsWith('/sales/')) return '/sales';
+    if (location == '/purchases/create' || location.startsWith('/purchases/')) {
+      return '/purchases';
+    }
+    if (location == '/categories/create' ||
+        location.startsWith('/categories/')) {
+      return '/categories';
+    }
+    if (location == '/suppliers/create' || location.startsWith('/suppliers/')) {
+      return '/suppliers';
+    }
+    if (location == '/customers/create' ||
+        location.startsWith('/customers/edit/') ||
+        location.startsWith('/customers/')) {
+      return '/customers';
+    }
+    if (location.startsWith('/cash/')) return '/cash';
+    if (location.startsWith('/settings/')) return '/settings';
+    if (location.startsWith('/storefront/')) return '/settings';
+    if (location.startsWith('/locked/')) return '/';
+    return null;
   }
 
   Widget _buildThemeToggle(bool isDark, Color iconColor, Color borderColor) {
@@ -314,7 +377,8 @@ class _AppShellState extends ConsumerState<AppShell> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text( 'app.admin_actions_logoutconfirmtit'.tr().tr(),
+                  Text(
+                    'app.admin_actions_logoutconfirmtit'.tr().tr(),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -324,7 +388,8 @@ class _AppShellState extends ConsumerState<AppShell> {
                 ],
               ),
               const SizedBox(height: 12),
-              Text( 'app.admin_actions_logoutconfirmmes'.tr().tr(),
+              Text(
+                'app.admin_actions_logoutconfirmmes'.tr().tr(),
                 style: TextStyle(
                   fontSize: 13,
                   color: textSecondary,
