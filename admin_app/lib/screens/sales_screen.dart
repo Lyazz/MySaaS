@@ -146,7 +146,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
               filters: [
                 SizedBox(
                   width: 320,
-                  child: DateRangeFilterField(
+                  child: DateRangeFilterField(showLabel: false, 
                     range: (_startDate != null && _endDate != null)
                         ? DateTimeRange(start: _startDate!, end: _endDate!)
                         : null,

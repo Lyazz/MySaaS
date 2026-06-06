@@ -267,7 +267,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           child: Consumer(
             builder: (context, ref, _) {
               final selectedCategory = ref.watch(productCategoryFilterProvider);
-              return FormSelect<String>(
+              return FormSelect<String>(showLabel: false, 
                 label: 'admin.pages.products.index.filters.category'.tr(),
                 value: selectedCategory,
                 contentPadding: const EdgeInsets.symmetric(
@@ -296,7 +296,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           child: Consumer(
             builder: (context, ref, _) {
               final selectedStatus = ref.watch(productStatusFilterProvider);
-              return FormSelect<String>(
+              return FormSelect<String>(showLabel: false, 
                 label: 'admin.pages.products.index.filters.status'.tr(),
                 value: selectedStatus,
                 contentPadding: const EdgeInsets.symmetric(

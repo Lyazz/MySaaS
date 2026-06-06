@@ -160,7 +160,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                 filters: [
                   SizedBox(
                     width: 320,
-                    child: DateRangeFilterField(
+                    child: DateRangeFilterField(showLabel: false, 
                       range: (_startDate != null && _endDate != null)
                           ? DateTimeRange(start: _startDate!, end: _endDate!)
                           : null,
@@ -178,7 +178,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   ),
                   SizedBox(
                     width: 240,
-                    child: FormSelect<String?>(
+                    child: FormSelect<String?>(showLabel: false, 
                       label: 'admin.pages.purchases.detail.cards.supplier'.tr(),
                       value: _selectedSupplierId,
                       contentPadding: const EdgeInsets.symmetric(

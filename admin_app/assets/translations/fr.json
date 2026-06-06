@@ -5037,7 +5037,7 @@
     "the_template_builder_is_part_o": "Le générateur de modèles fait partie de la gestion de la vitrine hébergée et nécessite un niveau en ligne.",
     "the_landing_page_builder_is_av": "Le générateur de pages de destination est disponible uniquement sur les niveaux en ligne.",
     "this_will_delete_all_variants": "Cela supprimera toutes les variantes associées à cette option.",
-    "admin_nav_storeparameters": "admin.nav.storeParamètres",
+    "admin_nav_storeparameters": "Paramètres",
     "app_offline_activation": "app.offline_activation",
     "app_generate_this_request_code": "app.generate_this_request_code_on",
     "app_paste_signed_activation_co": "app.paste_signed_activation_code_h",

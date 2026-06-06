@@ -15,8 +15,39 @@ import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/buttons/table_action_button.dart';
 import '../widgets/badges/status_badges.dart';
-import '../widgets/ui_tab_filter.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+// ── Orders filter state — Riverpod providers ──────────────────────────────────
+
+class _OrderStatusNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+  void set(String value) => state = value;
+}
+
+final orderStatusFilterProvider =
+    NotifierProvider<_OrderStatusNotifier, String>(_OrderStatusNotifier.new);
+
+DateTimeRange _ordersDefaultDateRange() {
+  final today = DateTime.now();
+  final lastWeek = today.subtract(const Duration(days: 6));
+  return DateTimeRange(
+    start: DateTime(lastWeek.year, lastWeek.month, lastWeek.day),
+    end: DateTime(today.year, today.month, today.day),
+  );
+}
+
+class _OrderDateRangeNotifier extends Notifier<DateTimeRange?> {
+  @override
+  DateTimeRange? build() => _ordersDefaultDateRange();
+  void set(DateTimeRange? value) => state = value;
+  void reset() => state = _ordersDefaultDateRange();
+}
+
+final orderDateRangeProvider =
+    NotifierProvider<_OrderDateRangeNotifier, DateTimeRange?>(
+      _OrderDateRangeNotifier.new,
+    );
 
 class OrdersScreen extends ConsumerStatefulWidget {
   final String? initialStatus;
@@ -29,60 +60,41 @@ class OrdersScreen extends ConsumerStatefulWidget {
 
 class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final _debouncer = Debouncer(milliseconds: 500);
+  final _debouncer = Debouncer(milliseconds: 400);
   final int _itemsPerPage = 25;
 
-  String _selectedStatus = '';
-  DateTime? _startDate;
-  DateTime? _endDate;
   int _page = 1;
-  String _activeTab = 'all';
   final Set<String> _selectedIds = {};
 
   @override
   void initState() {
     super.initState();
-    _setDefaultFilters();
-    final initialStatus = widget.initialStatus?.trim() ?? '';
-    if (initialStatus.isNotEmpty) _selectedStatus = initialStatus;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _fetchOrders());
-  }
-
-  void _setDefaultFilters() {
-    final today = DateTime.now();
-    final lastWeek = today.subtract(const Duration(days: 6));
-    _searchController.clear();
-    _selectedStatus = '';
-    _startDate = DateTime(lastWeek.year, lastWeek.month, lastWeek.day);
-    _endDate = DateTime(today.year, today.month, today.day);
-    _page = 1;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final initialStatus = widget.initialStatus?.trim() ?? '';
+      ref.read(orderStatusFilterProvider.notifier).set(initialStatus);
+      ref.read(orderDateRangeProvider.notifier).reset();
+      _fetchOrders();
+    });
   }
 
   void _resetFilters() {
     setState(() {
-      _activeTab = 'all';
-      _setDefaultFilters();
-      _selectedIds.clear();
-    });
-    _fetchOrders();
-  }
-
-  void _onTabChanged(String tab) {
-    setState(() {
-      _activeTab = tab;
-      _selectedStatus = tab == 'all' ? '' : tab;
+      _searchController.clear();
       _page = 1;
       _selectedIds.clear();
     });
+    ref.read(orderStatusFilterProvider.notifier).set('');
+    ref.read(orderDateRangeProvider.notifier).reset();
     _fetchOrders();
   }
 
   void _fetchOrders() {
+    final dateRange = ref.read(orderDateRangeProvider);
     ref.read(ordersProvider.notifier).fetchOrders(
           search: _searchController.text,
-          status: _selectedStatus,
-          startDate: _startDate,
-          endDate: _endDate,
+          status: ref.read(orderStatusFilterProvider),
+          startDate: dateRange?.start,
+          endDate: dateRange?.end,
           page: _page,
           limit: _itemsPerPage,
         );
@@ -95,9 +107,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     super.dispose();
   }
 
-  bool get _hasActiveFilters =>
-      _searchController.text.trim().isNotEmpty || _selectedStatus.isNotEmpty;
-
   @override
   Widget build(BuildContext context) {
     final ordersState = ref.watch(ordersProvider);
@@ -105,16 +114,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      floatingActionButton: isMobile
-          ? FloatingActionButton(
-              onPressed: () => context.go('/pos'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              child: Icon(
-                LucideIcons.plus,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            )
-          : null,
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -126,11 +125,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 children: [
                   // ── Header ──────────────────────────────────────────
                   _buildHeader(ordersState, isDark, isMobile),
-                  const SizedBox(height: 20),
-
-                  // ── Underline tab strip ──────────────────────────────
-                  _buildTabs(ordersState),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
                   // ── Bulk selection banner ────────────────────────────
                   if (_selectedIds.isNotEmpty) ...[
@@ -138,8 +133,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     const SizedBox(height: 12),
                   ],
 
-                  // ── Filter card ──────────────────────────────────────
-                  _buildFiltersCard(isDark),
+                  // ── Filter bar ────────────────────────────────────────
+                  _buildFilters(isMobile: isMobile),
                   const SizedBox(height: 20),
 
                   // ── Content ──────────────────────────────────────────
@@ -160,7 +155,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     );
   }
 
-  // ── Header: title + stats chips + action buttons ─────────────────────────
+  // ── Header: title + stats + [+ New Order] button ─────────────────────────
   Widget _buildHeader(OrdersState state, bool isDark, bool isMobile) {
     final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
     final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
@@ -176,7 +171,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title + subtitle
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,29 +193,19 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               ),
             ),
 
-            // Action buttons (desktop only)
+            // Primary CTA — desktop only, mirrors products screen
             if (!isMobile)
-              Row(
-                children: [
-                  AppButton.secondary(
-                    label: 'admin.nav.export'.tr(),
-                    icon: LucideIcons.download,
-                    onPressed: () {},
-                  ),
-                  const SizedBox(width: 10),
-                  AppButton.primary(
-                    label: 'admin.pages.orders.index.addBtn'.tr(),
-                    icon: LucideIcons.plus,
-                    onPressed: () => context.push('/orders/create'),
-                  ),
-                ],
+              AppButton.primary(
+                label: 'admin.pages.orders.index.addBtn'.tr(),
+                icon: LucideIcons.plus,
+                onPressed: () => context.push('/orders/create'),
               ),
           ],
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
 
-        // ── Inline stat chips ─────────────────────────────────────────
+        // ── Stat chips ───────────────────────────────────────────────
         Wrap(
           spacing: 8,
           runSpacing: 6,
@@ -252,42 +236,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ],
         ),
       ],
-    );
-  }
-
-  // ── Tab strip ────────────────────────────────────────────────────────────
-  Widget _buildTabs(OrdersState state) {
-    return UiTabFilter(
-      activeTab: _activeTab,
-      tabs: [
-        UiTabItem(key: 'all', label: 'All'),
-        UiTabItem(
-          key: 'PENDING',
-          label: 'admin.pages.billing.status.pending.badge'.tr(),
-          count: state.orders.where((o) => o.status == 'PENDING').length,
-        ),
-        UiTabItem(
-          key: 'CONFIRMED',
-          label: 'admin.orderStatus.confirmed'.tr(),
-          count: state.orders.where((o) => o.status == 'CONFIRMED').length,
-        ),
-        UiTabItem(
-          key: 'SHIPPED',
-          label: 'admin.orderStatus.shipped'.tr(),
-          count: state.orders.where((o) => o.status == 'SHIPPED').length,
-        ),
-        UiTabItem(
-          key: 'DELIVERED',
-          label: 'admin.orderStatus.delivered'.tr(),
-          count: state.orders.where((o) => o.status == 'DELIVERED').length,
-        ),
-        UiTabItem(
-          key: 'CANCELLED',
-          label: 'admin.pages.purchases.index.filters.statusValues.CANCELLED'.tr(),
-          count: state.orders.where((o) => o.status == 'CANCELLED').length,
-        ),
-      ],
-      onTabChanged: _onTabChanged,
     );
   }
 
@@ -322,155 +270,369 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     );
   }
 
-  // ── Filter card ───────────────────────────────────────────────────────────
-  Widget _buildFiltersCard(bool isDark) {
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+  // ── Filter bar ────────────────────────────────────────────────────────────
+  Widget _buildFilters({bool isMobile = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor =
+        isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
 
+    final searchField = FormInput(
+      label: 'admin.pages.orders.index.filters.searchLabel'.tr(),
+      controller: _searchController,
+      hint: 'admin.pages.orders.index.filters.searchPlaceholder'.tr(),
+      showLabel: isMobile,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      onChanged: (v) => _debouncer.run(() {
+        setState(() => _page = 1);
+        _fetchOrders();
+      }),
+    );
+
+    // Build status/date with or without label depending on context
+    Widget buildStatusField({required bool showLabel}) => Consumer(
+          builder: (context, ref, _) {
+            final status = ref.watch(orderStatusFilterProvider);
+            return FormSelect<String>(
+              label: showLabel
+                  ? 'admin.pages.orders.index.filters.statusLabel'.tr()
+                  : '',
+              value: status,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              items: [
+                DropdownMenuItem(
+                  value: '',
+                  child:
+                      Text('admin.pages.orders.index.filters.allOrders'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'PENDING',
+                  child:
+                      Text('admin.pages.billing.status.pending.badge'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'CONFIRMED',
+                  child: Text('admin.orderStatus.confirmed'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'SHIPPED',
+                  child: Text('admin.orderStatus.shipped'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'DELIVERED',
+                  child: Text('admin.orderStatus.delivered'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'CANCELLED',
+                  child: Text(
+                    'admin.pages.purchases.index.filters.statusValues.CANCELLED'
+                        .tr(),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'RETURNED',
+                  child: Text('admin.orderStatus.returned'.tr()),
+                ),
+              ],
+              onChanged: (value) {
+                ref
+                    .read(orderStatusFilterProvider.notifier)
+                    .set(value ?? '');
+                setState(() {
+                  _page = 1;
+                  _selectedIds.clear();
+                });
+                _fetchOrders();
+              },
+            );
+          },
+        );
+
+    Widget buildDateField({required bool showLabel}) => Consumer(
+          builder: (context, ref, _) {
+            final range = ref.watch(orderDateRangeProvider);
+            return DateRangeFilterField(
+              label: showLabel
+                  ? 'admin.pages.orders.index.filters.rangeLabel'.tr()
+                  : '',
+              range: range,
+              firstDate: DateTime(2020),
+              lastDate: DateTime.now(),
+              onChanged: (r) {
+                ref.read(orderDateRangeProvider.notifier).set(r);
+                setState(() => _page = 1);
+                _fetchOrders();
+              },
+            );
+          },
+        );
+
+    Widget content;
+
+    if (isMobile) {
+      // Mobile: search + 🔽 filter sheet icon + ⋯ actions icon
+      content = Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(child: searchField),
+          const SizedBox(width: 8),
+          _IconShellBtn(
+            borderColor: borderColor,
+            icon: Icon(
+              LucideIcons.listFilter,
+              size: 20,
+              color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+            ),
+            tooltip: 'admin.common.filters'.tr(),
+            onPressed: () => _showMobileFilterSheet(
+              isDark: isDark,
+              // Mobile sheet: WITH labels (fields are stacked, labels help)
+              statusField: buildStatusField(showLabel: true),
+              dateField: buildDateField(showLabel: true),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _IconShellBtn(
+            borderColor: borderColor,
+            icon: Icon(
+              LucideIcons.moreHorizontal,
+              size: 20,
+              color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+            ),
+            tooltip: 'admin.common.actions'.tr(),
+            onPressed: _showMobileActions,
+          ),
+        ],
+      );
+    } else {
+      // Desktop: single clean row — search | status | date | export
+      // NO labels on dropdowns so they match the search field style
+      content = Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(flex: 3, child: searchField),
+          const SizedBox(width: 12),
+          Expanded(flex: 2, child: buildStatusField(showLabel: false)),
+          const SizedBox(width: 12),
+          Expanded(flex: 2, child: buildDateField(showLabel: false)),
+          const SizedBox(width: 12),
+          AppButton.secondary(
+            label: 'admin.nav.export'.tr(),
+            icon: LucideIcons.download,
+            onPressed: () {},
+          ),
+        ],
+      );
+    }
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: surface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: surfaceBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
       ),
-      child: LayoutBuilder(builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 640;
+      child: content,
+    );
+  }
 
-        final searchField = _FilterSection(
-          label: 'admin.pages.orders.index.filters.searchLabel'.tr(),
-          isDark: isDark,
-          child: FormInput(
-            label: '',
-            controller: _searchController,
-            hint: 'admin.pages.orders.index.filters.searchPlaceholder'.tr(),
-            onChanged: (v) => _debouncer.run(() {
-              setState(() => _page = 1);
-              _fetchOrders();
-            }),
-          ),
-        );
+  // ── Mobile filter bottom sheet ────────────────────────────────────────────
+  void _showMobileFilterSheet({
+    required bool isDark,
+    required Widget statusField,
+    required Widget dateField,
+  }) {
+    final sheetBg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
+    final handleColor =
+        isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary =
+        isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
 
-        final rangeField = _FilterSection(
-          label: 'admin.pages.orders.index.filters.rangeLabel'.tr(),
-          isDark: isDark,
-          child: DateRangeFilterField(
-            range: (_startDate != null && _endDate != null)
-                ? DateTimeRange(start: _startDate!, end: _endDate!)
-                : null,
-            firstDate: DateTime(2020),
-            lastDate: DateTime.now(),
-            onChanged: (range) {
-              setState(() {
-                _page = 1;
-                _startDate = range?.start;
-                _endDate = range?.end;
-              });
-              _fetchOrders();
-            },
-          ),
-        );
-
-        final statusField = _FilterSection(
-          label: 'admin.pages.orders.index.filters.statusLabel'.tr(),
-          isDark: isDark,
-          child: FormSelect<String>(
-            label: '',
-            value: _selectedStatus,
-            items: [
-              DropdownMenuItem(
-                  value: '',
-                  child: Text('admin.pages.orders.index.filters.allOrders'.tr())),
-              DropdownMenuItem(
-                  value: 'PENDING',
-                  child: Text('admin.pages.billing.status.pending.badge'.tr())),
-              DropdownMenuItem(
-                  value: 'CONFIRMED',
-                  child: Text('admin.orderStatus.confirmed'.tr())),
-              DropdownMenuItem(
-                  value: 'SHIPPED',
-                  child: Text('admin.orderStatus.shipped'.tr())),
-              DropdownMenuItem(
-                  value: 'DELIVERED',
-                  child: Text('admin.orderStatus.delivered'.tr())),
-              DropdownMenuItem(
-                  value: 'CANCELLED',
-                  child: Text(
-                      'admin.pages.purchases.index.filters.statusValues.CANCELLED'
-                          .tr())),
-              DropdownMenuItem(
-                  value: 'RETURNED',
-                  child: Text('admin.orderStatus.returned'.tr())),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _selectedStatus = value ?? '';
-                _activeTab = value == '' ? 'all' : value!;
-                _page = 1;
-                _selectedIds.clear();
-              });
-              _fetchOrders();
-            },
-          ),
-        );
-
-        if (isWide) {
-          return Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(flex: 3, child: searchField),
-                  const SizedBox(width: 16),
-                  Expanded(flex: 2, child: rangeField),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(flex: 3, child: statusField),
-                  const Spacer(flex: 2),
-                  // Clear button
-                  if (_hasActiveFilters)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8, top: 4),
-                      child: AppButton.ghost(
-                        label: 'admin.common.clear'.tr(),
-                        onPressed: _resetFilters,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: sheetBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.35,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: handleColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'admin.common.filters'.tr(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: textPrimary,
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ],
-          );
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            searchField,
-            const SizedBox(height: 14),
-            rangeField,
-            const SizedBox(height: 14),
-            statusField,
-            if (_hasActiveFilters) ...[
-              const SizedBox(height: 12),
-              AppButton.ghost(
-                label: 'admin.common.clear'.tr(),
-                fullWidth: true,
-                onPressed: _resetFilters,
-              ),
-            ],
-          ],
+                      AppButton.ghost(
+                        label: 'admin.common.clear'.tr(),
+                        onPressed: () {
+                          _resetFilters();
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      statusField,
+                      const SizedBox(height: 20),
+                      dateField,
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: AppButton.primary(
+                    label: 'admin.common.close'.tr(),
+                    onPressed: () => Navigator.pop(context),
+                    fullWidth: true,
+                  ),
+                ),
+              ],
+            );
+          },
         );
-      }),
+      },
+    );
+  }
+
+  // ── Mobile ⋯ actions sheet ────────────────────────────────────────────────
+  void _showMobileActions() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.surface2 : AppColors.lightSurface2,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.35,
+          minChildSize: 0.25,
+          maxChildSize: 0.6,
+          expand: false,
+          builder: (context, scrollController) {
+            return Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.surfaceBorder
+                        : AppColors.lightSurfaceBorder,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'admin.common.actions'.tr(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDark
+                              ? AppColors.textPrimary
+                              : AppColors.lightTextPrimary,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(LucideIcons.x, size: 20),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    children: [
+                      ListTile(
+                        leading: Icon(
+                          LucideIcons.download,
+                          color: isDark
+                              ? AppColors.textSecondary
+                              : AppColors.lightTextSecondary,
+                        ),
+                        title: Text('admin.nav.export'.tr()),
+                        onTap: () => Navigator.pop(context),
+                      ),
+                      ListTile(
+                        leading: Icon(
+                          LucideIcons.plus,
+                          color: isDark
+                              ? AppColors.textSecondary
+                              : AppColors.lightTextSecondary,
+                        ),
+                        title: Text('admin.pages.orders.index.addBtn'.tr()),
+                        onTap: () {
+                          Navigator.pop(context);
+                          context.push('/orders/create');
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: AppButton.primary(
+                    label: 'admin.common.close'.tr(),
+                    onPressed: () => Navigator.pop(context),
+                    fullWidth: true,
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -533,7 +695,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   Widget _buildEmptyCard(bool isDark) {
     final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
     final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final hint = _hasActiveFilters
+    final hint = (_searchController.text.trim().isNotEmpty ||
+            ref.read(orderStatusFilterProvider).isNotEmpty)
         ? 'admin.pages.orders.index.empty.hintFiltered'.tr()
         : 'admin.pages.orders.index.empty.hint'.tr();
 
@@ -980,42 +1143,6 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-// ── Filter section label wrapper ─────────────────────────────────────────────
-class _FilterSection extends StatelessWidget {
-  final String label;
-  final Widget child;
-  final bool isDark;
-
-  const _FilterSection({
-    required this.label,
-    required this.child,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.6,
-            color: textTertiary,
-          ),
-        ),
-        const SizedBox(height: 6),
-        child,
-      ],
-    );
-  }
-}
-
 // ── Delete confirm dialog ─────────────────────────────────────────────────────
 class _DeleteDialog extends StatelessWidget {
   final bool isDark;
@@ -1121,6 +1248,42 @@ class _UiCard extends StatelessWidget {
         ],
       ),
       child: Center(child: child),
+    );
+  }
+}
+
+// ── Small bordered icon button (used in mobile filter row) ────────────────────
+class _IconShellBtn extends StatelessWidget {
+  final Color borderColor;
+  final VoidCallback onPressed;
+  final Widget icon;
+  final String tooltip;
+
+  const _IconShellBtn({
+    required this.borderColor,
+    required this.onPressed,
+    required this.icon,
+    required this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: icon,
+        tooltip: tooltip,
+        style: IconButton.styleFrom(
+          padding: const EdgeInsets.all(12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
     );
   }
 }

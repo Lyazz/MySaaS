@@ -16,6 +16,7 @@ class DateRangeFilterField extends StatefulWidget {
   final EdgeInsets contentPadding;
   final DateTimeRange Function(DateTimeRange range) normalize;
   final ValueChanged<DateTimeRange?> onChanged;
+  final bool showLabel;
 
   DateRangeFilterField({
     super.key,
@@ -31,6 +32,7 @@ class DateRangeFilterField extends StatefulWidget {
     ),
     DateTimeRange Function(DateTimeRange range)? normalize,
     required this.onChanged,
+    this.showLabel = true,
   }) : dateFormat = dateFormat ?? DateFormat('yyyy-MM-dd'),
        normalize = normalize ?? _identityRange;
 
@@ -154,7 +156,7 @@ class _DateRangeFilterFieldState extends State<DateRangeFilterField> {
           initialValue: _preset,
           isExpanded: true,
           decoration: InputDecoration(
-            labelText: widget.label,
+            labelText: widget.showLabel ? widget.label : null,
             prefixIcon: const Icon(
               LucideIcons.calendar,
               size: 16,

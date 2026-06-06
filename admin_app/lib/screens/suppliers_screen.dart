@@ -140,7 +140,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               filters: [
                 SizedBox(
                   width: 200,
-                  child: FormSelect<String>(
+                  child: FormSelect<String>(showLabel: false, 
                     label: 'admin.pages.pos.catalog.actions.sort'.tr(),
                     value: _sortBy,
                     contentPadding: EdgeInsets.symmetric(
