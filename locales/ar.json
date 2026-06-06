@@ -3304,7 +3304,8 @@
             "customerInfo": "معلومات العميل",
             "orderItems": "عناصر الطلب",
             "internalNotes": "ملاحظات داخلية",
-            "securityAndFraud": "الأمان والاحتيال"
+            "securityAndFraud": "الأمان والاحتيال",
+            "previousOrders": "الطلبات السابقة"
           },
           "fields": {
             "orderId": "رقم الطلب",
@@ -3331,6 +3332,16 @@
             "blacklistPhone": "حظر رقم الهاتف"
           },
           "securityHelp": "إجراءات متقدمة لإدارة السلوك المريب.",
+          "previousOrders": {
+            "matchCustomer": "تمت المطابقة من سجل العميل المرتبط.",
+            "matchPhone": "تمت المطابقة برقم الهاتف الموحد.",
+            "matchNone": "تعذر توحيد رقم الهاتف.",
+            "emptyCustomer": "لا توجد طلبات سابقة لهذا العميل.",
+            "emptyPhone": "لا توجد طلبات سابقة لهذا الهاتف.",
+            "emptyNone": "تعذر توحيد رقم الهاتف.",
+            "noItems": "لا توجد عناصر",
+            "moreItems": "+ {count} أخرى"
+          },
           "itemsTable": {
             "product": "المنتج",
             "price": "السعر",

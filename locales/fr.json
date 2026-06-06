@@ -3287,7 +3287,8 @@
             "customerInfo": "Informations client",
             "orderItems": "Articles de la commande",
             "internalNotes": "Notes internes",
-            "securityAndFraud": "Sécurité & Fraude"
+            "securityAndFraud": "Sécurité & Fraude",
+            "previousOrders": "Commandes précédentes"
           },
           "fields": {
             "orderId": "ID commande",
@@ -3314,6 +3315,16 @@
             "blacklistPhone": "Mettre le téléphone sur liste noire"
           },
           "securityHelp": "Actions avancées pour gérer les comportements à risque.",
+          "previousOrders": {
+            "matchCustomer": "Correspondance par fiche client liée.",
+            "matchPhone": "Correspondance par numéro de téléphone normalisé.",
+            "matchNone": "Le téléphone n'a pas pu être normalisé.",
+            "emptyCustomer": "Aucune commande précédente pour ce client.",
+            "emptyPhone": "Aucune commande précédente pour ce téléphone.",
+            "emptyNone": "Le téléphone n'a pas pu être normalisé.",
+            "noItems": "Aucun article",
+            "moreItems": "+ {count} autre(s)"
+          },
           "itemsTable": {
             "product": "Produit",
             "price": "Prix",

@@ -14,11 +14,12 @@ import { MaystroPickupPointService } from '../delivery/maystro/maystro-pickup-po
 import { LoyaltyCheckoutError, LoyaltyCheckoutService } from '../loyalty/loyalty-checkout.service'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
-import { PhoneNormalizationError } from '../loyalty/phone-normalization.service'
+import { PhoneNormalizationError, PhoneNormalizationService } from '../loyalty/phone-normalization.service'
 import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
 
 const telegramService = new TelegramService()
 const cashService = new CashService()
+const phoneNormalization = new PhoneNormalizationService()
 
 export class OrderValidationError extends Error {
     statusCode: number
@@ -147,6 +148,9 @@ const computeTotalWithShipping = (itemsTotal: number, shippingAmount: number | n
     const shippingCents = moneyToCents(shippingAmount || 0)
     return centsToMoney(itemsCents + shippingCents)
 }
+
+const normalizeCustomerPhoneForOrder = (phone: unknown) =>
+    phoneNormalization.tryNormalizeAlgerianPhone(phone)?.normalized ?? null
 
 const addUtcMonths = (date: Date, months: number) =>
     new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
@@ -862,7 +866,7 @@ export class OrdersService {
     }
 
     async findById(tenantId: string, id: string) {
-        return prisma.order.findFirst({
+        const order = await prisma.order.findFirst({
             where: { id, tenantId },
             include: {
                 items: {
@@ -895,6 +899,117 @@ export class OrdersService {
                 }
             }
         })
+
+        if (!order) return null
+
+        const previousOrderItemSelect = {
+            id: true,
+            productId: true,
+            variantId: true,
+            quantity: true,
+            price: true,
+            lineTotal: true,
+            product: {
+                select: { title: true }
+            },
+            variant: {
+                select: {
+                    optionValues: {
+                        select: {
+                            optionValue: {
+                                select: { label: true }
+                            }
+                        }
+                    }
+                }
+            }
+        } satisfies Prisma.OrderItemSelect
+
+        let previousOrdersMatch:
+            | { type: 'customer'; customerId: string; phoneNormalized?: string | null }
+            | { type: 'phone'; customerId?: null; phoneNormalized: string }
+            | { type: 'none'; customerId?: string | null; phoneNormalized?: string | null }
+
+        let previousOrders: any[] = []
+
+        if (order.customerId) {
+            previousOrdersMatch = {
+                type: 'customer',
+                customerId: order.customerId,
+                phoneNormalized: (order as any).customerPhoneNormalized ?? normalizeCustomerPhoneForOrder(order.customerPhone)
+            }
+            previousOrders = await prisma.order.findMany({
+                where: {
+                    tenantId,
+                    customerId: order.customerId,
+                    id: { not: order.id }
+                },
+                orderBy: { createdAt: 'desc' },
+                take: 100,
+                select: {
+                    id: true,
+                    publicId: true,
+                    status: true,
+                    callStatus: true,
+                    customerName: true,
+                    customerPhone: true,
+                    totalAmount: true,
+                    totalWithShippingAmount: true,
+                    shippingAmount: true,
+                    shippingProvider: true,
+                    deliveryMode: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    items: { select: previousOrderItemSelect }
+                }
+            })
+        } else {
+            const phoneNormalized = (order as any).customerPhoneNormalized ?? normalizeCustomerPhoneForOrder(order.customerPhone)
+            if (phoneNormalized) {
+                previousOrdersMatch = {
+                    type: 'phone',
+                    customerId: null,
+                    phoneNormalized
+                }
+                previousOrders = await prisma.order.findMany({
+                    where: {
+                        tenantId,
+                        customerPhoneNormalized: phoneNormalized,
+                        id: { not: order.id }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    take: 100,
+                    select: {
+                        id: true,
+                        publicId: true,
+                        status: true,
+                        callStatus: true,
+                        customerName: true,
+                        customerPhone: true,
+                        totalAmount: true,
+                        totalWithShippingAmount: true,
+                        shippingAmount: true,
+                        shippingProvider: true,
+                        deliveryMode: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        items: { select: previousOrderItemSelect }
+                    }
+                })
+            } else {
+                previousOrdersMatch = {
+                    type: 'none',
+                    customerId: null,
+                    phoneNormalized: null
+                }
+            }
+        }
+
+        return {
+            ...order,
+            previousOrders,
+            previousOrdersMatch
+        }
     }
 
     async deleteUnconfirmed(tenantId: string, id: string) {
@@ -1536,6 +1651,7 @@ export class OrdersService {
                 customerId: resolvedNextCustomerId,
                 customerName: nextCustomerName,
                 customerPhone: nextCustomerPhone,
+                customerPhoneNormalized: normalizeCustomerPhoneForOrder(nextCustomerPhone),
                 customerAddress: nextCustomerAddress,
                 deliveryMode: nextDeliveryMode,
                 shippingProvider: nextShippingProvider,
@@ -2371,6 +2487,7 @@ export class OrdersService {
                     customerId: resolvedCustomer?.id ?? null,
                     customerName,
                     customerPhone,
+                    customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? normalizeCustomerPhoneForOrder(customerPhone),
                     customerAddress: normalizedCustomerAddress,
                     deliveryMode,
                     shippingProvider,
@@ -2808,6 +2925,7 @@ export class OrdersService {
                     customerId: actualCustomerId,
                     customerName: actualCustomerName,
                     customerPhone: actualCustomerPhone,
+                    customerPhoneNormalized: normalizeCustomerPhoneForOrder(actualCustomerPhone),
                     customerAddress: normalizedCustomerAddress,
                     deliveryMode,
                     shippingProvider,

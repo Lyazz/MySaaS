@@ -3306,7 +3306,8 @@
             "customerInfo": "Customer information",
             "orderItems": "Order items",
             "internalNotes": "Internal Notes",
-            "securityAndFraud": "Security & Fraud"
+            "securityAndFraud": "Security & Fraud",
+            "previousOrders": "Previous orders"
           },
           "fields": {
             "orderId": "Order ID",
@@ -3333,6 +3334,16 @@
             "blacklistPhone": "Blacklist Phone Number"
           },
           "securityHelp": "Advanced actions to manage risky behavior.",
+          "previousOrders": {
+            "matchCustomer": "Matched by linked customer record.",
+            "matchPhone": "Matched by normalized phone number.",
+            "matchNone": "Phone could not be normalized.",
+            "emptyCustomer": "No previous orders for this customer.",
+            "emptyPhone": "No previous orders for this phone.",
+            "emptyNone": "Phone could not be normalized.",
+            "noItems": "No items",
+            "moreItems": "+ {count} more"
+          },
           "itemsTable": {
             "product": "Product",
             "price": "Price",

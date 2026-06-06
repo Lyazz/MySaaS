@@ -751,13 +751,13 @@
               </div>
             </section>
 
-            <!-- MORE: SECURITY -->
+            <!-- PREVIOUS ORDERS -->
             <section class="od-section">
               <header class="od-section__header" @click="toggleSection('more')" :aria-expanded="!collapsed.more" role="button" tabindex="0" @keydown.enter.prevent="toggleSection('more')" @keydown.space.prevent="toggleSection('more')">
                 <div class="od-section__title">
-                  <Icon name="lucide:shield-alert" class="w-3.5 h-3.5" />
-                  <span>{{ t('admin.pages.orders.detail.sections.securityAndFraud', 'Security & Fraud') }}</span>
-                  <span class="od-section__count od-section__count--soon">{{ t('common.comingSoon', 'Soon') }}</span>
+                  <Icon name="lucide:history" class="w-3.5 h-3.5" />
+                  <span>{{ t('admin.pages.orders.detail.sections.previousOrders', 'Previous orders') }}</span>
+                  <span class="od-section__count">{{ previousOrders.length }}</span>
                 </div>
                 <Icon
                   name="lucide:chevron-down"
@@ -765,32 +765,41 @@
                   :class="{ 'od-chev--open': !collapsed.more }"
                 />
               </header>
-              <div v-show="!collapsed.more" class="od-section__body space-y-2">
-                <p class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.pages.orders.detail.securityHelp', 'Advanced actions to manage risky behavior.') }}</p>
-                <button
-                  type="button"
-                  class="ui-btn ui-btn--ghost ui-btn--sm w-full justify-start"
-                  @click="handleBlacklistPlaceholder('customer')"
-                >
-                  <Icon name="lucide:user-x" class="w-3.5 h-3.5" />
-                  {{ t('admin.pages.orders.detail.actions.blacklistCustomer', 'Blacklist customer') }}
-                </button>
-                <button
-                  type="button"
-                  class="ui-btn ui-btn--ghost ui-btn--sm w-full justify-start"
-                  @click="handleBlacklistPlaceholder('ip')"
-                >
-                  <Icon name="lucide:globe-lock" class="w-3.5 h-3.5" />
-                  {{ t('admin.pages.orders.detail.actions.blacklistIp', 'Blacklist IP') }}
-                </button>
-                <button
-                  type="button"
-                  class="ui-btn ui-btn--ghost ui-btn--sm w-full justify-start"
-                  @click="handleBlacklistPlaceholder('phone')"
-                >
-                  <Icon name="lucide:phone-off" class="w-3.5 h-3.5" />
-                  {{ t('admin.pages.orders.detail.actions.blacklistPhone', 'Blacklist phone') }}
-                </button>
+              <div v-show="!collapsed.more" class="od-section__body">
+                <p class="od-history__match">
+                  <Icon name="lucide:shield-check" class="w-3.5 h-3.5" />
+                  {{ previousOrdersMatchLabel }}
+                </p>
+
+                <div v-if="previousOrders.length > 0" class="od-history">
+                  <NuxtLink
+                    v-for="historyOrder in previousOrders"
+                    :key="historyOrder.id"
+                    :to="`/admin/orders/${historyOrder.id}`"
+                    class="od-history__row"
+                  >
+                    <div class="od-history__top">
+                      <span class="od-history__id">{{ historyOrder.publicId || `#${historyOrder.id.substring(0, 8).toUpperCase()}` }}</span>
+                      <AdminOrderStatusBadge :status="historyOrder.status" />
+                    </div>
+                    <div class="od-history__meta">
+                      <span>{{ formatDate(historyOrder.createdAt) }}</span>
+                      <span>{{ callStatusLabel(historyOrder.callStatus) }}</span>
+                    </div>
+                    <div class="od-history__items">
+                      {{ formatPreviousOrderItems(historyOrder) }}
+                    </div>
+                    <div class="od-history__foot">
+                      <span>{{ deliveryModeLabel(historyOrder.deliveryMode) }}</span>
+                      <strong>{{ formatCurrency(previousOrderTotal(historyOrder)) }}</strong>
+                    </div>
+                  </NuxtLink>
+                </div>
+
+                <div v-else class="od-history__empty">
+                  <Icon name="lucide:shield-check" class="w-5 h-5" />
+                  <span>{{ previousOrdersEmptyLabel }}</span>
+                </div>
               </div>
             </section>
           </aside>
@@ -844,7 +853,7 @@ const { showToast } = useToast()
 const { format: formatCurrency } = useCurrency()
 const route = useRoute()
 const router = useRouter()
-const orderId = route.params.id as string
+const orderId = computed(() => String(route.params.id || ''))
 const { t, locale } = useI18n({ useScope: 'global' })
 const { markOrderAsRead } = useOrderUnreadCount()
 
@@ -863,11 +872,50 @@ interface OrderItem {
   } | null
 }
 
+interface PreviousOrderItem {
+  id: string
+  productId: string
+  variantId?: string | null
+  quantity: number
+  price: number
+  lineTotal?: number | null
+  product?: {
+    title: string
+  } | null
+  variant?: {
+    optionValues?: Array<{ optionValue?: { label?: string | null } | null }> | null
+  } | null
+}
+
+interface PreviousOrder {
+  id: string
+  publicId?: string | null
+  status: string
+  callStatus?: string | null
+  customerName: string
+  customerPhone: string
+  totalAmount: number
+  totalWithShippingAmount?: number | null
+  shippingAmount?: number | null
+  shippingProvider?: string | null
+  deliveryMode?: string | null
+  createdAt: string
+  updatedAt: string
+  items?: PreviousOrderItem[]
+}
+
+type PreviousOrdersMatch =
+  | { type: 'customer'; customerId: string; phoneNormalized?: string | null }
+  | { type: 'phone'; customerId?: null; phoneNormalized: string }
+  | { type: 'none'; customerId?: string | null; phoneNormalized?: string | null }
+
   interface Order {
     id: string
     publicId?: string | null
+    customerId?: string | null
     customerName: string
     customerPhone: string
+    customerPhoneNormalized?: string | null
     customerAddress: string | null
     totalAmount: number
     totalWithShippingAmount?: number | null
@@ -894,6 +942,8 @@ interface OrderItem {
     internalNotes: string | null
     createdAt: string
     items: OrderItem[]
+    previousOrders?: PreviousOrder[]
+    previousOrdersMatch?: PreviousOrdersMatch
   }
 
 type CartItem = {
@@ -1007,6 +1057,30 @@ function orderStatusLabel(code: string) {
     }
     const shipping = o.shippingAmount == null ? 0 : Number(o.shippingAmount)
     return Number(o.totalAmount || 0) + (Number.isFinite(shipping) ? shipping : 0)
+  })
+
+  const previousOrders = computed(() => order.value?.previousOrders ?? [])
+
+  const previousOrdersMatchLabel = computed(() => {
+    const match = order.value?.previousOrdersMatch
+    if (match?.type === 'customer') {
+      return t('admin.pages.orders.detail.previousOrders.matchCustomer', 'Matched by linked customer record.')
+    }
+    if (match?.type === 'phone') {
+      return t('admin.pages.orders.detail.previousOrders.matchPhone', 'Matched by normalized phone number.')
+    }
+    return t('admin.pages.orders.detail.previousOrders.matchNone', 'Phone could not be normalized.')
+  })
+
+  const previousOrdersEmptyLabel = computed(() => {
+    const match = order.value?.previousOrdersMatch
+    if (match?.type === 'customer') {
+      return t('admin.pages.orders.detail.previousOrders.emptyCustomer', 'No previous orders for this customer.')
+    }
+    if (match?.type === 'phone') {
+      return t('admin.pages.orders.detail.previousOrders.emptyPhone', 'No previous orders for this phone.')
+    }
+    return t('admin.pages.orders.detail.previousOrders.emptyNone', 'Phone could not be normalized.')
   })
 
   const statusLocked = computed(() => {
@@ -1532,6 +1606,36 @@ function orderStatusLabel(code: string) {
     return t('admin.pages.orders.index.deliveryModes.home', 'Home delivery')
   }
 
+  function previousOrderTotal(historyOrder: PreviousOrder) {
+    if (historyOrder.totalWithShippingAmount != null && Number.isFinite(Number(historyOrder.totalWithShippingAmount))) {
+      return Number(historyOrder.totalWithShippingAmount)
+    }
+    const shipping = historyOrder.shippingAmount == null ? 0 : Number(historyOrder.shippingAmount)
+    return Number(historyOrder.totalAmount || 0) + (Number.isFinite(shipping) ? shipping : 0)
+  }
+
+  function callStatusLabel(status: any) {
+    const value = String(status || 'not_called')
+    return t(`admin.pages.orders.detail.fields.callStatusValues.${value}`, value)
+  }
+
+  function formatPreviousOrderItems(historyOrder: PreviousOrder) {
+    const items = Array.isArray(historyOrder.items) ? historyOrder.items : []
+    if (items.length === 0) return t('admin.pages.orders.detail.previousOrders.noItems', 'No items')
+
+    const visible = items.slice(0, 2).map((item) => {
+      const title = item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product')
+      const variantLabel = variantLabelFromOrderItem(item)
+      const label = variantLabel ? `${title} (${variantLabel})` : title
+      return `${label} x${item.quantity}`
+    })
+    const remaining = items.length - visible.length
+    if (remaining > 0) {
+      visible.push(t('admin.pages.orders.detail.previousOrders.moreItems', { count: remaining }))
+    }
+    return visible.join(' · ')
+  }
+
   async function retryMaystro() {
     if (!order.value) return
     errorMessage.value = ''
@@ -1570,7 +1674,7 @@ function orderStatusLabel(code: string) {
     if (!order.value) return
     errorMessage.value = ''
     try {
-      const blob = await $fetch(`/api/admin/orders/${encodeURIComponent(orderId)}/bordereau`, {
+      const blob = await $fetch(`/api/admin/orders/${encodeURIComponent(orderId.value)}/bordereau`, {
         headers: { Authorization: `Bearer ${authStore.token}` },
         responseType: 'blob' as any
       }) as unknown as Blob
@@ -1583,7 +1687,7 @@ function orderStatusLabel(code: string) {
     }
   }
 
-function variantLabelFromOrderItem(item: OrderItem): string | undefined {
+function variantLabelFromOrderItem(item: OrderItem | PreviousOrderItem): string | undefined {
   const labels =
     item.variant?.optionValues
       ?.map((ov) => ov?.optionValue?.label)
@@ -1630,7 +1734,7 @@ const cartTotal = computed(() => {
 async function fetchOrder() {
   loading.value = true
   try {
-    const data = await $fetch(`/api/admin/orders/${orderId}`, {
+    const data = await $fetch(`/api/admin/orders/${orderId.value}`, {
       headers: {
         Authorization: `Bearer ${authStore.token}`
       }
@@ -1641,7 +1745,7 @@ async function fetchOrder() {
     editing.value = false
     editErrorMessage.value = ''
     try {
-      await markOrderAsRead(orderId)
+      await markOrderAsRead(orderId.value)
     } catch (markReadError) {
       console.error('Failed to mark order as read:', markReadError)
     }
@@ -1664,7 +1768,7 @@ async function confirmDelete() {
 
   deleteError.value = null
   try {
-    await $fetch(`/api/admin/orders/${encodeURIComponent(orderId)}`, {
+    await $fetch(`/api/admin/orders/${encodeURIComponent(orderId.value)}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
@@ -1844,7 +1948,7 @@ async function saveEdit() {
       }))
     }
 
-    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: payload
@@ -1892,7 +1996,7 @@ async function saveCustomerInfo() {
   customerSaveError.value = ''
   savingCustomer.value = true
   try {
-    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: {
@@ -1941,7 +2045,7 @@ async function handleStatusUpdate() {
   updating.value = true
 
   try {
-    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -1976,7 +2080,7 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
   updating.value = true
 
   try {
-    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -2011,7 +2115,7 @@ async function handleUpdateCallStatus() {
   callStatusSavedMessage.value = ''
   
   try {
-    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: { callStatus: order.value.callStatus }
@@ -2034,7 +2138,7 @@ async function handleUpdateInternalNotes() {
   savingNotes.value = true
   notesSavedMessage.value = ''
   try {
-    const updated = await $fetch(`/api/admin/orders/${orderId}`, {
+    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` },
       body: { internalNotes: order.value.internalNotes }
@@ -2202,6 +2306,13 @@ onMounted(() => {
     fetchOrder()
   ])
 })
+
+watch(
+  () => route.params.id,
+  () => {
+    void fetchOrder()
+  }
+)
 </script>
 
 <style scoped>
@@ -2509,6 +2620,100 @@ onMounted(() => {
 
 .od-section__body {
   padding: 18px;
+}
+
+.od-history__match {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
+.od-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.od-history__row {
+  display: block;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-2);
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+.od-history__row:hover {
+  border-color: rgb(var(--brand-rgb, 99 102 241) / 0.42);
+  background: rgb(var(--brand-rgb, 99 102 241) / 0.05);
+  transform: translateY(-1px);
+}
+
+.od-history__top,
+.od-history__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.od-history__id {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.od-history__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.od-history__items {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.od-history__foot {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--surface-border);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.od-history__foot strong {
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.od-history__empty {
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px dashed var(--surface-border);
+  background: var(--surface-2);
+  color: var(--text-tertiary);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .od-chev {

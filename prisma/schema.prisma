@@ -950,10 +950,11 @@ model Order {
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
 
-  customerName    String
-  customerPhone   String
-  customerAddress String?
-  customerIp      String?
+  customerName            String
+  customerPhone           String
+  customerPhoneNormalized String?
+  customerAddress         String?
+  customerIp              String?
 
   callStatus    String    @default("not_called")
   internalNotes String?
@@ -988,6 +989,7 @@ model Order {
   @@unique([tenantId, publicId])
   @@index([tenantId])
   @@index([tenantId, customerId])
+  @@index([tenantId, customerPhoneNormalized])
   @@index([tenantId, readAt])
 }
 

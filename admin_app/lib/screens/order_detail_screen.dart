@@ -14,6 +14,7 @@ import '../providers/store_settings_provider.dart';
 import '../utils/tenant_currency.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/badges/status_badges.dart';
 
 class DashedDivider extends StatelessWidget {
   final Color color;
@@ -210,7 +211,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
 
     final order = _order!;
     final id = order.id.isNotEmpty ? order.id : widget.orderId;
-    final publicId = order.publicId ?? '#${id.substring(0, 8).toUpperCase()}';
+    final fallbackId = id.length > 8 ? id.substring(0, 8) : id;
+    final publicId = order.publicId ?? '#${fallbackId.toUpperCase()}';
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -247,7 +249,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                     _buildStatusCard(context, order),
                     const SizedBox(height: 24),
 
-                    _buildSecurityCard(context),
+                    _buildPreviousOrdersCard(context, order, money),
                     const SizedBox(
                       height: 64,
                     ), // extra bottom padding for scroll
@@ -527,7 +529,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             fontSize: 10,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.08 * 10,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
         const SizedBox(height: 2),
@@ -538,7 +542,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
             fontWeight: strong ? FontWeight.w600 : FontWeight.w500,
             color: strong
                 ? Theme.of(context).colorScheme.onSurface
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -633,7 +639,9 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               Icon(
                 LucideIcons.eyeOff,
                 size: 12,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
               const SizedBox(width: 6),
               Text(
@@ -937,52 +945,319 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     );
   }
 
-  Widget _buildSecurityCard(BuildContext context) {
+  String _previousOrdersMatchLabel(Order order) {
+    final match = order.previousOrdersMatch;
+    if (match?.type == 'customer') {
+      return 'Matched by linked customer record.';
+    }
+    if (match?.type == 'phone') {
+      return 'Matched by normalized phone number.';
+    }
+    return 'Phone could not be normalized.';
+  }
+
+  String _previousOrdersEmptyLabel(Order order) {
+    final match = order.previousOrdersMatch;
+    if (match?.type == 'customer') {
+      return 'No previous orders for this customer.';
+    }
+    if (match?.type == 'phone') {
+      return 'No previous orders for this phone.';
+    }
+    return 'Phone could not be normalized.';
+  }
+
+  String _callStatusLabel(String status) {
+    switch (status.trim()) {
+      case 'called':
+      case 'answered':
+        return 'Called';
+      case 'no_answer':
+        return 'No answer';
+      case 'attempt_1':
+        return '1st attempt';
+      case 'attempt_2':
+        return '2nd attempt';
+      case 'attempt_3':
+        return '3rd attempt';
+      case 'switched_off':
+      case 'unreachable':
+        return 'Unreachable';
+      default:
+        return 'Not called';
+    }
+  }
+
+  String _deliveryModeLabel(String mode) {
+    switch (mode.trim().toLowerCase()) {
+      case 'pickup':
+      case 'desk':
+      case 'office':
+        return 'Stop desk';
+      case 'store':
+        return 'Store pickup';
+      default:
+        return 'Home delivery';
+    }
+  }
+
+  double _orderTotalWithShipping(Order order) {
+    if (order.totalWithShippingAmount != null) {
+      return order.totalWithShippingAmount!;
+    }
+    return order.totalAmount + (order.shippingAmount ?? 0);
+  }
+
+  String _previousOrderItemsSummary(Order order) {
+    if (order.items.isEmpty) return 'No items';
+    final visible = order.items.take(2).map((item) {
+      final title = (item.productTitle ?? item.productId).trim().isEmpty
+          ? 'Product'
+          : (item.productTitle ?? item.productId).trim();
+      final variant = item.variantLabel?.trim();
+      final label = variant != null && variant.isNotEmpty
+          ? '$title ($variant)'
+          : title;
+      return '$label ×${item.quantity}';
+    }).toList();
+    final remaining = order.items.length - visible.length;
+    if (remaining > 0) visible.add('+ $remaining more');
+    return visible.join(' · ');
+  }
+
+  Widget _buildPreviousOrdersCard(
+    BuildContext context,
+    Order order,
+    NumberFormat money,
+  ) {
+    final previousOrders = order.previousOrders;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+
     return _SectionCard(
-      title: 'Security & Fraud',
-      icon: LucideIcons.shieldAlert,
+      title: 'Previous orders',
+      icon: LucideIcons.history,
       trailing: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
         decoration: BoxDecoration(
-          color: const Color(0xFFF43F5E).withValues(alpha: 0.1),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
-          'soon',
+          '${previousOrders.length}',
           style: GoogleFonts.jetBrainsMono(
             fontSize: 10,
-            letterSpacing: 0.04 * 10,
-            color: const Color(0xFFBE123C),
+            fontWeight: FontWeight.w600,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Advanced actions to manage risky behavior.',
-            style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                LucideIcons.shieldCheck,
+                size: 15,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _previousOrdersMatchLabel(order),
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.35,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.62),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
-          AppButton.ghost(
-            label: 'Blacklist customer',
-            icon: LucideIcons.userX,
-            onPressed: () {},
-          ),
-          AppButton.ghost(
-            label: 'Blacklist IP',
-            icon: LucideIcons.globe,
-            onPressed: () {},
-          ),
-          AppButton.ghost(
-            label: 'Blacklist phone',
-            icon: LucideIcons.phoneOff,
-            onPressed: () {},
-          ),
+          if (previousOrders.isEmpty)
+            Container(
+              constraints: const BoxConstraints(minHeight: 86),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.03),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: borderColor,
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  _previousOrdersEmptyLabel(order),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.58),
+                  ),
+                ),
+              ),
+            )
+          else
+            Column(
+              children: [
+                for (var i = 0; i < previousOrders.length; i++) ...[
+                  _PreviousOrderTile(
+                    order: previousOrders[i],
+                    money: money,
+                    borderColor: borderColor,
+                    callStatusLabel: _callStatusLabel,
+                    deliveryModeLabel: _deliveryModeLabel,
+                    totalWithShipping: _orderTotalWithShipping,
+                    itemsSummary: _previousOrderItemsSummary,
+                    onTap: () =>
+                        context.push('/orders/${previousOrders[i].id}'),
+                  ),
+                  if (i != previousOrders.length - 1)
+                    const SizedBox(height: 10),
+                ],
+              ],
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _PreviousOrderTile extends StatelessWidget {
+  final Order order;
+  final NumberFormat money;
+  final Color borderColor;
+  final String Function(String status) callStatusLabel;
+  final String Function(String mode) deliveryModeLabel;
+  final double Function(Order order) totalWithShipping;
+  final String Function(Order order) itemsSummary;
+  final VoidCallback onTap;
+
+  const _PreviousOrderTile({
+    required this.order,
+    required this.money,
+    required this.borderColor,
+    required this.callStatusLabel,
+    required this.deliveryModeLabel,
+    required this.totalWithShipping,
+    required this.itemsSummary,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fallbackId = order.id.length > 8
+        ? order.id.substring(0, 8)
+        : order.id;
+    final publicId = order.publicId ?? '#${fallbackId.toUpperCase()}';
+    final textColor = Theme.of(context).colorScheme.onSurface;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: textColor.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    publicId,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OrderStatusBadge(status: order.status),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 10,
+              runSpacing: 4,
+              children: [
+                Text(
+                  DateFormat.yMd().add_jm().format(order.createdAt),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: textColor.withValues(alpha: 0.55),
+                  ),
+                ),
+                Text(
+                  callStatusLabel(order.callStatus),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: textColor.withValues(alpha: 0.55),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              itemsSummary(order),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.35,
+                color: textColor.withValues(alpha: 0.74),
+              ),
+            ),
+            const SizedBox(height: 10),
+            DashedDivider(color: borderColor),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    deliveryModeLabel(order.deliveryMode),
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: textColor.withValues(alpha: 0.55),
+                    ),
+                  ),
+                ),
+                Text(
+                  money.format(totalWithShipping(order)),
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1076,7 +1351,7 @@ class _OrderItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final qty = item.quantity;
     final title = item.productTitle ?? item.productId;
-    final lineTotal = item.price * qty;
+    final lineTotal = item.lineTotal ?? (item.price * qty);
 
     return Column(
       children: [
