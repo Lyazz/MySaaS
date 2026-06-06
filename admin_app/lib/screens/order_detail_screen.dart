@@ -946,25 +946,52 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   }
 
   String _previousOrdersMatchLabel(Order order) {
-    final match = order.previousOrdersMatch;
-    if (match?.type == 'customer') {
+    final type = _previousOrdersMatchType(order);
+    if (type == 'customer') {
       return 'Matched by linked customer record.';
     }
-    if (match?.type == 'phone') {
+    if (type == 'phone') {
       return 'Matched by normalized phone number.';
     }
     return 'Phone could not be normalized.';
   }
 
   String _previousOrdersEmptyLabel(Order order) {
-    final match = order.previousOrdersMatch;
-    if (match?.type == 'customer') {
+    final type = _previousOrdersMatchType(order);
+    if (type == 'customer') {
       return 'No previous orders for this customer.';
     }
-    if (match?.type == 'phone') {
+    if (type == 'phone') {
       return 'No previous orders for this phone.';
     }
     return 'Phone could not be normalized.';
+  }
+
+  String _previousOrdersMatchType(Order order) {
+    final type = order.previousOrdersMatch?.type.trim().toLowerCase();
+    if (type == 'customer' || type == 'phone') return type!;
+    if (_normalizedAlgerianPhone(order) != null) return 'phone';
+    return 'none';
+  }
+
+  String? _normalizedAlgerianPhone(Order order) {
+    final stored = order.customerPhoneNormalized?.trim();
+    if (stored != null && stored.isNotEmpty) return stored;
+
+    final digits = order.customerPhone.replaceAll(RegExp(r'\D'), '');
+    if (RegExp(r'^0[567]\d{8}$').hasMatch(digits)) {
+      return '213${digits.substring(1)}';
+    }
+    if (RegExp(r'^[567]\d{8}$').hasMatch(digits)) {
+      return '213$digits';
+    }
+    if (RegExp(r'^213[567]\d{8}$').hasMatch(digits)) {
+      return digits;
+    }
+    if (RegExp(r'^00213[567]\d{8}$').hasMatch(digits)) {
+      return digits.substring(2);
+    }
+    return null;
   }
 
   String _callStatusLabel(String status) {
