@@ -5,13 +5,16 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'app_config.dart';
 import 'bootstrap.dart';
+import 'providers/auth_provider.dart';
 import 'providers/settings_provider.dart';
 import 'router.dart';
 import 'services/app_storage.dart';
+import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService.registerBackgroundHandler();
   await EasyLocalization.ensureInitialized();
   await initializeDateFormatting();
 
@@ -35,13 +38,33 @@ Future<void> main() async {
   );
 }
 
-class AdminApp extends ConsumerWidget {
+class AdminApp extends ConsumerStatefulWidget {
   const AdminApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminApp> createState() => _AdminAppState();
+}
+
+class _AdminAppState extends ConsumerState<AdminApp> {
+  bool _scheduledInitialNotificationSync = false;
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final settings = ref.watch(settingsProvider);
+    final authState = ref.watch(authProvider);
+    final notificationService = ref.read(notificationServiceProvider);
+
+    notificationService.setRouteHandler(router.go);
+
+    ref.listen<AuthState>(authProvider, (_, next) {
+      _syncNotifications(next);
+    });
+
+    if (!_scheduledInitialNotificationSync) {
+      _scheduledInitialNotificationSync = true;
+      Future.microtask(() => _syncNotifications(authState));
+    }
 
     return MaterialApp.router(
       title: 'admin.nav.dashboard'.tr(),
@@ -53,6 +76,15 @@ class AdminApp extends ConsumerWidget {
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       debugShowCheckedModeBanner: false,
+    );
+  }
+
+  void _syncNotifications(AuthState authState) {
+    ref.read(notificationServiceProvider).syncAuthState(
+      isAuthenticated: authState.isAuthenticated,
+      mode: authState.mode,
+      userId: authState.user?.id,
+      tenantId: authState.user?.tenantId,
     );
   }
 }

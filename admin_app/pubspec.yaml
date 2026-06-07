@@ -75,6 +75,10 @@ dependencies:
   dart_jsonwebtoken: ^3.4.1
   crop_your_image: ^2.0.0
   image: ^4.8.0
+  firebase_core: ^4.10.0
+  firebase_messaging: ^16.3.0
+  flutter_local_notifications: ^20.1.0
+  http: ^1.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

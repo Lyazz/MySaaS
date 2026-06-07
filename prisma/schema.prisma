@@ -62,6 +62,9 @@ model Tenant {
   maystroInventoryLogs MaystroInventoryEvent[]
   licenses             License[]
   devices              Device[]
+  notificationEvents   NotificationEvent[]
+  notificationSubscriptions NotificationSubscription[]
+  notificationDeliveries    NotificationDelivery[]
 }
 
 model Cashbox {
@@ -386,6 +389,8 @@ model User {
   cashSessionsOpened      CashSession[]          @relation("CashSessionOpenedBy")
   cashSessionsClosed      CashSession[]          @relation("CashSessionClosedBy")
   cashTransactionsCreated CashTransaction[]      @relation("CashTransactionCreatedBy")
+  notificationSubscriptions NotificationSubscription[]
+  notificationDeliveries    NotificationDelivery[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
@@ -1350,6 +1355,88 @@ model GoogleOAuthToken {
 
   @@unique([tenantId, userId])
   @@index([tenantId])
+}
+
+model NotificationEvent {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  type       String
+  entityType String
+  entityId   String
+
+  title String
+  body  String
+  data  Json?
+
+  deliveries NotificationDelivery[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, type, createdAt])
+  @@index([tenantId, entityType, entityId])
+}
+
+model NotificationSubscription {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [tenantId, userId], references: [tenantId, id], onDelete: Cascade)
+
+  hardwareId String
+  platform   String
+  channel    String
+  fcmToken   String?
+  isActive   Boolean @default(true)
+  lastSeenAt DateTime @default(now())
+
+  deliveries NotificationDelivery[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, userId, hardwareId, channel])
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, isActive])
+  @@index([tenantId, channel])
+}
+
+model NotificationDelivery {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  eventId String
+  event   NotificationEvent @relation(fields: [tenantId, eventId], references: [tenantId, id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [tenantId, userId], references: [tenantId, id], onDelete: Cascade)
+
+  subscriptionId String?
+  subscription   NotificationSubscription? @relation(fields: [tenantId, subscriptionId], references: [tenantId, id], onDelete: Cascade)
+
+  channel String
+  status  String @default("PENDING")
+  error   String?
+  readAt  DateTime?
+  sentAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, eventId, userId, channel, subscriptionId])
+  @@index([tenantId])
+  @@index([tenantId, eventId])
+  @@index([tenantId, userId, readAt])
+  @@index([tenantId, subscriptionId])
+  @@index([tenantId, status])
 }
 
 model License {

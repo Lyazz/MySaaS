@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "173108648235",
+    "project_id": "swekly-45280",
+    "storage_bucket": "swekly-45280.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173108648235:android:d8acce0ea06929c067cd6e",
+        "android_client_info": {
+          "package_name": "com.example.admin_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTOfxF6pG8s7AkEbEaypPfsmpBrshvnBc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

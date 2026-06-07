@@ -40,6 +40,7 @@ import googleOAuthRouter from './modules/google-oauth/routes';
 import syncRouter from './modules/sync/routes';
 import provisioningRouter from './modules/provisioning/routes';
 import activationRouter from './modules/activation/routes';
+import notificationsRouter from './modules/notifications/routes';
 
 const router = Router();
 
@@ -92,6 +93,7 @@ router.use('/admin/staff-roles', staffRolesRouter);
 router.use('/admin/audit-logs', adminAuditLogsRouter);
 router.use('/admin/loyalty', loyaltyRouter);
 router.use('/admin/sync', syncRouter);
+router.use('/admin/notifications', notificationsRouter);
 
 // Super Admin
 router.use('/super-admin', superAdminRouter);

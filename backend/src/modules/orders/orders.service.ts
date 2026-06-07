@@ -16,6 +16,7 @@ import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
 import { PhoneNormalizationError, PhoneNormalizationService } from '../loyalty/phone-normalization.service'
 import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
+import { notificationsService } from '../notifications/notifications.service'
 
 const telegramService = new TelegramService()
 const cashService = new CashService()
@@ -2579,6 +2580,7 @@ export class OrdersService {
 
         if (finalOrder) {
             telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
+            notificationsService.emitOrderCreated(input.tenantId, finalOrder.id).catch(console.error)
         }
 
         return {
@@ -2991,6 +2993,7 @@ export class OrdersService {
 
         if (finalOrder) {
             telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
+            notificationsService.emitOrderCreated(input.tenantId, finalOrder.id).catch(console.error)
         }
 
         return finalOrder
