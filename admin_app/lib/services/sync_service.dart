@@ -7,7 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:dio/dio.dart' show DioException, Options;
-import 'package:sqflite_sqlcipher/sqflite.dart' show ConflictAlgorithm, Sqflite;
+import 'package:sqflite_sqlcipher/sqflite.dart'
+    show ConflictAlgorithm, DatabaseExecutor, Sqflite;
 
 import '../models/app_mode.dart';
 import '../utils/image_storage_manager.dart';
@@ -16,14 +17,29 @@ import 'database_service.dart';
 import 'sync_conflict_policy.dart';
 import 'tenant_mode_service.dart';
 
-enum SyncStatus { pending, syncing, synced, failed, conflicted }
+enum SyncStatus { pending, syncing, synced, failed, conflicted, rejected }
 
 enum SyncStage { synced, pending, syncing, failed, conflicted }
+
+enum _SyncFailureDisposition { retryable, conflicted, rejected }
 
 class SyncConflictDetected implements Exception {
   final String message;
 
   SyncConflictDetected(this.message);
+
+  @override
+  String toString() => message;
+}
+
+class SyncUnsupportedOperation implements Exception {
+  final String entityType;
+  final String action;
+
+  SyncUnsupportedOperation(this.entityType, this.action);
+
+  @override
+  String toString() => 'Cannot sync $entityType:$action';
 }
 
 /// Represents a single durable outbox entry.
@@ -147,6 +163,7 @@ class SyncState {
   final int retrying;
   final int recoveryRequired;
   final int conflicted;
+  final int rejected;
   final bool isSyncing;
   final DateTime? nextRetryAt;
   final String? latestError;
@@ -157,6 +174,7 @@ class SyncState {
     this.retrying = 0,
     this.recoveryRequired = 0,
     this.conflicted = 0,
+    this.rejected = 0,
     this.isSyncing = false,
     this.nextRetryAt,
     this.latestError,
@@ -165,7 +183,7 @@ class SyncState {
   SyncStage get stage {
     if (conflicted > 0) return SyncStage.conflicted;
     if (isSyncing) return SyncStage.syncing;
-    if (failed > 0) return SyncStage.failed;
+    if (failed > 0 || rejected > 0) return SyncStage.failed;
     if (pending > 0) return SyncStage.pending;
     return SyncStage.synced;
   }
@@ -178,6 +196,39 @@ class SyncService {
 
   static const int _maxRetries = 5;
   static const int _batchSize = 50;
+  static const Map<String, Set<String>> _supportedOperations = {
+    'sale': {'create'},
+    'customer': {'create', 'update'},
+    'product': {'create', 'update', 'delete'},
+    'category': {'create', 'update', 'delete'},
+    'user': {'create', 'update', 'delete'},
+    'supplier': {'create', 'update', 'delete'},
+    'order': {
+      'create',
+      'updateStatus',
+      'updateCallStatus',
+      'updateInternalNotes',
+    },
+    'storeSettings': {'patch'},
+    'contactInfo': {'create', 'update', 'delete'},
+    'customerPayment': {'create'},
+    'receiptLayout': {'create', 'update', 'delete'},
+    'printerProfile': {'create', 'update', 'delete'},
+    'staffRole': {'create', 'update', 'delete'},
+    'cashbox': {'create', 'update'},
+    'cashSession': {'open', 'close'},
+    'cashTransaction': {'create'},
+    'deliveryProvider': {'update'},
+    'purchase': {
+      'createDraft',
+      'addItem',
+      'receiveItem',
+      'updateItem',
+      'removeItem',
+      'delete',
+      'updateStatus',
+    },
+  };
 
   final _dbService = DatabaseService();
   final Connectivity _connectivity = Connectivity();
@@ -238,12 +289,13 @@ class SyncService {
     final db = await _dbService.database;
     final rows = await db.query(
       'sync_queue',
-      where: 'tenantId = ? AND workspaceId = ? AND status IN (?, ?)',
+      where: 'tenantId = ? AND workspaceId = ? AND status IN (?, ?, ?)',
       whereArgs: [
         tenantId,
         workspaceId,
         SyncStatus.failed.name,
         SyncStatus.conflicted.name,
+        SyncStatus.rejected.name,
       ],
       orderBy: 'createdAt ASC',
     );
@@ -287,6 +339,9 @@ class SyncService {
     required Map<String, dynamic> payload,
     String? idempotencyKey,
   }) async {
+    if (!_isSupportedOperation(entityType, action)) {
+      throw SyncUnsupportedOperation(entityType, action);
+    }
     final tenantId = TenantModeService().activeTenantId;
     if (tenantId.trim().isEmpty) {
       throw StateError(
@@ -314,6 +369,10 @@ class SyncService {
     if (_mode.allowsNetworkRequests) {
       _checkAndSync();
     }
+  }
+
+  bool _isSupportedOperation(String entityType, String action) {
+    return _supportedOperations[entityType]?.contains(action) == true;
   }
 
   Future<void> _checkAndSync() async {
@@ -385,6 +444,9 @@ class SyncService {
     );
 
     try {
+      if (!_isSupportedOperation(op.entityType, op.action)) {
+        throw SyncUnsupportedOperation(op.entityType, op.action);
+      }
       final withResolvedAliases = await _resolveOperationAliases(op);
       final resolved = await _processImagesInPayload(withResolvedAliases);
       final conflict = await _preflightConflictCheck(resolved);
@@ -399,11 +461,9 @@ class SyncService {
         whereArgs: [op.id, op.tenantId, op.workspaceId],
       );
     } catch (e) {
-      final isConflict =
-          e is SyncConflictDetected ||
-          (e is DioException && e.response?.statusCode == 409);
+      final disposition = _classifySyncFailure(e);
       final newRetryCount = op.retryCount + 1;
-      if (isConflict) {
+      if (disposition == _SyncFailureDisposition.conflicted) {
         await db.update(
           'sync_queue',
           {
@@ -415,6 +475,18 @@ class SyncService {
           whereArgs: [op.id, op.tenantId],
         );
         await _markLocalOperationConflicted(op);
+      } else if (disposition == _SyncFailureDisposition.rejected) {
+        await db.update(
+          'sync_queue',
+          {
+            'status': SyncStatus.rejected.name,
+            'lastError': _syncErrorMessage(e),
+            'nextRetryAt': null,
+          },
+          where: 'id = ? AND tenantId = ? AND workspaceId = ?',
+          whereArgs: [op.id, op.tenantId, op.workspaceId],
+        );
+        await _markLocalOperationRejected(op);
       } else {
         final backoffSeconds = _backoffSeconds(newRetryCount);
         final nextRetryAt = DateTime.now().add(
@@ -439,6 +511,40 @@ class SyncService {
         }
       }
     }
+  }
+
+  _SyncFailureDisposition _classifySyncFailure(Object error) {
+    if (error is SyncConflictDetected) {
+      return _SyncFailureDisposition.conflicted;
+    }
+    if (error is SyncUnsupportedOperation) {
+      return _SyncFailureDisposition.rejected;
+    }
+    if (error is DioException) {
+      final status = error.response?.statusCode;
+      if (status == 409) return _SyncFailureDisposition.conflicted;
+      if (status == 400 || status == 403 || status == 404 || status == 422) {
+        return _SyncFailureDisposition.rejected;
+      }
+      return _SyncFailureDisposition.retryable;
+    }
+    return _SyncFailureDisposition.retryable;
+  }
+
+  String _syncErrorMessage(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map) {
+        final message =
+            data['statusMessage'] ?? data['message'] ?? data['error'];
+        if (message != null && message.toString().trim().isNotEmpty) {
+          return message.toString();
+        }
+      }
+      final message = error.message?.trim();
+      if (message != null && message.isNotEmpty) return message;
+    }
+    return error.toString();
   }
 
   Future<void> _scheduleNextRetry() async {
@@ -493,6 +599,10 @@ class SyncService {
     switch (op.entityType) {
       case 'order':
         await resolveField('id', 'order');
+        break;
+      case 'user':
+        await resolveField('staffRoleId', 'staffRole');
+        await resolveField('cashboxId', 'cashbox');
         break;
       case 'sale':
         await resolveField('customerId', 'customer');
@@ -751,6 +861,18 @@ class SyncService {
             data: _stripSyncOnlyFields(op.payload, const {'baseFingerprint'}),
           )).data;
         }
+        if (op.action == 'updateCallStatus') {
+          return (await client.patch(
+            '/admin/orders/$id',
+            data: {'callStatus': op.payload['callStatus']},
+          )).data;
+        }
+        if (op.action == 'updateInternalNotes') {
+          return (await client.patch(
+            '/admin/orders/$id',
+            data: {'internalNotes': op.payload['internalNotes']},
+          )).data;
+        }
         break;
       case 'storeSettings':
         if (op.action == 'patch') {
@@ -950,7 +1072,7 @@ class SyncService {
         break;
     }
 
-    throw UnimplementedError('Cannot sync ${op.entityType}:${op.action}');
+    throw SyncUnsupportedOperation(op.entityType, op.action);
   }
 
   Map<String, dynamic> _stripSyncOnlyFields(
@@ -1073,6 +1195,69 @@ class SyncService {
     final localId = (op.payload['offlineId'] ?? op.payload['id'])?.toString();
 
     switch (op.entityType) {
+      case 'customer':
+        if (op.action == 'create' && localId != null && localId.isNotEmpty) {
+          final data = _asMap(responseData);
+          final remoteId = _string(data?['id']);
+          if (data != null && remoteId.isNotEmpty) {
+            await _replaceSyncedRow(
+              db: db,
+              table: 'customers',
+              tenantId: op.tenantId,
+              entityType: op.entityType,
+              localId: localId,
+              remoteId: remoteId,
+              values: {
+                'name': _string(data['name'] ?? op.payload['name']),
+                'phone':
+                    data['phone']?.toString() ??
+                    op.payload['phone']?.toString(),
+                'email':
+                    data['email']?.toString() ??
+                    op.payload['email']?.toString(),
+                'address':
+                    data['address']?.toString() ??
+                    op.payload['address']?.toString(),
+                'totalSpent': _double(data['totalSpent']),
+                'ordersCount': _int(data['ordersCount']),
+              },
+            );
+            return;
+          }
+        }
+        break;
+      case 'supplier':
+        if (op.action == 'create' && localId != null && localId.isNotEmpty) {
+          final data = _asMap(responseData);
+          final remoteId = _string(data?['id']);
+          if (data != null && remoteId.isNotEmpty) {
+            await _replaceSyncedRow(
+              db: db,
+              table: 'suppliers',
+              tenantId: op.tenantId,
+              entityType: op.entityType,
+              localId: localId,
+              remoteId: remoteId,
+              values: {
+                'name': _string(data['name'] ?? op.payload['name']),
+                'phone':
+                    data['phone']?.toString() ??
+                    op.payload['phone']?.toString(),
+                'email':
+                    data['email']?.toString() ??
+                    op.payload['email']?.toString(),
+                'address':
+                    data['address']?.toString() ??
+                    op.payload['address']?.toString(),
+                'notes':
+                    data['notes']?.toString() ??
+                    op.payload['notes']?.toString(),
+              },
+            );
+            return;
+          }
+        }
+        break;
       case 'storeSettings':
         final data = _asMap(responseData);
         if (data != null) {
@@ -1186,7 +1371,9 @@ class SyncService {
             return;
           }
         }
-        if (op.action == 'updateStatus') {
+        if (op.action == 'updateStatus' ||
+            op.action == 'updateCallStatus' ||
+            op.action == 'updateInternalNotes') {
           await _updateLocalOperationStatus(op, SyncStatus.synced);
           return;
         }
@@ -1293,6 +1480,10 @@ class SyncService {
         break;
     }
 
+    if (op.action == 'delete') {
+      await _deleteLocalOperationRow(op);
+      return;
+    }
     await _updateLocalOperationStatus(op, SyncStatus.synced);
   }
 
@@ -1987,6 +2178,10 @@ class SyncService {
         where: "tenantId = ? AND syncStatus = 'synced'",
         whereArgs: [tenantId],
       );
+      final deliveryProviderColumns = await _tableInfo(
+        txn,
+        'delivery_providers',
+      );
       for (final raw in rows.whereType<Map>()) {
         final provider = raw.cast<String, dynamic>();
         final id = _string(provider['provider']).toUpperCase();
@@ -2000,7 +2195,7 @@ class SyncService {
           continue;
         }
         final account = _asMap(provider['account']);
-        await txn.insert('delivery_providers', {
+        final values = _withRequiredColumnDefaults(deliveryProviderColumns, {
           'id': id,
           'tenantId': tenantId,
           'name': _string(provider['name']),
@@ -2012,7 +2207,12 @@ class SyncService {
               : 0,
           'updatedAt': provider['updatedAt']?.toString(),
           'syncStatus': SyncStatus.synced.name,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+        });
+        await txn.insert(
+          'delivery_providers',
+          values,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
     });
   }
@@ -2051,6 +2251,42 @@ class SyncService {
     if (value is Map<String, dynamic>) return value;
     if (value is Map) return value.cast<String, dynamic>();
     return null;
+  }
+
+  Future<List<Map<String, Object?>>> _tableInfo(
+    DatabaseExecutor db,
+    String table,
+  ) {
+    return db.rawQuery('PRAGMA table_info($table)');
+  }
+
+  Map<String, Object?> _withRequiredColumnDefaults(
+    List<Map<String, Object?>> columns,
+    Map<String, Object?> values,
+  ) {
+    final result = Map<String, Object?>.from(values);
+    for (final column in columns) {
+      final name = column['name']?.toString();
+      if (name == null || name.isEmpty || result.containsKey(name)) continue;
+      final isRequired = column['notnull'] == 1;
+      final hasDefault = column['dflt_value'] != null;
+      final isPrimaryKey = column['pk'] == 1;
+      if (!isRequired || hasDefault || isPrimaryKey) continue;
+
+      final type = (column['type']?.toString() ?? '').toUpperCase();
+      if (type.contains('INT')) {
+        result[name] = 0;
+      } else if (type.contains('REAL') ||
+          type.contains('NUM') ||
+          type.contains('DEC') ||
+          type.contains('DOUBLE') ||
+          type.contains('FLOAT')) {
+        result[name] = 0.0;
+      } else {
+        result[name] = '';
+      }
+    }
+    return result;
   }
 
   Future<bool> _markConflictIfLocalDirty(
@@ -2095,11 +2331,45 @@ class SyncService {
     await _updateLocalOperationStatus(op, SyncStatus.conflicted);
   }
 
+  Future<void> _markLocalOperationRejected(SyncOperation op) async {
+    await _updateLocalOperationStatus(op, SyncStatus.rejected);
+  }
+
+  Future<void> _deleteLocalOperationRow(SyncOperation op) async {
+    final table = _tableForEntityType(op.entityType);
+    if (table == null) return;
+    final localId = _localIdForOperation(op);
+    if (localId == null || localId.isEmpty) return;
+
+    final db = await _dbService.database;
+    await db.delete(
+      table,
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [localId, op.tenantId],
+    );
+  }
+
   Future<void> _updateLocalOperationStatus(
     SyncOperation op,
     SyncStatus status,
   ) async {
-    final table = switch (op.entityType) {
+    final table = _tableForEntityType(op.entityType);
+    if (table == null) return;
+
+    final localId = _localIdForOperation(op);
+    if (localId == null || localId.isEmpty) return;
+
+    final db = await _dbService.database;
+    await db.update(
+      table,
+      {'syncStatus': status.name},
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [localId, op.tenantId],
+    );
+  }
+
+  String? _tableForEntityType(String entityType) {
+    return switch (entityType) {
       'sale' => 'sales',
       'customer' => 'customers',
       'product' => 'products',
@@ -2119,23 +2389,14 @@ class SyncService {
       'purchase' => 'purchases',
       _ => null,
     };
-    if (table == null) return;
+  }
 
-    final localId =
-        (op.payload['offlineId'] ??
-                op.payload['id'] ??
-                op.payload['purchaseId'])
-            ?.toString()
-            .trim();
-    if (localId == null || localId.isEmpty) return;
-
-    final db = await _dbService.database;
-    await db.update(
-      table,
-      {'syncStatus': status.name},
-      where: 'id = ? AND tenantId = ?',
-      whereArgs: [localId, op.tenantId],
-    );
+  String? _localIdForOperation(SyncOperation op) {
+    return (op.payload['offlineId'] ??
+            op.payload['id'] ??
+            op.payload['purchaseId'])
+        ?.toString()
+        .trim();
   }
 
   Future<void> _emitState({bool syncing = false}) async {
@@ -2168,6 +2429,14 @@ class SyncService {
           ) ??
           0;
       final recoveryRequired = failed - retrying;
+      final rejected =
+          Sqflite.firstIntValue(
+            await db.rawQuery(
+              "SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND workspaceId = ? AND status = ?",
+              [tenantId, workspaceId, SyncStatus.rejected.name],
+            ),
+          ) ??
+          0;
       final conflictedQueue =
           Sqflite.firstIntValue(
             await db.rawQuery(
@@ -2189,12 +2458,13 @@ class SyncService {
         'sync_queue',
         columns: ['lastError'],
         where:
-            'tenantId = ? AND workspaceId = ? AND status IN (?, ?) AND lastError IS NOT NULL',
+            'tenantId = ? AND workspaceId = ? AND status IN (?, ?, ?) AND lastError IS NOT NULL',
         whereArgs: [
           tenantId,
           workspaceId,
           SyncStatus.failed.name,
           SyncStatus.conflicted.name,
+          SyncStatus.rejected.name,
         ],
         orderBy: 'lastAttemptAt DESC, createdAt DESC',
         limit: 1,
@@ -2205,8 +2475,10 @@ class SyncService {
           pending: pending,
           failed: failed,
           retrying: retrying,
-          recoveryRequired: recoveryRequired < 0 ? 0 : recoveryRequired,
+          recoveryRequired:
+              (recoveryRequired < 0 ? 0 : recoveryRequired) + rejected,
           conflicted: conflictedQueue + conflictedRows,
+          rejected: rejected,
           isSyncing: syncing || _isSyncing,
           nextRetryAt: nextRetryRows.isEmpty
               ? null

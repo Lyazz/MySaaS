@@ -184,7 +184,6 @@ class PurchaseRepository {
     String supplierName,
   ) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
     final newPurchase = Purchase.fromJson({
@@ -206,7 +205,7 @@ class PurchaseRepository {
       'status': newPurchase.status,
       'createdAt': newPurchase.createdAt.toIso8601String(),
       'itemsJson': '[]',
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(
@@ -288,8 +287,9 @@ class PurchaseRepository {
 
   Future<void> deletePurchase(String id) async {
     final db = await _dbService.database;
-    await db.delete(
+    await db.update(
       'purchases',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
     );
@@ -303,11 +303,10 @@ class PurchaseRepository {
 
   Future<void> updateStatus(String id, String status) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     await db.update(
       'purchases',
-      {'status': status, 'syncStatus': online ? 'synced' : 'pending'},
+      {'status': status, 'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
     );

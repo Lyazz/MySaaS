@@ -72,7 +72,6 @@ class SupplierRepository {
 
   Future<Supplier> createSupplier(Supplier supplier) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
     final newSupplier = Supplier(
@@ -92,7 +91,7 @@ class SupplierRepository {
       'email': newSupplier.email,
       'address': newSupplier.address,
       'notes': newSupplier.notes,
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(
@@ -106,7 +105,6 @@ class SupplierRepository {
 
   Future<void> updateSupplier(Supplier supplier) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     await db.update(
       'suppliers',
@@ -116,7 +114,7 @@ class SupplierRepository {
         'email': supplier.email,
         'address': supplier.address,
         'notes': supplier.notes,
-        'syncStatus': online ? 'synced' : 'pending',
+        'syncStatus': SyncStatus.pending.name,
       },
       where: 'id = ? AND tenantId = ?',
       whereArgs: [supplier.id, _tid],
@@ -131,8 +129,9 @@ class SupplierRepository {
 
   Future<void> deleteSupplier(String id) async {
     final db = await _dbService.database;
-    await db.delete(
+    await db.update(
       'suppliers',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
     );

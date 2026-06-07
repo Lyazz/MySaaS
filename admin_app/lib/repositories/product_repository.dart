@@ -316,8 +316,9 @@ class ProductRepository {
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Product ID is required');
     final db = await _dbService.database;
-    await db.delete(
+    await db.update(
       'products',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [trimmed, _tid],
     );

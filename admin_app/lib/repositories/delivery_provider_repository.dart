@@ -139,7 +139,8 @@ class DeliveryProviderRepository {
     DeliveryProvider provider, {
     required String syncStatus,
   }) async {
-    await db.insert('delivery_providers', {
+    final columns = await _tableInfo(db, 'delivery_providers');
+    final values = _withRequiredColumnDefaults(columns, {
       'id': provider.id,
       'tenantId': _tid,
       'name': provider.name,
@@ -147,6 +148,47 @@ class DeliveryProviderRepository {
       'offered': provider.offered ? 1 : 0,
       'isEnabled': provider.isEnabled ? 1 : 0,
       'syncStatus': syncStatus,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+    await db.insert(
+      'delivery_providers',
+      values,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Map<String, Object?>>> _tableInfo(
+    DatabaseExecutor db,
+    String table,
+  ) {
+    return db.rawQuery('PRAGMA table_info($table)');
+  }
+
+  Map<String, Object?> _withRequiredColumnDefaults(
+    List<Map<String, Object?>> columns,
+    Map<String, Object?> values,
+  ) {
+    final result = Map<String, Object?>.from(values);
+    for (final column in columns) {
+      final name = column['name']?.toString();
+      if (name == null || name.isEmpty || result.containsKey(name)) continue;
+      final isRequired = column['notnull'] == 1;
+      final hasDefault = column['dflt_value'] != null;
+      final isPrimaryKey = column['pk'] == 1;
+      if (!isRequired || hasDefault || isPrimaryKey) continue;
+
+      final type = (column['type']?.toString() ?? '').toUpperCase();
+      if (type.contains('INT')) {
+        result[name] = 0;
+      } else if (type.contains('REAL') ||
+          type.contains('NUM') ||
+          type.contains('DEC') ||
+          type.contains('DOUBLE') ||
+          type.contains('FLOAT')) {
+        result[name] = 0.0;
+      } else {
+        result[name] = '';
+      }
+    }
+    return result;
   }
 }

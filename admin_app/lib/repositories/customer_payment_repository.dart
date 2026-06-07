@@ -57,7 +57,6 @@ class CustomerPaymentRepository {
     Map<String, dynamic> payload,
   ) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
     final newPayment = CustomerPayment.fromJson({
@@ -82,7 +81,7 @@ class CustomerPaymentRepository {
       'note': newPayment.note,
       'saleId': newPayment.saleId,
       'createdAt': newPayment.createdAt?.toIso8601String(),
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(

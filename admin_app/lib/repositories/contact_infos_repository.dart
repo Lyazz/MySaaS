@@ -104,8 +104,9 @@ class ContactInfosRepository {
     final current = await _findById(db, trimmed);
     if (current == null) return;
 
-    await db.delete(
+    await db.update(
       'contact_infos',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [trimmed, _tid],
     );

@@ -68,7 +68,6 @@ class CustomerRepository {
   }
 
   Future<Customer> createCustomer(Map<String, dynamic> customerData) async {
-    final online = await _syncService.isOnline;
     final db = await _dbService.database;
     final id = const Uuid().v4();
     customerData['id'] = id;
@@ -82,7 +81,7 @@ class CustomerRepository {
       'address': localCustomer.address,
       'totalSpent': 0.0,
       'ordersCount': 0,
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
     await _syncService.enqueueOperation(
       entityType: 'customer',
@@ -140,9 +139,8 @@ class CustomerRepository {
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Customer ID is required');
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
     final dataToUpdate = <String, Object?>{
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     };
     if (update.containsKey('name')) dataToUpdate['name'] = update['name'];
     if (update.containsKey('phone')) dataToUpdate['phone'] = update['phone'];

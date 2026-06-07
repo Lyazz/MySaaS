@@ -43,12 +43,12 @@ dependencies:
   dio: ^5.9.1
   intl: ^0.20.2
   easy_localization: ^3.0.8
-  flutter_quill: ^10.0.0
+  flutter_quill: 11.5.0
   vsc_quill_delta_to_html: ^1.0.5
   image_picker: ^1.2.1
   image_cropper: ^12.2.1
   flutter_quill_delta_from_html: ^1.5.3
-  flutter_quill_extensions: ^10.8.5
+  flutter_quill_extensions: 11.0.0
   shared_preferences: ^2.2.2
   esc_pos_utils_plus: ^2.0.4
   flutter_blue_plus: ^2.1.0
@@ -79,6 +79,9 @@ dependencies:
   firebase_messaging: ^16.3.0
   flutter_local_notifications: ^20.1.0
   http: ^1.6.0
+  device_info_plus: ^12.4.0
+  crypto: ^3.0.7
+  toastification: ^3.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

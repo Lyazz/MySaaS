@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../firebase_options.dart';
+import '../models/admin_notification.dart';
 import '../models/app_mode.dart';
 import 'api_service.dart';
 import 'device_info_service.dart';
@@ -25,7 +26,9 @@ Future<void> adminNotificationBackgroundHandler(RemoteMessage message) async {
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   final service = NotificationService(ref.read(apiProvider));
-  ref.onDispose(service.stop);
+  ref.onDispose(() {
+    unawaited(service.dispose());
+  });
   return service;
 });
 
@@ -46,7 +49,11 @@ class NotificationService {
   final ApiService _apiService;
   final DeviceInfoService _deviceInfoService;
   final FlutterLocalNotificationsPlugin _localNotifications;
-  final Future<void> Function(String title, String body, Map<String, String> data)?
+  final Future<void> Function(
+    String title,
+    String body,
+    Map<String, String> data,
+  )?
   _localNotificationSink;
   http.Client? _httpClient;
 
@@ -54,6 +61,7 @@ class NotificationService {
   StreamSubscription<RemoteMessage>? _openedFcmSubscription;
   StreamSubscription<String>? _sseSubscription;
   StreamSubscription<String>? _fcmTokenRefreshSubscription;
+  final _events = StreamController<AdminNotification>.broadcast();
 
   bool _localInitialized = false;
   bool _firebaseInitialized = false;
@@ -65,6 +73,13 @@ class NotificationService {
     if (_supportsFcmPlatform) {
       FirebaseMessaging.onBackgroundMessage(adminNotificationBackgroundHandler);
     }
+  }
+
+  Stream<AdminNotification> get events => _events.stream;
+
+  Future<void> dispose() async {
+    await stop();
+    await _events.close();
   }
 
   void setRouteHandler(void Function(String route) handler) {
@@ -155,7 +170,33 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
-    await androidPlugin?.requestNotificationsPermission();
+    try {
+      await androidPlugin?.requestNotificationsPermission();
+    } catch (_) {}
+
+    final iosPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    try {
+      await iosPlugin?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (_) {}
+
+    final macosPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin
+        >();
+    try {
+      await macosPlugin?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (_) {}
 
     _localInitialized = true;
   }
@@ -175,9 +216,28 @@ class NotificationService {
 
   Future<void> _startFcm() async {
     final messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission(alert: true, badge: true, sound: true);
 
-    final token = await messaging.getToken();
+    try {
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
+    } catch (_) {
+      return;
+    }
+
+    try {
+      await messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (_) {}
+
+    String? token;
+    try {
+      token = await messaging.getToken();
+    } catch (_) {
+      return;
+    }
+
     if (token != null && token.trim().isNotEmpty) {
       await _registerFcmSubscription(token.trim());
     }
@@ -193,11 +253,11 @@ class NotificationService {
       _showRemoteMessage(message);
     });
 
-    _openedFcmSubscription = FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) {
-        _openRouteFromData(_asStringMap(message.data));
-      },
-    );
+    _openedFcmSubscription = FirebaseMessaging.onMessageOpenedApp.listen((
+      message,
+    ) {
+      _openRouteFromData(_asStringMap(message.data));
+    });
 
     final initialMessage = await messaging.getInitialMessage();
     if (initialMessage != null) {
@@ -280,6 +340,10 @@ class NotificationService {
       if (event is! Map) return;
       final map = Map<String, dynamic>.from(event);
       final data = _asStringMap(map['data']);
+      final notification = AdminNotification.fromJson(map);
+      if (notification.id.isNotEmpty) {
+        _events.add(notification);
+      }
       _showLocalNotification(
         title: map['title']?.toString() ?? 'New notification',
         body: map['body']?.toString() ?? '',
@@ -292,11 +356,11 @@ class NotificationService {
     final title =
         message.notification?.title ?? message.data['title'] ?? 'New order';
     final body = message.notification?.body ?? message.data['body'] ?? '';
-    _showLocalNotification(
-      title: title,
-      body: body,
-      data: Map<String, String>.from(message.data),
+    final data = Map<String, String>.from(message.data);
+    _events.add(
+      AdminNotification.fromPush(title: title, body: body, data: data),
     );
+    _showLocalNotification(title: title, body: body, data: data);
   }
 
   Future<void> _showLocalNotification({
@@ -377,9 +441,7 @@ class NotificationService {
   static bool get _supportsFcmPlatform {
     if (kIsWeb) return false;
     return switch (defaultTargetPlatform) {
-      TargetPlatform.android ||
-      TargetPlatform.iOS ||
-      TargetPlatform.macOS => true,
+      TargetPlatform.android => true,
       _ => false,
     };
   }

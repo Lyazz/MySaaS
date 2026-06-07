@@ -69,7 +69,6 @@ class StaffRoleRepository {
     required List<StaffRolePermissionGroup> permissions,
   }) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
     final id = const Uuid().v4();
 
     await db.insert('staff_roles', {
@@ -79,7 +78,7 @@ class StaffRoleRepository {
       'permissionsJson': jsonEncode(
         permissions.map((p) => p.toJson()).toList(),
       ),
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(
@@ -105,7 +104,6 @@ class StaffRoleRepository {
     required List<StaffRolePermissionGroup> permissions,
   }) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     await db.update(
       'staff_roles',
@@ -114,7 +112,7 @@ class StaffRoleRepository {
         'permissionsJson': jsonEncode(
           permissions.map((p) => p.toJson()).toList(),
         ),
-        'syncStatus': online ? 'synced' : 'pending',
+        'syncStatus': SyncStatus.pending.name,
       },
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
@@ -140,8 +138,9 @@ class StaffRoleRepository {
   Future<void> deleteRole(String id) async {
     final db = await _dbService.database;
 
-    await db.delete(
+    await db.update(
       'staff_roles',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
     );

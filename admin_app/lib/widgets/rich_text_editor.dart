@@ -116,9 +116,9 @@ class _RichTextEditorState extends State<RichTextEditor> {
       ),
       child: Column(
         children: [
-          QuillToolbar.simple(
+          QuillSimpleToolbar(
             controller: _controller,
-            configurations: const QuillSimpleToolbarConfigurations(
+            config: const QuillSimpleToolbarConfig(
               showFontFamily: false,
               showSearchButton: false,
               showInlineCode: false,
@@ -129,13 +129,9 @@ class _RichTextEditorState extends State<RichTextEditor> {
             height: 300,
             child: QuillEditor.basic(
               controller: _controller,
-              configurations: QuillEditorConfigurations(
+              config: QuillEditorConfig(
                 placeholder: widget.placeholder,
-                // Use default embed builders from flutter_quill_extensions
                 embedBuilders: FlutterQuillEmbeds.editorBuilders(),
-                sharedConfigurations: const QuillSharedConfigurations(
-                  locale: Locale('en'),
-                ),
               ),
             ),
           ),

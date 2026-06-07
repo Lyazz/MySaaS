@@ -151,8 +151,9 @@ class CategoryRepository {
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Category ID is required');
     final db = await _dbService.database;
-    await db.delete(
+    await db.update(
       'categories',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [trimmed, _tid],
     );

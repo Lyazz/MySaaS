@@ -16,7 +16,6 @@ class PosSaleRepository {
 
   Future<String> createSale(Map<String, dynamic> payload) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final saleId = const Uuid().v4();
     payload['offlineId'] = saleId;
@@ -44,7 +43,7 @@ class PosSaleRepository {
       'status': 'completed',
       'createdAt': DateTime.now().toIso8601String(),
       'payloadJson': jsonEncode(payload),
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(

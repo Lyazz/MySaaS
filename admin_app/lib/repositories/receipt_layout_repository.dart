@@ -24,7 +24,7 @@ class ReceiptLayoutRepository {
       whereArgs: [_tid],
     );
 
-        final localLayouts = localData
+    final localLayouts = localData
         .map(
           (e) => ReceiptLayout.fromMap({
             'id': e['id'],
@@ -102,7 +102,6 @@ class ReceiptLayoutRepository {
 
   Future<ReceiptLayout> createLayout(ReceiptLayout layout) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
     final newLayout = layout.copyWith(id: id);
@@ -129,7 +128,7 @@ class ReceiptLayoutRepository {
       'showFooter': newLayout.showFooter ? 1 : 0,
       'footerText': newLayout.footerText,
       'showTaxBreakdown': newLayout.showTaxBreakdown ? 1 : 0,
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(
@@ -143,7 +142,6 @@ class ReceiptLayoutRepository {
 
   Future<void> updateLayout(ReceiptLayout layout) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     await db.update(
       'receipt_layouts',
@@ -167,7 +165,7 @@ class ReceiptLayoutRepository {
         'showFooter': layout.showFooter ? 1 : 0,
         'footerText': layout.footerText,
         'showTaxBreakdown': layout.showTaxBreakdown ? 1 : 0,
-        'syncStatus': online ? 'synced' : 'pending',
+        'syncStatus': SyncStatus.pending.name,
       },
       where: 'id = ? AND tenantId = ?',
       whereArgs: [layout.id, _tid],
@@ -182,8 +180,9 @@ class ReceiptLayoutRepository {
 
   Future<void> deleteLayout(String id) async {
     final db = await _dbService.database;
-    await db.delete(
+    await db.update(
       'receipt_layouts',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
     );

@@ -194,6 +194,7 @@
             <span class="hidden sm:inline">{{ t('admin.actions.viewStore') }}</span>
           </a>
 
+          <AdminNotificationsButton />
           <LocaleSwitcher />
           <AdminThemeToggle />
 
@@ -293,6 +294,7 @@ import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import { useOrderUnreadCount } from '~/composables/useOrderUnreadCount'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 import AdminThemeToggle from '~/components/admin/AdminThemeToggle.vue'
+import AdminNotificationsButton from '~/components/admin/AdminNotificationsButton.vue'
 import {
   adminPathToResource,
   hasSettingsHubAccess,

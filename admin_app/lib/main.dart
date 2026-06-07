@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:toastification/toastification.dart';
 
 import 'app_config.dart';
 import 'bootstrap.dart';
@@ -66,16 +67,18 @@ class _AdminAppState extends ConsumerState<AdminApp> {
       Future.microtask(() => _syncNotifications(authState));
     }
 
-    return MaterialApp.router(
-      title: 'admin.nav.dashboard'.tr(),
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: settings.themeMode,
-      routerConfig: router,
-      locale: context.locale,
-      supportedLocales: context.supportedLocales,
-      localizationsDelegates: context.localizationDelegates,
-      debugShowCheckedModeBanner: false,
+    return ToastificationWrapper(
+      child: MaterialApp.router(
+        title: 'admin.nav.dashboard'.tr(),
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: settings.themeMode,
+        routerConfig: router,
+        locale: context.locale,
+        supportedLocales: context.supportedLocales,
+        localizationsDelegates: context.localizationDelegates,
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 

@@ -28,7 +28,9 @@ class OfflineBanner extends ConsumerWidget {
     );
     final canOpenRecovery =
         !authState.mode.skipsAuthentication &&
-        (syncState.failed > 0 || syncState.conflicted > 0);
+        (syncState.failed > 0 ||
+            syncState.conflicted > 0 ||
+            syncState.rejected > 0);
 
     return InkWell(
       onTap: canOpenRecovery
@@ -77,7 +79,8 @@ class OfflineBanner extends ConsumerWidget {
             ],
             if (canOpenRecovery) ...[
               const SizedBox(width: 8),
-              Text( 'admin.pages.purchases.index.table.manage'.tr(),
+              Text(
+                'admin.pages.purchases.index.table.manage'.tr(),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.9),
                   fontSize: 9,
@@ -111,7 +114,8 @@ class OfflineBanner extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text( 'app.sync_recovery'.tr(),
+                Text(
+                  'app.sync_recovery'.tr(),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -120,42 +124,52 @@ class OfflineBanner extends ConsumerWidget {
                 Text(
                   syncState.conflicted > 0
                       ? 'Conflicted edits need review before they can sync cleanly.'
+                      : syncState.rejected > 0
+                      ? 'Rejected operations need manual correction before they can sync.'
                       : 'Failed operations stay queued on this device until they succeed or you retry them.',
                   style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: 16),
                 if (issues.isEmpty)
-                  Text( 'app.no_queued_failures'.tr())
+                  Text('app.no_queued_failures'.tr())
                 else
-                  ...issues.take(6).map(
-                    (issue) => ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text('${issue.entityType} • ${issue.action}'),
-                      subtitle: Text(
-                        issue.lastError?.trim().isNotEmpty == true
-                            ? issue.lastError!
-                            : issue.status == SyncStatus.conflicted
-                            ? 'Remote data changed'
-                            : 'Retry count ${issue.retryCount}',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                  ...issues
+                      .take(6)
+                      .map(
+                        (issue) => ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          title: Text('${issue.entityType} • ${issue.action}'),
+                          subtitle: Text(
+                            issue.lastError?.trim().isNotEmpty == true
+                                ? issue.lastError!
+                                : issue.status == SyncStatus.conflicted
+                                ? 'Remote data changed'
+                                : issue.status == SyncStatus.rejected
+                                ? 'Server rejected this operation'
+                                : 'Retry count ${issue.retryCount}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: issue.nextRetryAt == null
+                              ? null
+                              : Text(
+                                  DateFormat(
+                                    'HH:mm:ss',
+                                  ).format(issue.nextRetryAt!),
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                        ),
                       ),
-                      trailing: issue.nextRetryAt == null
-                          ? null
-                          : Text(
-                              DateFormat('HH:mm:ss').format(issue.nextRetryAt!),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                    ),
-                  ),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: Text( 'admin.pages.cash.modals.closeSession.confirm'.tr()),
+                      child: Text(
+                        'admin.pages.cash.modals.closeSession.confirm'.tr(),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     FilledButton(
@@ -167,7 +181,7 @@ class OfflineBanner extends ConsumerWidget {
                                 Navigator.of(context).pop();
                               }
                             },
-                      child: Text( 'app.retry_failed'.tr()),
+                      child: Text('app.retry_failed'.tr()),
                     ),
                   ],
                 ),
@@ -227,7 +241,9 @@ class _BannerPresentation {
         backgroundColor: Colors.red.shade600,
         icon: LucideIcons.alertCircle,
         label: 'app.sync_failed'.tr(),
-        detail: syncState.recoveryRequired > 0
+        detail: syncState.rejected > 0
+            ? '${syncState.rejected} rejected'
+            : syncState.recoveryRequired > 0
             ? '${syncState.recoveryRequired} action needed'
             : syncState.nextRetryAt != null
             ? 'Retry ${DateFormat('HH:mm').format(syncState.nextRetryAt!)}'

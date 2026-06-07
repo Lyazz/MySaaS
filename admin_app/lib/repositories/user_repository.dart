@@ -88,7 +88,6 @@ class UserRepository {
 
   Future<AdminUser> createUser(Map<String, dynamic> payload) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
     payload['id'] = id;
@@ -106,7 +105,7 @@ class UserRepository {
       'cashboxId': newUser.cashboxId,
       'staffRoleId': newUser.staffRoleId,
       'createdAt': newUser.createdAt?.toIso8601String(),
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(
@@ -120,10 +119,9 @@ class UserRepository {
 
   Future<AdminUser> updateUser(String id, Map<String, dynamic> payload) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final dataToUpdate = <String, dynamic>{
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     };
     if (payload.containsKey('email')) dataToUpdate['email'] = payload['email'];
     if (payload.containsKey('role')) dataToUpdate['role'] = payload['role'];
@@ -173,8 +171,9 @@ class UserRepository {
 
   Future<void> deleteUser(String id) async {
     final db = await _dbService.database;
-    await db.delete(
+    await db.update(
       'users',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
     );

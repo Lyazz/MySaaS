@@ -395,16 +395,34 @@ export class NotificationsService {
             }
 
             try {
+                const data = toFcmData({
+                    ...((delivery.event.data as Record<string, string | null | undefined> | null) ?? {}),
+                    notificationId: delivery.event.id
+                })
+
                 await this.fcmSender.send({
                     token,
                     notification: {
                         title: delivery.event.title,
                         body: delivery.event.body
                     },
-                    data: toFcmData({
-                        ...((delivery.event.data as Record<string, string | null | undefined> | null) ?? {}),
-                        notificationId: delivery.event.id
-                    })
+                    data,
+                    apns: {
+                        headers: {
+                            'apns-priority': '10',
+                            'apns-push-type': 'alert'
+                        },
+                        payload: {
+                            aps: {
+                                alert: {
+                                    title: delivery.event.title,
+                                    body: delivery.event.body
+                                },
+                                sound: 'default',
+                                badge: 1
+                            }
+                        }
+                    }
                 })
 
                 await prisma.notificationDelivery.update({

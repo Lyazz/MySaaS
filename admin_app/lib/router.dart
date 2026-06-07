@@ -46,6 +46,7 @@ import 'screens/integrations_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/feature_locked_screen.dart';
 import 'screens/storefront_tools_screen.dart';
+import 'screens/notifications_screen.dart';
 import 'widgets/app_shell.dart';
 import 'utils/feature_access.dart';
 
@@ -535,6 +536,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const OnboardingScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/notifications',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const NotificationsScreen(),
             ),
           ),
         ],

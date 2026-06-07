@@ -77,7 +77,6 @@ class PrinterProfileRepository {
 
   Future<PrinterProfile> createProfile(PrinterProfile profile) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
     final newProfile = profile.copyWith(id: id);
@@ -89,7 +88,7 @@ class PrinterProfileRepository {
       'transport': newProfile.transport.index,
       'connectionParams': jsonEncode(newProfile.connectionParams),
       'capabilityParams': jsonEncode(newProfile.capabilityParams),
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(
@@ -103,7 +102,6 @@ class PrinterProfileRepository {
 
   Future<void> updateProfile(PrinterProfile profile) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     await db.update(
       'printer_profiles',
@@ -112,7 +110,7 @@ class PrinterProfileRepository {
         'transport': profile.transport.index,
         'connectionParams': jsonEncode(profile.connectionParams),
         'capabilityParams': jsonEncode(profile.capabilityParams),
-        'syncStatus': online ? 'synced' : 'pending',
+        'syncStatus': SyncStatus.pending.name,
       },
       where: 'id = ? AND tenantId = ?',
       whereArgs: [profile.id, _tid],
@@ -127,8 +125,9 @@ class PrinterProfileRepository {
 
   Future<void> deleteProfile(String id) async {
     final db = await _dbService.database;
-    await db.delete(
+    await db.update(
       'printer_profiles',
+      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
     );
