@@ -1992,9 +1992,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 )
               : Row(
                   children: [
-                    Expanded(
-                      child: searchField(),
-                    ),
+                    Expanded(child: searchField()),
                     const SizedBox(width: 12),
                     actionStrip(actions),
                   ],
@@ -3437,6 +3435,21 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
+                  const SizedBox(height: 1),
+                  Text(
+                    currency.format(item.price),
+                    key: ValueKey(
+                      'pos-cart-unit-price-${item.productId}${item.variantId != null ? '-${item.variantId}' : ''}',
+                    ),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: textSecondary,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),

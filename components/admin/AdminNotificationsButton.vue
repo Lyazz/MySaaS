@@ -1,91 +1,334 @@
 <template>
-  <div ref="rootRef" class="relative">
+  <div class="relative">
     <button
-      class="relative flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-150"
-      style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
+      class="notification-trigger relative flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-150"
+      :class="{ 'notification-trigger--pulse': unreadCount > 0 }"
+      style="border-color: var(--surface-border); color: var(--text-secondary)"
       aria-label="Notifications"
+      :aria-expanded="isOpen ? 'true' : 'false'"
+      aria-haspopup="dialog"
       @click="togglePanel"
-      @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
-      @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
     >
-      <Icon name="lucide:bell" class="h-3.5 w-3.5" />
+      <Icon
+        name="lucide:bell"
+        class="h-4 w-4"
+      />
       <span
         v-if="unreadCount > 0"
-        class="absolute -right-1 -top-1 flex min-w-[17px] items-center justify-center rounded-full px-1 text-[9px] font-bold leading-[17px]"
+        :key="badgeAnimationKey"
+        class="notification-badge absolute -right-1 -top-1 flex min-w-[17px] items-center justify-center rounded-full px-1 text-[9px] font-extrabold leading-[17px]"
         style="background: var(--brand); color: var(--brand-contrast); border: 1px solid var(--admin-topbar-bg)"
       >
         {{ unreadCount > 9 ? '9+' : unreadCount }}
       </span>
     </button>
 
-    <div
-      v-if="isOpen"
-      class="absolute right-0 top-10 z-50 w-[340px] overflow-hidden rounded-xl shadow-2xl"
-      style="background: var(--admin-sidebar-bg); border: 1px solid var(--surface-border)"
-    >
-      <div class="flex items-center justify-between px-3.5 py-3" style="border-bottom: 1px solid var(--surface-border)">
-        <div>
-          <p class="text-[12px] font-semibold" style="color: var(--text-primary)">Notifications</p>
-          <p class="text-[10.5px]" style="color: var(--text-tertiary)">
-            {{ unreadCount }} unread
-          </p>
-        </div>
-        <button
-          class="rounded-md p-1.5 transition-colors"
-          style="color: var(--text-tertiary)"
-          aria-label="Refresh notifications"
-          @click="refreshNotifications"
-          @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
-          @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }"
+    <Teleport to="body">
+      <Transition name="notifications-overlay">
+        <div
+          v-if="isOpen"
+          class="fixed inset-0 z-[70]"
+          @click.self="closePanel"
         >
-          <Icon name="lucide:refresh-cw" class="h-3.5 w-3.5" />
-        </button>
-      </div>
+          <div
+            class="absolute inset-0 bg-black/20 backdrop-blur-[2px]"
+            aria-hidden="true"
+          />
 
-      <div class="max-h-[360px] overflow-y-auto custom-scrollbar">
-        <div v-if="isLoading && items.length === 0" class="px-3.5 py-8 text-center text-[12px]" style="color: var(--text-tertiary)">
-          Loading notifications...
-        </div>
-        <div v-else-if="items.length === 0" class="px-3.5 py-8 text-center">
-          <Icon name="lucide:bell-off" class="mx-auto mb-2 h-5 w-5" style="color: var(--text-tertiary)" />
-          <p class="text-[12px] font-medium" style="color: var(--text-secondary)">No notifications yet</p>
-        </div>
-        <button
-          v-for="item in items.slice(0, 8)"
-          :key="item.id"
-          class="flex w-full gap-3 px-3.5 py-3 text-left transition-colors"
-          :style="!item.readAt ? 'background: rgba(var(--brand-rgb) / 0.06)' : ''"
-          @click="openNotification(item)"
-          @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }"
-          @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = !item.readAt ? 'rgba(var(--brand-rgb) / 0.06)' : '' }"
-        >
-          <span
-            class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-            :style="!item.readAt ? 'background: rgba(var(--brand-rgb) / 0.14); color: var(--brand)' : 'background: var(--nav-hover-bg); color: var(--text-tertiary)'"
+          <div
+            class="notification-panel absolute left-4 right-4 top-[60px] overflow-hidden rounded-[14px] sm:left-auto sm:right-4 sm:w-[380px]"
+            style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: 0 8px 28px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.08)"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Notifications"
           >
-            <Icon :name="iconFor(item)" class="h-3.5 w-3.5" />
-          </span>
-          <span class="min-w-0 flex-1">
-            <span class="flex items-start gap-2">
-              <span class="line-clamp-1 text-[12px] font-semibold" style="color: var(--text-primary)">{{ item.title }}</span>
-              <span v-if="!item.readAt" class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full" style="background: var(--brand)" />
-            </span>
-            <span class="mt-0.5 line-clamp-2 text-[11px] leading-relaxed" style="color: var(--text-secondary)">{{ item.body }}</span>
-            <span class="mt-1 block text-[10px]" style="color: var(--text-tertiary)">{{ formatTime(item.createdAt) }}</span>
-          </span>
-        </button>
-      </div>
-    </div>
+            <div class="h-[3px] bg-gradient-to-r from-[var(--brand)] to-[#86EFAC]" />
+
+            <div class="flex items-center gap-3 px-4 py-3">
+              <div
+                class="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--brand)] to-[#86EFAC]"
+                style="color: var(--brand-contrast)"
+              >
+                <Icon
+                  name="lucide:bell"
+                  class="h-4 w-4"
+                />
+              </div>
+
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <p
+                    class="truncate text-[13px] font-bold tracking-[-0.02em]"
+                    style="color: var(--text-primary)"
+                  >
+                    Notifications
+                  </p>
+                  <span
+                    v-if="unreadCount > 0"
+                    class="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                    style="background: rgba(var(--brand-rgb) / 0.15); color: var(--brand)"
+                  >
+                    {{ unreadCount }} new
+                  </span>
+                </div>
+                <p
+                  class="text-[11px]"
+                  style="color: var(--text-tertiary)"
+                >
+                  {{ unreadCount === 0 ? 'All caught up' : `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}` }}
+                </p>
+              </div>
+
+              <div class="flex items-center gap-1">
+                <button
+                  v-if="unreadCount > 0"
+                  class="notification-action flex h-7 w-7 items-center justify-center rounded-[7px] border transition-all duration-150"
+                  style="border-color: var(--surface-border); color: var(--text-tertiary)"
+                  aria-label="Mark all read"
+                  @click="handleMarkAllRead"
+                >
+                  <Icon
+                    name="lucide:check-check"
+                    class="h-[13px] w-[13px]"
+                  />
+                </button>
+                <button
+                  class="notification-action flex h-7 w-7 items-center justify-center rounded-[7px] border transition-all duration-150"
+                  style="border-color: var(--surface-border); color: var(--text-tertiary)"
+                  aria-label="Refresh notifications"
+                  @click="handleRefresh"
+                >
+                  <Icon
+                    name="lucide:refresh-cw"
+                    class="h-[13px] w-[13px]"
+                    :class="{ 'animate-spin': isLoading }"
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--surface-border)" />
+
+            <div class="max-h-[560px] overflow-y-auto">
+              <div
+                v-if="isLoading && items.length === 0"
+                class="space-y-3 p-4"
+              >
+                <div
+                  v-for="index in 3"
+                  :key="`notification-loading-${index}`"
+                  class="flex items-start gap-3"
+                >
+                  <div
+                    class="h-9 w-9 animate-pulse rounded-[10px]"
+                    style="background: rgba(255,255,255,0.08)"
+                  />
+                  <div class="flex-1 space-y-2 pt-1">
+                    <div
+                      class="h-[11px] animate-pulse rounded"
+                      style="width: 72%; background: rgba(255,255,255,0.08)"
+                    />
+                    <div
+                      class="h-[9px] animate-pulse rounded"
+                      style="width: 46%; background: rgba(255,255,255,0.05)"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                v-else-if="items.length === 0"
+                class="px-4 py-9 text-center"
+              >
+                <div
+                  class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border bg-gradient-to-br from-[rgba(198,244,50,0.12)] to-[rgba(134,239,172,0.05)]"
+                  style="border-color: rgba(var(--brand-rgb) / 0.2)"
+                >
+                  <Icon
+                    name="lucide:bell-off"
+                    class="h-6 w-6"
+                    style="color: rgba(var(--brand-rgb) / 0.7)"
+                  />
+                </div>
+                <p
+                  class="mt-3 text-[13px] font-bold"
+                  style="color: var(--text-primary)"
+                >
+                  All caught up!
+                </p>
+                <p
+                  class="mt-1 text-[11.5px]"
+                  style="color: var(--text-secondary)"
+                >
+                  No new notifications right now.
+                </p>
+              </div>
+
+              <div v-else>
+                <template v-if="groupedItems.today.length">
+                  <p
+                    class="px-4 pb-1 pt-3 text-[9.5px] font-bold uppercase tracking-[0.12em]"
+                    style="color: var(--text-tertiary)"
+                  >
+                    Today
+                  </p>
+                  <button
+                    v-for="item in groupedItems.today"
+                    :key="item.id"
+                    class="notification-row flex w-full items-start gap-3 px-4 py-[11px] text-left transition-all duration-150"
+                    :style="item.readAt ? '' : 'background: rgba(var(--brand-rgb) / 0.04)'"
+                    @click="openNotification(item)"
+                  >
+                    <span
+                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+                      :style="item.readAt
+                        ? 'background: var(--nav-hover-bg); color: var(--text-tertiary)'
+                        : 'background: rgba(var(--brand-rgb) / 0.15); color: var(--brand); border: 1px solid rgba(var(--brand-rgb) / 0.3)'"
+                    >
+                      <Icon
+                        :name="getAdminNotificationIcon(item)"
+                        class="h-4 w-4"
+                      />
+                    </span>
+
+                    <span class="min-w-0 flex-1">
+                      <span class="flex items-center gap-1.5">
+                        <span
+                          class="truncate text-[12.5px] tracking-[-0.01em]"
+                          :style="item.readAt ? 'color: var(--text-primary); font-weight: 600' : 'color: var(--text-primary); font-weight: 700'"
+                        >
+                          {{ item.title }}
+                        </span>
+                        <span
+                          class="ml-auto shrink-0 text-[10px]"
+                          style="color: var(--text-tertiary)"
+                        >
+                          {{ formatAdminNotificationRelative(item.createdAt, locale) }}
+                        </span>
+                        <span
+                          v-if="!item.readAt"
+                          class="h-1.5 w-1.5 shrink-0 rounded-full"
+                          style="background: var(--brand)"
+                        />
+                      </span>
+                      <span
+                        class="mt-1 line-clamp-2 block text-[11.5px] leading-[1.4]"
+                        style="color: var(--text-secondary)"
+                      >
+                        {{ item.body }}
+                      </span>
+                    </span>
+
+                    <span class="notification-row-arrow pt-1.5">
+                      <Icon
+                        name="lucide:arrow-right"
+                        class="h-[13px] w-[13px]"
+                        style="color: var(--text-tertiary)"
+                      />
+                    </span>
+                  </button>
+                </template>
+
+                <template v-if="groupedItems.earlier.length">
+                  <p
+                    class="px-4 pb-1 pt-3 text-[9.5px] font-bold uppercase tracking-[0.12em]"
+                    style="color: var(--text-tertiary)"
+                  >
+                    Earlier
+                  </p>
+                  <button
+                    v-for="item in groupedItems.earlier"
+                    :key="item.id"
+                    class="notification-row flex w-full items-start gap-3 px-4 py-[11px] text-left transition-all duration-150"
+                    :style="item.readAt ? '' : 'background: rgba(var(--brand-rgb) / 0.04)'"
+                    @click="openNotification(item)"
+                  >
+                    <span
+                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+                      :style="item.readAt
+                        ? 'background: var(--nav-hover-bg); color: var(--text-tertiary)'
+                        : 'background: rgba(var(--brand-rgb) / 0.15); color: var(--brand); border: 1px solid rgba(var(--brand-rgb) / 0.3)'"
+                    >
+                      <Icon
+                        :name="getAdminNotificationIcon(item)"
+                        class="h-4 w-4"
+                      />
+                    </span>
+
+                    <span class="min-w-0 flex-1">
+                      <span class="flex items-center gap-1.5">
+                        <span
+                          class="truncate text-[12.5px] tracking-[-0.01em]"
+                          :style="item.readAt ? 'color: var(--text-primary); font-weight: 600' : 'color: var(--text-primary); font-weight: 700'"
+                        >
+                          {{ item.title }}
+                        </span>
+                        <span
+                          class="ml-auto shrink-0 text-[10px]"
+                          style="color: var(--text-tertiary)"
+                        >
+                          {{ formatAdminNotificationRelative(item.createdAt, locale) }}
+                        </span>
+                        <span
+                          v-if="!item.readAt"
+                          class="h-1.5 w-1.5 shrink-0 rounded-full"
+                          style="background: var(--brand)"
+                        />
+                      </span>
+                      <span
+                        class="mt-1 line-clamp-2 block text-[11.5px] leading-[1.4]"
+                        style="color: var(--text-secondary)"
+                      >
+                        {{ item.body }}
+                      </span>
+                    </span>
+
+                    <span class="notification-row-arrow pt-1.5">
+                      <Icon
+                        name="lucide:arrow-right"
+                        class="h-[13px] w-[13px]"
+                        style="color: var(--text-tertiary)"
+                      />
+                    </span>
+                  </button>
+                </template>
+              </div>
+            </div>
+
+            <template v-if="items.length > 0">
+              <div style="border-top: 1px solid var(--surface-border)" />
+              <button
+                class="notification-footer flex w-full items-center justify-center gap-1 px-4 py-[11px] text-[12px] font-semibold transition-all duration-150"
+                style="color: var(--text-tertiary)"
+                @click="goToAllNotifications"
+              >
+                <span>View all notifications</span>
+                <Icon
+                  name="lucide:arrow-right"
+                  class="h-3 w-3"
+                />
+              </button>
+            </template>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { AdminNotificationItem } from '~/composables/useAdminNotifications'
-import { useAdminNotifications } from '~/composables/useAdminNotifications'
+import {
+  formatAdminNotificationRelative,
+  getAdminNotificationIcon,
+  splitAdminNotifications,
+  useAdminNotifications,
+  type AdminNotificationItem
+} from '~/composables/useAdminNotifications'
 
 const router = useRouter()
+const { locale } = useI18n({ useScope: 'global' })
 const isOpen = ref(false)
-const rootRef = ref<HTMLElement | null>(null)
+const badgeAnimationKey = ref(0)
 
 const {
   items,
@@ -93,52 +336,176 @@ const {
   isLoading,
   refreshNotifications,
   markRead,
+  markAllRead,
   connectStream,
   disconnectStream
 } = useAdminNotifications()
 
+const groupedItems = computed(() => splitAdminNotifications(items.value.slice(0, 20)))
+
+watch(unreadCount, (value, oldValue) => {
+  if (value !== oldValue) {
+    badgeAnimationKey.value += 1
+  }
+})
+
+function closePanel() {
+  isOpen.value = false
+}
+
 function togglePanel() {
   isOpen.value = !isOpen.value
-  if (isOpen.value) refreshNotifications()
+  if (isOpen.value) {
+    refreshNotifications()
+  }
 }
 
-function iconFor(item: AdminNotificationItem) {
-  if (item.type === 'ORDER_CREATED' || item.entityType === 'ORDER') return 'lucide:shopping-bag'
-  return 'lucide:bell'
+async function handleRefresh() {
+  await refreshNotifications()
 }
 
-function formatTime(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return new Intl.DateTimeFormat(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: 'short'
-  }).format(date)
+async function handleMarkAllRead() {
+  await markAllRead()
+}
+
+function resolveNotificationRoute(item: AdminNotificationItem) {
+  const route = String(item.data?.route || '').trim()
+  if (route) {
+    return route.startsWith('/admin') ? route : `/admin${route}`
+  }
+
+  const orderId = String(item.data?.orderId || '').trim()
+  if (orderId) {
+    return `/admin/orders/${orderId}`
+  }
+
+  return ''
 }
 
 async function openNotification(item: AdminNotificationItem) {
   await markRead(item.id)
-  isOpen.value = false
-  const route = item.data?.route || (item.data?.orderId ? `/admin/orders/${item.data.orderId}` : '')
-  if (route) router.push(route.startsWith('/admin') ? route : `/admin${route}`)
+  closePanel()
+
+  const targetRoute = resolveNotificationRoute(item)
+  if (targetRoute) {
+    router.push(targetRoute)
+  }
 }
 
-function onDocumentClick(event: MouseEvent) {
-  const root = rootRef.value
-  if (!root || root.contains(event.target as Node)) return
-  isOpen.value = false
+function goToAllNotifications() {
+  closePanel()
+  router.push('/admin/notifications')
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    closePanel()
+  }
 }
 
 onMounted(() => {
   refreshNotifications()
   connectStream()
-  document.addEventListener('click', onDocumentClick)
+  document.addEventListener('keydown', onKeydown)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('keydown', onKeydown)
   disconnectStream()
 })
 </script>
+
+<style scoped>
+.notification-trigger {
+  background: transparent;
+}
+
+.notification-trigger:hover,
+.notification-trigger:focus-visible,
+.notification-trigger[aria-expanded='true'] {
+  background: var(--nav-hover-bg);
+  color: var(--text-primary) !important;
+}
+
+.notification-trigger--pulse > :deep(.iconify) {
+  animation: notification-bell-pulse 1.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.notification-badge {
+  animation: notification-badge-pop 0.35s ease-out;
+}
+
+.notification-action:hover,
+.notification-action:focus-visible {
+  background: var(--nav-hover-bg);
+  color: var(--text-primary) !important;
+}
+
+.notification-row:hover,
+.notification-row:focus-visible {
+  background: var(--nav-hover-bg) !important;
+}
+
+.notification-row-arrow {
+  opacity: 0;
+  transition: opacity 130ms ease;
+}
+
+.notification-row:hover .notification-row-arrow,
+.notification-row:focus-visible .notification-row-arrow {
+  opacity: 1;
+}
+
+.notification-footer:hover,
+.notification-footer:focus-visible {
+  background: var(--nav-hover-bg);
+  color: var(--text-primary) !important;
+}
+
+.notifications-overlay-enter-active,
+.notifications-overlay-leave-active {
+  transition: opacity 180ms ease;
+}
+
+.notifications-overlay-enter-active .notification-panel,
+.notifications-overlay-leave-active .notification-panel {
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.notifications-overlay-enter-from,
+.notifications-overlay-leave-to {
+  opacity: 0;
+}
+
+.notifications-overlay-enter-from .notification-panel,
+.notifications-overlay-leave-to .notification-panel {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+@keyframes notification-bell-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+@keyframes notification-badge-pop {
+  0% {
+    transform: scale(0.55);
+  }
+
+  72% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+</style>

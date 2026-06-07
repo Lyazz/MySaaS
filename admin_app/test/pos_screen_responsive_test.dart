@@ -1,8 +1,11 @@
 import 'package:admin_app/models/pos_models.dart';
 import 'package:admin_app/models/product.dart';
+import 'package:admin_app/models/store_settings.dart';
 import 'package:admin_app/providers/pos_provider.dart';
+import 'package:admin_app/providers/store_settings_provider.dart';
 import 'package:admin_app/screens/pos_screen.dart';
 import 'package:admin_app/theme/app_theme.dart';
+import 'package:admin_app/utils/tenant_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -76,6 +79,11 @@ class _FakePosNotifier extends PosNotifier {
   Future<void> fetchProducts() async {}
 }
 
+class _FakeCompactPosNotifier extends _FakePosNotifier {
+  @override
+  PosState build() => super.build().copyWith(isCartSimpleView: true);
+}
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -109,4 +117,34 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('compact POS cart shows unit price', (WidgetTester tester) async {
+    const size = Size(320, 760);
+    await tester.binding.setSurfaceSize(size);
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [posProvider.overrideWith(_FakeCompactPosNotifier.new)],
+        child: buildLocalizedTestApp(
+          home: Theme(data: AppTheme.dark, child: const PosScreen()),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(tester.takeException(), isNull);
+
+    final priceLabel = tenantCurrencyFormatter(
+      StoreSettings.empty,
+    ).format(2450);
+    expect(
+      find.byKey(const ValueKey('pos-cart-unit-price-product_1')),
+      findsOneWidget,
+    );
+    expect(find.text(priceLabel), findsWidgets);
+  });
 }

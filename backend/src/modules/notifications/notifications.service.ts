@@ -197,6 +197,16 @@ export class NotificationsService {
         return { eventId, readAt }
     }
 
+    async markAllRead(tenantId: string, userId: string) {
+        const readAt = new Date()
+        const result = await prisma.notificationDelivery.updateMany({
+            where: { tenantId, userId, channel: 'IN_APP', readAt: null },
+            data: { readAt }
+        })
+
+        return { count: result.count, readAt }
+    }
+
     openStream(tenantId: string, userId: string, res: Response) {
         const id = `${tenantId}:${userId}:${Date.now()}:${Math.random().toString(16).slice(2)}`
         const client: StreamClient = { id, tenantId, userId, res }

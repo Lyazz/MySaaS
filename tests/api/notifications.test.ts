@@ -273,4 +273,36 @@ describe('Admin notifications', () => {
             .set('Authorization', `Bearer ${ownerBToken}`)
         expect(tenantBMark.status).toBe(404)
     })
+
+    it('marks all notifications read only for the current tenant user', async () => {
+        await prisma.notificationDelivery.updateMany({
+            where: { tenantId: tenantAId, userId: ownerAId, channel: 'IN_APP' },
+            data: { readAt: null }
+        })
+
+        const markAll = await request(app)
+            .post('/api/admin/notifications/read-all')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${ownerAToken}`)
+
+        expect(markAll.status).toBe(200)
+        expect(markAll.body.success).toBe(true)
+        expect(markAll.body.count).toBeGreaterThan(0)
+
+        const ownerDeliveries = await prisma.notificationDelivery.findMany({
+            where: { tenantId: tenantAId, userId: ownerAId, channel: 'IN_APP' },
+            select: { readAt: true }
+        })
+        expect(ownerDeliveries.length).toBeGreaterThan(0)
+        expect(ownerDeliveries.every((delivery) => delivery.readAt instanceof Date)).toBe(true)
+
+        const otherTenant = await request(app)
+            .post('/api/admin/notifications/read-all')
+            .set('X-Forwarded-Host', hostB)
+            .set('Authorization', `Bearer ${ownerBToken}`)
+
+        expect(otherTenant.status).toBe(200)
+        expect(otherTenant.body.success).toBe(true)
+        expect(otherTenant.body.count).toBe(0)
+    })
 })

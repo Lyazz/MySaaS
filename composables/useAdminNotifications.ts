@@ -20,6 +20,65 @@ type NotificationsResponse = {
 let streamAbort: AbortController | null = null
 let streamToken: string | null = null
 
+export function getAdminNotificationIcon(item: AdminNotificationItem) {
+  if (item.type === 'ORDER_CREATED' || item.entityType === 'ORDER') return 'lucide:shopping-bag'
+  if (item.entityType === 'PRODUCT') return 'lucide:package'
+  if (item.entityType === 'CUSTOMER') return 'lucide:user'
+  if (item.entityType === 'PAYMENT') return 'lucide:credit-card'
+  return 'lucide:bell'
+}
+
+export function formatAdminNotificationRelative(value: string, locale?: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const diffMs = Date.now() - date.getTime()
+  if (diffMs < 60_000) return 'now'
+
+  const diffMinutes = Math.floor(diffMs / 60_000)
+  if (diffMinutes < 60) return `${diffMinutes}m`
+
+  const diffHours = Math.floor(diffMs / 3_600_000)
+  if (diffHours < 24) return `${diffHours}h`
+
+  return new Intl.DateTimeFormat(locale || undefined, {
+    month: 'short',
+    day: 'numeric'
+  }).format(date)
+}
+
+export function formatAdminNotificationAbsolute(value: string, locale?: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  return new Intl.DateTimeFormat(locale || undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
+export function splitAdminNotifications(items: AdminNotificationItem[]) {
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  const today: AdminNotificationItem[] = []
+  const earlier: AdminNotificationItem[] = []
+
+  for (const item of items) {
+    const createdAt = new Date(item.createdAt).getTime()
+    if (!Number.isNaN(createdAt) && createdAt >= todayStart) {
+      today.push(item)
+      continue
+    }
+
+    earlier.push(item)
+  }
+
+  return { today, earlier }
+}
+
 function asNotification(raw: any): AdminNotificationItem | null {
   if (!raw || typeof raw !== 'object') return null
   const id = String(raw.id || raw.eventId || '').trim()
@@ -104,6 +163,21 @@ export function useAdminNotifications() {
     })
   }
 
+  async function markAllRead() {
+    if (!authStore.token) return
+
+    await $fetch('/api/admin/notifications/read-all', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    }).catch(() => null)
+
+    const readAt = new Date().toISOString()
+    items.value = items.value.map((item) => {
+      if (item.readAt) return item
+      return { ...item, readAt }
+    })
+  }
+
   async function connectStream() {
     if (!process.client || !authStore.token) return
     if (streamAbort && streamToken === authStore.token) return
@@ -172,6 +246,7 @@ export function useAdminNotifications() {
     error,
     refreshNotifications,
     markRead,
+    markAllRead,
     connectStream,
     disconnectStream
   }

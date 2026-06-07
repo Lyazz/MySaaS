@@ -75,8 +75,8 @@ const filteredProducts = computed(() => {
     if (searchQuery.value) {
         const q = normalizeSearchText(searchQuery.value)
         result = result.filter(p => 
-            p.title.toLowerCase().includes(q) || 
-            (p.searchKeywords && p.searchKeywords.toLowerCase().includes(q))
+            normalizeSearchText(p.title).includes(q) || 
+            (p.searchKeywords && normalizeSearchText(p.searchKeywords).includes(q))
         )
     }
 

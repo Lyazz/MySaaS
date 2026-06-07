@@ -13,6 +13,7 @@ router.get('/stream', controller.stream.bind(controller))
 router.get('/', controller.list.bind(controller))
 router.post('/subscriptions', controller.registerSubscription.bind(controller))
 router.delete('/subscriptions/:id', controller.disableSubscription.bind(controller))
+router.post('/read-all', controller.markAllRead.bind(controller))
 router.post('/:id/read', controller.markRead.bind(controller))
 
 export default router

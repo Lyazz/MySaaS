@@ -87,6 +87,22 @@ export class NotificationsController {
         }
     }
 
+    async markAllRead(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant
+            const user = req.user
+            if (!tenant || !user) {
+                return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
+            }
+
+            const result = await notificationsService.markAllRead(tenant.id, user.id)
+            return res.json({ success: true, ...result })
+        } catch (error) {
+            console.error('Mark all notifications read error:', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
     async stream(req: Request, res: Response) {
         const tenant = req.tenant
         const user = req.user
