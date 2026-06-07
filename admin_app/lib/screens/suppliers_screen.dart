@@ -261,10 +261,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
       ),
       rowBuilder: (context, supplier, index) {
         return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width < 800 ? 12 : 24,
-            vertical: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -272,11 +269,11 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: avatarBgColor,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -296,7 +293,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: primaryTextColor,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

@@ -15,6 +15,7 @@ import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
 import '../widgets/buttons/app_button.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class ActivationScreen extends ConsumerStatefulWidget {
   const ActivationScreen({super.key, this.offlineOnly = false});
@@ -116,12 +117,11 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
         builder: (dialogContext) {
           final offlineController = TextEditingController();
           return AlertDialog(
-            title: Text( 'app.offline_activation'.tr()),
+            title: Text('app.offline_activation'.tr()),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text( 'app.generate_this_request_code_on'.tr(),
-                ),
+                Text('app.generate_this_request_code_on'.tr()),
                 const SizedBox(height: 8),
                 SelectableText(
                   requestCode,
@@ -139,7 +139,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: Text( 'admin.common.cancel'.tr()),
+                child: Text('admin.common.cancel'.tr()),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -154,12 +154,10 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                     await _applyActivation(result);
                   } catch (e) {
                     if (!dialogContext.mounted) return;
-                    ScaffoldMessenger.of(
-                      dialogContext,
-                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                    AppToasts.show(dialogContext, e.toString());
                   }
                 },
-                child: Text( 'app.verify'.tr()),
+                child: Text('app.verify'.tr()),
               ),
             ],
           );
@@ -262,7 +260,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text( 'app.trusted_activation'.tr(),
+                                Text(
+                                  'app.trusted_activation'.tr(),
                                   style: GoogleFonts.dmSans(
                                     color: palette.primaryText,
                                     fontWeight: FontWeight.w600,
@@ -293,7 +292,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                             ),
                             decoration: InputDecoration(
                               labelText: 'app.activation_key'.tr(),
-                              hintText: 'app.paste_the_tenant_issued_key_fo'.tr(),
+                              hintText: 'app.paste_the_tenant_issued_key_fo'
+                                  .tr(),
                               errorText: _error,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(18),

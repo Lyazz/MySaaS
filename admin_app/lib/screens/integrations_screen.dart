@@ -8,6 +8,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
 import '../theme/app_theme.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class IntegrationsScreen extends ConsumerWidget {
   const IntegrationsScreen({super.key});
@@ -21,7 +22,8 @@ class IntegrationsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text( 'admin.settingsHub.links.integrations'.tr(),
+          Text(
+            'admin.settingsHub.links.integrations'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
@@ -29,7 +31,8 @@ class IntegrationsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text( 'app.connect_third_party_services_t'.tr(),
+          Text(
+            'app.connect_third_party_services_t'.tr(),
             style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 24),
@@ -50,7 +53,8 @@ class IntegrationsScreen extends ConsumerWidget {
                   configFields: [
                     _FieldDef(
                       key: 'pixelId',
-                      label: 'admin.pages.integrations.metaPixels.table.pixelId'.tr(),
+                      label: 'admin.pages.integrations.metaPixels.table.pixelId'
+                          .tr(),
                       hint: '1234567890',
                     ),
                     _FieldDef(
@@ -70,12 +74,16 @@ class IntegrationsScreen extends ConsumerWidget {
                   configFields: [
                     _FieldDef(
                       key: 'botToken',
-                      label: 'admin.pages.integrations.telegram.modal.fields.botToken.label'.tr(),
+                      label:
+                          'admin.pages.integrations.telegram.modal.fields.botToken.label'
+                              .tr(),
                       hint: '110201543:AAHd...',
                     ),
                     _FieldDef(
                       key: 'chatId',
-                      label: 'admin.pages.integrations.telegram.modal.fields.chatId.label'.tr(),
+                      label:
+                          'admin.pages.integrations.telegram.modal.fields.chatId.label'
+                              .tr(),
                       hint: '-100123456',
                     ),
                   ],
@@ -155,16 +163,12 @@ class _IntegrationCardState extends ConsumerState<_IntegrationCard> {
           .read(integrationsProvider.notifier)
           .save(widget.integration.provider, config);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${widget.name} saved')));
+        AppToasts.show(context, '${widget.name} saved');
         setState(() => _expanded = false);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        AppToasts.show(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _saving = false);

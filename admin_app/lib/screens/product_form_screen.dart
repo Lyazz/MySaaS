@@ -28,6 +28,7 @@ import '../widgets/form/form_select.dart';
 import '../widgets/product_options_list.dart';
 import '../widgets/rich_text_editor.dart';
 import '../widgets/tenant_image_widget.dart';
+import '../utils/app_toasts.dart';
 
 class ProductFormScreen extends ConsumerStatefulWidget {
   final String? productId;
@@ -49,7 +50,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _landingDescriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
-  final _lowStockThresholdController = TextEditingController(text: 'admin.forms.product.lowStockThreshold.placeholder'.tr());
+  final _lowStockThresholdController = TextEditingController(
+    text: 'admin.forms.product.lowStockThreshold.placeholder'.tr(),
+  );
   final _promotionalPriceController = TextEditingController();
 
   DateTime? _promotionStartDate;
@@ -142,7 +145,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           _selectedCategoryId = product.categoryId ?? product.category?.id;
           _isActive = product.isActive;
           _isPromotionActive = product.isPromotionActive;
-          _promotionalPriceController.text = product.promotionalPrice?.toString() ?? '';
+          _promotionalPriceController.text =
+              product.promotionalPrice?.toString() ?? '';
           _promotionStartDate = product.promotionStartDate;
           _promotionEndDate = product.promotionEndDate;
           _showCountdown = product.showCountdown;
@@ -307,7 +311,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     return 'admin.pages.products.edit.errors.imagePickFailed'.tr();
   }
 
-  Future<_PreparedImageUpload> _prepareImageUploadPayload(XFile selected) async {
+  Future<_PreparedImageUpload> _prepareImageUploadPayload(
+    XFile selected,
+  ) async {
     if (_isDesktopPlatform) {
       final croppedBytes = await _cropImageDesktop(selected);
       if (croppedBytes == null) {
@@ -377,7 +383,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text( 'admin.components.imageCropper.title'.tr(),
+                      Text(
+                        'admin.components.imageCropper.title'.tr(),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 12),
@@ -391,8 +398,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               image: originalBytes,
                               interactive: true,
                               initialRectBuilder:
-                                  desktop_crop.InitialRectBuilder
-                                      .withSizeAndRatio(
+                                  desktop_crop
+                                      .InitialRectBuilder.withSizeAndRatio(
                                     size: 0.9,
                                   ),
                               onCropped: (result) {
@@ -585,9 +592,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (url == null || url.isEmpty) return;
     await Clipboard.setData(ClipboardData(text: url));
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('admin.common.copied'.tr())));
+    AppToasts.show(context, 'admin.common.copied'.tr());
   }
 
   Future<void> _openUrl(String? url) async {
@@ -677,7 +682,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             onPromotionActiveChanged: (val) {
                               setState(() => _isPromotionActive = val);
                             },
-                            promotionalPriceController: _promotionalPriceController,
+                            promotionalPriceController:
+                                _promotionalPriceController,
                             promotionStartDate: _promotionStartDate,
                             onPromotionStartDateChanged: (val) {
                               setState(() => _promotionStartDate = val);
@@ -1045,7 +1051,8 @@ class _LoadingCard extends StatelessWidget {
 class _SearchKeywordsInput extends StatefulWidget {
   final TextEditingController controller;
 
-  const _SearchKeywordsInput({Key? key, required this.controller}) : super(key: key);
+  const _SearchKeywordsInput({Key? key, required this.controller})
+    : super(key: key);
 
   @override
   State<_SearchKeywordsInput> createState() => _SearchKeywordsInputState();
@@ -1115,7 +1122,9 @@ class _SearchKeywordsInputState extends State<_SearchKeywordsInput> {
           'admin.forms.product.searchKeywords.hint'.tr(),
           style: TextStyle(
             fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
       ],
@@ -1377,7 +1386,8 @@ class _GeneralTabSection extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text( 'app.admin_forms_product_isactive_l'.tr().tr(),
+                      Text(
+                        'app.admin_forms_product_isactive_l'.tr().tr(),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -1454,7 +1464,8 @@ class _GeneralTabSection extends StatelessWidget {
             maxLines: 3,
           ),
           const SizedBox(height: 4),
-          Text( 'app.admin_forms_product_minidescri'.tr().tr(),
+          Text(
+            'app.admin_forms_product_minidescri'.tr().tr(),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(
@@ -1562,7 +1573,8 @@ class _GeneralTabSection extends StatelessWidget {
           ),
           if (isEditing) ...[
             const SizedBox(height: 4),
-            Text( 'app.admin_forms_product_stock_hint'.tr().tr(),
+            Text(
+              'app.admin_forms_product_stock_hint'.tr().tr(),
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(
@@ -1590,7 +1602,8 @@ class _GeneralTabSection extends StatelessWidget {
             },
           ),
           const SizedBox(height: 4),
-          Text( 'app.admin_forms_product_lowstockth'.tr().tr(),
+          Text(
+            'app.admin_forms_product_lowstockth'.tr().tr(),
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(
@@ -1607,7 +1620,7 @@ class _GeneralTabSection extends StatelessWidget {
             items: [
               DropdownMenuItem<String?>(
                 value: null,
-                child: Text( 'app.admin_common_noneselected'.tr().tr()),
+                child: Text('app.admin_common_noneselected'.tr().tr()),
               ),
               ...categories.map(
                 (cat) => DropdownMenuItem<String?>(
@@ -1649,11 +1662,13 @@ class _ImagesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text( 'app.admin_pages_products_edit_gene'.tr().tr(),
+        Text(
+          'app.admin_pages_products_edit_gene'.tr().tr(),
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 4),
-        Text( 'app.admin_pages_products_edit_gene2'.tr().tr(),
+        Text(
+          'app.admin_pages_products_edit_gene2'.tr().tr(),
           style: TextStyle(
             color: Theme.of(
               context,
@@ -1708,7 +1723,8 @@ class _ImagesSection extends StatelessWidget {
                         color: Color(0xFF94A3B8),
                       ),
                       const SizedBox(height: 6),
-                      Text( 'app.admin_pages_products_edit_gene3'.tr().tr(),
+                      Text(
+                        'app.admin_pages_products_edit_gene3'.tr().tr(),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
@@ -1772,7 +1788,8 @@ class _DescriptionTabSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text( 'app.admin_pages_products_edit_desc'.tr().tr(),
+          Text(
+            'app.admin_pages_products_edit_desc'.tr().tr(),
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
@@ -1801,12 +1818,14 @@ class _VariantsTabSection extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_VariantsTabSection> createState() => _VariantsTabSectionState();
+  ConsumerState<_VariantsTabSection> createState() =>
+      _VariantsTabSectionState();
 }
 
 class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
   final List<_VariantEditorRow> _rows = <_VariantEditorRow>[];
-  final List<_StockAllocationRow> _stockAllocationRows = <_StockAllocationRow>[];
+  final List<_StockAllocationRow> _stockAllocationRows =
+      <_StockAllocationRow>[];
   bool _showArchivedVariants = false;
   bool _allocatingStock = false;
 
@@ -1849,8 +1868,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     _rows
       ..clear()
       ..addAll(
-        (widget.product?.variants ?? const <ProductVariant>[])
-            .map(_VariantEditorRow.fromVariant),
+        (widget.product?.variants ?? const <ProductVariant>[]).map(
+          _VariantEditorRow.fromVariant,
+        ),
       );
     _syncStockAllocationRows();
     if (mounted) setState(() {});
@@ -1878,9 +1898,15 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
         (variant) => _StockAllocationRow(
           variantId: variant.id,
           title: variant.title,
-          stockController: TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr()),
-          reservedController: TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr()),
-          safetyController: TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr()),
+          stockController: TextEditingController(
+            text: 'admin.forms.product.stock.placeholder'.tr(),
+          ),
+          reservedController: TextEditingController(
+            text: 'admin.forms.product.stock.placeholder'.tr(),
+          ),
+          safetyController: TextEditingController(
+            text: 'admin.forms.product.stock.placeholder'.tr(),
+          ),
         ),
       ),
     );
@@ -1926,15 +1952,13 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     return row.optionValues.isNotEmpty;
   }
 
-  String _extractErrorMessage(
-    Object error, {
-    required String fallbackKey,
-  }) {
+  String _extractErrorMessage(Object error, {required String fallbackKey}) {
     final fallback = fallbackKey.tr();
     if (error is DioException) {
       final data = error.response?.data;
       if (data is Map) {
-        final message = data['statusMessage'] ?? data['error'] ?? data['message'];
+        final message =
+            data['statusMessage'] ?? data['error'] ?? data['message'];
         if (message is String && message.trim().isNotEmpty) {
           return message.trim();
         }
@@ -1999,21 +2023,20 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
         'promotionEndDate': _supportsVariantPromotion(row)
             ? _toIsoOrNull(row.promotionEndController.text)
             : null,
-        'showCountdown': _supportsVariantPromotion(row) ? row.showCountdown : false,
+        'showCountdown': _supportsVariantPromotion(row)
+            ? row.showCountdown
+            : false,
       };
       await ref.read(productsProvider.notifier).updateVariant(row.id, payload);
       widget.onVariantUpdated();
     } catch (error) {
       row.restore(previous);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _extractErrorMessage(
-                error,
-                fallbackKey: 'admin.variantsTable.errors.updateVariantFailed',
-              ),
-            ),
+        AppToasts.show(
+          context,
+          _extractErrorMessage(
+            error,
+            fallbackKey: 'admin.variantsTable.errors.updateVariantFailed',
           ),
         );
       }
@@ -2031,22 +2054,18 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     _savingInventoryIds.add(row.id);
     setState(() {});
     try {
-      await ref.read(productsProvider.notifier).updateVariantInventory(
-            row.id,
-            patch,
-          );
+      await ref
+          .read(productsProvider.notifier)
+          .updateVariantInventory(row.id, patch);
       widget.onVariantUpdated();
     } catch (error) {
       row.restore(previous);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _extractErrorMessage(
-                error,
-                fallbackKey: 'admin.variantsTable.errors.updateInventoryFailed',
-              ),
-            ),
+        AppToasts.show(
+          context,
+          _extractErrorMessage(
+            error,
+            fallbackKey: 'admin.variantsTable.errors.updateInventoryFailed',
           ),
         );
       }
@@ -2062,12 +2081,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     if (nextStock < 0) {
       row.restore(previous);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text( 'app.admin_variantstable_errors_upd'.tr().tr(),
-            ),
-          ),
-        );
+        AppToasts.show(context, 'app.admin_variantstable_errors_upd'.tr().tr());
       }
       return;
     }
@@ -2075,7 +2089,10 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     _savingStockIds.add(row.id);
     setState(() {});
     try {
-      await ref.read(apiProvider).client.post(
+      await ref
+          .read(apiProvider)
+          .client
+          .post(
             '/admin/inventory/variants/${row.id}/stock/set',
             data: {
               'stock': nextStock,
@@ -2086,14 +2103,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     } catch (error) {
       row.restore(previous);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _extractErrorMessage(
-                error,
-                fallbackKey: 'admin.variantsTable.errors.updateStockFailed',
-              ),
-            ),
+        AppToasts.show(
+          context,
+          _extractErrorMessage(
+            error,
+            fallbackKey: 'admin.variantsTable.errors.updateStockFailed',
           ),
         );
       }
@@ -2111,14 +2125,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
       widget.onVariantUpdated();
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _extractErrorMessage(
-                error,
-                fallbackKey: 'admin.variantsTable.errors.lockSkuFailed',
-              ),
-            ),
+        AppToasts.show(
+          context,
+          _extractErrorMessage(
+            error,
+            fallbackKey: 'admin.variantsTable.errors.lockSkuFailed',
           ),
         );
       }
@@ -2132,9 +2143,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     _suggestingSkuIds.add(row.id);
     setState(() {});
     try {
-      final sku = await ref.read(productsProvider.notifier).suggestVariantSku(
-            row.id,
-          );
+      final sku = await ref
+          .read(productsProvider.notifier)
+          .suggestVariantSku(row.id);
       if (sku.trim().isEmpty) {
         throw Exception(
           'admin.variantsTable.errors.suggestSkuUnavailable'.tr(),
@@ -2144,14 +2155,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
       await _updateVariantInfo(row);
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _extractErrorMessage(
-                error,
-                fallbackKey: 'admin.variantsTable.errors.suggestSkuFailed',
-              ),
-            ),
+        AppToasts.show(
+          context,
+          _extractErrorMessage(
+            error,
+            fallbackKey: 'admin.variantsTable.errors.suggestSkuFailed',
           ),
         );
       }
@@ -2167,7 +2175,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     final fromProductImages = product.productImages
         .map((img) => img.url.trim())
         .where((url) => url.isNotEmpty);
-    final fromLegacy = product.images.map((url) => url.trim()).where((url) => url.isNotEmpty);
+    final fromLegacy = product.images
+        .map((url) => url.trim())
+        .where((url) => url.isNotEmpty);
 
     final seen = <String>{};
     final merged = <String>[];
@@ -2189,38 +2199,54 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
             final saving = _savingImagesIds.contains(row.id);
             return Dialog(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 820, maxHeight: 640),
+                constraints: const BoxConstraints(
+                  maxWidth: 820,
+                  maxHeight: 640,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text( 'app.admin_variantstable_imagepicke'.tr().tr(),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      Text(
+                        'app.admin_variantstable_imagepicke'.tr().tr(),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(height: 4),
-                      Text( 'app.admin_variantstable_imagepicke2'.tr().tr(),
+                      Text(
+                        'app.admin_variantstable_imagepicke2'.tr().tr(),
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(dialogBodyContext).colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: Theme.of(
+                            dialogBodyContext,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                       const SizedBox(height: 14),
                       Expanded(
                         child: availableImages.isEmpty
                             ? Center(
-                                child: Text( 'app.admin_variantstable_imagepicke3'.tr().tr(),
-                                  style: const TextStyle(color: Color(0xFF64748B)),
+                                child: Text(
+                                  'app.admin_variantstable_imagepicke3'
+                                      .tr()
+                                      .tr(),
+                                  style: const TextStyle(
+                                    color: Color(0xFF64748B),
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               )
                             : GridView.builder(
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: 10,
-                                  mainAxisSpacing: 10,
-                                  childAspectRatio: 0.9,
-                                ),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 10,
+                                      mainAxisSpacing: 10,
+                                      childAspectRatio: 0.9,
+                                    ),
                                 itemCount: availableImages.length,
                                 itemBuilder: (gridContext, index) {
                                   final url = availableImages[index];
@@ -2249,11 +2275,13 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                       ),
                                       padding: const EdgeInsets.all(8),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               child: TenantImageWidget(
                                                 imagePath: url,
                                                 fit: BoxFit.cover,
@@ -2264,10 +2292,20 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                           Row(
                                             children: [
                                               Expanded(
-                                                child: Text( 'app.admin_variantstable_imagepicke4'.tr()
-                                                      .tr(namedArgs: {'index': (index + 1).toString()}),
-                                                  style: const TextStyle(fontSize: 11),
-                                                  overflow: TextOverflow.ellipsis,
+                                                child: Text(
+                                                  'app.admin_variantstable_imagepicke4'
+                                                      .tr()
+                                                      .tr(
+                                                        namedArgs: {
+                                                          'index': (index + 1)
+                                                              .toString(),
+                                                        },
+                                                      ),
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ),
                                               Checkbox(
@@ -2324,15 +2362,12 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                       widget.onVariantUpdated();
                                     } catch (error) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              _extractErrorMessage(
-                                                error,
-                                                fallbackKey:
-                                                    'admin.variantsTable.errors.saveImagesFailed',
-                                              ),
-                                            ),
+                                        AppToasts.show(
+                                          context,
+                                          _extractErrorMessage(
+                                            error,
+                                            fallbackKey:
+                                                'admin.variantsTable.errors.saveImagesFailed',
                                           ),
                                         );
                                       }
@@ -2395,13 +2430,19 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                 children: [
                   Text(
                     '${'admin.variantsTable.movements.title'.tr()} - ${row.title}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text( 'app.admin_variantstable_movements'.tr().tr(),
+                  Text(
+                    'app.admin_variantstable_movements'.tr().tr(),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -2409,35 +2450,36 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                     child: loadError.isNotEmpty
                         ? Center(child: Text(loadError))
                         : movements.isEmpty
-                            ? Center(
-                                child: Text( 'app.admin_variantstable_movements2'.tr().tr(),
-                                  style: const TextStyle(color: Color(0xFF64748B)),
-                                ),
-                              )
-                            : SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(minWidth: 900),
-                                  child: Column(
-                                    children: [
-                                      _movementHeaderRow(context),
-                                      const Divider(height: 1),
-                                      Expanded(
-                                        child: ListView.separated(
-                                          itemCount: movements.length,
-                                          separatorBuilder: (_, _) =>
-                                              const Divider(height: 1),
-                                          itemBuilder: (context, index) =>
-                                              _movementDataRow(
+                        ? Center(
+                            child: Text(
+                              'app.admin_variantstable_movements2'.tr().tr(),
+                              style: const TextStyle(color: Color(0xFF64748B)),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minWidth: 900),
+                              child: Column(
+                                children: [
+                                  _movementHeaderRow(context),
+                                  const Divider(height: 1),
+                                  Expanded(
+                                    child: ListView.separated(
+                                      itemCount: movements.length,
+                                      separatorBuilder: (_, _) =>
+                                          const Divider(height: 1),
+                                      itemBuilder: (context, index) =>
+                                          _movementDataRow(
                                             context,
                                             movements[index],
                                           ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
+                            ),
+                          ),
                   ),
                   const SizedBox(height: 12),
                   Align(
@@ -2461,7 +2503,10 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
     _allocatingStock = true;
     setState(() {});
     try {
-      await ref.read(apiProvider).client.post(
+      await ref
+          .read(apiProvider)
+          .client
+          .post(
             '/admin/products/${widget.productId}/variants/allocate-stock',
             data: {
               'sourceVariantId': widget.product?.stockAllocationSourceVariantId,
@@ -2478,25 +2523,17 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
             },
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text( 'app.admin_pages_products_edit_vari'.tr().tr(),
-            ),
-          ),
-        );
+        AppToasts.show(context, 'app.admin_pages_products_edit_vari'.tr().tr());
       }
       widget.onVariantUpdated();
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _extractErrorMessage(
-                error,
-                fallbackKey:
-                    'admin.pages.products.edit.variantsTab.allocationUnbalanced',
-              ),
-            ),
+        AppToasts.show(
+          context,
+          _extractErrorMessage(
+            error,
+            fallbackKey:
+                'admin.pages.products.edit.variantsTab.allocationUnbalanced',
           ),
         );
       }
@@ -2507,16 +2544,47 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
   }
 
   Widget _movementHeaderRow(BuildContext context) {
-    TextStyle style = const TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+    TextStyle style = const TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 12,
+    );
     return Row(
       children: [
-        _headerCell('admin.variantsTable.movements.columns.date'.tr(), 170, style),
-        _headerCell('admin.variantsTable.movements.columns.type'.tr(), 160, style),
-        _headerCell('admin.variantsTable.movements.columns.deltaStock'.tr(), 100, style),
-        _headerCell('admin.variantsTable.movements.columns.deltaReserved'.tr(), 110, style),
-        _headerCell('admin.variantsTable.movements.columns.deltaSafety'.tr(), 100, style),
-        _headerCell('admin.variantsTable.movements.columns.after'.tr(), 220, style),
-        _headerCell('admin.variantsTable.movements.columns.by'.tr(), 180, style),
+        _headerCell(
+          'admin.variantsTable.movements.columns.date'.tr(),
+          170,
+          style,
+        ),
+        _headerCell(
+          'admin.variantsTable.movements.columns.type'.tr(),
+          160,
+          style,
+        ),
+        _headerCell(
+          'admin.variantsTable.movements.columns.deltaStock'.tr(),
+          100,
+          style,
+        ),
+        _headerCell(
+          'admin.variantsTable.movements.columns.deltaReserved'.tr(),
+          110,
+          style,
+        ),
+        _headerCell(
+          'admin.variantsTable.movements.columns.deltaSafety'.tr(),
+          100,
+          style,
+        ),
+        _headerCell(
+          'admin.variantsTable.movements.columns.after'.tr(),
+          220,
+          style,
+        ),
+        _headerCell(
+          'admin.variantsTable.movements.columns.by'.tr(),
+          180,
+          style,
+        ),
       ],
     );
   }
@@ -2539,8 +2607,7 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
         _dataCell('${row.safetyStockDelta}', 100, textStyle),
         _dataCell(afterText(), 220, textStyle),
         _dataCell(
-          row.createdByEmail ??
-              'admin.variantsTable.movements.system'.tr(),
+          row.createdByEmail ?? 'admin.variantsTable.movements.system'.tr(),
           180,
           textStyle,
         ),
@@ -2580,7 +2647,8 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
   Widget build(BuildContext context) {
     if (!widget.isEditing) {
       return Center(
-        child: Text( 'app.admin_pages_products_edit_vari2'.tr().tr(),
+        child: Text(
+          'app.admin_pages_products_edit_vari2'.tr().tr(),
           style: const TextStyle(color: Color(0xFF64748B)),
         ),
       );
@@ -2592,7 +2660,8 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
 
     final visibleRows = _visibleRows;
     final sourceBalance = widget.product!.stockAllocationSourceBalance;
-    final showAllocationBanner = widget.product!.stockAllocationRequired &&
+    final showAllocationBanner =
+        widget.product!.stockAllocationRequired &&
         sourceBalance != null &&
         _stockAllocationRows.isNotEmpty;
 
@@ -2606,13 +2675,17 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
             options: widget.product!.options,
           ),
           const SizedBox(height: 16),
-          Text( 'app.admin_pages_products_edit_vari3'.tr().tr(),
+          Text(
+            'app.admin_pages_products_edit_vari3'.tr().tr(),
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
-          Text( 'app.admin_pages_products_edit_vari4'.tr().tr(),
+          Text(
+            'app.admin_pages_products_edit_vari4'.tr().tr(),
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.65),
               fontSize: 12,
             ),
           ),
@@ -2622,7 +2695,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFFACC15).withValues(alpha: 0.55)),
+                border: Border.all(
+                  color: const Color(0xFFFACC15).withValues(alpha: 0.55),
+                ),
                 color: const Color(0xFFFEFCE8),
               ),
               child: Column(
@@ -2633,19 +2708,30 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                     children: [
                       const Padding(
                         padding: EdgeInsets.only(top: 2),
-                        child: Icon(LucideIcons.alertTriangle, size: 16, color: Color(0xFFCA8A04)),
+                        child: Icon(
+                          LucideIcons.alertTriangle,
+                          size: 16,
+                          color: Color(0xFFCA8A04),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text( 'app.admin_pages_products_edit_vari5'.tr().tr(),
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            Text(
+                              'app.admin_pages_products_edit_vari5'.tr().tr(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: 2),
-                            Text( 'app.admin_pages_products_edit_vari6'.tr().tr(),
-                              style: const TextStyle(fontSize: 12, color: Color(0xFF854D0E)),
+                            Text(
+                              'app.admin_pages_products_edit_vari6'.tr().tr(),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF854D0E),
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(
@@ -2653,7 +2739,10 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                               '${sourceBalance.stock} ${'admin.pages.products.edit.variantsTab.onHandShort'.tr()}, '
                               '${sourceBalance.reserved} ${'admin.pages.products.edit.variantsTab.reservedShort'.tr()}, '
                               '${sourceBalance.safetyStock} ${'admin.pages.products.edit.variantsTab.safetyShort'.tr()}',
-                              style: const TextStyle(fontSize: 12, color: Color(0xFF854D0E)),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF854D0E),
+                              ),
                             ),
                           ],
                         ),
@@ -2662,9 +2751,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                       AppButton.primary(
                         label: _allocatingStock
                             ? 'admin.common.saving'.tr()
-                            : 'admin.pages.products.edit.variantsTab.allocateAction'.tr(),
-                        onPressed:
-                            _allocatingStock || !_allocationBalanced ? null : _allocateStock,
+                            : 'admin.pages.products.edit.variantsTab.allocateAction'
+                                  .tr(),
+                        onPressed: _allocatingStock || !_allocationBalanced
+                            ? null
+                            : _allocateStock,
                         loading: _allocatingStock,
                         size: AppButtonSize.sm,
                       ),
@@ -2682,22 +2773,34 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                               _headerCell(
                                 'admin.variantsTable.columns.variant'.tr(),
                                 230,
-                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                                const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
                               ),
                               _headerCell(
                                 'admin.variantsTable.columns.onHand'.tr(),
                                 110,
-                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                                const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
                               ),
                               _headerCell(
                                 'admin.variantsTable.columns.reserved'.tr(),
                                 110,
-                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                                const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
                               ),
                               _headerCell(
                                 'admin.variantsTable.columns.safety'.tr(),
                                 110,
-                                const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                                const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -2706,11 +2809,17 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                               padding: const EdgeInsets.only(bottom: 8),
                               child: Row(
                                 children: [
-                                  _dataCell(row.title, 230, const TextStyle(fontSize: 12)),
+                                  _dataCell(
+                                    row.title,
+                                    230,
+                                    const TextStyle(fontSize: 12),
+                                  ),
                                   SizedBox(
                                     width: 110,
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
                                       child: TextField(
                                         controller: row.stockController,
                                         keyboardType: TextInputType.number,
@@ -2722,7 +2831,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                   SizedBox(
                                     width: 110,
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
                                       child: TextField(
                                         controller: row.reservedController,
                                         keyboardType: TextInputType.number,
@@ -2734,7 +2845,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                   SizedBox(
                                     width: 110,
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
                                       child: TextField(
                                         controller: row.safetyController,
                                         keyboardType: TextInputType.number,
@@ -2773,9 +2886,10 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               _allocationBalanced
-                                  ? 'admin.pages.products.edit.variantsTab.allocationBalanced'.tr()
+                                  ? 'admin.pages.products.edit.variantsTab.allocationBalanced'
+                                        .tr()
                                   : 'admin.pages.products.edit.variantsTab.allocationUnbalanced'
-                                      .tr(),
+                                        .tr(),
                               style: TextStyle(
                                 fontSize: 11,
                                 color: _allocationBalanced
@@ -2801,21 +2915,25 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                   setState(() => _showArchivedVariants = value == true);
                 },
               ),
-              Text( 'app.admin_pages_products_edit_vari7'.tr().tr()),
+              Text('app.admin_pages_products_edit_vari7'.tr().tr()),
               const SizedBox(width: 12),
-              Text( 'app.admin_pages_products_edit_vari8'.tr().tr(
+              Text(
+                'app.admin_pages_products_edit_vari8'.tr().tr(
                   namedArgs: {'count': _archivedCount.toString()},
                 ),
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
           if (visibleRows.isEmpty)
-            Text( 'app.admin_pages_products_edit_vari9'.tr().tr(),
+            Text(
+              'app.admin_pages_products_edit_vari9'.tr().tr(),
               style: const TextStyle(color: Color(0xFF64748B)),
             )
           else
@@ -2823,7 +2941,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.35),
                 ),
               ),
               child: SingleChildScrollView(
@@ -2833,39 +2953,145 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                   child: Column(
                     children: [
                       Container(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         child: Row(
                           children: [
-                            _headerCell('admin.variantsTable.columns.variant'.tr(), 180, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.price'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.cost'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.promotion'.tr(), 280, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.track'.tr(), 70, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.onHand'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.reserved'.tr(), 88, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.safety'.tr(), 92, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.available'.tr(), 90, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.sku'.tr(), 240, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.barcode'.tr(), 150, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.active'.tr(), 70, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.variantsTable.columns.images'.tr(), 120, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                            _headerCell('admin.common.actions'.tr(), 110, const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            _headerCell(
+                              'admin.variantsTable.columns.variant'.tr(),
+                              180,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.price'.tr(),
+                              92,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.cost'.tr(),
+                              92,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.promotion'.tr(),
+                              280,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.track'.tr(),
+                              70,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.onHand'.tr(),
+                              92,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.reserved'.tr(),
+                              88,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.safety'.tr(),
+                              92,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.available'.tr(),
+                              90,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.sku'.tr(),
+                              240,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.barcode'.tr(),
+                              150,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.active'.tr(),
+                              70,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.variantsTable.columns.images'.tr(),
+                              120,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            _headerCell(
+                              'admin.common.actions'.tr(),
+                              110,
+                              const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       ...visibleRows.map((row) {
                         final savingInfo = _savingInfoIds.contains(row.id);
-                        final savingInventory = _savingInventoryIds.contains(row.id);
+                        final savingInventory = _savingInventoryIds.contains(
+                          row.id,
+                        );
                         final savingStock = _savingStockIds.contains(row.id);
                         final lockingSku = _lockingSkuIds.contains(row.id);
-                        final suggestingSku = _suggestingSkuIds.contains(row.id);
+                        final suggestingSku = _suggestingSkuIds.contains(
+                          row.id,
+                        );
                         final supportPromo = _supportsVariantPromotion(row);
 
                         return Container(
                           decoration: BoxDecoration(
                             border: Border(
                               top: BorderSide(
-                                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outline.withValues(alpha: 0.2),
                               ),
                             ),
                           ),
@@ -2878,7 +3104,10 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                   padding: const EdgeInsets.all(8),
                                   child: Text(
                                     row.title,
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2890,7 +3119,10 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                     controller: row.priceController,
                                     enabled: !savingInfo,
                                     decoration: _inputDecoration(),
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     onSubmitted: (_) => _updateVariantInfo(row),
                                   ),
                                 ),
@@ -2903,7 +3135,10 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                     controller: row.costController,
                                     enabled: !savingInfo,
                                     decoration: _inputDecoration(),
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     onSubmitted: (_) => _updateVariantInfo(row),
                                   ),
                                 ),
@@ -2914,7 +3149,8 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                   padding: const EdgeInsets.all(6),
                                   child: supportPromo
                                       ? Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
@@ -2924,41 +3160,72 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                                       ? null
                                                       : (value) {
                                                           setState(() {
-                                                            row.isPromotionActive = value == true;
+                                                            row.isPromotionActive =
+                                                                value == true;
                                                           });
-                                                          _updateVariantInfo(row);
+                                                          _updateVariantInfo(
+                                                            row,
+                                                          );
                                                         },
                                                 ),
                                                 Expanded(
-                                                  child: Text( 'app.admin_forms_product_ispromotio'.tr().tr(),
-                                                    style: const TextStyle(fontSize: 11),
+                                                  child: Text(
+                                                    'app.admin_forms_product_ispromotio'
+                                                        .tr()
+                                                        .tr(),
+                                                    style: const TextStyle(
+                                                      fontSize: 11,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
                                             ),
                                             if (row.isPromotionActive) ...[
                                               TextField(
-                                                controller: row.promotionalPriceController,
+                                                controller: row
+                                                    .promotionalPriceController,
                                                 enabled: !savingInfo,
-                                                decoration: _inputDecoration().copyWith(
-                                                  hintText: 'app.admin_forms_product_promotiona'.tr().tr(),
-                                                ),
-                                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                                onSubmitted: (_) => _updateVariantInfo(row),
+                                                decoration: _inputDecoration()
+                                                    .copyWith(
+                                                      hintText:
+                                                          'app.admin_forms_product_promotiona'
+                                                              .tr()
+                                                              .tr(),
+                                                    ),
+                                                keyboardType:
+                                                    const TextInputType.numberWithOptions(
+                                                      decimal: true,
+                                                    ),
+                                                onSubmitted: (_) =>
+                                                    _updateVariantInfo(row),
                                               ),
                                               const SizedBox(height: 6),
                                               TextField(
-                                                controller: row.promotionStartController,
+                                                controller: row
+                                                    .promotionStartController,
                                                 enabled: !savingInfo,
-                                                decoration: _inputDecoration().copyWith(hintText: 'app.yyyy_mm_ddthh_mm'.tr()),
-                                                onSubmitted: (_) => _updateVariantInfo(row),
+                                                decoration: _inputDecoration()
+                                                    .copyWith(
+                                                      hintText:
+                                                          'app.yyyy_mm_ddthh_mm'
+                                                              .tr(),
+                                                    ),
+                                                onSubmitted: (_) =>
+                                                    _updateVariantInfo(row),
                                               ),
                                               const SizedBox(height: 6),
                                               TextField(
-                                                controller: row.promotionEndController,
+                                                controller:
+                                                    row.promotionEndController,
                                                 enabled: !savingInfo,
-                                                decoration: _inputDecoration().copyWith(hintText: 'app.yyyy_mm_ddthh_mm'.tr()),
-                                                onSubmitted: (_) => _updateVariantInfo(row),
+                                                decoration: _inputDecoration()
+                                                    .copyWith(
+                                                      hintText:
+                                                          'app.yyyy_mm_ddthh_mm'
+                                                              .tr(),
+                                                    ),
+                                                onSubmitted: (_) =>
+                                                    _updateVariantInfo(row),
                                               ),
                                               Row(
                                                 children: [
@@ -2968,14 +3235,22 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                                         ? null
                                                         : (value) {
                                                             setState(() {
-                                                              row.showCountdown = value == true;
+                                                              row.showCountdown =
+                                                                  value == true;
                                                             });
-                                                            _updateVariantInfo(row);
+                                                            _updateVariantInfo(
+                                                              row,
+                                                            );
                                                           },
                                                   ),
                                                   Expanded(
-                                                    child: Text( 'app.admin_forms_product_showcountd'.tr().tr(),
-                                                      style: const TextStyle(fontSize: 11),
+                                                    child: Text(
+                                                      'app.admin_forms_product_showcountd'
+                                                          .tr()
+                                                          .tr(),
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -2983,8 +3258,14 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                             ],
                                           ],
                                         )
-                                      : Text( 'app.admin_variantstable_promotions'.tr().tr(),
-                                          style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                      : Text(
+                                          'app.admin_variantstable_promotions'
+                                              .tr()
+                                              .tr(),
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Color(0xFF64748B),
+                                          ),
                                         ),
                                 ),
                               ),
@@ -2997,14 +3278,13 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                         ? null
                                         : (value) {
                                             setState(() {
-                                              row.trackInventory = value == true;
+                                              row.trackInventory =
+                                                  value == true;
                                             });
-                                            _updateVariantInventory(
-                                              row,
-                                              {
-                                                'trackInventory': row.trackInventory,
-                                              },
-                                            );
+                                            _updateVariantInventory(row, {
+                                              'trackInventory':
+                                                  row.trackInventory,
+                                            });
                                           },
                                   ),
                                 ),
@@ -3022,7 +3302,11 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                   ),
                                 ),
                               ),
-                              _dataCell('${row.reserved}', 88, const TextStyle(fontSize: 12)),
+                              _dataCell(
+                                '${row.reserved}',
+                                88,
+                                const TextStyle(fontSize: 12),
+                              ),
                               SizedBox(
                                 width: 92,
                                 child: Padding(
@@ -3033,21 +3317,20 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                     decoration: _inputDecoration(),
                                     keyboardType: TextInputType.number,
                                     onSubmitted: (_) {
-                                      _updateVariantInventory(
-                                        row,
-                                        {
-                                          'safetyStock': _parseInt(
-                                            row.safetyStockController.text,
-                                            fallback: row.safetyStock,
-                                          ),
-                                        },
-                                      );
+                                      _updateVariantInventory(row, {
+                                        'safetyStock': _parseInt(
+                                          row.safetyStockController.text,
+                                          fallback: row.safetyStock,
+                                        ),
+                                      });
                                     },
                                   ),
                                 ),
                               ),
                               _dataCell(
-                                row.trackInventory ? '${_availableOf(row)}' : '∞',
+                                row.trackInventory
+                                    ? '${_availableOf(row)}'
+                                    : '∞',
                                 90,
                                 const TextStyle(fontSize: 12),
                               ),
@@ -3060,41 +3343,73 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                       Expanded(
                                         child: TextField(
                                           controller: row.skuController,
-                                          enabled: !row.skuLocked && !savingInfo,
+                                          enabled:
+                                              !row.skuLocked && !savingInfo,
                                           decoration: _inputDecoration(),
-                                          onSubmitted: (_) => _updateVariantInfo(row),
+                                          onSubmitted: (_) =>
+                                              _updateVariantInfo(row),
                                         ),
                                       ),
                                       const SizedBox(width: 4),
                                       if (!row.skuLocked)
                                         IconButton(
-                                          tooltip: 'app.admin_variantstable_actions_su'.tr().tr(),
+                                          tooltip:
+                                              'app.admin_variantstable_actions_su'
+                                                  .tr()
+                                                  .tr(),
                                           icon: suggestingSku
                                               ? const SizedBox(
                                                   width: 12,
                                                   height: 12,
-                                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
                                                 )
-                                              : const Icon(LucideIcons.wand2, size: 16),
-                                          onPressed: suggestingSku ? null : () => _suggestSku(row),
+                                              : const Icon(
+                                                  LucideIcons.wand2,
+                                                  size: 16,
+                                                ),
+                                          onPressed: suggestingSku
+                                              ? null
+                                              : () => _suggestSku(row),
                                         ),
                                       if (!row.skuLocked)
                                         IconButton(
-                                          tooltip: 'app.admin_variantstable_actions_lo'.tr().tr(),
+                                          tooltip:
+                                              'app.admin_variantstable_actions_lo'
+                                                  .tr()
+                                                  .tr(),
                                           icon: lockingSku
                                               ? const SizedBox(
                                                   width: 12,
                                                   height: 12,
-                                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
                                                 )
-                                              : const Icon(LucideIcons.lock, size: 16),
-                                          onPressed: lockingSku ? null : () => _lockSku(row),
+                                              : const Icon(
+                                                  LucideIcons.lock,
+                                                  size: 16,
+                                                ),
+                                          onPressed: lockingSku
+                                              ? null
+                                              : () => _lockSku(row),
                                         )
                                       else
                                         Padding(
-                                          padding: const EdgeInsets.only(left: 6),
-                                          child: Text( 'app.admin_variantstable_actions_sk'.tr().tr(),
-                                            style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                          padding: const EdgeInsets.only(
+                                            left: 6,
+                                          ),
+                                          child: Text(
+                                            'app.admin_variantstable_actions_sk'
+                                                .tr()
+                                                .tr(),
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: Color(0xFF64748B),
+                                            ),
                                           ),
                                         ),
                                     ],
@@ -3134,10 +3449,14 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(6),
                                   child: AppButton.secondary(
-                                    label: 'app.admin_variantstable_actions_ma'.tr()
-                                            .tr(namedArgs: {
-                                      'count': row.images.length.toString(),
-                                    }),
+                                    label: 'app.admin_variantstable_actions_ma'
+                                        .tr()
+                                        .tr(
+                                          namedArgs: {
+                                            'count': row.images.length
+                                                .toString(),
+                                          },
+                                        ),
                                     onPressed: () => _openImageEditor(row),
                                     size: AppButtonSize.sm,
                                   ),
@@ -3148,7 +3467,9 @@ class _VariantsTabSectionState extends ConsumerState<_VariantsTabSection> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(6),
                                   child: AppButton.ghost(
-                                    label: 'app.admin_variantstable_actions_mo'.tr().tr(),
+                                    label: 'app.admin_variantstable_actions_mo'
+                                        .tr()
+                                        .tr(),
                                     onPressed: () => _openMovements(row),
                                     size: AppButtonSize.sm,
                                   ),
@@ -3241,10 +3562,13 @@ class _VariantEditorRow {
         text: variant.promotionalPrice?.toString() ?? '',
       ),
       promotionStartController: TextEditingController(
-        text: variant.promotionStartDate?.toIso8601String().substring(0, 16) ?? '',
+        text:
+            variant.promotionStartDate?.toIso8601String().substring(0, 16) ??
+            '',
       ),
       promotionEndController: TextEditingController(
-        text: variant.promotionEndDate?.toIso8601String().substring(0, 16) ?? '',
+        text:
+            variant.promotionEndDate?.toIso8601String().substring(0, 16) ?? '',
       ),
       stockController: TextEditingController(text: variant.stock.toString()),
       safetyStockController: TextEditingController(
@@ -3279,7 +3603,8 @@ class _VariantEditorRow {
   }
 
   void restore(Map<String, dynamic> snapshot) {
-    priceController.text = snapshot['price']?.toString() ?? priceController.text;
+    priceController.text =
+        snapshot['price']?.toString() ?? priceController.text;
     costController.text = snapshot['cost']?.toString() ?? costController.text;
     promotionalPriceController.text =
         snapshot['promo']?.toString() ?? promotionalPriceController.text;
@@ -3287,11 +3612,13 @@ class _VariantEditorRow {
         snapshot['promoStart']?.toString() ?? promotionStartController.text;
     promotionEndController.text =
         snapshot['promoEnd']?.toString() ?? promotionEndController.text;
-    stockController.text = snapshot['stockText']?.toString() ?? stockController.text;
+    stockController.text =
+        snapshot['stockText']?.toString() ?? stockController.text;
     safetyStockController.text =
         snapshot['safetyText']?.toString() ?? safetyStockController.text;
     skuController.text = snapshot['sku']?.toString() ?? skuController.text;
-    barcodeController.text = snapshot['barcode']?.toString() ?? barcodeController.text;
+    barcodeController.text =
+        snapshot['barcode']?.toString() ?? barcodeController.text;
     skuLocked = snapshot['skuLocked'] == true;
     trackInventory = snapshot['trackInventory'] == true;
     isActive = snapshot['isActive'] == true;
@@ -3478,7 +3805,9 @@ class _PromotionsTabSection extends StatelessWidget {
         children: [
           SwitchListTile(
             title: Text('admin.pages.products.edit.promotions.active'.tr()),
-            subtitle: Text('admin.pages.products.edit.promotions.activeHint'.tr()),
+            subtitle: Text(
+              'admin.pages.products.edit.promotions.activeHint'.tr(),
+            ),
             value: isPromotionActive,
             onChanged: onPromotionActiveChanged,
             contentPadding: EdgeInsets.zero,
@@ -3489,7 +3818,9 @@ class _PromotionsTabSection extends StatelessWidget {
             FormInput(
               label: 'admin.pages.products.edit.promotions.price'.tr(),
               controller: promotionalPriceController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               prefixIcon: const Icon(LucideIcons.tags),
             ),
             const SizedBox(height: 16),
@@ -3510,7 +3841,9 @@ class _PromotionsTabSection extends StatelessWidget {
                     },
                     child: InputDecorator(
                       decoration: InputDecoration(
-                        labelText: 'admin.pages.products.edit.promotions.startDate'.tr(),
+                        labelText:
+                            'admin.pages.products.edit.promotions.startDate'
+                                .tr(),
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(LucideIcons.calendar),
                       ),
@@ -3538,7 +3871,8 @@ class _PromotionsTabSection extends StatelessWidget {
                     },
                     child: InputDecorator(
                       decoration: InputDecoration(
-                        labelText: 'admin.pages.products.edit.promotions.endDate'.tr(),
+                        labelText:
+                            'admin.pages.products.edit.promotions.endDate'.tr(),
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(LucideIcons.calendar),
                       ),
@@ -3554,7 +3888,9 @@ class _PromotionsTabSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             CheckboxListTile(
-              title: Text('admin.pages.products.edit.promotions.showCountdown'.tr()),
+              title: Text(
+                'admin.pages.products.edit.promotions.showCountdown'.tr(),
+              ),
               value: showCountdown,
               onChanged: (val) => onShowCountdownChanged(val ?? false),
               contentPadding: EdgeInsets.zero,

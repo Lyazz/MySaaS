@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class ContactInfosPage extends ConsumerStatefulWidget {
   const ContactInfosPage({super.key});
@@ -105,14 +106,10 @@ class _ContactInfosPageState extends ConsumerState<ContactInfosPage> {
 
       await _load();
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text( 'app.contact_info_saved'.tr())));
+      AppToasts.show(context, 'app.contact_info_saved'.tr());
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      AppToasts.show(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -126,7 +123,7 @@ class _ContactInfosPageState extends ConsumerState<ContactInfosPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text( 'app.contact_information'.tr()),
+        title: Text('app.contact_information'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -188,7 +185,10 @@ class _ContactInfosPageState extends ConsumerState<ContactInfosPage> {
                   controller: _controllers['instagram']!,
                 ),
                 const SizedBox(height: 12),
-                FormInput(label: 'admin.contactInfosForm.kinds.tiktok.label'.tr(), controller: _controllers['tiktok']!),
+                FormInput(
+                  label: 'admin.contactInfosForm.kinds.tiktok.label'.tr(),
+                  controller: _controllers['tiktok']!,
+                ),
               ],
             ),
           ],

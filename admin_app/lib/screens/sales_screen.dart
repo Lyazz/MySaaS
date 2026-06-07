@@ -17,6 +17,7 @@ import '../widgets/responsive_server_paginated_table.dart';
 
 import '../widgets/buttons/app_button.dart';
 import '../widgets/buttons/table_action_button.dart';
+import '../utils/app_toasts.dart';
 
 class SalesScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -146,7 +147,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
               filters: [
                 SizedBox(
                   width: 320,
-                  child: DateRangeFilterField(showLabel: false, 
+                  child: DateRangeFilterField(
+                    showLabel: false,
                     range: (_startDate != null && _endDate != null)
                         ? DateTimeRange(start: _startDate!, end: _endDate!)
                         : null,
@@ -241,10 +243,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                   return InkWell(
                     onTap: () => context.push('/sales/${sale.id}'),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
                       child: Row(
                         children: [
                           Expanded(
@@ -253,7 +252,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               '#$shortId',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: textPrimary,
                               ),
                             ),
@@ -266,7 +265,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                   : sale.customerName,
                               style: TextStyle(
                                 fontWeight: FontWeight.w500,
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: textPrimary,
                               ),
                             ),
@@ -290,7 +289,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               money.format(sale.totalAmount),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: textPrimary,
                               ),
                             ),
@@ -310,7 +309,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   TableActionButton(
-                                    tooltip: 'admin.pages.sales.actions.refund'.tr(),
+                                    tooltip: 'admin.pages.sales.actions.refund'
+                                        .tr(),
                                     icon: LucideIcons.rotateCcw,
                                     isDanger: true,
                                     isLoading: refundBusy,
@@ -324,11 +324,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                             final reason = isOrder
                                                 ? 'Order-origin sales must be returned from the order flow.'
                                                 : 'Only COMPLETED POS sales can be refunded.';
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(content: Text(reason)),
-                                            );
+                                            AppToasts.show(context, reason);
                                           },
                                   ),
                                   const SizedBox(width: 8),
@@ -377,11 +373,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text( 'admin.pages.sales.messages.noOpenCashbox'.tr(),
-            ),
-          ),
+        AppToasts.show(
+          context,
+          'admin.pages.sales.messages.noOpenCashbox'.tr(),
         );
         return;
       }
@@ -403,14 +397,15 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
           return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
-                title: Text( 'admin.pages.sales.refundModal.title'.tr()),
+                title: Text('admin.pages.sales.refundModal.title'.tr()),
                 content: SizedBox(
                   width: 420,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text( 'app.create_refund_cash_outflow_and'.tr(),
+                      Text(
+                        'app.create_refund_cash_outflow_and'.tr(),
                         style: TextStyle(color: textMuted, fontSize: 13),
                       ),
                       const SizedBox(height: 12),
@@ -431,7 +426,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                     selectedCashboxId = v ?? selectedCashboxId,
                               ),
                         decoration: InputDecoration(
-                          labelText: 'admin.pages.sales.refundModal.cashboxLabel'.tr(),
+                          labelText:
+                              'admin.pages.sales.refundModal.cashboxLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -439,15 +435,24 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       DropdownButtonFormField<String>(
                         initialValue: selectedMethod,
                         items: [
-                          DropdownMenuItem(value: 'CASH', child: Text( 'admin.pages.cash.methods.CASH'.tr())),
-                          DropdownMenuItem(value: 'CARD', child: Text( 'admin.pages.cash.methods.CARD'.tr())),
+                          DropdownMenuItem(
+                            value: 'CASH',
+                            child: Text('admin.pages.cash.methods.CASH'.tr()),
+                          ),
+                          DropdownMenuItem(
+                            value: 'CARD',
+                            child: Text('admin.pages.cash.methods.CARD'.tr()),
+                          ),
                           DropdownMenuItem(
                             value: 'TRANSFER',
-                            child: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr()),
+                            child: Text(
+                              'admin.pages.cash.transactions.types.TRANSFER'
+                                  .tr(),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'OTHER',
-                            child: Text( 'admin.pages.cash.methods.OTHER'.tr()),
+                            child: Text('admin.pages.cash.methods.OTHER'.tr()),
                           ),
                         ],
                         onChanged: submitting
@@ -457,7 +462,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                     .toUpperCase(),
                               ),
                         decoration: InputDecoration(
-                          labelText: 'superAdmin.paymentsPage.history.table.method'.tr(),
+                          labelText:
+                              'superAdmin.paymentsPage.history.table.method'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -466,7 +473,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                         controller: referenceCtrl,
                         enabled: !submitting,
                         decoration: InputDecoration(
-                          labelText: 'admin.pages.sales.refundModal.referenceLabel'.tr(),
+                          labelText:
+                              'admin.pages.sales.refundModal.referenceLabel'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -476,7 +485,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                         enabled: !submitting,
                         maxLines: 2,
                         decoration: InputDecoration(
-                          labelText: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+                          labelText: 'admin.pages.sales.refundModal.noteLabel'
+                              .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -498,7 +508,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                     onPressed: submitting
                         ? null
                         : () => Navigator.of(dialogContext).pop(false),
-                    child: Text( 'admin.common.cancel'.tr()),
+                    child: Text('admin.common.cancel'.tr()),
                   ),
                   AppButton.danger(
                     label: 'admin.pages.sales.actions.refund'.tr(),
@@ -548,15 +558,11 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       if (confirmed == true) {
         _fetchSales();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text( 'app.sale_refunded_successfully'.tr())),
-        );
+        AppToasts.show(context, 'app.sale_refunded_successfully'.tr());
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to refund sale: $e')));
+      AppToasts.show(context, 'Failed to refund sale: $e');
     } finally {
       if (mounted) {
         setState(() => _refundingSaleIds.remove(sale.id));
@@ -566,13 +572,13 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 
   Widget _headerText(String text) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
     return Text(
-      text,
+      text.toUpperCase(),
       style: TextStyle(
-        color: textMuted,
-        fontSize: 12,
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }

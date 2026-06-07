@@ -185,7 +185,7 @@ class _ResponsiveServerPaginatedTableState<T>
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
-                    vertical: 12,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     border: Border(top: BorderSide(color: border)),

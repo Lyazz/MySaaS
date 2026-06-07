@@ -19,6 +19,7 @@ import '../widgets/badges/ui_badge.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/responsive_server_paginated_table.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class SaleDetailScreen extends ConsumerStatefulWidget {
   final String saleId;
@@ -271,7 +272,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         _totalCard(money.format(sale.totalAmount)),
                       ],
                       const SizedBox(height: 20),
-                      Text( 'admin.pages.sales.detail.sections.items'.tr(),
+                      Text(
+                        'admin.pages.sales.detail.sections.items'.tr(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -323,7 +325,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 6),
-                Text( 'admin.pages.sales.index.title'.tr(),
+                Text(
+                  'admin.pages.sales.index.title'.tr(),
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -353,9 +356,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     final reason = isOrder
                         ? 'Order-origin sales must be returned from the order flow.'
                         : 'Only COMPLETED POS sales can be refunded.';
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(reason)));
+                    AppToasts.show(context, reason);
                   },
           ),
           const SizedBox(width: 8),
@@ -386,11 +387,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text( 'admin.pages.sales.messages.noOpenCashbox'.tr(),
-            ),
-          ),
+        AppToasts.show(
+          context,
+          'admin.pages.sales.messages.noOpenCashbox'.tr(),
         );
         return;
       }
@@ -411,14 +410,15 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
-                title: Text( 'admin.pages.sales.refundModal.title'.tr()),
+                title: Text('admin.pages.sales.refundModal.title'.tr()),
                 content: SizedBox(
                   width: 420,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text( 'app.create_refund_cash_outflow_and'.tr(),
+                      Text(
+                        'app.create_refund_cash_outflow_and'.tr(),
                         style: TextStyle(fontSize: 13),
                       ),
                       const SizedBox(height: 12),
@@ -439,7 +439,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                     selectedCashboxId = v ?? selectedCashboxId,
                               ),
                         decoration: InputDecoration(
-                          labelText: 'admin.pages.sales.refundModal.cashboxLabel'.tr(),
+                          labelText:
+                              'admin.pages.sales.refundModal.cashboxLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -447,15 +448,24 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                       DropdownButtonFormField<String>(
                         initialValue: selectedMethod,
                         items: [
-                          DropdownMenuItem(value: 'CASH', child: Text( 'admin.pages.cash.methods.CASH'.tr())),
-                          DropdownMenuItem(value: 'CARD', child: Text( 'admin.pages.cash.methods.CARD'.tr())),
+                          DropdownMenuItem(
+                            value: 'CASH',
+                            child: Text('admin.pages.cash.methods.CASH'.tr()),
+                          ),
+                          DropdownMenuItem(
+                            value: 'CARD',
+                            child: Text('admin.pages.cash.methods.CARD'.tr()),
+                          ),
                           DropdownMenuItem(
                             value: 'TRANSFER',
-                            child: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr()),
+                            child: Text(
+                              'admin.pages.cash.transactions.types.TRANSFER'
+                                  .tr(),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'OTHER',
-                            child: Text( 'admin.pages.cash.methods.OTHER'.tr()),
+                            child: Text('admin.pages.cash.methods.OTHER'.tr()),
                           ),
                         ],
                         onChanged: submitting
@@ -465,7 +475,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                     .toUpperCase(),
                               ),
                         decoration: InputDecoration(
-                          labelText: 'superAdmin.paymentsPage.history.table.method'.tr(),
+                          labelText:
+                              'superAdmin.paymentsPage.history.table.method'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -474,7 +486,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         controller: referenceCtrl,
                         enabled: !submitting,
                         decoration: InputDecoration(
-                          labelText: 'admin.pages.sales.refundModal.referenceLabel'.tr(),
+                          labelText:
+                              'admin.pages.sales.refundModal.referenceLabel'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -484,7 +498,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         enabled: !submitting,
                         maxLines: 2,
                         decoration: InputDecoration(
-                          labelText: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+                          labelText: 'admin.pages.sales.refundModal.noteLabel'
+                              .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -506,7 +521,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     onPressed: submitting
                         ? null
                         : () => Navigator.of(dialogContext).pop(false),
-                    child: Text( 'admin.common.cancel'.tr()),
+                    child: Text('admin.common.cancel'.tr()),
                   ),
                   AppButton.danger(
                     label: 'admin.pages.sales.actions.refund'.tr(),
@@ -557,15 +572,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       if (confirmed == true) {
         _retry();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text( 'app.sale_refunded_successfully'.tr())),
-        );
+        AppToasts.show(context, 'app.sale_refunded_successfully'.tr());
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to refund sale: $e')));
+      AppToasts.show(context, 'Failed to refund sale: $e');
     } finally {
       if (mounted) {
         setState(() => _isRefunding = false);
@@ -596,7 +607,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text( 'admin.pages.sales.detail.itemsTable.total'.tr(),
+          Text(
+            'admin.pages.sales.detail.itemsTable.total'.tr(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -631,7 +643,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       emptyState: Center(
         child: Padding(
           padding: EdgeInsets.all(48),
-          child: Text( 'app.no_items_found'.tr()),
+          child: Text('app.no_items_found'.tr()),
         ),
       ),
       header: Row(
@@ -645,7 +657,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       rowBuilder: (context, item, index) {
         final lineTotal = item.price * item.quantity;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -656,6 +668,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
+                    fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -665,6 +678,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                 child: Text(
                   item.quantity.toString(),
                   style: TextStyle(
+                    fontSize: 13,
                     color: Theme.of(
                       context,
                     ).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -676,6 +690,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                 child: Text(
                   money.format(item.price),
                   style: TextStyle(
+                    fontSize: 13,
                     color: Theme.of(
                       context,
                     ).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -688,6 +703,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   money.format(lineTotal),
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
+                    fontSize: 13,
                     color: Color(0xFF0F172A),
                   ),
                 ),
@@ -700,14 +716,16 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   }
 
   Widget _headerCell(String text, {required int flex}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       flex: flex,
       child: Text(
-        text,
+        text.toUpperCase(),
         style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-          fontSize: 12,
+          color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -725,7 +743,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               child: CircularProgressIndicator(strokeWidth: 3),
             ),
             const SizedBox(height: 12),
-            Text( 'app.loading_sale'.tr(),
+            Text(
+              'app.loading_sale'.tr(),
               style: TextStyle(
                 color: Theme.of(
                   context,
@@ -773,7 +792,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
-            Text( 'admin.pages.sales.detail.notFound.title'.tr(),
+            Text(
+              'admin.pages.sales.detail.notFound.title'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -781,7 +801,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text( 'admin.pages.sales.detail.notFound.hint'.tr(),
+            Text(
+              'admin.pages.sales.detail.notFound.hint'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

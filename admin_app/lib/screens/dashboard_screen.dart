@@ -434,7 +434,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               _tableHeader('Order', width: 110),

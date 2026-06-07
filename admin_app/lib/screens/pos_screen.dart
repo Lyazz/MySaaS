@@ -27,6 +27,7 @@ import '../widgets/buttons/app_button.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/shimmer_skeleton.dart';
+import '../utils/app_toasts.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -205,12 +206,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       if (!mounted) return;
 
       if (item == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Product not found for SKU: $code'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 2),
-          ),
+        AppToasts.show(
+          context,
+          'Product not found for SKU: $code',
+          type: AppToastType.error,
+          duration: const Duration(seconds: 2),
         );
         return;
       }
@@ -230,21 +230,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           item.variantLabel!.trim(),
       ].join(' • ');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Added 1x $label'),
-          backgroundColor: const Color(0xFF65A30D),
-          duration: const Duration(seconds: 2),
-        ),
+      AppToasts.show(
+        context,
+        'Added 1x $label',
+        type: AppToastType.success,
+        duration: const Duration(seconds: 2),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Barcode lookup failed: $e'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2),
-        ),
+      AppToasts.show(
+        context,
+        'Barcode lookup failed: $e',
+        type: AppToastType.error,
+        duration: const Duration(seconds: 2),
       );
     }
   }
@@ -284,11 +282,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   Navigator.of(context).pop(created);
                 } catch (error) {
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Could not create customer: $error'),
-                      backgroundColor: AppColors.red,
-                    ),
+                  AppToasts.show(
+                    context,
+                    'Could not create customer: $error',
+                    type: AppToastType.error,
                   );
                 }
               }
@@ -532,12 +529,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       ref.read(storeSettingsProvider).settings,
     );
     if (posState.cart.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('app.add_products_before_applying_a'.tr()),
-          backgroundColor: Colors.grey,
-        ),
-      );
+      AppToasts.show(context, 'app.add_products_before_applying_a'.tr());
       return;
     }
 
@@ -785,23 +777,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   if (posState.isLoading) return;
 
                   if (!breakdown.isValid) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(
-                        content: Text('app.invalid_payment_amounts'.tr()),
-                        backgroundColor: Colors.red,
-                      ),
+                    AppToasts.show(
+                      dialogContext,
+                      'app.invalid_payment_amounts'.tr(),
+                      type: AppToastType.error,
                     );
                     return;
                   }
 
                   if (!breakdown.isSettled) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Remaining: ${currency.format(breakdown.remaining)}',
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
+                    AppToasts.show(
+                      dialogContext,
+                      'Remaining: ${currency.format(breakdown.remaining)}',
+                      type: AppToastType.error,
                     );
                     return;
                   }
@@ -826,11 +814,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   } else {
                     final error = ref.read(posProvider).error;
                     if (dialogContext.mounted) {
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        SnackBar(
-                          content: Text(error ?? 'Checkout failed'),
-                          backgroundColor: Colors.red,
-                        ),
+                      AppToasts.show(
+                        dialogContext,
+                        error ?? 'Checkout failed',
+                        type: AppToastType.error,
                       );
                     }
                   }
@@ -1752,36 +1739,27 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       if (!mounted) return;
 
       if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error),
-            backgroundColor: AppColors.red,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
-          ),
+        AppToasts.show(
+          context,
+          error,
+          type: AppToastType.error,
+          duration: const Duration(seconds: 3),
         );
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('app.reprinting_last_order'.tr()),
-          backgroundColor: isDark
-              ? AppColors.surface3
-              : AppColors.lightSurface3,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
+      AppToasts.show(
+        context,
+        'app.reprinting_last_order'.tr(),
+        duration: const Duration(seconds: 2),
       );
     }
 
     void showReturnRefundComingSoon() {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('app.return_refund_coming_soon'.tr()),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
+      AppToasts.show(
+        context,
+        'app.return_refund_coming_soon'.tr(),
+        duration: Duration(seconds: 2),
       );
     }
 
@@ -1812,6 +1790,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   )
                 : null,
             border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            filled: false,
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -1912,20 +1893,23 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             onTap: _showBarcodeScanner,
           )
         else ...[
-          _buildLabeledActionButton(
+          _buildIconChip(
             icon: LucideIcons.percent,
-            label: 'admin.pages.pos.catalog.actions.discount'.tr(),
+            tooltip: 'admin.pages.pos.catalog.actions.discount'.tr(),
             onTap: _showDiscountDialog,
+            width: 56,
           ),
-          _buildLabeledActionButton(
+          _buildIconChip(
             icon: LucideIcons.printer,
-            label: 'admin.pages.pos.catalog.actions.reprint'.tr(),
+            tooltip: 'admin.pages.pos.catalog.actions.reprint'.tr(),
             onTap: showReprintFeedback,
+            width: 56,
           ),
-          _buildLabeledActionButton(
+          _buildIconChip(
             icon: LucideIcons.undo2,
-            label: 'app.return_refund2'.tr(),
+            tooltip: 'app.return_refund'.tr(),
             onTap: showReturnRefundComingSoon,
+            width: 56,
           ),
         ],
         if (isMobile)
@@ -1943,7 +1927,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           icon: LucideIcons.zap,
           label: isMobile
               ? null
-              : 'admin.pages.pos.catalog.actions.quickCharge'.tr(),
+              : 'admin.pages.pos.catalog.actions.customAmount'.tr(),
           onTap: () => _showNumpadDialog(itemIndex: null),
           isPrimary: true,
         ),
@@ -2008,17 +1992,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 )
               : Row(
                   children: [
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 260),
+                    Expanded(
                       child: searchField(),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: actionStrip(actions),
-                      ),
-                    ),
+                    actionStrip(actions),
                   ],
                 ),
         );
@@ -2031,6 +2009,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     required String tooltip,
     required VoidCallback onTap,
     Widget? popup,
+    double width = 44,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface = isDark ? AppColors.surface2 : AppColors.lightSurface2;
@@ -2042,7 +2021,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         : AppColors.lightTextTertiary;
 
     final container = Container(
-      width: 44,
+      width: width,
       height: 44,
       decoration: BoxDecoration(
         color: surface,
@@ -2116,7 +2095,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           _menuItem(
             value: 'return',
             icon: LucideIcons.undo2,
-            label: 'app.return_refund2'.tr(),
+            label: 'app.return_refund'.tr(),
             color: textPrimary,
           ),
         ],
@@ -4007,11 +3986,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                             }
 
                             final error = ref.read(posProvider).error;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(error ?? 'Checkout failed'),
-                                backgroundColor: Colors.red,
-                              ),
+                            AppToasts.show(
+                              context,
+                              error ?? 'Checkout failed',
+                              type: AppToastType.error,
                             );
                           },
                     loading: posState.isLoading,
@@ -4335,9 +4313,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (!mounted) return;
 
     if (detailed == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('app.failed_to_load_product_variant'.tr())),
-      );
+      AppToasts.show(context, 'app.failed_to_load_product_variant'.tr());
       return;
     }
 

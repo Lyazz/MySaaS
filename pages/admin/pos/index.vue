@@ -55,11 +55,11 @@
           </button>
           <button
             class="h-9 px-3 text-sm rounded-lg [background:var(--brand)] text-white font-medium hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] shadow-sm transition-all flex items-center gap-1.5 shrink-0"
-            :title="t('admin.pages.pos.catalog.actions.quickCharge')"
-            @click="openExampleDialog(t('admin.pages.pos.catalog.actions.quickCharge'))"
+            :title="t('admin.pages.pos.catalog.actions.customAmount')"
+            @click="openExampleDialog(t('admin.pages.pos.catalog.actions.customAmount'))"
           >
             <Icon name="lucide:zap" class="w-4 h-4" />
-            <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.quickCharge') }}</span>
+            <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.customAmount') }}</span>
           </button>
 
           <div class="h-6 w-px mx-1 shrink-0" style="background: var(--surface-border)" />

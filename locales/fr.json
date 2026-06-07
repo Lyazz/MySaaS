@@ -2288,7 +2288,7 @@
             "discount": "Remise",
             "reprint": "Réimprimer",
             "reprintLastOrder": "Réimprimer la dernière commande",
-            "quickCharge": "Encaissement rapide",
+            "customAmount": "Montant libre",
             "sort": "Trier",
             "columns": "Colonnes"
           },

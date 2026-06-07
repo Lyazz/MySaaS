@@ -7,6 +7,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
 import '../theme/app_theme.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class VariantEditScreen extends ConsumerStatefulWidget {
   final ProductVariant variant;
@@ -103,9 +104,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to update variant: $e')));
+        AppToasts.show(context, 'Failed to update variant: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -157,19 +156,15 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                             onPressed: _isLoading
                                 ? null
                                 : () async {
-                                    final messenger = ScaffoldMessenger.of(
-                                      context,
-                                    );
                                     try {
                                       final suggested = await ref
                                           .read(productsProvider.notifier)
                                           .suggestVariantSku(widget.variant.id);
-                                      if (!mounted) return;
+                                      if (!context.mounted) return;
                                       if (suggested.trim().isEmpty) {
-                                        messenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text( 'app.no_sku_suggestion'.tr()),
-                                          ),
+                                        AppToasts.show(
+                                          context,
+                                          'app.no_sku_suggestion'.tr(),
                                         );
                                         return;
                                       }
@@ -177,13 +172,10 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                                         _skuController.text = suggested;
                                       });
                                     } catch (e) {
-                                      if (!mounted) return;
-                                      messenger.showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Failed to suggest SKU: $e',
-                                          ),
-                                        ),
+                                      if (!context.mounted) return;
+                                      AppToasts.show(
+                                        context,
+                                        'Failed to suggest SKU: $e',
                                       );
                                     }
                                   },
@@ -191,7 +183,10 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                           ),
                   ),
                   const SizedBox(height: 16),
-                  FormInput(label: 'admin.variantsTable.columns.barcode'.tr(), controller: _barcodeController),
+                  FormInput(
+                    label: 'admin.variantsTable.columns.barcode'.tr(),
+                    controller: _barcodeController,
+                  ),
                   const SizedBox(height: 16),
                   if (widget.variant.skuLocked != true)
                     Align(
@@ -203,34 +198,34 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                         onPressed: _isLoading
                             ? null
                             : () async {
-                                final messenger = ScaffoldMessenger.of(context);
                                 try {
                                   await ref
                                       .read(productsProvider.notifier)
                                       .lockVariantSku(widget.variant.id);
-                                  if (!mounted) return;
-                                  messenger.showSnackBar(
-                                    SnackBar(content: Text( 'app.sku_locked'.tr())),
+                                  if (!context.mounted) return;
+                                  AppToasts.show(
+                                    context,
+                                    'app.sku_locked'.tr(),
                                   );
                                 } catch (e) {
-                                  if (!mounted) return;
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text('Failed to lock SKU: $e'),
-                                    ),
+                                  if (!context.mounted) return;
+                                  AppToasts.show(
+                                    context,
+                                    'Failed to lock SKU: $e',
                                   );
                                 }
                               },
                       ),
                     )
                   else
-                    Text( 'app.sku_is_locked'.tr(),
+                    Text(
+                      'app.sku_is_locked'.tr(),
                       style: TextStyle(color: Color(0xFF64748B)),
                     ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: Text( 'superAdmin.tenants.status.active'.tr()),
-                    subtitle: Text( 'app.visible_to_customers'.tr()),
+                    title: Text('superAdmin.tenants.status.active'.tr()),
+                    subtitle: Text('app.visible_to_customers'.tr()),
                     value: _isActive,
                     activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _isActive = v),
@@ -246,7 +241,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                 title: 'admin.pages.inventory.title'.tr(),
                 children: [
                   SwitchListTile(
-                    title: Text( 'app.track_inventory'.tr()),
+                    title: Text('app.track_inventory'.tr()),
                     value: _trackInventory,
                     activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _trackInventory = v),
@@ -258,7 +253,8 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                       children: [
                         Expanded(
                           child: FormInput(
-                            label: 'admin.pages.products.index.table.stock'.tr(),
+                            label: 'admin.pages.products.index.table.stock'
+                                .tr(),
                             controller: _stockController,
                             keyboardType: TextInputType.number,
                             readOnly: true,

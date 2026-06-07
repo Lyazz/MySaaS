@@ -79,20 +79,22 @@ abstract final class AppTheme {
         error: AppColors.red,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
-        displayLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
-        displayMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
-        displaySmall: GoogleFonts.outfit(color: AppColors.textPrimary),
-        headlineLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
-        headlineMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
-        headlineSmall: GoogleFonts.outfit(color: AppColors.textPrimary),
-        titleLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
-        titleMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
-        titleSmall: GoogleFonts.outfit(color: AppColors.textPrimary),
-      ).apply(
-        bodyColor: AppColors.textPrimary,
-        displayColor: AppColors.textPrimary,
-      ),
+      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme)
+          .copyWith(
+            displayLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
+            displayMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
+            displaySmall: GoogleFonts.outfit(color: AppColors.textPrimary),
+            headlineLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
+            headlineMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
+            headlineSmall: GoogleFonts.outfit(color: AppColors.textPrimary),
+            titleLarge: GoogleFonts.outfit(color: AppColors.textPrimary),
+            titleMedium: GoogleFonts.outfit(color: AppColors.textPrimary),
+            titleSmall: GoogleFonts.outfit(color: AppColors.textPrimary),
+          )
+          .apply(
+            bodyColor: AppColors.textPrimary,
+            displayColor: AppColors.textPrimary,
+          ),
       cardTheme: const CardThemeData(
         color: AppColors.surface1,
         surfaceTintColor: Colors.transparent,
@@ -177,14 +179,6 @@ abstract final class AppTheme {
           side: BorderSide(color: AppColors.surfaceBorder),
         ),
       ),
-      snackBarTheme: const SnackBarThemeData(
-        backgroundColor: AppColors.surface3,
-        contentTextStyle: TextStyle(color: AppColors.textPrimary),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surface2,
         labelStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
@@ -235,20 +229,30 @@ abstract final class AppTheme {
         error: AppColors.red,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme).copyWith(
-        displayLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        displayMedium: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        displaySmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        headlineLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        headlineMedium: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        headlineSmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        titleLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        titleMedium: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-        titleSmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
-      ).apply(
-        bodyColor: AppColors.lightTextPrimary,
-        displayColor: AppColors.lightTextPrimary,
-      ),
+      textTheme: GoogleFonts.dmSansTextTheme(base.textTheme)
+          .copyWith(
+            displayLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+            displayMedium: GoogleFonts.outfit(
+              color: AppColors.lightTextPrimary,
+            ),
+            displaySmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+            headlineLarge: GoogleFonts.outfit(
+              color: AppColors.lightTextPrimary,
+            ),
+            headlineMedium: GoogleFonts.outfit(
+              color: AppColors.lightTextPrimary,
+            ),
+            headlineSmall: GoogleFonts.outfit(
+              color: AppColors.lightTextPrimary,
+            ),
+            titleLarge: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+            titleMedium: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+            titleSmall: GoogleFonts.outfit(color: AppColors.lightTextPrimary),
+          )
+          .apply(
+            bodyColor: AppColors.lightTextPrimary,
+            displayColor: AppColors.lightTextPrimary,
+          ),
       cardTheme: const CardThemeData(
         color: AppColors.lightSurface1,
         surfaceTintColor: Colors.transparent,
@@ -332,14 +336,6 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(12)),
           side: BorderSide(color: AppColors.lightSurfaceBorder),
         ),
-      ),
-      snackBarTheme: const SnackBarThemeData(
-        backgroundColor: AppColors.lightSurface3,
-        contentTextStyle: TextStyle(color: AppColors.lightTextPrimary),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-        ),
-        behavior: SnackBarBehavior.floating,
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.lightSurface2,

@@ -95,27 +95,19 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         children: [
           Expanded(
             flex: 3,
-            child: Text( 'admin.pages.sales.detail.itemsTable.product'.tr(),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            ),
+            child: _headerText(context, 'admin.pages.sales.detail.itemsTable.product'.tr()),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'admin.pages.purchases.detail.items.sku'.tr(),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            ),
+            child: _headerText(context, 'admin.pages.purchases.detail.items.sku'.tr()),
           ),
           Expanded(
             flex: 1,
-            child: Text( 'admin.pages.products.index.table.stock'.tr(),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            ),
+            child: _headerText(context, 'admin.pages.products.index.table.stock'.tr()),
           ),
           Expanded(
             flex: 1,
-            child: Text( 'superAdmin.paymentsPage.history.table.status'.tr(),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            ),
+            child: _headerText(context, 'superAdmin.paymentsPage.history.table.status'.tr()),
           ),
           SizedBox(width: 48), // Actions space
         ],
@@ -126,9 +118,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         final imagePath = product.mainImageUrl?.trim();
 
         return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width < 800 ? 12 : 24,
-            vertical: MediaQuery.of(context).size.width < 800 ? 12 : 16,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 13,
           ),
           child: Row(
             children: [
@@ -137,8 +129,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
@@ -162,7 +154,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     Expanded(
                       child: Text(
                         product.title,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -192,6 +184,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       '${product.stock}',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
+                        fontSize: 13,
                         color: isLowStock
                             ? AppColors.amber
                             : Theme.of(context).colorScheme.onSurface,
@@ -250,6 +243,19 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _headerText(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Text(
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
+      ),
     );
   }
 }

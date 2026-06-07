@@ -20,6 +20,7 @@ import '../widgets/badges/ui_badge.dart';
 import '../theme/app_theme.dart';
 import '../providers/store_settings_provider.dart';
 import '../widgets/tenant_image_widget.dart';
+import '../utils/app_toasts.dart';
 
 // Filter Notifiers
 class CategoryFilterNotifier extends Notifier<String> {
@@ -202,6 +203,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   Widget _buildHeader() {
     final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -210,20 +215,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           children: [
             Text(
               'admin.pages.products.index.title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF111827), // Gray-900
+                color: textPrimary,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'admin.pages.products.index.subtitle'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF6B7280),
-              ), // Gray-500
+                color: textSecondary,
+              ),
             ),
           ],
         ),
@@ -240,6 +245,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   Widget _buildFilters(List<Category> categories, {bool isMobile = false}) {
     final selectedCategoryId = ref.watch(productCategoryFilterProvider);
     final selectedStatus = ref.watch(productStatusFilterProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+
     final activeFilterChips = isMobile
         ? const <Widget>[]
         : _buildActiveFilterChips(
@@ -267,7 +276,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           child: Consumer(
             builder: (context, ref, _) {
               final selectedCategory = ref.watch(productCategoryFilterProvider);
-              return FormSelect<String>(showLabel: false, 
+              return FormSelect<String>(
+                showLabel: false,
                 label: 'admin.pages.products.index.filters.category'.tr(),
                 value: selectedCategory,
                 contentPadding: const EdgeInsets.symmetric(
@@ -296,7 +306,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           child: Consumer(
             builder: (context, ref, _) {
               final selectedStatus = ref.watch(productStatusFilterProvider);
-              return FormSelect<String>(showLabel: false, 
+              return FormSelect<String>(
+                showLabel: false,
                 label: 'admin.pages.products.index.filters.status'.tr(),
                 value: selectedStatus,
                 contentPadding: const EdgeInsets.symmetric(
@@ -337,15 +348,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           ? [
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: surfaceBorder),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
                   onPressed: () => _showMobileOperations(),
-                  icon: const Icon(
+                  icon: Icon(
                     LucideIcons.moreHorizontal,
                     size: 20,
-                    color: Color(0xFF64748B),
+                    color: textTertiary,
                   ),
                   tooltip: 'admin.common.actions'.tr(),
                   style: IconButton.styleFrom(
@@ -392,6 +403,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildImportExportMenu() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+
     return PopupMenuButton<String>(
       tooltip: 'admin.common.actions'.tr(),
       position: PopupMenuPosition.under,
@@ -408,10 +422,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           value: 'export',
           child: Row(
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.upload,
                 size: 16,
-                color: Color(0xFF64748B),
+                color: textTertiary,
               ),
               const SizedBox(width: 8),
               Text('admin.pages.products.index.bulk.export'.tr()),
@@ -422,10 +436,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           value: 'import',
           child: Row(
             children: [
-              const Icon(
+              Icon(
                 LucideIcons.download,
                 size: 16,
-                color: Color(0xFF64748B),
+                color: textTertiary,
               ),
               const SizedBox(width: 8),
               Text('admin.pages.products.index.bulk.import'.tr()),
@@ -445,12 +459,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildSortSelect() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           'app.admin_pages_products_index_sor'.tr().tr(),
-          style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+          style: TextStyle(fontSize: 13, color: textSecondary),
         ),
         const SizedBox(width: 8),
         SizedBox(
@@ -543,22 +560,24 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   void _showComingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'app.admin_common_featurecomingsoon'.tr().tr(
-            namedArgs: {'feature': feature},
-          ),
-        ),
+    AppToasts.show(
+      context,
+      'app.admin_common_featurecomingsoon'.tr().tr(
+        namedArgs: {'feature': feature},
       ),
     );
   }
 
   void _showMobileOperations() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark
+      backgroundColor: isDark
           ? AppColors.surface2
           : AppColors.lightSurface2,
       shape: const RoundedRectangleBorder(
@@ -579,7 +598,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: surfaceBorder,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -593,10 +612,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     children: [
                       Text(
                         'admin.common.actions'.tr(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
+                          color: textPrimary,
                         ),
                       ),
                       IconButton(
@@ -616,9 +635,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     children: [
                       if (!(ref.read(authProvider).mode == AppMode.offlineOnly))
                         ListTile(
-                          leading: const Icon(
+                          leading: Icon(
                             LucideIcons.plus,
-                            color: Color(0xFF0F172A),
+                            color: textPrimary,
                           ),
                           title: Text(
                             'app.admin_pages_products_index_add'.tr().tr(),
@@ -629,9 +648,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           },
                         ),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           LucideIcons.arrowUpDown,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         title: Text(
                           'app.admin_pages_products_index_sor'.tr().tr(),
@@ -705,51 +724,45 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         ),
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           LucideIcons.upload,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         title: Text(
                           'admin.pages.products.index.bulk.export'.tr(),
                         ),
                         onTap: () {
                           context.pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'app.admin_common_featurecomingsoon'.tr().tr(
-                                  namedArgs: {
-                                    'feature':
-                                        'admin.pages.products.index.bulk.export'
-                                            .tr(),
-                                  },
-                                ),
-                              ),
+                          AppToasts.show(
+                            context,
+                            'app.admin_common_featurecomingsoon'.tr().tr(
+                              namedArgs: {
+                                'feature':
+                                    'admin.pages.products.index.bulk.export'
+                                        .tr(),
+                              },
                             ),
                           );
                         },
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           LucideIcons.download,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         title: Text(
                           'admin.pages.products.index.bulk.import'.tr(),
                         ),
                         onTap: () {
                           context.pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'app.admin_common_featurecomingsoon'.tr().tr(
-                                  namedArgs: {
-                                    'feature':
-                                        'admin.pages.products.index.bulk.import'
-                                            .tr(),
-                                  },
-                                ),
-                              ),
+                          AppToasts.show(
+                            context,
+                            'app.admin_common_featurecomingsoon'.tr().tr(
+                              namedArgs: {
+                                'feature':
+                                    'admin.pages.products.index.bulk.import'
+                                        .tr(),
+                              },
                             ),
                           );
                         },
@@ -757,26 +770,23 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       if (_selectedProductIds.isNotEmpty) ...[
                         const Divider(),
                         ListTile(
-                          leading: const Icon(
+                          leading: Icon(
                             LucideIcons.edit,
-                            color: Color(0xFF64748B),
+                            color: textTertiary,
                           ),
                           title: Text(
                             '${'admin.pages.products.index.bulk.update'.tr()} — ${'admin.pages.products.index.bulk.selected'.tr(namedArgs: {'count': _selectedProductIds.length.toString()})}',
                           ),
                           onTap: () {
                             context.pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'app.admin_common_featurecomingsoon'.tr().tr(
-                                    namedArgs: {
-                                      'feature':
-                                          'admin.pages.products.index.bulk.update'
-                                              .tr(),
-                                    },
-                                  ),
-                                ),
+                            AppToasts.show(
+                              context,
+                              'app.admin_common_featurecomingsoon'.tr().tr(
+                                namedArgs: {
+                                  'feature':
+                                      'admin.pages.products.index.bulk.update'
+                                          .tr(),
+                                },
                               ),
                             );
                           },
@@ -808,6 +818,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   Widget _buildEmptyState() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 48),
@@ -817,28 +831,28 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.surface3 : const Color(0xFFF1F5F9),
+                color: isDark ? AppColors.surface3 : AppColors.lightSurface3,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 LucideIcons.package,
                 size: 32,
-                color: Color(0xFF94A3B8),
-              ), // Slate-400
+                color: textMuted,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'admin.pages.products.index.empty.title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B), // Slate-800
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'admin.pages.products.index.empty.hint'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B)), // Slate-500
+              style: TextStyle(color: textTertiary),
             ),
             const SizedBox(height: 24),
             if (!(ref.watch(authProvider).mode == AppMode.offlineOnly))
@@ -871,6 +885,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final allSelected =
         products.isNotEmpty && selectedVisibleCount == products.length;
     final noneSelected = selectedVisibleCount == 0;
+    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
 
     return Row(
       children: [
@@ -894,10 +912,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           flex: 4,
           child: Text(
             'admin.pages.products.index.table.product'.tr().toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: textTertiary,
               letterSpacing: 0.5,
             ),
           ),
@@ -906,10 +924,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           flex: 3,
           child: Text(
             'admin.pages.products.index.table.category'.tr().toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF6B7280),
+              color: textTertiary,
               letterSpacing: 0.5,
             ),
           ),
@@ -920,10 +938,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               'admin.pages.products.index.table.price'.tr().toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -935,10 +953,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               'admin.pages.products.index.table.stock'.tr().toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -950,10 +968,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             alignment: Alignment.centerLeft,
             child: Text(
               'admin.pages.products.index.table.status'.tr().toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -965,10 +983,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             alignment: Alignment.center,
             child: Text(
               'admin.pages.products.index.table.links'.tr().toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
               textAlign: TextAlign.center,
@@ -981,10 +999,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             alignment: Alignment.centerRight,
             child: Text(
               'admin.pages.products.index.table.actions'.tr().toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
               textAlign: TextAlign.right,
@@ -995,7 +1013,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
-  Widget _buildStockCell(Product product) {
+  Widget _buildStockCell(BuildContext context, Product product) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+
     if (product.stock == 0) {
       // Out of stock — red badge
       return UiBadge(
@@ -1033,9 +1054,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     // Normal stock — plain number
     return Text(
       '${product.stock}',
-      style: const TextStyle(
-        fontSize: 14,
-        color: Color(0xFF374151),
+      style: TextStyle(
+        fontSize: 13,
+        color: textPrimary,
         fontWeight: FontWeight.w500,
       ),
     );
@@ -1048,12 +1069,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final imagePath = product.mainImageUrl?.trim();
     final isSelected = _selectedProductIds.contains(product.id);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
 
     return Container(
       color: isSelected
           ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)
           : null,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
       child: Row(
         children: [
           SizedBox(
@@ -1076,24 +1102,22 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     color: isDark
                         ? AppColors.surface3
-                        : const Color(0xFFF9FAFB),
+                        : AppColors.lightSurface3,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isDark
-                          ? AppColors.surfaceBorder
-                          : const Color(0xFFE5E7EB),
+                      color: surfaceBorder,
                       width: 1,
                     ),
                   ),
                   child: imagePath == null || imagePath.isEmpty
-                      ? const Icon(
+                      ? Icon(
                           LucideIcons.image,
-                          color: Color(0xFF94A3B8),
+                          color: textMuted,
                           size: 20,
                         )
                       : ClipRRect(
@@ -1109,10 +1133,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     children: [
                       Text(
                         product.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: Color(0xFF111827),
+                          fontSize: 13,
+                          color: textPrimary,
                           letterSpacing: -0.1,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -1121,8 +1145,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       const SizedBox(height: 3),
                       Text(
                         product.slug,
-                        style: const TextStyle(
-                          color: Color(0xFF6B7280),
+                        style: TextStyle(
+                          color: textSecondary,
                           fontSize: 12,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -1146,8 +1170,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     )
                   : Text(
                       'admin.pages.products.index.table.uncategorized'.tr(),
-                      style: const TextStyle(
-                        color: Color(0xFF9CA3AF),
+                      style: TextStyle(
+                        color: textMuted,
                         fontSize: 13,
                       ),
                     ),
@@ -1164,7 +1188,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             flex: 2,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: _buildStockCell(product),
+              child: _buildStockCell(context, product),
             ),
           ),
           Expanded(
@@ -1198,7 +1222,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         fontSize: 13,
                         color: product.isActive
                             ? const Color(0xFF15803D)
-                            : const Color(0xFF64748B),
+                            : textTertiary,
                       ),
                     ),
                   ),
@@ -1211,9 +1235,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             child: Align(
               alignment: Alignment.center,
               child: PopupMenuButton<String>(
-                icon: const Icon(
+                icon: Icon(
                   LucideIcons.globe,
-                  color: Color(0xFF64748B),
+                  color: textTertiary,
                   size: 18,
                 ),
                 position: PopupMenuPosition.under,
@@ -1225,10 +1249,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     value: 'open_product',
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           LucideIcons.externalLink,
                           size: 16,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         const SizedBox(width: 8),
                         Text('app.admin_pages_products_index_lin'.tr().tr()),
@@ -1239,10 +1263,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     value: 'copy_product',
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           LucideIcons.copy,
                           size: 16,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         const SizedBox(width: 8),
                         Text('app.admin_pages_products_index_lin2'.tr().tr()),
@@ -1254,10 +1278,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     value: 'open_landing',
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           LucideIcons.externalLink,
                           size: 16,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         const SizedBox(width: 8),
                         Text('app.admin_pages_products_index_lin3'.tr().tr()),
@@ -1268,10 +1292,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     value: 'copy_landing',
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           LucideIcons.copy,
                           size: 16,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         const SizedBox(width: 8),
                         Text('app.admin_pages_products_index_lin4'.tr().tr()),
@@ -1287,9 +1311,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       ),
                     );
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('admin.common.copied'.tr())),
-                      );
+                      AppToasts.show(context, 'admin.common.copied'.tr());
                     }
                   } else if (value == 'copy_landing') {
                     await Clipboard.setData(
@@ -1299,19 +1321,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       ),
                     );
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('admin.common.copied'.tr())),
-                      );
+                      AppToasts.show(context, 'admin.common.copied'.tr());
                     }
                   } else {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'app.admin_common_featurecomingsoon'.tr().tr(
-                              namedArgs: {'feature': value},
-                            ),
-                          ),
+                      AppToasts.show(
+                        context,
+                        'app.admin_common_featurecomingsoon'.tr().tr(
+                          namedArgs: {'feature': value},
                         ),
                       );
                     }
@@ -1355,6 +1372,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   Widget _buildPriceCell(Product product, NumberFormat money, bool isDark) {
     final bool hasPromotion =
         product.promotionalPrice != null && product.promotionalPrice! > 0;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
 
     if (hasPromotion) {
       return Column(
@@ -1366,7 +1385,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               Text(
                 money.format(product.promotionalPrice!),
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: Color(0xFF84CC16), // Lime-500
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.2,
@@ -1375,9 +1394,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               const SizedBox(width: 6),
               Text(
                 money.format(product.price),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF9CA3AF), // Gray-400
+                  color: textMuted,
                   decoration: TextDecoration.lineThrough,
                 ),
               ),
@@ -1388,7 +1407,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
               padding: const EdgeInsets.only(top: 2.0),
               child: Text(
                 'exp. ${DateFormat('dd/MM/yyyy').format(product.promotionEndDate!)}',
-                style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF)),
+                style: TextStyle(fontSize: 11, color: textMuted),
               ),
             ),
         ],
@@ -1397,9 +1416,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     return Text(
       money.format(product.price),
-      style: const TextStyle(
-        fontSize: 14,
-        color: Color(0xFF111827),
+      style: TextStyle(
+        fontSize: 13,
+        color: textPrimary,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.2,
       ),
@@ -1453,6 +1472,7 @@ class _ActiveFilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
     return Container(
       constraints: const BoxConstraints(maxWidth: 180),
       padding: const EdgeInsets.only(left: 10, right: 4, top: 6, bottom: 6),
@@ -1473,10 +1493,10 @@ class _ActiveFilterChip extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF64748B),
+                color: textTertiary,
               ),
             ),
           ),
@@ -1484,9 +1504,9 @@ class _ActiveFilterChip extends StatelessWidget {
           InkWell(
             onTap: onDeleted,
             borderRadius: BorderRadius.circular(999),
-            child: const Padding(
-              padding: EdgeInsets.all(2),
-              child: Icon(LucideIcons.x, size: 12, color: Color(0xFF64748B)),
+            child: Padding(
+              padding: const EdgeInsets.all(2),
+              child: Icon(LucideIcons.x, size: 12, color: textTertiary),
             ),
           ),
         ],

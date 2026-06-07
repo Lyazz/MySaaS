@@ -11,6 +11,7 @@ import '../repositories/order_repository.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../providers/store_settings_provider.dart';
+import '../utils/app_toasts.dart';
 import '../utils/tenant_currency.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
@@ -382,11 +383,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                         InkWell(
                           onTap: () {
                             Clipboard.setData(ClipboardData(text: publicId));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Copied to clipboard'),
-                              ),
-                            );
+                            AppToasts.show(context, 'Copied to clipboard');
                           },
                           borderRadius: BorderRadius.circular(4),
                           child: const Padding(
@@ -442,9 +439,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                         Clipboard.setData(
                           ClipboardData(text: order.customerPhone),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Copied phone')),
-                        );
+                        AppToasts.show(context, 'Copied phone');
                       },
                       borderRadius: BorderRadius.circular(4),
                       child: const Padding(

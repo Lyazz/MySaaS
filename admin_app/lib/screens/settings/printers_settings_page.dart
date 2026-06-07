@@ -14,6 +14,7 @@ import 'receipt_layout_editor.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../../models/pos_models.dart'; // For CartItem
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class PrintersSettingsPage extends ConsumerStatefulWidget {
   const PrintersSettingsPage({super.key});
@@ -164,9 +165,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
     }
 
     _cancelEditing();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text( 'app.printer_saved_successfully'.tr())));
+    AppToasts.show(context, 'app.printer_saved_successfully'.tr());
   }
 
   @override
@@ -190,7 +189,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text( 'app.printer_settings'.tr(),
+        Text(
+          'app.printer_settings'.tr(),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -199,7 +199,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
           ),
         ),
         const SizedBox(height: 4),
-        Text( 'app.manage_your_receipt_printers_a'.tr(),
+        Text(
+          'app.manage_your_receipt_printers_a'.tr(),
           style: TextStyle(fontSize: 14, color: Colors.grey[500]),
         ),
       ],
@@ -255,7 +256,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
               ),
             ),
             const SizedBox(height: 24),
-            Text( 'app.no_printers_configured'.tr(),
+            Text(
+              'app.no_printers_configured'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -263,7 +265,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
               ),
             ),
             const SizedBox(height: 8),
-            Text( 'app.add_a_printer_to_start_printin'.tr(),
+            Text(
+              'app.add_a_printer_to_start_printin'.tr(),
               style: TextStyle(color: Colors.grey[500]),
             ),
             const SizedBox(height: 32),
@@ -282,7 +285,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text( 'app.saved_printers'.tr(),
+            Text(
+              'app.saved_printers'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -318,11 +322,11 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                 color: Colors.amber.shade700,
               ),
             ),
-            title: Text( 'app.receipt_layout_configuration'.tr(),
+            title: Text(
+              'app.receipt_layout_configuration'.tr(),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text( 'app.customize_your_receipt_header'.tr(),
-            ),
+            subtitle: Text('app.customize_your_receipt_header'.tr()),
             trailing: const Icon(LucideIcons.chevronRight),
             onTap: () {
               // Open Layout Editor
@@ -335,9 +339,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                       ref
                           .read(printerProfilesProvider.notifier)
                           .saveLayout(layout);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text( 'app.layout_saved'.tr())),
-                      );
+                      AppToasts.show(context, 'app.layout_saved'.tr());
                       Navigator.pop(context);
                     },
                   ),
@@ -409,7 +411,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                   color: accentColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text( 'admin.pages.sales.detail.itemsTable.defaultVariant'.tr(),
+                child: Text(
+                  'admin.pages.sales.detail.itemsTable.defaultVariant'.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10,
@@ -437,16 +440,19 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         trailing: PopupMenuButton(
           icon: const Icon(LucideIcons.moreVertical, color: Color(0xFF94A3B8)),
           itemBuilder: (context) => [
-            PopupMenuItem(value: 'edit', child: Text( 'app.edit_config'.tr())),
+            PopupMenuItem(value: 'edit', child: Text('app.edit_config'.tr())),
             if (!isDefault)
               PopupMenuItem(
                 value: 'default',
-                child: Text( 'app.set_as_default'.tr()),
+                child: Text('app.set_as_default'.tr()),
               ),
-            PopupMenuItem(value: 'test', child: Text( 'app.test_print'.tr())),
+            PopupMenuItem(value: 'test', child: Text('app.test_print'.tr())),
             PopupMenuItem(
               value: 'delete',
-              child: Text( 'admin.pages.products.index.bulk.delete'.tr(), style: TextStyle(color: Colors.red)),
+              child: Text(
+                'admin.pages.products.index.bulk.delete'.tr(),
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
           onSelected: (value) => _handleMenuAction(value, profile),
@@ -488,8 +494,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
           builder: (context) => AppDialog(
             title: 'app.delete_printer'.tr(),
             description: 'admin.confirmModal.defaults.message'.tr(),
-            content: Text( 'app.are_you_sure_you_want_to_delet3'.tr(),
-            ),
+            content: Text('app.are_you_sure_you_want_to_delet3'.tr()),
             secondaryLabel: 'Cancel',
             onSecondary: () => Navigator.pop(context, false),
             primaryLabel: 'Delete',
@@ -645,7 +650,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                               : null,
                         ),
                       ] else ...[
-                        Text( 'app.uses_system_default_print_dial'.tr(),
+                        Text(
+                          'app.uses_system_default_print_dial'.tr(),
                           style: TextStyle(color: Colors.grey),
                         ),
                       ],
@@ -666,11 +672,11 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                               items: [
                                 DropdownMenuItem(
                                   value: 80,
-                                  child: Text( 'app.80mm_standard'.tr()),
+                                  child: Text('app.80mm_standard'.tr()),
                                 ),
                                 DropdownMenuItem(
                                   value: 58,
-                                  child: Text( 'app.58mm_narrow'.tr()),
+                                  child: Text('app.58mm_narrow'.tr()),
                                 ),
                               ],
                               onChanged: (v) {
@@ -685,15 +691,15 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                       if (isMobile) ...[
                         CheckboxListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text( 'app.auto_cut_paper'.tr()),
+                          title: Text('app.auto_cut_paper'.tr()),
                           value: _cut,
                           onChanged: (v) => setState(() => _cut = v!),
                           activeColor: accentColor,
                         ),
                         CheckboxListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text( 'app.open_cash_drawer'.tr()),
-                          subtitle: Text( 'app.after_printing'.tr()),
+                          title: Text('app.open_cash_drawer'.tr()),
+                          subtitle: Text('app.after_printing'.tr()),
                           value: _drawer,
                           onChanged: (v) => setState(() => _drawer = v!),
                           activeColor: accentColor,
@@ -704,7 +710,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                             Expanded(
                               child: CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: Text( 'app.auto_cut_paper'.tr()),
+                                title: Text('app.auto_cut_paper'.tr()),
                                 value: _cut,
                                 onChanged: (v) => setState(() => _cut = v!),
                                 activeColor: accentColor,
@@ -713,8 +719,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                             Expanded(
                               child: CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: Text( 'app.open_cash_drawer'.tr()),
-                                subtitle: Text( 'app.after_printing'.tr()),
+                                title: Text('app.open_cash_drawer'.tr()),
+                                subtitle: Text('app.after_printing'.tr()),
                                 value: _drawer,
                                 onChanged: (v) => setState(() => _drawer = v!),
                                 activeColor: accentColor,
@@ -725,10 +731,13 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                         const SizedBox(height: 8),
                         CheckboxListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text( 'app.print_as_image_arabic_support'.tr()),
-                          subtitle: Text( 'app.rasterize_pdf_to_image_for_per'.tr()),
+                          title: Text('app.print_as_image_arabic_support'.tr()),
+                          subtitle: Text(
+                            'app.rasterize_pdf_to_image_for_per'.tr(),
+                          ),
                           value: _forceImagePrint,
-                          onChanged: (v) => setState(() => _forceImagePrint = v!),
+                          onChanged: (v) =>
+                              setState(() => _forceImagePrint = v!),
                           activeColor: accentColor,
                         ),
                       ],
@@ -814,9 +823,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
     final ports = DiscoveryService.getAvailableSerialPorts();
     if (ports.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text( 'app.no_serial_ports_found'.tr())));
+        AppToasts.show(context, 'app.no_serial_ports_found'.tr());
       }
       return;
     }
@@ -827,7 +834,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            title: Text( 'app.select_serial_port'.tr(),
+            title: Text(
+              'app.select_serial_port'.tr(),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -925,17 +933,14 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text( 'app.test_print_sent'.tr())));
+        AppToasts.show(context, 'app.test_print_sent'.tr());
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Test print failed: $e'),
-            backgroundColor: Colors.red,
-          ),
+        AppToasts.show(
+          context,
+          'Test print failed: $e',
+          type: AppToastType.error,
         );
       }
     }
@@ -1006,7 +1011,7 @@ class _BleScanDialogState extends State<_BleScanDialog> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text( 'app.no_devices_found'.tr()),
+                    : Text('app.no_devices_found'.tr()),
               )
             : ListView.builder(
                 itemCount: _results.length,

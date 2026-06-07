@@ -10,6 +10,7 @@ import 'dialogs/app_dialog.dart';
 import 'option_metadata_dialog.dart';
 import '../theme/app_theme.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class ProductOptionsList extends ConsumerStatefulWidget {
   final String productId;
@@ -69,9 +70,8 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
         _newOptionType = 'dropdown';
       });
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to create option: $e')));
+      if (!mounted) return;
+      AppToasts.show(context, 'Failed to create option: $e');
     }
   }
 
@@ -81,7 +81,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
       builder: (context) => AppDialog(
         title: 'admin.productOptionsEditor.deleteModal.title'.tr(),
         description: 'app.this_will_delete_all_variants'.tr(),
-        content: Text( 'app.are_you_sure_you_want_to_delet4'.tr()),
+        content: Text('app.are_you_sure_you_want_to_delet4'.tr()),
         secondaryLabel: 'Cancel',
         onSecondary: () => Navigator.pop(context, false),
         primaryLabel: 'Delete',
@@ -97,9 +97,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             .deleteOption(widget.productId, optionId);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete option: $e')),
-          );
+          AppToasts.show(context, 'Failed to delete option: $e');
         }
       }
     }
@@ -119,9 +117,8 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
           .addOptionValue(widget.productId, optionId, label);
       controller.clear();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to add value: $e')));
+      if (!mounted) return;
+      AppToasts.show(context, 'Failed to add value: $e');
     }
   }
 
@@ -131,9 +128,8 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
           .read(productsProvider.notifier)
           .deleteOptionValue(widget.productId, optionId, valueId);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to delete value: $e')));
+      if (!mounted) return;
+      AppToasts.show(context, 'Failed to delete value: $e');
     }
   }
 
@@ -146,7 +142,8 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text( 'admin.productOptionsEditor.title'.tr(),
+            Text(
+              'admin.productOptionsEditor.title'.tr(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
@@ -174,12 +171,18 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             decoration: BoxDecoration(
               color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.3),
+              ),
               boxShadow: isDark
                   ? null
                   : [
                       BoxShadow(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.05),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -188,7 +191,8 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text( 'app.new_option'.tr(),
+                Text(
+                  'app.new_option'.tr(),
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
@@ -208,23 +212,33 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                   items: [
                     DropdownMenuItem(
                       value: 'dropdown',
-                      child: Text( 'admin.productOptionsEditor.displayTypes.dropdown'.tr()),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.dropdown'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'button',
-                      child: Text( 'admin.productOptionsEditor.displayTypes.button'.tr()),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.button'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'radio',
-                      child: Text( 'admin.productOptionsEditor.displayTypes.radio'.tr()),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.radio'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'color',
-                      child: Text( 'admin.productOptionsEditor.displayTypes.color'.tr()),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.color'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'image',
-                      child: Text( 'admin.productOptionsEditor.displayTypes.image'.tr()),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.image'.tr(),
+                      ),
                     ),
                   ],
                   onChanged: (v) =>

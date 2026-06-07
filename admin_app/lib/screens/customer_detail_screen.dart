@@ -374,7 +374,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         final date = s.createdAt ?? s.updatedAt;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -383,7 +383,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   '#$shortId',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -394,7 +394,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   money.format(s.totalAmount),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -511,7 +511,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   money.format(p.amount),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -572,12 +572,14 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
   }
 
   Widget _headerText(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
+      text.toUpperCase(),
       style: TextStyle(
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-        fontSize: 12,
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }

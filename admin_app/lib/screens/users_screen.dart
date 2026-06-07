@@ -17,6 +17,7 @@ import '../widgets/buttons/app_button.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/badges/status_badges.dart';
 import '../theme/app_theme.dart';
+import '../utils/app_toasts.dart';
 
 class UsersScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -113,7 +114,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                         ? null
                         : () async {
                             if (_activeTab == 'users') {
-                              await ref.read(cashProvider.notifier).fetchCashboxes();
+                              await ref
+                                  .read(cashProvider.notifier)
+                                  .fetchCashboxes();
                               await ref
                                   .read(adminUsersProvider.notifier)
                                   .fetchUsers();
@@ -152,7 +155,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                           ? null
                           : () async {
                               if (_activeTab == 'users') {
-                                await ref.read(cashProvider.notifier).fetchCashboxes();
+                                await ref
+                                    .read(cashProvider.notifier)
+                                    .fetchCashboxes();
                                 await ref
                                     .read(adminUsersProvider.notifier)
                                     .fetchUsers();
@@ -175,7 +180,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                             fullWidth: true,
                           )
                         : AppButton.primary(
-                            label: 'app.admin_pages_users_roles_action'.tr()
+                            label: 'app.admin_pages_users_roles_action'
+                                .tr()
                                 .tr(),
                             icon: LucideIcons.plus,
                             onPressed: () => _openCreateRole(context),
@@ -219,7 +225,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                                 .fetchUsers(includeInactive: v == true);
                           },
                   ),
-                  Text( 'app.admin_pages_users_includeinact'.tr().tr()),
+                  Text('app.admin_pages_users_includeinact'.tr().tr()),
                 ],
               ),
             const SizedBox(height: 12),
@@ -497,17 +503,17 @@ class _UsersTable extends StatelessWidget {
       minWidth: 1200,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.users.columns.email'.tr(), flex: 4),
-          _buildHeaderCell('admin.pages.users.columns.role'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.users.columns.staffRole'.tr(), flex: 3),
-          _buildHeaderCell('admin.pages.users.columns.cashbox'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.users.columns.status'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.users.columns.createdAt'.tr(), flex: 2),
+          _buildHeaderCell(context, 'admin.pages.users.columns.email'.tr(), flex: 4),
+          _buildHeaderCell(context, 'admin.pages.users.columns.role'.tr(), flex: 2),
+          _buildHeaderCell(context, 'admin.pages.users.columns.staffRole'.tr(), flex: 3),
+          _buildHeaderCell(context, 'admin.pages.users.columns.cashbox'.tr(), flex: 2),
+          _buildHeaderCell(context, 'admin.pages.users.columns.status'.tr(), flex: 2),
+          _buildHeaderCell(context, 'admin.pages.users.columns.createdAt'.tr(), flex: 2),
           Expanded(
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText('admin.common.actions'.tr()),
+              child: _headerText(context, 'admin.common.actions'.tr()),
             ),
           ),
         ],
@@ -515,7 +521,7 @@ class _UsersTable extends StatelessWidget {
       rowBuilder: (context, u, index) {
         final staffRole = u.role == 'staff' ? _roleName(u.staffRoleId) : '—';
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -543,7 +549,7 @@ class _UsersTable extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          fontSize: 13,
                           color: Color(0xFF0F172A),
                         ),
                       ),
@@ -637,19 +643,21 @@ class _UsersTable extends StatelessWidget {
     );
   }
 
-  Widget _headerText(String text) {
+  Widget _headerText(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF64748B), // Slate-500
-        fontSize: 12,
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
 
-  Widget _buildHeaderCell(String text, {required int flex}) {
-    return Expanded(flex: flex, child: _headerText(text));
+  Widget _buildHeaderCell(BuildContext context, String text, {required int flex}) {
+    return Expanded(flex: flex, child: _headerText(context, text));
   }
 }
 
@@ -676,10 +684,12 @@ class _RolesTable extends StatelessWidget {
       header: Row(
         children: [
           _buildHeaderCell(
+            context,
             'admin.pages.users.roles.columns.name'.tr(),
             flex: 5,
           ),
           _buildHeaderCell(
+            context,
             'admin.pages.users.roles.columns.permissions'.tr(),
             flex: 2,
           ),
@@ -687,7 +697,7 @@ class _RolesTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText('admin.common.actions'.tr()),
+              child: _headerText(context, 'admin.common.actions'.tr()),
             ),
           ),
         ],
@@ -698,7 +708,7 @@ class _RolesTable extends StatelessWidget {
           (sum, p) => sum + p.actions.length,
         );
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -707,7 +717,7 @@ class _RolesTable extends StatelessWidget {
                   r.name,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Color(0xFF0F172A),
                   ),
                 ),
@@ -751,19 +761,21 @@ class _RolesTable extends StatelessWidget {
     );
   }
 
-  Widget _headerText(String text) {
+  Widget _headerText(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF64748B), // Slate-500
-        fontSize: 12,
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
 
-  Widget _buildHeaderCell(String text, {required int flex}) {
-    return Expanded(flex: flex, child: _headerText(text));
+  Widget _buildHeaderCell(BuildContext context, String text, {required int flex}) {
+    return Expanded(flex: flex, child: _headerText(context, text));
   }
 }
 
@@ -868,8 +880,14 @@ class _UserDialogState extends State<_UserDialog> {
               label: 'admin.pages.users.fields.role'.tr(),
               value: _role,
               items: [
-                DropdownMenuItem(value: 'staff', child: Text( 'admin.roles.staff'.tr())),
-                DropdownMenuItem(value: 'admin', child: Text( 'admin.roles.admin'.tr())),
+                DropdownMenuItem(
+                  value: 'staff',
+                  child: Text('admin.roles.staff'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'admin',
+                  child: Text('admin.roles.admin'.tr()),
+                ),
               ],
               onChanged: (v) {
                 if (v == null) return;
@@ -887,7 +905,7 @@ class _UserDialogState extends State<_UserDialog> {
                 items: [
                   DropdownMenuItem<String?>(
                     value: null,
-                    child: Text( 'app.no_staff_role'.tr()),
+                    child: Text('app.no_staff_role'.tr()),
                   ),
                   ...widget.roles.map(
                     (r) => DropdownMenuItem<String?>(
@@ -902,7 +920,7 @@ class _UserDialogState extends State<_UserDialog> {
             if (widget.showActiveToggle) ...[
               const SizedBox(height: 8),
               SwitchListTile(
-                title: Text( 'superAdmin.tenants.status.active'.tr()),
+                title: Text('superAdmin.tenants.status.active'.tr()),
                 value: _isActive,
                 onChanged: (v) => setState(() => _isActive = v),
                 contentPadding: EdgeInsets.zero,
@@ -996,7 +1014,8 @@ class _RoleDialogState extends State<_RoleDialog> {
             const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text( 'admin.pages.users.roles.fields.permissions'.tr(),
+              child: Text(
+                'admin.pages.users.roles.fields.permissions'.tr(),
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               ),
             ),
@@ -1035,9 +1054,7 @@ class _RoleDialogState extends State<_RoleDialog> {
           );
         }
         if (perms.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text( 'app.select_at_least_one_permission'.tr())),
-          );
+          AppToasts.show(context, 'app.select_at_least_one_permission'.tr());
           return;
         }
         Navigator.of(

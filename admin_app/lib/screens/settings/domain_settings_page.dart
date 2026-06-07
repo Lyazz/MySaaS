@@ -8,6 +8,7 @@ import '../../services/api_service.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class DomainSettingsPage extends ConsumerStatefulWidget {
   const DomainSettingsPage({super.key});
@@ -71,9 +72,7 @@ class _DomainSettingsPageState extends ConsumerState<DomainSettingsPage> {
       await _load();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      AppToasts.show(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -91,14 +90,15 @@ class _DomainSettingsPageState extends ConsumerState<DomainSettingsPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text( 'app.custom_domains'.tr())),
+      appBar: AppBar(title: Text('app.custom_domains'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (_error != null) ...[Text(_error!), const SizedBox(height: 12)],
-            Text( 'app.point_your_cname_record_to'.tr(),
+            Text(
+              'app.point_your_cname_record_to'.tr(),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 6),

@@ -284,27 +284,27 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
       minWidth: 900,
       header: Row(
         children: [
-          Expanded(flex: 2, child: Text( 'admin.pages.purchases.index.table.id'.tr(), style: _headerStyle(textMuted))),
+          Expanded(flex: 2, child: Text( 'admin.pages.purchases.index.table.id'.tr().toUpperCase(), style: _headerStyle(isDark))),
           Expanded(
             flex: 3,
-            child: Text( 'admin.pages.purchases.detail.cards.supplier'.tr(), style: _headerStyle(textMuted)),
+            child: Text( 'admin.pages.purchases.detail.cards.supplier'.tr().toUpperCase(), style: _headerStyle(isDark)),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'superAdmin.paymentsPage.history.table.status'.tr(), style: _headerStyle(textMuted)),
+            child: Text( 'superAdmin.paymentsPage.history.table.status'.tr().toUpperCase(), style: _headerStyle(isDark)),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'admin.pages.sales.detail.sections.items'.tr(), style: _headerStyle(textMuted)),
+            child: Text( 'admin.pages.sales.detail.sections.items'.tr().toUpperCase(), style: _headerStyle(isDark)),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'superAdmin.paymentsPage.history.table.date'.tr(), style: _headerStyle(textMuted)),
+            child: Text( 'superAdmin.paymentsPage.history.table.date'.tr().toUpperCase(), style: _headerStyle(isDark)),
           ),
           Expanded(
             flex: 1,
-            child: Text( 'admin.pages.purchases.index.table.action'.tr(),
-              style: _headerStyle(textMuted),
+            child: Text( 'admin.pages.purchases.index.table.action'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
               textAlign: TextAlign.right,
             ),
           ),
@@ -314,9 +314,9 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
         return InkWell(
           onTap: () => context.go('/purchases/${purchase.id}'),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 12 : 24,
-              vertical: 12,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 13,
             ),
             child: Row(
               children: [
@@ -327,6 +327,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: textPrimary,
+                      fontSize: 13,
                       fontFamily: 'RobotoMono',
                     ),
                   ),
@@ -338,6 +339,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: textSecondary,
+                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -381,10 +383,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     );
   }
 
-  static TextStyle _headerStyle(Color color) => TextStyle(
+  static TextStyle _headerStyle(bool isDark) => TextStyle(
     fontWeight: FontWeight.w600,
     fontSize: 11,
-    color: color,
+    color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
     letterSpacing: 0.5,
   );
 }

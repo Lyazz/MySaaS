@@ -43,6 +43,7 @@ void main() {
 
   setUpAll(() async {
     sqfliteFfiInit();
+    SyncService.disableSupplementalRefreshForTests = true;
     tempDbDir = await Directory.systemTemp.createTemp('sync-image-db');
     appDocsDir = await Directory.systemTemp.createTemp('sync-image-docs');
 
@@ -413,6 +414,7 @@ void main() {
     ConnectivityPlatform.instance = originalConnectivityPlatform;
     DatabaseService.databaseOpener = originalDatabaseOpener;
     DatabaseService.resetTestOverrides();
+    SyncService.resetTestOverrides();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(pathProviderChannel, null);
     await tempDbDir.delete(recursive: true);
@@ -530,9 +532,10 @@ void main() {
     await _waitFor(() async {
       final rows = await (await DatabaseService().database).query('sync_queue');
       return rows.isNotEmpty &&
-          rows.single['status'] == SyncStatus.failed.name &&
-          rows.single['retryCount'] == 1;
-    }, reason: 'failed sync state');
+          rows.single['status'] == SyncStatus.rejected.name &&
+          rows.single['retryCount'] == 0 &&
+          rows.single['nextRetryAt'] == null;
+    }, reason: 'rejected sync state');
 
     final rows = await (await DatabaseService().database).query('sync_queue');
     final payload = jsonDecode(rows.single['payload']! as String) as Map;

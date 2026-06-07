@@ -14,6 +14,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/tenant_image_widget.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class CategoryFormScreen extends ConsumerStatefulWidget {
   final String? categoryId;
@@ -98,11 +99,10 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       _autoGenerateSlug = false;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading category: $e'),
-            backgroundColor: Colors.red,
-          ),
+        AppToasts.show(
+          context,
+          'Error loading category: $e',
+          type: AppToastType.error,
         );
         context.pop();
       }
@@ -157,15 +157,12 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       if (mounted) {
         if (success) {
           _sessionLocalImages.clear();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                widget.categoryId == null
-                    ? 'Category created successfully'
-                    : 'Category updated successfully',
-              ),
-              backgroundColor: Colors.green,
-            ),
+          AppToasts.show(
+            context,
+            widget.categoryId == null
+                ? 'Category created successfully'
+                : 'Category updated successfully',
+            type: AppToastType.success,
           );
           context.pop();
         } else {
@@ -174,9 +171,7 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-        );
+        AppToasts.show(context, 'Error: $e', type: AppToastType.error);
       }
     } finally {
       if (mounted) {
@@ -229,7 +224,9 @@ class _CategoryFormScreenState extends ConsumerState<CategoryFormScreen> {
                               const SizedBox(height: 20),
                               _buildTextField(
                                 controller: _slugController,
-                                label: 'superAdmin.tenants.modal.fields.slug.slugFallback'.tr(),
+                                label:
+                                    'superAdmin.tenants.modal.fields.slug.slugFallback'
+                                        .tr(),
                                 hint: 'e.g., electronics',
                                 onChanged: (_) {
                                   setState(() => _autoGenerateSlug = false);

@@ -8,6 +8,7 @@ import '../../services/api_service.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class HomepageSettingsPage extends ConsumerStatefulWidget {
   const HomepageSettingsPage({super.key});
@@ -144,14 +145,10 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
         },
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text( 'app.homepage_settings_saved'.tr())));
+      AppToasts.show(context, 'app.homepage_settings_saved'.tr());
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      AppToasts.show(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -165,7 +162,7 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text( 'admin.pages.settings.homepage.title'.tr()),
+        title: Text('admin.pages.settings.homepage.title'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -182,9 +179,15 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
         child: Column(
           children: [
             if (_error != null) ...[Text(_error!), const SizedBox(height: 12)],
-            FormInput(label: 'app.hero_image_url'.tr(), controller: _slideImageCtrl),
+            FormInput(
+              label: 'app.hero_image_url'.tr(),
+              controller: _slideImageCtrl,
+            ),
             const SizedBox(height: 12),
-            FormInput(label: 'app.hero_title'.tr(), controller: _slideTitleCtrl),
+            FormInput(
+              label: 'app.hero_title'.tr(),
+              controller: _slideTitleCtrl,
+            ),
             const SizedBox(height: 12),
             FormInput(
               label: 'app.hero_subtitle'.tr(),
@@ -211,7 +214,9 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
             ),
             const SizedBox(height: 20),
             _HomepageSectionCard(
-              title: 'admin.homepageSettingsForm.sections.browseByCategory.title'.tr(),
+              title:
+                  'admin.homepageSettingsForm.sections.browseByCategory.title'
+                      .tr(),
               enabled: _browseEnabled,
               onChanged: (value) => setState(() => _browseEnabled = value),
               eyebrowController: _browseEyebrowCtrl,
@@ -219,7 +224,8 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
             ),
             const SizedBox(height: 16),
             _HomepageSectionCard(
-              title: 'admin.homepageSettingsForm.sections.newArrivals.title'.tr(),
+              title: 'admin.homepageSettingsForm.sections.newArrivals.title'
+                  .tr(),
               enabled: _arrivalsEnabled,
               onChanged: (value) => setState(() => _arrivalsEnabled = value),
               eyebrowController: _arrivalsEyebrowCtrl,
@@ -228,7 +234,8 @@ class _HomepageSettingsPageState extends ConsumerState<HomepageSettingsPage> {
             ),
             const SizedBox(height: 16),
             _HomepageSectionCard(
-              title: 'admin.homepageSettingsForm.sections.bestSellers.title'.tr(),
+              title: 'admin.homepageSettingsForm.sections.bestSellers.title'
+                  .tr(),
               enabled: _bestEnabled,
               onChanged: (value) => setState(() => _bestEnabled = value),
               eyebrowController: _bestEyebrowCtrl,
@@ -276,7 +283,10 @@ class _HomepageSectionCard extends StatelessWidget {
           ),
           FormInput(label: 'app.eyebrow'.tr(), controller: eyebrowController),
           const SizedBox(height: 12),
-          FormInput(label: 'admin.pages.categories.index.sort.title'.tr(), controller: titleController),
+          FormInput(
+            label: 'admin.pages.categories.index.sort.title'.tr(),
+            controller: titleController,
+          ),
           if (limitController != null) ...[
             const SizedBox(height: 12),
             FormInput(

@@ -2308,7 +2308,7 @@
             "discount": "Discount",
             "reprint": "Reprint Last",
             "reprintLastOrder": "Reprint Last Order",
-            "quickCharge": "Quick Charge",
+            "customAmount": "Custom Amount",
             "sort": "Sort",
             "columns": "Columns"
           },

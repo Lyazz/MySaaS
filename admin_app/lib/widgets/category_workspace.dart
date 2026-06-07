@@ -8,6 +8,7 @@ import '../../theme/app_theme.dart';
 import 'tenant_image_widget.dart';
 import 'badges/ui_badge.dart';
 import 'buttons/app_button.dart';
+import '../utils/app_toasts.dart';
 
 class CategoryWorkspace extends StatefulWidget {
   final List<Category> categories;
@@ -71,11 +72,10 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
   void _copyLink(String slug) {
     final url = '/category/$slug';
     Clipboard.setData(ClipboardData(text: url));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('app.category_link_copied_to_clipbo'.tr()),
-        duration: const Duration(seconds: 2),
-      ),
+    AppToasts.show(
+      context,
+      'app.category_link_copied_to_clipbo'.tr(),
+      duration: const Duration(seconds: 2),
     );
   }
 
@@ -86,13 +86,16 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
     final sortedCategories = List<Category>.from(widget.categories)
       ..sort(_compareCategories);
 
-    final topLevelCategories =
-        sortedCategories.where((c) => c.parentId == null).toList();
+    final topLevelCategories = sortedCategories
+        .where((c) => c.parentId == null)
+        .toList();
 
     final subcategoriesByParentId = <String, List<Category>>{};
     for (final category in sortedCategories) {
       if (category.parentId != null) {
-        subcategoriesByParentId.putIfAbsent(category.parentId!, () => []).add(category);
+        subcategoriesByParentId
+            .putIfAbsent(category.parentId!, () => [])
+            .add(category);
       }
     }
 
@@ -103,17 +106,22 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
       return children.any((child) => _categoryMatchesQuery(child, query));
     }).toList();
 
-    final totalPages =
-        (filteredParentCategories.length / _itemsPerPage).ceil().clamp(1, 9999);
+    final totalPages = (filteredParentCategories.length / _itemsPerPage)
+        .ceil()
+        .clamp(1, 9999);
     if (_currentPage > totalPages) {
       _currentPage = totalPages;
     }
 
     final start = (_currentPage - 1) * _itemsPerPage;
-    final end = (start + _itemsPerPage).clamp(0, filteredParentCategories.length);
+    final end = (start + _itemsPerPage).clamp(
+      0,
+      filteredParentCategories.length,
+    );
     final paginatedParents = filteredParentCategories.sublist(start, end);
 
-    final effectiveActiveParentId = (paginatedParents.any((c) => c.id == _activeParentId)
+    final effectiveActiveParentId =
+        (paginatedParents.any((c) => c.id == _activeParentId)
         ? _activeParentId
         : (paginatedParents.isNotEmpty ? paginatedParents.first.id : null));
 
@@ -127,8 +135,9 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
       if (query.isEmpty || _categoryMatchesQuery(activeParent, query)) {
         activeSubcategories = children;
       } else {
-        activeSubcategories =
-            children.where((child) => _categoryMatchesQuery(child, query)).toList();
+        activeSubcategories = children
+            .where((child) => _categoryMatchesQuery(child, query))
+            .toList();
       }
     }
 
@@ -143,10 +152,19 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildParentsList(paginatedParents, effectiveActiveParentId, filteredParentCategories.length, isDark),
+          _buildParentsList(
+            paginatedParents,
+            effectiveActiveParentId,
+            filteredParentCategories.length,
+            isDark,
+          ),
           const SizedBox(height: 16),
           if (activeParent != null)
-            _buildActiveParentDetails(activeParent, activeSubcategories, isDark),
+            _buildActiveParentDetails(
+              activeParent,
+              activeSubcategories,
+              isDark,
+            ),
         ],
       );
     }
@@ -156,13 +174,22 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
       children: [
         Expanded(
           flex: 6,
-          child: _buildParentsList(paginatedParents, effectiveActiveParentId, filteredParentCategories.length, isDark),
+          child: _buildParentsList(
+            paginatedParents,
+            effectiveActiveParentId,
+            filteredParentCategories.length,
+            isDark,
+          ),
         ),
         const SizedBox(width: 24),
         Expanded(
           flex: 4,
           child: activeParent != null
-              ? _buildActiveParentDetails(activeParent, activeSubcategories, isDark)
+              ? _buildActiveParentDetails(
+                  activeParent,
+                  activeSubcategories,
+                  isDark,
+                )
               : _buildEmptySelection(isDark),
         ),
       ],
@@ -171,9 +198,12 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
 
   // ── Empty state ───────────────────────────────────────────────────────────
   Widget _buildEmptyState(bool isDark) {
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return _UiCard(
       isDark: isDark,
@@ -182,11 +212,7 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              LucideIcons.shapes,
-              size: 48,
-              color: textTertiary,
-            ),
+            Icon(LucideIcons.shapes, size: 48, color: textTertiary),
             const SizedBox(height: 12),
             Text(
               'admin.pages.categories.index.empty.title'.tr(),
@@ -199,10 +225,7 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
             const SizedBox(height: 4),
             Text(
               'admin.pages.categories.index.empty.hint'.tr(),
-              style: TextStyle(
-                fontSize: 13,
-                color: textTertiary,
-              ),
+              style: TextStyle(fontSize: 13, color: textTertiary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -224,9 +247,15 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
     int totalCount,
     bool isDark,
   ) {
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
     final brandColor = isDark ? AppColors.brand : AppColors.lightBrand;
 
     return _UiCard(
@@ -251,10 +280,7 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
                 const SizedBox(height: 2),
                 Text(
                   'admin.pages.categories.index.workspace.parentsHint'.tr(),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: textTertiary,
-                  ),
+                  style: TextStyle(fontSize: 12, color: textTertiary),
                 ),
               ],
             ),
@@ -300,14 +326,21 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
                       : null,
                 ),
                 Text(
-                  'admin.pages.categories.index.pagination.showing'.tr(namedArgs: {
-                    'from': ((_currentPage - 1) * _itemsPerPage + 1).toString(),
-                    'to': ((_currentPage - 1) * _itemsPerPage + parents.length).toString(),
-                    'total': totalCount.toString(),
-                  }),
+                  'admin.pages.categories.index.pagination.showing'.tr(
+                    namedArgs: {
+                      'from': ((_currentPage - 1) * _itemsPerPage + 1)
+                          .toString(),
+                      'to':
+                          ((_currentPage - 1) * _itemsPerPage + parents.length)
+                              .toString(),
+                      'total': totalCount.toString(),
+                    },
+                  ),
                   style: TextStyle(
                     fontSize: 13,
-                    color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+                    color: isDark
+                        ? AppColors.textSecondary
+                        : AppColors.lightTextSecondary,
                   ),
                 ),
                 AppButton.secondary(
@@ -332,9 +365,15 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
     List<Category> subcategories,
     bool isDark,
   ) {
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return _UiCard(
       isDark: isDark,
@@ -374,10 +413,7 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
                     ),
                     Text(
                       '/category/${activeParent.slug}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: textTertiary,
-                      ),
+                      style: TextStyle(fontSize: 12, color: textTertiary),
                     ),
                   ],
                 ),
@@ -388,13 +424,15 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
                 children: [
                   _ActionIconButton(
                     icon: LucideIcons.externalLink,
-                    tooltip: 'admin.pages.categories.index.links.openCategory'.tr(),
+                    tooltip: 'admin.pages.categories.index.links.openCategory'
+                        .tr(),
                     isDark: isDark,
                     onPressed: () {},
                   ),
                   _ActionIconButton(
                     icon: LucideIcons.copy,
-                    tooltip: 'admin.pages.categories.index.links.copyCategory'.tr(),
+                    tooltip: 'admin.pages.categories.index.links.copyCategory'
+                        .tr(),
                     isDark: isDark,
                     onPressed: () => _copyLink(activeParent.slug),
                   ),
@@ -402,7 +440,8 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
                     icon: LucideIcons.pencil,
                     tooltip: 'admin.common.edit'.tr(),
                     isDark: isDark,
-                    onPressed: () => context.push('/categories/${activeParent.id}'),
+                    onPressed: () =>
+                        context.push('/categories/${activeParent.id}'),
                   ),
                   _ActionIconButton(
                     icon: LucideIcons.trash,
@@ -419,10 +458,7 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
           const SizedBox(height: 12),
           Text(
             'admin.pages.categories.index.workspace.subcategoriesHint'.tr(),
-            style: TextStyle(
-              fontSize: 13,
-              color: textSecondary,
-            ),
+            style: TextStyle(fontSize: 13, color: textSecondary),
           ),
           const SizedBox(height: 16),
 
@@ -470,7 +506,9 @@ class _CategoryWorkspaceState extends State<CategoryWorkspace> {
         'admin.pages.categories.index.workspace.selectCategory'.tr(),
         style: TextStyle(
           fontSize: 13,
-          color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+          color: isDark
+              ? AppColors.textSecondary
+              : AppColors.lightTextSecondary,
         ),
         textAlign: TextAlign.center,
       ),
@@ -498,8 +536,12 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
     final surface3 = isDark ? AppColors.surface3 : AppColors.lightSurface3;
 
     return InkWell(
@@ -524,11 +566,7 @@ class _CategoryRow extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: category.imageUrl != null && category.imageUrl!.isNotEmpty
                   ? TenantImageWidget(imagePath: category.imageUrl!)
-                  : Icon(
-                      LucideIcons.image,
-                      size: 18,
-                      color: textTertiary,
-                    ),
+                  : Icon(LucideIcons.image, size: 18, color: textTertiary),
             ),
             const SizedBox(width: 12),
             // Title + slug
@@ -548,10 +586,7 @@ class _CategoryRow extends StatelessWidget {
                   ),
                   Text(
                     category.slug,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: textTertiary,
-                    ),
+                    style: TextStyle(fontSize: 12, color: textTertiary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -565,14 +600,20 @@ class _CategoryRow extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 UiBadge(
-                  label: 'admin.pages.categories.index.table.productsCount'
-                      .tr(namedArgs: {'count': category.productCount.toString()}),
+                  label: 'admin.pages.categories.index.table.productsCount'.tr(
+                    namedArgs: {'count': category.productCount.toString()},
+                  ),
                   tone: isDark ? UiBadgeTone.slateDark : UiBadgeTone.slate,
                 ),
                 const SizedBox(height: 4),
                 UiBadge(
-                  label: 'admin.pages.categories.index.workspace.subcategoriesCount'
-                      .tr(namedArgs: {'count': category.subcategoriesCount.toString()}),
+                  label:
+                      'admin.pages.categories.index.workspace.subcategoriesCount'
+                          .tr(
+                            namedArgs: {
+                              'count': category.subcategoriesCount.toString(),
+                            },
+                          ),
                   tone: isDark ? UiBadgeTone.slateDark : UiBadgeTone.slate,
                 ),
               ],
@@ -602,9 +643,15 @@ class _SubcategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
 
     return Container(
@@ -632,10 +679,7 @@ class _SubcategoryRow extends StatelessWidget {
                 ),
                 Text(
                   subcategory.slug,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: textTertiary,
-                  ),
+                  style: TextStyle(fontSize: 12, color: textTertiary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -714,7 +758,9 @@ class _ActionIconButtonState extends State<_ActionIconButton> {
       iconColor = AppColors.red;
       bgColor = AppColors.red.withValues(alpha: 0.08);
     } else if (_hovered) {
-      iconColor = widget.isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+      iconColor = widget.isDark
+          ? AppColors.textPrimary
+          : AppColors.lightTextPrimary;
       bgColor = widget.isDark
           ? AppColors.navHoverBg
           : AppColors.lightNavHoverBg;
@@ -754,7 +800,9 @@ class _DashedBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
 
     return CustomPaint(
@@ -834,7 +882,9 @@ class _UiCard extends StatelessWidget {
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder,
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
         ),
         boxShadow: [
           BoxShadow(

@@ -7,6 +7,7 @@ import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
 import '../../widgets/form/form_select.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class LegalPagesPage extends ConsumerStatefulWidget {
   const LegalPagesPage({super.key});
@@ -89,14 +90,10 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
         'legalPages': _mergedPayload(),
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text( 'app.legal_pages_saved'.tr())));
+      AppToasts.show(context, 'app.legal_pages_saved'.tr());
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      AppToasts.show(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -113,7 +110,7 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text( 'admin.settingsHub.links.legal'.tr()),
+        title: Text('admin.settingsHub.links.legal'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -150,7 +147,7 @@ class _LegalPagesPageState extends ConsumerState<LegalPagesPage> {
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
-                    title: Text( 'app.publish_this_legal_page'.tr()),
+                    title: Text('app.publish_this_legal_page'.tr()),
                     value: _enabled,
                     onChanged: (value) => setState(() => _enabled = value),
                   ),

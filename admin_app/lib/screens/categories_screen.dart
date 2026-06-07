@@ -13,6 +13,7 @@ import '../widgets/buttons/app_button.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/category_workspace.dart';
+import '../utils/app_toasts.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({super.key});
@@ -69,14 +70,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           .deleteCategory(category.id);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? 'admin.pages.categories.index.deleteModal.success'.tr()
-                  : 'admin.pages.categories.index.deleteModal.error'.tr(),
-            ),
-          ),
+        AppToasts.show(
+          context,
+          success
+              ? 'admin.pages.categories.index.deleteModal.success'.tr()
+              : 'admin.pages.categories.index.deleteModal.error'.tr(),
         );
       }
     }
@@ -89,8 +87,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return Scaffold(
       floatingActionButton: (isMobile && !isOfflineTenant)
@@ -129,10 +131,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'admin.pages.categories.index.subtitle'.tr(),
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: textSecondary,
-                          ),
+                          style: TextStyle(fontSize: 14, color: textSecondary),
                         ),
                       ],
                     ),
@@ -192,7 +191,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               'admin.pages.categories.index.loading'.tr(),
               style: TextStyle(
                 fontSize: 14,
-                color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.textSecondary
+                    : AppColors.lightTextSecondary,
               ),
             ),
           ],
@@ -208,136 +209,151 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       child: Center(
         child: Text(
           'Error: $error',
-          style: TextStyle(
-            color: AppColors.red,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: AppColors.red, fontSize: 14),
         ),
       ),
     );
   }
 
   Widget _buildToolbar(bool isDark) {
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return _UiCard(
       isDark: isDark,
       padding: const EdgeInsets.all(16),
-      child: LayoutBuilder(builder: (context, constraints) {
-        final isMobileLayout = constraints.maxWidth < 600;
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isMobileLayout = constraints.maxWidth < 600;
 
-        final searchWidget = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'admin.pages.categories.index.filters.searchLabel'.tr(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            FormInput(
-              label: '',
-              controller: _searchController,
-              hint: 'admin.pages.categories.index.filters.searchPlaceholder'.tr(),
-              onChanged: (value) => _searchDebouncer.run(() => setState(() {})),
-            ),
-          ],
-        );
-
-        final sortWidget = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'admin.pages.categories.index.sort.sortBy'.tr(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: FormSelect<String>(
-                    label: '',
-                    value: _sortBy,
-                    items: [
-                      DropdownMenuItem(
-                          value: 'createdAt',
-                          child: Text('admin.pages.categories.index.sort.newest'.tr())),
-                      DropdownMenuItem(
-                          value: 'title',
-                          child: Text('admin.pages.categories.index.sort.title'.tr())),
-                      DropdownMenuItem(
-                          value: 'slug',
-                          child: Text('admin.pages.categories.index.sort.slug'.tr())),
-                      DropdownMenuItem(
-                          value: 'products',
-                          child: Text('admin.pages.categories.index.sort.products'.tr())),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) _setSort(value);
-                    },
-                  ),
+          final searchWidget = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'admin.pages.categories.index.filters.searchLabel'.tr(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
                 ),
-                const SizedBox(width: 8),
-                // Sort order toggle
-                Tooltip(
-                  message: _sortOrder == 'asc'
-                      ? 'admin.common.next'.tr()
-                      : 'admin.common.previous'.tr(),
-                  child: InkWell(
-                    onTap: _toggleSortOrder,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: surfaceBorder),
-                        borderRadius: BorderRadius.circular(8),
-                        color: surface2,
-                      ),
-                      child: Icon(
-                        _sortOrder == 'asc'
-                            ? LucideIcons.arrowUp
-                            : LucideIcons.arrowDown,
-                        size: 16,
-                        color: textSecondary,
+              ),
+              const SizedBox(height: 4),
+              FormInput(
+                label: '',
+                controller: _searchController,
+                hint: 'admin.pages.categories.index.filters.searchPlaceholder'
+                    .tr(),
+                onChanged: (value) =>
+                    _searchDebouncer.run(() => setState(() {})),
+              ),
+            ],
+          );
+
+          final sortWidget = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'admin.pages.categories.index.sort.sortBy'.tr(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Expanded(
+                    child: FormSelect<String>(
+                      label: '',
+                      value: _sortBy,
+                      items: [
+                        DropdownMenuItem(
+                          value: 'createdAt',
+                          child: Text(
+                            'admin.pages.categories.index.sort.newest'.tr(),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'title',
+                          child: Text(
+                            'admin.pages.categories.index.sort.title'.tr(),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'slug',
+                          child: Text(
+                            'admin.pages.categories.index.sort.slug'.tr(),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'products',
+                          child: Text(
+                            'admin.pages.categories.index.sort.products'.tr(),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) _setSort(value);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Sort order toggle
+                  Tooltip(
+                    message: _sortOrder == 'asc'
+                        ? 'admin.common.next'.tr()
+                        : 'admin.common.previous'.tr(),
+                    child: InkWell(
+                      onTap: _toggleSortOrder,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: surfaceBorder),
+                          borderRadius: BorderRadius.circular(8),
+                          color: surface2,
+                        ),
+                        child: Icon(
+                          _sortOrder == 'asc'
+                              ? LucideIcons.arrowUp
+                              : LucideIcons.arrowDown,
+                          size: 16,
+                          color: textSecondary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        );
-
-        if (isMobileLayout) {
-          return Column(
-            children: [
-              searchWidget,
-              const SizedBox(height: 16),
-              sortWidget,
+                ],
+              ),
             ],
           );
-        }
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(flex: 2, child: searchWidget),
-            const SizedBox(width: 16),
-            Expanded(flex: 1, child: sortWidget),
-          ],
-        );
-      }),
+          if (isMobileLayout) {
+            return Column(
+              children: [searchWidget, const SizedBox(height: 16), sortWidget],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(flex: 2, child: searchWidget),
+              const SizedBox(width: 16),
+              Expanded(flex: 1, child: sortWidget),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -351,8 +367,12 @@ class _DeleteDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -373,7 +393,11 @@ class _DeleteDialog extends StatelessWidget {
                       color: AppColors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(LucideIcons.alertTriangle, size: 20, color: AppColors.red),
+                    child: Icon(
+                      LucideIcons.alertTriangle,
+                      size: 20,
+                      color: AppColors.red,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -391,7 +415,8 @@ class _DeleteDialog extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 'admin.pages.categories.index.deleteModal.messageWithTitle'.tr(
-                    namedArgs: {'title': category.title}),
+                  namedArgs: {'title': category.title},
+                ),
                 style: TextStyle(
                   fontSize: 14,
                   color: textSecondary,
@@ -441,7 +466,9 @@ class _UiCard extends StatelessWidget {
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder,
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
         ),
         boxShadow: [
           BoxShadow(

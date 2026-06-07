@@ -230,6 +230,14 @@ class SyncService {
     },
   };
 
+  @visibleForTesting
+  static bool disableSupplementalRefreshForTests = false;
+
+  @visibleForTesting
+  static void resetTestOverrides() {
+    disableSupplementalRefreshForTests = false;
+  }
+
   final _dbService = DatabaseService();
   final Connectivity _connectivity = Connectivity();
   final _syncStateController = StreamController<SyncState>.broadcast();
@@ -417,7 +425,9 @@ class SyncService {
       }
       if (tenantId.trim().isNotEmpty) {
         await _pullRemoteChanges(tenantId);
-        await _refreshSupplementalDomains(tenantId);
+        if (!disableSupplementalRefreshForTests) {
+          await _refreshSupplementalDomains(tenantId);
+        }
       }
     } catch (error, stackTrace) {
       debugPrint('SyncService: fatal sync failure: $error');

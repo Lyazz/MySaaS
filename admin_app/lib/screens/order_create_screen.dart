@@ -15,6 +15,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 const _wilayas = [
   ('01', 'Adrar'),
@@ -224,9 +225,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        AppToasts.show(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -246,7 +245,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
           icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => context.pop(),
         ),
-        title: Text( 'admin.pages.orders.index.addBtn'.tr()),
+        title: Text('admin.pages.orders.index.addBtn'.tr()),
       ),
       body: Form(
         key: _formKey,
@@ -295,7 +294,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   items: [
                     DropdownMenuItem(
                       value: '',
-                      child: Text( 'app.new_customer'.tr()),
+                      child: Text('app.new_customer'.tr()),
                     ),
                     ...customers.map(
                       (c) => DropdownMenuItem(
@@ -337,15 +336,25 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   label: 'app.provider'.tr(),
                   value: _shippingProvider,
                   items: [
-                    DropdownMenuItem(value: '', child: Text( 'admin.pages.products.edit.bundlesTab.tags.none'.tr())),
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(
+                        'admin.pages.products.edit.bundlesTab.tags.none'.tr(),
+                      ),
+                    ),
                     DropdownMenuItem(
                       value: 'YALIDINE',
-                      child: Text( 'app.yalidine'.tr()),
+                      child: Text('app.yalidine'.tr()),
                     ),
-                    DropdownMenuItem(value: 'MAYSTRO', child: Text( 'app.maystro'.tr())),
+                    DropdownMenuItem(
+                      value: 'MAYSTRO',
+                      child: Text('app.maystro'.tr()),
+                    ),
                     DropdownMenuItem(
                       value: 'SELF',
-                      child: Text( 'storefront.checkout.delivery.provider.self'.tr()),
+                      child: Text(
+                        'storefront.checkout.delivery.provider.self'.tr(),
+                      ),
                     ),
                   ],
                   onChanged: (v) => setState(() => _shippingProvider = v ?? ''),
@@ -355,8 +364,16 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   label: 'admin.pages.orders.create.deliveryMode'.tr(),
                   value: _deliveryMode,
                   items: [
-                    DropdownMenuItem(value: 'home', child: Text( 'admin.pages.delivery.pricing.modes.home'.tr())),
-                    DropdownMenuItem(value: 'pickup', child: Text( 'app.stop_desk'.tr())),
+                    DropdownMenuItem(
+                      value: 'home',
+                      child: Text(
+                        'admin.pages.delivery.pricing.modes.home'.tr(),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'pickup',
+                      child: Text('app.stop_desk'.tr()),
+                    ),
                   ],
                   onChanged: (v) => setState(() => _deliveryMode = v ?? 'home'),
                 ),
@@ -365,10 +382,7 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   label: 'admin.pages.orders.create.wilaya'.tr(),
                   value: _selectedWilaya,
                   items: [
-                    DropdownMenuItem(
-                      value: '',
-                      child: Text( 'app.select'.tr()),
-                    ),
+                    DropdownMenuItem(value: '', child: Text('app.select'.tr())),
                     ..._wilayas.map(
                       (w) => DropdownMenuItem(
                         value: w.$1,
@@ -379,9 +393,16 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                   onChanged: (v) => setState(() => _selectedWilaya = v ?? ''),
                 ),
                 const SizedBox(height: 12),
-                FormInput(label: 'admin.pages.suppliers.index.table.address'.tr(), controller: _addressCtrl),
+                FormInput(
+                  label: 'admin.pages.suppliers.index.table.address'.tr(),
+                  controller: _addressCtrl,
+                ),
                 const SizedBox(height: 12),
-                FormInput(label: 'superAdmin.paymentsPage.import.fields.notes'.tr(), controller: _notesCtrl, maxLines: 2),
+                FormInput(
+                  label: 'superAdmin.paymentsPage.import.fields.notes'.tr(),
+                  controller: _notesCtrl,
+                  maxLines: 2,
+                ),
               ],
             ),
           ),
@@ -460,7 +481,8 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
                     color: Color(0xFF94A3B8),
                   ),
                   SizedBox(height: 8),
-                  Text( 'admin.pages.orders.create.emptyCart'.tr(),
+                  Text(
+                    'admin.pages.orders.create.emptyCart'.tr(),
                     style: TextStyle(color: Color(0xFF94A3B8)),
                   ),
                 ],
@@ -558,7 +580,8 @@ class _OrderCreateScreenState extends ConsumerState<OrderCreateScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text( 'admin.pages.sales.detail.itemsTable.total'.tr(),
+              Text(
+                'admin.pages.sales.detail.itemsTable.total'.tr(),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(

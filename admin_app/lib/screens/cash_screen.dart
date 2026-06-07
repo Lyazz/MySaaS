@@ -19,6 +19,7 @@ import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import '../utils/app_toasts.dart';
 
 class CashScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -162,7 +163,8 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text( 'admin.pages.cash.methods.CASH'.tr(),
+              Text(
+                'admin.pages.cash.methods.CASH'.tr(),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -171,7 +173,8 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              Text( 'admin.pages.cash.subtitle'.tr(),
+              Text(
+                'admin.pages.cash.subtitle'.tr(),
                 style: TextStyle(
                   color: Theme.of(
                     context,
@@ -196,7 +199,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.user, size: 18),
-            title: Text( 'admin.pages.cash.actions.newCustomerPayment'.tr()),
+            title: Text('admin.pages.cash.actions.newCustomerPayment'.tr()),
           ),
         ),
         PopupMenuItem(
@@ -204,7 +207,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.truck, size: 18),
-            title: Text( 'admin.pages.cash.actions.newSupplierPayment'.tr()),
+            title: Text('admin.pages.cash.actions.newSupplierPayment'.tr()),
           ),
         ),
         PopupMenuDivider(),
@@ -213,7 +216,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.minusCircle, size: 18),
-            title: Text( 'admin.pages.cash.modals.expense.title'.tr()),
+            title: Text('admin.pages.cash.modals.expense.title'.tr()),
           ),
         ),
         PopupMenuItem(
@@ -221,7 +224,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.receipt, size: 18),
-            title: Text( 'admin.pages.cash.modals.charge.title'.tr()),
+            title: Text('admin.pages.cash.modals.charge.title'.tr()),
           ),
         ),
         PopupMenuDivider(),
@@ -234,7 +237,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               size: 18,
               color: Color(0xFF4D7C0F),
             ),
-            title: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr()),
+            title: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
           ),
         ),
       ],
@@ -265,7 +268,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           children: [
             ListTile(
               leading: const Icon(LucideIcons.user),
-              title: Text( 'admin.pages.cash.actions.newCustomerPayment'.tr()),
+              title: Text('admin.pages.cash.actions.newCustomerPayment'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.customerPayment);
@@ -273,7 +276,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.truck),
-              title: Text( 'admin.pages.cash.actions.newSupplierPayment'.tr()),
+              title: Text('admin.pages.cash.actions.newSupplierPayment'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.supplierPayment);
@@ -282,7 +285,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             const Divider(height: 1),
             ListTile(
               leading: const Icon(LucideIcons.minusCircle),
-              title: Text( 'admin.pages.cash.modals.expense.title'.tr()),
+              title: Text('admin.pages.cash.modals.expense.title'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.expense);
@@ -290,7 +293,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.receipt),
-              title: Text( 'admin.pages.cash.modals.charge.title'.tr()),
+              title: Text('admin.pages.cash.modals.charge.title'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.charge);
@@ -302,7 +305,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                 LucideIcons.arrowLeftRight,
                 color: Color(0xFF4D7C0F),
               ),
-              title: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr()),
+              title: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.transfer);
@@ -388,7 +391,8 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: Text( 'admin.pages.cash.cashboxes.title'.tr(),
+                child: Text(
+                  'admin.pages.cash.cashboxes.title'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -457,14 +461,16 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                         ).colorScheme.onSurface.withValues(alpha: 0.3),
                       ),
                       const SizedBox(height: 8),
-                      Text( 'admin.pages.cash.cashboxes.empty'.tr(),
+                      Text(
+                        'admin.pages.cash.cashboxes.empty'.tr(),
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text( 'admin.pages.cash.cashboxes.emptyHint'.tr(),
+                      Text(
+                        'admin.pages.cash.cashboxes.emptyHint'.tr(),
                         style: TextStyle(
                           color: Theme.of(
                             context,
@@ -796,7 +802,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               SwitchListTile(
                 value: isActive,
                 onChanged: (v) => setLocalState(() => isActive = v),
-                title: Text( 'superAdmin.tenants.status.active'.tr()),
+                title: Text('superAdmin.tenants.status.active'.tr()),
                 contentPadding: EdgeInsets.zero,
               ),
             ],
@@ -828,12 +834,15 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              FormInput(label: 'superAdmin.tenants.table.name'.tr(), controller: nameController),
+              FormInput(
+                label: 'superAdmin.tenants.table.name'.tr(),
+                controller: nameController,
+              ),
               const SizedBox(height: 16),
               SwitchListTile(
                 value: isActive,
                 onChanged: (v) => setLocalState(() => isActive = v),
-                title: Text( 'superAdmin.tenants.status.active'.tr()),
+                title: Text('superAdmin.tenants.status.active'.tr()),
                 contentPadding: EdgeInsets.zero,
               ),
             ],
@@ -877,7 +886,10 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               hint: '0',
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'admin.pages.sales.refundModal.noteLabel'.tr(), controller: noteController),
+            FormInput(
+              label: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+              controller: noteController,
+            ),
           ],
         ),
         secondaryLabel: 'Cancel',
@@ -944,7 +956,8 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text( 'app.opening'.tr(),
+                        Text(
+                          'app.opening'.tr(),
                           style: TextStyle(
                             color: Theme.of(
                               context,
@@ -961,7 +974,8 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text( 'admin.pages.cash.directions.in'.tr(),
+                        Text(
+                          'admin.pages.cash.directions.in'.tr(),
                           style: TextStyle(
                             color: Theme.of(
                               context,
@@ -981,7 +995,8 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text( 'admin.pages.cash.directions.out'.tr(),
+                        Text(
+                          'admin.pages.cash.directions.out'.tr(),
                           style: TextStyle(
                             color: Theme.of(
                               context,
@@ -1008,7 +1023,10 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               hint: '0',
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'admin.pages.sales.refundModal.noteLabel'.tr(), controller: noteController),
+            FormInput(
+              label: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+              controller: noteController,
+            ),
           ],
         ),
         secondaryLabel: 'Cancel',
@@ -1171,7 +1189,8 @@ class _ErrorBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text( 'app.something_went_wrong'.tr(),
+                Text(
+                  'app.something_went_wrong'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF991B1B),
@@ -1412,14 +1431,16 @@ class _CashboxCard extends StatelessWidget {
               Expanded(
                 child: open == null
                     ? AppButton.primary(
-                        label: 'superAdmin.paymentsPage.history.proof.open'.tr(),
+                        label: 'superAdmin.paymentsPage.history.proof.open'
+                            .tr(),
                         icon: LucideIcons.play,
                         size: AppButtonSize.sm,
                         onPressed: onOpen,
                         fullWidth: true,
                       )
                     : AppButton.secondary(
-                        label: 'admin.pages.cash.modals.closeSession.confirm'.tr(),
+                        label: 'admin.pages.cash.modals.closeSession.confirm'
+                            .tr(),
                         icon: LucideIcons.lock,
                         size: AppButtonSize.sm,
                         onPressed: onClose,
@@ -1841,7 +1862,10 @@ class _TxFilters extends StatelessWidget {
         value: txCashboxId,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'admin.pages.cash.sessions.filters.allCashboxes'.tr())),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.cash.sessions.filters.allCashboxes'.tr()),
+          ),
           ...cashboxes.map(
             (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
           ),
@@ -1853,19 +1877,34 @@ class _TxFilters extends StatelessWidget {
         value: txType,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'admin.pages.cash.transactions.filters.allTypes'.tr())),
-          DropdownMenuItem(value: 'SALE_PAYMENT', child: Text( 'app.sale_payment'.tr())),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.cash.transactions.filters.allTypes'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'SALE_PAYMENT',
+            child: Text('app.sale_payment'.tr()),
+          ),
           DropdownMenuItem(
             value: 'CUSTOMER_PAYMENT',
-            child: Text( 'app.customer_payment'.tr()),
+            child: Text('app.customer_payment'.tr()),
           ),
           DropdownMenuItem(
             value: 'SUPPLIER_PAYMENT',
-            child: Text( 'app.supplier_payment'.tr()),
+            child: Text('app.supplier_payment'.tr()),
           ),
-          DropdownMenuItem(value: 'EXPENSE', child: Text( 'admin.pages.cash.transactions.types.EXPENSE'.tr())),
-          DropdownMenuItem(value: 'CHARGE', child: Text( 'admin.pages.cash.transactions.types.CHARGE'.tr())),
-          DropdownMenuItem(value: 'TRANSFER', child: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr())),
+          DropdownMenuItem(
+            value: 'EXPENSE',
+            child: Text('admin.pages.cash.transactions.types.EXPENSE'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'CHARGE',
+            child: Text('admin.pages.cash.transactions.types.CHARGE'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'TRANSFER',
+            child: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
+          ),
         ],
         onChanged: (v) => onTypeChanged(v ?? ''),
       ),
@@ -1874,9 +1913,15 @@ class _TxFilters extends StatelessWidget {
         value: txDirection,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'app.all_directions'.tr())),
-          DropdownMenuItem(value: 'IN', child: Text( 'admin.pages.cash.directions.in'.tr())),
-          DropdownMenuItem(value: 'OUT', child: Text( 'admin.pages.cash.directions.out'.tr())),
+          DropdownMenuItem(value: '', child: Text('app.all_directions'.tr())),
+          DropdownMenuItem(
+            value: 'IN',
+            child: Text('admin.pages.cash.directions.in'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'OUT',
+            child: Text('admin.pages.cash.directions.out'.tr()),
+          ),
         ],
         onChanged: (v) => onDirectionChanged(v ?? ''),
       ),
@@ -1885,11 +1930,28 @@ class _TxFilters extends StatelessWidget {
         value: txMethod,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'admin.pages.cash.transactions.filters.allMethods'.tr())),
-          DropdownMenuItem(value: 'CASH', child: Text( 'admin.pages.cash.methods.CASH'.tr())),
-          DropdownMenuItem(value: 'CARD', child: Text( 'admin.pages.cash.methods.CARD'.tr())),
-          DropdownMenuItem(value: 'TRANSFER', child: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr())),
-          DropdownMenuItem(value: 'OTHER', child: Text( 'admin.pages.cash.methods.OTHER'.tr())),
+          DropdownMenuItem(
+            value: '',
+            child: Text(
+              'admin.pages.cash.transactions.filters.allMethods'.tr(),
+            ),
+          ),
+          DropdownMenuItem(
+            value: 'CASH',
+            child: Text('admin.pages.cash.methods.CASH'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'CARD',
+            child: Text('admin.pages.cash.methods.CARD'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'TRANSFER',
+            child: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'OTHER',
+            child: Text('admin.pages.cash.methods.OTHER'.tr()),
+          ),
         ],
         onChanged: (v) => onMethodChanged(v ?? ''),
       ),
@@ -1898,7 +1960,10 @@ class _TxFilters extends StatelessWidget {
         value: txUserId,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'admin.pages.sales.index.filters.allUsers'.tr())),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.sales.index.filters.allUsers'.tr()),
+          ),
           ...users.map(
             (u) => DropdownMenuItem(value: u.id, child: Text(u.email)),
           ),
@@ -1981,7 +2046,10 @@ class _SessionFilters extends StatelessWidget {
         value: cashboxId,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'admin.pages.cash.sessions.filters.allCashboxes'.tr())),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.cash.sessions.filters.allCashboxes'.tr()),
+          ),
           ...cashboxes.map(
             (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
           ),
@@ -1993,9 +2061,18 @@ class _SessionFilters extends StatelessWidget {
         value: status,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'admin.pages.purchases.index.filters.allStatuses'.tr())),
-          DropdownMenuItem(value: 'OPEN', child: Text( 'superAdmin.paymentsPage.history.proof.open'.tr())),
-          DropdownMenuItem(value: 'CLOSED', child: Text( 'admin.pages.cash.status.CLOSED'.tr())),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.purchases.index.filters.allStatuses'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'OPEN',
+            child: Text('superAdmin.paymentsPage.history.proof.open'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'CLOSED',
+            child: Text('admin.pages.cash.status.CLOSED'.tr()),
+          ),
         ],
         onChanged: (v) => onStatusChanged(v ?? ''),
       ),
@@ -2004,7 +2081,10 @@ class _SessionFilters extends StatelessWidget {
         value: userId,
         fillColor: null,
         items: [
-          DropdownMenuItem(value: '', child: Text( 'admin.pages.sales.index.filters.allUsers'.tr())),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.sales.index.filters.allUsers'.tr()),
+          ),
           ...users.map(
             (u) => DropdownMenuItem(value: u.id, child: Text(u.email)),
           ),
@@ -2278,7 +2358,8 @@ class _SessionMobileRow extends StatelessWidget {
                       value: money.format(session.openingFloat),
                     ),
                     _Metric(
-                      label: 'admin.pages.cash.sessions.table.expectedClosing'.tr(),
+                      label: 'admin.pages.cash.sessions.table.expectedClosing'
+                          .tr(),
                       value: session.expectedClosing == null
                           ? '—'
                           : money.format(session.expectedClosing!),
@@ -2492,10 +2573,11 @@ class _TxTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final headerStyle = TextStyle(
       fontWeight: FontWeight.w600,
       fontSize: 11,
-      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+      color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
       letterSpacing: 0.5,
     );
     return ResponsivePaginatedTable<CashTransactionSummary>(
@@ -2553,7 +2635,7 @@ class _TxTable extends StatelessWidget {
       ),
       rowBuilder: (context, tx, index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -2573,6 +2655,7 @@ class _TxTable extends StatelessWidget {
                   _cashboxName(cashboxById, tx.cashboxId),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
+                    fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -2599,6 +2682,7 @@ class _TxTable extends StatelessWidget {
                       _typeLabel(tx.type),
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
+                        fontSize: 13,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
@@ -2643,6 +2727,7 @@ class _TxTable extends StatelessWidget {
                     '${tx.direction == 'IN' ? '+' : '-'}${money.format(tx.amount)}',
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
+                      fontSize: 13,
                       color: tx.direction == 'IN'
                           ? const Color(0xFF059669)
                           : const Color(0xFFE11D48),
@@ -2673,10 +2758,11 @@ class _SessionsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final headerStyle = TextStyle(
       fontWeight: FontWeight.w600,
       fontSize: 11,
-      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+      color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
       letterSpacing: 0.5,
     );
     return ResponsivePaginatedTable<CashSessionSummary>(
@@ -2708,13 +2794,15 @@ class _SessionsTable extends StatelessWidget {
           ),
           Expanded(
             flex: 2,
-            child: Text( 'admin.pages.cash.sessions.table.openedAt'.tr().toUpperCase(),
+            child: Text(
+              'admin.pages.cash.sessions.table.openedAt'.tr().toUpperCase(),
               style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'admin.pages.cash.sessions.table.closedAt'.tr().toUpperCase(),
+            child: Text(
+              'admin.pages.cash.sessions.table.closedAt'.tr().toUpperCase(),
               style: headerStyle,
             ),
           ),
@@ -2722,7 +2810,10 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text( 'admin.pages.cash.sessions.table.openingFloat'.tr().toUpperCase(),
+              child: Text(
+                'admin.pages.cash.sessions.table.openingFloat'
+                    .tr()
+                    .toUpperCase(),
                 style: headerStyle,
               ),
             ),
@@ -2731,7 +2822,10 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text( 'admin.pages.cash.sessions.table.expectedClosing'.tr().toUpperCase(),
+              child: Text(
+                'admin.pages.cash.sessions.table.expectedClosing'
+                    .tr()
+                    .toUpperCase(),
                 style: headerStyle,
               ),
             ),
@@ -2740,7 +2834,10 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: Text( 'admin.pages.cash.sessions.table.closingCount'.tr().toUpperCase(),
+              child: Text(
+                'admin.pages.cash.sessions.table.closingCount'
+                    .tr()
+                    .toUpperCase(),
                 style: headerStyle,
               ),
             ),
@@ -2760,7 +2857,7 @@ class _SessionsTable extends StatelessWidget {
       rowBuilder: (context, s, index) {
         final diff = s.difference;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -2769,6 +2866,7 @@ class _SessionsTable extends StatelessWidget {
                   _cashboxName(cashboxById, s.cashboxId),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
+                    fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -2817,6 +2915,7 @@ class _SessionsTable extends StatelessWidget {
                     money.format(s.openingFloat),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
+                      fontSize: 13,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -2832,6 +2931,7 @@ class _SessionsTable extends StatelessWidget {
                         : money.format(s.expectedClosing!),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
+                      fontSize: 13,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -2847,6 +2947,7 @@ class _SessionsTable extends StatelessWidget {
                         : money.format(s.closingCount!),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
+                      fontSize: 13,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -2860,6 +2961,7 @@ class _SessionsTable extends StatelessWidget {
                     diff == null ? '—' : money.format(diff),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
+                      fontSize: 13,
                       color: diff != null && diff != 0
                           ? const Color(0xFFE11D48)
                           : Theme.of(context).colorScheme.onSurface,
@@ -3066,7 +3168,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                 DropdownMenuItem(
                   value: null,
                   enabled: false,
-                  child: Text( 'app.select_cashbox'.tr()),
+                  child: Text('app.select_cashbox'.tr()),
                 ),
                 ...widget.cashboxes.map(
                   (c) => DropdownMenuItem(
@@ -3089,22 +3191,34 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                 label: 'admin.pages.inventory.movements.table.type'.tr(),
                 value: _type,
                 items: [
-                  DropdownMenuItem(value: 'EXPENSE', child: Text( 'admin.pages.cash.transactions.types.EXPENSE'.tr())),
-                  DropdownMenuItem(value: 'CHARGE', child: Text( 'admin.pages.cash.transactions.types.CHARGE'.tr())),
+                  DropdownMenuItem(
+                    value: 'EXPENSE',
+                    child: Text(
+                      'admin.pages.cash.transactions.types.EXPENSE'.tr(),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'CHARGE',
+                    child: Text(
+                      'admin.pages.cash.transactions.types.CHARGE'.tr(),
+                    ),
+                  ),
                   DropdownMenuItem(
                     value: 'CUSTOMER_PAYMENT',
-                    child: Text( 'app.customer_payment'.tr()),
+                    child: Text('app.customer_payment'.tr()),
                   ),
                   DropdownMenuItem(
                     value: 'SUPPLIER_PAYMENT',
-                    child: Text( 'app.supplier_payment'.tr()),
+                    child: Text('app.supplier_payment'.tr()),
                   ),
                 ],
                 onChanged: (v) => _applyType(v ?? 'EXPENSE'),
               )
             else
               InputDecorator(
-                decoration: InputDecoration(labelText: 'admin.pages.inventory.movements.table.type'.tr()),
+                decoration: InputDecoration(
+                  labelText: 'admin.pages.inventory.movements.table.type'.tr(),
+                ),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -3118,10 +3232,24 @@ class _TransactionDialogState extends State<_TransactionDialog> {
               label: 'superAdmin.paymentsPage.history.table.method'.tr(),
               value: _method,
               items: [
-                DropdownMenuItem(value: 'CASH', child: Text( 'admin.pages.cash.methods.CASH'.tr())),
-                DropdownMenuItem(value: 'CARD', child: Text( 'admin.pages.cash.methods.CARD'.tr())),
-                DropdownMenuItem(value: 'TRANSFER', child: Text( 'admin.pages.cash.transactions.types.TRANSFER'.tr())),
-                DropdownMenuItem(value: 'OTHER', child: Text( 'admin.pages.cash.methods.OTHER'.tr())),
+                DropdownMenuItem(
+                  value: 'CASH',
+                  child: Text('admin.pages.cash.methods.CASH'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'CARD',
+                  child: Text('admin.pages.cash.methods.CARD'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'TRANSFER',
+                  child: Text(
+                    'admin.pages.cash.transactions.types.TRANSFER'.tr(),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'OTHER',
+                  child: Text('admin.pages.cash.methods.OTHER'.tr()),
+                ),
               ],
               onChanged: (v) => setState(() => _method = v ?? 'CASH'),
             ),
@@ -3145,7 +3273,10 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                 const SizedBox(width: 16),
                 SizedBox(
                   width: 110,
-                  child: FormInput(label: 'admin.settingsHub.links.currency'.tr(), controller: _currency),
+                  child: FormInput(
+                    label: 'admin.settingsHub.links.currency'.tr(),
+                    controller: _currency,
+                  ),
                 ),
               ],
             ),
@@ -3165,7 +3296,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                   DropdownMenuItem(
                     value: null,
                     enabled: false,
-                    child: Text( 'app.select_customer'.tr()),
+                    child: Text('app.select_customer'.tr()),
                   ),
                   ...filteredCustomers.map(
                     (c) => DropdownMenuItem(
@@ -3182,7 +3313,8 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                   padding: EdgeInsets.only(top: 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text( 'app.no_customers_match_your_search'.tr(),
+                    child: Text(
+                      'app.no_customers_match_your_search'.tr(),
                       style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                     ),
                   ),
@@ -3204,7 +3336,9 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                   DropdownMenuItem(
                     value: null,
                     enabled: false,
-                    child: Text( 'admin.pages.purchases.create.supplier.label'.tr()),
+                    child: Text(
+                      'admin.pages.purchases.create.supplier.label'.tr(),
+                    ),
                   ),
                   ...filteredSuppliers.map(
                     (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
@@ -3218,7 +3352,8 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                   padding: EdgeInsets.only(top: 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text( 'admin.pages.suppliers.index.empty.hintFiltered'.tr(),
+                    child: Text(
+                      'admin.pages.suppliers.index.empty.hintFiltered'.tr(),
                       style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                     ),
                   ),
@@ -3238,12 +3373,17 @@ class _TransactionDialogState extends State<_TransactionDialog> {
             ],
             const SizedBox(height: 16),
             FormInput(
-              label: 'admin.pages.purchases.detail.paymentModal.referenceLabel'.tr(),
+              label: 'admin.pages.purchases.detail.paymentModal.referenceLabel'
+                  .tr(),
               hint: 'Optional',
               controller: _reference,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'admin.pages.purchases.detail.paymentModal.noteLabel'.tr(), hint: 'Optional', controller: _note),
+            FormInput(
+              label: 'admin.pages.purchases.detail.paymentModal.noteLabel'.tr(),
+              hint: 'Optional',
+              controller: _note,
+            ),
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerLeft,
@@ -3416,22 +3556,31 @@ class _TransferDialogState extends State<_TransferDialog> {
                 const SizedBox(width: 16),
                 SizedBox(
                   width: 110,
-                  child: FormInput(label: 'admin.settingsHub.links.currency'.tr(), controller: _currency),
+                  child: FormInput(
+                    label: 'admin.settingsHub.links.currency'.tr(),
+                    controller: _currency,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'admin.pages.purchases.detail.paymentModal.referenceLabel'.tr(),
+              label: 'admin.pages.purchases.detail.paymentModal.referenceLabel'
+                  .tr(),
               hint: 'Optional',
               controller: _reference,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'admin.pages.purchases.detail.paymentModal.noteLabel'.tr(), hint: 'Optional', controller: _note),
+            FormInput(
+              label: 'admin.pages.purchases.detail.paymentModal.noteLabel'.tr(),
+              hint: 'Optional',
+              controller: _note,
+            ),
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text( 'app.note_both_cashboxes_must_have'.tr(),
+              child: Text(
+                'app.note_both_cashboxes_must_have'.tr(),
                 style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
               ),
             ),
@@ -3444,9 +3593,7 @@ class _TransferDialogState extends State<_TransferDialog> {
       onPrimary: () {
         if (!_formKey.currentState!.validate()) return;
         if (_from == _to) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text( 'app.from_and_to_must_differ'.tr())),
-          );
+          AppToasts.show(context, 'app.from_and_to_must_differ'.tr());
           return;
         }
         final amount = double.tryParse(_amount.text.trim()) ?? 0;

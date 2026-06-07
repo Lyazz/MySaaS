@@ -7,6 +7,7 @@ import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
 import '../../widgets/form/form_select.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class StoreAppearancePage extends ConsumerStatefulWidget {
   const StoreAppearancePage({super.key});
@@ -84,14 +85,10 @@ class _StoreAppearancePageState extends ConsumerState<StoreAppearancePage> {
         'language': _language,
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text( 'app.appearance_settings_saved'.tr())),
-      );
+      AppToasts.show(context, 'app.appearance_settings_saved'.tr());
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      AppToasts.show(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -109,7 +106,7 @@ class _StoreAppearancePageState extends ConsumerState<StoreAppearancePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text( 'app.storefront_appearance'.tr()),
+        title: Text('app.storefront_appearance'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -127,9 +124,15 @@ class _StoreAppearancePageState extends ConsumerState<StoreAppearancePage> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  FormInput(label: 'app.logo_url'.tr(), controller: _logoUrlCtrl),
+                  FormInput(
+                    label: 'app.logo_url'.tr(),
+                    controller: _logoUrlCtrl,
+                  ),
                   const SizedBox(height: 12),
-                  FormInput(label: 'app.favicon_url'.tr(), controller: _faviconUrlCtrl),
+                  FormInput(
+                    label: 'app.favicon_url'.tr(),
+                    controller: _faviconUrlCtrl,
+                  ),
                   const SizedBox(height: 12),
                   FormInput(
                     label: 'app.primary_brand_color'.tr(),
@@ -154,12 +157,23 @@ class _StoreAppearancePageState extends ConsumerState<StoreAppearancePage> {
                   ),
                   SizedBox(height: 12),
                   FormSelect<String>(
-                    label: 'admin.functionalSettingsForm.localization.defaultLanguage'.tr(),
+                    label:
+                        'admin.functionalSettingsForm.localization.defaultLanguage'
+                            .tr(),
                     value: _language,
                     items: [
-                      DropdownMenuItem(value: 'fr', child: Text( 'i18n.locales.fr'.tr())),
-                      DropdownMenuItem(value: 'en', child: Text( 'i18n.locales.en'.tr())),
-                      DropdownMenuItem(value: 'ar', child: Text( 'i18n.locales.ar'.tr())),
+                      DropdownMenuItem(
+                        value: 'fr',
+                        child: Text('i18n.locales.fr'.tr()),
+                      ),
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Text('i18n.locales.en'.tr()),
+                      ),
+                      DropdownMenuItem(
+                        value: 'ar',
+                        child: Text('i18n.locales.ar'.tr()),
+                      ),
                     ],
                     onChanged: (value) {
                       if (value != null) {
@@ -175,13 +189,13 @@ class _StoreAppearancePageState extends ConsumerState<StoreAppearancePage> {
                   ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: Text( 'app.use_brand_color_on_the_storefr'.tr()),
+                    title: Text('app.use_brand_color_on_the_storefr'.tr()),
                     value: _useBrandColor,
                     onChanged: (value) =>
                         setState(() => _useBrandColor = value),
                   ),
                   SwitchListTile(
-                    title: Text( 'app.scroll_announcement_bar'.tr()),
+                    title: Text('app.scroll_announcement_bar'.tr()),
                     value: _announcementScrolling,
                     onChanged: (value) =>
                         setState(() => _announcementScrolling = value),

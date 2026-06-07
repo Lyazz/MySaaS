@@ -16,6 +16,7 @@ import '../widgets/buttons/app_button.dart';
 import '../widgets/buttons/table_action_button.dart';
 import '../widgets/badges/status_badges.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 // ── Orders filter state — Riverpod providers ──────────────────────────────────
 
@@ -90,7 +91,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   void _fetchOrders() {
     final dateRange = ref.read(orderDateRangeProvider);
-    ref.read(ordersProvider.notifier).fetchOrders(
+    ref
+        .read(ordersProvider.notifier)
+        .fetchOrders(
           search: _searchController.text,
           status: ref.read(orderStatusFilterProvider),
           startDate: dateRange?.start,
@@ -157,12 +160,22 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   // ── Header: title + stats + [+ New Order] button ─────────────────────────
   Widget _buildHeader(OrdersState state, bool isDark, bool isMobile) {
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
-    final pendingCount = state.orders.where((o) => o.status == 'PENDING').length;
-    final deliveredCount = state.orders.where((o) => o.status == 'DELIVERED').length;
-    final cancelledCount = state.orders.where((o) => o.status == 'CANCELLED').length;
+    final pendingCount = state.orders
+        .where((o) => o.status == 'PENDING')
+        .length;
+    final deliveredCount = state.orders
+        .where((o) => o.status == 'DELIVERED')
+        .length;
+    final cancelledCount = state.orders
+        .where((o) => o.status == 'CANCELLED')
+        .length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,8 +265,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'admin.pages.orders.index.selectedCount'
-                .tr(namedArgs: {'count': _selectedIds.length.toString()}),
+            'admin.pages.orders.index.selectedCount'.tr(
+              namedArgs: {'count': _selectedIds.length.toString()},
+            ),
             style: TextStyle(
               fontSize: 13,
               color: isDark ? AppColors.redText : const Color(0xFF991B1B),
@@ -273,8 +287,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   // ── Filter bar ────────────────────────────────────────────────────────────
   Widget _buildFilters({bool isMobile = false}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor =
-        isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
 
     final searchField = FormInput(
@@ -291,82 +306,80 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
     // Build status/date with or without label depending on context
     Widget buildStatusField({required bool showLabel}) => Consumer(
-          builder: (context, ref, _) {
-            final status = ref.watch(orderStatusFilterProvider);
-            return FormSelect<String>(
-              label: showLabel
-                  ? 'admin.pages.orders.index.filters.statusLabel'.tr()
-                  : '',
-              value: status,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              items: [
-                DropdownMenuItem(
-                  value: '',
-                  child:
-                      Text('admin.pages.orders.index.filters.allOrders'.tr()),
-                ),
-                DropdownMenuItem(
-                  value: 'PENDING',
-                  child:
-                      Text('admin.pages.billing.status.pending.badge'.tr()),
-                ),
-                DropdownMenuItem(
-                  value: 'CONFIRMED',
-                  child: Text('admin.orderStatus.confirmed'.tr()),
-                ),
-                DropdownMenuItem(
-                  value: 'SHIPPED',
-                  child: Text('admin.orderStatus.shipped'.tr()),
-                ),
-                DropdownMenuItem(
-                  value: 'DELIVERED',
-                  child: Text('admin.orderStatus.delivered'.tr()),
-                ),
-                DropdownMenuItem(
-                  value: 'CANCELLED',
-                  child: Text(
-                    'admin.pages.purchases.index.filters.statusValues.CANCELLED'
-                        .tr(),
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: 'RETURNED',
-                  child: Text('admin.orderStatus.returned'.tr()),
-                ),
-              ],
-              onChanged: (value) {
-                ref
-                    .read(orderStatusFilterProvider.notifier)
-                    .set(value ?? '');
-                setState(() {
-                  _page = 1;
-                  _selectedIds.clear();
-                });
-                _fetchOrders();
-              },
-            );
+      builder: (context, ref, _) {
+        final status = ref.watch(orderStatusFilterProvider);
+        return FormSelect<String>(
+          label: showLabel
+              ? 'admin.pages.orders.index.filters.statusLabel'.tr()
+              : '',
+          value: status,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
+          items: [
+            DropdownMenuItem(
+              value: '',
+              child: Text('admin.pages.orders.index.filters.allOrders'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'PENDING',
+              child: Text('admin.pages.billing.status.pending.badge'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'CONFIRMED',
+              child: Text('admin.orderStatus.confirmed'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'SHIPPED',
+              child: Text('admin.orderStatus.shipped'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'DELIVERED',
+              child: Text('admin.orderStatus.delivered'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'CANCELLED',
+              child: Text(
+                'admin.pages.purchases.index.filters.statusValues.CANCELLED'
+                    .tr(),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'RETURNED',
+              child: Text('admin.orderStatus.returned'.tr()),
+            ),
+          ],
+          onChanged: (value) {
+            ref.read(orderStatusFilterProvider.notifier).set(value ?? '');
+            setState(() {
+              _page = 1;
+              _selectedIds.clear();
+            });
+            _fetchOrders();
           },
         );
+      },
+    );
 
     Widget buildDateField({required bool showLabel}) => Consumer(
-          builder: (context, ref, _) {
-            final range = ref.watch(orderDateRangeProvider);
-            return DateRangeFilterField(
-              label: showLabel
-                  ? 'admin.pages.orders.index.filters.rangeLabel'.tr()
-                  : '',
-              range: range,
-              firstDate: DateTime(2020),
-              lastDate: DateTime.now(),
-              onChanged: (r) {
-                ref.read(orderDateRangeProvider.notifier).set(r);
-                setState(() => _page = 1);
-                _fetchOrders();
-              },
-            );
+      builder: (context, ref, _) {
+        final range = ref.watch(orderDateRangeProvider);
+        return DateRangeFilterField(
+          label: showLabel
+              ? 'admin.pages.orders.index.filters.rangeLabel'.tr()
+              : '',
+          range: range,
+          firstDate: DateTime(2020),
+          lastDate: DateTime.now(),
+          onChanged: (r) {
+            ref.read(orderDateRangeProvider.notifier).set(r);
+            setState(() => _page = 1);
+            _fetchOrders();
           },
         );
+      },
+    );
 
     Widget content;
 
@@ -382,7 +395,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             icon: Icon(
               LucideIcons.listFilter,
               size: 20,
-              color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+              color: isDark
+                  ? AppColors.textTertiary
+                  : AppColors.lightTextTertiary,
             ),
             tooltip: 'admin.common.filters'.tr(),
             onPressed: () => _showMobileFilterSheet(
@@ -398,7 +413,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             icon: Icon(
               LucideIcons.moreHorizontal,
               size: 20,
-              color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+              color: isDark
+                  ? AppColors.textTertiary
+                  : AppColors.lightTextTertiary,
             ),
             tooltip: 'admin.common.actions'.tr(),
             onPressed: _showMobileActions,
@@ -453,10 +470,12 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     required Widget dateField,
   }) {
     final sheetBg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
-    final handleColor =
-        isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textPrimary =
-        isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final handleColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
 
     showModalBottomSheet(
       context: context,
@@ -639,7 +658,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   // ── Loading ───────────────────────────────────────────────────────────────
   Widget _buildLoadingCard(bool isDark) {
     final brand = Theme.of(context).colorScheme.primary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
     return _UiCard(
       isDark: isDark,
       padding: const EdgeInsets.all(48),
@@ -677,7 +698,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.textSecondary : AppColors.lightTextSecondary,
+              color: isDark
+                  ? AppColors.textSecondary
+                  : AppColors.lightTextSecondary,
             ),
           ),
           const SizedBox(height: 16),
@@ -693,9 +716,14 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   // ── Empty ─────────────────────────────────────────────────────────────────
   Widget _buildEmptyCard(bool isDark) {
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final hint = (_searchController.text.trim().isNotEmpty ||
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final hint =
+        (_searchController.text.trim().isNotEmpty ||
             ref.read(orderStatusFilterProvider).isNotEmpty)
         ? 'admin.pages.orders.index.empty.hintFiltered'.tr()
         : 'admin.pages.orders.index.empty.hint'.tr();
@@ -728,18 +756,29 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   // ── Table ─────────────────────────────────────────────────────────────────
   Widget _buildTable(OrdersState ordersState, bool isDark) {
-    final money = tenantCurrencyFormatter(ref.watch(storeSettingsProvider).settings);
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
     final brand = Theme.of(context).colorScheme.primary;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     final pendingIds = ordersState.orders
         .where((o) => o.status == 'PENDING')
         .map((o) => o.id)
         .toList();
-    final allPendingSelected = pendingIds.isNotEmpty &&
+    final allPendingSelected =
+        pendingIds.isNotEmpty &&
         pendingIds.every((id) => _selectedIds.contains(id));
 
     return ResponsiveServerPaginatedTable<Order>(
@@ -767,23 +806,47 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                 onChanged: pendingIds.isEmpty
                     ? null
                     : (_) => setState(() {
-                          if (allPendingSelected) {
-                            _selectedIds.removeAll(pendingIds);
-                          } else {
-                            _selectedIds.addAll(pendingIds);
-                          }
-                        }),
+                        if (allPendingSelected) {
+                          _selectedIds.removeAll(pendingIds);
+                        } else {
+                          _selectedIds.addAll(pendingIds);
+                        }
+                      }),
                 side: BorderSide(color: surfaceBorder),
                 activeColor: brand,
               ),
             ),
           ),
-          _th('admin.pages.orders.index.table.orderId'.tr(), flex: 3, isDark: isDark),
-          _th('admin.pages.orders.index.table.customer'.tr(), flex: 2, isDark: isDark),
-          _th('admin.pages.orders.index.table.phone'.tr(), flex: 2, isDark: isDark),
-          _th('admin.pages.orders.index.table.delivery'.tr(), flex: 2, isDark: isDark),
-          _th('admin.pages.orders.index.table.total'.tr(), flex: 2, isDark: isDark),
-          _th('admin.pages.orders.index.table.status'.tr(), flex: 2, isDark: isDark),
+          _th(
+            'admin.pages.orders.index.table.orderId'.tr(),
+            flex: 3,
+            isDark: isDark,
+          ),
+          _th(
+            'admin.pages.orders.index.table.customer'.tr(),
+            flex: 2,
+            isDark: isDark,
+          ),
+          _th(
+            'admin.pages.orders.index.table.phone'.tr(),
+            flex: 2,
+            isDark: isDark,
+          ),
+          _th(
+            'admin.pages.orders.index.table.delivery'.tr(),
+            flex: 2,
+            isDark: isDark,
+          ),
+          _th(
+            'admin.pages.orders.index.table.total'.tr(),
+            flex: 2,
+            isDark: isDark,
+          ),
+          _th(
+            'admin.pages.orders.index.table.status'.tr(),
+            flex: 2,
+            isDark: isDark,
+          ),
           // Date with sort arrow (desc active)
           Expanded(
             flex: 3,
@@ -828,7 +891,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
         final publicId = (order.publicId?.isNotEmpty == true)
             ? order.publicId!
             : '#${order.id.length > 8 ? order.id.substring(0, 8) : order.id}';
-        final shortUuid = order.id.length > 8 ? order.id.substring(0, 8) : order.id;
+        final shortUuid = order.id.length > 8
+            ? order.id.substring(0, 8)
+            : order.id;
         final showUuidSub = order.publicId?.isNotEmpty == true;
 
         // Delivery
@@ -905,10 +970,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                   flex: 2,
                   child: Text(
                     order.customerName,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 13, color: textPrimary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -921,7 +983,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     order.customerPhone.isEmpty ? '-' : order.customerPhone,
                     style: TextStyle(
                       fontSize: 13,
-                      color: order.customerPhone.isEmpty ? textTertiary : textSecondary,
+                      color: order.customerPhone.isEmpty
+                          ? textTertiary
+                          : textSecondary,
                     ),
                   ),
                 ),
@@ -957,14 +1021,17 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        money.format(order.totalWithShippingAmount ?? order.totalAmount),
+                        money.format(
+                          order.totalWithShippingAmount ?? order.totalAmount,
+                        ),
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                           color: textPrimary,
                         ),
                       ),
-                      if (order.shippingAmount != null && order.shippingAmount! > 0)
+                      if (order.shippingAmount != null &&
+                          order.shippingAmount! > 0)
                         Text(
                           '+${money.format(order.shippingAmount!)}',
                           style: TextStyle(fontSize: 11, color: textTertiary),
@@ -1034,9 +1101,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       builder: (ctx) => _DeleteDialog(isDark: isDark),
     );
     if (confirmed == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('admin.pages.orders.index.deleteOneConfirm'.tr())),
-      );
+      AppToasts.show(context, 'admin.pages.orders.index.deleteOneConfirm'.tr());
     }
   }
 
@@ -1100,7 +1165,9 @@ class _StatChip extends StatelessWidget {
         break;
       case _StatChipTone.none:
         bg = isDark ? AppColors.surface3 : AppColors.lightSurface3;
-        textColor = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+        textColor = isDark
+            ? AppColors.textSecondary
+            : AppColors.lightTextSecondary;
         dotColor = Colors.transparent;
     }
 
@@ -1111,7 +1178,9 @@ class _StatChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(9999),
         border: Border.all(
           color: tone == _StatChipTone.none
-              ? (isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder)
+              ? (isDark
+                    ? AppColors.surfaceBorder
+                    : AppColors.lightSurfaceBorder)
               : dotColor.withValues(alpha: 0.25),
         ),
       ),
@@ -1150,8 +1219,12 @@ class _DeleteDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1171,8 +1244,11 @@ class _DeleteDialog extends StatelessWidget {
                       color: AppColors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(LucideIcons.alertTriangle,
-                        size: 18, color: AppColors.red),
+                    child: Icon(
+                      LucideIcons.alertTriangle,
+                      size: 18,
+                      color: AppColors.red,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -1191,7 +1267,10 @@ class _DeleteDialog extends StatelessWidget {
               Text(
                 'admin.pages.orders.index.deleteOneConfirm'.tr(),
                 style: TextStyle(
-                    fontSize: 13, color: textSecondary, height: 1.5),
+                  fontSize: 13,
+                  color: textSecondary,
+                  height: 1.5,
+                ),
               ),
               const SizedBox(height: 20),
               Row(
@@ -1237,7 +1316,9 @@ class _UiCard extends StatelessWidget {
         color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder,
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
         ),
         boxShadow: [
           BoxShadow(
@@ -1279,9 +1360,7 @@ class _IconShellBtn extends StatelessWidget {
         tooltip: tooltip,
         style: IconButton.styleFrom(
           padding: const EdgeInsets.all(12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
     );

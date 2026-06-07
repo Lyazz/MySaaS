@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:toastification/toastification.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -16,6 +15,7 @@ import '../providers/sync_provider.dart';
 import '../providers/workspace_provider.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
+import '../utils/app_toasts.dart';
 import 'admin_notifications_button.dart';
 import 'language_switcher_button.dart';
 import 'responsive_layout.dart';
@@ -40,21 +40,16 @@ class _AppShellState extends ConsumerState<AppShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _notificationSub = ref.read(notificationServiceProvider).events.listen((event) {
+      _notificationSub = ref.read(notificationServiceProvider).events.listen((
+        event,
+      ) {
         if (!mounted || event.id.isEmpty) return;
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        toastification.show(
-          context: context,
-          type: ToastificationType.info,
-          style: ToastificationStyle.flat,
-          title: Text(event.title, style: TextStyle(fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black87)),
-          description: Text(event.body, style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
-          alignment: MediaQuery.of(context).size.width > 800 ? Alignment.topRight : Alignment.topCenter,
-          autoCloseDuration: const Duration(seconds: 5),
+        AppToasts.show(
+          context,
+          event.title,
+          description: event.body,
+          duration: const Duration(seconds: 5),
           icon: const Icon(LucideIcons.bell),
-          showProgressBar: false,
-          backgroundColor: isDark ? AppColors.surface2 : AppColors.lightSurface2,
-          borderRadius: BorderRadius.circular(12),
         );
       });
     });

@@ -7,6 +7,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/buttons/app_button.dart';
 import '../../widgets/form/form_input.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class StoreSettingsPage extends ConsumerStatefulWidget {
   const StoreSettingsPage({super.key});
@@ -68,14 +69,10 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
         'hideOptionalAddress': _hideOptionalAddress,
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text( 'app.store_settings_saved'.tr())));
+      AppToasts.show(context, 'app.store_settings_saved'.tr());
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      AppToasts.show(context, e.toString());
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -102,7 +99,7 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text( 'app.store_settings'.tr()),
+        title: Text('app.store_settings'.tr()),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -126,7 +123,11 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                     description: 'app.operational_settings_used_acro'.tr(),
                     child: Column(
                       children: [
-                        FormInput(label: 'admin.pages.onboarding.storeInfo.nameLabel'.tr(), controller: _nameCtrl),
+                        FormInput(
+                          label: 'admin.pages.onboarding.storeInfo.nameLabel'
+                              .tr(),
+                          controller: _nameCtrl,
+                        ),
                         const SizedBox(height: 12),
                         FormInput(
                           label: 'app.store_slug'.tr(),
@@ -180,8 +181,9 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                         ),
                         const SizedBox(height: 16),
                         SwitchListTile(
-                          title: Text( 'app.enable_cart'.tr()),
-                          subtitle: Text( 'app.allow_storefront_visitors_to_b'.tr(),
+                          title: Text('app.enable_cart'.tr()),
+                          subtitle: Text(
+                            'app.allow_storefront_visitors_to_b'.tr(),
                             style: TextStyle(color: textMuted),
                           ),
                           value: _cartEnabled,
@@ -189,8 +191,9 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                               setState(() => _cartEnabled = value),
                         ),
                         SwitchListTile(
-                          title: Text( 'app.enable_cash_on_delivery'.tr()),
-                          subtitle: Text( 'app.keep_cod_ordering_active_for_t'.tr(),
+                          title: Text('app.enable_cash_on_delivery'.tr()),
+                          subtitle: Text(
+                            'app.keep_cod_ordering_active_for_t'.tr(),
                             style: TextStyle(color: textMuted),
                           ),
                           value: _codEnabled,
@@ -198,8 +201,12 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                               setState(() => _codEnabled = value),
                         ),
                         SwitchListTile(
-                          title: Text( 'admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.title'.tr()),
-                          subtitle: Text( 'app.simplify_checkout_when_detaile'.tr(),
+                          title: Text(
+                            'admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.title'
+                                .tr(),
+                          ),
+                          subtitle: Text(
+                            'app.simplify_checkout_when_detaile'.tr(),
                             style: TextStyle(color: textMuted),
                           ),
                           value: _hideOptionalAddress,
@@ -223,7 +230,8 @@ class _StoreSettingsPageState extends ConsumerState<StoreSettingsPage> {
                         const Icon(LucideIcons.shieldCheck, size: 18),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text( 'app.provisioning_and_workspace_bin'.tr(),
+                          child: Text(
+                            'app.provisioning_and_workspace_bin'.tr(),
                             style: TextStyle(
                               fontSize: 13,
                               height: 1.45,

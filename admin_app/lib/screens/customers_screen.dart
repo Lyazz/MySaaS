@@ -247,7 +247,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         return InkWell(
           onTap: () => context.go('/customers/${customer.id}'),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
             child: Row(
               children: [
                 Expanded(
@@ -255,11 +255,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   child: Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 28,
+                        height: 28,
                         decoration: BoxDecoration(
                           color: AppColors.blue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                         alignment: Alignment.center,
                         child: Text(
@@ -280,7 +280,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: 14,
+                            fontSize: 13,
                           ),
                         ),
                       ),
@@ -530,12 +530,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   Widget _headerText(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
+      text.toUpperCase(),
       style: TextStyle(
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-        fontSize: 12,
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
