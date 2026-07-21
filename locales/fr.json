@@ -923,7 +923,6 @@
       "selectPlaceholder": "Sélectionner…",
       "storeFallback": "Boutique"
     },
-
     "actions": {
       "addToCart": "Ajouter au panier",
       "adding": "Ajout…",
@@ -1331,7 +1330,8 @@
       "replace": "Remplacer",
       "soon": "Bientôt",
       "moveUp": "Monter",
-      "moveDown": "Descendre"
+      "moveDown": "Descendre",
+      "amount": "Montant"
     },
     "confirmModal": {
       "defaults": {
@@ -3288,7 +3288,8 @@
             "orderItems": "Articles de la commande",
             "internalNotes": "Notes internes",
             "securityAndFraud": "Sécurité & Fraude",
-            "previousOrders": "Commandes précédentes"
+            "previousOrders": "Commandes précédentes",
+            "remainingAmount": "Reste à payer"
           },
           "fields": {
             "orderId": "ID commande",

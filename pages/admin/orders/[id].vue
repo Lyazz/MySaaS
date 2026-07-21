@@ -184,7 +184,7 @@
                     v-if="order.paymentStatus !== 'PAID'"
                     type="button"
                     class="ui-btn ui-btn--primary ui-btn--md"
-                    @click="paymentModalOpen = true"
+                    @click="openPaymentModal"
                   >
                     <Icon name="lucide:banknote" class="w-4 h-4" />
                     {{ t('admin.pages.orders.modals.payment.title', 'Record Payment') }}
@@ -285,7 +285,7 @@
               v-if="order.paymentStatus !== 'PAID'"
               type="button"
               class="ui-btn ui-btn--primary ui-btn--sm flex-1"
-              @click="paymentModalOpen = true"
+              @click="openPaymentModal"
             >
               <Icon name="lucide:banknote" class="w-4 h-4" />
               {{ t('admin.pages.orders.modals.payment.title', 'Record Payment') }}
@@ -1006,6 +1006,19 @@ const successMessage = ref('')
 const deliveryModalOpen = ref(false)
 const paymentModalOpen = ref(false)
 const cashboxes = ref<any[]>([])
+
+async function openPaymentModal() {
+  try {
+    const data = await $fetch('/api/admin/cashboxes', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    cashboxes.value = data as any[]
+    paymentModalOpen.value = true
+  } catch (e) {
+    console.error('Failed to load cashboxes:', e)
+    errorMessage.value = t('admin.pages.orders.detail.statusUpdate.errors.loadCashboxesFailed')
+  }
+}
 
 const deleteOpen = ref(false)
 const deleteError = ref<string | null>(null)

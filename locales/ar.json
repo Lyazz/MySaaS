@@ -941,7 +941,6 @@
       "selectPlaceholder": "اختر…",
       "storeFallback": "المتجر"
     },
-
     "actions": {
       "addToCart": "أضف إلى السلة",
       "adding": "جارٍ الإضافة…",
@@ -1349,7 +1348,8 @@
       "replace": "استبدال",
       "soon": "قريبًا",
       "moveUp": "تحريك للأعلى",
-      "moveDown": "تحريك للأسفل"
+      "moveDown": "تحريك للأسفل",
+      "amount": "المبلغ"
     },
     "confirmModal": {
       "defaults": {
@@ -3305,7 +3305,8 @@
             "orderItems": "عناصر الطلب",
             "internalNotes": "ملاحظات داخلية",
             "securityAndFraud": "الأمان والاحتيال",
-            "previousOrders": "الطلبات السابقة"
+            "previousOrders": "الطلبات السابقة",
+            "remainingAmount": "المبلغ المتبقي"
           },
           "fields": {
             "orderId": "رقم الطلب",

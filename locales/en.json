@@ -937,7 +937,6 @@
       "selectPlaceholder": "Select…",
       "storeFallback": "Store"
     },
-
     "actions": {
       "addToCart": "Add to cart",
       "adding": "Adding…",
@@ -1345,7 +1344,8 @@
       "replace": "Replace",
       "soon": "Soon",
       "moveUp": "Move up",
-      "moveDown": "Move down"
+      "moveDown": "Move down",
+      "amount": "Amount"
     },
     "confirmModal": {
       "defaults": {
@@ -3307,7 +3307,8 @@
             "orderItems": "Order items",
             "internalNotes": "Internal Notes",
             "securityAndFraud": "Security & Fraud",
-            "previousOrders": "Previous orders"
+            "previousOrders": "Previous orders",
+            "remainingAmount": "Remaining Amount"
           },
           "fields": {
             "orderId": "Order ID",
