@@ -1,4 +1,4 @@
-import 'package:admin_app/bootstrap.dart';
+ximport 'package:admin_app/bootstrap.dart';
 import 'package:admin_app/models/bootstrap_config.dart';
 import 'package:admin_app/providers/settings_provider.dart';
 import 'package:admin_app/screens/login_screen.dart';

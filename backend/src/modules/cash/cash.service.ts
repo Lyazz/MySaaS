@@ -113,6 +113,8 @@ const typePolicy = (type: string): { direction: 'IN' | 'OUT'; needs: Array<'cust
             return { direction: 'IN', needs: [] }
         case 'SALE_REFUND':
             return { direction: 'OUT', needs: [] }
+        case 'ORDER_PAYMENT':
+            return { direction: 'IN', needs: [] }
         case 'CUSTOMER_PAYMENT':
             return { direction: 'IN', needs: ['customer'] }
         case 'SUPPLIER_PAYMENT':

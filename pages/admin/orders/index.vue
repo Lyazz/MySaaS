@@ -179,6 +179,12 @@
                   <Icon v-if="sortBy === 'status'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
+              <th class="ui-th cursor-pointer transition-colors" @click="setSort('paymentStatus')">
+                <div class="flex items-center gap-1">
+                  {{ t('admin.pages.orders.index.table.paymentStatus', 'Payment') }}
+                  <Icon v-if="sortBy === 'paymentStatus'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
+                </div>
+              </th>
               <th class="ui-th cursor-pointer transition-colors" @click="setSort('createdAt')">
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.orders.index.table.date') }}
@@ -267,7 +273,6 @@
               <td class="ui-td whitespace-nowrap">
                 <div class="flex flex-col gap-1 items-start">
                   <AdminOrderStatusBadge :status="order.status" />
-                  <AdminPaymentStatusBadge v-if="order.paymentStatus && order.paymentStatus !== 'UNPAID'" :status="order.paymentStatus" />
                   <span
                     v-if="order.status === 'PENDING' && order.callStatus"
                     class="text-xs truncate max-w-[120px]" style="color: var(--text-tertiary)"
@@ -275,6 +280,9 @@
                     {{ t(`admin.pages.orders.detail.fields.callStatusValues.${order.callStatus}`) }}
                   </span>
                 </div>
+              </td>
+              <td class="ui-td whitespace-nowrap">
+                <AdminPaymentStatusBadge :status="order.paymentStatus || 'UNPAID'" />
               </td>
               <td class="ui-td whitespace-nowrap" style="color: var(--text-secondary)">
                 {{ formatDate(order.createdAt) }}

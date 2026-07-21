@@ -39,6 +39,9 @@
             <p class="mt-1 text-xs text-secondary">
               {{ t('admin.pages.orders.detail.sections.remainingAmount') }}: {{ formatCurrency(remainingAmount) }}
             </p>
+            <p v-if="parsedAmount > remainingAmount" class="mt-1 text-xs text-red-500">
+              {{ t('admin.common.errors.amountTooHigh', 'Amount cannot be greater than the remaining balance.') }}
+            </p>
           </div>
 
           <div>
@@ -168,7 +171,8 @@ const subtitle = computed(() => props.subtitle ?? t('admin.pages.orders.modals.p
 const confirmText = computed(() => props.confirmText ?? t('admin.pages.orders.modals.payment.confirm', 'Record Payment'))
 
 const selectableCashboxes = computed(() => (Array.isArray(props.cashboxes) ? props.cashboxes : []).filter((c) => c.isActive))
-const canConfirm = computed(() => Boolean(cashboxId.value && method.value && typeof amount.value === 'number' && amount.value > 0))
+const parsedAmount = computed(() => Number(amount.value))
+const canConfirm = computed(() => Boolean(cashboxId.value && method.value && !isNaN(parsedAmount.value) && parsedAmount.value > 0 && parsedAmount.value <= props.remainingAmount))
 
 watch(
   () => props.modelValue,

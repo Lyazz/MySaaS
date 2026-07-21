@@ -638,10 +638,10 @@ export class OrdersController {
                 const result = await service.recordPayment(tenant.id, user.id, id, { amount, method, cashboxId, reference, note })
                 res.json(result)
             } catch (err) {
-                if (err instanceof OrderValidationError) {
-                    return res.status(err.statusCode).json({
-                        statusCode: err.statusCode,
-                        statusMessage: err.statusMessage,
+                if (err instanceof OrderValidationError || err.name === 'CashValidationError' || err.statusCode) {
+                    return res.status(err.statusCode || 400).json({
+                        statusCode: err.statusCode || 400,
+                        statusMessage: err.statusMessage || err.message,
                         code: err.code,
                         meta: err.meta
                     })

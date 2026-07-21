@@ -1,9 +1,9 @@
 export type DashboardRange = 'today' | '7d' | '30d' | '90d' | 'custom'
 
 const isoDate = (date: Date) => {
-    const year = date.getUTCFullYear()
-    const month = `${date.getUTCMonth() + 1}`.padStart(2, '0')
-    const day = `${date.getUTCDate()}`.padStart(2, '0')
+    const year = date.getFullYear()
+    const month = `${date.getMonth() + 1}`.padStart(2, '0')
+    const day = `${date.getDate()}`.padStart(2, '0')
     return `${year}-${month}-${day}`
 }
 
@@ -12,7 +12,7 @@ export type DashboardPresetRange = typeof dashboardPresetRanges[number]
 
 export const getDashboardPresetDateRange = (range: DashboardPresetRange, now = new Date()) => {
     const days = range === 'today' ? 1 : range === '90d' ? 90 : range === '30d' ? 30 : 7
-    const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const start = new Date(end.getTime() - (days - 1) * 24 * 60 * 60 * 1000)
     return {
         from: isoDate(start),

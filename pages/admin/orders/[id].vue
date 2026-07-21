@@ -1788,7 +1788,7 @@ const cartTotal = computed(() => {
 })
 
 async function fetchOrder() {
-  loading.value = true
+  if (!order.value) loading.value = true
   try {
     const data = await $fetch(`/api/admin/orders/${orderId.value}`, {
       headers: {
@@ -1807,7 +1807,9 @@ async function fetchOrder() {
     }
   } catch (error: any) {
     console.error('Failed to fetch order:', error)
-    order.value = null
+    if (!order.value) {
+      order.value = null
+    }
   } finally {
     loading.value = false
   }

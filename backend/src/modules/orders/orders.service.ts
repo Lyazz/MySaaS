@@ -778,6 +778,7 @@ export class OrdersService {
             customerName: 'customerName',
             totalAmount: 'totalAmount',
             status: 'status',
+            paymentStatus: 'paymentStatus',
             createdAt: 'createdAt'
         }
 
@@ -806,6 +807,8 @@ export class OrdersService {
                     customerName: true,
                     customerPhone: true,
                     customerId: true,
+                    paymentStatus: true,
+                    paidAmount: true,
                     createdAt: true,
                     updatedAt: true
                 },
