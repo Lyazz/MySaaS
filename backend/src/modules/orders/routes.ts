@@ -15,6 +15,7 @@ router.post('/:id/mark-read', requireStaffPermission('orders', 'read'), controll
 router.get('/:id', requireStaffCrud('orders'), controller.getById.bind(controller))
 router.get('/:id/bordereau', requireStaffCrud('orders'), controller.bordereauPdf.bind(controller))
 router.post('/', requireStaffCrud('orders'), controller.createAdmin.bind(controller))
+router.post('/:id/payments', requireStaffCrud('orders'), controller.recordPayment.bind(controller))
 router.patch('/:id', requireStaffCrud('orders'), controller.updateStatus.bind(controller))
 router.put('/:id', requireStaffCrud('orders'), controller.updateUnconfirmed.bind(controller))
 router.delete('/:id', requireStaffCrud('orders'), controller.deleteUnconfirmed.bind(controller))

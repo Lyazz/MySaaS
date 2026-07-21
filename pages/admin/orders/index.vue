@@ -267,6 +267,7 @@
               <td class="ui-td whitespace-nowrap">
                 <div class="flex flex-col gap-1 items-start">
                   <AdminOrderStatusBadge :status="order.status" />
+                  <AdminPaymentStatusBadge v-if="order.paymentStatus && order.paymentStatus !== 'UNPAID'" :status="order.paymentStatus" />
                   <span
                     v-if="order.status === 'PENDING' && order.callStatus"
                     class="text-xs truncate max-w-[120px]" style="color: var(--text-tertiary)"
@@ -397,6 +398,8 @@ const { t, locale } = useI18n({ useScope: 'global' })
 interface Order {
   id: string
   publicId?: string | null
+  paidAmount: number
+  paymentStatus: string
   customerName: string
   customerPhone: string
   customerAddress: string

@@ -616,4 +616,41 @@ export class OrdersController {
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
+
+    async recordPayment(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user!
+            const { id } = req.params
+            const { amount, method, cashboxId, note } = req.body
+
+            if (!id) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+            }
+            if (!amount || typeof amount !== 'number' || amount <= 0) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid amount' })
+            }
+            if (!cashboxId) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Cashbox ID is required' })
+            }
+
+            try {
+                const result = await service.recordPayment(tenant.id, user.id, id, { amount, method, cashboxId, note })
+                res.json(result)
+            } catch (err) {
+                if (err instanceof OrderValidationError) {
+                    return res.status(err.statusCode).json({
+                        statusCode: err.statusCode,
+                        statusMessage: err.statusMessage,
+                        code: err.code,
+                        meta: err.meta
+                    })
+                }
+                throw err
+            }
+        } catch (error) {
+            console.error('Record order payment error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
 }

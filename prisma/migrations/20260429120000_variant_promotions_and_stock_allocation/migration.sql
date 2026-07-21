@@ -1,3 +1,10 @@
+ALTER TABLE "Product"
+ADD COLUMN "promotionalPrice" DECIMAL,
+ADD COLUMN "isPromotionActive" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "promotionStartDate" TIMESTAMP(3),
+ADD COLUMN "promotionEndDate" TIMESTAMP(3),
+ADD COLUMN "showCountdown" BOOLEAN NOT NULL DEFAULT false;
+
 ALTER TABLE "ProductVariant"
 ADD COLUMN "promotionalPrice" DECIMAL,
 ADD COLUMN "isPromotionActive" BOOLEAN NOT NULL DEFAULT false,

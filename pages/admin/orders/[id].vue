@@ -18,6 +18,16 @@
       @confirm="confirmDelivered"
     />
 
+    <OrderPaymentModal
+      v-if="order"
+      v-model="paymentModalOpen"
+      :cashboxes="cashboxes"
+      :default-amount="orderTotalWithShipping - (order.paidAmount || 0)"
+      :remaining-amount="orderTotalWithShipping - (order.paidAmount || 0)"
+      :loading="updating"
+      @confirm="confirmPayment"
+    />
+
     <TransitionRoot
       appear
       :show="variantModalOpen"
@@ -170,6 +180,15 @@
                     <Icon name="lucide:printer" class="w-4 h-4" />
                     {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
                   </button>
+                  <button
+                    v-if="order.paymentStatus !== 'PAID'"
+                    type="button"
+                    class="ui-btn ui-btn--primary ui-btn--md"
+                    @click="paymentModalOpen = true"
+                  >
+                    <Icon name="lucide:banknote" class="w-4 h-4" />
+                    {{ t('admin.pages.orders.modals.payment.title', 'Record Payment') }}
+                  </button>
                   <OrdersOrderDetailNBA
                     :model="nbaModel"
                     :busy="updating"
@@ -193,6 +212,7 @@
                     <Icon name="lucide:copy" class="w-3.5 h-3.5" />
                   </button>
                   <AdminOrderStatusBadge :status="order.status" />
+                  <AdminPaymentStatusBadge :status="order.paymentStatus" class="ml-2" />
                 </div>
 
                 <div class="od-customer">
@@ -235,21 +255,40 @@
                   <span class="od-totals__label">{{ t('admin.pages.orders.detail.sections.orderItems') }}</span>
                   <span class="od-totals__value">{{ order.items?.length ?? 0 }}</span>
                 </div>
+                <span class="od-totals__sep" aria-hidden="true">·</span>
+                <div class="od-totals__cell" v-if="order.paidAmount > 0">
+                  <span class="od-totals__label">{{ t('admin.common.paid', 'Paid') }}</span>
+                  <span class="od-totals__value [color:var(--brand)]">{{ formatCurrency(order.paidAmount) }}</span>
+                </div>
+                <span class="od-totals__sep" v-if="order.paidAmount > 0" aria-hidden="true">·</span>
+                <div class="od-totals__cell od-totals__cell--strong" v-if="order.paidAmount > 0">
+                  <span class="od-totals__label">{{ t('admin.common.remaining', 'Remaining') }}</span>
+                  <span class="od-totals__value">{{ formatCurrency(orderTotalWithShipping - order.paidAmount) }}</span>
+                </div>
               </div>
             </div>
           </div>
 
           <div
-            v-if="canPrintBordereauVisible"
-            class="od-bordereau-row lg:hidden"
+            class="od-bordereau-row lg:hidden flex gap-2"
           >
             <button
+              v-if="canPrintBordereauVisible"
               type="button"
-              class="ui-btn ui-btn--secondary ui-btn--sm w-full"
+              class="ui-btn ui-btn--secondary ui-btn--sm flex-1"
               @click="printBordereau"
             >
               <Icon name="lucide:printer" class="w-4 h-4" />
               {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
+            </button>
+            <button
+              v-if="order.paymentStatus !== 'PAID'"
+              type="button"
+              class="ui-btn ui-btn--primary ui-btn--sm flex-1"
+              @click="paymentModalOpen = true"
+            >
+              <Icon name="lucide:banknote" class="w-4 h-4" />
+              {{ t('admin.pages.orders.modals.payment.title', 'Record Payment') }}
             </button>
           </div>
 
@@ -835,6 +874,7 @@ import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import DeliveryPaymentModal from '~/components/cash/DeliveryPaymentModal.vue'
+import OrderPaymentModal from '~/components/admin/orders/OrderPaymentModal.vue'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
@@ -913,6 +953,8 @@ type PreviousOrdersMatch =
     id: string
     publicId?: string | null
     customerId?: string | null
+    paidAmount: number
+    paymentStatus: string
     customerName: string
     customerPhone: string
     customerPhoneNormalized?: string | null
@@ -962,6 +1004,7 @@ const newStatus = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const deliveryModalOpen = ref(false)
+const paymentModalOpen = ref(false)
 const cashboxes = ref<any[]>([])
 
 const deleteOpen = ref(false)
@@ -2080,11 +2123,8 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
   updating.value = true
 
   try {
-    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
+    const updated = await $fetch(`/api/v1/admin/orders/${route.params.id}`, {
       method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      },
       body: {
         status: 'DELIVERED',
         cashboxId: payload.cashboxId,
@@ -2094,15 +2134,36 @@ async function confirmDelivered(payload: { cashboxId: string; method: string; re
       }
     })
 
-    order.value.status = updated.status
+    order.value = updated as unknown as Order
     newStatus.value = updated.status
     successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
     setTimeout(() => {
       successMessage.value = ''
     }, 3000)
+    deliveryModalOpen.value = false
   } catch (error: any) {
     console.error('Failed to mark delivered:', error)
     errorMessage.value = error.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')
+  } finally {
+    updating.value = false
+  }
+}
+
+async function confirmPayment(payload: { amount: number; cashboxId: string; method: string; reference: string | null; note: string | null }) {
+  updating.value = true
+  errorMessage.value = ''
+  try {
+    const res = await $fetch(`/api/v1/admin/orders/${route.params.id}/payments`, {
+      method: 'POST',
+      body: payload
+    })
+    // Reload order to get new paidAmount and paymentStatus
+    await fetchOrder()
+    successMessage.value = t('admin.pages.orders.detail.paymentRecorded', 'Payment recorded')
+    paymentModalOpen.value = false
+  } catch (err: any) {
+    console.error('Record payment error:', err)
+    errorMessage.value = err.data?.statusMessage || err.message || 'Failed to record payment'
   } finally {
     updating.value = false
   }

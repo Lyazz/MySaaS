@@ -2998,4 +2998,25 @@ export class OrdersService {
 
         return finalOrder
     }
+
+    async recordPayment(tenantId: string, userId: string, orderId: string, data: { amount: number, method: string, cashboxId: string, note?: string }) {
+        const order = await prisma.order.findUnique({
+            where: { tenantId, id: orderId }
+        })
+
+        if (!order) {
+            throw new OrderValidationError(404, 'Order not found')
+        }
+
+        return await cashService.createTransaction(tenantId, {
+            cashboxId: data.cashboxId,
+            direction: 'IN',
+            type: 'ORDER_PAYMENT',
+            amount: data.amount,
+            method: data.method || 'CASH',
+            orderId: order.id,
+            customerId: order.customerId,
+            note: data.note
+        }, { userId })
+    }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../models/integration.dart';
 import '../providers/integrations_provider.dart';
@@ -47,7 +47,7 @@ class IntegrationsScreen extends ConsumerWidget {
                   integration: state.facebook,
                   name: 'Facebook Pixel',
                   description: 'app.track_conversions_and_retarget'.tr(),
-                  icon: LucideIcons.facebook,
+                  icon: Icons.facebook,
                   iconColor: const Color(0xFF3B82F6),
                   iconBg: Color(0xFFEFF6FF),
                   configFields: [

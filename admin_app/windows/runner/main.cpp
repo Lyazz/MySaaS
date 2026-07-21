@@ -41,3 +41,42 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   ::CoUninitialize();
   return EXIT_SUCCESS;
 }
+
+extern "C" {
+    unsigned long long __std_find_first_of_trivial_pos_1(const char* First1, unsigned long long Count1, const char* First2, unsigned long long Count2) {
+        for (unsigned long long i = 0; i < Count1; ++i) {
+            for (unsigned long long j = 0; j < Count2; ++j) {
+                if (First1[i] == First2[j]) {
+                    return i;
+                }
+            }
+        }
+        return (unsigned long long)-1;
+    }
+
+    unsigned long long __std_find_last_of_trivial_pos_1(const char* First1, unsigned long long Count1, const char* First2, unsigned long long Count2) {
+        for (long long i = (long long)Count1 - 1; i >= 0; --i) {
+            for (unsigned long long j = 0; j < Count2; ++j) {
+                if (First1[i] == First2[j]) {
+                    return (unsigned long long)i;
+                }
+            }
+        }
+        return (unsigned long long)-1;
+    }
+
+    void* __std_remove_8(void* First, void* Last, const void* Val) {
+        unsigned long long* first = (unsigned long long*)First;
+        unsigned long long* last = (unsigned long long*)Last;
+        unsigned long long val = *(const unsigned long long*)Val;
+        
+        unsigned long long* result = first;
+        for (; first != last; ++first) {
+            if (!(*first == val)) {
+                *result = *first;
+                ++result;
+            }
+        }
+        return result;
+    }
+}

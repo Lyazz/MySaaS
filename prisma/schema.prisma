@@ -16,53 +16,53 @@ model Tenant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users                User[]
-  staffRoles           TenantStaffRole[]
-  staffRolePermissions TenantStaffRolePermission[]
-  customers            Customer[]
-  customerPointsLedger CustomerPointsLedger[]
-  customerPayments     CustomerPayment[]
-  cashboxes            Cashbox[]
-  cashSessions         CashSession[]
-  cashTransactions     CashTransaction[]
-  subscription         TenantSubscription?
-  payments             BillingPayment[]
-  products             Product[]
-  productBundleDeals   ProductBundleDeal[]
-  productImages        ProductImage[]
-  productOptions       ProductOption[]
-  optionValues         ProductOptionValue[]
-  variants             ProductVariant[]
-  variantValues        ProductVariantOptionValue[]
-  variantImages        ProductVariantImage[]
-  inventoryMoves       InventoryMovement[]
-  suppliers            Supplier[]
-  supplierPayments     SupplierPayment[]
-  purchaseOrders       PurchaseOrder[]
-  purchaseOrderItems   PurchaseOrderItem[]
-  categories           Category[]
-  productCategories    ProductCategory[]
-  orders               Order[]
-  orderItems           OrderItem[]
-  sales                Sale[]
-  saleItems            SaleItem[]
-  salesInvoices        SalesInvoice[]
-  shipments            Shipment[]
-  deliveryRates        DeliveryRate[]
-  deliveryAccounts     TenantDeliveryAccount[]
-  storeSettings        StoreSettings?
-  contactInfos         TenantContactInfo[]
-  domains              TenantDomain[]
-  shipmentEvents       ShipmentEvent[]             @relation("TenantShipmentEvents")
-  integrations         TenantIntegration[]
-  metaPixels           TenantMetaPixel[]
-  productMetaPixels    ProductMetaPixel[]
-  maystroProductMaps   MaystroProductMapping[]
-  maystroOrderMaps     MaystroOrderMapping[]
-  maystroInventoryLogs MaystroInventoryEvent[]
-  licenses             License[]
-  devices              Device[]
-  notificationEvents   NotificationEvent[]
+  users                     User[]
+  staffRoles                TenantStaffRole[]
+  staffRolePermissions      TenantStaffRolePermission[]
+  customers                 Customer[]
+  customerPointsLedger      CustomerPointsLedger[]
+  customerPayments          CustomerPayment[]
+  cashboxes                 Cashbox[]
+  cashSessions              CashSession[]
+  cashTransactions          CashTransaction[]
+  subscription              TenantSubscription?
+  payments                  BillingPayment[]
+  products                  Product[]
+  productBundleDeals        ProductBundleDeal[]
+  productImages             ProductImage[]
+  productOptions            ProductOption[]
+  optionValues              ProductOptionValue[]
+  variants                  ProductVariant[]
+  variantValues             ProductVariantOptionValue[]
+  variantImages             ProductVariantImage[]
+  inventoryMoves            InventoryMovement[]
+  suppliers                 Supplier[]
+  supplierPayments          SupplierPayment[]
+  purchaseOrders            PurchaseOrder[]
+  purchaseOrderItems        PurchaseOrderItem[]
+  categories                Category[]
+  productCategories         ProductCategory[]
+  orders                    Order[]
+  orderItems                OrderItem[]
+  sales                     Sale[]
+  saleItems                 SaleItem[]
+  salesInvoices             SalesInvoice[]
+  shipments                 Shipment[]
+  deliveryRates             DeliveryRate[]
+  deliveryAccounts          TenantDeliveryAccount[]
+  storeSettings             StoreSettings?
+  contactInfos              TenantContactInfo[]
+  domains                   TenantDomain[]
+  shipmentEvents            ShipmentEvent[]             @relation("TenantShipmentEvents")
+  integrations              TenantIntegration[]
+  metaPixels                TenantMetaPixel[]
+  productMetaPixels         ProductMetaPixel[]
+  maystroProductMaps        MaystroProductMapping[]
+  maystroOrderMaps          MaystroOrderMapping[]
+  maystroInventoryLogs      MaystroInventoryEvent[]
+  licenses                  License[]
+  devices                   Device[]
+  notificationEvents        NotificationEvent[]
   notificationSubscriptions NotificationSubscription[]
   notificationDeliveries    NotificationDelivery[]
 }
@@ -379,16 +379,16 @@ model User {
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
-  inventoryMovements      InventoryMovement[]
-  purchaseOrdersCreated   PurchaseOrder[]        @relation("PurchaseOrderCreatedBy")
-  salesCreated            Sale[]                 @relation("SaleCreatedBy")
-  salesInvoicesCreated    SalesInvoice[]         @relation("SalesInvoiceCreatedBy")
-  customerPointsCreated   CustomerPointsLedger[]
-  customerPaymentsCreated CustomerPayment[]      @relation("CustomerPaymentCreatedBy")
-  supplierPaymentsCreated SupplierPayment[]      @relation("SupplierPaymentCreatedBy")
-  cashSessionsOpened      CashSession[]          @relation("CashSessionOpenedBy")
-  cashSessionsClosed      CashSession[]          @relation("CashSessionClosedBy")
-  cashTransactionsCreated CashTransaction[]      @relation("CashTransactionCreatedBy")
+  inventoryMovements        InventoryMovement[]
+  purchaseOrdersCreated     PurchaseOrder[]            @relation("PurchaseOrderCreatedBy")
+  salesCreated              Sale[]                     @relation("SaleCreatedBy")
+  salesInvoicesCreated      SalesInvoice[]             @relation("SalesInvoiceCreatedBy")
+  customerPointsCreated     CustomerPointsLedger[]
+  customerPaymentsCreated   CustomerPayment[]          @relation("CustomerPaymentCreatedBy")
+  supplierPaymentsCreated   SupplierPayment[]          @relation("SupplierPaymentCreatedBy")
+  cashSessionsOpened        CashSession[]              @relation("CashSessionOpenedBy")
+  cashSessionsClosed        CashSession[]              @relation("CashSessionClosedBy")
+  cashTransactionsCreated   CashTransaction[]          @relation("CashTransactionCreatedBy")
   notificationSubscriptions NotificationSubscription[]
   notificationDeliveries    NotificationDelivery[]
 
@@ -946,8 +946,10 @@ model Order {
   tenantId                String
   tenant                  Tenant  @relation(fields: [tenantId], references: [id])
   status                  String  @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  paymentStatus           String  @default("UNPAID") // UNPAID | PARTIALLY_PAID | PAID
   totalAmount             Float
   totalWithShippingAmount Float?
+  paidAmount              Float   @default(0)
   earnedPointsTotal       Int     @default(0)
   redeemedPointsTotal     Int     @default(0)
   redeemedAmount          Float   @default(0)
@@ -1392,7 +1394,7 @@ model NotificationSubscription {
   platform   String
   channel    String
   fcmToken   String?
-  isActive   Boolean @default(true)
+  isActive   Boolean  @default(true)
   lastSeenAt DateTime @default(now())
 
   deliveries NotificationDelivery[]
@@ -1423,7 +1425,7 @@ model NotificationDelivery {
   subscription   NotificationSubscription? @relation(fields: [tenantId, subscriptionId], references: [tenantId, id], onDelete: Cascade)
 
   channel String
-  status  String @default("PENDING")
+  status  String    @default("PENDING")
   error   String?
   readAt  DateTime?
   sentAt  DateTime?
@@ -1465,10 +1467,10 @@ model Device {
   licenseId String
   license   License @relation(fields: [licenseId], references: [id], onDelete: Cascade)
 
-  hardwareId String
-  deviceName String?
+  hardwareId     String
+  deviceName     String?
   devicePlatform String?
-  status     String  @default("ACTIVE")
+  status         String  @default("ACTIVE")
 
   lastSyncAt DateTime?
 

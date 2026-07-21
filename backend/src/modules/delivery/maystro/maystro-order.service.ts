@@ -66,10 +66,15 @@ export class MaystroOrderService {
         totalAmount?: unknown
         totalWithShippingAmount?: unknown
         shippingAmount?: unknown
+        paidAmount?: unknown
     }) {
+        const paidAmount = Number.isFinite(Number(order.paidAmount)) ? Number(order.paidAmount) : 0
         const totalWithShippingRaw = order.totalWithShippingAmount
         const totalWithShipping = totalWithShippingRaw == null ? NaN : Number(totalWithShippingRaw)
-        if (Number.isFinite(totalWithShipping)) return Math.round(totalWithShipping)
+
+        if (Number.isFinite(totalWithShipping)) {
+            return Math.round(Math.max(0, totalWithShipping - paidAmount))
+        }
 
         const itemsTotalRaw = order.totalAmount
         const itemsTotal = Number.isFinite(Number(itemsTotalRaw)) ? Number(itemsTotalRaw) : 0
@@ -77,7 +82,7 @@ export class MaystroOrderService {
         const shippingRaw = order.shippingAmount
         const shippingAmount = Number.isFinite(Number(shippingRaw)) ? Number(shippingRaw) : 0
 
-        return Math.round(itemsTotal + shippingAmount)
+        return Math.round(Math.max(0, (itemsTotal + shippingAmount) - paidAmount))
     }
 
     private async buildPayload(input: {

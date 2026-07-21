@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/settings_provider.dart';
@@ -294,7 +294,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Expanded(
                       child: _buildSocialButton(
                         palette,
-                        icon: LucideIcons.chrome,
+                        icon: Icons.public,
                         label: 'app.google'.tr(),
                       ),
                     ),
@@ -302,7 +302,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Expanded(
                       child: _buildSocialButton(
                         palette,
-                        icon: LucideIcons.facebook,
+                        icon: Icons.facebook,
                         label: 'admin.contactInfosForm.kinds.facebook.label'.tr(),
                       ),
                     ),

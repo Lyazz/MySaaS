@@ -519,7 +519,9 @@ export class DeliveryService {
             Number.isFinite(Number((input as any).codAmount)) && Number((input as any).codAmount) >= 0
                 ? Number((input as any).codAmount)
                 : null
-        const codAmount = explicitCodAmount ?? computeOrderTotalWithShipping(order as any)
+        const total = computeOrderTotalWithShipping(order as any)
+        const paidAmount = Number.isFinite(Number((order as any).paidAmount)) ? Number((order as any).paidAmount) : 0
+        const codAmount = explicitCodAmount ?? Math.max(0, total - paidAmount)
         const baseInput: CreateShipmentInput = { ...input, deliveryMode: inferredDeliveryMode, codAmount }
 
         const orderPickupPoint =
