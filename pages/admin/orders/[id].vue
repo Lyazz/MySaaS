@@ -2166,8 +2166,9 @@ async function confirmPayment(payload: { amount: number; cashboxId: string; meth
   updating.value = true
   errorMessage.value = ''
   try {
-    const res = await $fetch(`/api/v1/admin/orders/${route.params.id}/payments`, {
+    const res = await $fetch(`/api/admin/orders/${route.params.id}/payments`, {
       method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
       body: payload
     })
     // Reload order to get new paidAmount and paymentStatus

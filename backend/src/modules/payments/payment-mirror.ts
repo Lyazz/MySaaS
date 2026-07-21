@@ -39,29 +39,30 @@ export async function mirrorCashTransactionToPayments(tx: DbClient, tenantId: st
             },
             update: {}
         })
+    }
 
-        if (cashTx.orderId) {
-            const aggs = await tx.cashTransaction.aggregate({
-                where: { tenantId, orderId: cashTx.orderId, direction: 'IN', type: { in: ['CUSTOMER_PAYMENT', 'ORDER_PAYMENT', 'SALE_PAYMENT'] } },
-                _sum: { amount: true }
-            })
-            const paidAmount = aggs._sum.amount ? Number(aggs._sum.amount) : 0
+    // Update order totals even if there is no customerId
+    if (cashTx.direction === 'IN' && cashTx.orderId && (cashTx.type === 'CUSTOMER_PAYMENT' || cashTx.type === 'SALE_PAYMENT' || cashTx.type === 'ORDER_PAYMENT')) {
+        const aggs = await tx.cashTransaction.aggregate({
+            where: { tenantId, orderId: cashTx.orderId, direction: 'IN', type: { in: ['CUSTOMER_PAYMENT', 'ORDER_PAYMENT', 'SALE_PAYMENT'] } },
+            _sum: { amount: true }
+        })
+        const paidAmount = aggs._sum.amount ? Number(aggs._sum.amount) : 0
 
-            const order = await tx.order.findFirst({
-                where: { tenantId, id: cashTx.orderId },
-                select: { totalWithShippingAmount: true, totalAmount: true }
-            })
-            if (order) {
-                const total = order.totalWithShippingAmount ?? order.totalAmount
-                let paymentStatus = 'UNPAID'
-                if (paidAmount > 0) {
-                    paymentStatus = paidAmount >= total && total > 0 ? 'PAID' : 'PARTIALLY_PAID'
-                }
-                await tx.order.updateMany({
-                    where: { tenantId, id: cashTx.orderId },
-                    data: { paidAmount, paymentStatus }
-                })
+        const order = await tx.order.findFirst({
+            where: { tenantId, id: cashTx.orderId },
+            select: { totalWithShippingAmount: true, totalAmount: true }
+        })
+        if (order) {
+            const total = order.totalWithShippingAmount ?? order.totalAmount
+            let paymentStatus = 'UNPAID'
+            if (paidAmount > 0) {
+                paymentStatus = paidAmount >= total && total > 0 ? 'PAID' : 'PARTIALLY_PAID'
             }
+            await tx.order.updateMany({
+                where: { tenantId, id: cashTx.orderId },
+                data: { paidAmount, paymentStatus }
+            })
         }
     }
 

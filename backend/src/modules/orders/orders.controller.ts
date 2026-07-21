@@ -622,7 +622,7 @@ export class OrdersController {
             const tenant = req.tenant!
             const user = req.user!
             const { id } = req.params
-            const { amount, method, cashboxId, note } = req.body
+            const { amount, method, cashboxId, reference, note } = req.body
 
             if (!id) {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
@@ -635,7 +635,7 @@ export class OrdersController {
             }
 
             try {
-                const result = await service.recordPayment(tenant.id, user.id, id, { amount, method, cashboxId, note })
+                const result = await service.recordPayment(tenant.id, user.id, id, { amount, method, cashboxId, reference, note })
                 res.json(result)
             } catch (err) {
                 if (err instanceof OrderValidationError) {

@@ -2999,7 +2999,7 @@ export class OrdersService {
         return finalOrder
     }
 
-    async recordPayment(tenantId: string, userId: string, orderId: string, data: { amount: number, method: string, cashboxId: string, note?: string }) {
+    async recordPayment(tenantId: string, userId: string, orderId: string, data: { amount: number, method: string, cashboxId: string, reference?: string | null, note?: string | null }) {
         const order = await prisma.order.findUnique({
             where: { tenantId, id: orderId }
         })
@@ -3016,6 +3016,7 @@ export class OrdersService {
             method: data.method || 'CASH',
             orderId: order.id,
             customerId: order.customerId,
+            reference: data.reference,
             note: data.note
         }, { userId })
     }
