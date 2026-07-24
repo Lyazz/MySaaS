@@ -262,11 +262,28 @@ export class MaystroOrderService {
         const { externalId, payload } = await this.buildPayload(input)
 
         try {
-            const response = await client.request<MaystroOrderResponse>({
-                method: 'POST',
-                path: '/orders/',
-                data: payload
-            })
+            let response: MaystroOrderResponse;
+            try {
+                response = await client.request<MaystroOrderResponse>({
+                    method: 'POST',
+                    path: '/orders/',
+                    data: payload
+                })
+            } catch (error: any) {
+                // Code 55 means duplicate order in the last 24h. We bypass it by modifying the name slightly.
+                const isDuplicate = error?.details?.errors?.some((e: any) => e.code === 55)
+                if (isDuplicate) {
+                    payload.order.customer_name = (payload.order.customer_name || '').trim() + ' .'
+                    response = await client.request<MaystroOrderResponse>({
+                        method: 'POST',
+                        path: '/orders/',
+                        data: payload
+                    })
+                } else {
+                    throw error
+                }
+            }
+
             return this.persistOrderMapping({
                 tenantId: input.tenantId,
                 localOrderId: input.localOrderId,

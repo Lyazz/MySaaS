@@ -98,16 +98,29 @@ export class MaystroClient {
             }
         }
 
+const extractMaystroDetail = (data: any): string | null => {
+    if (!data) return null
+    if (typeof data.detail === 'string') return data.detail
+    if (Array.isArray(data.errors)) {
+        const details = data.errors.map((e: any) => e?.detail).filter((d: any) => typeof d === 'string' && d.length > 0)
+        if (details.length > 0) return details.join('; ')
+    }
+    if (typeof data.message === 'string') return data.message
+    if (typeof data.error === 'string') return data.error
+    return null
+}
+
         if (axios.isAxiosError(lastError)) {
             const status = lastError.response?.status ?? 502
             const data = lastError.response?.data
             const code = asMaystroOrderErrorCode(data)
+            const detailStr = extractMaystroDetail(data)
 
             if (code != null) {
                 const mapped = mapMaystroOrderErrorCode(code)
                 throw new MaystroIntegrationError({
                     statusCode: mapped.statusCode,
-                    statusMessage: mapped.statusMessage,
+                    statusMessage: detailStr ? `${mapped.statusMessage} (${detailStr})` : mapped.statusMessage,
                     code: code as import('./maystro.errors').MaystroOrderErrorCode,
                     details: data
                 })
@@ -116,7 +129,7 @@ export class MaystroClient {
             if (status === 401) {
                 throw new MaystroIntegrationError({
                     statusCode: 401,
-                    statusMessage: 'Maystro: unauthorized (check api token)',
+                    statusMessage: detailStr ? `Maystro: unauthorized - ${detailStr}` : 'Maystro: unauthorized (check api token)',
                     details: {
                         baseURL: this.http.defaults.baseURL,
                         path: opts.path,
@@ -128,7 +141,7 @@ export class MaystroClient {
 
             throw new MaystroIntegrationError({
                 statusCode: status >= 400 && status <= 599 ? status : 502,
-                statusMessage: 'Maystro request failed',
+                statusMessage: detailStr ? `Maystro request failed: ${detailStr}` : 'Maystro request failed',
                 details: data
             })
         }
